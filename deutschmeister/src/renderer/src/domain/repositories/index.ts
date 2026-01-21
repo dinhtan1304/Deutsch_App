@@ -4,3 +4,5 @@
  */
 
 export * from './IProfileRepository';
+export * from './ISettingsRepository';
+export * from './IWordRepository';

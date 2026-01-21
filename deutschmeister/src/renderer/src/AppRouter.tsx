@@ -7,6 +7,10 @@ import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { CreateProfilePage } from './presentation/pages/onboarding/CreateProfilePage';
 import { DashboardPage } from './presentation/pages/home/DashboardPage';
+import { SettingsPage } from './presentation/pages/settings/SettingsPage';
+import { WordSearchPage } from './presentation/pages/words/WordSearchPage';
+import { FavoritesPage } from './presentation/pages/words/FavoritesPage';
+import { HistoryPage } from './presentation/pages/words/HistoryPage';
 import { useHasCompletedOnboarding } from './presentation/stores/profileStore';
 
 /**
@@ -63,16 +67,59 @@ export function AppRouter() {
         }
       />
       
-      {/* Placeholder routes for future modules */}
+      {/* Settings Route - UC-1.2.x */}
       <Route
-        path="/articles/*"
+        path="/settings"
         element={
           <ProtectedRoute>
-            <PlaceholderPage title="Der/Die/Das Module" />
+            <SettingsPage />
           </ProtectedRoute>
         }
       />
       
+      {/* Der/Die/Das Module - UC-2.x */}
+      <Route
+        path="/articles"
+        element={
+          <ProtectedRoute>
+            <WordSearchPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/articles/search"
+        element={
+          <ProtectedRoute>
+            <WordSearchPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/words"
+        element={
+          <ProtectedRoute>
+            <WordSearchPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/words/favorites"
+        element={
+          <ProtectedRoute>
+            <FavoritesPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/words/history"
+        element={
+          <ProtectedRoute>
+            <HistoryPage />
+          </ProtectedRoute>
+        }
+      />
+      
+      {/* Placeholder routes for future modules */}
       <Route
         path="/grammar/*"
         element={
@@ -105,15 +152,6 @@ export function AppRouter() {
         element={
           <ProtectedRoute>
             <PlaceholderPage title="Writing Module" />
-          </ProtectedRoute>
-        }
-      />
-      
-      <Route
-        path="/settings/*"
-        element={
-          <ProtectedRoute>
-            <PlaceholderPage title="Settings" />
           </ProtectedRoute>
         }
       />

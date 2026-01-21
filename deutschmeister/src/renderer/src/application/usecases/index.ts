@@ -5,3 +5,4 @@
 
 export * from './CreateProfileUseCase';
 export * from './UpdateProfileUseCase';
+export * from './DeleteProfileUseCase';

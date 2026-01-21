@@ -5,3 +5,5 @@
 
 export * from './ui';
 export * from './profile';
+export * from './settings';
+export * from './words';

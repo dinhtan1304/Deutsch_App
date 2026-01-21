@@ -4,18 +4,32 @@
  * This is a placeholder - will be fully implemented in UC-7.1.x
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useProfile, useProfileStore } from '../../stores/profileStore';
+import { useSettingsStore } from '../../stores/settingsStore';
+import { useFavoritesStore } from '../../stores/favoritesStore';
+import { useHistoryStore } from '../../stores/historyStore';
 import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { EditProfileModal } from '../../components/profile/EditProfileModal';
-import { CEFRLevelInfo } from '../../../domain/valueObjects/CEFRLevel';
-import { LanguageInfo } from '../../../domain/valueObjects/Language';
+import { ProfileSummaryCard } from '../../components/profile/ProfileSummaryCard';
+import { ConfirmDeleteModal } from '../../components/profile/ConfirmDeleteModal';
 
 export function DashboardPage() {
+  const navigate = useNavigate();
   const profile = useProfile();
-  const { clearProfile } = useProfileStore();
+  const { deleteProfileAsync } = useProfileStore();
+  const { initializeSettings } = useSettingsStore();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
+  // Initialize settings when profile loads
+  useEffect(() => {
+    if (profile?.id) {
+      initializeSettings(profile.id);
+    }
+  }, [profile?.id, initializeSettings]);
 
   if (!profile) {
     return (
@@ -25,21 +39,13 @@ export function DashboardPage() {
     );
   }
 
-  // Get avatar display
-  const isBase64Image = profile.avatarPath?.startsWith('data:image');
-  const avatarDisplay = profile.avatarPath ? (
-    isBase64Image ? (
-      <img
-        src={profile.avatarPath}
-        alt="Avatar"
-        className="h-20 w-20 rounded-full object-cover"
-      />
-    ) : (
-      <span className="text-5xl">{profile.avatarPath}</span>
-    )
-  ) : (
-    <span className="text-5xl">👤</span>
-  );
+  const handleDeleteProfile = async () => {
+    const success = await deleteProfileAsync();
+    if (success) {
+      // Navigate to home after successful deletion
+      navigate('/');
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
@@ -51,7 +57,7 @@ export function DashboardPage() {
           </h1>
           <Button
             variant="outline"
-            onClick={() => setIsEditModalOpen(true)}
+            onClick={() => navigate('/settings')}
             leftIcon={
               <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
@@ -63,94 +69,35 @@ export function DashboardPage() {
           </Button>
         </header>
 
-        {/* Welcome Card */}
-        <Card className="mb-6">
-          <CardContent className="flex items-center gap-6 p-6">
-            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-blue-100">
-              {avatarDisplay}
-            </div>
-            <div className="flex-1">
-              <h2 className="text-2xl font-semibold text-gray-900">
-                Welcome, {profile.displayName}! 🎉
-              </h2>
-              <p className="mt-1 text-gray-600">
-                Ready to continue your German learning journey?
-              </p>
-            </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsEditModalOpen(true)}
-              className="text-blue-600 hover:text-blue-700"
-            >
-              <svg className="mr-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-              </svg>
-              Edit Profile
-            </Button>
-          </CardContent>
-        </Card>
+        {/* Profile Summary Card - UC-1.1.07 */}
+        <div className="mb-6">
+          <ProfileSummaryCard
+            profile={profile}
+            onEditClick={() => setIsEditModalOpen(true)}
+            showEditButton={true}
+          />
+        </div>
 
-        {/* Profile Summary */}
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle>Your Learning Profile</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-              <div className="rounded-lg bg-blue-50 p-4 text-center">
-                <p className="text-sm text-gray-600">Current Level</p>
-                <p className="mt-1 text-2xl font-bold text-blue-600">
-                  {profile.currentLevel}
-                </p>
-                <p className="text-xs text-gray-500">
-                  {CEFRLevelInfo[profile.currentLevel].name}
-                </p>
-              </div>
-
-              <div className="rounded-lg bg-green-50 p-4 text-center">
-                <p className="text-sm text-gray-600">Target Level</p>
-                <p className="mt-1 text-2xl font-bold text-green-600">
-                  {profile.targetLevel}
-                </p>
-                <p className="text-xs text-gray-500">
-                  {CEFRLevelInfo[profile.targetLevel].name}
-                </p>
-              </div>
-
-              <div className="rounded-lg bg-purple-50 p-4 text-center">
-                <p className="text-sm text-gray-600">Daily Goal</p>
-                <p className="mt-1 text-2xl font-bold text-purple-600">
-                  {profile.dailyGoalMinutes}
-                </p>
-                <p className="text-xs text-gray-500">minutes/day</p>
-              </div>
-
-              <div className="rounded-lg bg-orange-50 p-4 text-center">
-                <p className="text-sm text-gray-600">Language</p>
-                <p className="mt-1 text-2xl font-bold text-orange-600">
-                  {LanguageInfo[profile.interfaceLanguage].flag}
-                </p>
-                <p className="text-xs text-gray-500">
-                  {LanguageInfo[profile.interfaceLanguage].name}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Quick Actions Placeholder */}
+        {/* Quick Actions */}
         <Card className="mb-6">
           <CardHeader>
             <CardTitle>Quick Start</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
-              <Button variant="outline" className="h-24 flex-col" disabled>
+              <Button 
+                variant="outline" 
+                className="h-24 flex-col"
+                onClick={() => navigate('/words')}
+              >
                 <span className="text-2xl">📚</span>
                 <span className="mt-2">Der/Die/Das</span>
-                <span className="text-xs text-gray-500">Coming soon</span>
+                <span className="text-xs text-green-600">Ready!</span>
               </Button>
+
+              <FavoritesButton onClick={() => navigate('/words/favorites')} />
+
+              <HistoryButton onClick={() => navigate('/words/history')} />
 
               <Button variant="outline" className="h-24 flex-col" disabled>
                 <span className="text-2xl">📖</span>
@@ -170,26 +117,20 @@ export function DashboardPage() {
                 <span className="text-xs text-gray-500">Coming soon</span>
               </Button>
 
-              <Button variant="outline" className="h-24 flex-col" disabled>
-                <span className="text-2xl">📝</span>
-                <span className="mt-2">Exam Prep</span>
-                <span className="text-xs text-gray-500">Coming soon</span>
-              </Button>
-
               <Button 
                 variant="outline" 
                 className="h-24 flex-col"
-                onClick={() => setIsEditModalOpen(true)}
+                onClick={() => navigate('/settings')}
               >
                 <span className="text-2xl">⚙️</span>
                 <span className="mt-2">Settings</span>
-                <span className="text-xs text-gray-500">Edit profile</span>
+                <span className="text-xs text-gray-500">Preferences</span>
               </Button>
             </div>
           </CardContent>
         </Card>
 
-        {/* Debug: Reset Profile */}
+        {/* Developer Tools */}
         <Card>
           <CardHeader>
             <CardTitle>Developer Tools</CardTitle>
@@ -207,29 +148,13 @@ export function DashboardPage() {
               </Button>
               <Button
                 variant="danger"
-                onClick={() => {
-                  if (confirm('Are you sure you want to delete your profile? This cannot be undone.')) {
-                    localStorage.removeItem('deutschmeister_profile');
-                    clearProfile();
-                    window.location.href = '/';
-                  }
-                }}
+                onClick={() => setIsDeleteModalOpen(true)}
               >
-                Reset Profile
+                Delete Profile
               </Button>
             </div>
           </CardContent>
         </Card>
-
-        {/* Footer */}
-        <footer className="mt-8 text-center text-sm text-gray-500">
-          <p>
-            Profile created: {new Date(profile.createdAt).toLocaleDateString()}
-            {profile.updatedAt !== profile.createdAt && (
-              <> · Last updated: {new Date(profile.updatedAt).toLocaleDateString()}</>
-            )}
-          </p>
-        </footer>
       </div>
 
       {/* Edit Profile Modal */}
@@ -237,10 +162,73 @@ export function DashboardPage() {
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
         onSuccess={() => {
-          // Optional: Show success toast
           console.log('Profile updated successfully!');
         }}
       />
+
+      {/* Delete Confirmation Modal - UC-1.1.08 */}
+      <ConfirmDeleteModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={handleDeleteProfile}
+        profileName={profile.displayName}
+      />
     </div>
+  );
+}
+
+/**
+ * Favorites Button with count badge
+ */
+function FavoritesButton({ onClick }: { onClick: () => void }) {
+  const count = useFavoritesStore(state => state.favoriteIds.length);
+  
+  return (
+    <Button 
+      variant="outline" 
+      className="h-24 flex-col relative"
+      onClick={onClick}
+    >
+      <span className="text-2xl">⭐</span>
+      <span className="mt-2">Favorites</span>
+      {count > 0 ? (
+        <span className="text-xs text-yellow-600">{count} words</span>
+      ) : (
+        <span className="text-xs text-gray-500">No favorites</span>
+      )}
+      {count > 0 && (
+        <span className="absolute top-2 right-2 inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-yellow-500 rounded-full">
+          {count > 99 ? '99+' : count}
+        </span>
+      )}
+    </Button>
+  );
+}
+
+/**
+ * History Button with count badge
+ */
+function HistoryButton({ onClick }: { onClick: () => void }) {
+  const count = useHistoryStore(state => state.history.length);
+  
+  return (
+    <Button 
+      variant="outline" 
+      className="h-24 flex-col relative"
+      onClick={onClick}
+    >
+      <span className="text-2xl">🕐</span>
+      <span className="mt-2">History</span>
+      {count > 0 ? (
+        <span className="text-xs text-gray-600">{count} viewed</span>
+      ) : (
+        <span className="text-xs text-gray-500">No history</span>
+      )}
+      {count > 0 && (
+        <span className="absolute top-2 right-2 inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-gray-500 rounded-full">
+          {count > 99 ? '99+' : count}
+        </span>
+      )}
+    </Button>
   );
 }

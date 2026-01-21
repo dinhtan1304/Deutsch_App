@@ -4,3 +4,5 @@
  */
 
 export * from './ProfileRepository';
+export * from './SettingsRepository';
+export * from './WordRepository';

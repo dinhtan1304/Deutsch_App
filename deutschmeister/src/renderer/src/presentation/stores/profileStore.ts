@@ -10,6 +10,7 @@ import { Language } from '../../domain/valueObjects/Language';
 import { CreateProfileOutputDTO } from '../../application/dto/CreateProfileDTO';
 import { UpdateProfileInputDTO, UpdateProfileOutputDTO } from '../../application/dto/UpdateProfileDTO';
 import { UpdateProfileUseCase } from '../../application/usecases/UpdateProfileUseCase';
+import { DeleteProfileUseCase } from '../../application/usecases/DeleteProfileUseCase';
 import { ProfileRepository } from '../../infrastructure/repositories/ProfileRepository';
 
 /**
@@ -31,6 +32,7 @@ interface ProfileState {
   setProfile: (profile: CreateProfileOutputDTO) => void;
   updateProfile: (updates: Partial<CreateProfileOutputDTO>) => void;
   updateProfileAsync: (updates: UpdateProfileInputDTO) => Promise<boolean>;
+  deleteProfileAsync: () => Promise<boolean>;
   clearProfile: () => void;
   setLoading: (isLoading: boolean) => void;
   setError: (error: string | null) => void;
@@ -102,6 +104,54 @@ export const useProfileStore = create<ProfileState>()(
             set({ 
               isLoading: false, 
               error: errorMessage 
+            });
+            return false;
+          }
+        } catch (error) {
+          const message = error instanceof Error ? error.message : 'An unexpected error occurred';
+          set({ 
+            isLoading: false, 
+            error: message 
+          });
+          return false;
+        }
+      },
+
+      /**
+       * Delete profile asynchronously using DeleteProfileUseCase
+       * Returns true if successful, false otherwise
+       */
+      deleteProfileAsync: async (): Promise<boolean> => {
+        const currentProfile = get().profile;
+        if (!currentProfile) {
+          set({ error: 'No profile to delete' });
+          return false;
+        }
+
+        set({ isLoading: true, error: null });
+        
+        try {
+          const profileRepository = new ProfileRepository();
+          const deleteProfileUseCase = new DeleteProfileUseCase(profileRepository);
+          
+          const result = await deleteProfileUseCase.execute({ 
+            profileId: currentProfile.id 
+          });
+          
+          if (result.success) {
+            // Clear all profile data
+            set({ 
+              profile: null,
+              isLoading: false,
+              hasCompletedOnboarding: false,
+              isEditing: false,
+              error: null
+            });
+            return true;
+          } else {
+            set({ 
+              isLoading: false, 
+              error: result.error || 'Failed to delete profile'
             });
             return false;
           }

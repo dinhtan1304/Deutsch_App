@@ -5,3 +5,5 @@
 
 export * from './onboarding';
 export * from './home';
+export * from './settings';
+export * from './words';

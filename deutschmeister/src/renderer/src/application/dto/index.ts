@@ -5,3 +5,4 @@
 
 export * from './CreateProfileDTO';
 export * from './UpdateProfileDTO';
+export * from './DeleteProfileDTO';

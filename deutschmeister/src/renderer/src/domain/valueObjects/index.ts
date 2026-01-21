@@ -5,3 +5,6 @@
 
 export * from './CEFRLevel';
 export * from './Language';
+export * from './Theme';
+export * from './Gender';
+export * from './WordCategory';
