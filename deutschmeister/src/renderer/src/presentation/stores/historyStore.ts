@@ -5,6 +5,7 @@
  * Implements UC-2.1.11: Clear History
  */
 
+import { useMemo } from 'react';
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 
@@ -99,14 +100,18 @@ export const useHistoryStore = create<HistoryState>()(
 
 /**
  * Hook to get formatted history with timestamps
+ * Uses useMemo to prevent infinite re-renders
  */
 export function useFormattedHistory() {
   const history = useHistoryStore(state => state.history);
-  
-  return history.map(entry => ({
-    ...entry,
-    viewedAtFormatted: formatTimeAgo(entry.viewedAt)
-  }));
+
+  return useMemo(() =>
+    history.map(entry => ({
+      ...entry,
+      viewedAtFormatted: formatTimeAgo(entry.viewedAt)
+    })),
+    [history]
+  );
 }
 
 /**

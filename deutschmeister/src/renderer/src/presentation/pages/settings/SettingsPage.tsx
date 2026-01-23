@@ -46,10 +46,10 @@ export function SettingsPage() {
 
   // Initialize settings when profile is available
   useEffect(() => {
-    if (profile?.id && !settings) {
+    if (profile?.id) {
       initializeSettings(profile.id);
     }
-  }, [profile?.id, settings, initializeSettings]);
+  }, [profile?.id, initializeSettings]);
 
   if (!profile) {
     return (
@@ -110,16 +110,16 @@ export function SettingsPage() {
     { value: '120', label: '120 minutes' }
   ];
 
-  const handleResetToDefaults = async () => {
+  const handleResetToDefaults = () => {
     if (confirm('Are you sure you want to reset all settings to defaults?')) {
-      await resetToDefaults();
+      resetToDefaults();
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 pb-8">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 pb-8">
       {/* Header */}
-      <header className="sticky top-0 z-10 bg-white border-b border-gray-200 px-6 py-4">
+      <header className="sticky top-0 z-10 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4">
         <div className="mx-auto max-w-3xl flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Button
@@ -132,7 +132,7 @@ export function SettingsPage() {
               </svg>
               Back
             </Button>
-            <h1 className="text-xl font-semibold text-gray-900">Settings</h1>
+            <h1 className="text-xl font-semibold text-gray-900 dark:text-white">Settings</h1>
           </div>
           <Button
             variant="outline"
@@ -217,19 +217,17 @@ export function SettingsPage() {
           />
           
           {settings.dailyReminderEnabled && (
-            <div className="rounded-lg bg-gray-50 p-4">
+            <div className="rounded-lg bg-gray-50 dark:bg-gray-800 p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="font-medium text-gray-900">Reminder Time</p>
-                  <p className="text-sm text-gray-500">When to send the daily reminder</p>
+                  <p className="font-medium text-gray-900 dark:text-white">Reminder Time</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">When to send the daily reminder</p>
                 </div>
                 <input
                   type="time"
-                  id="reminder-time"
-                  aria-label="Reminder Time"
                   value={settings.dailyReminderTime}
                   onChange={(e) => setDailyReminder(true, e.target.value)}
-                  className="rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                  className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white px-3 py-2 text-sm"
                 />
               </div>
             </div>
@@ -307,7 +305,7 @@ export function SettingsPage() {
           <CardHeader>
             <CardTitle>About</CardTitle>
           </CardHeader>
-          <CardContent className="text-sm text-gray-600 space-y-2">
+          <CardContent className="text-sm text-gray-600 dark:text-gray-300 space-y-2">
             <p><strong>DeutschMeister</strong> v1.0.0</p>
             <p>A comprehensive German learning application</p>
             <p className="text-xs text-gray-400">

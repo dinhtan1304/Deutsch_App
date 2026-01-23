@@ -8,3 +8,4 @@ export * from './settingsStore';
 export * from './wordStore';
 export * from './favoritesStore';
 export * from './historyStore';
+export * from './gameStore';

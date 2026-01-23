@@ -101,14 +101,14 @@ export function ProfileSummaryCard({
         <CardContent className="p-4">
           <div className="flex items-center gap-4">
             {/* Avatar */}
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-blue-100 to-indigo-100">
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900 dark:to-indigo-900">
               {avatarDisplay}
             </div>
 
             {/* Info */}
             <div className="flex-1">
-              <h3 className="font-semibold text-gray-900">{profile.displayName}</h3>
-              <p className="text-sm text-gray-500">
+              <h3 className="font-semibold text-gray-900 dark:text-white">{profile.displayName}</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
                 {profile.currentLevel} → {profile.targetLevel} · {profile.dailyGoalMinutes} min/day
               </p>
             </div>
@@ -144,19 +144,19 @@ export function ProfileSummaryCard({
       <CardContent className="space-y-6">
         {/* Profile Header */}
         <div className="flex items-center gap-6">
-          <div className="flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-blue-100 to-indigo-100 shadow-inner">
+          <div className="flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900 dark:to-indigo-900 shadow-inner">
             {avatarDisplay}
           </div>
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">{profile.displayName}</h2>
-            <p className="mt-1 text-gray-500">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{profile.displayName}</h2>
+            <p className="mt-1 text-gray-500 dark:text-gray-400">
               Learning German for {daysSinceCreation} {daysSinceCreation === 1 ? 'day' : 'days'}
             </p>
             <div className="mt-2 flex items-center gap-2">
-              <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800">
+              <span className="inline-flex items-center rounded-full bg-blue-100 dark:bg-blue-900 px-2.5 py-0.5 text-xs font-medium text-blue-800 dark:text-blue-200">
                 {LanguageInfo[profile.interfaceLanguage].flag} {LanguageInfo[profile.interfaceLanguage].name}
               </span>
-              <span className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">
+              <span className="inline-flex items-center rounded-full bg-green-100 dark:bg-green-900 px-2.5 py-0.5 text-xs font-medium text-green-800 dark:text-green-200">
                 {profile.dailyGoalMinutes} min/day
               </span>
             </div>
@@ -164,14 +164,14 @@ export function ProfileSummaryCard({
         </div>
 
         {/* Level Progress */}
-        <div className="rounded-xl bg-gray-50 p-4">
+        <div className="rounded-xl bg-gray-50 dark:bg-gray-800 p-4">
           <div className="mb-3 flex items-center justify-between">
-            <span className="text-sm font-medium text-gray-700">Learning Progress</span>
-            <span className="text-sm text-gray-500">{progress}%</span>
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Learning Progress</span>
+            <span className="text-sm text-gray-500 dark:text-gray-400">{progress}%</span>
           </div>
 
           {/* Progress Bar */}
-          <div className="mb-4 h-3 w-full overflow-hidden rounded-full bg-gray-200">
+          <div className="mb-4 h-3 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
             <div
               className="h-full rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 transition-all duration-500"
               style={{ width: `${progress}%` }}
@@ -191,29 +191,29 @@ export function ProfileSummaryCard({
                   <div
                     className={cn(
                       'flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold transition-all',
-                      isTargetLevel && 'ring-2 ring-green-500 ring-offset-2',
+                      isTargetLevel && 'ring-2 ring-green-500 ring-offset-2 dark:ring-offset-gray-800',
                       isCurrent
                         ? 'bg-blue-600 text-white shadow-lg'
                         : isPassed
-                          ? 'bg-blue-200 text-blue-700'
-                          : 'bg-gray-200 text-gray-500'
+                          ? 'bg-blue-200 dark:bg-blue-800 text-blue-700 dark:text-blue-200'
+                          : 'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400'
                     )}
                   >
                     {level}
                   </div>
                   <span className={cn(
                     'mt-1.5 text-xs',
-                    isCurrent ? 'font-medium text-blue-600' : 'text-gray-500'
+                    isCurrent ? 'font-medium text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400'
                   )}>
                     {CEFRLevelInfo[level].name}
                   </span>
                   {isCurrentLevel && (
-                    <span className="mt-0.5 text-[10px] font-medium uppercase text-blue-600">
+                    <span className="mt-0.5 text-[10px] font-medium uppercase text-blue-600 dark:text-blue-400">
                       Current
                     </span>
                   )}
                   {isTargetLevel && !isCurrentLevel && (
-                    <span className="mt-0.5 text-[10px] font-medium uppercase text-green-600">
+                    <span className="mt-0.5 text-[10px] font-medium uppercase text-green-600 dark:text-green-400">
                       Target
                     </span>
                   )}
@@ -225,37 +225,37 @@ export function ProfileSummaryCard({
 
         {/* Stats Grid */}
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-          <div className="rounded-lg bg-blue-50 p-3 text-center">
-            <div className="text-2xl font-bold text-blue-600">{profile.currentLevel}</div>
-            <div className="text-xs text-gray-600">Current Level</div>
+          <div className="rounded-lg bg-blue-50 dark:bg-blue-900/30 p-3 text-center">
+            <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{profile.currentLevel}</div>
+            <div className="text-xs text-gray-600 dark:text-gray-400">Current Level</div>
           </div>
-          <div className="rounded-lg bg-green-50 p-3 text-center">
-            <div className="text-2xl font-bold text-green-600">{profile.targetLevel}</div>
-            <div className="text-xs text-gray-600">Target Level</div>
+          <div className="rounded-lg bg-green-50 dark:bg-green-900/30 p-3 text-center">
+            <div className="text-2xl font-bold text-green-600 dark:text-green-400">{profile.targetLevel}</div>
+            <div className="text-xs text-gray-600 dark:text-gray-400">Target Level</div>
           </div>
-          <div className="rounded-lg bg-purple-50 p-3 text-center">
-            <div className="text-2xl font-bold text-purple-600">{profile.dailyGoalMinutes}</div>
-            <div className="text-xs text-gray-600">Min/Day Goal</div>
+          <div className="rounded-lg bg-purple-50 dark:bg-purple-900/30 p-3 text-center">
+            <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">{profile.dailyGoalMinutes}</div>
+            <div className="text-xs text-gray-600 dark:text-gray-400">Min/Day Goal</div>
           </div>
-          <div className="rounded-lg bg-orange-50 p-3 text-center">
-            <div className="text-2xl font-bold text-orange-600">{daysSinceCreation}</div>
-            <div className="text-xs text-gray-600">Days Active</div>
+          <div className="rounded-lg bg-orange-50 dark:bg-orange-900/30 p-3 text-center">
+            <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">{daysSinceCreation}</div>
+            <div className="text-xs text-gray-600 dark:text-gray-400">Days Active</div>
           </div>
         </div>
 
         {/* Account Info */}
-        <div className="border-t border-gray-100 pt-4">
-          <div className="flex flex-wrap gap-x-6 gap-y-2 text-xs text-gray-500">
+        <div className="border-t border-gray-100 dark:border-gray-700 pt-4">
+          <div className="flex flex-wrap gap-x-6 gap-y-2 text-xs text-gray-500 dark:text-gray-400">
             <span>
-              <strong>Created:</strong> {formatDate(profile.createdAt)}
+              <strong className="text-gray-700 dark:text-gray-300">Created:</strong> {formatDate(profile.createdAt)}
             </span>
             {profile.updatedAt !== profile.createdAt && (
               <span>
-                <strong>Updated:</strong> {formatDate(profile.updatedAt)}
+                <strong className="text-gray-700 dark:text-gray-300">Updated:</strong> {formatDate(profile.updatedAt)}
               </span>
             )}
             <span>
-              <strong>ID:</strong> {profile.id.slice(0, 8)}...
+              <strong className="text-gray-700 dark:text-gray-300">ID:</strong> {profile.id.slice(0, 8)}...
             </span>
           </div>
         </div>

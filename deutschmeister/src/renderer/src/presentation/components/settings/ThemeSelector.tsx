@@ -17,8 +17,8 @@ export function ThemeSelector({ compact = false }: ThemeSelectorProps) {
   const effectiveTheme = useEffectiveTheme();
   const { setTheme } = useSettingsStore();
 
-  const handleThemeChange = async (theme: Theme) => {
-    await setTheme(theme);
+  const handleThemeChange = (theme: Theme) => {
+    setTheme(theme);
   };
 
   if (compact) {
@@ -31,8 +31,8 @@ export function ThemeSelector({ compact = false }: ThemeSelectorProps) {
             className={cn(
               'flex h-10 w-10 items-center justify-center rounded-lg text-lg transition-all',
               currentTheme === theme
-                ? 'bg-blue-100 text-blue-600 ring-2 ring-blue-500'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                ? 'bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400 ring-2 ring-blue-500'
+                : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
             )}
             title={ThemeInfo[theme].name}
           >
@@ -45,7 +45,7 @@ export function ThemeSelector({ compact = false }: ThemeSelectorProps) {
 
   return (
     <div className="space-y-3">
-      <label className="text-sm font-medium text-gray-700">Theme</label>
+      <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Theme</label>
       <div className="grid grid-cols-3 gap-3">
         {THEMES.map((theme) => {
           const isSelected = currentTheme === theme;
@@ -58,8 +58,8 @@ export function ThemeSelector({ compact = false }: ThemeSelectorProps) {
               className={cn(
                 'flex flex-col items-center rounded-xl border-2 p-4 transition-all',
                 isSelected
-                  ? 'border-blue-500 bg-blue-50'
-                  : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50'
+                  ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30'
+                  : 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-500 hover:bg-gray-50 dark:hover:bg-gray-600'
               )}
             >
               {/* Theme Preview */}
@@ -75,19 +75,19 @@ export function ThemeSelector({ compact = false }: ThemeSelectorProps) {
               {/* Theme Name */}
               <span className={cn(
                 'font-medium',
-                isSelected ? 'text-blue-700' : 'text-gray-900'
+                isSelected ? 'text-blue-700 dark:text-blue-400' : 'text-gray-900 dark:text-white'
               )}>
                 {info.name}
               </span>
               
               {/* Description */}
-              <span className="mt-1 text-xs text-gray-500 text-center">
+              <span className="mt-1 text-xs text-gray-500 dark:text-gray-400 text-center">
                 {info.description}
               </span>
 
               {/* Current indicator for system theme */}
               {theme === 'system' && isSelected && (
-                <span className="mt-2 text-xs text-blue-600">
+                <span className="mt-2 text-xs text-blue-600 dark:text-blue-400">
                   Currently: {effectiveTheme === 'dark' ? '🌙 Dark' : '☀️ Light'}
                 </span>
               )}

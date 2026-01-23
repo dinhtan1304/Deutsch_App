@@ -6,3 +6,4 @@
 export * from './Profile';
 export * from './Settings';
 export * from './Word';
+export * from './GameSession';

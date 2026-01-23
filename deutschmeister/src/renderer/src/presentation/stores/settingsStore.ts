@@ -1,13 +1,13 @@
 /**
  * Settings Store
  * Zustand store for managing application settings
+ * Uses Zustand persist middleware for auto-save to localStorage
  */
 
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, createJSONStorage, StateStorage } from 'zustand/middleware';
 import { v4 as uuidv4 } from 'uuid';
 import { 
-  Settings, 
   SettingsProps, 
   DEFAULT_SETTINGS,
   FontSize,
@@ -17,7 +17,6 @@ import {
   PlaybackSpeed
 } from '../../domain/entities/Settings';
 import { Theme, applyTheme, watchSystemTheme, getEffectiveTheme } from '../../domain/valueObjects/Theme';
-import { SettingsRepository } from '../../infrastructure/repositories/SettingsRepository';
 
 /**
  * Settings state interface
@@ -32,44 +31,75 @@ interface SettingsState {
   effectiveTheme: 'light' | 'dark';
   
   // Actions
-  initializeSettings: (profileId: string) => Promise<void>;
-  loadSettings: (profileId: string) => Promise<void>;
+  initializeSettings: (profileId: string) => void;
   
   // Theme actions (UC-1.2.01)
-  setTheme: (theme: Theme) => Promise<boolean>;
+  setTheme: (theme: Theme) => void;
   
   // Font size actions (UC-1.2.02)
-  setFontSize: (fontSize: FontSize) => Promise<boolean>;
+  setFontSize: (fontSize: FontSize) => void;
   
   // Audio actions (UC-1.2.04, UC-1.2.05, UC-1.2.06)
-  setVolume: (volume: number) => Promise<boolean>;
-  setPlaybackSpeed: (speed: PlaybackSpeed) => Promise<boolean>;
-  setAudioQuality: (quality: AudioQuality) => Promise<boolean>;
+  setVolume: (volume: number) => void;
+  setPlaybackSpeed: (speed: PlaybackSpeed) => void;
+  setAudioQuality: (quality: AudioQuality) => void;
   
   // Study settings actions (UC-1.2.08 - UC-1.2.11)
-  setDailyReminder: (enabled: boolean, time?: string) => Promise<boolean>;
-  setSessionDuration: (minutes: number) => Promise<boolean>;
-  setBreakReminders: (enabled: boolean) => Promise<boolean>;
-  setAutoDifficulty: (enabled: boolean) => Promise<boolean>;
+  setDailyReminder: (enabled: boolean, time?: string) => void;
+  setSessionDuration: (minutes: number) => void;
+  setBreakReminders: (enabled: boolean) => void;
+  setAutoDifficulty: (enabled: boolean) => void;
   
   // Display settings actions (UC-1.2.12 - UC-1.2.15)
-  setShowTranslations: (show: boolean) => Promise<boolean>;
-  setArticleColorCoding: (enabled: boolean) => Promise<boolean>;
-  setAnimationSpeed: (speed: AnimationSpeed) => Promise<boolean>;
-  setViewMode: (mode: ViewMode) => Promise<boolean>;
+  setShowTranslations: (show: boolean) => void;
+  setArticleColorCoding: (enabled: boolean) => void;
+  setAnimationSpeed: (speed: AnimationSpeed) => void;
+  setViewMode: (mode: ViewMode) => void;
   
   // Bulk update
-  updateSettings: (updates: Partial<SettingsProps>) => Promise<boolean>;
+  updateSettings: (updates: Partial<SettingsProps>) => void;
   
   // Reset
-  resetToDefaults: () => Promise<boolean>;
+  resetToDefaults: () => void;
   
   // Utility
   setError: (error: string | null) => void;
 }
 
 /**
- * Settings Zustand Store
+ * Custom storage that handles Date serialization
+ */
+const customStorage: StateStorage = {
+  getItem: (name: string): string | null => {
+    const str = localStorage.getItem(name);
+    if (!str) return null;
+    
+    try {
+      const parsed = JSON.parse(str);
+      // Convert date strings back to Date objects
+      if (parsed.state?.settings) {
+        if (parsed.state.settings.createdAt) {
+          parsed.state.settings.createdAt = new Date(parsed.state.settings.createdAt);
+        }
+        if (parsed.state.settings.updatedAt) {
+          parsed.state.settings.updatedAt = new Date(parsed.state.settings.updatedAt);
+        }
+      }
+      return JSON.stringify(parsed);
+    } catch {
+      return str;
+    }
+  },
+  setItem: (name: string, value: string): void => {
+    localStorage.setItem(name, value);
+  },
+  removeItem: (name: string): void => {
+    localStorage.removeItem(name);
+  },
+};
+
+/**
+ * Settings Zustand Store with persist middleware
  */
 export const useSettingsStore = create<SettingsState>()(
   persist(
@@ -83,76 +113,55 @@ export const useSettingsStore = create<SettingsState>()(
       /**
        * Initialize settings for a profile (create if not exists)
        */
-      initializeSettings: async (profileId: string) => {
-        set({ isLoading: true, error: null });
+      initializeSettings: (profileId: string) => {
+        const currentSettings = get().settings;
         
-        try {
-          const repository = new SettingsRepository();
-          let settings = await repository.getByProfileId(profileId);
+        // If settings already exist for this profile, just apply theme
+        if (currentSettings && currentSettings.profileId === profileId) {
+          const effectiveTheme = getEffectiveTheme(currentSettings.theme);
+          applyTheme(currentSettings.theme);
+          set({ effectiveTheme });
           
-          if (!settings) {
-            // Create default settings
-            settings = Settings.createDefault(uuidv4(), profileId);
-            await repository.create(settings);
-          }
-          
-          const settingsData = settings.toObject();
-          const effectiveTheme = getEffectiveTheme(settingsData.theme);
-          
-          // Apply theme immediately
-          applyTheme(settingsData.theme);
-          
-          set({ 
-            settings: settingsData, 
-            effectiveTheme,
-            isLoading: false 
-          });
-          
-          // Watch for system theme changes if using 'system' theme
-          if (settingsData.theme === 'system') {
+          // Watch for system theme changes
+          if (currentSettings.theme === 'system') {
             watchSystemTheme((isDark) => {
-              const currentSettings = get().settings;
-              if (currentSettings?.theme === 'system') {
+              const settings = get().settings;
+              if (settings?.theme === 'system') {
                 set({ effectiveTheme: isDark ? 'dark' : 'light' });
                 applyTheme('system');
               }
             });
           }
-        } catch (error) {
-          set({ 
-            isLoading: false, 
-            error: error instanceof Error ? error.message : 'Failed to initialize settings'
-          });
+          return;
         }
-      },
-
-      /**
-       * Load settings for a profile
-       */
-      loadSettings: async (profileId: string) => {
-        set({ isLoading: true, error: null });
         
-        try {
-          const repository = new SettingsRepository();
-          const settings = await repository.getByProfileId(profileId);
-          
-          if (settings) {
-            const settingsData = settings.toObject();
-            const effectiveTheme = getEffectiveTheme(settingsData.theme);
-            applyTheme(settingsData.theme);
-            
-            set({ 
-              settings: settingsData, 
-              effectiveTheme,
-              isLoading: false 
-            });
-          } else {
-            set({ settings: null, isLoading: false });
-          }
-        } catch (error) {
-          set({ 
-            isLoading: false, 
-            error: error instanceof Error ? error.message : 'Failed to load settings'
+        // Create default settings for new profile
+        const now = new Date();
+        const newSettings: SettingsProps = {
+          id: uuidv4(),
+          profileId,
+          ...DEFAULT_SETTINGS,
+          createdAt: now,
+          updatedAt: now
+        };
+        
+        const effectiveTheme = getEffectiveTheme(newSettings.theme);
+        applyTheme(newSettings.theme);
+        
+        set({ 
+          settings: newSettings, 
+          effectiveTheme,
+          isLoading: false 
+        });
+        
+        // Watch for system theme changes if using 'system' theme
+        if (newSettings.theme === 'system') {
+          watchSystemTheme((isDark) => {
+            const settings = get().settings;
+            if (settings?.theme === 'system') {
+              set({ effectiveTheme: isDark ? 'dark' : 'light' });
+              applyTheme('system');
+            }
           });
         }
       },
@@ -160,346 +169,281 @@ export const useSettingsStore = create<SettingsState>()(
       /**
        * UC-1.2.01: Set Theme
        */
-      setTheme: async (theme: Theme): Promise<boolean> => {
+      setTheme: (theme: Theme) => {
         const currentSettings = get().settings;
-        if (!currentSettings) return false;
+        if (!currentSettings) return;
         
-        try {
-          const repository = new SettingsRepository();
-          const settings = Settings.fromPersistence(currentSettings);
-          const updatedSettings = settings.updateTheme(theme);
-          await repository.update(updatedSettings);
-          
-          const effectiveTheme = getEffectiveTheme(theme);
-          applyTheme(theme);
-          
-          set({ 
-            settings: updatedSettings.toObject(),
-            effectiveTheme 
-          });
-          
-          return true;
-        } catch (error) {
-          set({ error: error instanceof Error ? error.message : 'Failed to update theme' });
-          return false;
-        }
+        const effectiveTheme = getEffectiveTheme(theme);
+        applyTheme(theme);
+        
+        set({ 
+          settings: {
+            ...currentSettings,
+            theme,
+            updatedAt: new Date()
+          },
+          effectiveTheme 
+        });
       },
 
       /**
        * UC-1.2.02: Set Font Size
        */
-      setFontSize: async (fontSize: FontSize): Promise<boolean> => {
+      setFontSize: (fontSize: FontSize) => {
         const currentSettings = get().settings;
-        if (!currentSettings) return false;
+        if (!currentSettings) return;
         
-        try {
-          const repository = new SettingsRepository();
-          const settings = Settings.fromPersistence(currentSettings);
-          const updatedSettings = settings.updateFontSize(fontSize);
-          await repository.update(updatedSettings);
-          
-          set({ settings: updatedSettings.toObject() });
-          return true;
-        } catch (error) {
-          set({ error: error instanceof Error ? error.message : 'Failed to update font size' });
-          return false;
-        }
+        set({ 
+          settings: {
+            ...currentSettings,
+            fontSize,
+            updatedAt: new Date()
+          }
+        });
       },
 
       /**
        * UC-1.2.04: Set Volume
        */
-      setVolume: async (volume: number): Promise<boolean> => {
+      setVolume: (volume: number) => {
         const currentSettings = get().settings;
-        if (!currentSettings) return false;
+        if (!currentSettings) return;
         
-        try {
-          const repository = new SettingsRepository();
-          const settings = Settings.fromPersistence(currentSettings);
-          const updatedSettings = settings.updateVolume(volume);
-          await repository.update(updatedSettings);
-          
-          set({ settings: updatedSettings.toObject() });
-          return true;
-        } catch (error) {
-          set({ error: error instanceof Error ? error.message : 'Failed to update volume' });
-          return false;
-        }
+        set({ 
+          settings: {
+            ...currentSettings,
+            volume: Math.round(Math.min(100, Math.max(0, volume))),
+            updatedAt: new Date()
+          }
+        });
       },
 
       /**
        * UC-1.2.05: Set Playback Speed
        */
-      setPlaybackSpeed: async (speed: PlaybackSpeed): Promise<boolean> => {
+      setPlaybackSpeed: (speed: PlaybackSpeed) => {
         const currentSettings = get().settings;
-        if (!currentSettings) return false;
+        if (!currentSettings) return;
         
-        try {
-          const repository = new SettingsRepository();
-          const settings = Settings.fromPersistence(currentSettings);
-          const updatedSettings = settings.updatePlaybackSpeed(speed);
-          await repository.update(updatedSettings);
-          
-          set({ settings: updatedSettings.toObject() });
-          return true;
-        } catch (error) {
-          set({ error: error instanceof Error ? error.message : 'Failed to update playback speed' });
-          return false;
-        }
+        set({ 
+          settings: {
+            ...currentSettings,
+            playbackSpeed: speed,
+            updatedAt: new Date()
+          }
+        });
       },
 
       /**
        * UC-1.2.06: Set Audio Quality
        */
-      setAudioQuality: async (quality: AudioQuality): Promise<boolean> => {
+      setAudioQuality: (quality: AudioQuality) => {
         const currentSettings = get().settings;
-        if (!currentSettings) return false;
+        if (!currentSettings) return;
         
-        try {
-          const repository = new SettingsRepository();
-          const settings = Settings.fromPersistence(currentSettings);
-          const updatedSettings = settings.updateAudioQuality(quality);
-          await repository.update(updatedSettings);
-          
-          set({ settings: updatedSettings.toObject() });
-          return true;
-        } catch (error) {
-          set({ error: error instanceof Error ? error.message : 'Failed to update audio quality' });
-          return false;
-        }
+        set({ 
+          settings: {
+            ...currentSettings,
+            audioQuality: quality,
+            updatedAt: new Date()
+          }
+        });
       },
 
       /**
        * UC-1.2.08: Set Daily Reminder
        */
-      setDailyReminder: async (enabled: boolean, time?: string): Promise<boolean> => {
+      setDailyReminder: (enabled: boolean, time?: string) => {
         const currentSettings = get().settings;
-        if (!currentSettings) return false;
+        if (!currentSettings) return;
         
-        try {
-          const repository = new SettingsRepository();
-          const settings = Settings.fromPersistence(currentSettings);
-          const updatedSettings = settings.updateDailyReminder(enabled, time);
-          await repository.update(updatedSettings);
-          
-          set({ settings: updatedSettings.toObject() });
-          return true;
-        } catch (error) {
-          set({ error: error instanceof Error ? error.message : 'Failed to update daily reminder' });
-          return false;
-        }
+        set({ 
+          settings: {
+            ...currentSettings,
+            dailyReminderEnabled: enabled,
+            dailyReminderTime: time ?? currentSettings.dailyReminderTime,
+            updatedAt: new Date()
+          }
+        });
       },
 
       /**
        * UC-1.2.09: Set Session Duration
        */
-      setSessionDuration: async (minutes: number): Promise<boolean> => {
+      setSessionDuration: (minutes: number) => {
         const currentSettings = get().settings;
-        if (!currentSettings) return false;
+        if (!currentSettings) return;
         
-        try {
-          const repository = new SettingsRepository();
-          const settings = Settings.fromPersistence(currentSettings);
-          const updatedSettings = settings.updateSessionDuration(minutes);
-          await repository.update(updatedSettings);
-          
-          set({ settings: updatedSettings.toObject() });
-          return true;
-        } catch (error) {
-          set({ error: error instanceof Error ? error.message : 'Failed to update session duration' });
-          return false;
-        }
+        set({ 
+          settings: {
+            ...currentSettings,
+            sessionDurationMinutes: Math.min(120, Math.max(5, minutes)),
+            updatedAt: new Date()
+          }
+        });
       },
 
       /**
        * UC-1.2.10: Set Break Reminders
        */
-      setBreakReminders: async (enabled: boolean): Promise<boolean> => {
+      setBreakReminders: (enabled: boolean) => {
         const currentSettings = get().settings;
-        if (!currentSettings) return false;
+        if (!currentSettings) return;
         
-        try {
-          const repository = new SettingsRepository();
-          const settings = Settings.fromPersistence(currentSettings);
-          const updatedSettings = settings.updateBreakReminders(enabled);
-          await repository.update(updatedSettings);
-          
-          set({ settings: updatedSettings.toObject() });
-          return true;
-        } catch (error) {
-          set({ error: error instanceof Error ? error.message : 'Failed to update break reminders' });
-          return false;
-        }
+        set({ 
+          settings: {
+            ...currentSettings,
+            breakRemindersEnabled: enabled,
+            updatedAt: new Date()
+          }
+        });
       },
 
       /**
        * UC-1.2.11: Set Auto Difficulty
        */
-      setAutoDifficulty: async (enabled: boolean): Promise<boolean> => {
+      setAutoDifficulty: (enabled: boolean) => {
         const currentSettings = get().settings;
-        if (!currentSettings) return false;
+        if (!currentSettings) return;
         
-        try {
-          const repository = new SettingsRepository();
-          const settings = Settings.fromPersistence(currentSettings);
-          const updatedSettings = settings.updateAutoDifficulty(enabled);
-          await repository.update(updatedSettings);
-          
-          set({ settings: updatedSettings.toObject() });
-          return true;
-        } catch (error) {
-          set({ error: error instanceof Error ? error.message : 'Failed to update auto difficulty' });
-          return false;
-        }
+        set({ 
+          settings: {
+            ...currentSettings,
+            autoDifficultyEnabled: enabled,
+            updatedAt: new Date()
+          }
+        });
       },
 
       /**
        * UC-1.2.12: Set Show Translations
        */
-      setShowTranslations: async (show: boolean): Promise<boolean> => {
+      setShowTranslations: (show: boolean) => {
         const currentSettings = get().settings;
-        if (!currentSettings) return false;
+        if (!currentSettings) return;
         
-        try {
-          const repository = new SettingsRepository();
-          const settings = Settings.fromPersistence(currentSettings);
-          const updatedSettings = settings.updateShowTranslations(show);
-          await repository.update(updatedSettings);
-          
-          set({ settings: updatedSettings.toObject() });
-          return true;
-        } catch (error) {
-          set({ error: error instanceof Error ? error.message : 'Failed to update show translations' });
-          return false;
-        }
+        set({ 
+          settings: {
+            ...currentSettings,
+            showTranslations: show,
+            updatedAt: new Date()
+          }
+        });
       },
 
       /**
        * UC-1.2.13: Set Article Color Coding
        */
-      setArticleColorCoding: async (enabled: boolean): Promise<boolean> => {
+      setArticleColorCoding: (enabled: boolean) => {
         const currentSettings = get().settings;
-        if (!currentSettings) return false;
+        if (!currentSettings) return;
         
-        try {
-          const repository = new SettingsRepository();
-          const settings = Settings.fromPersistence(currentSettings);
-          const updatedSettings = settings.updateArticleColorCoding(enabled);
-          await repository.update(updatedSettings);
-          
-          set({ settings: updatedSettings.toObject() });
-          return true;
-        } catch (error) {
-          set({ error: error instanceof Error ? error.message : 'Failed to update article color coding' });
-          return false;
-        }
+        set({ 
+          settings: {
+            ...currentSettings,
+            articleColorCoding: enabled,
+            updatedAt: new Date()
+          }
+        });
       },
 
       /**
        * UC-1.2.14: Set Animation Speed
        */
-      setAnimationSpeed: async (speed: AnimationSpeed): Promise<boolean> => {
+      setAnimationSpeed: (speed: AnimationSpeed) => {
         const currentSettings = get().settings;
-        if (!currentSettings) return false;
+        if (!currentSettings) return;
         
-        try {
-          const repository = new SettingsRepository();
-          const settings = Settings.fromPersistence(currentSettings);
-          const updatedSettings = settings.updateAnimationSpeed(speed);
-          await repository.update(updatedSettings);
-          
-          set({ settings: updatedSettings.toObject() });
-          return true;
-        } catch (error) {
-          set({ error: error instanceof Error ? error.message : 'Failed to update animation speed' });
-          return false;
-        }
+        set({ 
+          settings: {
+            ...currentSettings,
+            animationSpeed: speed,
+            updatedAt: new Date()
+          }
+        });
       },
 
       /**
        * UC-1.2.15: Set View Mode
        */
-      setViewMode: async (mode: ViewMode): Promise<boolean> => {
+      setViewMode: (mode: ViewMode) => {
         const currentSettings = get().settings;
-        if (!currentSettings) return false;
+        if (!currentSettings) return;
         
-        try {
-          const repository = new SettingsRepository();
-          const settings = Settings.fromPersistence(currentSettings);
-          const updatedSettings = settings.updateViewMode(mode);
-          await repository.update(updatedSettings);
-          
-          set({ settings: updatedSettings.toObject() });
-          return true;
-        } catch (error) {
-          set({ error: error instanceof Error ? error.message : 'Failed to update view mode' });
-          return false;
-        }
+        set({ 
+          settings: {
+            ...currentSettings,
+            viewMode: mode,
+            updatedAt: new Date()
+          }
+        });
       },
 
       /**
        * Update multiple settings at once
        */
-      updateSettings: async (updates: Partial<SettingsProps>): Promise<boolean> => {
+      updateSettings: (updates: Partial<SettingsProps>) => {
         const currentSettings = get().settings;
-        if (!currentSettings) return false;
+        if (!currentSettings) return;
         
-        try {
-          const repository = new SettingsRepository();
-          const settings = Settings.fromPersistence(currentSettings);
-          const updatedSettings = settings.updateMultiple(updates);
-          await repository.update(updatedSettings);
-          
-          const newSettingsData = updatedSettings.toObject();
-          
-          // If theme changed, apply it
-          if (updates.theme) {
-            const effectiveTheme = getEffectiveTheme(updates.theme);
-            applyTheme(updates.theme);
-            set({ settings: newSettingsData, effectiveTheme });
-          } else {
-            set({ settings: newSettingsData });
-          }
-          
-          return true;
-        } catch (error) {
-          set({ error: error instanceof Error ? error.message : 'Failed to update settings' });
-          return false;
+        const newSettings = {
+          ...currentSettings,
+          ...updates,
+          updatedAt: new Date()
+        };
+        
+        // If theme changed, apply it
+        if (updates.theme) {
+          const effectiveTheme = getEffectiveTheme(updates.theme);
+          applyTheme(updates.theme);
+          set({ settings: newSettings, effectiveTheme });
+        } else {
+          set({ settings: newSettings });
         }
       },
 
       /**
        * UC-1.2.18: Reset to Defaults
        */
-      resetToDefaults: async (): Promise<boolean> => {
+      resetToDefaults: () => {
         const currentSettings = get().settings;
-        if (!currentSettings) return false;
+        if (!currentSettings) return;
         
-        try {
-          const repository = new SettingsRepository();
-          const settings = Settings.createDefault(currentSettings.id, currentSettings.profileId);
-          await repository.update(settings);
-          
-          const settingsData = settings.toObject();
-          const effectiveTheme = getEffectiveTheme(settingsData.theme);
-          applyTheme(settingsData.theme);
-          
-          set({ settings: settingsData, effectiveTheme });
-          return true;
-        } catch (error) {
-          set({ error: error instanceof Error ? error.message : 'Failed to reset settings' });
-          return false;
-        }
+        const now = new Date();
+        const newSettings: SettingsProps = {
+          id: currentSettings.id,
+          profileId: currentSettings.profileId,
+          ...DEFAULT_SETTINGS,
+          createdAt: currentSettings.createdAt,
+          updatedAt: now
+        };
+        
+        const effectiveTheme = getEffectiveTheme(newSettings.theme);
+        applyTheme(newSettings.theme);
+        
+        set({ settings: newSettings, effectiveTheme });
       },
 
       setError: (error) => set({ error })
     }),
     {
-      name: 'deutschmeister-settings-store',
+      name: 'deutschmeister-settings',
+      storage: createJSONStorage(() => customStorage),
       partialize: (state) => ({
         settings: state.settings,
         effectiveTheme: state.effectiveTheme
-      })
+      }),
+      onRehydrateStorage: () => (state) => {
+        // Apply theme after rehydration
+        if (state?.settings?.theme) {
+          const effectiveTheme = getEffectiveTheme(state.settings.theme);
+          applyTheme(state.settings.theme);
+          // We need to update effectiveTheme after rehydration
+          setTimeout(() => {
+            useSettingsStore.setState({ effectiveTheme });
+          }, 0);
+        }
+      }
     }
   )
 );

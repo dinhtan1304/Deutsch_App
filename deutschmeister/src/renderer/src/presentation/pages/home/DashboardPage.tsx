@@ -10,6 +10,7 @@ import { useProfile, useProfileStore } from '../../stores/profileStore';
 import { useSettingsStore } from '../../stores/settingsStore';
 import { useFavoritesStore } from '../../stores/favoritesStore';
 import { useHistoryStore } from '../../stores/historyStore';
+import { useGameStore } from '../../stores/gameStore';
 import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { EditProfileModal } from '../../components/profile/EditProfileModal';
@@ -48,11 +49,11 @@ export function DashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
       <div className="mx-auto max-w-4xl">
         {/* Header */}
         <header className="mb-8 flex items-center justify-between">
-          <h1 className="text-3xl font-bold text-gray-900">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
             🇩🇪 DeutschMeister
           </h1>
           <Button
@@ -91,9 +92,11 @@ export function DashboardPage() {
                 onClick={() => navigate('/words')}
               >
                 <span className="text-2xl">📚</span>
-                <span className="mt-2">Der/Die/Das</span>
-                <span className="text-xs text-green-600">Ready!</span>
+                <span className="mt-2 text-gray-900 dark:text-white">Der/Die/Das</span>
+                <span className="text-xs text-green-600 dark:text-green-400">Dictionary</span>
               </Button>
+
+              <GamesButton onClick={() => navigate('/games')} />
 
               <FavoritesButton onClick={() => navigate('/words/favorites')} />
 
@@ -101,20 +104,20 @@ export function DashboardPage() {
 
               <Button variant="outline" className="h-24 flex-col" disabled>
                 <span className="text-2xl">📖</span>
-                <span className="mt-2">Grammar</span>
-                <span className="text-xs text-gray-500">Coming soon</span>
+                <span className="mt-2 text-gray-900 dark:text-white">Grammar</span>
+                <span className="text-xs text-gray-500 dark:text-gray-400">Coming soon</span>
               </Button>
 
               <Button variant="outline" className="h-24 flex-col" disabled>
                 <span className="text-2xl">🎧</span>
-                <span className="mt-2">Listening</span>
-                <span className="text-xs text-gray-500">Coming soon</span>
+                <span className="mt-2 text-gray-900 dark:text-white">Listening</span>
+                <span className="text-xs text-gray-500 dark:text-gray-400">Coming soon</span>
               </Button>
 
               <Button variant="outline" className="h-24 flex-col" disabled>
                 <span className="text-2xl">✍️</span>
-                <span className="mt-2">Writing</span>
-                <span className="text-xs text-gray-500">Coming soon</span>
+                <span className="mt-2 text-gray-900 dark:text-white">Writing</span>
+                <span className="text-xs text-gray-500 dark:text-gray-400">Coming soon</span>
               </Button>
 
               <Button 
@@ -123,8 +126,8 @@ export function DashboardPage() {
                 onClick={() => navigate('/settings')}
               >
                 <span className="text-2xl">⚙️</span>
-                <span className="mt-2">Settings</span>
-                <span className="text-xs text-gray-500">Preferences</span>
+                <span className="mt-2 text-gray-900 dark:text-white">Settings</span>
+                <span className="text-xs text-gray-500 dark:text-gray-400">Preferences</span>
               </Button>
             </div>
           </CardContent>
@@ -136,7 +139,7 @@ export function DashboardPage() {
             <CardTitle>Developer Tools</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="mb-4 text-sm text-gray-500">
+            <p className="mb-4 text-sm text-gray-500 dark:text-gray-400">
               These options are for testing purposes only.
             </p>
             <div className="flex gap-3">
@@ -190,11 +193,11 @@ function FavoritesButton({ onClick }: { onClick: () => void }) {
       onClick={onClick}
     >
       <span className="text-2xl">⭐</span>
-      <span className="mt-2">Favorites</span>
+      <span className="mt-2 text-gray-900 dark:text-white">Favorites</span>
       {count > 0 ? (
-        <span className="text-xs text-yellow-600">{count} words</span>
+        <span className="text-xs text-yellow-600 dark:text-yellow-400">{count} words</span>
       ) : (
-        <span className="text-xs text-gray-500">No favorites</span>
+        <span className="text-xs text-gray-500 dark:text-gray-400">No favorites</span>
       )}
       {count > 0 && (
         <span className="absolute top-2 right-2 inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-yellow-500 rounded-full">
@@ -218,15 +221,50 @@ function HistoryButton({ onClick }: { onClick: () => void }) {
       onClick={onClick}
     >
       <span className="text-2xl">🕐</span>
-      <span className="mt-2">History</span>
+      <span className="mt-2 text-gray-900 dark:text-white">History</span>
       {count > 0 ? (
-        <span className="text-xs text-gray-600">{count} viewed</span>
+        <span className="text-xs text-gray-600 dark:text-gray-300">{count} viewed</span>
       ) : (
-        <span className="text-xs text-gray-500">No history</span>
+        <span className="text-xs text-gray-500 dark:text-gray-400">No history</span>
       )}
       {count > 0 && (
         <span className="absolute top-2 right-2 inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-gray-500 rounded-full">
           {count > 99 ? '99+' : count}
+        </span>
+      )}
+    </Button>
+  );
+}
+
+/**
+ * Games Button with stats
+ */
+function GamesButton({ onClick }: { onClick: () => void }) {
+  const { totalGamesPlayed, totalCorrectAnswers, totalIncorrectAnswers } = useGameStore();
+  
+  const totalAnswers = totalCorrectAnswers + totalIncorrectAnswers;
+  const accuracy = totalAnswers > 0 
+    ? Math.round((totalCorrectAnswers / totalAnswers) * 100) 
+    : 0;
+  
+  return (
+    <Button 
+      variant="outline" 
+      className="h-24 flex-col relative"
+      onClick={onClick}
+    >
+      <span className="text-2xl">🎮</span>
+      <span className="mt-2 text-gray-900 dark:text-white">Games</span>
+      {totalGamesPlayed > 0 ? (
+        <span className="text-xs text-green-600 dark:text-green-400">
+          {accuracy}% accuracy
+        </span>
+      ) : (
+        <span className="text-xs text-green-600 dark:text-green-400">Play now!</span>
+      )}
+      {totalGamesPlayed > 0 && (
+        <span className="absolute top-2 right-2 inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-green-500 rounded-full">
+          {totalGamesPlayed > 99 ? '99+' : totalGamesPlayed}
         </span>
       )}
     </Button>

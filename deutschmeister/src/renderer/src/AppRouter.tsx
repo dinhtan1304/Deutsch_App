@@ -11,7 +11,9 @@ import { SettingsPage } from './presentation/pages/settings/SettingsPage';
 import { WordSearchPage } from './presentation/pages/words/WordSearchPage';
 import { FavoritesPage } from './presentation/pages/words/FavoritesPage';
 import { HistoryPage } from './presentation/pages/words/HistoryPage';
+import { GameMenuPage, QuickQuizPage, FlashcardPage, FillBlankPage, TimedChallengePage } from './presentation/pages/games';
 import { useHasCompletedOnboarding } from './presentation/stores/profileStore';
+
 
 /**
  * Protected Route Component
@@ -77,7 +79,7 @@ export function AppRouter() {
         }
       />
       
-      {/* Der/Die/Das Module - UC-2.x */}
+      {/* Der/Die/Das Dictionary - UC-2.1.x */}
       <Route
         path="/articles"
         element={
@@ -115,6 +117,56 @@ export function AppRouter() {
         element={
           <ProtectedRoute>
             <HistoryPage />
+          </ProtectedRoute>
+        }
+      />
+      
+      {/* Games Routes - UC-2.2.x */}
+      <Route
+        path="/games"
+        element={
+          <ProtectedRoute>
+            <GameMenuPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/games/quiz"
+        element={
+          <ProtectedRoute>
+            <QuickQuizPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/games/quick-quiz"
+        element={
+          <ProtectedRoute>
+            <QuickQuizPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/games/flashcard"
+        element={
+          <ProtectedRoute>
+            <FlashcardPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/games/fill-blank"
+        element={
+          <ProtectedRoute>
+            <FillBlankPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/games/timed-challenge"
+        element={
+          <ProtectedRoute>
+            <TimedChallengePage />
           </ProtectedRoute>
         }
       />
