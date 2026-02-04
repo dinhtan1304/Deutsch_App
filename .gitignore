@@ -1,1 +1,223 @@
 /FEATURES_LIST.md
+# ============================================================
+# DEUTSCHMEISTER - Full Stack Project
+# NestJS (Backend) + Next.js (Frontend) + Prisma
+# ============================================================
+
+# ================================
+# Dependencies
+# ================================
+node_modules/
+.pnp
+.pnp.js
+.yarn/install-state.gz
+
+# ================================
+# Build outputs
+# ================================
+dist/
+build/
+out/
+.next/
+*.js.map
+
+# ================================
+# Environment variables (IMPORTANT!)
+# ================================
+.env
+.env.local
+.env.development
+.env.development.local
+.env.test.local
+.env.production
+.env.production.local
+.env*.local
+
+# Keep example env file
+!.env.example
+!.env.sample
+
+# ================================
+# IDE / Editor
+# ================================
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.swp
+*.swo
+*.sublime-workspace
+*.sublime-project
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.code-workspace
+
+# ================================
+# OS generated files
+# ================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+$RECYCLE.BIN/
+
+# ================================
+# Logs
+# ================================
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# ================================
+# Testing
+# ================================
+coverage/
+.nyc_output/
+*.lcov
+/cypress/videos
+/cypress/screenshots
+/playwright-report/
+/playwright/.cache/
+__snapshots__/
+
+# ================================
+# Prisma
+# ================================
+# SQLite database files (if using SQLite locally)
+*.db
+*.db-journal
+prisma/*.db
+prisma/*.db-journal
+
+# Generated Prisma Client (regenerated on npm install)
+# node_modules/.prisma/
+
+# ================================
+# NestJS
+# ================================
+/dist
+
+# ================================
+# Next.js
+# ================================
+.next/
+out/
+.vercel
+*.tsbuildinfo
+next-env.d.ts
+
+# ================================
+# TypeScript
+# ================================
+*.tsbuildinfo
+tsconfig.tsbuildinfo
+
+# ================================
+# Temporary files
+# ================================
+tmp/
+temp/
+.tmp/
+.temp/
+*.tmp
+*.temp
+*.bak
+*.backup
+
+# ================================
+# Secrets / Keys (NEVER commit!)
+# ================================
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+secrets/
+.secrets/
+private/
+*.secret
+
+# ================================
+# Uploads (if storing locally)
+# ================================
+uploads/*
+!uploads/.gitkeep
+public/uploads/*
+!public/uploads/.gitkeep
+
+# ================================
+# Cache
+# ================================
+.cache/
+.parcel-cache/
+.eslintcache
+.stylelintcache
+
+# ================================
+# Debug
+# ================================
+.debug/
+debug.log
+
+# ================================
+# Docker (optional)
+# ================================
+# Uncomment if not using Docker
+# docker-compose.override.yml
+# .docker/
+
+# ================================
+# Package manager - KEEP ONLY ONE
+# ================================
+# If using npm (keep package-lock.json):
+# yarn.lock
+# pnpm-lock.yaml
+
+# If using yarn (keep yarn.lock):
+# package-lock.json
+# pnpm-lock.yaml
+
+# If using pnpm (keep pnpm-lock.yaml):
+# package-lock.json
+# yarn.lock
+
+# ================================
+# Misc
+# ================================
+*.pid
+*.seed
+*.pid.lock
+
+# Storybook
+storybook-static/
+
+# PWA files
+**/public/sw.js
+**/public/workbox-*.js
+**/public/sw.js.map
+
+# Sentry
+.sentryclirc
+
+# Bundle analyzer
+.next/analyze/
+analyze/
+
+# Local Netlify folder
+.netlify
+
+# Husky
+# .husky/

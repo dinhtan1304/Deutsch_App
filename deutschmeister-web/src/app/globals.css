@@ -1,0 +1,320 @@
+@import "tailwindcss";
+
+/* 
+ * PURE CSS THEME SOLUTION
+ * This works regardless of Tailwind version or configuration
+ * Theme is controlled by 'data-theme' attribute on <html>
+ */
+
+/* ============================================
+   FORCE DISABLE Tailwind's media-based dark mode
+   by overriding with our own selectors
+   ============================================ */
+
+/* Light Theme Colors */
+:root,
+html[data-theme="light"],
+html.light {
+  --theme-bg-body: #f9fafb;        /* gray-50 */
+  --theme-bg-card: #ffffff;         /* white */
+  --theme-bg-secondary: #f3f4f6;    /* gray-100 */
+  --theme-bg-tertiary: #e5e7eb;     /* gray-200 */
+  --theme-text-primary: #111827;    /* gray-900 */
+  --theme-text-secondary: #4b5563;  /* gray-600 */
+  --theme-text-muted: #6b7280;      /* gray-500 */
+  --theme-border: #e5e7eb;          /* gray-200 */
+  --theme-border-dark: #d1d5db;     /* gray-300 */
+}
+
+/* Dark Theme Colors */
+html[data-theme="dark"],
+html.dark {
+  --theme-bg-body: #111827;         /* gray-900 */
+  --theme-bg-card: #1f2937;         /* gray-800 */
+  --theme-bg-secondary: #374151;    /* gray-700 */
+  --theme-bg-tertiary: #4b5563;     /* gray-600 */
+  --theme-text-primary: #f9fafb;    /* gray-50 */
+  --theme-text-secondary: #d1d5db;  /* gray-300 */
+  --theme-text-muted: #9ca3af;      /* gray-400 */
+  --theme-border: #374151;          /* gray-700 */
+  --theme-border-dark: #4b5563;     /* gray-600 */
+}
+
+/* ============================================
+   APPLY THEME TO BODY - This is the key!
+   ============================================ */
+
+body {
+  background-color: var(--theme-bg-body) !important;
+  color: var(--theme-text-primary) !important;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* ============================================
+   OVERRIDE ALL TAILWIND BACKGROUND CLASSES
+   ============================================ */
+
+/* Body/Page backgrounds */
+html[data-theme="light"] .bg-gray-50,
+html.light .bg-gray-50 {
+  background-color: #f9fafb !important;
+}
+
+html[data-theme="dark"] .bg-gray-50,
+html.dark .bg-gray-50 {
+  background-color: #111827 !important;
+}
+
+html[data-theme="light"] .bg-gray-900,
+html.light .bg-gray-900 {
+  background-color: #111827 !important;
+}
+
+html[data-theme="dark"] .bg-gray-900,
+html.dark .bg-gray-900 {
+  background-color: #111827 !important;
+}
+
+/* Card backgrounds */
+html[data-theme="light"] .bg-white,
+html.light .bg-white {
+  background-color: #ffffff !important;
+}
+
+html[data-theme="dark"] .bg-white,
+html.dark .bg-white {
+  background-color: #1f2937 !important;
+}
+
+html[data-theme="light"] .bg-gray-800,
+html.light .bg-gray-800 {
+  background-color: #1f2937 !important;
+}
+
+html[data-theme="dark"] .bg-gray-800,
+html.dark .bg-gray-800 {
+  background-color: #1f2937 !important;
+}
+
+/* Secondary backgrounds */
+html[data-theme="light"] .bg-gray-100,
+html.light .bg-gray-100 {
+  background-color: #f3f4f6 !important;
+}
+
+html[data-theme="dark"] .bg-gray-100,
+html.dark .bg-gray-100 {
+  background-color: #374151 !important;
+}
+
+html[data-theme="light"] .bg-gray-700,
+html.light .bg-gray-700 {
+  background-color: #374151 !important;
+}
+
+html[data-theme="dark"] .bg-gray-700,
+html.dark .bg-gray-700 {
+  background-color: #374151 !important;
+}
+
+/* ============================================
+   OVERRIDE ALL TAILWIND TEXT CLASSES
+   ============================================ */
+
+html[data-theme="light"] .text-gray-900,
+html.light .text-gray-900 {
+  color: #111827 !important;
+}
+
+html[data-theme="dark"] .text-gray-900,
+html.dark .text-gray-900 {
+  color: #f9fafb !important;
+}
+
+html[data-theme="light"] .text-white,
+html.light .text-white {
+  color: #ffffff !important;
+}
+
+html[data-theme="dark"] .text-white,
+html.dark .text-white {
+  color: #ffffff !important;
+}
+
+html[data-theme="light"] .text-gray-600,
+html.light .text-gray-600 {
+  color: #4b5563 !important;
+}
+
+html[data-theme="dark"] .text-gray-600,
+html.dark .text-gray-600 {
+  color: #d1d5db !important;
+}
+
+html[data-theme="light"] .text-gray-500,
+html.light .text-gray-500 {
+  color: #6b7280 !important;
+}
+
+html[data-theme="dark"] .text-gray-500,
+html.dark .text-gray-500 {
+  color: #9ca3af !important;
+}
+
+html[data-theme="light"] .text-gray-400,
+html.light .text-gray-400 {
+  color: #9ca3af !important;
+}
+
+html[data-theme="dark"] .text-gray-400,
+html.dark .text-gray-400 {
+  color: #9ca3af !important;
+}
+
+html[data-theme="light"] .text-gray-300,
+html.light .text-gray-300 {
+  color: #d1d5db !important;
+}
+
+html[data-theme="dark"] .text-gray-300,
+html.dark .text-gray-300 {
+  color: #d1d5db !important;
+}
+
+/* ============================================
+   OVERRIDE BORDER CLASSES
+   ============================================ */
+
+html[data-theme="light"] .border-gray-200,
+html.light .border-gray-200 {
+  border-color: #e5e7eb !important;
+}
+
+html[data-theme="dark"] .border-gray-200,
+html.dark .border-gray-200 {
+  border-color: #374151 !important;
+}
+
+html[data-theme="light"] .border-gray-700,
+html.light .border-gray-700 {
+  border-color: #374151 !important;
+}
+
+html[data-theme="dark"] .border-gray-700,
+html.dark .border-gray-700 {
+  border-color: #374151 !important;
+}
+
+/* ============================================
+   HANDLE dark: PREFIX CLASSES
+   These override Tailwind's dark: classes
+   ============================================ */
+
+/* When in light mode, ignore dark: classes */
+html[data-theme="light"] [class*="dark:"],
+html.light [class*="dark:"] {
+  /* Light mode values applied via other rules */
+}
+
+/* When in dark mode, apply dark: class values */
+html[data-theme="dark"] .dark\:bg-gray-900,
+html.dark .dark\:bg-gray-900 {
+  background-color: #111827 !important;
+}
+
+html[data-theme="dark"] .dark\:bg-gray-800,
+html.dark .dark\:bg-gray-800 {
+  background-color: #1f2937 !important;
+}
+
+html[data-theme="dark"] .dark\:bg-gray-700,
+html.dark .dark\:bg-gray-700 {
+  background-color: #374151 !important;
+}
+
+html[data-theme="dark"] .dark\:text-white,
+html.dark .dark\:text-white {
+  color: #ffffff !important;
+}
+
+html[data-theme="dark"] .dark\:text-gray-100,
+html.dark .dark\:text-gray-100 {
+  color: #f3f4f6 !important;
+}
+
+html[data-theme="dark"] .dark\:text-gray-200,
+html.dark .dark\:text-gray-200 {
+  color: #e5e7eb !important;
+}
+
+html[data-theme="dark"] .dark\:text-gray-300,
+html.dark .dark\:text-gray-300 {
+  color: #d1d5db !important;
+}
+
+html[data-theme="dark"] .dark\:text-gray-400,
+html.dark .dark\:text-gray-400 {
+  color: #9ca3af !important;
+}
+
+html[data-theme="dark"] .dark\:border-gray-600,
+html.dark .dark\:border-gray-600 {
+  border-color: #4b5563 !important;
+}
+
+html[data-theme="dark"] .dark\:border-gray-700,
+html.dark .dark\:border-gray-700 {
+  border-color: #374151 !important;
+}
+
+html[data-theme="dark"] .dark\:border-gray-800,
+html.dark .dark\:border-gray-800 {
+  border-color: #1f2937 !important;
+}
+
+/* ============================================
+   CUSTOM SCROLLBAR
+   ============================================ */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--theme-border-dark);
+  border-radius: 4px;
+}
+
+/* ============================================
+   RANGE INPUT
+   ============================================ */
+
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 8px;
+  background: transparent;
+  cursor: pointer;
+}
+
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 8px;
+  border-radius: 4px;
+  background: var(--theme-bg-tertiary);
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #3b82f6;
+  margin-top: -6px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
