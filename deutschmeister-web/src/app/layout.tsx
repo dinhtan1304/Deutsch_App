@@ -1,13 +1,15 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
-import { Providers } from '@/providers';
 import './globals.css';
+import { MainLayout } from '@/components/layout';
+import { Providers } from './providers';
 
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({ subsets: ['latin', 'vietnamese'] });
 
 export const metadata: Metadata = {
-  title: 'DeutschMeister - Learn German Articles',
-  description: 'Master German articles (der, die, das) with fun games and exercises',
+  title: 'Deutschmeister - Học tiếng Đức cho người Việt',
+  description: 'Ứng dụng học tiếng Đức với giải thích song ngữ Đức-Việt, tập trung vào Der/Die/Das và từ vựng A1-B1',
+  keywords: ['học tiếng Đức', 'German learning', 'Der Die Das', 'Vietnamese German'],
 };
 
 export default function RootLayout({
@@ -16,10 +18,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="vi" suppressHydrationWarning>
       <body className={inter.className} suppressHydrationWarning>
         <Providers>
-          {children}
+          <MainLayout>{children}</MainLayout>
         </Providers>
       </body>
     </html>

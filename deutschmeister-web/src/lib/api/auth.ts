@@ -1,8 +1,11 @@
-import { apiPost, apiGet, setAccessToken, setRefreshToken, clearTokens } from './client';
+import { apiPost, apiGet, setAccessToken, clearTokens } from './client';
 
+/**
+ * Auth response from server
+ * Note: refreshToken is now set as httpOnly cookie by server, not in response body
+ */
 export interface AuthResponse {
   accessToken: string;
-  refreshToken: string;
   user: {
     id: string;
     email: string;
@@ -33,20 +36,21 @@ export const authApi = {
   register: async (data: RegisterDto): Promise<AuthResponse> => {
     const response = await apiPost<AuthResponse>('/auth/register', data);
     setAccessToken(response.accessToken);
-    setRefreshToken(response.refreshToken);
+    // Note: refreshToken is automatically set as httpOnly cookie by server
     return response;
   },
 
   login: async (data: LoginDto): Promise<AuthResponse> => {
     const response = await apiPost<AuthResponse>('/auth/login', data);
     setAccessToken(response.accessToken);
-    setRefreshToken(response.refreshToken);
+    // Note: refreshToken is automatically set as httpOnly cookie by server
     return response;
   },
 
   logout: async (): Promise<void> => {
     try {
       await apiPost('/auth/logout');
+      // Server will clear the httpOnly cookie
     } finally {
       clearTokens();
     }
@@ -56,7 +60,13 @@ export const authApi = {
     return apiGet<User>('/auth/me');
   },
 
-  refresh: async (refreshToken: string): Promise<AuthResponse> => {
-    return apiPost<AuthResponse>('/auth/refresh', { refreshToken });
+  /**
+   * Refresh access token
+   * The refresh token is sent automatically via httpOnly cookie
+   */
+  refresh: async (): Promise<AuthResponse> => {
+    const response = await apiPost<AuthResponse>('/auth/refresh', {});
+    setAccessToken(response.accessToken);
+    return response;
   },
 };

@@ -26,7 +26,7 @@ const navItems: NavItem[] = [
     label: 'Dictionary',
     labelVi: 'Từ điển',
     icon: '📖',
-    href: '/dictionary',
+    href: '/words',
   },
   {
     label: 'Word Bank',
