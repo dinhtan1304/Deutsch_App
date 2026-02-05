@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
+import Link from 'next/link';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { WordBankCard } from '@/components/word-bank/WordBankCard';
 import { ImportModal } from '@/components/word-bank/ImportModal';
@@ -12,6 +13,7 @@ import {
   useToggleFavorite,
   useImportPersonalWords,
   useExportPersonalWords,
+  useSRSStats,
 } from '@/hooks/usePersonalWords';
 import {
   WordType, Level, Gender,
@@ -37,6 +39,9 @@ export default function WordBankPage() {
   const toggleFavoriteMutation = useToggleFavorite();
   const importMutation = useImportPersonalWords();
   const exportMutation = useExportPersonalWords();
+  
+  // SRS Stats
+  const { data: srsStats } = useSRSStats();
 
   const words = wordsData?.data ?? [];
   const total = wordsData?.total ?? 0;
@@ -120,6 +125,88 @@ export default function WordBankPage() {
           </div>
         </div>
 
+        {/* SRS Review Card */}
+        {statTotal > 0 && srsStats && (
+          <div 
+            className="mb-6 p-4 rounded-2xl border-2 transition-all hover:shadow-lg"
+            style={{ 
+              borderColor: srsStats.due > 0 ? '#ef4444' : '#22c55e',
+              backgroundColor: srsStats.due > 0 ? 'rgba(239, 68, 68, 0.05)' : 'rgba(34, 197, 94, 0.05)',
+            }}
+          >
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div className="flex items-center gap-4">
+                <div 
+                  className="w-14 h-14 rounded-xl flex items-center justify-center text-2xl"
+                  style={{ backgroundColor: srsStats.due > 0 ? 'rgba(239, 68, 68, 0.15)' : 'rgba(34, 197, 94, 0.15)' }}
+                >
+                  {srsStats.due > 0 ? '🔥' : '✨'}
+                </div>
+                <div>
+                  <h3 className="font-bold text-lg" style={{ color: 'var(--theme-text-primary)' }}>
+                    Ôn tập SRS
+                  </h3>
+                  <p className="text-sm text-gray-500">
+                    {srsStats.due > 0 ? (
+                      <>
+                        <span className="font-bold text-red-500">{srsStats.due}</span> từ cần ôn
+                        {srsStats.new > 0 && (
+                          <> • <span className="text-blue-500">{srsStats.new}</span> từ mới</>
+                        )}
+                      </>
+                    ) : (
+                      'Tuyệt vời! Bạn đã ôn hết tất cả các từ cho hôm nay 🎉'
+                    )}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3">
+                {/* Quick stats */}
+                <div className="hidden sm:flex gap-3 text-sm">
+                  <div className="px-3 py-1.5 rounded-lg bg-yellow-100 dark:bg-yellow-900/30">
+                    <span className="text-yellow-600 dark:text-yellow-400">📖 {srsStats.learning}</span>
+                  </div>
+                  <div className="px-3 py-1.5 rounded-lg bg-green-100 dark:bg-green-900/30">
+                    <span className="text-green-600 dark:text-green-400">🎯 {srsStats.mature}</span>
+                  </div>
+                  <div className="px-3 py-1.5 rounded-lg bg-blue-100 dark:bg-blue-900/30">
+                    <span className="text-blue-600 dark:text-blue-400">📊 {srsStats.retentionRate}%</span>
+                  </div>
+                </div>
+
+                <Link
+                  href="/word-bank/review"
+                  className="px-5 py-2.5 rounded-xl font-medium text-white transition-all hover:scale-105"
+                  style={{ 
+                    backgroundColor: srsStats.due > 0 ? '#ef4444' : '#3b82f6',
+                  }}
+                >
+                  {srsStats.due > 0 ? 'Ôn ngay →' : 'Học thêm →'}
+                </Link>
+              </div>
+            </div>
+
+            {/* Progress bar */}
+            {statTotal > 0 && (
+              <div className="mt-4">
+                <div className="flex justify-between text-xs text-gray-500 mb-1">
+                  <span>Tiến độ hôm nay: {srsStats.reviewedToday} từ đã ôn</span>
+                  <span>
+                    {srsStats.mature} / {statTotal} từ đã thuộc ({Math.round((srsStats.mature / statTotal) * 100)}%)
+                  </span>
+                </div>
+                <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-linear-to-r from-yellow-400 via-green-400 to-green-500 transition-all duration-500"
+                    style={{ width: `${Math.min(100, (srsStats.mature / statTotal) * 100)}%` }}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Stats by word type */}
         {statTotal > 0 && stats && (
           <div className="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-9 gap-2 mb-6">
@@ -150,7 +237,7 @@ export default function WordBankPage() {
         {statTotal > 0 && (
           <>
             <div className="flex flex-wrap gap-2 mb-4">
-              <div className="flex-1 min-w-[200px]">
+              <div className="flex-1 min-w-50">
                 <input
                   value={filters.search}
                   onChange={e => setFilters({ search: e.target.value })}

@@ -33,6 +33,10 @@ const navItems: NavItem[] = [
     labelVi: 'Sổ từ vựng',
     icon: '📒',
     href: '/word-bank',
+    children: [
+      { label: 'All Words', labelVi: 'Tất cả từ', icon: '📋', href: '/word-bank' },
+      { label: 'SRS Review', labelVi: 'Ôn tập SRS', icon: '🧠', href: '/word-bank/review' },
+    ],
   },
   {
     label: 'Topics',
@@ -55,14 +59,14 @@ const navItems: NavItem[] = [
   {
     label: 'Grammar',
     labelVi: 'Ngữ pháp',
-    icon: '📚',
+    icon: '📝',
     href: '/grammar',
   },
   {
-    label: 'SRS Review',
-    labelVi: 'Ôn tập SRS',
-    icon: '🧠',
-    href: '/srs',
+    label: 'Review',
+    labelVi: 'Ôn tập từ điển',
+    icon: '🔄',
+    href: '/review',
   },
   {
     label: 'Settings',
@@ -107,7 +111,12 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
 
   const isActive = (href: string) => {
     if (href === '/') return pathname === '/';
-    return pathname.startsWith(href);
+    // Exact match for items that have children with same base path
+    if (href === '/word-bank' && pathname === '/word-bank') return true;
+    if (href === '/word-bank/review' && pathname === '/word-bank/review') return true;
+    // For other paths, use startsWith
+    if (href !== '/word-bank') return pathname.startsWith(href);
+    return false;
   };
 
   return (

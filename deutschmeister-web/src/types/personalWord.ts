@@ -36,12 +36,65 @@ export interface AdjektivData { komparativ?: string; superlativ?: string; }
 export interface PrapositionData { kasus?: ('akkusativ' | 'dativ' | 'genitiv' | 'wechsel')[]; }
 
 export interface PersonalWord {
-  id: string; word: string; wordType: WordType;
-  nomenData?: NomenData; verbData?: VerbData; adjektivData?: AdjektivData; prapositionData?: PrapositionData;
-  translationEn: string; translationVi: string;
-  examples: string[]; level: Level; category?: string; tags?: string[]; notes?: string; pronunciation?: string;
-  createdAt: string; updatedAt: string; isFavorite: boolean; reviewCount: number; lastReviewedAt?: string;
+  id: string;
+  word: string;
+  wordType: WordType;
+  nomenData?: NomenData;
+  verbData?: VerbData;
+  adjektivData?: AdjektivData;
+  prapositionData?: PrapositionData;
+  translationEn: string;
+  translationVi: string;
+  examples: string[];
+  level: Level;
+  category?: string;
+  tags?: string[];
+  notes?: string;
+  pronunciation?: string;
+  isFavorite: boolean;
+  
+  // SRS Fields
+  easeFactor: number;      // SM-2 ease factor (default 2.5, min 1.3)
+  interval: number;        // Days until next review
+  repetitions: number;     // Consecutive correct reviews
+  nextReviewAt: string;    // ISO datetime
+  lastReviewAt?: string;   // ISO datetime
+  totalReviews: number;
+  correctCount: number;
+  
+  createdAt: string;
+  updatedAt: string;
 }
+
+// SRS Status helpers
+export type SRSStatus = 'new' | 'learning' | 'review' | 'mature';
+
+export function getSRSStatus(word: PersonalWord): SRSStatus {
+  if (word.repetitions === 0 && word.totalReviews === 0) return 'new';
+  if (word.interval < 7) return 'learning';
+  if (word.interval < 21) return 'review';
+  return 'mature';
+}
+
+export function isDueForReview(word: PersonalWord): boolean {
+  return new Date(word.nextReviewAt) <= new Date();
+}
+
+export function getIntervalText(interval: number): string {
+  if (interval === 0) return 'Hôm nay';
+  if (interval === 1) return '1 ngày';
+  if (interval < 7) return `${interval} ngày`;
+  if (interval < 30) return `${Math.round(interval / 7)} tuần`;
+  if (interval < 365) return `${Math.round(interval / 30)} tháng`;
+  return `${Math.round(interval / 365)} năm`;
+}
+
+export const SRSStatusInfo: Record<SRSStatus, { label: string; color: string; bgColor: string }> = {
+  new:      { label: 'Mới',        color: '#3b82f6', bgColor: '#dbeafe' },
+  learning: { label: 'Đang học',   color: '#f59e0b', bgColor: '#fef3c7' },
+  review:   { label: 'Ôn tập',     color: '#8b5cf6', bgColor: '#ede9fe' },
+  mature:   { label: 'Thuộc lòng', color: '#22c55e', bgColor: '#dcfce7' },
+};
 
 export interface ImportRow {
   word: string; wordType: WordType; article?: string; plural?: string;

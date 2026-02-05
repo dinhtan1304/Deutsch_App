@@ -3,8 +3,8 @@
 /**
  * Personal Words React Query Hooks
  *
- * Queries: list, stats, categories, single word
- * Mutations: create, update, delete, import, toggle favorite, batch delete
+ * Queries: list, stats, categories, single word, SRS
+ * Mutations: create, update, delete, import, toggle favorite, batch delete, review
  */
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -14,6 +14,9 @@ import {
   CreatePersonalWordDto,
   UpdatePersonalWordDto,
   ImportWordsDto,
+  SRSQueryParams,
+  ReviewWordDto,
+  SRSRating,
 } from '@/lib/api/personal-words';
 
 // ============================================
@@ -182,3 +185,103 @@ export function useExportPersonalWords() {
     },
   });
 }
+
+// ============================================
+// SRS (Spaced Repetition System) Hooks
+// ============================================
+
+/** SRS Query Keys */
+export const srsKeys = {
+  all: ['personal-words-srs'] as const,
+  due: (params?: SRSQueryParams) => [...srsKeys.all, 'due', params] as const,
+  stats: () => [...srsKeys.all, 'stats'] as const,
+  preview: (id: string) => [...srsKeys.all, 'preview', id] as const,
+};
+
+/** Lấy từ cần ôn tập */
+export function useSRSDue(params?: SRSQueryParams) {
+  return useQuery({
+    queryKey: srsKeys.due(params),
+    queryFn: () => personalWordsApi.getDueForReview(params),
+    staleTime: 30 * 1000, // 30 seconds - fresh data for reviews
+  });
+}
+
+/** Thống kê SRS */
+export function useSRSStats() {
+  return useQuery({
+    queryKey: srsKeys.stats(),
+    queryFn: () => personalWordsApi.getSRSStats(),
+    staleTime: 60 * 1000, // 1 minute
+  });
+}
+
+/** Preview intervals */
+export function useIntervalPreview(id: string) {
+  return useQuery({
+    queryKey: srsKeys.preview(id),
+    queryFn: () => personalWordsApi.getIntervalPreview(id),
+    enabled: !!id,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+}
+
+/** Review một từ */
+export function useReviewWord() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: ReviewWordDto) => personalWordsApi.reviewWord(data),
+    onSuccess: (updatedWord) => {
+      // Update word in cache
+      queryClient.setQueryData(personalWordsKeys.detail(updatedWord.id), updatedWord);
+      
+      // Invalidate SRS queries
+      queryClient.invalidateQueries({ queryKey: srsKeys.all });
+      queryClient.invalidateQueries({ queryKey: personalWordsKeys.stats() });
+    },
+  });
+}
+
+/** Batch review */
+export function useBatchReview() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (reviews: ReviewWordDto[]) => personalWordsApi.batchReview(reviews),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: srsKeys.all });
+      queryClient.invalidateQueries({ queryKey: personalWordsKeys.all });
+    },
+  });
+}
+
+/** Reset SRS cho một từ */
+export function useResetSRS() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => personalWordsApi.resetSRS(id),
+    onSuccess: (updatedWord) => {
+      queryClient.setQueryData(personalWordsKeys.detail(updatedWord.id), updatedWord);
+      queryClient.invalidateQueries({ queryKey: srsKeys.all });
+      queryClient.invalidateQueries({ queryKey: personalWordsKeys.stats() });
+    },
+  });
+}
+
+/** Reset tất cả SRS */
+export function useResetAllSRS() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () => personalWordsApi.resetAllSRS(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: srsKeys.all });
+      queryClient.invalidateQueries({ queryKey: personalWordsKeys.all });
+    },
+  });
+}
+
+// Re-export types for convenience
+export type { SRSRating, SRSQueryParams, ReviewWordDto };

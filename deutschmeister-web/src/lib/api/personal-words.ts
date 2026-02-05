@@ -157,4 +157,105 @@ export const personalWordsApi = {
   batchDelete: async (ids: string[]): Promise<{ deleted: number }> => {
     return apiPost<{ deleted: number }>('/personal-words/batch-delete', { ids });
   },
+
+  // ============================================
+  // SRS (Spaced Repetition System)
+  // ============================================
+
+  // GET /api/personal-words/srs/due — Get words due for review
+  getDueForReview: async (params?: SRSQueryParams): Promise<SRSDueResponse> => {
+    const searchParams = new URLSearchParams();
+    if (params?.limit) searchParams.set('limit', params.limit.toString());
+    if (params?.wordType) searchParams.set('wordType', params.wordType);
+    if (params?.level) searchParams.set('level', params.level);
+    if (params?.includeNew !== undefined) searchParams.set('includeNew', params.includeNew.toString());
+    if (params?.newLimit) searchParams.set('newLimit', params.newLimit.toString());
+
+    const query = searchParams.toString();
+    return apiGet<SRSDueResponse>(`/personal-words/srs/due${query ? `?${query}` : ''}`);
+  },
+
+  // GET /api/personal-words/srs/stats — Get SRS statistics
+  getSRSStats: async (): Promise<SRSStats> => {
+    return apiGet<SRSStats>('/personal-words/srs/stats');
+  },
+
+  // POST /api/personal-words/srs/review — Review a word
+  reviewWord: async (data: ReviewWordDto): Promise<PersonalWord> => {
+    return apiPost<PersonalWord>('/personal-words/srs/review', data);
+  },
+
+  // POST /api/personal-words/srs/batch-review — Batch review
+  batchReview: async (reviews: ReviewWordDto[]): Promise<BatchReviewResult> => {
+    return apiPost<BatchReviewResult>('/personal-words/srs/batch-review', { reviews });
+  },
+
+  // GET /api/personal-words/srs/preview/:id — Preview intervals
+  getIntervalPreview: async (id: string): Promise<IntervalPreview> => {
+    return apiGet<IntervalPreview>(`/personal-words/srs/preview/${id}`);
+  },
+
+  // POST /api/personal-words/srs/reset/:id — Reset SRS for a word
+  resetSRS: async (id: string): Promise<PersonalWord> => {
+    return apiPost<PersonalWord>(`/personal-words/srs/reset/${id}`);
+  },
+
+  // POST /api/personal-words/srs/reset-all — Reset all SRS
+  resetAllSRS: async (): Promise<{ reset: number }> => {
+    return apiPost<{ reset: number }>('/personal-words/srs/reset-all');
+  },
 };
+
+// ============================================
+// SRS Types
+// ============================================
+export type SRSRating = 'again' | 'hard' | 'good' | 'easy';
+
+export interface SRSQueryParams {
+  limit?: number;
+  wordType?: WordType;
+  level?: Level;
+  includeNew?: boolean;
+  newLimit?: number;
+}
+
+export interface SRSDueResponse {
+  due: PersonalWord[];
+  new: PersonalWord[];
+  total: number;
+}
+
+export interface SRSStats {
+  due: number;
+  new: number;
+  learning: number;
+  review: number;
+  mature: number;
+  total: number;
+  retentionRate: number;
+  reviewedToday: number;
+  forecast: { date: string; count: number }[];
+}
+
+export interface ReviewWordDto {
+  wordId: string;
+  rating: SRSRating;
+}
+
+export interface BatchReviewResult {
+  reviewed: number;
+  failed: number;
+  results: Array<{
+    wordId: string;
+    success: boolean;
+    data?: PersonalWord;
+    error?: string;
+  }>;
+}
+
+export interface IntervalPreview {
+  again: number;
+  hard: number;
+  good: number;
+  easy: number;
+}
