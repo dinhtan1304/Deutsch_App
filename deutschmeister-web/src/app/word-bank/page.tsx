@@ -19,35 +19,70 @@ import {
   WordType, Level, Gender,
   WordTypeInfo, GenderInfo, WordBankFilters, ImportRow,
 } from '@/types/personalWord';
+import {
+  IconNotebook, IconSearch, IconStar, IconRefresh, IconChevronLeft, IconChevronRight,
+} from '@/components/ui/Icons';
 
 const wordTypes: WordType[] = ['nomen', 'verb', 'adjektiv', 'adverb', 'praposition', 'konjunktion', 'pronomen', 'partikel', 'andere'];
 const levels: Level[] = ['A1', 'A2', 'B1', 'B2', 'C1'];
 const genders: Gender[] = ['masculine', 'feminine', 'neuter'];
 
+// ─── Inline SVG icons ───
+function IconDownload({ size = 16 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}>
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+      <polyline points="7 10 12 15 17 10" /><line x1="12" x2="12" y1="15" y2="3" />
+    </svg>
+  );
+}
+function IconUpload({ size = 16 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}>
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+      <polyline points="17 8 12 3 7 8" /><line x1="12" x2="12" y1="3" y2="15" />
+    </svg>
+  );
+}
+function IconFilter({ size = 16 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}>
+      <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
+    </svg>
+  );
+}
+function IconBrain({ size = 16, ...props }: { size?: number, [key: string]: any }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }} {...props}>
+      <path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z" />
+      <path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z" />
+      <path d="M15 13a4.5 4.5 0 0 1-3-4 4.5 4.5 0 0 1-3 4" />
+    </svg>
+  );
+}
+
 export default function WordBankPage() {
   const { filters, page, limit, setFilters, resetFilters, setPage, getApiParams } = useWordBankUI();
-
   const [showImportModal, setShowImportModal] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
 
-  // React Query
   const apiParams = getApiParams();
   const { data: wordsData, isLoading, isFetching } = usePersonalWords(apiParams);
   const { data: stats } = usePersonalWordStats();
   const { data: categories = [] } = usePersonalWordCategories();
-
   const toggleFavoriteMutation = useToggleFavorite();
   const importMutation = useImportPersonalWords();
   const exportMutation = useExportPersonalWords();
-  
-  // SRS Stats
   const { data: srsStats } = useSRSStats();
 
   const words = wordsData?.data ?? [];
   const total = wordsData?.total ?? 0;
   const totalPages = wordsData?.totalPages ?? 1;
 
-  // TTS
   const speak = useCallback((text: string) => {
     if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
     window.speechSynthesis.cancel();
@@ -57,132 +92,134 @@ export default function WordBankPage() {
     window.speechSynthesis.speak(u);
   }, []);
 
-  // Import handler — chuyển ImportRow[] → API format
   const handleImport = (rows: ImportRow[]) => {
-    const mapped = rows.map(row => ({
-      word: row.word,
-      wordType: row.wordType,
-      translationEn: row.translationEn,
-      translationVi: row.translationVi,
-      article: row.article,
-      plural: row.plural,
-      partizipII: row.partizipII,
-      hilfsverb: row.hilfsverb,
-      komparativ: row.komparativ,
-      superlativ: row.superlativ,
-      kasus: row.kasus,
-      examples: row.examples,
-      level: row.level,
-      category: row.category,
-      tags: row.tags,
-      notes: row.notes,
+    const mapped = rows.map(r => ({
+      word: r.word, wordType: r.wordType, translationEn: r.translationEn,
+      translationVi: r.translationVi, article: r.article, plural: r.plural,
+      partizipII: r.partizipII, hilfsverb: r.hilfsverb, komparativ: r.komparativ,
+      superlativ: r.superlativ, kasus: r.kasus, examples: r.examples,
+      level: r.level, category: r.category, tags: r.tags, notes: r.notes,
     }));
-
     return importMutation.mutateAsync({ words: mapped });
   };
 
-  // Export handler
   const handleExport = () => exportMutation.mutate();
+  const statTotal = stats?.total ?? 0;
+  const statFavorites = stats?.favorites ?? 0;
 
   if (isLoading) {
     return (
       <MainLayout>
         <div className="flex items-center justify-center py-20">
-          <div className="animate-spin text-4xl">📚</div>
+          <div className="w-12 h-12 rounded-2xl flex items-center justify-center animate-pulse"
+            style={{ background: 'linear-gradient(135deg, #8B5CF6, #6366F1)' }}>
+            <IconNotebook size={24} className="text-white" />
+          </div>
         </div>
       </MainLayout>
     );
   }
 
-  const statTotal = stats?.total ?? 0;
-  const statFavorites = stats?.favorites ?? 0;
-
   return (
     <MainLayout>
-      <div className="max-w-5xl mx-auto px-4 py-8">
+      <div className="max-w-5xl mx-auto px-4 py-6">
 
-        {/* Header */}
+        {/* ─── Header ─── */}
         <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-          <div>
-            <h1 className="text-3xl font-bold" style={{ color: 'var(--theme-text-primary, #111827)' }}>
-              📒 Sổ từ vựng cá nhân
-            </h1>
-            <p className="text-gray-500 mt-1">
-              {statTotal} từ • {statFavorites} yêu thích
-              {isFetching && <span className="ml-2 text-blue-500 text-xs">đang tải...</span>}
-            </p>
+          <div className="flex items-center gap-3">
+            <div className="w-11 h-11 rounded-2xl flex items-center justify-center"
+              style={{ background: 'linear-gradient(135deg, #8B5CF6, #6366F1)' }}>
+              <IconNotebook size={22} className="text-white" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold" style={{ color: 'var(--theme-text-primary)' }}>
+                Sổ từ vựng cá nhân
+              </h1>
+              <p className="text-[13px] mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>
+                {statTotal} từ • {statFavorites} yêu thích
+                {isFetching && <span className="ml-2 text-blue-500 text-[11px]">đang tải...</span>}
+              </p>
+            </div>
           </div>
           <div className="flex gap-2">
             <button onClick={() => setShowImportModal(true)}
-              className="px-4 py-2.5 rounded-xl text-sm font-medium text-white bg-green-600 hover:bg-green-700 transition-all">
-              📥 Import
+              className="flex items-center gap-2 px-4 py-2 rounded-xl text-[13px] font-semibold text-white
+                transition-all hover:shadow-md hover:-translate-y-0.5"
+              style={{ background: 'linear-gradient(135deg, #10B981, #059669)' }}>
+              <IconDownload size={15} /> Import
             </button>
             <button onClick={handleExport} disabled={statTotal === 0 || exportMutation.isPending}
-              className="px-4 py-2.5 rounded-xl text-sm font-medium border transition-all hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl text-[13px] font-medium border
+                transition-all hover:-translate-y-0.5 disabled:opacity-40"
               style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)' }}>
-              📤 Export
+              <IconUpload size={15} /> Export
             </button>
           </div>
         </div>
 
-        {/* SRS Review Card */}
+        {/* ─── SRS Review Card ─── */}
         {statTotal > 0 && srsStats && (
-          <div 
-            className="mb-6 p-4 rounded-2xl border-2 transition-all hover:shadow-lg"
-            style={{ 
-              borderColor: srsStats.due > 0 ? '#ef4444' : '#22c55e',
-              backgroundColor: srsStats.due > 0 ? 'rgba(239, 68, 68, 0.05)' : 'rgba(34, 197, 94, 0.05)',
-            }}
-          >
+          <div className="mb-6 p-5 rounded-2xl border-2 transition-all hover:shadow-md"
+            style={{
+              borderColor: srsStats.due > 0 ? '#EF4444' : '#22C55E',
+              backgroundColor: srsStats.due > 0 ? 'rgba(239,68,68,.04)' : 'rgba(34,197,94,.04)',
+            }}>
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div className="flex items-center gap-4">
-                <div 
-                  className="w-14 h-14 rounded-xl flex items-center justify-center text-2xl"
-                  style={{ backgroundColor: srsStats.due > 0 ? 'rgba(239, 68, 68, 0.15)' : 'rgba(34, 197, 94, 0.15)' }}
-                >
-                  {srsStats.due > 0 ? '🔥' : '✨'}
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center"
+                  style={{
+                    background: srsStats.due > 0
+                      ? 'linear-gradient(135deg, rgba(239,68,68,.15), rgba(239,68,68,.08))'
+                      : 'linear-gradient(135deg, rgba(34,197,94,.15), rgba(34,197,94,.08))',
+                  }}>
+                  <IconBrain
+                      size={24} 
+                      style={{ color: srsStats.due > 0 ? '#EF4444' : '#22C55E' }}
+                    />
                 </div>
                 <div>
-                  <h3 className="font-bold text-lg" style={{ color: 'var(--theme-text-primary)' }}>
+                  <h3 className="font-bold text-[16px]" style={{ color: 'var(--theme-text-primary)' }}>
                     Ôn tập SRS
                   </h3>
-                  <p className="text-sm text-gray-500">
+                  <p className="text-[13px]" style={{ color: 'var(--theme-text-muted)' }}>
                     {srsStats.due > 0 ? (
                       <>
-                        <span className="font-bold text-red-500">{srsStats.due}</span> từ cần ôn
+                        <span className="font-bold" style={{ color: '#EF4444' }}>{srsStats.due}</span> từ cần ôn
                         {srsStats.new > 0 && (
-                          <> • <span className="text-blue-500">{srsStats.new}</span> từ mới</>
+                          <> • <span style={{ color: '#3B82F6' }}>{srsStats.new}</span> từ mới</>
                         )}
                       </>
                     ) : (
-                      'Tuyệt vời! Bạn đã ôn hết tất cả các từ cho hôm nay 🎉'
+                      'Tuyệt vời! Bạn đã ôn hết cho hôm nay 🎉'
                     )}
                   </p>
                 </div>
               </div>
 
               <div className="flex items-center gap-3">
-                {/* Quick stats */}
-                <div className="hidden sm:flex gap-3 text-sm">
-                  <div className="px-3 py-1.5 rounded-lg bg-yellow-100 dark:bg-yellow-900/30">
-                    <span className="text-yellow-600 dark:text-yellow-400">📖 {srsStats.learning}</span>
-                  </div>
-                  <div className="px-3 py-1.5 rounded-lg bg-green-100 dark:bg-green-900/30">
-                    <span className="text-green-600 dark:text-green-400">🎯 {srsStats.mature}</span>
-                  </div>
-                  <div className="px-3 py-1.5 rounded-lg bg-blue-100 dark:bg-blue-900/30">
-                    <span className="text-blue-600 dark:text-blue-400">📊 {srsStats.retentionRate}%</span>
-                  </div>
+                <div className="hidden sm:flex gap-2 text-[12px]">
+                  {[
+                    { label: srsStats.learning, color: '#F59E0B', bg: 'rgba(245,158,11,.1)', icon: '📖' },
+                    { label: srsStats.mature, color: '#22C55E', bg: 'rgba(34,197,94,.1)', icon: '🎯' },
+                    { label: `${srsStats.retentionRate}%`, color: '#3B82F6', bg: 'rgba(59,130,246,.1)', icon: '📊' },
+                  ].map((s, i) => (
+                    <span key={i} className="px-2.5 py-1 rounded-lg font-medium"
+                      style={{ backgroundColor: s.bg, color: s.color }}>
+                      {s.icon} {s.label}
+                    </span>
+                  ))}
                 </div>
 
-                <Link
-                  href="/word-bank/review"
-                  className="px-5 py-2.5 rounded-xl font-medium text-white transition-all hover:scale-105"
-                  style={{ 
-                    backgroundColor: srsStats.due > 0 ? '#ef4444' : '#3b82f6',
-                  }}
-                >
-                  {srsStats.due > 0 ? 'Ôn ngay →' : 'Học thêm →'}
+                <Link href="/word-bank/review"
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-[13px] text-white
+                    transition-all hover:shadow-md hover:-translate-y-0.5"
+                  style={{
+                    background: srsStats.due > 0
+                      ? 'linear-gradient(135deg, #EF4444, #DC2626)'
+                      : 'linear-gradient(135deg, #3B82F6, #6366F1)',
+                  }}>
+                  <IconRefresh size={15} />
+                  {srsStats.due > 0 ? 'Ôn ngay' : 'Học thêm'}
                 </Link>
               </div>
             </div>
@@ -190,24 +227,25 @@ export default function WordBankPage() {
             {/* Progress bar */}
             {statTotal > 0 && (
               <div className="mt-4">
-                <div className="flex justify-between text-xs text-gray-500 mb-1">
-                  <span>Tiến độ hôm nay: {srsStats.reviewedToday} từ đã ôn</span>
-                  <span>
-                    {srsStats.mature} / {statTotal} từ đã thuộc ({Math.round((srsStats.mature / statTotal) * 100)}%)
-                  </span>
+                <div className="flex justify-between text-[11px] mb-1.5"
+                  style={{ color: 'var(--theme-text-muted)' }}>
+                  <span>Đã ôn hôm nay: {srsStats.reviewedToday} từ</span>
+                  <span>{srsStats.mature} / {statTotal} đã thuộc ({Math.round((srsStats.mature / statTotal) * 100)}%)</span>
                 </div>
-                <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-linear-to-r from-yellow-400 via-green-400 to-green-500 transition-all duration-500"
-                    style={{ width: `${Math.min(100, (srsStats.mature / statTotal) * 100)}%` }}
-                  />
+                <div className="h-1.5 rounded-full overflow-hidden"
+                  style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
+                  <div className="h-full rounded-full transition-all duration-700"
+                    style={{
+                      width: `${Math.min(100, (srsStats.mature / statTotal) * 100)}%`,
+                      background: 'linear-gradient(90deg, #F59E0B, #22C55E, #10B981)',
+                    }} />
                 </div>
               </div>
             )}
           </div>
         )}
 
-        {/* Stats by word type */}
+        {/* ─── Word Type Chips ─── */}
         {statTotal > 0 && stats && (
           <div className="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-9 gap-2 mb-6">
             {wordTypes.map(t => {
@@ -217,54 +255,63 @@ export default function WordBankPage() {
               return (
                 <button key={t}
                   onClick={() => setFilters({ wordType: active ? 'all' : t })}
-                  className="p-2 rounded-xl text-center transition-all"
+                  className="p-2.5 rounded-xl text-center transition-all duration-200 border hover:-translate-y-0.5"
                   style={{
-                    backgroundColor: active ? info.color : 'var(--theme-bg-card, #ffffff)',
+                    backgroundColor: active ? info.color : 'var(--theme-bg-card)',
                     color: active ? 'white' : 'var(--theme-text-secondary)',
-                    border: `1px solid ${active ? info.color : 'var(--theme-border, #e5e7eb)'}`,
-                    opacity: count === 0 && !active ? 0.5 : 1,
+                    borderColor: active ? info.color : 'var(--theme-border)',
+                    opacity: count === 0 && !active ? 0.4 : 1,
                   }}>
-                  <div className="text-lg">{info.icon}</div>
-                  <div className="text-xs font-medium">{info.label}</div>
-                  <div className="text-xs font-bold">{count}</div>
+                  <div className="text-[14px]">{info.icon}</div>
+                  <div className="text-[11px] font-medium mt-0.5">{info.label}</div>
+                  <div className="text-[11px] font-bold">{count}</div>
                 </button>
               );
             })}
           </div>
         )}
 
-        {/* Search + Filter Bar */}
+        {/* ─── Search + Filter Bar ─── */}
         {statTotal > 0 && (
           <>
             <div className="flex flex-wrap gap-2 mb-4">
-              <div className="flex-1 min-w-50">
+              <div className="flex-1 min-w-50 relative">
+                <span className="absolute left-3.5 top-1/2 -translate-y-1/2"
+                  style={{ color: 'var(--theme-text-muted)' }}>
+                  <IconSearch size={16} />
+                </span>
                 <input
                   value={filters.search}
                   onChange={e => setFilters({ search: e.target.value })}
-                  placeholder="🔍 Tìm từ, nghĩa, ghi chú..."
-                  className="w-full p-3 rounded-xl border"
-                  style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)', color: 'var(--theme-text-primary)' }}
+                  placeholder="Tìm từ, nghĩa, ghi chú..."
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border text-[13px]
+                    focus:outline-none focus:ring-2 focus:ring-blue-500/40 transition-all"
+                  style={{
+                    borderColor: 'var(--theme-border)',
+                    backgroundColor: 'var(--theme-bg-card)',
+                    color: 'var(--theme-text-primary)',
+                  }}
                 />
               </div>
 
               <button onClick={() => setShowFilters(!showFilters)}
-                className="px-4 py-3 rounded-xl border font-medium text-sm"
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl border text-[13px] font-medium transition-all"
                 style={{
-                  borderColor: 'var(--theme-border)',
-                  backgroundColor: showFilters ? '#3b82f6' : 'var(--theme-bg-card)',
-                  color: showFilters ? 'white' : 'var(--theme-text-secondary)',
+                  borderColor: showFilters ? '#3B82F6' : 'var(--theme-border)',
+                  backgroundColor: showFilters ? 'rgba(59,130,246,.08)' : 'var(--theme-bg-card)',
+                  color: showFilters ? '#3B82F6' : 'var(--theme-text-secondary)',
                 }}>
-                🎛️ Lọc
+                <IconFilter size={14} /> Lọc
               </button>
 
               <button onClick={() => setFilters({ favoritesOnly: !filters.favoritesOnly })}
-                className="px-4 py-3 rounded-xl border font-medium text-sm"
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl border text-[13px] font-medium transition-all"
                 style={{
-                  borderColor: filters.favoritesOnly ? '#eab308' : 'var(--theme-border)',
-                  backgroundColor: filters.favoritesOnly ? 'rgba(234,179,8,0.1)' : 'var(--theme-bg-card)',
-                  color: filters.favoritesOnly ? '#eab308' : 'var(--theme-text-secondary)',
+                  borderColor: filters.favoritesOnly ? '#EAB308' : 'var(--theme-border)',
+                  backgroundColor: filters.favoritesOnly ? 'rgba(234,179,8,.08)' : 'var(--theme-bg-card)',
+                  color: filters.favoritesOnly ? '#EAB308' : 'var(--theme-text-secondary)',
                 }}>
-                {filters.favoritesOnly ? '⭐' : '☆'} Yêu thích
+                <IconStar size={14} style={filters.favoritesOnly ? { fill: '#EAB308' } : {}} /> Yêu thích
               </button>
 
               <select
@@ -273,8 +320,13 @@ export default function WordBankPage() {
                   const [sortBy, sortOrder] = e.target.value.split('-') as [WordBankFilters['sortBy'], 'asc' | 'desc'];
                   setFilters({ sortBy, sortOrder });
                 }}
-                className="px-3 py-3 rounded-xl border text-sm"
-                style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)', color: 'var(--theme-text-primary)' }}>
+                className="px-3 py-2.5 rounded-xl border text-[13px]
+                  focus:outline-none focus:ring-2 focus:ring-blue-500/40 transition-all"
+                style={{
+                  borderColor: 'var(--theme-border)',
+                  backgroundColor: 'var(--theme-bg-card)',
+                  color: 'var(--theme-text-primary)',
+                }}>
                 <option value="createdAt-desc">Mới nhất</option>
                 <option value="createdAt-asc">Cũ nhất</option>
                 <option value="word-asc">A → Z</option>
@@ -286,23 +338,30 @@ export default function WordBankPage() {
 
             {/* Extended filters */}
             {showFilters && (
-              <div className="p-4 rounded-xl border mb-4 space-y-3"
+              <div className="p-4 rounded-2xl border mb-4 space-y-3"
                 style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
-                <div className="flex flex-wrap gap-4">
+                <div className="flex flex-wrap gap-5">
                   {/* Level */}
                   <div>
-                    <label className="block text-xs font-medium text-gray-500 mb-1">Cấp độ</label>
+                    <label className="block text-[11px] font-semibold mb-1.5"
+                      style={{ color: 'var(--theme-text-muted)' }}>Cấp độ</label>
                     <div className="flex gap-1">
                       <button onClick={() => setFilters({ level: 'all' })}
-                        className="px-2.5 py-1 rounded text-xs font-medium"
-                        style={{ backgroundColor: filters.level === 'all' ? '#3b82f6' : 'var(--theme-bg-secondary)', color: filters.level === 'all' ? 'white' : 'var(--theme-text-secondary)' }}>
+                        className="px-2.5 py-1 rounded-lg text-[12px] font-medium transition-all"
+                        style={{
+                          backgroundColor: filters.level === 'all' ? '#3B82F6' : 'var(--theme-bg-secondary)',
+                          color: filters.level === 'all' ? 'white' : 'var(--theme-text-secondary)',
+                        }}>
                         Tất cả
                       </button>
                       {levels.map(l => (
                         <button key={l}
                           onClick={() => setFilters({ level: filters.level === l ? 'all' : l })}
-                          className="px-2.5 py-1 rounded text-xs font-medium"
-                          style={{ backgroundColor: filters.level === l ? '#3b82f6' : 'var(--theme-bg-secondary)', color: filters.level === l ? 'white' : 'var(--theme-text-secondary)' }}>
+                          className="px-2.5 py-1 rounded-lg text-[12px] font-medium transition-all"
+                          style={{
+                            backgroundColor: filters.level === l ? '#3B82F6' : 'var(--theme-bg-secondary)',
+                            color: filters.level === l ? 'white' : 'var(--theme-text-secondary)',
+                          }}>
                           {l}
                         </button>
                       ))}
@@ -311,11 +370,15 @@ export default function WordBankPage() {
 
                   {/* Gender */}
                   <div>
-                    <label className="block text-xs font-medium text-gray-500 mb-1">Giống (Nomen)</label>
+                    <label className="block text-[11px] font-semibold mb-1.5"
+                      style={{ color: 'var(--theme-text-muted)' }}>Giống (Nomen)</label>
                     <div className="flex gap-1">
                       <button onClick={() => setFilters({ gender: 'all' })}
-                        className="px-2.5 py-1 rounded text-xs font-medium"
-                        style={{ backgroundColor: filters.gender === 'all' ? '#6b7280' : 'var(--theme-bg-secondary)', color: filters.gender === 'all' ? 'white' : 'var(--theme-text-secondary)' }}>
+                        className="px-2.5 py-1 rounded-lg text-[12px] font-medium transition-all"
+                        style={{
+                          backgroundColor: filters.gender === 'all' ? '#6B7280' : 'var(--theme-bg-secondary)',
+                          color: filters.gender === 'all' ? 'white' : 'var(--theme-text-secondary)',
+                        }}>
                         Tất cả
                       </button>
                       {genders.map(g => {
@@ -323,8 +386,11 @@ export default function WordBankPage() {
                         return (
                           <button key={g}
                             onClick={() => setFilters({ gender: filters.gender === g ? 'all' : g })}
-                            className="px-2.5 py-1 rounded text-xs font-medium"
-                            style={{ backgroundColor: filters.gender === g ? info.color : 'var(--theme-bg-secondary)', color: filters.gender === g ? 'white' : 'var(--theme-text-secondary)' }}>
+                            className="px-2.5 py-1 rounded-lg text-[12px] font-medium transition-all"
+                            style={{
+                              backgroundColor: filters.gender === g ? info.color : 'var(--theme-bg-secondary)',
+                              color: filters.gender === g ? 'white' : 'var(--theme-text-secondary)',
+                            }}>
                             {info.article}
                           </button>
                         );
@@ -335,52 +401,64 @@ export default function WordBankPage() {
                   {/* Category */}
                   {categories.length > 0 && (
                     <div>
-                      <label className="block text-xs font-medium text-gray-500 mb-1">Chủ đề</label>
+                      <label className="block text-[11px] font-semibold mb-1.5"
+                        style={{ color: 'var(--theme-text-muted)' }}>Chủ đề</label>
                       <select value={filters.category}
                         onChange={e => setFilters({ category: e.target.value })}
-                        className="px-2.5 py-1 rounded text-xs border"
-                        style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-primary)' }}>
+                        className="px-2.5 py-1 rounded-lg text-[12px] border transition-all
+                          focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+                        style={{
+                          borderColor: 'var(--theme-border)',
+                          backgroundColor: 'var(--theme-bg-secondary)',
+                          color: 'var(--theme-text-primary)',
+                        }}>
                         <option value="">Tất cả</option>
                         {categories.map(c => <option key={c} value={c}>{c}</option>)}
                       </select>
                     </div>
                   )}
                 </div>
-                <button onClick={resetFilters} className="text-xs text-blue-500 hover:underline">↺ Reset bộ lọc</button>
+                <button onClick={resetFilters}
+                  className="text-[12px] font-medium transition-all hover:opacity-70"
+                  style={{ color: '#3B82F6' }}>
+                  ↺ Reset bộ lọc
+                </button>
               </div>
             )}
 
-            <p className="text-sm text-gray-400 mb-3">
+            <p className="text-[12px] mb-3" style={{ color: 'var(--theme-text-muted)' }}>
               Hiển thị {words.length} / {total} từ
               {totalPages > 1 && ` • Trang ${page} / ${totalPages}`}
             </p>
           </>
         )}
 
-        {/* Word List */}
+        {/* ─── Word List ─── */}
         {words.length === 0 ? (
           <div className="text-center py-16">
             {statTotal === 0 ? (
               <>
-                <div className="text-6xl mb-4">📒</div>
-                <h3 className="text-xl font-bold mb-2" style={{ color: 'var(--theme-text-primary)' }}>
+                <div className="text-5xl mb-4">📒</div>
+                <h3 className="text-[18px] font-bold mb-2" style={{ color: 'var(--theme-text-primary)' }}>
                   Sổ từ vựng trống
                 </h3>
-                <p className="text-gray-500 mb-6 max-w-md mx-auto">
-                  Import danh sách từ vựng để bắt đầu. Từ đã có sẵn trong hệ thống sẽ được tự động bỏ qua.
+                <p className="text-[13px] mb-6 max-w-md mx-auto" style={{ color: 'var(--theme-text-muted)' }}>
+                  Import danh sách từ vựng để bắt đầu. Từ đã có sẵn sẽ được tự động bỏ qua.
                 </p>
                 <button onClick={() => setShowImportModal(true)}
-                  className="px-6 py-3 rounded-xl font-medium text-white bg-green-600 hover:bg-green-700 transition-all">
-                  📥 Import từ vựng
+                  className="flex items-center gap-2 mx-auto px-6 py-3 rounded-xl font-semibold text-[14px] text-white
+                    transition-all hover:shadow-md hover:-translate-y-0.5"
+                  style={{ background: 'linear-gradient(135deg, #10B981, #059669)' }}>
+                  <IconDownload size={17} /> Import từ vựng
                 </button>
               </>
             ) : (
               <>
                 <div className="text-4xl mb-4">🔍</div>
-                <h3 className="text-lg font-bold mb-2" style={{ color: 'var(--theme-text-primary)' }}>
+                <h3 className="text-[16px] font-bold mb-2" style={{ color: 'var(--theme-text-primary)' }}>
                   Không tìm thấy từ nào
                 </h3>
-                <p className="text-gray-500">Thử thay đổi bộ lọc</p>
+                <p className="text-[13px]" style={{ color: 'var(--theme-text-muted)' }}>Thử thay đổi bộ lọc</p>
               </>
             )}
           </div>
@@ -391,7 +469,7 @@ export default function WordBankPage() {
                 <WordBankCard
                   key={w.id}
                   word={w}
-                  onToggleFavorite={(id) => toggleFavoriteMutation.mutate(id)}
+                  onToggleFavorite={id => toggleFavoriteMutation.mutate(id)}
                   onSpeak={speak}
                 />
               ))}
@@ -399,27 +477,59 @@ export default function WordBankPage() {
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <div className="flex items-center justify-center gap-2 mt-6">
+              <div className="flex items-center justify-center gap-2 mt-8">
                 <button onClick={() => setPage(page - 1)} disabled={page <= 1}
-                  className="px-4 py-2 rounded-lg border text-sm disabled:opacity-40"
-                  style={{ borderColor: 'var(--theme-border)' }}>
-                  ← Trước
+                  className="w-9 h-9 rounded-lg flex items-center justify-center border
+                    transition-all duration-200 disabled:opacity-30"
+                  style={{
+                    borderColor: 'var(--theme-border)',
+                    color: 'var(--theme-text-secondary)',
+                    backgroundColor: 'var(--theme-bg-card)',
+                  }}>
+                  <IconChevronLeft size={16} />
                 </button>
-                <span className="text-sm text-gray-500">
-                  Trang {page} / {totalPages}
-                </span>
+
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  let pageNum: number;
+                  if (totalPages <= 5) pageNum = i + 1;
+                  else if (page <= 3) pageNum = i + 1;
+                  else if (page >= totalPages - 2) pageNum = totalPages - 4 + i;
+                  else pageNum = page - 2 + i;
+
+                  return (
+                    <button key={pageNum} onClick={() => setPage(pageNum)}
+                      className="w-9 h-9 rounded-lg flex items-center justify-center text-[13px] font-semibold
+                        transition-all duration-200"
+                      style={pageNum === page ? {
+                        background: 'linear-gradient(135deg, #8B5CF6, #6366F1)',
+                        color: 'white',
+                      } : {
+                        color: 'var(--theme-text-secondary)',
+                      }}>
+                      {pageNum}
+                    </button>
+                  );
+                })}
+
                 <button onClick={() => setPage(page + 1)} disabled={page >= totalPages}
-                  className="px-4 py-2 rounded-lg border text-sm disabled:opacity-40"
-                  style={{ borderColor: 'var(--theme-border)' }}>
-                  Sau →
+                  className="w-9 h-9 rounded-lg flex items-center justify-center border
+                    transition-all duration-200 disabled:opacity-30"
+                  style={{
+                    borderColor: 'var(--theme-border)',
+                    color: 'var(--theme-text-secondary)',
+                    backgroundColor: 'var(--theme-bg-card)',
+                  }}>
+                  <IconChevronRight size={16} />
                 </button>
+                <span className="ml-2 text-[12px]" style={{ color: 'var(--theme-text-muted)' }}>
+                  / {totalPages} trang
+                </span>
               </div>
             )}
           </>
         )}
       </div>
 
-      {/* Import Modal */}
       <ImportModal
         isOpen={showImportModal}
         onClose={() => setShowImportModal(false)}

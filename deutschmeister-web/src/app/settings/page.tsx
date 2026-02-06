@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useSettingsStore, applyTheme } from '@/stores/settingsStore';
+import { useSettingsStore } from '@/stores/settingsStore';
 import { useAuthStore } from '@/stores/authStore';
 
 export default function SettingsPage() {
@@ -13,24 +13,10 @@ export default function SettingsPage() {
   
   const [toast, setToast] = useState('');
   const [activeTab, setActiveTab] = useState<'display' | 'sound' | 'learning' | 'account'>('display');
-  const [isDark, setIsDark] = useState(false);
 
   useEffect(() => {
     loadSettings();
   }, [loadSettings]);
-
-  // Watch theme changes
-  useEffect(() => {
-    const update = () => {
-      const html = document.documentElement;
-      setIsDark(html.getAttribute('data-theme') === 'dark');
-    };
-    update();
-    
-    const observer = new MutationObserver(update);
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
-    return () => observer.disconnect();
-  }, []);
 
   const showToast = (msg: string) => {
     setToast(msg);
@@ -59,20 +45,9 @@ export default function SettingsPage() {
     router.push('/');
   };
 
-  // Theme-aware colors
-  const colors = {
-    bgBody: isDark ? '#111827' : '#f9fafb',
-    bgCard: isDark ? '#1f2937' : '#ffffff',
-    bgSecondary: isDark ? '#374151' : '#f3f4f6',
-    bgTertiary: isDark ? '#4b5563' : '#e5e7eb',
-    textPrimary: isDark ? '#f9fafb' : '#111827',
-    textSecondary: isDark ? '#9ca3af' : '#6b7280',
-    border: isDark ? '#374151' : '#e5e7eb',
-  };
-
   if (!isLoaded) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: colors.bgBody }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--theme-bg-primary)' }}>
         <div className="animate-spin text-4xl">⚙️</div>
       </div>
     );
@@ -86,48 +61,69 @@ export default function SettingsPage() {
   ];
 
   return (
-    <div className="min-h-screen transition-colors duration-300" style={{ backgroundColor: colors.bgBody, color: colors.textPrimary }}>
-      {/* Header */}
-      <div className="border-b" style={{ borderColor: colors.border, backgroundColor: colors.bgCard }}>
-        <div className="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Link href="/" className="text-2xl">🇩🇪</Link>
-            <h1 className="text-xl font-bold">⚙️ Cài đặt</h1>
+    <div className="min-h-screen transition-colors duration-300" style={{ backgroundColor: 'var(--theme-bg-primary)' }}>
+      <div className="max-w-6xl mx-auto px-4 py-8">
+        {/* Header */}
+        <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-3">
+              <Link href="/" className="text-2xl">🇩🇪</Link>
+              <div>
+                <p className="text-sm" style={{ color: 'var(--theme-text-secondary)' }}>Cài đặt</p>
+                <h1 className="text-2xl font-bold" style={{ color: 'var(--theme-text-primary)' }}>
+                  Tùy chỉnh trải nghiệm học tập
+                </h1>
+              </div>
+            </div>
+            <p className="mt-2 text-sm" style={{ color: 'var(--theme-text-secondary)' }}>
+              Đồng bộ giao diện với dashboard và tối ưu các tuỳ chọn học tập của bạn.
+            </p>
           </div>
           {toast && (
-            <span className="px-4 py-2 bg-green-500 text-white rounded-full text-sm font-medium animate-pulse">
+            <span className="px-4 py-2 bg-green-500 text-white rounded-full text-sm font-medium shadow-sm animate-pulse">
               {toast}
             </span>
           )}
         </div>
-      </div>
 
-      <div className="max-w-3xl mx-auto px-4 py-6">
-        {/* Tabs */}
-        <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className="px-4 py-2 rounded-xl font-medium whitespace-nowrap transition-all"
-              style={{
-                backgroundColor: activeTab === tab.id ? '#3b82f6' : colors.bgSecondary,
-                color: activeTab === tab.id ? '#ffffff' : colors.textPrimary,
-              }}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
+        <div className="grid gap-6 lg:grid-cols-[240px_1fr]">
+          {/* Tabs */}
+          <div
+            className="h-fit rounded-2xl border p-3 space-y-1"
+            style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}
+          >
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`w-full px-4 py-3 rounded-xl font-medium text-left transition-all ${
+                  activeTab === tab.id
+                    ? 'bg-blue-50 text-blue-600'
+                    : 'hover:bg-gray-50 dark:hover:bg-gray-800'
+                }`}
+                style={{ color: activeTab === tab.id ? undefined : 'var(--theme-text-primary)' }}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
 
-        {/* Display Settings */}
-        {activeTab === 'display' && (
-          <Card colors={colors}>
-            <h2 className="text-xl font-bold mb-6">🎨 Cài đặt hiển thị</h2>
+          <div>
+            {/* Display Settings */}
+            {activeTab === 'display' && (
+              <Card>
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h2 className="text-xl font-bold" style={{ color: 'var(--theme-text-primary)' }}>🎨 Cài đặt hiển thị</h2>
+                    <p className="text-sm" style={{ color: 'var(--theme-text-secondary)' }}>
+                      Tinh chỉnh giao diện và thông tin hiển thị trên bài học.
+                    </p>
+                  </div>
+                </div>
             
             {/* Theme */}
             <div className="mb-6">
-              <label className="block text-sm font-medium mb-3" style={{ color: colors.textSecondary }}>
+              <label className="block text-sm font-medium mb-3" style={{ color: 'var(--theme-text-secondary)' }}>
                 Giao diện (Theme)
               </label>
               <div className="grid grid-cols-3 gap-3">
@@ -139,12 +135,10 @@ export default function SettingsPage() {
                   <button
                     key={opt.value}
                     onClick={() => handleTheme(opt.value)}
-                    className="p-4 rounded-xl border-2 transition-all"
+                    className="p-4 rounded-xl border-2 transition-all hover:shadow-sm"
                     style={{
-                      borderColor: settings.theme === opt.value ? '#3b82f6' : colors.border,
-                      backgroundColor: settings.theme === opt.value 
-                        ? (isDark ? 'rgba(59, 130, 246, 0.2)' : 'rgba(59, 130, 246, 0.1)')
-                        : 'transparent'
+                      borderColor: settings.theme === opt.value ? '#3b82f6' : 'var(--theme-border)',
+                      backgroundColor: settings.theme === opt.value ? 'rgba(59, 130, 246, 0.1)' : 'transparent',
                     }}
                   >
                     <div className="text-3xl mb-1">{opt.icon}</div>
@@ -162,43 +156,45 @@ export default function SettingsPage() {
               desc="Hiện bản dịch tiếng Việt cho mỗi từ"
               checked={settings.showVietnamese}
               onChange={(v) => handleChange('showVietnamese', v)}
-              colors={colors}
             />
             <Toggle
               label="Hiển thị phiên âm"
               desc="Hiện phiên âm IPA cho mỗi từ"
               checked={settings.showPronunciation}
               onChange={(v) => handleChange('showPronunciation', v)}
-              colors={colors}
             />
             <Toggle
               label="Hiển thị ví dụ"
               desc="Hiện câu ví dụ cho mỗi từ"
               checked={settings.showExamples}
               onChange={(v) => handleChange('showExamples', v)}
-              colors={colors}
             />
-          </Card>
-        )}
+              </Card>
+            )}
 
-        {/* Sound Settings */}
-        {activeTab === 'sound' && (
-          <Card colors={colors}>
-            <h2 className="text-xl font-bold mb-6">🔊 Cài đặt âm thanh</h2>
+            {/* Sound Settings */}
+            {activeTab === 'sound' && (
+              <Card>
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h2 className="text-xl font-bold" style={{ color: 'var(--theme-text-primary)' }}>🔊 Cài đặt âm thanh</h2>
+                    <p className="text-sm" style={{ color: 'var(--theme-text-secondary)' }}>
+                      Điều chỉnh âm thanh và tốc độ phát âm phù hợp với bạn.
+                    </p>
+                  </div>
+                </div>
             
             <Toggle
               label="Bật âm thanh"
               desc="Phát âm thanh khi trả lời đúng/sai"
               checked={settings.soundEnabled}
               onChange={(v) => handleChange('soundEnabled', v)}
-              colors={colors}
             />
             <Toggle
               label="Tự động phát âm"
               desc="Tự động đọc từ khi hiển thị"
               checked={settings.autoPlaySound}
               onChange={(v) => handleChange('autoPlaySound', v)}
-              colors={colors}
             />
 
             <div className="mt-6">
@@ -215,7 +211,7 @@ export default function SettingsPage() {
                 onChange={(e) => handleChange('speechRate', parseFloat(e.target.value))}
                 className="w-full"
               />
-              <div className="flex justify-between text-xs mt-1" style={{ color: colors.textSecondary }}>
+              <div className="flex justify-between text-xs mt-1" style={{ color: 'var(--theme-text-secondary)' }}>
                 <span>Chậm (0.5x)</span>
                 <span>Bình thường</span>
                 <span>Nhanh (1.5x)</span>
@@ -232,18 +228,25 @@ export default function SettingsPage() {
                   window.speechSynthesis.speak(u);
                 }
               }}
-              className="mt-6 w-full px-4 py-3 rounded-xl border-2 font-medium transition-all hover:bg-blue-50"
-              style={{ borderColor: colors.border }}
+              className="mt-6 w-full px-4 py-3 rounded-xl border-2 font-medium transition-all hover:bg-blue-50 dark:hover:bg-gray-800"
+              style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-primary)' }}
             >
               🔊 Thử phát âm "der Apfel"
             </button>
-          </Card>
-        )}
+              </Card>
+            )}
 
-        {/* Learning Settings */}
-        {activeTab === 'learning' && (
-          <Card colors={colors}>
-            <h2 className="text-xl font-bold mb-6">📚 Cài đặt học tập</h2>
+            {/* Learning Settings */}
+            {activeTab === 'learning' && (
+              <Card>
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h2 className="text-xl font-bold" style={{ color: 'var(--theme-text-primary)' }}>📚 Cài đặt học tập</h2>
+                    <p className="text-sm" style={{ color: 'var(--theme-text-secondary)' }}>
+                      Tối ưu mục tiêu và khối lượng bài luyện mỗi ngày.
+                    </p>
+                  </div>
+                </div>
             
             <Slider
               label="Mục tiêu hàng ngày"
@@ -253,7 +256,6 @@ export default function SettingsPage() {
               step={5}
               unit="từ"
               onChange={(v) => handleChange('dailyGoal', v)}
-              colors={colors}
             />
 
             <div className="my-6">
@@ -263,9 +265,9 @@ export default function SettingsPage() {
                 onChange={(e) => handleChange('preferredLevel', e.target.value as any)}
                 className="w-full px-4 py-3 rounded-xl border"
                 style={{ 
-                  backgroundColor: colors.bgCard, 
-                  borderColor: colors.border,
-                  color: colors.textPrimary 
+                  backgroundColor: 'var(--theme-bg-card)', 
+                  borderColor: 'var(--theme-border)',
+                  color: 'var(--theme-text-primary)',
                 }}
               >
                 <option value="all">Tất cả cấp độ</option>
@@ -286,7 +288,6 @@ export default function SettingsPage() {
               step={5}
               unit="câu"
               onChange={(v) => handleChange('questionsPerGame', v)}
-              colors={colors}
             />
 
             <Slider
@@ -297,29 +298,40 @@ export default function SettingsPage() {
               step={15}
               unit="giây"
               onChange={(v) => handleChange('timedChallengeSeconds', v)}
-              colors={colors}
             />
-          </Card>
-        )}
+              </Card>
+            )}
 
-        {/* Account Settings */}
-        {activeTab === 'account' && (
-          <Card colors={colors}>
-            <h2 className="text-xl font-bold mb-6">👤 Tài khoản</h2>
+            {/* Account Settings */}
+            {activeTab === 'account' && (
+              <Card>
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h2 className="text-xl font-bold" style={{ color: 'var(--theme-text-primary)' }}>👤 Tài khoản</h2>
+                    <p className="text-sm" style={{ color: 'var(--theme-text-secondary)' }}>
+                      Quản lý thông tin người dùng và đồng bộ dữ liệu.
+                    </p>
+                  </div>
+                </div>
             
             {isAuthenticated ? (
               <>
-                <div className="flex items-center gap-4 p-4 rounded-xl mb-6" style={{ backgroundColor: colors.bgSecondary }}>
-                  <div className="w-14 h-14 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-xl font-bold">
+                <div
+                  className="flex items-center gap-4 p-4 rounded-xl mb-6"
+                  style={{ backgroundColor: 'var(--theme-bg-secondary)' }}
+                >
+                  <div className="w-14 h-14 rounded-full bg-linear-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-xl font-bold">
                     {user?.name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || 'U'}
                   </div>
                   <div>
-                    <div className="font-bold text-lg">{user?.name || 'Chưa đặt tên'}</div>
-                    <div className="text-sm" style={{ color: colors.textSecondary }}>{user?.email}</div>
+                    <div className="font-bold text-lg" style={{ color: 'var(--theme-text-primary)' }}>
+                      {user?.name || 'Chưa đặt tên'}
+                    </div>
+                    <div className="text-sm" style={{ color: 'var(--theme-text-secondary)' }}>{user?.email}</div>
                   </div>
                 </div>
                 
-                <div className="pt-4 border-t" style={{ borderColor: colors.border }}>
+                <div className="pt-4 border-t" style={{ borderColor: 'var(--theme-border)' }}>
                   <h3 className="font-medium text-red-500 mb-4">⚠️ Vùng nguy hiểm</h3>
                   <button
                     onClick={handleLogout}
@@ -333,7 +345,7 @@ export default function SettingsPage() {
               <div className="text-center py-8">
                 <div className="text-6xl mb-4">👤</div>
                 <h3 className="text-lg font-bold mb-2">Chưa đăng nhập</h3>
-                <p className="mb-6" style={{ color: colors.textSecondary }}>
+                <p className="mb-6" style={{ color: 'var(--theme-text-secondary)' }}>
                   Đăng nhập để đồng bộ tiến độ học tập
                 </p>
                 <div className="flex gap-4 justify-center">
@@ -346,35 +358,32 @@ export default function SettingsPage() {
                   <Link 
                     href="/auth/register"
                     className="px-6 py-3 border-2 rounded-xl font-medium hover:bg-gray-50"
-                    style={{ borderColor: colors.border }}
+                    style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-primary)' }}
                   >
                     Đăng ký
                   </Link>
                 </div>
               </div>
             )}
-          </Card>
-        )}
+              </Card>
+            )}
 
-        {/* Reset Button */}
-        <div className="text-center mt-6">
-          <button
-            onClick={handleReset}
-            className="px-4 py-2 text-sm font-medium transition-colors hover:underline"
-            style={{ color: colors.textSecondary }}
-          >
-            🔄 Đặt lại tất cả về mặc định
-          </button>
-        </div>
-
-        {/* Back Link */}
-        <div className="text-center mt-4">
-          <Link 
-            href="/"
-            className="text-blue-500 hover:underline"
-          >
-            ← Quay lại trang chủ
-          </Link>
+            <div className="flex flex-wrap items-center justify-between gap-3 mt-6">
+              <button
+                onClick={handleReset}
+                className="px-4 py-2 text-sm font-medium transition-colors hover:underline"
+                style={{ color: 'var(--theme-text-secondary)' }}
+              >
+                🔄 Đặt lại tất cả về mặc định
+              </button>
+              <Link 
+                href="/"
+                className="text-blue-500 hover:underline text-sm"
+              >
+                ← Quay lại trang chủ
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -382,11 +391,11 @@ export default function SettingsPage() {
 }
 
 // Card Component
-function Card({ children, colors }: { children: React.ReactNode; colors: any }) {
+function Card({ children }: { children: React.ReactNode }) {
   return (
     <div 
-      className="rounded-2xl p-6 mb-6 shadow-sm"
-      style={{ backgroundColor: colors.bgCard }}
+      className="rounded-2xl p-6 mb-6 shadow-sm border"
+      style={{ backgroundColor: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}
     >
       {children}
     </div>
@@ -394,26 +403,25 @@ function Card({ children, colors }: { children: React.ReactNode; colors: any }) 
 }
 
 // Toggle Component
-function Toggle({ label, desc, checked, onChange, colors }: {
+function Toggle({ label, desc, checked, onChange }: {
   label: string;
   desc: string;
   checked: boolean;
   onChange: (v: boolean) => void;
-  colors: any;
 }) {
   return (
     <div 
       className="flex items-center justify-between py-4 border-b last:border-0"
-      style={{ borderColor: colors.border }}
+      style={{ borderColor: 'var(--theme-border)' }}
     >
       <div>
-        <div className="font-medium">{label}</div>
-        <div className="text-sm" style={{ color: colors.textSecondary }}>{desc}</div>
+        <div className="font-medium" style={{ color: 'var(--theme-text-primary)' }}>{label}</div>
+        <div className="text-sm" style={{ color: 'var(--theme-text-secondary)' }}>{desc}</div>
       </div>
       <button
         onClick={() => onChange(!checked)}
         className="relative w-14 h-7 rounded-full transition-colors"
-        style={{ backgroundColor: checked ? '#3b82f6' : colors.bgTertiary }}
+        style={{ backgroundColor: checked ? '#3b82f6' : 'var(--theme-bg-secondary)' }}
       >
         <div 
           className="absolute top-0.5 w-6 h-6 rounded-full bg-white shadow transition-all"
@@ -425,7 +433,7 @@ function Toggle({ label, desc, checked, onChange, colors }: {
 }
 
 // Slider Component
-function Slider({ label, value, min, max, step, unit, onChange, colors }: {
+function Slider({ label, value, min, max, step, unit, onChange }: {
   label: string;
   value: number;
   min: number;
@@ -433,7 +441,6 @@ function Slider({ label, value, min, max, step, unit, onChange, colors }: {
   step: number;
   unit: string;
   onChange: (v: number) => void;
-  colors: any;
 }) {
   return (
     <div className="mb-6">

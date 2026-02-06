@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Word, GenderInfo } from '@/types';
 import { WordDetailModal } from './WordDetailModal';
 import { useSettingsStore } from '@/stores/settingsStore';
+import { IconStar } from '@/components/ui/Icons';
 
 interface WordCardProps {
   word: Word;
@@ -13,40 +14,55 @@ interface WordCardProps {
   compact?: boolean;
 }
 
-export function WordCard({ 
-  word, 
-  onFavoriteToggle, 
+const GENDER_STYLES = {
+  masculine: {
+    border: '#3B82F6',
+    bg: 'rgba(59,130,246,.08)',
+    text: '#3B82F6',
+    gradient: 'linear-gradient(135deg, #3B82F6, #1D4ED8)',
+    glow: 'rgba(59,130,246,.15)',
+  },
+  feminine: {
+    border: '#EC4899',
+    bg: 'rgba(236,72,153,.08)',
+    text: '#EC4899',
+    gradient: 'linear-gradient(135deg, #EC4899, #BE185D)',
+    glow: 'rgba(236,72,153,.15)',
+  },
+  neuter: {
+    border: '#22C55E',
+    bg: 'rgba(34,197,94,.08)',
+    text: '#22C55E',
+    gradient: 'linear-gradient(135deg, #22C55E, #15803D)',
+    glow: 'rgba(34,197,94,.15)',
+  },
+};
+
+// ─── Speaker SVG Icon ───
+function IconVolume({ size = 18, className = '' }: { size?: number; className?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round"
+      className={className} style={{ display: 'block', flexShrink: 0 }}>
+      <path d="M11 5 6 9H2v6h4l5 4zM15.54 8.46a5 5 0 0 1 0 7.07" />
+      <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+    </svg>
+  );
+}
+
+export function WordCard({
+  word,
+  onFavoriteToggle,
   isFavorite = false,
   showFavoriteButton = true,
-  compact = false
+  compact = false,
 }: WordCardProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [imageError, setImageError] = useState(false);
   const { settings } = useSettingsStore();
 
   const genderInfo = GenderInfo[word.gender];
-  
-  const genderStyles = {
-    masculine: {
-      border: '#3b82f6',
-      bg: 'rgba(59, 130, 246, 0.1)',
-      text: '#3b82f6',
-      gradient: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
-    },
-    feminine: {
-      border: '#ec4899',
-      bg: 'rgba(236, 72, 153, 0.1)',
-      text: '#ec4899',
-      gradient: 'linear-gradient(135deg, #ec4899 0%, #be185d 100%)',
-    },
-    neuter: {
-      border: '#22c55e',
-      bg: 'rgba(34, 197, 94, 0.1)',
-      text: '#22c55e',
-      gradient: 'linear-gradient(135deg, #22c55e 0%, #15803d 100%)',
-    },
-  };
-  const styles = genderStyles[word.gender];
+  const gs = GENDER_STYLES[word.gender];
 
   const handleCardClick = () => setIsModalOpen(true);
 
@@ -59,180 +75,184 @@ export function WordCard({
     e.stopPropagation();
     if (typeof window !== 'undefined' && 'speechSynthesis' in window && settings.soundEnabled) {
       window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(`${word.article} ${word.word}`);
-      utterance.lang = 'de-DE';
-      utterance.rate = settings.speechRate;
-      window.speechSynthesis.speak(utterance);
+      const u = new SpeechSynthesisUtterance(`${word.article} ${word.word}`);
+      u.lang = 'de-DE';
+      u.rate = settings.speechRate;
+      window.speechSynthesis.speak(u);
     }
   };
 
   const hasImage = word.imageUrl && !imageError;
 
-  // Compact version
+  // ─── Compact variant ───
   if (compact) {
     return (
       <>
         <div
           onClick={handleCardClick}
-          className="group relative rounded-xl cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-[1.02]"
-          style={{
-            backgroundColor: 'var(--theme-bg-card, #ffffff)',
-            border: `2px solid ${styles.border}`,
-          }}
+          className="group relative rounded-xl cursor-pointer transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 border"
+          style={{ backgroundColor: 'var(--theme-bg-card)', borderColor: gs.border }}
         >
           <div className="p-3 flex items-center gap-3">
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
-                <span 
-                  className="text-xs font-bold px-2 py-0.5 rounded text-white"
-                  style={{ background: styles.gradient }}
-                >
+                <span className="text-[11px] font-bold px-2 py-0.5 rounded-md text-white"
+                  style={{ background: gs.gradient }}>
                   {word.article}
                 </span>
-                <span className="font-bold" style={{ color: 'var(--theme-text-primary)' }}>
+                <span className="font-bold text-[14px] truncate"
+                  style={{ color: 'var(--theme-text-primary)' }}>
                   {word.word}
                 </span>
               </div>
-              <p className="text-sm mt-1" style={{ color: 'var(--theme-text-secondary)' }}>
-                {word.translationEn}
+              <p className="text-[12px] mt-0.5 truncate"
+                style={{ color: 'var(--theme-text-muted)' }}>
+                {word.translationVi || word.translationEn}
               </p>
             </div>
-            <button onClick={speakWord} className="p-1.5 rounded-full hover:bg-black/10">🔊</button>
+            <button onClick={speakWord}
+              className="w-7 h-7 rounded-full flex items-center justify-center transition-all hover:scale-110"
+              style={{ backgroundColor: gs.bg, color: gs.text }}>
+              <IconVolume size={14} />
+            </button>
             {showFavoriteButton && onFavoriteToggle && (
-              <button onClick={handleFavoriteClick} className="text-lg">{isFavorite ? '⭐' : '☆'}</button>
+              <button onClick={handleFavoriteClick}
+                className="w-7 h-7 rounded-full flex items-center justify-center transition-all hover:scale-110"
+                style={{
+                  backgroundColor: isFavorite ? 'rgba(234,179,8,.15)' : 'var(--theme-bg-secondary)',
+                  color: isFavorite ? '#EAB308' : 'var(--theme-text-muted)',
+                }}>
+                <IconStar size={14} style={isFavorite ? { fill: '#EAB308' } : {}} />
+              </button>
             )}
           </div>
         </div>
-        <WordDetailModal word={word} isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onFavoriteToggle={onFavoriteToggle} isFavorite={isFavorite} />
+        <WordDetailModal word={word} isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}
+          onFavoriteToggle={onFavoriteToggle} isFavorite={isFavorite} />
       </>
     );
   }
 
-  // Full card
+  // ─── Full card ───
   return (
     <>
       <div
         onClick={handleCardClick}
-        className="group relative rounded-2xl cursor-pointer transition-all duration-300 hover:shadow-xl hover:scale-[1.01]"
+        className="group relative rounded-2xl cursor-pointer transition-all duration-300
+          hover:shadow-lg hover:-translate-y-1 border"
         style={{
-          backgroundColor: 'var(--theme-bg-card, #ffffff)',
-          borderLeft: `4px solid ${styles.border}`,
-          boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+          backgroundColor: 'var(--theme-bg-card)',
+          borderColor: 'var(--theme-border)',
+          borderLeftWidth: '3px',
+          borderLeftColor: gs.border,
         }}
       >
         <div className="p-4">
-          {/* Main content row */}
-          <div className="flex gap-3">
-            {/* Left: Word info */}
-            <div className="flex-1 min-w-0">
-              {/* Article + Word + Speaker */}
-              <div className="flex items-center gap-2 mb-1 flex-wrap">
-                <span 
-                  className="text-sm font-bold px-2 py-0.5 rounded text-white"
-                  style={{ background: styles.gradient }}
-                >
-                  {word.article}
-                </span>
-                <span 
-                  className="text-lg font-bold"
-                  style={{ color: 'var(--theme-text-primary, #111827)' }}
-                >
-                  {word.word}
-                </span>
-                <button
-                  onClick={speakWord}
-                  className="w-7 h-7 flex items-center justify-center rounded-full transition-all hover:scale-110 text-sm"
-                  style={{ backgroundColor: 'var(--theme-bg-secondary, #f3f4f6)' }}
-                >
-                  🔊
-                </button>
-              </div>
-              
-              {/* IPA */}
-              {settings.showPronunciation && word.pronunciation && (
-                <p className="text-sm mb-1" style={{ color: 'var(--theme-text-secondary, #6b7280)' }}>
-                  [{word.pronunciation}]
-                </p>
-              )}
-
-              {/* Translations */}
-              <div className="space-y-0.5 mb-2">
-                <p className="text-sm" style={{ color: 'var(--theme-text-primary, #111827)' }}>
-                  <span className="opacity-70 mr-1">EN</span> {word.translationEn}
-                </p>
-                {settings.showVietnamese && word.translationVi && (
-                  <p className="text-sm" style={{ color: 'var(--theme-text-secondary, #6b7280)' }}>
-                    <span className="opacity-70 mr-1">VN</span> {word.translationVi}
-                  </p>
-                )}
-              </div>
-
-              {/* Tags */}
-              <div className="flex flex-wrap gap-1">
-                <span 
-                  className="px-1.5 py-0.5 rounded text-xs font-medium"
-                  style={{ backgroundColor: styles.bg, color: styles.text }}
-                >
-                  {genderInfo.label}
-                </span>
-                <span 
-                  className="px-1.5 py-0.5 rounded text-xs"
-                  style={{ backgroundColor: 'var(--theme-bg-secondary, #f3f4f6)', color: 'var(--theme-text-secondary, #6b7280)' }}
-                >
-                  {word.level}
-                </span>
-                <span 
-                  className="px-1.5 py-0.5 rounded text-xs"
-                  style={{ backgroundColor: 'var(--theme-bg-secondary, #f3f4f6)', color: 'var(--theme-text-secondary, #6b7280)' }}
-                >
-                  {word.category}
-                </span>
-              </div>
+          {/* Top row: article + word + actions */}
+          <div className="flex items-start justify-between gap-2 mb-2">
+            <div className="flex items-center gap-2 flex-wrap min-w-0">
+              <span className="text-[12px] font-bold px-2.5 py-1 rounded-lg text-white shadow-sm"
+                style={{ background: gs.gradient }}>
+                {word.article}
+              </span>
+              <span className="text-[17px] font-bold truncate"
+                style={{ color: 'var(--theme-text-primary)' }}>
+                {word.word}
+              </span>
             </div>
 
-            {/* Right: Favorite + Image */}
-            <div className="flex flex-col items-end gap-2">
+            {/* Action buttons */}
+            <div className="flex items-center gap-1 shrink-0">
+              <button
+                onClick={speakWord}
+                className="w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200
+                  hover:scale-110"
+                style={{ backgroundColor: gs.bg, color: gs.text }}
+              >
+                <IconVolume size={16} />
+              </button>
               {showFavoriteButton && onFavoriteToggle && (
                 <button
                   onClick={handleFavoriteClick}
-                  className="w-8 h-8 flex items-center justify-center rounded-full transition-all text-lg hover:scale-110"
-                  style={{ backgroundColor: isFavorite ? 'rgba(234, 179, 8, 0.2)' : 'var(--theme-bg-secondary, #f3f4f6)' }}
+                  className="w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200
+                    hover:scale-110"
+                  style={{
+                    backgroundColor: isFavorite ? 'rgba(234,179,8,.12)' : 'var(--theme-bg-secondary)',
+                    color: isFavorite ? '#EAB308' : 'var(--theme-text-muted)',
+                  }}
                 >
-                  {isFavorite ? '⭐' : '☆'}
+                  <IconStar size={16} style={isFavorite ? { fill: '#EAB308' } : {}} />
                 </button>
-              )}
-              
-              {hasImage && (
-                <div 
-                  className="w-16 h-16 rounded-xl overflow-hidden shadow-sm flex-shrink-0"
-                  style={{ border: `2px solid ${styles.border}` }}
-                >
-                  <img 
-                    src={word.imageUrl!} 
-                    alt={word.word}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform"
-                    onError={() => setImageError(true)}
-                  />
-                </div>
               )}
             </div>
           </div>
 
+          {/* Pronunciation */}
+          {settings.showPronunciation && word.pronunciation && (
+            <p className="text-[12px] mb-1.5" style={{ color: 'var(--theme-text-muted)' }}>
+              [{word.pronunciation}]
+            </p>
+          )}
+
+          {/* Translations */}
+          <div className="space-y-0.5 mb-3">
+            <p className="text-[13px]" style={{ color: 'var(--theme-text-primary)' }}>
+              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded mr-1.5"
+                style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }}>
+                EN
+              </span>
+              {word.translationEn}
+            </p>
+            {settings.showVietnamese && word.translationVi && (
+              <p className="text-[13px]" style={{ color: 'var(--theme-text-secondary)' }}>
+                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded mr-1.5"
+                  style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }}>
+                  VN
+                </span>
+                {word.translationVi}
+              </p>
+            )}
+          </div>
+
+          {/* Tags row */}
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <span className="px-2 py-0.5 rounded-md text-[11px] font-semibold"
+              style={{ backgroundColor: gs.bg, color: gs.text }}>
+              {genderInfo.label}
+            </span>
+            <span className="px-2 py-0.5 rounded-md text-[11px] font-medium"
+              style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }}>
+              {word.level}
+            </span>
+            <span className="px-2 py-0.5 rounded-md text-[11px] font-medium"
+              style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }}>
+              {word.category}
+            </span>
+
+            {/* Image thumbnail */}
+            {hasImage && (
+              <div className="ml-auto w-10 h-10 rounded-lg overflow-hidden shadow-sm shrink-0 border"
+                style={{ borderColor: gs.glow }}>
+                <img src={word.imageUrl!} alt={word.word}
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                  onError={() => setImageError(true)} />
+              </div>
+            )}
+          </div>
+
           {/* Example preview */}
           {settings.showExamples && word.examples && word.examples.length > 0 && (
-            <div className="mt-2 pt-2 border-t" style={{ borderColor: 'var(--theme-border, #e5e7eb)' }}>
-              <p className="text-xs italic line-clamp-1" style={{ color: 'var(--theme-text-secondary, #6b7280)' }}>
-                💬 "{word.examples[0]}"
+            <div className="mt-3 pt-2.5" style={{ borderTop: '1px solid var(--theme-border)' }}>
+              <p className="text-[12px] italic line-clamp-1" style={{ color: 'var(--theme-text-muted)' }}>
+                💬 „{word.examples[0]}"
               </p>
             </div>
           )}
 
           {/* Hover hint */}
-          <p 
-            className="text-center text-xs mt-2 opacity-0 group-hover:opacity-100 transition-opacity"
-            style={{ color: styles.text }}
-          >
-            Click để xem chi tiết →
+          <p className="text-center text-[11px] mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+            style={{ color: gs.text }}>
+            Nhấn để xem chi tiết →
           </p>
         </div>
       </div>
