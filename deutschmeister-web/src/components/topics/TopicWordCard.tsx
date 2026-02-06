@@ -72,16 +72,16 @@ export function TopicWordCard({
   };
 
   return (
-    <div className={`relative overflow-hidden rounded-2xl border transition-all duration-300
-      ${isLearned ? 'opacity-50' : ''}
-      ${showDetails ? 'shadow-md' : 'hover:-translate-y-0.5 hover:shadow-sm'}`}
-      style={{
-        borderColor: showDetails ? ac.color : 'var(--theme-border)',
-        backgroundColor: 'var(--theme-bg-card)',
-        borderLeftWidth: '3px',
-        borderLeftColor: ac.color,
-      }}>
-
+      <div
+        className="relative overflow-hidden rounded-2xl transition-all duration-300"
+        style={{
+          borderWidth: '1px',
+          borderStyle: 'solid',
+          borderColor: showDetails ? ac.color : 'var(--theme-border)',
+          borderLeftWidth: '3px',
+          borderLeftColor: ac.color,
+        }}
+      >
       {/* Main content */}
       <div className="p-4 cursor-pointer" onClick={() => setShowDetails(!showDetails)}>
         <div className="flex items-start justify-between gap-3">

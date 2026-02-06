@@ -39,6 +39,8 @@ export default function TimedChallengePage() {
   const countdownRef = useRef<NodeJS.Timeout | null>(null);
   const scoreRef = useRef(0);
   const bestComboRef = useRef(0);
+  const correctRef = useRef(0);
+  const wrongRef = useRef(0);
 
   const { data: words, refetch, isLoading } = useRandomWords(200, {});
   const currentWord = words?.[index];
@@ -61,6 +63,7 @@ export default function TimedChallengePage() {
       setIndex(0); setTimeLeft(duration); setScore(0); setCombo(0); setBestCombo(0);
       setCorrect(0); setWrong(0); setCountdown(3); setLastAnswer(null);
       scoreRef.current = 0; bestComboRef.current = 0;
+      correctRef.current = 0; wrongRef.current = 0;
       setPhase('countdown');
       session.start(200);
 
@@ -88,12 +91,13 @@ export default function TimedChallengePage() {
 
     if (isCorrect) {
       playCorrect();
+      correctRef.current++;
       const newCombo = combo + 1; const mult = Math.min(newCombo, 4);
       setScore(s => s + 10 * mult); scoreRef.current += 10 * mult;
       setCorrect(c => c + 1); setCombo(newCombo); setLastAnswer('correct');
       if (newCombo > bestCombo) { setBestCombo(newCombo); bestComboRef.current = newCombo; }
       if (newCombo === 5 || newCombo === 10 || newCombo === 15 || newCombo === 20) setTimeout(() => playCombo(), 150);
-    } else { playWrong(); setWrong(w => w + 1); setCombo(0); setLastAnswer('wrong'); }
+    } else { playWrong(); wrongRef.current++; setWrong(w => w + 1); setCombo(0); setLastAnswer('wrong'); }
 
     setTimeout(() => setLastAnswer(null), 300);
     setIndex(i => (i >= (words?.length || 1) - 1 ? 0 : i + 1));
@@ -113,7 +117,7 @@ export default function TimedChallengePage() {
   // Save game session to backend when game ends
   useEffect(() => {
     if (phase === 'result') {
-      session.end(scoreRef.current, bestComboRef.current);
+      session.end(scoreRef.current, bestComboRef.current, correctRef.current, wrongRef.current);
     }
   }, [phase, session]);
 

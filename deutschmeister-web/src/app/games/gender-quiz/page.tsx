@@ -41,6 +41,8 @@ export default function GenderQuizPage() {
   const [answers, setAnswers] = useState<AnswerRecord[]>([]);
   const scoreRef = useRef(0);
   const bestComboRef = useRef(0);
+  const correctRef = useRef(0);
+  const wrongRef = useRef(0);
 
   const questionsCount = isLoaded ? settings.questionsPerGame : 20;
   const { data: words, refetch, isLoading } = useRandomWords(questionsCount, {});
@@ -54,6 +56,7 @@ export default function GenderQuizPage() {
     if (!result.data?.length) { alert('Không có từ vựng! Vui lòng seed database.'); return; }
     setIndex(0); setScore(0); setCombo(0); setBestCombo(0);
     scoreRef.current = 0; bestComboRef.current = 0;
+    correctRef.current = 0; wrongRef.current = 0;
     setAnswered(false); setSelectedAnswer(null); setAnswers([]); setPhase('playing');
     session.start(questionsCount);
   };
@@ -66,6 +69,7 @@ export default function GenderQuizPage() {
 
     if (isCorrect) {
       playCorrect();
+      correctRef.current++;
       const newCombo = combo + 1;
       const multiplier = Math.min(newCombo, 4);
       setScore(s => s + 10 * multiplier); scoreRef.current += 10 * multiplier;
@@ -73,7 +77,7 @@ export default function GenderQuizPage() {
       if (newCombo > bestCombo) { setBestCombo(newCombo); bestComboRef.current = newCombo; }
       if (newCombo === 3 || newCombo === 5 || newCombo === 10) setTimeout(() => playCombo(), 200);
       if ((score + 10 * multiplier) % 100 === 0) setTimeout(() => playLevelUp(), 300);
-    } else { playWrong(); setCombo(0); }
+    } else { playWrong(); wrongRef.current++; setCombo(0); }
 
     setTimeout(() => {
       if (index + 1 >= questionsCount) { playGameOver(); setPhase('result'); }
@@ -95,7 +99,7 @@ export default function GenderQuizPage() {
   // Save game session to backend when game ends
   useEffect(() => {
     if (phase === 'result') {
-      session.end(scoreRef.current, bestComboRef.current);
+      session.end(scoreRef.current, bestComboRef.current, correctRef.current, wrongRef.current);
     }
   }, [phase, session]);
 

@@ -21,6 +21,8 @@ export const gamesApi = {
     sessionId: string;
     score: number;
     bestStreak: number;
+    correctAnswers: number;
+    wrongAnswers: number;
   }): Promise<GameSession> => {
     return apiPost<GameSession>('/games/end', data);
   },

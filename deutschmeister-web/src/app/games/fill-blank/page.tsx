@@ -34,6 +34,8 @@ export default function FillBlankPage() {
   const inputRef = useRef<HTMLInputElement>(null);
   const scoreRef = useRef(0);
   const bestComboRef = useRef(0);
+  const correctRef = useRef(0);
+  const wrongRef = useRef(0);
 
   const [phase, setPhase] = useState<Phase>('setup');
   const [index, setIndex] = useState(0);
@@ -62,6 +64,7 @@ export default function FillBlankPage() {
     if (!result.data?.length) { alert('Không có từ vựng!'); return; }
     setIndex(0); setScore(0); setCombo(0); setBestCombo(0);
     scoreRef.current = 0; bestComboRef.current = 0;
+    correctRef.current = 0; wrongRef.current = 0;
     setUserInput(''); setAnswered(false); setIsCorrect(false);
     setAnswers([]); setShowHint(false); setPhase('playing');
     session.start(questionsCount);
@@ -77,13 +80,14 @@ export default function FillBlankPage() {
 
     if (correct) {
       playCorrect();
+      correctRef.current++;
       const newCombo = combo + 1; const multiplier = Math.min(newCombo, 4);
       setScore(s => s + 10 * multiplier); scoreRef.current += 10 * multiplier;
       setCombo(newCombo);
       if (newCombo > bestCombo) { setBestCombo(newCombo); bestComboRef.current = newCombo; }
       if (newCombo === 3 || newCombo === 5 || newCombo === 10) setTimeout(() => playCombo(), 200);
       if ((score + 10 * multiplier) % 100 === 0) setTimeout(() => playLevelUp(), 300);
-    } else { playWrong(); setCombo(0); }
+    } else { playWrong(); wrongRef.current++; setCombo(0); }
   }, [answered, currentWord, userInput, combo, bestCombo, score, playCorrect, playWrong, playCombo, playLevelUp]);
 
   const nextQuestion = useCallback(() => {
@@ -104,19 +108,19 @@ export default function FillBlankPage() {
       setAnswered(true); setIsCorrect(correct);
       setAnswers(prev => [...prev, { word: currentWord!, userInput: article, correctAnswer: currentWord!.article, isCorrect: correct }]);
       if (correct) {
-        playCorrect(); const newCombo = combo + 1;
+        playCorrect(); correctRef.current++; const newCombo = combo + 1;
         setScore(s => s + 10 * Math.min(newCombo, 4)); scoreRef.current += 10 * Math.min(newCombo, 4);
         setCombo(newCombo);
         if (newCombo > bestCombo) { setBestCombo(newCombo); bestComboRef.current = newCombo; }
         if (newCombo === 3 || newCombo === 5 || newCombo === 10) setTimeout(() => playCombo(), 200);
-      } else { playWrong(); setCombo(0); }
+      } else { playWrong(); wrongRef.current++; setCombo(0); }
     }, 100);
   };
 
   // Save game session to backend when game ends
   useEffect(() => {
     if (phase === 'result') {
-      session.end(scoreRef.current, bestComboRef.current);
+      session.end(scoreRef.current, bestComboRef.current, correctRef.current, wrongRef.current);
     }
   }, [phase, session]);
 

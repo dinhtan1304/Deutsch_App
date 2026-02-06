@@ -156,13 +156,13 @@ export default function WritingResultPage() {
   if (isLoading) {
     return (
       <MainLayout>
-        <div className="max-w-5xl mx-auto py-6 space-y-6">
+        <div className="py-6 space-y-6">
           <div className="h-8 w-48 rounded-lg animate-pulse" style={{ backgroundColor: 'var(--theme-bg-secondary)' }} />
-          <div className="flex gap-6">
-            <div className="h-40 w-40 rounded-full animate-pulse" style={{ backgroundColor: 'var(--theme-bg-secondary)' }} />
-            <div className="flex-1 space-y-3">
-              <div className="h-6 rounded w-3/4 animate-pulse" style={{ backgroundColor: 'var(--theme-bg-secondary)' }} />
-              <div className="h-6 rounded w-1/2 animate-pulse" style={{ backgroundColor: 'var(--theme-bg-secondary)' }} />
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-5">
+            <div className="md:col-span-2 h-52 rounded-2xl animate-pulse" style={{ backgroundColor: 'var(--theme-bg-secondary)' }} />
+            <div className="md:col-span-3 space-y-3">
+              <div className="h-28 rounded-xl animate-pulse" style={{ backgroundColor: 'var(--theme-bg-secondary)' }} />
+              <div className="h-28 rounded-xl animate-pulse" style={{ backgroundColor: 'var(--theme-bg-secondary)' }} />
             </div>
           </div>
         </div>
@@ -173,7 +173,7 @@ export default function WritingResultPage() {
   if (isError || !session || session.status !== 'GRADED') {
     return (
       <MainLayout>
-        <div className="max-w-5xl mx-auto py-20 text-center">
+        <div className="py-20 text-center">
           <div className="w-16 h-16 rounded-2xl mx-auto flex items-center justify-center mb-4"
             style={{ background: 'linear-gradient(135deg, #6366F1, #8B5CF6)' }}>
             <IconList size={28} style={{ color: 'white' }} />
@@ -196,7 +196,7 @@ export default function WritingResultPage() {
 
   return (
     <MainLayout>
-      <div className="max-w-5xl mx-auto py-6">
+      <div className="py-6">
 
         {/* Header */}
         <div className="mb-6">
@@ -213,16 +213,16 @@ export default function WritingResultPage() {
           </p>
         </div>
 
-        {/* Score + Feedback */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
+        {/* Score + Feedback — side by side */}
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-5 mb-6">
           {/* Score ring */}
-          <div className="flex justify-center items-center p-6 rounded-2xl border"
+          <div className="md:col-span-2 flex justify-center items-center p-6 rounded-2xl border"
             style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
             <ScoreRing score={session.overallScore || 0} />
           </div>
 
           {/* Strengths & Improvements */}
-          <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="md:col-span-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="rounded-xl border p-4" style={{ borderColor: 'rgba(34,197,94,.2)', backgroundColor: 'rgba(34,197,94,.04)' }}>
               <h3 className="text-[12px] font-bold uppercase tracking-wider mb-2 flex items-center gap-1" style={{ color: '#22C55E' }}>
                 Stärken / Điểm mạnh
@@ -266,75 +266,80 @@ export default function WritingResultPage() {
           </div>
         </div>
 
-        {/* Text Comparison */}
-        <div className="mb-6">
-          <div className="flex items-center gap-3 mb-3">
-            <h2 className="text-[16px] font-bold" style={{ color: 'var(--theme-text-primary)' }}>Bài viết</h2>
-            <div className="flex rounded-lg p-0.5" style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
-              {['Bài gốc', 'Bài đã sửa'].map((label, idx) => {
-                const isActive = idx === 0 ? showOriginal : !showOriginal;
-                return (
-                  <button key={label} onClick={() => setShowOriginal(idx === 0)}
-                    className="px-3 py-1 rounded-md text-[12px] font-medium transition-colors"
-                    style={isActive
-                      ? { backgroundColor: 'var(--theme-bg-card)', color: 'var(--theme-text-primary)', boxShadow: '0 1px 3px rgba(0,0,0,.08)' }
-                      : { color: 'var(--theme-text-muted)' }
-                    }>
-                    {label}
-                  </button>
-                );
-              })}
+        {/* Text Comparison + Error Details — side by side on large screens */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-6">
+
+          {/* Text Comparison */}
+          <div>
+            <div className="flex items-center gap-3 mb-3">
+              <h2 className="text-[16px] font-bold" style={{ color: 'var(--theme-text-primary)' }}>Bài viết</h2>
+              <div className="flex rounded-lg p-0.5" style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
+                {['Bài gốc', 'Bài đã sửa'].map((label, idx) => {
+                  const isActive = idx === 0 ? showOriginal : !showOriginal;
+                  return (
+                    <button key={label} onClick={() => setShowOriginal(idx === 0)}
+                      className="px-3 py-1 rounded-md text-[12px] font-medium transition-colors"
+                      style={isActive
+                        ? { backgroundColor: 'var(--theme-bg-card)', color: 'var(--theme-text-primary)', boxShadow: '0 1px 3px rgba(0,0,0,.08)' }
+                        : { color: 'var(--theme-text-muted)' }
+                      }>
+                      {label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+            <div className="p-5 rounded-xl border min-h-64" style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
+              <p className="text-[13px] leading-relaxed whitespace-pre-line" style={{ color: 'var(--theme-text-primary)' }}>
+                {showOriginal ? session.userText : session.correctedText}
+              </p>
             </div>
           </div>
-          <div className="p-5 rounded-xl border" style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
-            <p className="text-[13px] leading-relaxed whitespace-pre-line" style={{ color: 'var(--theme-text-primary)' }}>
-              {showOriginal ? session.userText : session.correctedText}
-            </p>
+
+          {/* Error Details */}
+          <div>
+            <h2 className="text-[16px] font-bold mb-3" style={{ color: 'var(--theme-text-primary)' }}>
+              Chi tiết lỗi ({errors.length})
+            </h2>
+
+            {Object.keys(errorsByType).length > 1 && (
+              <div className="flex flex-wrap gap-1.5 mb-4">
+                <button onClick={() => setFilterType('')}
+                  className="px-3 py-1.5 rounded-lg text-[12px] font-semibold transition-all"
+                  style={!filterType
+                    ? { background: 'linear-gradient(135deg, #6366F1, #8B5CF6)', color: 'white' }
+                    : { backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }
+                  }>
+                  Tất cả ({errors.length})
+                </button>
+                {Object.entries(errorsByType).sort(([, a], [, b]) => b - a).map(([type, count]) => {
+                  const info = ERROR_TYPE_INFO[type];
+                  return (
+                    <button key={type} onClick={() => setFilterType(type === filterType ? '' : type)}
+                      className="px-3 py-1.5 rounded-lg text-[12px] font-semibold transition-all"
+                      style={filterType === type
+                        ? { background: `linear-gradient(135deg, ${info?.color || '#6B7280'}, ${info?.color || '#6B7280'}cc)`, color: 'white' }
+                        : { backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }
+                      }>
+                      {info?.labelVi || type} ({count})
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
+            {filteredErrors.length === 0 ? (
+              <div className="text-center py-10 rounded-2xl border-2 border-dashed" style={{ borderColor: 'var(--theme-border)' }}>
+                <p className="text-[18px] mb-1">🎉</p>
+                <p className="text-[13px]" style={{ color: 'var(--theme-text-muted)' }}>Không có lỗi nào!</p>
+              </div>
+            ) : (
+              <div className="space-y-2 max-h-128 overflow-y-auto pr-1">
+                {filteredErrors.map(error => <ErrorCard key={error.id} error={error} />)}
+              </div>
+            )}
           </div>
-        </div>
 
-        {/* Error Details */}
-        <div className="mb-6">
-          <h2 className="text-[16px] font-bold mb-3" style={{ color: 'var(--theme-text-primary)' }}>
-            Chi tiết lỗi ({errors.length})
-          </h2>
-
-          {Object.keys(errorsByType).length > 1 && (
-            <div className="flex flex-wrap gap-1.5 mb-4">
-              <button onClick={() => setFilterType('')}
-                className="px-3 py-1.5 rounded-lg text-[12px] font-semibold transition-all"
-                style={!filterType
-                  ? { background: 'linear-gradient(135deg, #6366F1, #8B5CF6)', color: 'white' }
-                  : { backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }
-                }>
-                Tất cả ({errors.length})
-              </button>
-              {Object.entries(errorsByType).sort(([, a], [, b]) => b - a).map(([type, count]) => {
-                const info = ERROR_TYPE_INFO[type];
-                return (
-                  <button key={type} onClick={() => setFilterType(type === filterType ? '' : type)}
-                    className="px-3 py-1.5 rounded-lg text-[12px] font-semibold transition-all"
-                    style={filterType === type
-                      ? { background: `linear-gradient(135deg, ${info?.color || '#6B7280'}, ${info?.color || '#6B7280'}cc)`, color: 'white' }
-                      : { backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }
-                    }>
-                    {info?.labelVi || type} ({count})
-                  </button>
-                );
-              })}
-            </div>
-          )}
-
-          {filteredErrors.length === 0 ? (
-            <div className="text-center py-10 rounded-2xl border-2 border-dashed" style={{ borderColor: 'var(--theme-border)' }}>
-              <p className="text-[18px] mb-1">🎉</p>
-              <p className="text-[13px]" style={{ color: 'var(--theme-text-muted)' }}>Không có lỗi nào!</p>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              {filteredErrors.map(error => <ErrorCard key={error.id} error={error} />)}
-            </div>
-          )}
         </div>
 
         {/* Action Buttons */}

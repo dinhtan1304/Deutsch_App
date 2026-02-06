@@ -146,6 +146,16 @@ export async function api<T>(
         headers,
         credentials: 'include',
       });
+    } else {
+      // Refresh failed → tokens cleared → redirect to login
+      if (typeof window !== 'undefined') {
+        const isAuthPage = window.location.pathname.startsWith('/auth');
+        if (!isAuthPage) {
+          window.location.href = '/auth/login';
+          // Return a never-resolving promise to prevent further execution
+          return new Promise<T>(() => {});
+        }
+      }
     }
   }
 

@@ -34,6 +34,7 @@ export default function FlashcardsPage() {
   const [bestStreak, setBestStreak] = useState(0);
   const knewRef = useRef(0);
   const bestStreakRef = useRef(0);
+  const didntKnowRef = useRef(0);
 
   const cardsCount = isLoaded ? settings.questionsPerGame : 20;
   const { data: words, refetch, isLoading } = useRandomWords(cardsCount, {});
@@ -47,7 +48,7 @@ export default function FlashcardsPage() {
     const result = await refetch();
     if (!result.data?.length) { alert('Không có từ vựng!'); return; }
     setIndex(0); setIsFlipped(false); setResults([]); setStreak(0); setBestStreak(0);
-    knewRef.current = 0; bestStreakRef.current = 0;
+    knewRef.current = 0; bestStreakRef.current = 0; didntKnowRef.current = 0;
     setPhase('playing');
     session.start(cardsCount);
   };
@@ -64,7 +65,7 @@ export default function FlashcardsPage() {
       const newStreak = streak + 1; setStreak(newStreak);
       if (newStreak > bestStreak) { setBestStreak(newStreak); bestStreakRef.current = newStreak; }
       if (newStreak === 5 || newStreak === 10 || newStreak === 15) setTimeout(() => playCombo(), 200);
-    } else { playWrong(); setStreak(0); }
+    } else { playWrong(); didntKnowRef.current++; setStreak(0); }
 
     setTimeout(() => {
       if (index + 1 >= (words?.length || 0)) {
@@ -89,7 +90,7 @@ export default function FlashcardsPage() {
   // Save game session to backend when game ends
   useEffect(() => {
     if (phase === 'result') {
-      session.end(knewRef.current * 10, bestStreakRef.current);
+      session.end(knewRef.current * 10, bestStreakRef.current, knewRef.current, didntKnowRef.current);
     }
   }, [phase, session]);
 

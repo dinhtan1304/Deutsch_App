@@ -140,7 +140,7 @@ export default function WritingEditorPage() {
   if (isLoading) {
     return (
       <MainLayout>
-        <div className="max-w-4xl mx-auto py-6">
+        <div className="py-6">
           <div className="space-y-4">
             <div className="h-8 w-48 rounded-lg animate-pulse" style={{ backgroundColor: 'var(--theme-bg-secondary)' }} />
             <div className="h-40 rounded-xl animate-pulse" style={{ backgroundColor: 'var(--theme-bg-secondary)' }} />
@@ -154,7 +154,7 @@ export default function WritingEditorPage() {
   if (isError || !session) {
     return (
       <MainLayout>
-        <div className="max-w-4xl mx-auto py-20 text-center">
+        <div className="py-20 text-center">
           <div className="w-16 h-16 rounded-2xl mx-auto flex items-center justify-center mb-4"
             style={{ background: 'linear-gradient(135deg, #EF4444, #EF4444cc)' }}>
             <IconPenLine size={28} style={{ color: 'white' }} />
@@ -178,7 +178,7 @@ export default function WritingEditorPage() {
 
   return (
     <MainLayout>
-      <div className="max-w-4xl mx-auto py-6">
+      <div className="py-6">
 
         {/* Header */}
         <div className="flex items-center justify-between mb-5">
@@ -209,10 +209,10 @@ export default function WritingEditorPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
 
           {/* Left: Prompt + Hints */}
-          <div className="lg:col-span-1 space-y-3">
+          <div className="lg:col-span-2 space-y-3 lg:sticky lg:top-20 lg:self-start">
             {/* Prompt */}
             <div className="rounded-xl border-2 p-4" style={{ borderColor: 'rgba(59,130,246,.3)', backgroundColor: 'rgba(59,130,246,.04)' }}>
               <h3 className="text-[12px] font-bold uppercase tracking-wider mb-2 flex items-center gap-1.5" style={{ color: '#3B82F6' }}>
@@ -265,7 +265,7 @@ export default function WritingEditorPage() {
           </div>
 
           {/* Right: Text Editor */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-3">
             <div className="rounded-2xl border overflow-hidden"
               style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
               {/* Editor header */}
@@ -286,7 +286,7 @@ export default function WritingEditorPage() {
               {/* Textarea */}
               <textarea ref={textareaRef} value={text} onChange={e => setText(e.target.value)} autoFocus
                 placeholder={`Schreiben Sie hier Ihren Text...\n\nViết bài của bạn ở đây... (${session.wordCountMin}–${session.wordCountMax} từ)`}
-                className="w-full min-h-100 p-5 bg-transparent resize-y focus:outline-none text-[15px] leading-relaxed"
+                className="w-full min-h-[28rem] p-5 bg-transparent resize-y focus:outline-none text-[15px] leading-relaxed"
                 style={{ color: 'var(--theme-text-primary)' }} />
 
               {/* Progress bar */}
@@ -301,12 +301,12 @@ export default function WritingEditorPage() {
             {/* Action buttons */}
             <div className="flex items-center gap-3 mt-4">
               <button onClick={handleSaveDraft} disabled={!text.trim() || saveDraftMutation.isPending}
-                className="flex-1 py-3 rounded-xl border-2 font-semibold text-[14px] transition-all duration-200 hover:-translate-y-0.5 disabled:opacity-40 flex items-center justify-center gap-2"
+                className="py-3 px-6 rounded-xl border-2 font-semibold text-[14px] transition-all duration-200 hover:-translate-y-0.5 disabled:opacity-40 flex items-center justify-center gap-2"
                 style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)' }}>
                 <IconSave size={16} /> Lưu nháp
               </button>
               <button onClick={handleSubmit} disabled={!text.trim() || submitMutation.isPending || isUnderMin}
-                className="flex-2 py-3 rounded-xl font-bold text-[14px] text-white transition-all duration-200 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="flex-1 py-3 rounded-xl font-bold text-[14px] text-white transition-all duration-200 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 style={{ background: 'linear-gradient(135deg, #6366F1, #8B5CF6)', boxShadow: '0 4px 12px rgba(99,102,241,.3)' }}>
                 {submitMutation.isPending
                   ? <><IconLoader size={16} /> AI đang chấm bài...</>

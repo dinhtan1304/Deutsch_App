@@ -53,28 +53,37 @@ export const useSRSStore = create<SRSState>((set, get) => ({
         cards[p.wordId] = p;
       });
       set({ cards, isLoaded: true, isLoading: false });
-    } catch (e) {
+    } catch (e: any) {
+      if (e?.status === 401) {
+        set({ cards: {}, isLoaded: false, isLoading: false });
+        return;
+      }
       console.error('Failed to load SRS cards:', e);
       set({ cards: {}, isLoaded: true, isLoading: false });
     }
   },
 
   reviewCard: async (wordId: string, rating: ReviewRating) => {
+    if (!getAccessToken()) return;
     try {
       const updated = await progressApi.review(wordId, rating);
       const { cards } = get();
       set({ cards: { ...cards, [wordId]: updated } });
-    } catch (e) {
+    } catch (e: any) {
+      if (e?.status === 401) return;
       console.error('Failed to review card:', e);
     }
   },
 
   addWords: async (wordIds: string[]) => {
+    if (!getAccessToken()) return;
     try {
       await progressApi.addWords(wordIds);
       // Reload all cards to get the new ones with word data
       await get().loadCards();
-    } catch (e) {
+    } catch (e: any) {
+      // Silently handle auth errors (redirect handled by API client)
+      if (e?.status === 401) return;
       console.error('Failed to add words:', e);
     }
   },

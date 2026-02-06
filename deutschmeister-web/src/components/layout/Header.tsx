@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/stores/authStore';
 import { IconSearch, IconGamepad, IconBrain } from '@/components/ui/Icons';
+import { SIDEBAR_WIDTH, SIDEBAR_COLLAPSED_WIDTH } from './Sidebar';
 
 interface HeaderProps {
   sidebarCollapsed: boolean;
@@ -25,12 +26,12 @@ export function Header({ sidebarCollapsed }: HeaderProps) {
 
   return (
     <header
-      className={`fixed top-0 right-0 h-16 z-30 transition-all duration-300 ease-in-out
-        ${sidebarCollapsed ? 'left-18' : 'left-65'}
-        backdrop-blur-xl border-b flex items-center justify-between px-6`}
+      className="fixed top-0 right-0 h-16 z-30 backdrop-blur-xl border-b flex items-center justify-between px-6"
       style={{
+        left: `${sidebarCollapsed ? SIDEBAR_COLLAPSED_WIDTH : SIDEBAR_WIDTH}px`,
         backgroundColor: 'color-mix(in srgb, var(--theme-bg-card) 85%, transparent)',
         borderColor: 'var(--theme-border)',
+        transition: 'left .3s cubic-bezier(.4,0,.2,1)',
       }}
     >
       {/* Search */}

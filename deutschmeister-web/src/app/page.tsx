@@ -134,7 +134,7 @@ function GuestLanding() {
         <h1 className="text-4xl md:text-5xl font-bold mb-4" style={{ color: 'var(--theme-text-primary)' }}>
           Deutschmeister
         </h1>
-        <p className="text-xl text-gray-500 mb-8 max-w-2xl mx-auto">
+        <p className="text-xl mb-8 max-w-2xl mx-auto" style={{ color: 'var(--theme-text-muted)' }}>
           Học tiếng Đức hiệu quả với phương pháp khoa học.
           <br />
           Der, Die, Das - không còn là vấn đề!
@@ -152,15 +152,15 @@ function GuestLanding() {
       <div className="grid md:grid-cols-3 gap-6 mb-12">
         <div className="p-6 rounded-2xl text-center" style={{ backgroundColor: 'rgba(59, 130, 246, 0.1)' }}>
           <div className="text-4xl font-bold text-blue-600 mb-2">{publicStats?.totalWords || 140}+</div>
-          <div className="text-gray-500">Từ vựng</div>
+          <div style={{ color: 'var(--theme-text-muted)' }}>Từ vựng</div>
         </div>
         <div className="p-6 rounded-2xl text-center" style={{ backgroundColor: 'rgba(16, 185, 129, 0.1)' }}>
           <div className="text-4xl font-bold text-green-600 mb-2">{publicStats?.totalTopics || 12}</div>
-          <div className="text-gray-500">Chủ đề A1</div>
+          <div style={{ color: 'var(--theme-text-muted)' }}>Chủ đề A1</div>
         </div>
         <div className="p-6 rounded-2xl text-center" style={{ backgroundColor: 'rgba(139, 92, 246, 0.1)' }}>
           <div className="text-4xl font-bold text-purple-600 mb-2">4+</div>
-          <div className="text-gray-500">Mini Games</div>
+          <div style={{ color: 'var(--theme-text-muted)' }}>Mini Games</div>
         </div>
       </div>
 
@@ -174,7 +174,7 @@ function GuestLanding() {
           <div key={i} className="p-6 rounded-2xl border text-center" style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
             <div className="text-4xl mb-3">{feature.icon}</div>
             <h3 className="font-bold mb-1" style={{ color: 'var(--theme-text-primary)' }}>{feature.title}</h3>
-            <p className="text-sm text-gray-500">{feature.desc}</p>
+            <p className="text-sm" style={{ color: 'var(--theme-text-muted)' }}>{feature.desc}</p>
           </div>
         ))}
       </div>
@@ -194,7 +194,7 @@ function WelcomeBanner() {
           <h2 className="text-xl font-bold mb-1">Chào mừng bạn đến với Deutschmeister!</h2>
           <p className="text-white/80">Bắt đầu hành trình học tiếng Đức của bạn ngay hôm nay</p>
         </div>
-        <Link href="/topics" className="px-6 py-2 rounded-xl bg-white text-blue-600 font-bold hover:bg-gray-100 transition-colors">
+        <Link href="/topics" className="px-6 py-2 rounded-xl font-bold transition-colors" style={{ backgroundColor: 'white', color: '#2563EB' }}>
           Bắt đầu học
         </Link>
       </div>
@@ -282,7 +282,7 @@ function AuthenticatedDashboard() {
           <h1 className="text-2xl font-bold" style={{ color: 'var(--theme-text-primary)' }}>
             Chào {user?.name || 'bạn'}! 👋
           </h1>
-          <p className="text-gray-500">
+          <p style={{ color: 'var(--theme-text-muted)' }}>
             {dashboardData.stats.streak > 0 ? (
               <>Tuyệt vời! Bạn đã học <span className="text-orange-500 font-bold">{dashboardData.stats.streak} ngày</span> liên tiếp 🔥</>
             ) : localStats.wordsLearned > 0 ? (
@@ -294,7 +294,7 @@ function AuthenticatedDashboard() {
             )}
           </p>
         </div>
-        <div className="text-right text-sm text-gray-500">
+        <div className="text-right text-sm" style={{ color: 'var(--theme-text-muted)' }}>
           {new Date().toLocaleDateString('vi-VN', {
             weekday: 'long',
             year: 'numeric',
@@ -335,17 +335,17 @@ function AuthenticatedDashboard() {
             <Link href="/topics" className="p-4 rounded-xl transition-all hover:scale-[1.02]" style={{ backgroundColor: 'rgba(59, 130, 246, 0.1)' }}>
               <div className="text-2xl mb-2">📚</div>
               <div className="font-medium text-blue-600">Học theo chủ đề</div>
-              <div className="text-sm text-gray-500">12 chủ đề A1 cơ bản</div>
+              <div className="text-sm" style={{ color: 'var(--theme-text-muted)' }}>12 chủ đề A1 cơ bản</div>
             </Link>
             <Link href="/games/quick-quiz" className="p-4 rounded-xl transition-all hover:scale-[1.02]" style={{ backgroundColor: 'rgba(16, 185, 129, 0.1)' }}>
               <div className="text-2xl mb-2">🎮</div>
               <div className="font-medium text-green-600">Chơi Quick Quiz</div>
-              <div className="text-sm text-gray-500">Luyện tập Der/Die/Das</div>
+              <div className="text-sm" style={{ color: 'var(--theme-text-muted)' }}>Luyện tập Der/Die/Das</div>
             </Link>
             <Link href="/dictionary" className="p-4 rounded-xl transition-all hover:scale-[1.02]" style={{ backgroundColor: 'rgba(139, 92, 246, 0.1)' }}>
               <div className="text-2xl mb-2">📖</div>
               <div className="font-medium text-purple-600">Khám phá từ điển</div>
-              <div className="text-sm text-gray-500">Tra cứu từ vựng</div>
+              <div className="text-sm" style={{ color: 'var(--theme-text-muted)' }}>Tra cứu từ vựng</div>
             </Link>
           </div>
         </div>

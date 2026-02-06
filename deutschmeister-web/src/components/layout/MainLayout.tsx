@@ -1,7 +1,7 @@
 'use client';
 
 import { ReactNode, useState, useEffect } from 'react';
-import { Sidebar } from './Sidebar';
+import { Sidebar, SIDEBAR_WIDTH, SIDEBAR_COLLAPSED_WIDTH } from './Sidebar';
 import { Header } from './Header';
 
 interface MainLayoutProps {
@@ -41,14 +41,19 @@ export function MainLayout({ children }: MainLayoutProps) {
     );
   }
 
+  const marginLeft = sidebarCollapsed ? SIDEBAR_COLLAPSED_WIDTH : SIDEBAR_WIDTH;
+
   return (
     <div className="min-h-screen" style={{ backgroundColor: 'var(--theme-bg-body)' }}>
       <Sidebar isCollapsed={sidebarCollapsed} onToggle={toggleSidebar} />
       <Header sidebarCollapsed={sidebarCollapsed} />
 
       <main
-        className="transition-all duration-300 ease-in-out pt-16"
-        style={{ marginLeft: sidebarCollapsed ? '72px' : '260px' }}
+        className="pt-16"
+        style={{
+          marginLeft: `${marginLeft}px`,
+          transition: 'margin-left .3s cubic-bezier(.4,0,.2,1)',
+        }}
       >
         <div className="min-h-[calc(100vh-4rem)] px-6 lg:px-8 xl:px-10">
           {children}

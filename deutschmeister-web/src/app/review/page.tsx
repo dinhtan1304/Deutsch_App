@@ -157,11 +157,15 @@ export default function SRSReviewPage() {
   }, [phase, isFlipped, handleReview]);
 
   const addRandomWords = async () => {
-    const result = await refetchRandom();
-    if (result.data) {
-      await addWords(result.data.map(w => w.id));
-      playStreak();
-      setPhase('setup');
+    try {
+      const result = await refetchRandom();
+      if (result.data) {
+        await addWords(result.data.map(w => w.id));
+        playStreak();
+        setPhase('setup');
+      }
+    } catch (e) {
+      console.warn('Failed to add random words:', e);
     }
   };
 

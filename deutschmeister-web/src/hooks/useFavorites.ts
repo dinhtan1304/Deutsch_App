@@ -3,15 +3,21 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { favoritesApi } from '@/lib/api/favorites';
 import { useAuthStore } from '@/stores/authStore';
+import { ApiError } from '@/lib/api/client';
 
 export function useFavorites() {
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, logout } = useAuthStore();
   
   return useQuery({
     queryKey: ['favorites'],
     queryFn: () => favoritesApi.getAll(),
     enabled: isAuthenticated,
-    retry: false,
+    retry: (failureCount, error) => {
+      // Don't retry on auth errors
+      if (error instanceof ApiError && error.status === 401) return false;
+      return failureCount < 2;
+    },
+    staleTime: 30_000, // Cache 30s to reduce refetches
   });
 }
 
@@ -44,7 +50,10 @@ export function useCheckFavorite(wordId: string) {
     queryKey: ['favorites', 'check', wordId],
     queryFn: () => favoritesApi.check(wordId),
     enabled: !!wordId && isAuthenticated,
-    retry: false,
+    retry: (failureCount, error) => {
+      if (error instanceof ApiError && error.status === 401) return false;
+      return failureCount < 2;
+    },
   });
 }
 

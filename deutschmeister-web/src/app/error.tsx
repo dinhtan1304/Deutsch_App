@@ -10,38 +10,38 @@ export default function Error({
   reset: () => void;
 }) {
   useEffect(() => {
-    // Log error to error reporting service
     console.error('Page error:', error);
   }, [error]);
 
   return (
     <div className="min-h-[60vh] flex items-center justify-center p-8">
       <div className="max-w-md w-full text-center">
-        {/* Error Icon */}
-        <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
-          <span className="text-4xl">😵</span>
+        <div className="w-20 h-20 mx-auto mb-6 rounded-2xl flex items-center justify-center"
+          style={{ background: 'linear-gradient(135deg, rgba(239,68,68,.1), rgba(239,68,68,.2))' }}>
+          <svg width={36} height={36} viewBox="0 0 24 24" fill="none" stroke="#EF4444"
+            strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" y1="8" x2="12" y2="12" />
+            <line x1="12" y1="16" x2="12.01" y2="16" />
+          </svg>
         </div>
 
-        {/* Error Message */}
-        <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+        <h2 className="text-xl font-bold mb-2" style={{ color: 'var(--theme-text-primary)' }}>
           Oops! Có lỗi xảy ra
         </h2>
-        <p className="text-gray-500 dark:text-gray-400 mb-6">
+        <p className="text-[13px] mb-6" style={{ color: 'var(--theme-text-muted)' }}>
           Trang này gặp sự cố. Vui lòng thử lại.
         </p>
 
-        {/* Action Buttons */}
         <div className="flex gap-3 justify-center">
-          <button
-            onClick={reset}
-            className="px-6 py-2.5 rounded-xl bg-blue-500 hover:bg-blue-600 text-white font-medium transition-colors"
-          >
+          <button onClick={reset}
+            className="px-5 py-2.5 rounded-xl font-semibold text-[14px] text-white transition-all duration-200 hover:-translate-y-0.5"
+            style={{ background: 'linear-gradient(135deg, #3B82F6, #6366F1)', boxShadow: '0 4px 12px rgba(59,130,246,.25)' }}>
             Thử lại
           </button>
-          <a
-            href="/"
-            className="px-6 py-2.5 rounded-xl bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 font-medium transition-colors"
-          >
+          <a href="/"
+            className="px-5 py-2.5 rounded-xl font-semibold text-[14px] transition-all duration-200 hover:-translate-y-0.5"
+            style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-secondary)', border: '1px solid var(--theme-border)' }}>
             Về trang chủ
           </a>
         </div>

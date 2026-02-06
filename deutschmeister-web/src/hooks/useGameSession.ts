@@ -31,13 +31,15 @@ export function useGameSession(gameType: GameType, difficulty: Difficulty = 'beg
     }
   }, [gameType, difficulty]);
 
-  const end = useCallback(async (score: number, bestStreak: number) => {
+  const end = useCallback(async (score: number, bestStreak: number, correctAnswers: number, wrongAnswers: number) => {
     if (!sessionIdRef.current) return;
     try {
       await gamesApi.end({
         sessionId: sessionIdRef.current,
         score,
         bestStreak,
+        correctAnswers,
+        wrongAnswers,
       });
       // Refresh dashboard data so Recent Activity updates
       queryClient.invalidateQueries({ queryKey: dashboardKeys.all });
