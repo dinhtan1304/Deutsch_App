@@ -132,8 +132,8 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
   return (
     <aside
       className={`fixed left-0 top-0 h-full z-40 flex flex-col
-        transition-all duration-300 ease-[cubic-bezier(.4,0,.2,1)]
-        ${isCollapsed ? 'w-[72px]' : 'w-[260px]'}
+        transition-all duration-300 ease-in-out
+        ${isCollapsed ? 'w-18' : 'w-65'}
         border-r`}
       style={{
         backgroundColor: 'var(--theme-bg-card)',
@@ -159,7 +159,7 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
       {/* ─── Toggle ─── */}
       <button
         onClick={onToggle}
-        className="absolute -right-3.5 top-[72px] w-7 h-7 rounded-full border
+        className="absolute -right-3.5 top-18 w-7 h-7 rounded-full border
           flex items-center justify-center shadow-sm
           hover:scale-110 active:scale-95 transition-all duration-200 z-50"
         style={{
@@ -192,7 +192,7 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                         transition-all duration-200 outline-none
                         ${active
                           ? 'text-blue-500'
-                          : 'hover:bg-[var(--theme-bg-secondary)]'
+                          : 'hover:bg-(--theme-bg-secondary)'
                         }`}
                       style={{ color: active ? undefined : 'var(--theme-text-secondary)' }}
                       title={isCollapsed ? item.labelVi : undefined}
@@ -200,7 +200,7 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                       {/* Active indicator bar */}
                       {active && (
                         <span
-                          className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full transition-all"
+                          className="absolute left-0 top-1/2 -translate-y-1/2 w-0.75 h-5 rounded-r-full transition-all"
                           style={{ background: 'linear-gradient(180deg, #3B82F6, #8B5CF6)' }}
                         />
                       )}
@@ -221,7 +221,7 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
 
                     {/* Children */}
                     <div
-                      className={`overflow-hidden transition-all duration-300 ease-[cubic-bezier(.4,0,.2,1)]
+                      className={`overflow-hidden transition-all duration-300 ease-in-out
                         ${!isCollapsed && expanded ? 'max-h-60 opacity-100' : 'max-h-0 opacity-0'}`}
                     >
                       <ul className="mt-0.5 ml-5 pl-3 space-y-0.5"
@@ -238,7 +238,7 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                                   transition-all duration-200
                                   ${childActive
                                     ? 'text-blue-500 font-semibold bg-blue-500/8'
-                                    : 'hover:bg-[var(--theme-bg-secondary)]'
+                                    : 'hover:bg-(--theme-bg-secondary)'
                                   }`}
                                 style={{ color: childActive ? undefined : 'var(--theme-text-muted)' }}
                               >
@@ -261,14 +261,14 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                       transition-all duration-200
                       ${active
                         ? 'text-blue-500'
-                        : 'hover:bg-[var(--theme-bg-secondary)]'
+                        : 'hover:bg-(--theme-bg-secondary)'
                       }`}
                     style={{ color: active ? undefined : 'var(--theme-text-secondary)' }}
                     title={isCollapsed ? item.labelVi : undefined}
                   >
                     {active && (
                       <span
-                        className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full"
+                        className="absolute left-0 top-1/2 -translate-y-1/2 w-0.75 h-5 rounded-r-full"
                         style={{ background: 'linear-gradient(180deg, #3B82F6, #8B5CF6)' }}
                       />
                     )}
