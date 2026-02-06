@@ -5,3 +5,5 @@ export * from './useGames';
 export * from './useUser';
 export * from './useSoundEffects';
 export * from './useDashboard';
+export * from './useWriting';
+

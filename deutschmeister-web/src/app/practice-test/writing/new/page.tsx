@@ -31,7 +31,7 @@ export default function NewWritingPage() {
   const [wordCountIdx, setWordCountIdx] = useState(0);
 
   // ── Data ──
-  const { data: suggestions, isLoading } = useWritingTopics(level);
+  const { data: suggestions, isLoading, isError, error, refetch } = useWritingTopics(level);
   const generateMutation = useGeneratePrompt();
 
   // Reset selections khi đổi level
@@ -122,6 +122,18 @@ export default function NewWritingPage() {
               <div key={i} className="h-16 rounded-xl bg-gray-100 dark:bg-gray-800 animate-pulse" />
             ))}
           </div>
+        ) : isError ? (
+          <div className="p-4 rounded-xl border-2 border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-900/20 text-center">
+            <p className="text-red-600 dark:text-red-400 text-sm mb-2">
+              ❌ Không thể tải dữ liệu. {(error as any)?.message || ''}
+            </p>
+            <button
+              onClick={() => refetch()}
+              className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
+            >
+              🔄 Thử lại
+            </button>
+          </div>
         ) : (
           <>
             <div className="grid grid-cols-3 md:grid-cols-4 gap-2 mb-3">
@@ -174,8 +186,15 @@ export default function NewWritingPage() {
         <h2 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
           3. Dạng bài
         </h2>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-          {suggestions?.writingTypes.map((t) => (
+        {isLoading ? (
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="h-14 rounded-xl bg-gray-100 dark:bg-gray-800 animate-pulse" />
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+            {suggestions?.writingTypes.map((t) => (
             <button
               key={t.value}
               onClick={() => setWritingType(t.value)}
@@ -197,6 +216,7 @@ export default function NewWritingPage() {
             </button>
           ))}
         </div>
+        )}
       </section>
 
       {/* ── STEP 4: Word Count ── */}
@@ -204,6 +224,13 @@ export default function NewWritingPage() {
         <h2 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
           4. Độ dài bài viết
         </h2>
+        {isLoading ? (
+          <div className="flex gap-3">
+            {Array.from({ length: 2 }).map((_, i) => (
+              <div key={i} className="h-10 w-40 rounded-xl bg-gray-100 dark:bg-gray-800 animate-pulse" />
+            ))}
+          </div>
+        ) : (
         <div className="flex gap-3">
           {suggestions?.wordCountSuggestions.map((wc, idx) => (
             <button
@@ -219,6 +246,7 @@ export default function NewWritingPage() {
             </button>
           ))}
         </div>
+        )}
       </section>
 
       {/* ── Summary + Generate Button ── */}

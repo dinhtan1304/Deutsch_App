@@ -6,3 +6,4 @@ export * from './history';
 export * from './games';
 export { type User as AuthUser } from './auth';
 export * from './progress';
+export * from './writing';
