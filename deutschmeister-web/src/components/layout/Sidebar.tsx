@@ -63,6 +63,15 @@ const navItems: NavItem[] = [
     href: '/grammar',
   },
   {
+    label: 'Test',
+    labelVi: 'Luyện thi',
+    icon: '✍️',
+    href: '/practice-test',
+    children: [
+      { label: 'Writing', labelVi: 'Luyện viết', icon: '📝', href: '/practice-test/writing' },
+  ],
+  },
+  {
     label: 'Review',
     labelVi: 'Ôn tập từ điển',
     icon: '🔄',
