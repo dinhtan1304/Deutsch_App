@@ -127,20 +127,20 @@ export function ActivityHeatmap({ data }: ActivityHeatmapProps) {
           <div className="flex">
             <div className="flex flex-col mr-2">
               {DAYS.map((day, i) => (
-                <div key={i} className="text-[10px] h-3.25 flex items-center"
+                <div key={i} className="text-[10px] h-3.5 flex items-center"
                   style={{ color: 'var(--theme-text-muted)' }}>
                   {day}
                 </div>
               ))}
             </div>
 
-            <div className="flex gap-0.75">
+            <div className="flex gap-px">
               {weeks.map((week, weekIndex) => (
-                <div key={weekIndex} className="flex flex-col gap-0.75">
+                <div key={weekIndex} className="flex flex-col gap-px">
                   {week.map((day, dayIndex) => (
                     <div
                       key={`${weekIndex}-${dayIndex}`}
-                      className={`w-2.75 h-2.75 rounded-sm transition-all cursor-pointer
+                      className={`w-3 h-3 rounded-sm transition-all cursor-pointer
                         ${day.count >= 0 ? 'hover:ring-2 hover:ring-offset-1 hover:ring-blue-400/50' : ''}`}
                       style={{
                         backgroundColor: day.count < 0 ? 'transparent' : LEVEL_COLORS[day.level],
@@ -160,7 +160,7 @@ export function ActivityHeatmap({ data }: ActivityHeatmapProps) {
       <div className="flex items-center justify-end gap-1.5 mt-4">
         <span className="text-[10px]" style={{ color: 'var(--theme-text-muted)' }}>Ít</span>
         {LEVEL_COLORS.map((color, i) => (
-          <div key={i} className="w-2.75 h-2.75 rounded-sm" style={{ backgroundColor: color }} />
+          <div key={i} className="w-3 h-3 rounded-sm" style={{ backgroundColor: color }} />
         ))}
         <span className="text-[10px]" style={{ color: 'var(--theme-text-muted)' }}>Nhiều</span>
       </div>

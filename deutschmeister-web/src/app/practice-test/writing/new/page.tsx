@@ -3,51 +3,63 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { MainLayout } from '@/components/layout/MainLayout';
 import { useWritingTopics, useGeneratePrompt } from '@/hooks/useWriting';
 
-// ── Level colors ──
-const LEVEL_COLORS: Record<string, string> = {
-  A1: 'bg-green-100 text-green-700 border-green-300 dark:bg-green-900/30 dark:text-green-400 dark:border-green-700',
-  A2: 'bg-blue-100 text-blue-700 border-blue-300 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-700',
-  B1: 'bg-purple-100 text-purple-700 border-purple-300 dark:bg-purple-900/30 dark:text-purple-400 dark:border-purple-700',
-  B2: 'bg-orange-100 text-orange-700 border-orange-300 dark:bg-orange-900/30 dark:text-orange-400 dark:border-orange-700',
-};
+// ─── Inline SVG Icons ───
+function IconDice({ size = 16, style }: { size?: number; style?: React.CSSProperties }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}>
+      <rect width="12" height="12" x="2" y="10" rx="2" ry="2" />
+      <path d="m17.92 14 3.5-3.5a2.24 2.24 0 0 0 0-3l-5-4.92a2.24 2.24 0 0 0-3 0L10 6" />
+      <path d="M6 18h.01" /><path d="M10 14h.01" /><path d="M15 6h.01" /><path d="M18 9h.01" />
+    </svg>
+  );
+}
+function IconChevronLeft({ size = 16, style }: { size?: number; style?: React.CSSProperties }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}>
+      <polyline points="15 18 9 12 15 6" />
+    </svg>
+  );
+}
+function IconRobot({ size = 16, style }: { size?: number; style?: React.CSSProperties }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}>
+      <rect width="18" height="10" x="3" y="11" rx="2" />
+      <circle cx="12" cy="5" r="2" /><path d="M12 7v4" />
+      <line x1="8" x2="8" y1="16" y2="16" /><line x1="16" x2="16" y1="16" y2="16" />
+    </svg>
+  );
+}
+function IconLoader({ size = 16, style }: { size?: number; style?: React.CSSProperties }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="animate-spin" style={{ display: 'block', ...style }}>
+      <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+    </svg>
+  );
+}
 
-const LEVEL_ACTIVE: Record<string, string> = {
-  A1: 'bg-green-600 text-white border-green-600',
-  A2: 'bg-blue-600 text-white border-blue-600',
-  B1: 'bg-purple-600 text-white border-purple-600',
-  B2: 'bg-orange-600 text-white border-orange-600',
-};
+// ─── Level colors ───
+const LEVEL_COLORS: Record<string, string> = { A1: '#22C55E', A2: '#3B82F6', B1: '#8B5CF6', B2: '#F97316' };
 
 export default function NewWritingPage() {
   const router = useRouter();
-
-  // ── State ──
   const [level, setLevel] = useState('A1');
   const [selectedTopic, setSelectedTopic] = useState('');
   const [customTopic, setCustomTopic] = useState('');
   const [writingType, setWritingType] = useState('');
   const [wordCountIdx, setWordCountIdx] = useState(0);
 
-  // ── Data ──
-  const { data: suggestions, isLoading, isError, error, refetch } = useWritingTopics(level);
+  const { data: suggestions, isLoading } = useWritingTopics(level);
   const generateMutation = useGeneratePrompt();
 
-  // Reset selections khi đổi level
-  useEffect(() => {
-    setSelectedTopic('');
-    setCustomTopic('');
-    setWritingType('');
-    setWordCountIdx(0);
-  }, [level]);
-
-  // Auto-select first writing type
-  useEffect(() => {
-    if (suggestions?.writingTypes.length && !writingType) {
-      setWritingType(suggestions.writingTypes[0].value);
-    }
-  }, [suggestions, writingType]);
+  useEffect(() => { setSelectedTopic(''); setCustomTopic(''); setWritingType(''); setWordCountIdx(0); }, [level]);
+  useEffect(() => { if (suggestions?.writingTypes.length && !writingType) setWritingType(suggestions.writingTypes[0].value); }, [suggestions, writingType]);
 
   const finalTopic = customTopic.trim() || selectedTopic;
   const wordCount = suggestions?.wordCountSuggestions[wordCountIdx];
@@ -55,251 +67,203 @@ export default function NewWritingPage() {
 
   const handleGenerate = async () => {
     if (!canGenerate || !wordCount) return;
-
     try {
       const session = await generateMutation.mutateAsync({
-        topic: finalTopic,
-        cefrLevel: level,
-        writingType,
-        wordCountMin: wordCount.min,
-        wordCountMax: wordCount.max,
+        topic: finalTopic, cefrLevel: level, writingType,
+        wordCountMin: wordCount.min, wordCountMax: wordCount.max,
       });
       router.push(`/practice-test/writing/${session.id}`);
-    } catch (err) {
-      // Error handled by React Query
-    }
+    } catch { /* handled */ }
   };
 
+  const activeColor = LEVEL_COLORS[level] || '#3B82F6';
+
   return (
-    <div className="p-6 max-w-3xl mx-auto">
-      {/* Header */}
-      <div className="mb-8">
-        <Link
-          href="/practice-test/writing"
-          className="text-sm text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 mb-2 inline-flex items-center gap-1"
-        >
-          ← Quay lại
-        </Link>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mt-2">
-          🎲 Tạo đề bài mới
-        </h1>
-        <p className="text-gray-500 dark:text-gray-400 mt-1">
-          Chọn cấu hình để AI tạo đề bài viết tiếng Đức cho bạn
-        </p>
-      </div>
+    <MainLayout>
+      <div className="max-w-3xl mx-auto py-6">
 
-      {/* ── STEP 1: Level ── */}
-      <section className="mb-8">
-        <h2 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
-          1. Trình độ CEFR
-        </h2>
-        <div className="flex gap-3">
-          {['A1', 'A2', 'B1', 'B2'].map((l) => (
-            <button
-              key={l}
-              onClick={() => setLevel(l)}
-              className={`px-5 py-2.5 rounded-xl text-sm font-bold border-2 transition-all ${
-                level === l
-                  ? LEVEL_ACTIVE[l]
-                  : `${LEVEL_COLORS[l]} hover:opacity-80`
-              }`}
-            >
-              {l}
-            </button>
-          ))}
+        {/* Header */}
+        <div className="mb-6">
+          <Link href="/practice-test/writing"
+            className="flex items-center gap-1 text-[13px] font-medium mb-2 transition-opacity hover:opacity-70"
+            style={{ color: 'var(--theme-text-muted)' }}>
+            <IconChevronLeft size={14} /> Quay lại
+          </Link>
+          <div className="flex items-center gap-3">
+            <div className="w-11 h-11 rounded-2xl flex items-center justify-center"
+              style={{ background: 'linear-gradient(135deg, #6366F1, #8B5CF6)' }}>
+              <IconDice size={22} style={{ color: 'white' }} />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold" style={{ color: 'var(--theme-text-primary)' }}>Tạo đề bài mới</h1>
+              <p className="text-[13px] mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>
+                Chọn cấu hình để AI tạo đề bài viết tiếng Đức
+              </p>
+            </div>
+          </div>
         </div>
-      </section>
 
-      {/* ── STEP 2: Topic ── */}
-      <section className="mb-8">
-        <h2 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
-          2. Chủ đề
-        </h2>
-
-        {isLoading ? (
-          <div className="grid grid-cols-3 md:grid-cols-4 gap-2">
-            {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="h-16 rounded-xl bg-gray-100 dark:bg-gray-800 animate-pulse" />
-            ))}
-          </div>
-        ) : isError ? (
-          <div className="p-4 rounded-xl border-2 border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-900/20 text-center">
-            <p className="text-red-600 dark:text-red-400 text-sm mb-2">
-              ❌ Không thể tải dữ liệu. {(error as any)?.message || ''}
-            </p>
-            <button
-              onClick={() => refetch()}
-              className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
-            >
-              🔄 Thử lại
-            </button>
-          </div>
-        ) : (
-          <>
-            <div className="grid grid-cols-3 md:grid-cols-4 gap-2 mb-3">
-              {suggestions?.topics.map((t) => (
-                <button
-                  key={t.topic}
-                  onClick={() => {
-                    setSelectedTopic(t.topic);
-                    setCustomTopic('');
-                  }}
-                  className={`p-3 rounded-xl text-left border-2 transition-all ${
-                    selectedTopic === t.topic && !customTopic
-                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                      : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-600'
-                  }`}
-                >
-                  <span className="text-lg">{t.icon}</span>
-                  <div className="text-xs font-medium text-gray-900 dark:text-white mt-1 truncate">
-                    {t.labelDe}
-                  </div>
-                  <div className="text-xs text-gray-400 truncate">{t.labelVi}</div>
+        {/* Step 1: Level */}
+        <section className="mb-6">
+          <h2 className="text-[12px] font-bold uppercase tracking-wider mb-3"
+            style={{ color: 'var(--theme-text-muted)' }}>1. Trình độ CEFR</h2>
+          <div className="flex gap-2">
+            {['A1', 'A2', 'B1', 'B2'].map(l => {
+              const isActive = level === l;
+              const c = LEVEL_COLORS[l];
+              return (
+                <button key={l} onClick={() => setLevel(l)}
+                  className="px-5 py-2.5 rounded-xl text-[13px] font-bold border-2 transition-all duration-200 hover:-translate-y-0.5"
+                  style={isActive
+                    ? { background: `linear-gradient(135deg, ${c}, ${c}cc)`, color: 'white', borderColor: c, boxShadow: `0 4px 12px ${c}30` }
+                    : { borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)', backgroundColor: 'transparent' }
+                  }>
+                  {l}
                 </button>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* Step 2: Topic */}
+        <section className="mb-6">
+          <h2 className="text-[12px] font-bold uppercase tracking-wider mb-3"
+            style={{ color: 'var(--theme-text-muted)' }}>2. Chủ đề</h2>
+          {isLoading ? (
+            <div className="grid grid-cols-3 md:grid-cols-4 gap-2">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <div key={i} className="h-16 rounded-xl animate-pulse" style={{ backgroundColor: 'var(--theme-bg-secondary)' }} />
               ))}
             </div>
-
-            {/* Custom topic */}
-            <div className="relative">
-              <input
-                type="text"
-                value={customTopic}
-                onChange={(e) => {
-                  setCustomTopic(e.target.value);
-                  if (e.target.value) setSelectedTopic('');
-                }}
-                placeholder="Hoặc nhập chủ đề tùy chỉnh..."
-                className="w-full px-4 py-3 rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800/50 text-gray-900 dark:text-white placeholder-gray-400 focus:border-blue-500 focus:outline-none transition-colors"
-              />
-              {customTopic && (
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-blue-500 font-medium">
-                  Tùy chỉnh ✓
-                </span>
-              )}
-            </div>
-          </>
-        )}
-      </section>
-
-      {/* ── STEP 3: Writing Type ── */}
-      <section className="mb-8">
-        <h2 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
-          3. Dạng bài
-        </h2>
-        {isLoading ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="h-14 rounded-xl bg-gray-100 dark:bg-gray-800 animate-pulse" />
-            ))}
-          </div>
-        ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-            {suggestions?.writingTypes.map((t) => (
-            <button
-              key={t.value}
-              onClick={() => setWritingType(t.value)}
-              className={`p-3 rounded-xl border-2 text-left transition-all ${
-                writingType === t.value
-                  ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                  : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-600'
-              }`}
-            >
-              <div className="flex items-center gap-2">
-                <span>{t.icon}</span>
-                <div>
-                  <div className="text-sm font-medium text-gray-900 dark:text-white">
-                    {t.labelDe}
-                  </div>
-                  <div className="text-xs text-gray-400">{t.labelVi}</div>
-                </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-3 md:grid-cols-4 gap-2 mb-3">
+                {suggestions?.topics.map(t => {
+                  const isActive = selectedTopic === t.topic && !customTopic;
+                  return (
+                    <button key={t.topic} onClick={() => { setSelectedTopic(t.topic); setCustomTopic(''); }}
+                      className="p-3 rounded-xl text-left border-2 transition-all duration-200 hover:-translate-y-0.5"
+                      style={{
+                        borderColor: isActive ? activeColor : 'var(--theme-border)',
+                        backgroundColor: isActive ? `${activeColor}08` : 'var(--theme-bg-card)',
+                        boxShadow: isActive ? `0 4px 12px ${activeColor}15` : 'none',
+                      }}>
+                      <span className="text-[16px]">{t.icon}</span>
+                      <div className="text-[12px] font-semibold mt-1 truncate" style={{ color: 'var(--theme-text-primary)' }}>{t.labelDe}</div>
+                      <div className="text-[11px] truncate" style={{ color: 'var(--theme-text-muted)' }}>{t.labelVi}</div>
+                    </button>
+                  );
+                })}
               </div>
-            </button>
-          ))}
-        </div>
-        )}
-      </section>
+              <div className="relative">
+                <input type="text" value={customTopic}
+                  onChange={e => { setCustomTopic(e.target.value); if (e.target.value) setSelectedTopic(''); }}
+                  placeholder="Hoặc nhập chủ đề tùy chỉnh..."
+                  className="w-full px-4 py-3 rounded-xl border-2 border-dashed text-[14px] focus:outline-none transition-colors"
+                  style={{
+                    borderColor: customTopic ? activeColor : 'var(--theme-border)',
+                    backgroundColor: 'var(--theme-bg-secondary)',
+                    color: 'var(--theme-text-primary)',
+                  }} />
+                {customTopic && (
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[12px] font-bold" style={{ color: activeColor }}>
+                    Tùy chỉnh ✓
+                  </span>
+                )}
+              </div>
+            </>
+          )}
+        </section>
 
-      {/* ── STEP 4: Word Count ── */}
-      <section className="mb-8">
-        <h2 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
-          4. Độ dài bài viết
-        </h2>
-        {isLoading ? (
-          <div className="flex gap-3">
-            {Array.from({ length: 2 }).map((_, i) => (
-              <div key={i} className="h-10 w-40 rounded-xl bg-gray-100 dark:bg-gray-800 animate-pulse" />
-            ))}
+        {/* Step 3: Writing Type */}
+        <section className="mb-6">
+          <h2 className="text-[12px] font-bold uppercase tracking-wider mb-3"
+            style={{ color: 'var(--theme-text-muted)' }}>3. Dạng bài</h2>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+            {suggestions?.writingTypes.map(t => {
+              const isActive = writingType === t.value;
+              return (
+                <button key={t.value} onClick={() => setWritingType(t.value)}
+                  className="p-3 rounded-xl border-2 text-left transition-all duration-200 hover:-translate-y-0.5"
+                  style={{
+                    borderColor: isActive ? activeColor : 'var(--theme-border)',
+                    backgroundColor: isActive ? `${activeColor}08` : 'var(--theme-bg-card)',
+                    boxShadow: isActive ? `0 4px 12px ${activeColor}15` : 'none',
+                  }}>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[16px]">{t.icon}</span>
+                    <div>
+                      <div className="text-[13px] font-semibold" style={{ color: 'var(--theme-text-primary)' }}>{t.labelDe}</div>
+                      <div className="text-[11px]" style={{ color: 'var(--theme-text-muted)' }}>{t.labelVi}</div>
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
           </div>
-        ) : (
-        <div className="flex gap-3">
-          {suggestions?.wordCountSuggestions.map((wc, idx) => (
-            <button
-              key={idx}
-              onClick={() => setWordCountIdx(idx)}
-              className={`px-4 py-2.5 rounded-xl text-sm font-medium border-2 transition-all ${
-                wordCountIdx === idx
-                  ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
-                  : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:border-gray-300'
-              }`}
-            >
-              {wc.label}
-            </button>
-          ))}
+        </section>
+
+        {/* Step 4: Word Count */}
+        <section className="mb-6">
+          <h2 className="text-[12px] font-bold uppercase tracking-wider mb-3"
+            style={{ color: 'var(--theme-text-muted)' }}>4. Độ dài bài viết</h2>
+          <div className="flex gap-2">
+            {suggestions?.wordCountSuggestions.map((wc, idx) => {
+              const isActive = wordCountIdx === idx;
+              return (
+                <button key={idx} onClick={() => setWordCountIdx(idx)}
+                  className="px-4 py-2.5 rounded-xl text-[13px] font-semibold border-2 transition-all duration-200 hover:-translate-y-0.5"
+                  style={{
+                    borderColor: isActive ? activeColor : 'var(--theme-border)',
+                    backgroundColor: isActive ? `${activeColor}08` : 'transparent',
+                    color: isActive ? activeColor : 'var(--theme-text-secondary)',
+                  }}>
+                  {wc.label}
+                </button>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* Summary */}
+        <div className="rounded-2xl border p-5 mb-4"
+          style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-secondary)' }}>
+          <h3 className="text-[13px] font-bold mb-3" style={{ color: 'var(--theme-text-secondary)' }}>
+            Tóm tắt cấu hình
+          </h3>
+          <div className="grid grid-cols-2 gap-y-2 text-[13px]">
+            <span style={{ color: 'var(--theme-text-muted)' }}>Trình độ:</span>
+            <span className="font-semibold" style={{ color: 'var(--theme-text-primary)' }}>{level}</span>
+            <span style={{ color: 'var(--theme-text-muted)' }}>Chủ đề:</span>
+            <span className="font-semibold" style={{ color: finalTopic ? 'var(--theme-text-primary)' : 'var(--theme-text-muted)' }}>
+              {finalTopic || 'Chưa chọn'}
+            </span>
+            <span style={{ color: 'var(--theme-text-muted)' }}>Dạng bài:</span>
+            <span className="font-semibold" style={{ color: 'var(--theme-text-primary)' }}>
+              {suggestions?.writingTypes.find(t => t.value === writingType)?.labelVi || 'Chưa chọn'}
+            </span>
+            <span style={{ color: 'var(--theme-text-muted)' }}>Độ dài:</span>
+            <span className="font-semibold" style={{ color: 'var(--theme-text-primary)' }}>{wordCount?.label || '—'}</span>
+          </div>
         </div>
+
+        {/* Generate Button */}
+        <button onClick={handleGenerate} disabled={!canGenerate || generateMutation.isPending}
+          className="w-full py-3.5 rounded-xl font-bold text-[16px] text-white transition-all duration-200 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          style={{ background: `linear-gradient(135deg, ${activeColor}, ${activeColor}cc)`, boxShadow: `0 4px 12px ${activeColor}30` }}>
+          {generateMutation.isPending
+            ? <><IconLoader size={18} /> AI đang tạo đề bài...</>
+            : <><IconRobot size={18} /> Tạo đề bài</>
+          }
+        </button>
+
+        {generateMutation.isError && (
+          <p className="text-[13px] text-center mt-3" style={{ color: '#EF4444' }}>
+            Không thể tạo đề bài. Vui lòng thử lại.
+          </p>
         )}
-      </section>
 
-      {/* ── Summary + Generate Button ── */}
-      <div className="p-5 rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 mb-4">
-        <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
-          📋 Tóm tắt cấu hình
-        </h3>
-        <div className="grid grid-cols-2 gap-y-2 text-sm">
-          <span className="text-gray-500 dark:text-gray-400">Trình độ:</span>
-          <span className="font-medium text-gray-900 dark:text-white">{level}</span>
-
-          <span className="text-gray-500 dark:text-gray-400">Chủ đề:</span>
-          <span className="font-medium text-gray-900 dark:text-white">
-            {finalTopic || <span className="text-gray-400 italic">Chưa chọn</span>}
-          </span>
-
-          <span className="text-gray-500 dark:text-gray-400">Dạng bài:</span>
-          <span className="font-medium text-gray-900 dark:text-white">
-            {suggestions?.writingTypes.find((t) => t.value === writingType)?.labelVi || (
-              <span className="text-gray-400 italic">Chưa chọn</span>
-            )}
-          </span>
-
-          <span className="text-gray-500 dark:text-gray-400">Độ dài:</span>
-          <span className="font-medium text-gray-900 dark:text-white">
-            {wordCount?.label || '—'}
-          </span>
-        </div>
       </div>
-
-      <button
-        onClick={handleGenerate}
-        disabled={!canGenerate || generateMutation.isPending}
-        className="w-full py-3.5 rounded-xl bg-blue-600 text-white font-semibold text-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
-      >
-        {generateMutation.isPending ? (
-          <>
-            <span className="animate-spin">⏳</span>
-            AI đang tạo đề bài...
-          </>
-        ) : (
-          <>
-            <span>🤖</span>
-            Tạo đề bài
-          </>
-        )}
-      </button>
-
-      {generateMutation.isError && (
-        <p className="text-red-500 text-sm text-center mt-3">
-          ❌ Không thể tạo đề bài. Vui lòng thử lại.
-        </p>
-      )}
-    </div>
+    </MainLayout>
   );
 }

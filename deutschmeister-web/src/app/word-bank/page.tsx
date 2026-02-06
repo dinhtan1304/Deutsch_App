@@ -122,7 +122,7 @@ export default function WordBankPage() {
 
   return (
     <MainLayout>
-      <div className="max-w-5xl mx-auto px-4 py-6">
+      <div className="py-6">
 
         {/* ─── Header ─── */}
         <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
@@ -172,10 +172,7 @@ export default function WordBankPage() {
                       ? 'linear-gradient(135deg, rgba(239,68,68,.15), rgba(239,68,68,.08))'
                       : 'linear-gradient(135deg, rgba(34,197,94,.15), rgba(34,197,94,.08))',
                   }}>
-                  <IconBrain
-                      size={24} 
-                      style={{ color: srsStats.due > 0 ? '#EF4444' : '#22C55E' }}
-                    />
+                  <IconBrain size={24} style={{ color: srsStats.due > 0 ? '#EF4444' : '#22C55E' }} />
                 </div>
                 <div>
                   <h3 className="font-bold text-[16px]" style={{ color: 'var(--theme-text-primary)' }}>

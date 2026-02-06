@@ -3,143 +3,149 @@
 import { useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
+import { MainLayout } from '@/components/layout/MainLayout';
 import { useWritingSession } from '@/hooks/useWriting';
 import type { WritingError } from '@/lib/api/writing';
 
-// ── Helpers ──
-
-function getScoreGrade(score: number) {
-  if (score >= 90) return { label: 'Ausgezeichnet!', labelVi: 'Xuất sắc!', emoji: '🏆', color: 'text-green-500' };
-  if (score >= 80) return { label: 'Sehr gut!', labelVi: 'Rất tốt!', emoji: '🌟', color: 'text-green-500' };
-  if (score >= 70) return { label: 'Gut!', labelVi: 'Tốt!', emoji: '👍', color: 'text-blue-500' };
-  if (score >= 60) return { label: 'Befriedigend', labelVi: 'Khá', emoji: '📝', color: 'text-yellow-500' };
-  if (score >= 40) return { label: 'Ausreichend', labelVi: 'Đạt', emoji: '💪', color: 'text-orange-500' };
-  return { label: 'Weiter üben!', labelVi: 'Cần cố gắng thêm!', emoji: '📚', color: 'text-red-500' };
+// ─── Inline SVG Icons ───
+function IconChevronLeft({ size = 16, style }: { size?: number; style?: React.CSSProperties }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}>
+      <polyline points="15 18 9 12 15 6" />
+    </svg>
+  );
+}
+function IconDice({ size = 16, style }: { size?: number; style?: React.CSSProperties }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}>
+      <rect width="12" height="12" x="2" y="10" rx="2" ry="2" />
+      <path d="m17.92 14 3.5-3.5a2.24 2.24 0 0 0 0-3l-5-4.92a2.24 2.24 0 0 0-3 0L10 6" />
+      <path d="M6 18h.01" /><path d="M10 14h.01" /><path d="M15 6h.01" /><path d="M18 9h.01" />
+    </svg>
+  );
+}
+function IconList({ size = 16, style }: { size?: number; style?: React.CSSProperties }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}>
+      <line x1="8" y1="6" x2="21" y2="6" /><line x1="8" y1="12" x2="21" y2="12" /><line x1="8" y1="18" x2="21" y2="18" />
+      <line x1="3" y1="6" x2="3.01" y2="6" /><line x1="3" y1="12" x2="3.01" y2="12" /><line x1="3" y1="18" x2="3.01" y2="18" />
+    </svg>
+  );
+}
+function IconChevronDown({ size = 16, style }: { size?: number; style?: React.CSSProperties }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}>
+      <polyline points="6 9 12 15 18 9" />
+    </svg>
+  );
 }
 
-const ERROR_TYPE_INFO: Record<string, { label: string; labelVi: string; icon: string; color: string }> = {
-  article: { label: 'Artikel', labelVi: 'Mạo từ', icon: '🔤', color: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' },
-  grammar: { label: 'Grammatik', labelVi: 'Ngữ pháp', icon: '📐', color: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' },
-  word_order: { label: 'Wortstellung', labelVi: 'Trật tự từ', icon: '🔀', color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' },
-  conjugation: { label: 'Konjugation', labelVi: 'Chia động từ', icon: '🔄', color: 'bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400' },
-  case: { label: 'Kasus', labelVi: 'Cách', icon: '📊', color: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400' },
-  spelling: { label: 'Rechtschreibung', labelVi: 'Chính tả', icon: '✏️', color: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' },
-  vocabulary: { label: 'Wortschatz', labelVi: 'Từ vựng', icon: '📖', color: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' },
+// ─── Helpers ───
+function getScoreGrade(score: number) {
+  if (score >= 90) return { label: 'Ausgezeichnet!', labelVi: 'Xuất sắc!', color: '#22C55E' };
+  if (score >= 80) return { label: 'Sehr gut!', labelVi: 'Rất tốt!', color: '#22C55E' };
+  if (score >= 70) return { label: 'Gut!', labelVi: 'Tốt!', color: '#3B82F6' };
+  if (score >= 60) return { label: 'Befriedigend', labelVi: 'Khá', color: '#F59E0B' };
+  if (score >= 40) return { label: 'Ausreichend', labelVi: 'Đạt', color: '#F97316' };
+  return { label: 'Weiter üben!', labelVi: 'Cần cố gắng thêm!', color: '#EF4444' };
+}
+
+const ERROR_TYPE_INFO: Record<string, { labelVi: string; color: string }> = {
+  article:     { labelVi: 'Mạo từ',       color: '#EF4444' },
+  grammar:     { labelVi: 'Ngữ pháp',     color: '#8B5CF6' },
+  word_order:  { labelVi: 'Trật tự từ',   color: '#3B82F6' },
+  conjugation: { labelVi: 'Chia động từ', color: '#14B8A6' },
+  case:        { labelVi: 'Cách',         color: '#6366F1' },
+  spelling:    { labelVi: 'Chính tả',     color: '#F97316' },
+  vocabulary:  { labelVi: 'Từ vựng',      color: '#22C55E' },
 };
 
-const SEVERITY_STYLES: Record<string, { label: string; dot: string; bg: string; border: string }> = {
-  error: { label: 'Lỗi', dot: 'bg-red-500', bg: 'bg-red-50 dark:bg-red-900/10', border: 'border-red-200 dark:border-red-800' },
-  warning: { label: 'Cảnh báo', dot: 'bg-yellow-500', bg: 'bg-yellow-50 dark:bg-yellow-900/10', border: 'border-yellow-200 dark:border-yellow-800' },
-  suggestion: { label: 'Gợi ý', dot: 'bg-blue-500', bg: 'bg-blue-50 dark:bg-blue-900/10', border: 'border-blue-200 dark:border-blue-800' },
+const SEVERITY_CONFIG: Record<string, { label: string; color: string }> = {
+  error:      { label: 'Lỗi',      color: '#EF4444' },
+  warning:    { label: 'Cảnh báo', color: '#F59E0B' },
+  suggestion: { label: 'Gợi ý',    color: '#3B82F6' },
 };
 
-// ── Score Ring Component ──
-
+// ─── Score Ring ───
 function ScoreRing({ score }: { score: number }) {
   const circumference = 2 * Math.PI * 54;
   const offset = circumference - (score / 100) * circumference;
   const grade = getScoreGrade(score);
-
-  const strokeColor =
-    score >= 80 ? '#22c55e' :
-    score >= 60 ? '#3b82f6' :
-    score >= 40 ? '#f59e0b' : '#ef4444';
+  const strokeColor = grade.color;
 
   return (
     <div className="flex flex-col items-center">
       <div className="relative w-36 h-36">
         <svg className="w-full h-full -rotate-90" viewBox="0 0 120 120">
-          <circle cx="60" cy="60" r="54" fill="none" stroke="currentColor" strokeWidth="8"
-            className="text-gray-200 dark:text-gray-700" />
+          <circle cx="60" cy="60" r="54" fill="none" strokeWidth="8" style={{ stroke: 'var(--theme-border)' }} />
           <circle cx="60" cy="60" r="54" fill="none" stroke={strokeColor} strokeWidth="8"
             strokeLinecap="round" strokeDasharray={circumference} strokeDashoffset={offset}
             className="transition-all duration-1000 ease-out" />
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-3xl font-bold text-gray-900 dark:text-white">
-            {Math.round(score)}
-          </span>
-          <span className="text-xs text-gray-400">/100</span>
+          <span className="text-3xl font-extrabold" style={{ color: 'var(--theme-text-primary)' }}>{Math.round(score)}</span>
+          <span className="text-[11px]" style={{ color: 'var(--theme-text-muted)' }}>/100</span>
         </div>
       </div>
       <div className="mt-2 text-center">
-        <span className="text-2xl">{grade.emoji}</span>
-        <p className={`font-bold ${grade.color}`}>{grade.label}</p>
-        <p className="text-sm text-gray-500 dark:text-gray-400">{grade.labelVi}</p>
+        <p className="text-[15px] font-bold" style={{ color: strokeColor }}>{grade.label}</p>
+        <p className="text-[12px]" style={{ color: 'var(--theme-text-muted)' }}>{grade.labelVi}</p>
       </div>
     </div>
   );
 }
 
-// ── Error Card Component ──
-
-function ErrorCard({ error, index }: { error: WritingError; index: number }) {
+// ─── Error Card ───
+function ErrorCard({ error }: { error: WritingError }) {
   const [expanded, setExpanded] = useState(false);
-  const typeInfo = ERROR_TYPE_INFO[error.errorType] || {
-    label: error.errorType, labelVi: error.errorType, icon: '❓',
-    color: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300',
-  };
-  const severity = SEVERITY_STYLES[error.severity] || SEVERITY_STYLES.error;
+  const typeInfo = ERROR_TYPE_INFO[error.errorType] || { labelVi: error.errorType, color: '#6B7280' };
+  const severity = SEVERITY_CONFIG[error.severity] || SEVERITY_CONFIG.error;
 
   return (
-    <button
-      onClick={() => setExpanded(!expanded)}
-      className={`w-full text-left p-4 rounded-xl border ${severity.border} ${severity.bg} transition-all hover:shadow-sm`}
-    >
+    <button onClick={() => setExpanded(!expanded)}
+      className="w-full text-left rounded-xl border p-4 transition-all duration-200 hover:-translate-y-0.5"
+      style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
       <div className="flex items-start gap-3">
-        {/* Severity dot */}
-        <div className={`w-2.5 h-2.5 rounded-full mt-1.5 shrink-0 ${severity.dot}`} />
-
+        <div className="w-2.5 h-2.5 rounded-full mt-1.5 shrink-0" style={{ backgroundColor: severity.color }} />
         <div className="flex-1 min-w-0">
-          {/* Header */}
           <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${typeInfo.color}`}>
-              {typeInfo.icon} {typeInfo.labelVi}
+            <span className="px-2 py-0.5 rounded-md text-[11px] font-bold"
+              style={{ backgroundColor: `${typeInfo.color}15`, color: typeInfo.color }}>
+              {typeInfo.labelVi}
             </span>
-            <span className="text-xs text-gray-400">{severity.label}</span>
+            <span className="text-[11px]" style={{ color: 'var(--theme-text-muted)' }}>{severity.label}</span>
           </div>
-
-          {/* Error text */}
-          <div className="flex items-center gap-2 text-sm flex-wrap">
-            <span className="line-through text-red-500 dark:text-red-400 font-medium">
-              {error.originalText}
-            </span>
-            <span className="text-gray-400">→</span>
-            <span className="text-green-600 dark:text-green-400 font-medium">
-              {error.correctedText}
-            </span>
+          <div className="flex items-center gap-2 text-[13px] flex-wrap">
+            <span className="line-through font-medium" style={{ color: '#EF4444' }}>{error.originalText}</span>
+            <span style={{ color: 'var(--theme-text-muted)' }}>→</span>
+            <span className="font-medium" style={{ color: '#22C55E' }}>{error.correctedText}</span>
           </div>
-
-          {/* Expanded explanations */}
           {expanded && (
-            <div className="mt-3 space-y-2 border-t border-gray-200/50 dark:border-gray-700/50 pt-3">
+            <div className="mt-3 space-y-2 border-t pt-3" style={{ borderColor: 'var(--theme-border)' }}>
               <div>
-                <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">🇩🇪 Deutsch</span>
-                <p className="text-sm text-gray-700 dark:text-gray-300 mt-0.5">
-                  {error.explanationDe}
-                </p>
+                <span className="text-[11px] font-bold uppercase" style={{ color: 'var(--theme-text-muted)' }}>Deutsch</span>
+                <p className="text-[12px] mt-0.5" style={{ color: 'var(--theme-text-secondary)' }}>{error.explanationDe}</p>
               </div>
               <div>
-                <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">🇻🇳 Tiếng Việt</span>
-                <p className="text-sm text-gray-700 dark:text-gray-300 mt-0.5">
-                  {error.explanationVi}
-                </p>
+                <span className="text-[11px] font-bold uppercase" style={{ color: 'var(--theme-text-muted)' }}>Tiếng Việt</span>
+                <p className="text-[12px] mt-0.5" style={{ color: 'var(--theme-text-secondary)' }}>{error.explanationVi}</p>
               </div>
             </div>
           )}
         </div>
-
-        {/* Expand indicator */}
-        <span className={`text-gray-400 transition-transform shrink-0 ${expanded ? 'rotate-180' : ''}`}>
-          ▼
+        <span className="shrink-0 transition-transform duration-200" style={{ transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)', color: 'var(--theme-text-muted)' }}>
+          <IconChevronDown size={16} />
         </span>
       </div>
     </button>
   );
 }
 
-// ── Main Page ──
-
+// ─── Main Page ───
 export default function WritingResultPage() {
   const params = useParams();
   const id = params.id as string;
@@ -149,233 +155,203 @@ export default function WritingResultPage() {
 
   if (isLoading) {
     return (
-      <div className="p-6 max-w-5xl mx-auto">
-        <div className="animate-pulse space-y-6">
-          <div className="h-8 w-48 bg-gray-200 dark:bg-gray-700 rounded" />
+      <MainLayout>
+        <div className="max-w-5xl mx-auto py-6 space-y-6">
+          <div className="h-8 w-48 rounded-lg animate-pulse" style={{ backgroundColor: 'var(--theme-bg-secondary)' }} />
           <div className="flex gap-6">
-            <div className="h-40 w-40 bg-gray-200 dark:bg-gray-700 rounded-full" />
+            <div className="h-40 w-40 rounded-full animate-pulse" style={{ backgroundColor: 'var(--theme-bg-secondary)' }} />
             <div className="flex-1 space-y-3">
-              <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-3/4" />
-              <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-1/2" />
+              <div className="h-6 rounded w-3/4 animate-pulse" style={{ backgroundColor: 'var(--theme-bg-secondary)' }} />
+              <div className="h-6 rounded w-1/2 animate-pulse" style={{ backgroundColor: 'var(--theme-bg-secondary)' }} />
             </div>
           </div>
-          <div className="h-64 bg-gray-200 dark:bg-gray-700 rounded-xl" />
         </div>
-      </div>
+      </MainLayout>
     );
   }
 
   if (isError || !session || session.status !== 'GRADED') {
     return (
-      <div className="p-6 max-w-5xl mx-auto text-center py-20">
-        <span className="text-5xl mb-4 block">🔍</span>
-        <p className="text-gray-500 dark:text-gray-400 mb-4">
-          {session?.status === 'GRADING'
-            ? 'Bài viết đang được chấm... Vui lòng đợi.'
-            : 'Không tìm thấy kết quả'}
-        </p>
-        <Link href="/practice-test/writing" className="text-blue-600 hover:text-blue-700 font-medium">
-          ← Quay lại danh sách
-        </Link>
-      </div>
+      <MainLayout>
+        <div className="max-w-5xl mx-auto py-20 text-center">
+          <div className="w-16 h-16 rounded-2xl mx-auto flex items-center justify-center mb-4"
+            style={{ background: 'linear-gradient(135deg, #6366F1, #8B5CF6)' }}>
+            <IconList size={28} style={{ color: 'white' }} />
+          </div>
+          <p className="text-[14px] mb-4" style={{ color: 'var(--theme-text-muted)' }}>
+            {session?.status === 'GRADING' ? 'Bài viết đang được chấm... Vui lòng đợi.' : 'Không tìm thấy kết quả'}
+          </p>
+          <Link href="/practice-test/writing" className="text-[13px] font-medium" style={{ color: '#3B82F6' }}>
+            ← Quay lại danh sách
+          </Link>
+        </div>
+      </MainLayout>
     );
   }
 
-  const errors = session.errors || [];
-  const filteredErrors = filterType
-    ? errors.filter((e) => e.errorType === filterType)
-    : errors;
-
-  // Group errors by type for stats
+  const errors = (session.errors || []) as WritingError[];
   const errorsByType: Record<string, number> = {};
-  errors.forEach((e) => {
-    errorsByType[e.errorType] = (errorsByType[e.errorType] || 0) + 1;
-  });
+  errors.forEach(e => { errorsByType[e.errorType] = (errorsByType[e.errorType] || 0) + 1; });
+  const filteredErrors = filterType ? errors.filter(e => e.errorType === filterType) : errors;
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
-      {/* Header */}
-      <div className="mb-6">
-        <Link
-          href="/practice-test/writing"
-          className="text-sm text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 inline-flex items-center gap-1"
-        >
-          ← Quay lại
-        </Link>
-        <h1 className="text-xl font-bold text-gray-900 dark:text-white mt-1">
-          📊 Kết quả chấm bài
-        </h1>
-        <p className="text-sm text-gray-500 dark:text-gray-400">
-          {session.topic} · {session.cefrLevel} · {new Date(session.gradedAt!).toLocaleDateString('vi-VN')}
-        </p>
-      </div>
+    <MainLayout>
+      <div className="max-w-5xl mx-auto py-6">
 
-      {/* ── Score + Feedback Overview ── */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        {/* Score ring */}
-        <div className="flex justify-center items-center p-6 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
-          <ScoreRing score={session.overallScore || 0} />
+        {/* Header */}
+        <div className="mb-6">
+          <Link href="/practice-test/writing"
+            className="flex items-center gap-1 text-[13px] font-medium mb-2 transition-opacity hover:opacity-70"
+            style={{ color: 'var(--theme-text-muted)' }}>
+            <IconChevronLeft size={14} /> Quay lại
+          </Link>
+          <h1 className="text-2xl font-bold" style={{ color: 'var(--theme-text-primary)' }}>
+            Kết quả chấm bài
+          </h1>
+          <p className="text-[13px]" style={{ color: 'var(--theme-text-muted)' }}>
+            {session.topic} · {session.cefrLevel} · {new Date(session.gradedAt!).toLocaleDateString('vi-VN')}
+          </p>
         </div>
 
-        {/* Strengths & Improvements */}
-        <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {/* Strengths */}
-          <div className="p-4 rounded-xl border border-green-200 dark:border-green-800 bg-green-50/50 dark:bg-green-900/10">
-            <h3 className="text-sm font-semibold text-green-700 dark:text-green-400 mb-2 flex items-center gap-1.5">
-              ✅ Stärken / Điểm mạnh
+        {/* Score + Feedback */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
+          {/* Score ring */}
+          <div className="flex justify-center items-center p-6 rounded-2xl border"
+            style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
+            <ScoreRing score={session.overallScore || 0} />
+          </div>
+
+          {/* Strengths & Improvements */}
+          <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="rounded-xl border p-4" style={{ borderColor: 'rgba(34,197,94,.2)', backgroundColor: 'rgba(34,197,94,.04)' }}>
+              <h3 className="text-[12px] font-bold uppercase tracking-wider mb-2 flex items-center gap-1" style={{ color: '#22C55E' }}>
+                Stärken / Điểm mạnh
+              </h3>
+              <ul className="space-y-1.5">
+                {(session.strengths as string[] || []).map((s, i) => (
+                  <li key={i} className="text-[12px] flex items-start gap-1.5" style={{ color: 'var(--theme-text-secondary)' }}>
+                    <span style={{ color: '#22C55E' }}>•</span>{s}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="rounded-xl border p-4" style={{ borderColor: 'rgba(245,158,11,.2)', backgroundColor: 'rgba(245,158,11,.04)' }}>
+              <h3 className="text-[12px] font-bold uppercase tracking-wider mb-2 flex items-center gap-1" style={{ color: '#F59E0B' }}>
+                Verbesserungen / Cần cải thiện
+              </h3>
+              <ul className="space-y-1.5">
+                {(session.improvements as string[] || []).map((s, i) => (
+                  <li key={i} className="text-[12px] flex items-start gap-1.5" style={{ color: 'var(--theme-text-secondary)' }}>
+                    <span style={{ color: '#F59E0B' }}>•</span>{s}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        {/* General Feedback */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
+          <div className="rounded-xl border p-4" style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
+            <h3 className="text-[11px] font-bold uppercase tracking-wider mb-2" style={{ color: 'var(--theme-text-muted)' }}>
+              Feedback auf Deutsch
             </h3>
-            <ul className="space-y-1.5">
-              {(session.strengths as string[] || []).map((s, i) => (
-                <li key={i} className="text-sm text-gray-700 dark:text-gray-300 flex items-start gap-1.5">
-                  <span className="text-green-400 mt-0.5">•</span>
-                  {s}
-                </li>
-              ))}
-            </ul>
+            <p className="text-[13px] leading-relaxed" style={{ color: 'var(--theme-text-secondary)' }}>{session.feedbackDe}</p>
           </div>
-
-          {/* Improvements */}
-          <div className="p-4 rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50/50 dark:bg-amber-900/10">
-            <h3 className="text-sm font-semibold text-amber-700 dark:text-amber-400 mb-2 flex items-center gap-1.5">
-              📈 Verbesserungen / Cần cải thiện
+          <div className="rounded-xl border p-4" style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
+            <h3 className="text-[11px] font-bold uppercase tracking-wider mb-2" style={{ color: 'var(--theme-text-muted)' }}>
+              Nhận xét tiếng Việt
             </h3>
-            <ul className="space-y-1.5">
-              {(session.improvements as string[] || []).map((s, i) => (
-                <li key={i} className="text-sm text-gray-700 dark:text-gray-300 flex items-start gap-1.5">
-                  <span className="text-amber-400 mt-0.5">•</span>
-                  {s}
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      {/* ── General Feedback ── */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-        <div className="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
-          <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
-            🇩🇪 Feedback auf Deutsch
-          </h3>
-          <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
-            {session.feedbackDe}
-          </p>
-        </div>
-        <div className="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
-          <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
-            🇻🇳 Nhận xét tiếng Việt
-          </h3>
-          <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
-            {session.feedbackVi}
-          </p>
-        </div>
-      </div>
-
-      {/* ── Text Comparison ── */}
-      <div className="mb-8">
-        <div className="flex items-center gap-3 mb-3">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">📝 Bài viết</h2>
-          <div className="flex bg-gray-100 dark:bg-gray-800 rounded-lg p-0.5">
-            <button
-              onClick={() => setShowOriginal(true)}
-              className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${
-                showOriginal ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm' : 'text-gray-500'
-              }`}
-            >
-              Bài gốc
-            </button>
-            <button
-              onClick={() => setShowOriginal(false)}
-              className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${
-                !showOriginal ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm' : 'text-gray-500'
-              }`}
-            >
-              Bài đã sửa
-            </button>
+            <p className="text-[13px] leading-relaxed" style={{ color: 'var(--theme-text-secondary)' }}>{session.feedbackVi}</p>
           </div>
         </div>
 
-        <div className="p-5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
-          <p className="text-sm text-gray-800 dark:text-gray-200 leading-relaxed whitespace-pre-line">
-            {showOriginal ? session.userText : session.correctedText}
-          </p>
-        </div>
-      </div>
-
-      {/* ── Error Details ── */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-            🔍 Chi tiết lỗi ({errors.length})
-          </h2>
-        </div>
-
-        {/* Error type filter chips */}
-        {Object.keys(errorsByType).length > 1 && (
-          <div className="flex flex-wrap gap-2 mb-4">
-            <button
-              onClick={() => setFilterType('')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                !filterType
-                  ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900'
-                  : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200'
-              }`}
-            >
-              Tất cả ({errors.length})
-            </button>
-            {Object.entries(errorsByType)
-              .sort(([, a], [, b]) => b - a)
-              .map(([type, count]) => {
-                const info = ERROR_TYPE_INFO[type];
+        {/* Text Comparison */}
+        <div className="mb-6">
+          <div className="flex items-center gap-3 mb-3">
+            <h2 className="text-[16px] font-bold" style={{ color: 'var(--theme-text-primary)' }}>Bài viết</h2>
+            <div className="flex rounded-lg p-0.5" style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
+              {['Bài gốc', 'Bài đã sửa'].map((label, idx) => {
+                const isActive = idx === 0 ? showOriginal : !showOriginal;
                 return (
-                  <button
-                    key={type}
-                    onClick={() => setFilterType(type === filterType ? '' : type)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                      filterType === type
-                        ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900'
-                        : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200'
-                    }`}
-                  >
-                    {info?.icon || '❓'} {info?.labelVi || type} ({count})
+                  <button key={label} onClick={() => setShowOriginal(idx === 0)}
+                    className="px-3 py-1 rounded-md text-[12px] font-medium transition-colors"
+                    style={isActive
+                      ? { backgroundColor: 'var(--theme-bg-card)', color: 'var(--theme-text-primary)', boxShadow: '0 1px 3px rgba(0,0,0,.08)' }
+                      : { color: 'var(--theme-text-muted)' }
+                    }>
+                    {label}
                   </button>
                 );
               })}
+            </div>
           </div>
-        )}
+          <div className="p-5 rounded-xl border" style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
+            <p className="text-[13px] leading-relaxed whitespace-pre-line" style={{ color: 'var(--theme-text-primary)' }}>
+              {showOriginal ? session.userText : session.correctedText}
+            </p>
+          </div>
+        </div>
 
-        {/* Error list */}
-        {filteredErrors.length === 0 ? (
-          <div className="text-center py-8 rounded-xl border-2 border-dashed border-gray-200 dark:border-gray-700">
-            <span className="text-4xl mb-2 block">🎉</span>
-            <p className="text-gray-500 dark:text-gray-400">Không có lỗi nào!</p>
-          </div>
-        ) : (
-          <div className="space-y-2">
-            {filteredErrors.map((error, i) => (
-              <ErrorCard key={error.id} error={error} index={i} />
-            ))}
-          </div>
-        )}
-      </div>
+        {/* Error Details */}
+        <div className="mb-6">
+          <h2 className="text-[16px] font-bold mb-3" style={{ color: 'var(--theme-text-primary)' }}>
+            Chi tiết lỗi ({errors.length})
+          </h2>
 
-      {/* ── Action Buttons ── */}
-      <div className="flex flex-wrap gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
-        <Link
-          href="/practice-test/writing/new"
-          className="flex-1 min-w-35 py-3 rounded-xl bg-blue-600 text-white font-medium text-center hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
-        >
-          <span>🎲</span>
-          Viết bài mới
-        </Link>
-        <Link
-          href="/practice-test/writing"
-          className="flex-1 min-w-35 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-medium text-center hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors flex items-center justify-center gap-2"
-        >
-          <span>📋</span>
-          Xem lịch sử
-        </Link>
+          {Object.keys(errorsByType).length > 1 && (
+            <div className="flex flex-wrap gap-1.5 mb-4">
+              <button onClick={() => setFilterType('')}
+                className="px-3 py-1.5 rounded-lg text-[12px] font-semibold transition-all"
+                style={!filterType
+                  ? { background: 'linear-gradient(135deg, #6366F1, #8B5CF6)', color: 'white' }
+                  : { backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }
+                }>
+                Tất cả ({errors.length})
+              </button>
+              {Object.entries(errorsByType).sort(([, a], [, b]) => b - a).map(([type, count]) => {
+                const info = ERROR_TYPE_INFO[type];
+                return (
+                  <button key={type} onClick={() => setFilterType(type === filterType ? '' : type)}
+                    className="px-3 py-1.5 rounded-lg text-[12px] font-semibold transition-all"
+                    style={filterType === type
+                      ? { background: `linear-gradient(135deg, ${info?.color || '#6B7280'}, ${info?.color || '#6B7280'}cc)`, color: 'white' }
+                      : { backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }
+                    }>
+                    {info?.labelVi || type} ({count})
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
+          {filteredErrors.length === 0 ? (
+            <div className="text-center py-10 rounded-2xl border-2 border-dashed" style={{ borderColor: 'var(--theme-border)' }}>
+              <p className="text-[18px] mb-1">🎉</p>
+              <p className="text-[13px]" style={{ color: 'var(--theme-text-muted)' }}>Không có lỗi nào!</p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {filteredErrors.map(error => <ErrorCard key={error.id} error={error} />)}
+            </div>
+          )}
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex flex-wrap gap-3 pt-4 border-t" style={{ borderColor: 'var(--theme-border)' }}>
+          <Link href="/practice-test/writing/new"
+            className="flex-1 min-w-35 py-3 rounded-xl font-bold text-[14px] text-white text-center transition-all duration-200 hover:-translate-y-0.5 flex items-center justify-center gap-2"
+            style={{ background: 'linear-gradient(135deg, #6366F1, #8B5CF6)', boxShadow: '0 4px 12px rgba(99,102,241,.3)' }}>
+            <IconDice size={16} /> Viết bài mới
+          </Link>
+          <Link href="/practice-test/writing"
+            className="flex-1 min-w-35 py-3 rounded-xl border-2 font-semibold text-[14px] text-center transition-all duration-200 hover:-translate-y-0.5 flex items-center justify-center gap-2"
+            style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)' }}>
+            <IconList size={16} /> Xem lịch sử
+          </Link>
+        </div>
+
       </div>
-    </div>
+    </MainLayout>
   );
 }

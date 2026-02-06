@@ -3,12 +3,19 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { MainLayout } from '@/components/layout/MainLayout';
-import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
 import { useRandomWords } from '@/hooks/useWords';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
+import { useGameSession } from '@/hooks/useGameSession';
 import { Gender, GenderInfo, Word } from '@/types';
+import {
+  GameSetupCard, GameResultCard, GameButton, GameProgressBar,
+  ComboBadge, StatCard, AnswerReview, GameInfoBox, KBD,
+  IconPenTool, IconTarget, IconCheck, IconX, IconRocket, IconKeyboard, IconVolume,
+  IconRefresh, IconChevronLeft, IconLightbulb,
+} from '@/components/games/GameUI';
+
+const AC: Record<string, string> = { masculine: '#3B82F6', feminine: '#EC4899', neuter: '#22C55E' };
 
 type Phase = 'setup' | 'playing' | 'result';
 
@@ -23,7 +30,10 @@ export default function FillBlankPage() {
   const router = useRouter();
   const { settings, isLoaded, loadSettings } = useSettingsStore();
   const { playCorrect, playWrong, playCombo, playLevelUp, playGameOver, playClick } = useSoundEffects();
+  const session = useGameSession('fill-blank');
   const inputRef = useRef<HTMLInputElement>(null);
+  const scoreRef = useRef(0);
+  const bestComboRef = useRef(0);
 
   const [phase, setPhase] = useState<Phase>('setup');
   const [index, setIndex] = useState(0);
@@ -40,181 +50,100 @@ export default function FillBlankPage() {
   const { data: words, refetch, isLoading } = useRandomWords(questionsCount, {});
   const currentWord = words?.[index];
 
-  useEffect(() => {
-    loadSettings();
-  }, [loadSettings]);
+  useEffect(() => { loadSettings(); }, [loadSettings]);
 
-  // Focus input when playing
   useEffect(() => {
-    if (phase === 'playing' && !answered && inputRef.current) {
-      inputRef.current.focus();
-    }
+    if (phase === 'playing' && !answered && inputRef.current) inputRef.current.focus();
   }, [phase, answered, index]);
 
   const startGame = async () => {
     playClick();
-    
     const result = await refetch();
-    if (!result.data?.length) {
-      alert('Không có từ vựng! Vui lòng seed database.');
-      return;
-    }
-
-    setIndex(0);
-    setScore(0);
-    setCombo(0);
-    setBestCombo(0);
-    setUserInput('');
-    setAnswered(false);
-    setIsCorrect(false);
-    setAnswers([]);
-    setShowHint(false);
-    setPhase('playing');
+    if (!result.data?.length) { alert('Không có từ vựng!'); return; }
+    setIndex(0); setScore(0); setCombo(0); setBestCombo(0);
+    scoreRef.current = 0; bestComboRef.current = 0;
+    setUserInput(''); setAnswered(false); setIsCorrect(false);
+    setAnswers([]); setShowHint(false); setPhase('playing');
+    session.start(questionsCount);
   };
 
   const checkAnswer = useCallback(() => {
     if (answered || !currentWord) return;
-
     const correctAnswer = currentWord.article.toLowerCase();
     const userAnswer = userInput.trim().toLowerCase();
     const correct = userAnswer === correctAnswer;
-
-    setAnswered(true);
-    setIsCorrect(correct);
-
-    // Record answer
-    setAnswers(prev => [...prev, {
-      word: currentWord,
-      userInput: userInput.trim(),
-      correctAnswer: currentWord.article,
-      isCorrect: correct,
-    }]);
+    setAnswered(true); setIsCorrect(correct);
+    setAnswers(prev => [...prev, { word: currentWord, userInput: userInput.trim(), correctAnswer: currentWord.article, isCorrect: correct }]);
 
     if (correct) {
       playCorrect();
-      
-      const newCombo = combo + 1;
-      const multiplier = Math.min(newCombo, 4);
-      setScore(s => s + 10 * multiplier);
+      const newCombo = combo + 1; const multiplier = Math.min(newCombo, 4);
+      setScore(s => s + 10 * multiplier); scoreRef.current += 10 * multiplier;
       setCombo(newCombo);
-      
-      if (newCombo > bestCombo) setBestCombo(newCombo);
-
-      // Combo sound
-      if (newCombo === 3 || newCombo === 5 || newCombo === 10) {
-        setTimeout(() => playCombo(), 200);
-      }
-
-      // Level up sound
-      if ((score + 10 * multiplier) % 100 === 0) {
-        setTimeout(() => playLevelUp(), 300);
-      }
-    } else {
-      playWrong();
-      setCombo(0);
-    }
+      if (newCombo > bestCombo) { setBestCombo(newCombo); bestComboRef.current = newCombo; }
+      if (newCombo === 3 || newCombo === 5 || newCombo === 10) setTimeout(() => playCombo(), 200);
+      if ((score + 10 * multiplier) % 100 === 0) setTimeout(() => playLevelUp(), 300);
+    } else { playWrong(); setCombo(0); }
   }, [answered, currentWord, userInput, combo, bestCombo, score, playCorrect, playWrong, playCombo, playLevelUp]);
 
   const nextQuestion = useCallback(() => {
-    if (index + 1 >= questionsCount) {
-      playGameOver();
-      setPhase('result');
-    } else {
-      setIndex(i => i + 1);
-      setUserInput('');
-      setAnswered(false);
-      setIsCorrect(false);
-      setShowHint(false);
-    }
+    if (index + 1 >= questionsCount) { playGameOver(); setPhase('result'); }
+    else { setIndex(i => i + 1); setUserInput(''); setAnswered(false); setIsCorrect(false); setShowHint(false); }
   }, [index, questionsCount, playGameOver]);
 
-  // Handle Enter key
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      if (!answered) {
-        checkAnswer();
-      } else {
-        nextQuestion();
-      }
-    }
+    if (e.key === 'Enter') { if (!answered) checkAnswer(); else nextQuestion(); }
   };
 
-  // Quick answer buttons
   const handleQuickAnswer = (article: string) => {
     if (answered) return;
     setUserInput(article);
-    
-    // Auto submit after short delay
     setTimeout(() => {
       const correctAnswer = currentWord?.article.toLowerCase();
       const correct = article.toLowerCase() === correctAnswer;
-      
-      setAnswered(true);
-      setIsCorrect(correct);
-
-      setAnswers(prev => [...prev, {
-        word: currentWord!,
-        userInput: article,
-        correctAnswer: currentWord!.article,
-        isCorrect: correct,
-      }]);
-
+      setAnswered(true); setIsCorrect(correct);
+      setAnswers(prev => [...prev, { word: currentWord!, userInput: article, correctAnswer: currentWord!.article, isCorrect: correct }]);
       if (correct) {
-        playCorrect();
-        const newCombo = combo + 1;
-        setScore(s => s + 10 * Math.min(newCombo, 4));
+        playCorrect(); const newCombo = combo + 1;
+        setScore(s => s + 10 * Math.min(newCombo, 4)); scoreRef.current += 10 * Math.min(newCombo, 4);
         setCombo(newCombo);
-        if (newCombo > bestCombo) setBestCombo(newCombo);
-        if (newCombo === 3 || newCombo === 5 || newCombo === 10) {
-          setTimeout(() => playCombo(), 200);
-        }
-      } else {
-        playWrong();
-        setCombo(0);
-      }
+        if (newCombo > bestCombo) { setBestCombo(newCombo); bestComboRef.current = newCombo; }
+        if (newCombo === 3 || newCombo === 5 || newCombo === 10) setTimeout(() => playCombo(), 200);
+      } else { playWrong(); setCombo(0); }
     }, 100);
   };
 
-  // Setup Screen
+  // Save game session to backend when game ends
+  useEffect(() => {
+    if (phase === 'result') {
+      session.end(scoreRef.current, bestComboRef.current);
+    }
+  }, [phase, session]);
+
+  // ─── Setup ───
   if (phase === 'setup') {
     return (
       <MainLayout>
-        <div className="max-w-2xl mx-auto px-4 py-12">
-          <Card className="text-center">
-            <div className="text-6xl mb-6">✍️</div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">Fill in the Blank</h1>
-            <p className="text-gray-600 dark:text-gray-400 mb-2">
-              Điền mạo từ đúng (der/die/das) cho <span className="font-bold text-blue-500">{questionsCount} từ</span>
-            </p>
-            <p className="text-sm text-gray-400 mb-8">(Thay đổi số câu trong Settings → Học tập)</p>
-
-            <div className="bg-gray-100 dark:bg-gray-700 rounded-xl p-4 mb-8">
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                🎯 Gõ hoặc click nút để điền mạo từ
-              </p>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                ⌨️ Nhấn <kbd className="px-2 py-1 bg-white dark:bg-gray-800 rounded">Enter</kbd> để xác nhận
-              </p>
-              <p className="text-sm text-gray-500 mt-2">
-                🔊 Âm thanh: {settings.soundEnabled ? 'Bật' : 'Tắt'}
-              </p>
-            </div>
-
-            <div className="flex gap-4 justify-center">
-              <Button size="lg" onClick={startGame} isLoading={isLoading}>
-                🚀 Bắt đầu
-              </Button>
-              <Button size="lg" variant="outline" onClick={() => router.push('/games')}>
-                ← Quay lại
-              </Button>
-            </div>
-          </Card>
-        </div>
+        <GameSetupCard icon={({ size }) => <IconPenTool size={size} style={{ color: 'white' }} />} iconColor="#8B5CF6" title="Fill in the Blank">
+          <p className="text-[14px] mb-1" style={{ color: 'var(--theme-text-secondary)' }}>
+            Điền mạo từ đúng cho <span className="font-bold" style={{ color: '#8B5CF6' }}>{questionsCount} từ</span>
+          </p>
+          <p className="text-[12px] mb-6" style={{ color: 'var(--theme-text-muted)' }}>(Thay đổi số câu trong Settings → Học tập)</p>
+          <GameInfoBox>
+            <div className="flex items-center gap-2"><IconTarget size={14} style={{ color: '#8B5CF6' }} /><span>Gõ hoặc click nút để điền mạo từ</span></div>
+            <div className="flex items-center gap-2"><IconKeyboard size={14} style={{ color: '#3B82F6' }} /><span>Nhấn <KBD>Enter</KBD> để xác nhận</span></div>
+            <div className="flex items-center gap-2"><IconVolume size={14} style={{ color: '#22C55E' }} /><span>Âm thanh: {settings.soundEnabled ? 'Bật' : 'Tắt'}</span></div>
+          </GameInfoBox>
+          <div className="flex gap-3 justify-center mt-6">
+            <GameButton onClick={startGame} loading={isLoading} color="#8B5CF6"><IconRocket size={16} /> Bắt đầu</GameButton>
+            <GameButton variant="outline" onClick={() => router.push('/games')}><IconChevronLeft size={16} /> Quay lại</GameButton>
+          </div>
+        </GameSetupCard>
       </MainLayout>
     );
   }
 
-  // Result Screen
+  // ─── Result ───
   if (phase === 'result') {
     const correctCount = answers.filter(a => a.isCorrect).length;
     const wrongCount = answers.filter(a => !a.isCorrect).length;
@@ -222,237 +151,136 @@ export default function FillBlankPage() {
 
     return (
       <MainLayout>
-        <div className="max-w-2xl mx-auto px-4 py-8">
-          <Card className="text-center mb-6">
-            <div className="text-6xl mb-4">
-              {accuracy >= 80 ? '🏆' : accuracy >= 60 ? '👍' : '📚'}
-            </div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Kết quả</h1>
-            
-            <div className="my-6">
-              <div className="text-6xl font-bold text-blue-500">{score}</div>
-              <p className="text-gray-500">điểm</p>
-            </div>
+        <GameResultCard accuracy={accuracy} title="Kết quả">
+          <div className="my-5">
+            <div className="text-5xl font-extrabold" style={{ color: '#8B5CF6' }}>{score}</div>
+            <p className="text-[13px] mt-1" style={{ color: 'var(--theme-text-muted)' }}>điểm</p>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-6">
+            <StatCard label="Đúng" value={correctCount} color="#22C55E" />
+            <StatCard label="Sai" value={wrongCount} color="#EF4444" />
+            <StatCard label="Chính xác" value={`${accuracy}%`} color="#3B82F6" />
+            <StatCard label="Best Combo" value={`x${bestCombo}`} color="#F59E0B" />
+          </div>
+          <div className="flex gap-3 justify-center">
+            <GameButton onClick={startGame} color="#8B5CF6"><IconRefresh size={16} /> Chơi lại</GameButton>
+            <GameButton variant="outline" onClick={() => router.push('/games')}><IconChevronLeft size={16} /> Menu</GameButton>
+          </div>
+        </GameResultCard>
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-6">
-              <div className="bg-green-100 dark:bg-green-900/30 rounded-xl p-3">
-                <div className="text-xl font-bold text-green-600">{correctCount}</div>
-                <div className="text-xs text-green-600">Đúng</div>
-              </div>
-              <div className="bg-red-100 dark:bg-red-900/30 rounded-xl p-3">
-                <div className="text-xl font-bold text-red-600">{wrongCount}</div>
-                <div className="text-xs text-red-600">Sai</div>
-              </div>
-              <div className="bg-blue-100 dark:bg-blue-900/30 rounded-xl p-3">
-                <div className="text-xl font-bold text-blue-600">{accuracy}%</div>
-                <div className="text-xs text-blue-600">Chính xác</div>
-              </div>
-              <div className="bg-orange-100 dark:bg-orange-900/30 rounded-xl p-3">
-                <div className="text-xl font-bold text-orange-600">x{bestCombo}</div>
-                <div className="text-xs text-orange-600">Best Combo</div>
-              </div>
-            </div>
-
-            <div className="flex gap-4 justify-center">
-              <Button size="lg" onClick={startGame}>🔄 Chơi lại</Button>
-              <Button size="lg" variant="outline" onClick={() => router.push('/games')}>← Menu</Button>
-            </div>
-          </Card>
-
-          {/* Answer Review */}
-          <Card>
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">📝 Chi tiết câu trả lời</h2>
-            <div className="space-y-2 max-h-96 overflow-y-auto">
-              {answers.map((record, i) => {
-                const genderInfo = GenderInfo[record.word.gender];
-                
-                return (
-                  <div 
-                    key={i}
-                    className="flex items-center justify-between p-3 rounded-xl"
-                    style={{
-                      backgroundColor: record.isCorrect 
-                        ? 'rgba(34, 197, 94, 0.1)' 
-                        : 'rgba(239, 68, 68, 0.1)'
-                    }}
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className={record.isCorrect ? 'text-green-500' : 'text-red-500'}>
-                        {record.isCorrect ? '✓' : '✗'}
-                      </span>
-                      <div>
-                        <span 
-                          className="font-medium"
-                          style={{ color: genderInfo.color }}
-                        >
-                          {record.correctAnswer}
-                        </span>
-                        <span className="ml-1 font-bold">{record.word.word}</span>
-                        <span className="ml-2 text-sm text-gray-500">({record.word.translationEn})</span>
-                      </div>
-                    </div>
-                    
-                    {!record.isCorrect && (
-                      <div className="text-sm text-gray-500">
-                        Bạn gõ: <span className="text-red-500 font-medium">{record.userInput || '(trống)'}</span>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </Card>
+        <div className="max-w-2xl mx-auto px-4 sm:px-6">
+          <AnswerReview
+            answers={answers}
+            getCorrectArticle={a => ({ article: a.correctAnswer, color: AC[a.word.gender] || '#8B5CF6' })}
+            getSelectedLabel={a => !a.isCorrect ? (a.userInput || '(trống)') : null}
+          />
         </div>
       </MainLayout>
     );
   }
 
-  // Playing Screen
-  const genderInfo = currentWord ? GenderInfo[currentWord.gender] : null;
+  // ─── Playing ───
+  const genderColor = currentWord ? (AC[currentWord.gender] || '#8B5CF6') : '#8B5CF6';
 
   return (
     <MainLayout>
-      <div className="max-w-2xl mx-auto px-4 py-6">
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 py-5">
         {/* Header */}
-        <div className="flex justify-between items-center mb-4">
-          <div className="text-2xl font-bold text-blue-500">{score} điểm</div>
-          <div className="text-sm text-gray-500">
-            {index + 1} / {questionsCount}
-          </div>
+        <div className="flex justify-between items-center mb-3">
+          <div className="text-xl font-extrabold" style={{ color: '#8B5CF6' }}>{score} <span className="text-[13px] font-medium" style={{ color: 'var(--theme-text-muted)' }}>điểm</span></div>
+          <div className="text-[13px] font-semibold" style={{ color: 'var(--theme-text-muted)' }}>{index + 1} / {questionsCount}</div>
         </div>
 
-        {/* Progress */}
-        <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full mb-4 overflow-hidden">
-          <div 
-            className="h-full bg-blue-500 transition-all duration-300"
-            style={{ width: `${((index + 1) / questionsCount) * 100}%` }}
-          />
-        </div>
-
-        {/* Combo */}
-        <div className="h-10 flex justify-center items-center mb-4">
-          {combo > 0 && (
-            <div className="px-4 py-1 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-full font-bold text-sm">
-              🔥 Combo x{Math.min(combo, 4)}!
-            </div>
-          )}
-        </div>
+        <GameProgressBar current={index + 1} total={questionsCount} color="#8B5CF6" />
+        <div className="mt-3 mb-4"><ComboBadge combo={combo} /></div>
 
         {/* Word Card */}
         {currentWord && (
-          <Card 
-            className="text-center mb-6 py-8 transition-all duration-300"
+          <div className="rounded-2xl border p-7 text-center mb-5 transition-all duration-300"
             style={{
-              borderColor: answered 
-                ? (isCorrect ? '#22c55e' : '#ef4444')
-                : 'transparent',
-              borderWidth: answered ? '3px' : '1px',
-            }}
-          >
-            {/* Fill in the blank sentence */}
-            <div className="text-3xl md:text-4xl font-bold mb-6">
-              <span 
-                className="inline-block min-w-[80px] border-b-4 mx-2 pb-1"
-                style={{ 
-                  borderColor: answered 
-                    ? (isCorrect ? '#22c55e' : '#ef4444')
-                    : '#3b82f6',
-                  color: answered ? genderInfo?.color : 'inherit'
-                }}
-              >
+              borderColor: answered ? (isCorrect ? '#22C55E' : '#EF4444') : 'var(--theme-border)',
+              backgroundColor: 'var(--theme-bg-card)',
+              borderWidth: answered ? '2px' : '1px',
+            }}>
+            {/* Fill blank sentence */}
+            <div className="text-3xl md:text-4xl font-bold mb-5">
+              <span className="inline-block min-w-20 border-b-4 mx-2 pb-1 transition-colors duration-300"
+                style={{ borderColor: answered ? (isCorrect ? '#22C55E' : '#EF4444') : '#8B5CF6', color: answered ? genderColor : 'var(--theme-text-primary)' }}>
                 {answered ? currentWord.article : '______'}
               </span>
-              <span className="text-gray-900 dark:text-white">{currentWord.word}</span>
+              <span style={{ color: 'var(--theme-text-primary)' }}>{currentWord.word}</span>
             </div>
 
-            {/* Translation */}
-            <p className="text-xl text-gray-500 mb-4">{currentWord.translationEn}</p>
+            <p className="text-[16px] mb-1" style={{ color: 'var(--theme-text-secondary)' }}>{currentWord.translationEn}</p>
             {settings.showVietnamese && currentWord.translationVi && (
-              <p className="text-gray-400">{currentWord.translationVi}</p>
+              <p className="text-[14px]" style={{ color: 'var(--theme-text-muted)' }}>{currentWord.translationVi}</p>
             )}
 
             {/* Hint */}
             {!answered && (
-              <button
-                onClick={() => setShowHint(true)}
-                className="mt-4 text-sm text-blue-500 hover:underline"
-              >
-                {showHint ? `💡 ${genderInfo?.label}` : '💡 Xem gợi ý'}
+              <button onClick={() => setShowHint(true)}
+                className="mt-4 text-[13px] font-medium flex items-center gap-1 mx-auto transition-opacity hover:opacity-80"
+                style={{ color: '#F59E0B' }}>
+                <IconLightbulb size={14} />
+                {showHint ? GenderInfo[currentWord.gender].label : 'Xem gợi ý'}
               </button>
             )}
 
-            {/* Result feedback */}
+            {/* Feedback */}
             {answered && (
-              <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                <p className={`text-lg font-medium ${isCorrect ? 'text-green-500' : 'text-red-500'}`}>
-                  {isCorrect ? '✓ Chính xác!' : `✗ Sai rồi! Đáp án là "${currentWord.article}"`}
+              <div className="mt-5 pt-4 border-t" style={{ borderColor: 'var(--theme-border)' }}>
+                <p className="text-[16px] font-semibold flex items-center justify-center gap-1.5"
+                  style={{ color: isCorrect ? '#22C55E' : '#EF4444' }}>
+                  {isCorrect ? <><IconCheck size={16} /> Chính xác!</> : <><IconX size={16} /> Sai rồi! Đáp án là "{currentWord.article}"</>}
                 </p>
               </div>
             )}
-          </Card>
+          </div>
         )}
 
         {/* Input Area */}
         {!answered ? (
-          <div className="space-y-4">
-            {/* Text Input */}
+          <div className="space-y-3">
             <div className="flex gap-2">
-              <input
-                ref={inputRef}
-                type="text"
-                value={userInput}
-                onChange={(e) => setUserInput(e.target.value)}
-                onKeyDown={handleKeyDown}
+              <input ref={inputRef} type="text" value={userInput}
+                onChange={e => setUserInput(e.target.value)} onKeyDown={handleKeyDown}
                 placeholder="Gõ der, die hoặc das..."
-                className="flex-1 px-4 py-3 rounded-xl border-2 text-center text-xl font-medium focus:border-blue-500 focus:outline-none"
+                autoComplete="off" autoCapitalize="off"
+                className="flex-1 px-4 py-3 rounded-xl border-2 text-center text-[18px] font-semibold
+                  focus:outline-none focus:ring-2 transition-all duration-200"
                 style={{
-                  backgroundColor: 'var(--theme-bg-card, #ffffff)',
-                  borderColor: 'var(--theme-border, #e5e7eb)',
-                  color: 'var(--theme-text-primary, #111827)',
-                }}
-                autoComplete="off"
-                autoCapitalize="off"
-              />
-              <Button onClick={checkAnswer} disabled={!userInput.trim()}>
-                Kiểm tra
-              </Button>
+                  backgroundColor: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)',
+                  color: 'var(--theme-text-primary)', '--tw-ring-color': '#8B5CF6',
+                } as React.CSSProperties} />
+              <GameButton onClick={checkAnswer} disabled={!userInput.trim()} color="#8B5CF6">Kiểm tra</GameButton>
             </div>
 
-            {/* Quick Answer Buttons */}
+            {/* Quick answer buttons */}
             <div className="grid grid-cols-3 gap-3">
-              {(['der', 'die', 'das'] as const).map((article) => {
-                const gender = article === 'der' ? 'masculine' : article === 'die' ? 'feminine' : 'neuter';
-                const info = GenderInfo[gender];
-                
-                return (
-                  <button
-                    key={article}
-                    onClick={() => handleQuickAnswer(article)}
-                    className="py-4 rounded-xl font-bold text-xl text-white transition-all hover:scale-105 active:scale-95"
-                    style={{ backgroundColor: info.color }}
-                  >
-                    {article}
-                  </button>
-                );
-              })}
+              {([
+                { article: 'der', color: '#3B82F6' },
+                { article: 'die', color: '#EC4899' },
+                { article: 'das', color: '#22C55E' },
+              ]).map(btn => (
+                <button key={btn.article} onClick={() => handleQuickAnswer(btn.article)}
+                  className="py-3.5 rounded-xl font-bold text-[18px] text-white transition-all duration-200
+                    hover:-translate-y-0.5 hover:shadow-md active:scale-95"
+                  style={{ background: `linear-gradient(135deg, ${btn.color}, ${btn.color}cc)`, boxShadow: `0 3px 12px ${btn.color}25` }}>
+                  {btn.article}
+                </button>
+              ))}
             </div>
           </div>
         ) : (
-          <Button size="lg" onClick={nextQuestion} className="w-full">
-            {index + 1 >= questionsCount ? '🏆 Xem kết quả' : 'Câu tiếp theo →'}
-          </Button>
+          <GameButton onClick={nextQuestion} className="w-full" color="#8B5CF6">
+            {index + 1 >= questionsCount ? <><IconCheck size={16} /> Xem kết quả</> : <>Câu tiếp theo →</>}
+          </GameButton>
         )}
 
-        <div className="text-center mt-6">
-          <Button 
-            variant="ghost" 
-            onClick={() => { 
-              playClick();
-              router.push('/games'); 
-            }}
-          >
-            ✕ Thoát
-          </Button>
+        <div className="text-center mt-5">
+          <GameButton variant="ghost" onClick={() => { playClick(); router.push('/games'); }}>
+            <IconX size={14} /> Thoát
+          </GameButton>
         </div>
       </div>
     </MainLayout>

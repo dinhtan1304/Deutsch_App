@@ -10,6 +10,7 @@ export interface AuthResponse {
     id: string;
     email: string;
     name: string | null;
+    role: string;
   };
 }
 
@@ -29,6 +30,7 @@ export interface User {
   email: string;
   name: string | null;
   avatar: string | null;
+  role: string;
   createdAt: string;
 }
 

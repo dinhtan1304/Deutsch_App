@@ -35,6 +35,16 @@ function getLocalTopicProgress(topicId: string, totalWords: number): { wordsLear
 }
 
 // ============================================
+// Helper: timezone-safe date string
+// ============================================
+const toLocalDateStr = (date: Date): string => {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+};
+
+// ============================================
 // Default/Empty Data
 // ============================================
 const getEmptyStats = (): DashboardStats => ({
@@ -47,7 +57,7 @@ const getEmptyStats = (): DashboardStats => ({
   totalTopics: 12,
   wordsToReview: 0,
   gamesPlayed: 0,
-  startedAt: new Date().toISOString().split('T')[0],
+  startedAt: toLocalDateStr(new Date()),
 });
 
 const getEmptyHeatmap = (): HeatmapData => {
@@ -57,7 +67,7 @@ const getEmptyHeatmap = (): HeatmapData => {
     const date = new Date(today);
     date.setDate(date.getDate() - i);
     data.push({
-      date: date.toISOString().split('T')[0],
+      date: toLocalDateStr(date),
       count: 0,
       level: 0,
     });
@@ -79,7 +89,7 @@ const getEmptyWeeklyProgress = (): WeeklyProgress[] => {
     date.setDate(date.getDate() - i);
     days.push({
       day: dayNames[date.getDay()],
-      date: date.toISOString().split('T')[0],
+      date: toLocalDateStr(date),
       wordsLearned: 0,
       gamesPlayed: 0,
       minutes: 0,

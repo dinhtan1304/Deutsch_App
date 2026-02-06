@@ -1,104 +1,11 @@
 /**
- * SM-2 (SuperMemo 2) Spaced Repetition Algorithm
+ * SRS Utility Functions
  * 
- * Calculates optimal review intervals based on recall quality
+ * SM-2 calculation is handled by the backend.
+ * This file provides display utilities for the frontend.
  */
 
-export interface SRSCard {
-  wordId: string;
-  
-  // SM-2 parameters
-  repetitions: number;      // Number of consecutive correct reviews
-  easeFactor: number;       // EF (2.5 default, min 1.3)
-  interval: number;         // Days until next review
-  
-  // Dates
-  nextReviewDate: string;   // ISO date string (YYYY-MM-DD)
-  lastReviewDate: string | null;
-  
-  // Stats
-  totalReviews: number;
-  correctReviews: number;
-}
-
-export type ReviewQuality = 0 | 1 | 2 | 3 | 4 | 5;
-// 0 - Complete blackout
-// 1 - Incorrect, recognized after seeing answer
-// 2 - Incorrect, but seemed familiar  
-// 3 - Correct with difficulty
-// 4 - Correct with hesitation
-// 5 - Perfect recall
-
-/**
- * Create a new SRS card for a word
- */
-export function createSRSCard(wordId: string): SRSCard {
-  const today = new Date().toISOString().split('T')[0];
-  return {
-    wordId,
-    repetitions: 0,
-    easeFactor: 2.5,
-    interval: 0,
-    nextReviewDate: today,
-    lastReviewDate: null,
-    totalReviews: 0,
-    correctReviews: 0,
-  };
-}
-
-/**
- * Calculate new SM-2 parameters after review
- */
-export function calculateSM2(card: SRSCard, quality: ReviewQuality): SRSCard {
-  const today = new Date().toISOString().split('T')[0];
-  
-  let { repetitions, easeFactor, interval } = card;
-  
-  // Update ease factor: EF' = EF + (0.1 - (5-q) * (0.08 + (5-q) * 0.02))
-  const newEaseFactor = Math.max(
-    1.3,
-    easeFactor + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02))
-  );
-  
-  if (quality < 3) {
-    // Failed - reset
-    repetitions = 0;
-    interval = 1;
-  } else {
-    // Success
-    if (repetitions === 0) {
-      interval = 1;
-    } else if (repetitions === 1) {
-      interval = 6;
-    } else {
-      interval = Math.round(interval * newEaseFactor);
-    }
-    repetitions += 1;
-  }
-  
-  // Calculate next review date
-  const nextDate = new Date();
-  nextDate.setDate(nextDate.getDate() + interval);
-  
-  return {
-    ...card,
-    repetitions,
-    easeFactor: newEaseFactor,
-    interval,
-    nextReviewDate: nextDate.toISOString().split('T')[0],
-    lastReviewDate: today,
-    totalReviews: card.totalReviews + 1,
-    correctReviews: card.correctReviews + (quality >= 3 ? 1 : 0),
-  };
-}
-
-/**
- * Check if card is due for review
- */
-export function isDueForReview(card: SRSCard): boolean {
-  const today = new Date().toISOString().split('T')[0];
-  return card.nextReviewDate <= today;
-}
+import { Progress } from '@/types';
 
 /**
  * Get interval text in Vietnamese
@@ -113,9 +20,9 @@ export function getIntervalText(interval: number): string {
 }
 
 /**
- * Get card status
+ * Get card status based on progress data
  */
-export function getCardStatus(card: SRSCard): 'new' | 'learning' | 'review' | 'mature' {
+export function getCardStatus(card: Progress): 'new' | 'learning' | 'review' | 'mature' {
   if (card.repetitions === 0) return 'new';
   if (card.interval < 7) return 'learning';
   if (card.interval < 21) return 'review';
@@ -123,13 +30,35 @@ export function getCardStatus(card: SRSCard): 'new' | 'learning' | 'review' | 'm
 }
 
 /**
- * Calculate preview intervals for each quality
+ * Preview estimated intervals for each rating (client-side approximation).
+ * Uses the standard SM-2 formula for display purposes only — 
+ * actual calculation is done by the backend.
  */
-export function previewIntervals(card: SRSCard): { again: number; hard: number; good: number; easy: number } {
+export function previewIntervals(card: Progress): {
+  again: number;
+  hard: number;
+  good: number;
+  easy: number;
+} {
+  const { easeFactor, interval, repetitions } = card;
+
+  const estimate = (quality: number): number => {
+    if (quality < 3) return 1;
+
+    const newEF = Math.max(
+      1.3,
+      easeFactor + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02)),
+    );
+
+    if (repetitions === 0) return 1;
+    if (repetitions === 1) return 6;
+    return Math.round(interval * newEF);
+  };
+
   return {
-    again: 1, // quality < 3
-    hard: calculateSM2(card, 3).interval,
-    good: calculateSM2(card, 4).interval,
-    easy: calculateSM2(card, 5).interval,
+    again: 1,
+    hard: estimate(3),
+    good: estimate(4),
+    easy: estimate(5),
   };
 }

@@ -8,17 +8,18 @@ interface CardProps extends HTMLAttributes<HTMLDivElement> {
 }
 
 export const Card = forwardRef<HTMLDivElement, CardProps>(
-  ({ className, variant = 'default', children, ...props }, ref) => {
-    const variants = {
-      default: 'bg-white dark:bg-gray-800',
-      bordered: 'bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700',
-      elevated: 'bg-white dark:bg-gray-800 shadow-lg',
+  ({ className, variant = 'default', style, children, ...props }, ref) => {
+    const variantStyles: Record<string, React.CSSProperties> = {
+      default: { backgroundColor: 'var(--theme-bg-card)' },
+      bordered: { backgroundColor: 'var(--theme-bg-card)', border: '2px solid var(--theme-border)' },
+      elevated: { backgroundColor: 'var(--theme-bg-card)', boxShadow: '0 4px 16px rgba(0,0,0,.08)' },
     };
 
     return (
       <div
         ref={ref}
-        className={cn('rounded-2xl p-6', variants[variant], className)}
+        className={cn('rounded-2xl p-6', className)}
+        style={{ ...variantStyles[variant], ...style }}
         {...props}
       >
         {children}
@@ -33,12 +34,20 @@ export const CardHeader = ({ className, ...props }: HTMLAttributes<HTMLDivElemen
   <div className={cn('mb-4', className)} {...props} />
 );
 
-export const CardTitle = ({ className, ...props }: HTMLAttributes<HTMLHeadingElement>) => (
-  <h3 className={cn('text-xl font-bold text-gray-900 dark:text-white', className)} {...props} />
+export const CardTitle = ({ className, style, ...props }: HTMLAttributes<HTMLHeadingElement>) => (
+  <h3
+    className={cn('text-xl font-bold', className)}
+    style={{ color: 'var(--theme-text-primary)', ...style }}
+    {...props}
+  />
 );
 
-export const CardDescription = ({ className, ...props }: HTMLAttributes<HTMLParagraphElement>) => (
-  <p className={cn('text-gray-500 dark:text-gray-400 mt-1', className)} {...props} />
+export const CardDescription = ({ className, style, ...props }: HTMLAttributes<HTMLParagraphElement>) => (
+  <p
+    className={cn('mt-1', className)}
+    style={{ color: 'var(--theme-text-muted)', ...style }}
+    {...props}
+  />
 );
 
 export const CardContent = ({ className, ...props }: HTMLAttributes<HTMLDivElement>) => (

@@ -9,11 +9,12 @@ export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ className, label, error, type = 'text', ...props }, ref) => {
+  ({ className, label, error, type = 'text', style, ...props }, ref) => {
     return (
       <div className="w-full">
         {label && (
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label className="block text-[13px] font-semibold mb-1.5"
+            style={{ color: 'var(--theme-text-secondary)' }}>
             {label}
           </label>
         )}
@@ -21,19 +22,20 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           ref={ref}
           type={type}
           className={cn(
-            'w-full px-4 py-2 rounded-xl border transition-colors',
-            'bg-white dark:bg-gray-800',
-            'border-gray-300 dark:border-gray-600',
-            'text-gray-900 dark:text-white',
-            'placeholder-gray-400 dark:placeholder-gray-500',
+            'w-full px-4 py-2.5 rounded-xl border text-[14px] transition-colors',
             'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-            error && 'border-red-500 focus:ring-red-500',
             className
           )}
+          style={{
+            backgroundColor: 'var(--theme-bg-secondary)',
+            borderColor: error ? '#EF4444' : 'var(--theme-border)',
+            color: 'var(--theme-text-primary)',
+            ...style,
+          }}
           {...props}
         />
         {error && (
-          <p className="mt-1 text-sm text-red-500">{error}</p>
+          <p className="mt-1 text-[12px]" style={{ color: '#EF4444' }}>{error}</p>
         )}
       </div>
     );

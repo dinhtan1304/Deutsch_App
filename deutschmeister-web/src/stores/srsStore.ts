@@ -1,138 +1,117 @@
 'use client';
 
 import { create } from 'zustand';
-import { 
-  SRSCard, 
-  ReviewQuality, 
-  createSRSCard, 
-  calculateSM2, 
-  isDueForReview,
-  getCardStatus 
-} from '@/lib/srs';
+import { progressApi } from '@/lib/api/progress';
+import { getAccessToken } from '@/lib/api/client';
+import { Progress, ReviewRating } from '@/types';
 
-interface SRSState {
-  cards: Record<string, SRSCard>;  // wordId -> SRSCard
-  isLoaded: boolean;
-  
-  // Actions
-  loadCards: () => void;
-  saveCards: () => void;
-  getCard: (wordId: string) => SRSCard;
-  reviewCard: (wordId: string, quality: ReviewQuality) => void;
-  addWord: (wordId: string) => void;
-  removeWord: (wordId: string) => void;
-  
-  // Getters
-  getDueCards: () => SRSCard[];
-  getNewCards: () => SRSCard[];
-  getLearningCards: () => SRSCard[];
-  getMatureCards: () => SRSCard[];
-  getStats: () => {
-    total: number;
-    due: number;
-    new: number;
-    learning: number;
-    mature: number;
-    reviewedToday: number;
-  };
+interface SRSStats {
+  total: number;
+  due: number;
+  new: number;
+  learning: number;
+  mature: number;
+  reviewedToday: number;
 }
 
-const STORAGE_KEY = 'deutschmeister-srs';
+interface SRSState {
+  cards: Record<string, Progress>; // wordId -> Progress
+  isLoaded: boolean;
+  isLoading: boolean;
+
+  // Actions
+  loadCards: () => Promise<void>;
+  reviewCard: (wordId: string, rating: ReviewRating) => Promise<void>;
+  addWords: (wordIds: string[]) => Promise<void>;
+
+  // Getters
+  getCard: (wordId: string) => Progress | null;
+  getDueCards: () => Progress[];
+  getStats: () => SRSStats;
+}
 
 export const useSRSStore = create<SRSState>((set, get) => ({
   cards: {},
   isLoaded: false,
+  isLoading: false,
 
-  loadCards: () => {
-    if (typeof window === 'undefined') return;
-    
+  loadCards: async () => {
+    if (get().isLoading) return;
+
+    // Skip API call if not authenticated
+    if (!getAccessToken()) {
+      set({ cards: {}, isLoaded: true, isLoading: false });
+      return;
+    }
+
+    set({ isLoading: true });
+
     try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        const cards = JSON.parse(stored);
-        set({ cards, isLoaded: true });
-      } else {
-        set({ isLoaded: true });
-      }
+      const allProgress = await progressApi.getAll();
+      const cards: Record<string, Progress> = {};
+      allProgress.forEach((p) => {
+        cards[p.wordId] = p;
+      });
+      set({ cards, isLoaded: true, isLoading: false });
     } catch (e) {
       console.error('Failed to load SRS cards:', e);
-      set({ isLoaded: true });
+      set({ cards: {}, isLoaded: true, isLoading: false });
     }
   },
 
-  saveCards: () => {
-    if (typeof window === 'undefined') return;
-    
+  reviewCard: async (wordId: string, rating: ReviewRating) => {
     try {
+      const updated = await progressApi.review(wordId, rating);
       const { cards } = get();
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(cards));
+      set({ cards: { ...cards, [wordId]: updated } });
     } catch (e) {
-      console.error('Failed to save SRS cards:', e);
+      console.error('Failed to review card:', e);
+    }
+  },
+
+  addWords: async (wordIds: string[]) => {
+    try {
+      await progressApi.addWords(wordIds);
+      // Reload all cards to get the new ones with word data
+      await get().loadCards();
+    } catch (e) {
+      console.error('Failed to add words:', e);
     }
   },
 
   getCard: (wordId: string) => {
-    const { cards } = get();
-    return cards[wordId] || createSRSCard(wordId);
-  },
-
-  addWord: (wordId: string) => {
-    const { cards, saveCards } = get();
-    if (!cards[wordId]) {
-      set({ cards: { ...cards, [wordId]: createSRSCard(wordId) } });
-      saveCards();
-    }
-  },
-
-  removeWord: (wordId: string) => {
-    const { cards, saveCards } = get();
-    const newCards = { ...cards };
-    delete newCards[wordId];
-    set({ cards: newCards });
-    saveCards();
-  },
-
-  reviewCard: (wordId: string, quality: ReviewQuality) => {
-    const { cards, saveCards } = get();
-    const card = cards[wordId] || createSRSCard(wordId);
-    const updatedCard = calculateSM2(card, quality);
-    
-    set({ cards: { ...cards, [wordId]: updatedCard } });
-    saveCards();
+    return get().cards[wordId] || null;
   },
 
   getDueCards: () => {
     const { cards } = get();
-    return Object.values(cards).filter(isDueForReview);
-  },
-
-  getNewCards: () => {
-    const { cards } = get();
-    return Object.values(cards).filter(c => getCardStatus(c) === 'new');
-  },
-
-  getLearningCards: () => {
-    const { cards } = get();
-    return Object.values(cards).filter(c => getCardStatus(c) === 'learning');
-  },
-
-  getMatureCards: () => {
-    const { cards } = get();
-    return Object.values(cards).filter(c => getCardStatus(c) === 'mature');
+    const now = new Date();
+    return Object.values(cards).filter(
+      (p) => new Date(p.nextReviewAt) <= now,
+    );
   },
 
   getStats: () => {
     const { cards } = get();
     const cardList = Object.values(cards);
-    const today = new Date().toISOString().split('T')[0];
-    
+    const now = new Date();
+    const todayStart = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate(),
+    );
+
     return {
       total: cardList.length,
-      due: cardList.filter(isDueForReview).length,
-      new: cardList.filter(c => getCardStatus(c) === 'new').length,
-      learning: cardList.filter(c => getCardStatus(c) === 'learning').length,
-      mature: cardList.filter(c => getCardStatus(c) === 'mature').length,
-      reviewedToday: cardList.filter(c => c.lastReviewDate === today).length,
+      due: cardList.filter((p) => new Date(p.nextReviewAt) <= now).length,
+      new: cardList.filter((p) => p.repetitions === 0).length,
+      learning: cardList.filter(
+        (p) => p.repetitions > 0 && p.interval < 21,
+      ).length,
+      mature: cardList.filter((p) => p.interval >= 21).length,
+      reviewedToday: cardList.filter(
+        (p) => p.lastReviewAt && new Date(p.lastReviewAt) >= todayStart,
+      ).length,
     };
   },
 }));

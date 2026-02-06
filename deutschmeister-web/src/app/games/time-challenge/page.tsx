@@ -3,12 +3,17 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { MainLayout } from '@/components/layout/MainLayout';
-import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
 import { useRandomWords } from '@/hooks/useWords';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
+import { useGameSession } from '@/hooks/useGameSession';
 import { Gender, GenderInfo } from '@/types';
+import {
+  GameSetupCard, GameResultCard, GameButton, ComboBadge, StatCard,
+  GenderButtons, GameInfoBox, KBD,
+  IconClock, IconTarget, IconCheck, IconX, IconFlame, IconRocket, IconKeyboard, IconVolume,
+  IconRefresh, IconChevronLeft, IconZap,
+} from '@/components/games/GameUI';
 
 type Phase = 'setup' | 'countdown' | 'playing' | 'result';
 
@@ -16,7 +21,8 @@ export default function TimedChallengePage() {
   const router = useRouter();
   const { settings, isLoaded, loadSettings } = useSettingsStore();
   const { playCorrect, playWrong, playCombo, playGameOver, playTick, playClick } = useSoundEffects();
-  
+  const session = useGameSession('timed-challenge');
+
   const [phase, setPhase] = useState<Phase>('setup');
   const [index, setIndex] = useState(0);
   const [timeLeft, setTimeLeft] = useState(60);
@@ -31,15 +37,14 @@ export default function TimedChallengePage() {
 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const countdownRef = useRef<NodeJS.Timeout | null>(null);
+  const scoreRef = useRef(0);
+  const bestComboRef = useRef(0);
 
   const { data: words, refetch, isLoading } = useRandomWords(200, {});
   const currentWord = words?.[index];
-
-  useEffect(() => {
-    loadSettings();
-  }, [loadSettings]);
-
   const duration = isLoaded ? settings.timedChallengeSeconds : 60;
+
+  useEffect(() => { loadSettings(); }, [loadSettings]);
 
   const clearTimers = useCallback(() => {
     if (timerRef.current) clearInterval(timerRef.current);
@@ -49,99 +54,51 @@ export default function TimedChallengePage() {
   useEffect(() => () => clearTimers(), [clearTimers]);
 
   const startGame = async () => {
-    playClick();
-    setStarting(true);
-    clearTimers();
-    
+    playClick(); setStarting(true); clearTimers();
     try {
       const result = await refetch();
-      if (!result.data?.length) {
-        alert('Không có từ vựng! Vui lòng seed database.');
-        setStarting(false);
-        return;
-      }
-      
-      setIndex(0);
-      setTimeLeft(duration);
-      setScore(0);
-      setCombo(0);
-      setBestCombo(0);
-      setCorrect(0);
-      setWrong(0);
-      setCountdown(3);
-      setLastAnswer(null);
+      if (!result.data?.length) { alert('Không có từ vựng!'); setStarting(false); return; }
+      setIndex(0); setTimeLeft(duration); setScore(0); setCombo(0); setBestCombo(0);
+      setCorrect(0); setWrong(0); setCountdown(3); setLastAnswer(null);
+      scoreRef.current = 0; bestComboRef.current = 0;
       setPhase('countdown');
+      session.start(200);
 
       let c = 3;
       countdownRef.current = setInterval(() => {
-        c--;
-        setCountdown(c);
-        playTick();
-        
+        c--; setCountdown(c); playTick();
         if (c <= 0) {
-          clearInterval(countdownRef.current!);
-          setPhase('playing');
-          
+          clearInterval(countdownRef.current!); setPhase('playing');
           timerRef.current = setInterval(() => {
             setTimeLeft(t => {
-              // Play tick sound in last 10 seconds
-              if (t <= 10 && t > 0) {
-                playTick();
-              }
-              
-              if (t <= 1) {
-                clearInterval(timerRef.current!);
-                playGameOver();
-                setPhase('result');
-                return 0;
-              }
+              if (t <= 10 && t > 0) playTick();
+              if (t <= 1) { clearInterval(timerRef.current!); playGameOver(); setPhase('result'); return 0; }
               return t - 1;
             });
           }, 1000);
         }
       }, 1000);
-    } catch (e) {
-      alert('Lỗi tải từ vựng!');
-    } finally {
-      setStarting(false);
-    }
+    } catch { alert('Lỗi tải từ vựng!'); }
+    finally { setStarting(false); }
   };
 
   const answer = useCallback((gender: Gender) => {
     if (phase !== 'playing' || !currentWord) return;
-
     const isCorrect = gender === currentWord.gender;
 
     if (isCorrect) {
       playCorrect();
-      
-      const newCombo = combo + 1;
-      const mult = Math.min(newCombo, 4);
-      setScore(s => s + 10 * mult);
-      setCorrect(c => c + 1);
-      setCombo(newCombo);
-      setLastAnswer('correct');
-      
-      if (newCombo > bestCombo) setBestCombo(newCombo);
-      
-      // Play combo sound at milestones
-      if (newCombo === 5 || newCombo === 10 || newCombo === 15 || newCombo === 20) {
-        setTimeout(() => playCombo(), 150);
-      }
-    } else {
-      playWrong();
-      setWrong(w => w + 1);
-      setCombo(0);
-      setLastAnswer('wrong');
-    }
-    
-    // Clear feedback after short delay
+      const newCombo = combo + 1; const mult = Math.min(newCombo, 4);
+      setScore(s => s + 10 * mult); scoreRef.current += 10 * mult;
+      setCorrect(c => c + 1); setCombo(newCombo); setLastAnswer('correct');
+      if (newCombo > bestCombo) { setBestCombo(newCombo); bestComboRef.current = newCombo; }
+      if (newCombo === 5 || newCombo === 10 || newCombo === 15 || newCombo === 20) setTimeout(() => playCombo(), 150);
+    } else { playWrong(); setWrong(w => w + 1); setCombo(0); setLastAnswer('wrong'); }
+
     setTimeout(() => setLastAnswer(null), 300);
-    
     setIndex(i => (i >= (words?.length || 1) - 1 ? 0 : i + 1));
   }, [phase, currentWord, combo, bestCombo, words?.length, playCorrect, playWrong, playCombo]);
 
-  // Keyboard
   useEffect(() => {
     const handle = (e: KeyboardEvent) => {
       if (phase !== 'playing') return;
@@ -153,62 +110,54 @@ export default function TimedChallengePage() {
     return () => window.removeEventListener('keydown', handle);
   }, [phase, answer]);
 
-  // Setup
+  // Save game session to backend when game ends
+  useEffect(() => {
+    if (phase === 'result') {
+      session.end(scoreRef.current, bestComboRef.current);
+    }
+  }, [phase, session]);
+
+  // ─── Setup ───
   if (phase === 'setup') {
     return (
       <MainLayout>
-        <div className="max-w-2xl mx-auto px-4 py-12">
-          <Card className="text-center">
-            <div className="text-6xl mb-6">⏱️</div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">Timed Challenge</h1>
-            <p className="text-gray-600 dark:text-gray-400 mb-2">
-              Trả lời nhanh trong <span className="font-bold text-blue-500">{duration} giây</span>!
-            </p>
-            <p className="text-sm text-gray-400 mb-8">(Thay đổi trong Settings → Học tập)</p>
-
-            <div className="bg-gray-100 dark:bg-gray-700 rounded-xl p-4 mb-8">
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                🎯 10 điểm/câu đúng • Combo tối đa x4 • Sai = mất combo
-              </p>
-              <p className="text-sm text-gray-500 mt-2">
-                Phím: <kbd className="px-2 py-1 bg-white dark:bg-gray-800 rounded">1</kbd> der,{' '}
-                <kbd className="px-2 py-1 bg-white dark:bg-gray-800 rounded">2</kbd> die,{' '}
-                <kbd className="px-2 py-1 bg-white dark:bg-gray-800 rounded">3</kbd> das
-              </p>
-              <p className="text-sm text-gray-500 mt-2">
-                🔊 Âm thanh: {settings.soundEnabled ? 'Bật' : 'Tắt'}
-              </p>
-            </div>
-
-            <div className="flex gap-4 justify-center">
-              <Button size="lg" onClick={startGame} isLoading={isLoading || starting}>
-                🚀 Bắt đầu
-              </Button>
-              <Button size="lg" variant="outline" onClick={() => router.push('/games')}>
-                ← Quay lại
-              </Button>
-            </div>
-          </Card>
-        </div>
+        <GameSetupCard icon={({ size }) => <IconClock size={size} style={{ color: 'white' }} />} iconColor="#EF4444" title="Timed Challenge">
+          <p className="text-[14px] mb-1" style={{ color: 'var(--theme-text-secondary)' }}>
+            Trả lời nhanh trong <span className="font-bold" style={{ color: '#EF4444' }}>{duration} giây</span>!
+          </p>
+          <p className="text-[12px] mb-6" style={{ color: 'var(--theme-text-muted)' }}>(Thay đổi trong Settings → Học tập)</p>
+          <GameInfoBox>
+            <div className="flex items-center gap-2"><IconTarget size={14} style={{ color: '#EF4444' }} /><span>10 điểm/câu đúng · Combo tối đa x4 · Sai = mất combo</span></div>
+            <div className="flex items-center gap-2"><IconKeyboard size={14} style={{ color: '#8B5CF6' }} /><span>Phím: <KBD>1</KBD> der, <KBD>2</KBD> die, <KBD>3</KBD> das</span></div>
+            <div className="flex items-center gap-2"><IconVolume size={14} style={{ color: '#22C55E' }} /><span>Âm thanh: {settings.soundEnabled ? 'Bật' : 'Tắt'}</span></div>
+          </GameInfoBox>
+          <div className="flex gap-3 justify-center mt-6">
+            <GameButton onClick={startGame} loading={isLoading || starting} color="#EF4444"><IconRocket size={16} /> Bắt đầu</GameButton>
+            <GameButton variant="outline" onClick={() => router.push('/games')}><IconChevronLeft size={16} /> Quay lại</GameButton>
+          </div>
+        </GameSetupCard>
       </MainLayout>
     );
   }
 
-  // Countdown
+  // ─── Countdown ───
   if (phase === 'countdown') {
     return (
       <MainLayout>
         <div className="flex items-center justify-center min-h-[60vh]">
           <div className="text-center">
-            <div className="text-[150px] font-bold text-blue-500 animate-pulse">{countdown}</div>
-            <p className="text-2xl text-gray-500">Chuẩn bị!</p>
+            <div className="w-32 h-32 rounded-full mx-auto flex items-center justify-center mb-4"
+              style={{ background: 'linear-gradient(135deg, rgba(239,68,68,.12), rgba(239,68,68,.04))' }}>
+              <span className="text-7xl font-extrabold" style={{ color: '#EF4444' }}>{countdown}</span>
+            </div>
+            <p className="text-xl font-semibold" style={{ color: 'var(--theme-text-muted)' }}>Chuẩn bị!</p>
           </div>
         </div>
       </MainLayout>
     );
   }
 
-  // Result
+  // ─── Result ───
   if (phase === 'result') {
     const total = correct + wrong;
     const acc = total > 0 ? Math.round((correct / total) * 100) : 0;
@@ -216,155 +165,97 @@ export default function TimedChallengePage() {
 
     return (
       <MainLayout>
-        <div className="max-w-2xl mx-auto px-4 py-12">
-          <Card className="text-center">
-            <div className="text-6xl mb-4">🏆</div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Hết giờ!</h1>
-            
-            <div className="my-6">
-              <div className="text-7xl font-bold text-blue-500">{score}</div>
-              <p className="text-gray-500">điểm</p>
-            </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-8">
-              <div className="bg-green-100 dark:bg-green-900/30 rounded-xl p-3">
-                <div className="text-xl font-bold text-green-600">{correct}</div>
-                <div className="text-xs text-green-600">Đúng</div>
-              </div>
-              <div className="bg-red-100 dark:bg-red-900/30 rounded-xl p-3">
-                <div className="text-xl font-bold text-red-600">{wrong}</div>
-                <div className="text-xs text-red-600">Sai</div>
-              </div>
-              <div className="bg-blue-100 dark:bg-blue-900/30 rounded-xl p-3">
-                <div className="text-xl font-bold text-blue-600">{acc}%</div>
-                <div className="text-xs text-blue-600">Chính xác</div>
-              </div>
-              <div className="bg-orange-100 dark:bg-orange-900/30 rounded-xl p-3">
-                <div className="text-xl font-bold text-orange-600">x{bestCombo}</div>
-                <div className="text-xs text-orange-600">Best Combo</div>
-              </div>
-            </div>
-
-            <p className="text-gray-500 mb-6">⚡ Tốc độ: {wpm} từ/phút</p>
-
-            <div className="flex gap-4 justify-center">
-              <Button size="lg" onClick={startGame}>🔄 Chơi lại</Button>
-              <Button size="lg" variant="outline" onClick={() => router.push('/games')}>← Quay lại</Button>
-            </div>
-          </Card>
-        </div>
+        <GameResultCard accuracy={acc} title="Hết giờ!">
+          <div className="my-5">
+            <div className="text-5xl font-extrabold" style={{ color: '#3B82F6' }}>{score}</div>
+            <p className="text-[13px] mt-1" style={{ color: 'var(--theme-text-muted)' }}>điểm</p>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">
+            <StatCard label="Đúng" value={correct} color="#22C55E" />
+            <StatCard label="Sai" value={wrong} color="#EF4444" />
+            <StatCard label="Chính xác" value={`${acc}%`} color="#3B82F6" />
+            <StatCard label="Best Combo" value={`x${bestCombo}`} color="#F59E0B" />
+          </div>
+          <div className="flex items-center justify-center gap-1.5 mb-6 text-[14px] font-semibold"
+            style={{ color: 'var(--theme-text-secondary)' }}>
+            <IconZap size={16} style={{ color: '#F59E0B' }} /> Tốc độ: {wpm} từ/phút
+          </div>
+          <div className="flex gap-3 justify-center">
+            <GameButton onClick={startGame} color="#EF4444"><IconRefresh size={16} /> Chơi lại</GameButton>
+            <GameButton variant="outline" onClick={() => router.push('/games')}><IconChevronLeft size={16} /> Quay lại</GameButton>
+          </div>
+        </GameResultCard>
       </MainLayout>
     );
   }
 
-  // Playing
-  const genderButtons = [
-    { gender: 'masculine' as Gender, color: '#3b82f6' },
-    { gender: 'feminine' as Gender, color: '#ec4899' },
-    { gender: 'neuter' as Gender, color: '#22c55e' },
-  ];
+  // ─── Playing ───
+  const timerPct = (timeLeft / duration) * 100;
+  const timerColor = timeLeft <= 10 ? '#EF4444' : '#3B82F6';
 
   return (
     <MainLayout>
-      <div className="max-w-2xl mx-auto px-4 py-6">
-        {/* Header */}
-        <div className="flex justify-between items-center mb-4">
-          <div 
-            className="text-5xl font-bold transition-colors"
-            style={{ color: timeLeft <= 10 ? '#ef4444' : 'inherit' }}
-          >
-            {timeLeft}<span className="text-xl text-gray-400">s</span>
-          </div>
-          <div className="text-4xl font-bold text-blue-500">{score}</div>
-        </div>
-
-        {/* Progress */}
-        <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded-full mb-4 overflow-hidden">
-          <div 
-            className="h-full transition-all duration-1000"
-            style={{ 
-              width: `${(timeLeft / duration) * 100}%`,
-              backgroundColor: timeLeft <= 10 ? '#ef4444' : '#3b82f6'
-            }}
-          />
-        </div>
-
-        {/* Combo */}
-        <div className="h-12 flex justify-center items-center mb-4">
-          {combo > 0 && (
-            <div 
-              className="px-6 py-2 text-white rounded-full font-bold"
-              style={{ 
-                background: 'linear-gradient(135deg, #f97316 0%, #ef4444 100%)',
-                animation: combo >= 5 ? 'pulse 0.5s infinite' : 'none'
-              }}
-            >
-              🔥 x{Math.min(combo, 4)} Combo! {combo >= 5 && '🔥'}
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 py-5">
+        {/* Timer + Score header */}
+        <div className="flex justify-between items-center mb-3">
+          <div className="flex items-center gap-2">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center"
+              style={{ background: timeLeft <= 10 ? 'linear-gradient(135deg, rgba(239,68,68,.15), rgba(239,68,68,.06))' : 'linear-gradient(135deg, rgba(59,130,246,.15), rgba(59,130,246,.06))' }}>
+              <IconClock size={18} style={{ color: timerColor }} />
             </div>
-          )}
+            <span className="text-3xl font-extrabold transition-colors duration-300" style={{ color: timerColor }}>
+              {timeLeft}<span className="text-[14px] font-medium" style={{ color: 'var(--theme-text-muted)' }}>s</span>
+            </span>
+          </div>
+          <div className="text-2xl font-extrabold" style={{ color: '#3B82F6' }}>{score}</div>
         </div>
 
-        {/* Stats */}
-        <div className="flex justify-center gap-12 mb-4">
-          <span className="text-green-500 font-bold text-lg">✓ {correct}</span>
-          <span className="text-red-500 font-bold text-lg">✗ {wrong}</span>
+        {/* Timer bar */}
+        <div className="h-2.5 rounded-full overflow-hidden mb-3" style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
+          <div className="h-full rounded-full transition-all duration-1000"
+            style={{ width: `${timerPct}%`, background: `linear-gradient(90deg, ${timerColor}, ${timerColor}cc)` }} />
         </div>
 
-        {/* Word */}
+        {/* Combo + Score counters */}
+        <div className="flex justify-between items-center mb-4">
+          <ComboBadge combo={combo} />
+          <div className="flex gap-4">
+            <span className="flex items-center gap-1 text-[14px] font-bold" style={{ color: '#22C55E' }}>
+              <IconCheck size={14} /> {correct}
+            </span>
+            <span className="flex items-center gap-1 text-[14px] font-bold" style={{ color: '#EF4444' }}>
+              <IconX size={14} /> {wrong}
+            </span>
+          </div>
+        </div>
+
+        {/* Word Card */}
         {currentWord && (
-          <Card 
-            className="text-center mb-6 py-10 transition-all"
+          <div className="rounded-2xl border p-8 md:p-10 text-center mb-5 transition-all duration-200"
             style={{
-              boxShadow: lastAnswer === 'correct' 
-                ? '0 0 30px rgba(34, 197, 94, 0.5)' 
-                : lastAnswer === 'wrong' 
-                  ? '0 0 30px rgba(239, 68, 68, 0.5)' 
-                  : undefined
-            }}
-          >
-            <h2 className="text-5xl md:text-6xl font-bold text-gray-900 dark:text-white mb-4">
+              borderColor: 'var(--theme-border)',
+              backgroundColor: 'var(--theme-bg-card)',
+              boxShadow: lastAnswer === 'correct'
+                ? '0 0 30px rgba(34,197,94,.15)'
+                : lastAnswer === 'wrong'
+                ? '0 0 30px rgba(239,68,68,.15)' : 'none',
+            }}>
+            <h2 className="text-4xl md:text-5xl font-bold mb-3" style={{ color: 'var(--theme-text-primary)' }}>
               {currentWord.word}
             </h2>
-            <p className="text-xl text-gray-500">{currentWord.translationEn}</p>
-          </Card>
+            <p className="text-[16px]" style={{ color: 'var(--theme-text-secondary)' }}>{currentWord.translationEn}</p>
+          </div>
         )}
 
         {/* Answer Buttons */}
-        <div className="grid grid-cols-3 gap-3">
-          {genderButtons.map(({ gender, color }, i) => (
-            <button
-              key={gender}
-              onClick={() => answer(gender)}
-              disabled={!currentWord}
-              className="py-8 md:py-10 rounded-2xl font-bold text-3xl md:text-4xl text-white transition-all hover:scale-105 active:scale-95 disabled:opacity-50"
-              style={{ backgroundColor: color }}
-            >
-              {GenderInfo[gender].article}
-              <div className="text-sm font-normal mt-2 opacity-80">({i + 1})</div>
-            </button>
-          ))}
-        </div>
+        <GenderButtons onAnswer={answer} answered={false} selectedAnswer={null} />
 
-        <div className="text-center mt-6">
-          <Button 
-            variant="ghost" 
-            onClick={() => { 
-              clearTimers(); 
-              playClick();
-              router.push('/games'); 
-            }}
-          >
-            ✕ Thoát
-          </Button>
+        <div className="text-center mt-5">
+          <GameButton variant="ghost" onClick={() => { clearTimers(); playClick(); router.push('/games'); }}>
+            <IconX size={14} /> Thoát
+          </GameButton>
         </div>
       </div>
-
-      <style jsx>{`
-        @keyframes pulse {
-          0%, 100% { transform: scale(1); }
-          50% { transform: scale(1.05); }
-        }
-      `}</style>
     </MainLayout>
   );
 }

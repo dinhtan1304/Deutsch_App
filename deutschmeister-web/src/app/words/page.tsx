@@ -1,10 +1,11 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import Link from 'next/link';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { WordCard } from '@/components/words/WordCard';
 import { useWords } from '@/hooks/useWords';
-import { useFavorites } from '@/hooks/useFavorites';
+import { useFavorites, useToggleFavorite } from '@/hooks/useFavorites';
 import { Gender, CEFRLevel, CATEGORIES, LEVELS } from '@/types';
 import { IconBook, IconSearch, IconChevronLeft, IconChevronRight } from '@/components/ui/Icons';
 
@@ -41,7 +42,13 @@ export default function WordsPage() {
   });
 
   const { data: favorites } = useFavorites();
+  const { toggle: toggleFavorite } = useToggleFavorite();
   const favoriteIds = useMemo(() => new Set(favorites?.map(f => f.wordId) || []), [favorites]);
+  const handleFavoriteToggle = async (wordId: string) => {
+    try {
+      await toggleFavorite(wordId, favoriteIds.has(wordId));
+    } catch { /* ignore duplicate/not-found errors */ }
+  };
 
   const hasFilters = !!(search || gender || category || level);
 
@@ -56,7 +63,7 @@ export default function WordsPage() {
 
   return (
     <MainLayout>
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className="py-6">
 
         {/* ─── Header ─── */}
         <div className="flex items-start justify-between mb-6">
@@ -74,16 +81,49 @@ export default function WordsPage() {
               </p>
             </div>
           </div>
-          {data && (
-            <div className="text-right hidden sm:block">
-              <div className="text-2xl font-extrabold" style={{ color: 'var(--theme-text-primary)' }}>
-                {data.total}
+          <div className="flex items-center gap-3">
+            {/* Tips link */}
+            <Link href="/tips"
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-[13px] font-semibold transition-all duration-200 hover:-translate-y-0.5"
+              style={{ background: 'linear-gradient(135deg, #F59E0B18, #F59E0B08)', color: '#F59E0B', border: '1px solid rgba(245,158,11,.2)' }}>
+              <svg width={15} height={15} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}>
+                <path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5" />
+                <path d="M9 18h6" /><path d="M10 22h4" />
+              </svg>
+              Mẹo nhớ
+            </Link>
+
+            {/* Favorites link */}
+            <Link href="/favorites"
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-[13px] font-semibold transition-all duration-200 hover:-translate-y-0.5"
+              style={{ background: 'linear-gradient(135deg, #EC489918, #EC489908)', color: '#EC4899', border: '1px solid rgba(236,72,153,.2)' }}>
+              <svg width={15} height={15} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}>
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+              </svg>
+              Yêu thích
+            </Link>
+            {/* History link */}
+            <Link href="/history"
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-[13px] font-semibold transition-all duration-200 hover:-translate-y-0.5"
+              style={{ background: 'linear-gradient(135deg, #8B5CF618, #8B5CF608)', color: '#8B5CF6', border: '1px solid rgba(139,92,246,.2)' }}>
+              <svg width={15} height={15} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}>
+                <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
+              </svg>
+              Lịch sử
+            </Link>
+
+            {/* Word count */}
+            {data && (
+              <div className="text-right hidden sm:block">
+                <div className="text-2xl font-extrabold" style={{ color: 'var(--theme-text-primary)' }}>
+                  {data.total}
+                </div>
+                <div className="text-[11px]" style={{ color: 'var(--theme-text-muted)' }}>
+                  {hasFilters ? 'kết quả' : 'từ vựng'}
+                </div>
               </div>
-              <div className="text-[11px]" style={{ color: 'var(--theme-text-muted)' }}>
-                {hasFilters ? 'kết quả' : 'từ vựng'}
-              </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
 
         {/* ─── Filter Bar ─── */}
@@ -223,6 +263,7 @@ export default function WordsPage() {
                   key={word.id}
                   word={word}
                   isFavorite={favoriteIds.has(word.id)}
+                  onFavoriteToggle={handleFavoriteToggle}
                 />
               ))}
             </div>

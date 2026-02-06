@@ -14,6 +14,10 @@ export const progressApi = {
     return apiPost<Progress>('/progress/review', { wordId, rating });
   },
 
+  addWords: async (wordIds: string[]): Promise<{ added: number }> => {
+    return apiPost<{ added: number }>('/progress/add', { wordIds });
+  },
+
   getStats: async (): Promise<{
     total: number;
     mastered: number;

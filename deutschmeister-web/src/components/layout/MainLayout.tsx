@@ -50,7 +50,7 @@ export function MainLayout({ children }: MainLayoutProps) {
         className="transition-all duration-300 ease-in-out pt-16"
         style={{ marginLeft: sidebarCollapsed ? '72px' : '260px' }}
       >
-        <div className="min-h-[calc(100vh-4rem)]">
+        <div className="min-h-[calc(100vh-4rem)] px-6 lg:px-8 xl:px-10">
           {children}
         </div>
       </main>

@@ -16,11 +16,7 @@ interface State {
 export class ErrorBoundary extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
-    this.state = {
-      hasError: false,
-      error: null,
-      errorInfo: null,
-    };
+    this.state = { hasError: false, error: null, errorInfo: null };
   }
 
   static getDerivedStateFromError(error: Error): Partial<State> {
@@ -29,67 +25,62 @@ export class ErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     this.setState({ errorInfo });
-    
-    // Log error to console (có thể gửi lên error tracking service)
     console.error('ErrorBoundary caught an error:', error, errorInfo);
   }
 
   handleReset = () => {
-    this.setState({
-      hasError: false,
-      error: null,
-      errorInfo: null,
-    });
+    this.setState({ hasError: false, error: null, errorInfo: null });
   };
 
   render() {
     if (this.state.hasError) {
-      // Custom fallback UI
-      if (this.props.fallback) {
-        return this.props.fallback;
-      }
+      if (this.props.fallback) return this.props.fallback;
 
       return (
-        <div className="min-h-100 flex items-center justify-center p-8">
+        <div className="min-h-[400px] flex items-center justify-center p-8">
           <div className="max-w-md w-full text-center">
             {/* Error Icon */}
-            <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
-              <span className="text-4xl">😵</span>
+            <div className="w-20 h-20 mx-auto mb-6 rounded-2xl flex items-center justify-center"
+              style={{ background: 'linear-gradient(135deg, rgba(239,68,68,.1), rgba(239,68,68,.2))' }}>
+              <svg width={36} height={36} viewBox="0 0 24 24" fill="none" stroke="#EF4444"
+                strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
             </div>
 
-            {/* Error Message */}
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+            <h2 className="text-xl font-bold mb-2" style={{ color: 'var(--theme-text-primary)' }}>
               Oops! Có lỗi xảy ra
             </h2>
-            <p className="text-gray-500 dark:text-gray-400 mb-6">
+            <p className="text-[13px] mb-6" style={{ color: 'var(--theme-text-muted)' }}>
               Đã có lỗi không mong muốn. Vui lòng thử lại hoặc tải lại trang.
             </p>
 
             {/* Error Details (dev only) */}
             {process.env.NODE_ENV === 'development' && this.state.error && (
               <details className="mb-6 text-left">
-                <summary className="cursor-pointer text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
+                <summary className="cursor-pointer text-[12px]" style={{ color: 'var(--theme-text-muted)' }}>
                   Chi tiết lỗi (dev mode)
                 </summary>
-                <pre className="mt-2 p-4 rounded-xl bg-gray-100 dark:bg-gray-800 text-xs text-red-600 dark:text-red-400 overflow-auto max-h-40">
+                <pre className="mt-2 p-4 rounded-xl text-[11px] overflow-auto max-h-40"
+                  style={{ backgroundColor: 'var(--theme-bg-secondary)', color: '#EF4444' }}>
                   {this.state.error.toString()}
                   {this.state.errorInfo?.componentStack}
                 </pre>
               </details>
             )}
 
-            {/* Action Buttons */}
+            {/* Actions */}
             <div className="flex gap-3 justify-center">
-              <button
-                onClick={this.handleReset}
-                className="px-6 py-2.5 rounded-xl bg-blue-500 hover:bg-blue-600 text-white font-medium transition-colors"
-              >
+              <button onClick={this.handleReset}
+                className="px-5 py-2.5 rounded-xl font-semibold text-[14px] text-white transition-all duration-200 hover:-translate-y-0.5"
+                style={{ background: 'linear-gradient(135deg, #3B82F6, #6366F1)', boxShadow: '0 4px 12px rgba(59,130,246,.25)' }}>
                 Thử lại
               </button>
-              <button
-                onClick={() => window.location.reload()}
-                className="px-6 py-2.5 rounded-xl bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 font-medium transition-colors"
-              >
+              <button onClick={() => window.location.reload()}
+                className="px-5 py-2.5 rounded-xl font-semibold text-[14px] transition-all duration-200 hover:-translate-y-0.5"
+                style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-secondary)', border: '1px solid var(--theme-border)' }}>
                 Tải lại trang
               </button>
             </div>
@@ -107,9 +98,7 @@ export function useErrorHandler() {
   const [error, setError] = React.useState<Error | null>(null);
 
   React.useEffect(() => {
-    if (error) {
-      throw error;
-    }
+    if (error) throw error;
   }, [error]);
 
   return setError;

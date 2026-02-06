@@ -1,26 +1,30 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { MainLayout } from '@/components/layout/MainLayout';
-import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
 import { useRandomWords } from '@/hooks/useWords';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
+import { useGameSession } from '@/hooks/useGameSession';
 import { GenderInfo, Word } from '@/types';
+import {
+  GameSetupCard, GameResultCard, GameButton, GameProgressBar, StatCard,
+  AnswerReview, GameInfoBox, KBD,
+  IconLayers, IconCheck, IconX, IconFlame, IconRocket, IconKeyboard, IconVolume,
+  IconRefresh, IconChevronLeft,
+} from '@/components/games/GameUI';
+
+const AC: Record<string, string> = { masculine: '#3B82F6', feminine: '#EC4899', neuter: '#22C55E' };
 
 type Phase = 'setup' | 'playing' | 'result';
-
-interface CardResult {
-  word: Word;
-  knew: boolean;
-}
+interface CardResult { word: Word; knew: boolean; }
 
 export default function FlashcardsPage() {
   const router = useRouter();
   const { settings, isLoaded, loadSettings } = useSettingsStore();
   const { playCorrect, playWrong, playCombo, playClick, playGameOver, playStreak } = useSoundEffects();
+  const session = useGameSession('flashcard');
 
   const [phase, setPhase] = useState<Phase>('setup');
   const [index, setIndex] = useState(0);
@@ -28,135 +32,91 @@ export default function FlashcardsPage() {
   const [results, setResults] = useState<CardResult[]>([]);
   const [streak, setStreak] = useState(0);
   const [bestStreak, setBestStreak] = useState(0);
+  const knewRef = useRef(0);
+  const bestStreakRef = useRef(0);
 
   const cardsCount = isLoaded ? settings.questionsPerGame : 20;
   const { data: words, refetch, isLoading } = useRandomWords(cardsCount, {});
   const currentWord = words?.[index];
-  const progress = words?.length ? ((index) / words.length) * 100 : 0;
+  const progress = words?.length ? (index / words.length) * 100 : 0;
 
-  useEffect(() => {
-    loadSettings();
-  }, [loadSettings]);
+  useEffect(() => { loadSettings(); }, [loadSettings]);
 
   const startGame = async () => {
     playClick();
-    
     const result = await refetch();
-    if (!result.data?.length) {
-      alert('Không có từ vựng! Vui lòng seed database.');
-      return;
-    }
-
-    setIndex(0);
-    setIsFlipped(false);
-    setResults([]);
-    setStreak(0);
-    setBestStreak(0);
+    if (!result.data?.length) { alert('Không có từ vựng!'); return; }
+    setIndex(0); setIsFlipped(false); setResults([]); setStreak(0); setBestStreak(0);
+    knewRef.current = 0; bestStreakRef.current = 0;
     setPhase('playing');
+    session.start(cardsCount);
   };
 
-  const flipCard = () => {
-    playClick();
-    setIsFlipped(!isFlipped);
-  };
+  const flipCard = () => { playClick(); setIsFlipped(!isFlipped); };
 
   const handleResponse = useCallback((knew: boolean) => {
     if (!currentWord) return;
-
-    // Record result
     setResults(prev => [...prev, { word: currentWord, knew }]);
 
     if (knew) {
       playCorrect();
-      const newStreak = streak + 1;
-      setStreak(newStreak);
-      if (newStreak > bestStreak) setBestStreak(newStreak);
-      
-      // Combo sounds
-      if (newStreak === 5 || newStreak === 10 || newStreak === 15) {
-        setTimeout(() => playCombo(), 200);
-      }
-    } else {
-      playWrong();
-      setStreak(0);
-    }
+      knewRef.current++;
+      const newStreak = streak + 1; setStreak(newStreak);
+      if (newStreak > bestStreak) { setBestStreak(newStreak); bestStreakRef.current = newStreak; }
+      if (newStreak === 5 || newStreak === 10 || newStreak === 15) setTimeout(() => playCombo(), 200);
+    } else { playWrong(); setStreak(0); }
 
-    // Next card or finish
     setTimeout(() => {
       if (index + 1 >= (words?.length || 0)) {
         playGameOver();
-        if (bestStreak >= 5 || streak >= 5) {
-          setTimeout(() => playStreak(), 300);
-        }
+        if (bestStreak >= 5 || streak >= 5) setTimeout(() => playStreak(), 300);
         setPhase('result');
-      } else {
-        setIndex(i => i + 1);
-        setIsFlipped(false);
-      }
+      } else { setIndex(i => i + 1); setIsFlipped(false); }
     }, 300);
   }, [currentWord, index, words?.length, streak, bestStreak, playCorrect, playWrong, playCombo, playGameOver, playStreak]);
 
-  // Keyboard shortcuts
   useEffect(() => {
     const handle = (e: KeyboardEvent) => {
       if (phase !== 'playing') return;
-      
-      if (e.key === ' ' || e.key === 'Enter') {
-        e.preventDefault();
-        if (!isFlipped) {
-          flipCard();
-        }
-      } else if (e.key === 'ArrowLeft' || e.key === '1') {
-        if (isFlipped) handleResponse(false);
-      } else if (e.key === 'ArrowRight' || e.key === '2') {
-        if (isFlipped) handleResponse(true);
-      }
+      if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); if (!isFlipped) flipCard(); }
+      else if (e.key === 'ArrowLeft' || e.key === '1') { if (isFlipped) handleResponse(false); }
+      else if (e.key === 'ArrowRight' || e.key === '2') { if (isFlipped) handleResponse(true); }
     };
-    
     window.addEventListener('keydown', handle);
     return () => window.removeEventListener('keydown', handle);
   }, [phase, isFlipped, handleResponse]);
 
-  // Setup Screen
+  // Save game session to backend when game ends
+  useEffect(() => {
+    if (phase === 'result') {
+      session.end(knewRef.current * 10, bestStreakRef.current);
+    }
+  }, [phase, session]);
+
+  // ─── Setup ───
   if (phase === 'setup') {
     return (
       <MainLayout>
-        <div className="max-w-2xl mx-auto px-4 py-12">
-          <Card className="text-center">
-            <div className="text-6xl mb-6">🃏</div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">Flashcards</h1>
-            <p className="text-gray-600 dark:text-gray-400 mb-2">
-              Ôn tập <span className="font-bold text-blue-500">{cardsCount} từ</span> với thẻ ghi nhớ
-            </p>
-            <p className="text-sm text-gray-400 mb-8">(Thay đổi số thẻ trong Settings → Học tập)</p>
-
-            <div className="bg-gray-100 dark:bg-gray-700 rounded-xl p-4 mb-8">
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                🃏 Click thẻ hoặc nhấn <kbd className="px-2 py-1 bg-white dark:bg-gray-800 rounded">Space</kbd> để lật
-              </p>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                ⬅️ Chưa nhớ | ➡️ Đã nhớ
-              </p>
-              <p className="text-sm text-gray-500 mt-2">
-                🔊 Âm thanh: {settings.soundEnabled ? 'Bật' : 'Tắt'}
-              </p>
-            </div>
-
-            <div className="flex gap-4 justify-center">
-              <Button size="lg" onClick={startGame} isLoading={isLoading}>
-                🚀 Bắt đầu
-              </Button>
-              <Button size="lg" variant="outline" onClick={() => router.push('/games')}>
-                ← Quay lại
-              </Button>
-            </div>
-          </Card>
-        </div>
+        <GameSetupCard icon={({ size }) => <IconLayers size={size} style={{ color: 'white' }} />} iconColor="#22C55E" title="Flashcards">
+          <p className="text-[14px] mb-1" style={{ color: 'var(--theme-text-secondary)' }}>
+            Ôn tập <span className="font-bold" style={{ color: '#22C55E' }}>{cardsCount} từ</span> với thẻ ghi nhớ
+          </p>
+          <p className="text-[12px] mb-6" style={{ color: 'var(--theme-text-muted)' }}>(Thay đổi số thẻ trong Settings → Học tập)</p>
+          <GameInfoBox>
+            <div className="flex items-center gap-2"><IconLayers size={14} style={{ color: '#22C55E' }} /><span>Click thẻ hoặc nhấn <KBD>Space</KBD> để lật</span></div>
+            <div className="flex items-center gap-2"><IconKeyboard size={14} style={{ color: '#8B5CF6' }} /><span><KBD>←</KBD> Chưa nhớ · <KBD>→</KBD> Đã nhớ</span></div>
+            <div className="flex items-center gap-2"><IconVolume size={14} style={{ color: '#3B82F6' }} /><span>Âm thanh: {settings.soundEnabled ? 'Bật' : 'Tắt'}</span></div>
+          </GameInfoBox>
+          <div className="flex gap-3 justify-center mt-6">
+            <GameButton onClick={startGame} loading={isLoading} color="#22C55E"><IconRocket size={16} /> Bắt đầu</GameButton>
+            <GameButton variant="outline" onClick={() => router.push('/games')}><IconChevronLeft size={16} /> Quay lại</GameButton>
+          </div>
+        </GameSetupCard>
       </MainLayout>
     );
   }
 
-  // Result Screen
+  // ─── Result ───
   if (phase === 'result') {
     const knewCount = results.filter(r => r.knew).length;
     const didntKnowCount = results.filter(r => !r.knew).length;
@@ -165,138 +125,110 @@ export default function FlashcardsPage() {
 
     return (
       <MainLayout>
-        <div className="max-w-2xl mx-auto px-4 py-8">
-          <Card className="text-center mb-6">
-            <div className="text-6xl mb-4">
-              {accuracy >= 80 ? '🏆' : accuracy >= 60 ? '👍' : '📚'}
-            </div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Hoàn thành!</h1>
-            
-            <div className="grid grid-cols-3 gap-4 my-6">
-              <div className="bg-green-100 dark:bg-green-900/30 rounded-xl p-4">
-                <div className="text-3xl font-bold text-green-600">{knewCount}</div>
-                <div className="text-sm text-green-600">Đã nhớ</div>
-              </div>
-              <div className="bg-red-100 dark:bg-red-900/30 rounded-xl p-4">
-                <div className="text-3xl font-bold text-red-600">{didntKnowCount}</div>
-                <div className="text-sm text-red-600">Cần ôn</div>
-              </div>
-              <div className="bg-orange-100 dark:bg-orange-900/30 rounded-xl p-4">
-                <div className="text-3xl font-bold text-orange-600">{bestStreak}</div>
-                <div className="text-sm text-orange-600">Best Streak</div>
-              </div>
-            </div>
+        <GameResultCard accuracy={accuracy} title="Hoàn thành!">
+          <div className="grid grid-cols-3 gap-2 my-5">
+            <StatCard label="Đã nhớ" value={knewCount} color="#22C55E" />
+            <StatCard label="Cần ôn" value={didntKnowCount} color="#EF4444" />
+            <StatCard label="Best Streak" value={bestStreak} color="#F59E0B" />
+          </div>
+          <div className="flex gap-3 justify-center">
+            <GameButton onClick={startGame} color="#22C55E"><IconRefresh size={16} /> Học lại</GameButton>
+            <GameButton variant="outline" onClick={() => router.push('/games')}><IconChevronLeft size={16} /> Menu</GameButton>
+          </div>
+        </GameResultCard>
 
-            <div className="flex gap-4 justify-center">
-              <Button size="lg" onClick={startGame}>🔄 Học lại</Button>
-              <Button size="lg" variant="outline" onClick={() => router.push('/games')}>← Menu</Button>
-            </div>
-          </Card>
-
-          {/* Words to review */}
-          {needReview.length > 0 && (
-            <Card>
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
-                📝 Từ cần ôn lại ({needReview.length})
-              </h2>
-              <div className="space-y-2 max-h-64 overflow-y-auto">
+        {needReview.length > 0 && (
+          <div className="max-w-2xl mx-auto px-4 sm:px-6">
+            <div className="rounded-2xl border overflow-hidden"
+              style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
+              <div className="px-5 py-4 border-b flex items-center gap-2"
+                style={{ borderColor: 'var(--theme-border)' }}>
+                <IconX size={15} style={{ color: '#EF4444' }} />
+                <h2 className="text-[15px] font-bold" style={{ color: 'var(--theme-text-primary)' }}>
+                  Từ cần ôn lại ({needReview.length})
+                </h2>
+              </div>
+              <div className="max-h-64 overflow-y-auto divide-y" style={{ borderColor: 'var(--theme-border)' }}>
                 {needReview.map((record, i) => {
-                  const genderInfo = GenderInfo[record.word.gender];
+                  const gc = AC[record.word.gender] || '#3B82F6';
                   return (
-                    <div 
-                      key={i}
-                      className="flex items-center justify-between p-3 rounded-xl"
-                      style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)' }}
-                    >
+                    <div key={i} className="flex items-center justify-between px-4 py-3"
+                      style={{ background: 'rgba(239,68,68,.03)' }}>
                       <div>
-                        <span style={{ color: genderInfo.color }} className="font-medium">
-                          {record.word.article}
-                        </span>
-                        <span className="ml-1 font-bold">{record.word.word}</span>
+                        <span className="text-[13px] font-semibold" style={{ color: gc }}>{record.word.article}</span>
+                        <span className="text-[14px] font-bold ml-1.5" style={{ color: 'var(--theme-text-primary)' }}>{record.word.word}</span>
                       </div>
-                      <span className="text-sm text-gray-500">{record.word.translationEn}</span>
+                      <span className="text-[12px]" style={{ color: 'var(--theme-text-muted)' }}>{record.word.translationEn}</span>
                     </div>
                   );
                 })}
               </div>
-            </Card>
-          )}
-        </div>
+            </div>
+          </div>
+        )}
       </MainLayout>
     );
   }
 
-  // Playing Screen
-  const genderInfo = currentWord ? GenderInfo[currentWord.gender] : null;
+  // ─── Playing ───
+  const genderColor = currentWord ? (AC[currentWord.gender] || '#3B82F6') : '#3B82F6';
 
   return (
     <MainLayout>
-      <div className="max-w-2xl mx-auto px-4 py-6">
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 py-5">
         {/* Header */}
-        <div className="flex justify-between items-center mb-4">
-          <div className="text-sm text-gray-500">
+        <div className="flex justify-between items-center mb-3">
+          <div className="text-[13px] font-semibold" style={{ color: 'var(--theme-text-muted)' }}>
             {index + 1} / {words?.length || 0}
           </div>
           {streak > 0 && (
-            <div className="px-3 py-1 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-full text-sm font-bold">
-              🔥 {streak} streak
+            <div className="flex items-center gap-1.5 px-3 py-1 rounded-full text-white text-[12px] font-bold"
+              style={{ background: 'linear-gradient(135deg, #F97316, #EF4444)' }}>
+              <IconFlame size={13} /> {streak} streak
             </div>
           )}
         </div>
 
-        {/* Progress */}
-        <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full mb-8 overflow-hidden">
-          <div 
-            className="h-full bg-blue-500 transition-all duration-300"
-            style={{ width: `${progress}%` }}
-          />
-        </div>
+        <GameProgressBar current={index} total={words?.length || 1} color="#22C55E" />
 
         {/* Flashcard */}
         {currentWord && (
-          <div className="relative h-80 mb-8">
-            {/* Front Card */}
-            <div 
-              className={`absolute inset-0 rounded-3xl p-8 flex flex-col items-center justify-center shadow-xl cursor-pointer transition-all duration-300 ${
-                isFlipped ? 'opacity-0 pointer-events-none scale-95' : 'opacity-100'
-              }`}
-              style={{ 
-                backgroundColor: 'var(--theme-bg-card, #ffffff)',
-                border: '3px solid #3b82f6',
-              }}
-              onClick={flipCard}
-            >
-              <p className="text-sm text-gray-400 mb-4">Từ tiếng Đức</p>
-              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+          <div className="relative h-80 my-7">
+            {/* Front */}
+            <div
+              className={`absolute inset-0 rounded-2xl border-2 p-8 flex flex-col items-center justify-center
+                cursor-pointer transition-all duration-300
+                ${isFlipped ? 'opacity-0 pointer-events-none scale-95' : 'opacity-100 hover:-translate-y-1 hover:shadow-lg'}`}
+              style={{ borderColor: '#3B82F6', backgroundColor: 'var(--theme-bg-card)' }}
+              onClick={flipCard}>
+              <p className="text-[12px] mb-4" style={{ color: 'var(--theme-text-muted)' }}>Từ tiếng Đức</p>
+              <h2 className="text-4xl md:text-5xl font-bold mb-3" style={{ color: 'var(--theme-text-primary)' }}>
                 {currentWord.word}
               </h2>
               {currentWord.pronunciation && settings.showPronunciation && (
-                <p className="text-gray-500">[{currentWord.pronunciation}]</p>
+                <p className="text-[14px]" style={{ color: 'var(--theme-text-muted)' }}>[{currentWord.pronunciation}]</p>
               )}
-              <p className="mt-8 text-sm text-blue-500">
-                👆 Click để lật thẻ
+              <p className="mt-8 text-[13px] font-medium" style={{ color: '#3B82F6' }}>
+                Click để lật thẻ
               </p>
             </div>
 
-            {/* Back Card */}
-            <div 
-              className={`absolute inset-0 rounded-3xl p-8 flex flex-col items-center justify-center shadow-xl transition-all duration-300 ${
-                isFlipped ? 'opacity-100' : 'opacity-0 pointer-events-none scale-95'
-              }`}
-              style={{ 
-                backgroundColor: genderInfo?.color || '#3b82f6',
-              }}
-            >
-              <p className="text-white/80 text-sm mb-2">Đáp án</p>
-              <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
+            {/* Back */}
+            <div
+              className={`absolute inset-0 rounded-2xl p-8 flex flex-col items-center justify-center
+                transition-all duration-300
+                ${isFlipped ? 'opacity-100' : 'opacity-0 pointer-events-none scale-95'}`}
+              style={{ background: `linear-gradient(135deg, ${genderColor}, ${genderColor}cc)` }}>
+              <p className="text-white/70 text-[12px] mb-2">Đáp án</p>
+              <h2 className="text-4xl md:text-5xl font-bold text-white mb-3">
                 {currentWord.article} {currentWord.word}
               </h2>
-              <p className="text-white/90 text-xl mb-2">{currentWord.translationEn}</p>
+              <p className="text-white/90 text-[18px] mb-1">{currentWord.translationEn}</p>
               {settings.showVietnamese && currentWord.translationVi && (
-                <p className="text-white/70">{currentWord.translationVi}</p>
+                <p className="text-white/60 text-[14px]">{currentWord.translationVi}</p>
               )}
-              <div className="mt-4 px-4 py-2 bg-white/20 rounded-full">
-                <span className="text-white font-medium">{genderInfo?.label}</span>
+              <div className="mt-4 px-4 py-1.5 bg-white/15 rounded-full">
+                <span className="text-white text-[13px] font-medium">{GenderInfo[currentWord.gender].label}</span>
               </div>
             </div>
           </div>
@@ -304,38 +236,32 @@ export default function FlashcardsPage() {
 
         {/* Action Buttons */}
         {isFlipped ? (
-          <div className="grid grid-cols-2 gap-4">
-            <button
-              onClick={() => handleResponse(false)}
-              className="py-6 rounded-2xl font-bold text-xl text-white bg-red-500 hover:bg-red-600 transition-all hover:scale-105 active:scale-95"
-            >
-              ❌ Chưa nhớ
-              <div className="text-sm font-normal opacity-80 mt-1">← hoặc phím 1</div>
+          <div className="grid grid-cols-2 gap-3">
+            <button onClick={() => handleResponse(false)}
+              className="py-5 rounded-2xl font-bold text-[18px] text-white transition-all duration-200
+                hover:-translate-y-1 hover:shadow-lg active:scale-95 flex items-center justify-center gap-2"
+              style={{ background: 'linear-gradient(135deg, #EF4444, #DC2626)', boxShadow: '0 4px 16px rgba(239,68,68,.25)' }}>
+              <IconX size={18} /> Chưa nhớ
+              <span className="text-[11px] font-medium opacity-70 ml-1">← / 1</span>
             </button>
-            <button
-              onClick={() => handleResponse(true)}
-              className="py-6 rounded-2xl font-bold text-xl text-white bg-green-500 hover:bg-green-600 transition-all hover:scale-105 active:scale-95"
-            >
-              ✅ Đã nhớ
-              <div className="text-sm font-normal opacity-80 mt-1">→ hoặc phím 2</div>
+            <button onClick={() => handleResponse(true)}
+              className="py-5 rounded-2xl font-bold text-[18px] text-white transition-all duration-200
+                hover:-translate-y-1 hover:shadow-lg active:scale-95 flex items-center justify-center gap-2"
+              style={{ background: 'linear-gradient(135deg, #22C55E, #16A34A)', boxShadow: '0 4px 16px rgba(34,197,94,.25)' }}>
+              <IconCheck size={18} /> Đã nhớ
+              <span className="text-[11px] font-medium opacity-70 ml-1">→ / 2</span>
             </button>
           </div>
         ) : (
-          <Button size="lg" onClick={flipCard} className="w-full">
-            🔄 Lật thẻ (Space)
-          </Button>
+          <GameButton onClick={flipCard} className="w-full" color="#3B82F6">
+            <IconRefresh size={16} /> Lật thẻ (Space)
+          </GameButton>
         )}
 
-        <div className="text-center mt-6">
-          <Button 
-            variant="ghost" 
-            onClick={() => { 
-              playClick();
-              router.push('/games'); 
-            }}
-          >
-            ✕ Thoát
-          </Button>
+        <div className="text-center mt-5">
+          <GameButton variant="ghost" onClick={() => { playClick(); router.push('/games'); }}>
+            <IconX size={14} /> Thoát
+          </GameButton>
         </div>
       </div>
     </MainLayout>

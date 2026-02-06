@@ -7,15 +7,19 @@ import { Button } from '@/components/ui/Button';
 import { useSRSStore } from '@/stores/srsStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
-import { useWords, useRandomWords } from '@/hooks/useWords';
-import { ReviewQuality, previewIntervals, getIntervalText, getCardStatus } from '@/lib/srs';
-import { GenderInfo, Word } from '@/types';
+import { useRandomWords } from '@/hooks/useWords';
+import { previewIntervals, getIntervalText } from '@/lib/srs';
+import { GenderInfo, ReviewRating } from '@/types';
 import {
   IconBrain, IconRefresh, IconTarget, IconFlame, IconBookOpen, IconChevronLeft,
 } from '@/components/ui/Icons';
+import type { SVGProps } from "react";
 
+  type IconProps = {
+    size?: number;
+  } & SVGProps<SVGSVGElement>;
 // ─── Inline SVG icons ───
-function IconTrophy({ size = 16, ...props }: { size?: number, [key: string]: any }) {
+function IconTrophy({ size = 16, ...props }: IconProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
       strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }} {...props}>
@@ -75,28 +79,18 @@ export default function SRSReviewPage() {
   const { settings, loadSettings } = useSettingsStore();
   const { playCorrect, playWrong, playCombo, playClick, playLevelUp, playStreak } = useSoundEffects();
 
-  const { cards, isLoaded, loadCards, getDueCards, reviewCard, addWord, getStats } = useSRSStore();
+  const { cards, isLoaded, loadCards, getDueCards, reviewCard, addWords, getStats } = useSRSStore();
 
   const [phase, setPhase] = useState<Phase>('loading');
   const [reviewQueue, setReviewQueue] = useState<string[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
   const [sessionStats, setSessionStats] = useState({ correct: 0, wrong: 0, streak: 0, bestStreak: 0 });
-  const [wordMap, setWordMap] = useState<Record<string, Word>>({});
 
   const dueCards = useMemo(() => getDueCards(), [cards]);
-  const { data: allWordsData } = useWords({ limit: 500 });
   const { data: randomWords, refetch: refetchRandom } = useRandomWords(20, {});
 
   useEffect(() => { loadSettings(); loadCards(); }, [loadSettings, loadCards]);
-
-  useEffect(() => {
-    if (allWordsData?.data) {
-      const map: Record<string, Word> = {};
-      allWordsData.data.forEach(w => { map[w.id] = w; });
-      setWordMap(map);
-    }
-  }, [allWordsData]);
 
   useEffect(() => {
     if (!isLoaded) { setPhase('loading'); return; }
@@ -120,16 +114,16 @@ export default function SRSReviewPage() {
   }, [getDueCards, settings.questionsPerGame, playClick]);
 
   const currentWordId = reviewQueue[currentIndex];
-  const currentWord = currentWordId ? wordMap[currentWordId] : null;
   const currentCard = currentWordId ? useSRSStore.getState().getCard(currentWordId) : null;
+  const currentWord = currentCard?.word || null;
   const intervals = currentCard ? previewIntervals(currentCard) : null;
 
   const flipCard = () => { if (!isFlipped) { playClick(); setIsFlipped(true); } };
 
-  const handleReview = useCallback((quality: ReviewQuality) => {
+  const handleReview = useCallback((rating: ReviewRating) => {
     if (!currentWordId) return;
-    reviewCard(currentWordId, quality);
-    const isCorrect = quality >= 3;
+    reviewCard(currentWordId, rating);
+    const isCorrect = rating !== 'again';
     if (isCorrect) {
       playCorrect();
       setSessionStats(prev => {
@@ -152,10 +146,10 @@ export default function SRSReviewPage() {
       if (phase !== 'reviewing') return;
       if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); if (!isFlipped) flipCard(); }
       else if (isFlipped) {
-        if (e.key === '1') handleReview(1);
-        else if (e.key === '2') handleReview(3);
-        else if (e.key === '3') handleReview(4);
-        else if (e.key === '4') handleReview(5);
+        if (e.key === '1') handleReview('again');
+        else if (e.key === '2') handleReview('hard');
+        else if (e.key === '3') handleReview('good');
+        else if (e.key === '4') handleReview('easy');
       }
     };
     window.addEventListener('keydown', handle);
@@ -165,7 +159,7 @@ export default function SRSReviewPage() {
   const addRandomWords = async () => {
     const result = await refetchRandom();
     if (result.data) {
-      result.data.forEach(word => { addWord(word.id); setWordMap(prev => ({ ...prev, [word.id]: word })); });
+      await addWords(result.data.map(w => w.id));
       playStreak();
       setPhase('setup');
     }
@@ -193,7 +187,7 @@ export default function SRSReviewPage() {
   if (phase === 'empty') {
     return (
       <MainLayout>
-        <div className="max-w-2xl mx-auto px-4 py-12">
+        <div className="max-w-2xl mx-auto py-12">
           <div className="rounded-3xl p-8 text-center border"
             style={{ backgroundColor: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}>
 
@@ -253,7 +247,7 @@ export default function SRSReviewPage() {
 
     return (
       <MainLayout>
-        <div className="max-w-2xl mx-auto px-4 py-12">
+        <div className="max-w-2xl mx-auto py-12">
           <div className="rounded-3xl p-8 text-center border"
             style={{ backgroundColor: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}>
 
@@ -340,7 +334,7 @@ export default function SRSReviewPage() {
 
     return (
       <MainLayout>
-        <div className="max-w-2xl mx-auto px-4 py-12">
+        <div className="max-w-2xl mx-auto py-12">
           <div className="rounded-3xl p-8 text-center border"
             style={{ backgroundColor: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}>
 
@@ -393,7 +387,7 @@ export default function SRSReviewPage() {
 
   return (
     <MainLayout>
-      <div className="max-w-2xl mx-auto px-4 py-6">
+      <div className="max-w-2xl mx-auto py-6">
         {/* Header bar */}
         <div className="flex justify-between items-center mb-4">
           <div className="text-[13px] font-semibold" style={{ color: 'var(--theme-text-muted)' }}>
@@ -481,12 +475,12 @@ export default function SRSReviewPage() {
           <>
             <div className="grid grid-cols-4 gap-2">
               {[
-                { quality: 1 as ReviewQuality, label: 'Quên', color: '#EF4444', interval: intervals.again, hotkey: '1' },
-                { quality: 3 as ReviewQuality, label: 'Khó', color: '#F59E0B', interval: intervals.hard, hotkey: '2' },
-                { quality: 4 as ReviewQuality, label: 'Được', color: '#22C55E', interval: intervals.good, hotkey: '3' },
-                { quality: 5 as ReviewQuality, label: 'Dễ', color: '#3B82F6', interval: intervals.easy, hotkey: '4' },
+                { rating: 'again' as ReviewRating, label: 'Quên', color: '#EF4444', interval: intervals.again, hotkey: '1' },
+                { rating: 'hard' as ReviewRating, label: 'Khó', color: '#F59E0B', interval: intervals.hard, hotkey: '2' },
+                { rating: 'good' as ReviewRating, label: 'Được', color: '#22C55E', interval: intervals.good, hotkey: '3' },
+                { rating: 'easy' as ReviewRating, label: 'Dễ', color: '#3B82F6', interval: intervals.easy, hotkey: '4' },
               ].map(btn => (
-                <button key={btn.quality} onClick={() => handleReview(btn.quality)}
+                <button key={btn.rating} onClick={() => handleReview(btn.rating)}
                   className="py-4 rounded-2xl font-medium transition-all duration-200
                     hover:-translate-y-1 hover:shadow-lg active:translate-y-0"
                   style={{ background: `${btn.color}12`, border: `2px solid ${btn.color}30` }}>
