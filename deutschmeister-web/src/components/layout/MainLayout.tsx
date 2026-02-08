@@ -1,7 +1,8 @@
 'use client';
 
 import { ReactNode, useState, useEffect } from 'react';
-import { Sidebar, SIDEBAR_WIDTH, SIDEBAR_COLLAPSED_WIDTH } from './Sidebar';
+import { usePathname } from 'next/navigation';
+import { Sidebar } from './Sidebar';
 import { Header } from './Header';
 
 interface MainLayoutProps {
@@ -10,24 +11,38 @@ interface MainLayoutProps {
 
 const SIDEBAR_COLLAPSED_KEY = 'deutschmeister-sidebar-collapsed';
 
+// Routes that should render WITHOUT sidebar/header (full-screen)
+const BARE_ROUTES = ['/auth/login', '/auth/register', '/auth'];
+
 export function MainLayout({ children }: MainLayoutProps) {
+  const pathname = usePathname();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mounted, setMounted] = useState(false);
 
+  const isBareRoute = BARE_ROUTES.some(
+    (route) => pathname === route || pathname.startsWith(route + '/')
+  );
+
   useEffect(() => {
     setMounted(true);
-    const saved = localStorage.getItem(SIDEBAR_COLLAPSED_KEY);
-    if (saved !== null) {
-      setSidebarCollapsed(saved === 'true');
+    if (!isBareRoute) {
+      const saved = localStorage.getItem(SIDEBAR_COLLAPSED_KEY);
+      if (saved !== null) {
+        setSidebarCollapsed(saved === 'true');
+      }
     }
-  }, []);
+  }, [isBareRoute]);
 
-  const toggleSidebar = () => {
-    const newState = !sidebarCollapsed;
-    setSidebarCollapsed(newState);
-    localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(newState));
-  };
+  // ─── Auth pages: full-screen, no chrome ───
+  if (isBareRoute) {
+    return (
+      <div className="min-h-screen" style={{ backgroundColor: 'var(--theme-bg-body)' }}>
+        {children}
+      </div>
+    );
+  }
 
+  // ─── Loading state ───
   if (!mounted) {
     return (
       <div className="min-h-screen" style={{ backgroundColor: 'var(--theme-bg-body)' }}>
@@ -41,19 +56,21 @@ export function MainLayout({ children }: MainLayoutProps) {
     );
   }
 
-  const marginLeft = sidebarCollapsed ? SIDEBAR_COLLAPSED_WIDTH : SIDEBAR_WIDTH;
+  const toggleSidebar = () => {
+    const newState = !sidebarCollapsed;
+    setSidebarCollapsed(newState);
+    localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(newState));
+  };
 
+  // ─── Normal pages: sidebar + header ───
   return (
     <div className="min-h-screen" style={{ backgroundColor: 'var(--theme-bg-body)' }}>
       <Sidebar isCollapsed={sidebarCollapsed} onToggle={toggleSidebar} />
       <Header sidebarCollapsed={sidebarCollapsed} />
 
       <main
-        className="pt-16"
-        style={{
-          marginLeft: `${marginLeft}px`,
-          transition: 'margin-left .3s cubic-bezier(.4,0,.2,1)',
-        }}
+        className="transition-all duration-300 ease-in-out pt-16"
+        style={{ marginLeft: sidebarCollapsed ? '72px' : '260px' }}
       >
         <div className="min-h-[calc(100vh-4rem)] px-6 lg:px-8 xl:px-10">
           {children}

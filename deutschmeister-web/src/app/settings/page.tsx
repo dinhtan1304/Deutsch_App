@@ -138,7 +138,7 @@ function SettingToggle({ label, desc, checked, onChange }: {
         <div className="text-[12px] mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>{desc}</div>
       </div>
       <button onClick={() => onChange(!checked)}
-        className="relative w-12 h-6 rounded-full transition-all duration-300 shrink-0"
+        className="relative w-12 h-6 rounded-full transition-all duration-300 flex-shrink-0"
         style={{ backgroundColor: checked ? '#3B82F6' : 'var(--theme-bg-secondary)' }}>
         <div className="absolute top-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-all duration-300"
           style={{ left: checked ? '1.625rem' : '0.125rem' }} />
@@ -232,7 +232,15 @@ export default function SettingsPage() {
     if (confirm('Đặt lại tất cả cài đặt về mặc định?')) { resetSettings(); showToast('Đã đặt lại!'); }
   };
 
-  const handleLogout = async () => { await logout(); router.push('/'); };
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch (e) {
+      console.warn('Logout error:', e);
+    } finally {
+      router.push('/');
+    }
+  };
 
   if (!isLoaded) {
     return (

@@ -51,7 +51,7 @@ export function WeeklyChart({ data }: WeeklyChartProps) {
       </div>
 
       {/* Chart */}
-      <div className="flex items-end justify-between h-44 gap-2 mb-3">
+      <div className="flex items-end justify-between h-38 gap-2 mb-3">
         {data.map((day, i) => {
           const wH = (day.wordsLearned / maxWords) * 100;
           const gH = (day.gamesPlayed / maxGames) * 100;

@@ -77,7 +77,7 @@ export function ActivityHeatmap({ data }: ActivityHeatmapProps) {
 
   return (
     <div
-      className="p-5 rounded-2xl border"
+      className="p-5 rounded-2xl border h-66"
       style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}
     >
       {/* Header */}

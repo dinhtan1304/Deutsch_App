@@ -5,6 +5,7 @@
  * - Refresh token is stored in httpOnly cookie (set by server)
  * - Access token is stored in memory only (not localStorage)
  * - On page refresh, we automatically call /refresh to get new access token
+ * - onAuthExpired callback syncs auth state when tokens become invalid
  *
  * This prevents XSS attacks from stealing refresh tokens
  */
@@ -17,6 +18,18 @@ let accessToken: string | null = null;
 // Flag to prevent multiple simultaneous refresh attempts
 let isRefreshing = false;
 let refreshPromise: Promise<string | null> | null = null;
+
+// Callback to notify auth store when tokens expire
+// This bridges client.ts ↔ zustand authStore to prevent state desync
+let onAuthExpiredCallback: (() => void) | null = null;
+
+/**
+ * Register a callback that fires when auth tokens become invalid.
+ * Called by authStore to sync isAuthenticated state.
+ */
+export const onAuthExpired = (callback: () => void) => {
+  onAuthExpiredCallback = callback;
+};
 
 /**
  * Set access token (stored in memory only)
@@ -92,6 +105,7 @@ async function refreshAccessToken(): Promise<string | null> {
 
       if (!response.ok) {
         clearTokens();
+        onAuthExpiredCallback?.();
         return null;
       }
 
@@ -100,6 +114,7 @@ async function refreshAccessToken(): Promise<string | null> {
       return data.accessToken;
     } catch {
       clearTokens();
+      onAuthExpiredCallback?.();
       return null;
     } finally {
       isRefreshing = false;
@@ -146,17 +161,15 @@ export async function api<T>(
         headers,
         credentials: 'include',
       });
-    } else {
-      // Refresh failed → tokens cleared → redirect to login
-      if (typeof window !== 'undefined') {
-        const isAuthPage = window.location.pathname.startsWith('/auth');
-        if (!isAuthPage) {
-          window.location.href = '/auth/login';
-          // Return a never-resolving promise to prevent further execution
-          return new Promise<T>(() => {});
-        }
+
+      // If STILL 401 after successful refresh → token/session truly invalid
+      if (response.status === 401) {
+        clearTokens();
+        onAuthExpiredCallback?.();
       }
     }
+    // If refresh failed (newToken is null), onAuthExpiredCallback already
+    // called inside refreshAccessToken() — no hard redirect needed
   }
 
   if (!response.ok) {

@@ -3,7 +3,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { authApi, LoginDto, RegisterDto, User } from '@/lib/api/auth';
-import { clearTokens, getAccessToken } from '@/lib/api/client';
+import { clearTokens, getAccessToken, onAuthExpired } from '@/lib/api/client';
 
 interface AuthState {
   user: User | null;
@@ -91,3 +91,17 @@ export const useAuthStore = create<AuthState>()(
     }
   )
 );
+
+// ─── Sync API client token expiry → zustand auth state ───
+// When client.ts detects 401 + refresh failure, this callback
+// resets zustand so Header/UI immediately reflects logged-out state.
+// Without this: clearTokens() removes accessToken but zustand still
+// has isAuthenticated:true in localStorage → Header shows avatar,
+// pages show login form = desync bug.
+onAuthExpired(() => {
+  useAuthStore.setState({
+    user: null,
+    isAuthenticated: false,
+    isLoading: false,
+  });
+});

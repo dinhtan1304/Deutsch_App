@@ -173,7 +173,11 @@ export default function WritingListPage() {
     e.preventDefault();
     e.stopPropagation();
     if (!confirm('Bạn có chắc muốn xóa bài viết này?')) return;
-    await deleteMutation.mutateAsync(id);
+    try {
+      await deleteMutation.mutateAsync(id);
+    } catch (e) {
+      console.warn('Failed to delete writing:', e);
+    }
   };
 
   return (
