@@ -7,7 +7,7 @@ import {
   IconHome, IconBook, IconNotebook, IconLayers, IconGamepad,
   IconPenLine, IconGraduationCap, IconRefresh, IconSettings,
   IconZap, IconCards, IconTimer, IconPencil, IconList, IconBrain,
-  IconChevronRight, IconChevronLeft,
+  IconChevronRight, IconChevronLeft, IconBookOpen,
 } from '@/components/ui/Icons';
 
 // ============================================
@@ -41,7 +41,7 @@ const navItems: NavItem[] = [
       { label: 'Timed Challenge', labelVi: 'Thử thách', icon: IconTimer, href: '/games/timed-challenge' },
     ],
   },
-  { label: 'Grammar', labelVi: 'Ngữ pháp', icon: IconPenLine, href: '/grammar' },
+  { label: 'Grammar', labelVi: 'Ngữ pháp', icon: IconBookOpen, href: '/grammar' },
   {
     label: 'Test', labelVi: 'Luyện thi', icon: IconGraduationCap, href: '/practice-test',
     children: [
