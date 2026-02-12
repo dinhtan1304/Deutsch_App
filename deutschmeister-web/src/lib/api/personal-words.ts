@@ -62,7 +62,7 @@ export interface PersonalWordStats {
 }
 
 export interface ImportWordsDto {
-  words: Array<{
+  rows: Array<{
     word: string;
     wordType: WordType;
     translationEn: string;

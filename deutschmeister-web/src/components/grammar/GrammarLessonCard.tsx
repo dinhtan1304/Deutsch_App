@@ -24,7 +24,7 @@ export const GrammarLessonCard = ({ lesson, progress }: GrammarLessonCardProps) 
                         lesson.level === 'A2' ? 'bg-blue-100 text-blue-800' :
                             'bg-yellow-100 text-yellow-800'
                         }`}>
-                        {lesson.level}
+                        {lesson.level} – Bài {lesson.lessonNumber}
                     </span>
                     {progress?.status === 'completed' && (
                         <span className="text-green-600 text-xl">✓</span>

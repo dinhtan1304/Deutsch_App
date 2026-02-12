@@ -13,6 +13,8 @@ export interface DashboardStats {
   wordsToReview: number;
   gamesPlayed: number;
   startedAt: string;
+  grammarCompleted: number;
+  grammarTotal: number;
 }
 
 export interface ActivityDay {
@@ -49,7 +51,7 @@ export interface TopicProgress {
 }
 
 export interface RecentActivity {
-  type: 'game' | 'word' | 'topic' | 'review';
+  type: 'game' | 'word' | 'topic' | 'review' | 'grammar';
   description: string;
   timestamp: string;
   metadata?: string;

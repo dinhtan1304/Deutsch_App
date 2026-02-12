@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import type { RecentActivity } from '@/types/dashboard';
-import { IconGamepad, IconPencil, IconLayers, IconBrain, IconClock } from '@/components/ui/Icons';
+import { IconGamepad, IconPencil, IconLayers, IconBrain, IconClock, IconGraduationCap } from '@/components/ui/Icons';
 
 interface RecentActivityFeedProps {
   data: RecentActivity[];
@@ -16,10 +16,11 @@ const TYPE_CONFIG: Record<string, {
   accent: string;
   label: string;
 }> = {
-  game:   { icon: IconGamepad, gradient: 'linear-gradient(135deg, #3B82F6, #6366F1)', accent: '#3B82F6', label: 'Game' },
-  word:   { icon: IconPencil,  gradient: 'linear-gradient(135deg, #10B981, #34D399)', accent: '#10B981', label: 'Từ vựng' },
-  topic:  { icon: IconLayers,  gradient: 'linear-gradient(135deg, #8B5CF6, #A855F7)', accent: '#8B5CF6', label: 'Chủ đề' },
-  review: { icon: IconBrain,   gradient: 'linear-gradient(135deg, #F59E0B, #FBBF24)', accent: '#F59E0B', label: 'Ôn tập' },
+  game:    { icon: IconGamepad,       gradient: 'linear-gradient(135deg, #3B82F6, #6366F1)', accent: '#3B82F6', label: 'Game' },
+  word:    { icon: IconPencil,        gradient: 'linear-gradient(135deg, #10B981, #34D399)', accent: '#10B981', label: 'Từ vựng' },
+  topic:   { icon: IconLayers,        gradient: 'linear-gradient(135deg, #8B5CF6, #A855F7)', accent: '#8B5CF6', label: 'Chủ đề' },
+  review:  { icon: IconBrain,         gradient: 'linear-gradient(135deg, #F59E0B, #FBBF24)', accent: '#F59E0B', label: 'Ôn tập' },
+  grammar: { icon: IconGraduationCap, gradient: 'linear-gradient(135deg, #F59E0B, #EF4444)', accent: '#F59E0B', label: 'Ngữ pháp' },
 };
 
 // ─── Inline chevron icon ───

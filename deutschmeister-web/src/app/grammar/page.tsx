@@ -6,6 +6,7 @@ import { GrammarLesson, GrammarProgress } from '@/types/grammar';
 import { GrammarLessonCard } from '@/components/grammar/GrammarLessonCard';
 import { Loading } from '@/components/ui/Loading'; // Assuming Loading component exists
 import { Button } from '@/components/ui/Button';
+import { MainLayout } from '@/components/layout/MainLayout';
 
 export default function GrammarDashboardPage() {
     const [lessons, setLessons] = useState<GrammarLesson[]>([]);
@@ -32,22 +33,34 @@ export default function GrammarDashboardPage() {
         fetchData();
     }, []);
 
-    const filteredLessons = filterLevel === 'ALL'
+    const filteredLessons = (filterLevel === 'ALL'
         ? lessons
-        : lessons.filter(l => l.level === filterLevel);
+        : lessons.filter(l => l.level === filterLevel)
+    ).sort((a, b) => a.lessonNumber - b.lessonNumber);
 
     const getLessonProgress = (lessonId: string) => {
         return progress.find(p => p.lessonId === lessonId);
     };
 
-    if (loading) return <Loading />; // Or a skeleton loader
+    if (loading) return <MainLayout><Loading /></MainLayout>;
 
     return (
-        <div className="container mx-auto px-4 py-8">
+        <MainLayout>
+        <div className="py-8">
             <div className="flex flex-col md:flex-row justify-between items-center mb-8">
-                <div>
-                    <h1 className="text-3xl font-bold text-gray-900 mb-2">Ngữ pháp tiếng Đức</h1>
-                    <p className="text-gray-600">Lộ trình học ngữ pháp từ A1 đến B1</p>
+                <div className="flex items-center gap-3">
+                    <div className="w-11 h-11 rounded-2xl flex items-center justify-center"
+                        style={{ background: 'linear-gradient(135deg, #3B82F6, #6366F1)' }}>
+                        <svg width={22} height={22} viewBox="0 0 24 24" fill="none" stroke="white"
+                            strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}>
+                            <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" />
+                            <path d="M8 7h6" /><path d="M8 11h8" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 className="text-2xl font-bold" style={{ color: 'var(--theme-text-primary)' }}>Ngữ pháp tiếng Đức</h1>
+                        <p className="text-[13px]" style={{ color: 'var(--theme-text-muted)' }}>Lộ trình học ngữ pháp từ A1 đến B1</p>
+                    </div>
                 </div>
 
                 <div className="flex gap-2 mt-4 md:mt-0 bg-gray-100 p-1 rounded-xl">
@@ -82,5 +95,6 @@ export default function GrammarDashboardPage() {
                 </div>
             )}
         </div>
+        </MainLayout>
     );
 }

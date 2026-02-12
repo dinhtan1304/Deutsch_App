@@ -6,6 +6,18 @@ import {
   IconClock, IconLayers, IconBrain,
 } from '@/components/ui/Icons';
 
+// Inline grammar icon (no dependency on lucide for this one)
+function IconGraduationCap({ size = 16, className }: { size?: number; className?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round"
+      className={className} style={{ display: 'block' }}>
+      <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
+      <path d="M6 12v5c3 3 9 3 12 0v-5" />
+    </svg>
+  );
+}
+
 interface StatsCardsProps {
   stats: DashboardStats;
 }
@@ -72,6 +84,15 @@ const cardConfigs: StatCardConfig[] = [
     accent: '#EC4899',
   },
   {
+    icon: IconGraduationCap,
+    label: 'Ngữ pháp',
+    getValue: s => s.grammarCompleted ?? 0,
+    getSubValue: s => `/ ${s.grammarTotal ?? 0} bài học`,
+    gradient: 'linear-gradient(135deg, rgba(245,158,11,.12), rgba(252,211,77,.08))',
+    iconBg: 'linear-gradient(135deg, #F59E0B, #FCD34D)',
+    accent: '#F59E0B',
+  },
+  {
     icon: IconBrain,
     label: 'Cần ôn tập',
     getValue: s => s.wordsToReview,
@@ -84,7 +105,7 @@ const cardConfigs: StatCardConfig[] = [
 
 export function StatsCards({ stats }: StatsCardsProps) {
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
       {cardConfigs.map((card, i) => {
         const Icon = card.icon;
         const value = card.getValue(stats);

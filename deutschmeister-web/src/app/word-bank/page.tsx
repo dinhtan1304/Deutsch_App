@@ -100,7 +100,7 @@ export default function WordBankPage() {
       superlativ: r.superlativ, kasus: r.kasus, examples: r.examples,
       level: r.level, category: r.category, tags: r.tags, notes: r.notes,
     }));
-    return importMutation.mutateAsync({ words: mapped });
+    return importMutation.mutateAsync({ rows: mapped });
   };
 
   const handleExport = () => exportMutation.mutate();
