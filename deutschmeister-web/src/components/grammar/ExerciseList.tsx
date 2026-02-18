@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { Exercise, SubmitResult } from '@/types/grammar';
+import { HighlightedText } from '@/components/word-highlight/HighlightedText';
 
 /* ─── Inline Icons ─── */
 function IconCheck({ size = 16, style }: { size?: number; style?: React.CSSProperties }) {
@@ -101,7 +102,9 @@ function MCQInput({ options, value, onChange, disabled }: {
                         </div>
                         <input type="radio" name="mcq" value={idx} checked={isSelected}
                             onChange={() => onChange(String(idx))} disabled={disabled} className="sr-only" />
-                        <span className="text-[14px] font-medium" style={{ color: 'var(--theme-text-primary)' }}>{opt}</span>
+                        <span className="text-[14px] font-medium" style={{ color: 'var(--theme-text-primary)' }}>
+                            <HighlightedText text={opt} />
+                        </span>
                     </label>
                 );
             })}
@@ -438,11 +441,11 @@ export const ExerciseList = ({ exercises, onSubmit }: ExerciseListProps) => {
                 {/* Question */}
                 <div className="px-6 py-5">
                     <h3 className="text-[16px] font-bold mb-1.5" style={{ color: 'var(--theme-text-primary)' }}>
-                        {exercise.questionVi}
+                        <HighlightedText text={exercise.questionVi as any} />
                     </h3>
                     {exercise.questionDe && exercise.questionDe !== exercise.questionVi && (
                         <p className="text-[13px] italic" style={{ color: 'var(--theme-text-muted)' }}>
-                            {exercise.questionDe}
+                            <HighlightedText text={exercise.questionDe} />
                         </p>
                     )}
                 </div>

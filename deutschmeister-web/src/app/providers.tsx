@@ -4,6 +4,9 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useState } from 'react';
 import { ErrorBoundary } from '@/components/ui';
 import { ApiError, clearTokens } from '@/lib/api/client';
+import { DictionaryProvider } from '@/providers/DictionaryProvider';
+import { WordHighlightProvider } from '@/providers/WordHighlightProvider';
+import { GrammarAnalyzerProvider } from '@/providers/GrammarAnalyzerProvider';
 
 /**
  * Global handler for API errors in React Query.
@@ -27,9 +30,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
       new QueryClient({
         defaultOptions: {
           queries: {
-            staleTime: 60 * 1000, // 1 minute
+            staleTime: 60 * 1000,
             retry: (failureCount, error) => {
-              // Don't retry on 401 (auth errors)
               if (error instanceof ApiError && error.status === 401) return false;
               return failureCount < 1;
             },
@@ -45,7 +47,13 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
-        {children}
+        <WordHighlightProvider>
+          <DictionaryProvider>
+            <GrammarAnalyzerProvider>
+              {children}
+            </GrammarAnalyzerProvider>
+          </DictionaryProvider>
+        </WordHighlightProvider>
       </QueryClientProvider>
     </ErrorBoundary>
   );

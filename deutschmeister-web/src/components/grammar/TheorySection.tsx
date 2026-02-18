@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import { usePronunciation } from '@/hooks/usePronunciation';
+import { HighlightedText } from '@/components/word-highlight/HighlightedText';
 
 interface TheorySectionProps {
     content: {
@@ -114,7 +115,7 @@ export const TheorySection = ({ content }: TheorySectionProps) => {
                         {/* ── Description ── */}
                         <div className="px-6 py-4">
                             <p className="text-[14px] leading-relaxed" style={{ color: 'var(--theme-text-secondary)' }}>
-                                {section.content}
+                                <HighlightedText text={section.content} />
                             </p>
                         </div>
 
@@ -159,7 +160,7 @@ export const TheorySection = ({ content }: TheorySectionProps) => {
                                                                     fontFamily: isIPAorMeta(cell) ? 'monospace' : 'inherit',
                                                                     fontSize: isIPAorMeta(cell) ? '12px' : undefined,
                                                                 }}>
-                                                                {cell}
+                                                                {isIPAorMeta(cell) ? cell : <HighlightedText text={cell} />}
                                                             </td>
                                                         ))}
                                                         {audioCol >= 0 && (
