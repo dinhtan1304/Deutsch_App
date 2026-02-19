@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { MainLayout } from '@/components/layout/MainLayout';
 import {
   derRules,
   dieRules,
@@ -137,7 +136,6 @@ export default function TipsPage() {
   const [activeTab, setActiveTab] = useState<TabType>('all');
 
   return (
-    <MainLayout>
       <div className="py-6">
 
         {/* ─── Header ─── */}
@@ -337,6 +335,5 @@ export default function TipsPage() {
         </div>
 
       </div>
-    </MainLayout>
   );
 }

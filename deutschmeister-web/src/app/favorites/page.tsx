@@ -2,7 +2,6 @@
 
 import { useMemo } from 'react';
 import Link from 'next/link';
-import { MainLayout } from '@/components/layout/MainLayout';
 import { WordCard } from '@/components/words/WordCard';
 import { useFavorites, useToggleFavorite } from '@/hooks/useFavorites';
 import { useAuthStore } from '@/stores/authStore';
@@ -64,7 +63,6 @@ export default function FavoritesPage() {
 
   if (!isAuthenticated) {
     return (
-      <MainLayout>
         <div className="max-w-md mx-auto py-20 text-center">
           <div className="w-16 h-16 rounded-2xl mx-auto flex items-center justify-center mb-4"
             style={{ background: 'linear-gradient(135deg, #F59E0B, #F97316)' }}>
@@ -78,12 +76,10 @@ export default function FavoritesPage() {
             <IconLogIn size={16} /> Đăng nhập
           </Link>
         </div>
-      </MainLayout>
     );
   }
 
   return (
-    <MainLayout>
       <div className="py-6">
         {/* Header */}
         <div className="flex items-start justify-between mb-6">
@@ -180,6 +176,5 @@ export default function FavoritesPage() {
           </div>
         )}
       </div>
-    </MainLayout>
   );
 }

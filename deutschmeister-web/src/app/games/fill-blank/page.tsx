@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { MainLayout } from '@/components/layout/MainLayout';
 import { useRandomWords } from '@/hooks/useWords';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
@@ -127,7 +126,6 @@ export default function FillBlankPage() {
   // ─── Setup ───
   if (phase === 'setup') {
     return (
-      <MainLayout>
         <GameSetupCard icon={({ size }) => <IconPenTool size={size} style={{ color: 'white' }} />} iconColor="#8B5CF6" title="Fill in the Blank">
           <p className="text-[14px] mb-1" style={{ color: 'var(--theme-text-secondary)' }}>
             Điền mạo từ đúng cho <span className="font-bold" style={{ color: '#8B5CF6' }}>{questionsCount} từ</span>
@@ -143,7 +141,6 @@ export default function FillBlankPage() {
             <GameButton variant="outline" onClick={() => router.push('/games')}><IconChevronLeft size={16} /> Quay lại</GameButton>
           </div>
         </GameSetupCard>
-      </MainLayout>
     );
   }
 
@@ -154,7 +151,7 @@ export default function FillBlankPage() {
     const accuracy = Math.round((correctCount / questionsCount) * 100);
 
     return (
-      <MainLayout>
+      <>
         <GameResultCard accuracy={accuracy} title="Kết quả">
           <div className="my-5">
             <div className="text-5xl font-extrabold" style={{ color: '#8B5CF6' }}>{score}</div>
@@ -179,7 +176,7 @@ export default function FillBlankPage() {
             getSelectedLabel={a => !a.isCorrect ? (a.userInput || '(trống)') : null}
           />
         </div>
-      </MainLayout>
+      </>
     );
   }
 
@@ -187,7 +184,6 @@ export default function FillBlankPage() {
   const genderColor = currentWord ? (AC[currentWord.gender] || '#8B5CF6') : '#8B5CF6';
 
   return (
-    <MainLayout>
       <div className="max-w-2xl mx-auto px-4 sm:px-6 py-5">
         {/* Header */}
         <div className="flex justify-between items-center mb-3">
@@ -287,6 +283,5 @@ export default function FillBlankPage() {
           </GameButton>
         </div>
       </div>
-    </MainLayout>
   );
 }

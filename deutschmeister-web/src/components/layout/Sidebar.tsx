@@ -244,7 +244,7 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                     {/* Tooltip — collapsed hover (parent with children) */}
                     {tooltip?.href === item.href && (
                       <div
-                        className="fixed z-60 px-3 py-2 rounded-xl shadow-lg text-[13px] font-medium whitespace-nowrap pointer-events-none"
+                        className="fixed z-50 px-3 py-2 rounded-xl shadow-lg text-[13px] font-medium whitespace-nowrap pointer-events-none"
                         style={{
                           left: `${SIDEBAR_COLLAPSED_WIDTH + 8}px`,
                           top: `${tooltip.top}px`,

@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { MainLayout } from '@/components/layout/MainLayout';
 import { useRandomWords } from '@/hooks/useWords';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
@@ -97,7 +96,6 @@ export default function FlashcardsPage() {
   // ─── Setup ───
   if (phase === 'setup') {
     return (
-      <MainLayout>
         <GameSetupCard icon={({ size }) => <IconLayers size={size} style={{ color: 'white' }} />} iconColor="#22C55E" title="Flashcards">
           <p className="text-[14px] mb-1" style={{ color: 'var(--theme-text-secondary)' }}>
             Ôn tập <span className="font-bold" style={{ color: '#22C55E' }}>{cardsCount} từ</span> với thẻ ghi nhớ
@@ -113,7 +111,6 @@ export default function FlashcardsPage() {
             <GameButton variant="outline" onClick={() => router.push('/games')}><IconChevronLeft size={16} /> Quay lại</GameButton>
           </div>
         </GameSetupCard>
-      </MainLayout>
     );
   }
 
@@ -125,7 +122,7 @@ export default function FlashcardsPage() {
     const needReview = results.filter(r => !r.knew);
 
     return (
-      <MainLayout>
+      <>
         <GameResultCard accuracy={accuracy} title="Hoàn thành!">
           <div className="grid grid-cols-3 gap-2 my-5">
             <StatCard label="Đã nhớ" value={knewCount} color="#22C55E" />
@@ -167,7 +164,7 @@ export default function FlashcardsPage() {
             </div>
           </div>
         )}
-      </MainLayout>
+      </>
     );
   }
 
@@ -175,7 +172,6 @@ export default function FlashcardsPage() {
   const genderColor = currentWord ? (AC[currentWord.gender] || '#3B82F6') : '#3B82F6';
 
   return (
-    <MainLayout>
       <div className="max-w-2xl mx-auto px-4 sm:px-6 py-5">
         {/* Header */}
         <div className="flex justify-between items-center mb-3">
@@ -265,6 +261,5 @@ export default function FlashcardsPage() {
           </GameButton>
         </div>
       </div>
-    </MainLayout>
   );
 }

@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { MainLayout } from '@/components/layout/MainLayout';
 import {
   StatsCards,
   ActivityHeatmap,
@@ -361,7 +360,6 @@ export default function HomePage() {
   const { isAuthenticated, isLoading: authLoading } = useAuthStore();
 
   return (
-    <MainLayout>
       <div className="max-w-7xl mx-auto px-4 py-6">
         {authLoading ? (
           <DashboardSkeleton />
@@ -371,6 +369,5 @@ export default function HomePage() {
           <GuestLanding />
         )}
       </div>
-    </MainLayout>
   );
 }

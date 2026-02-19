@@ -32,43 +32,26 @@ export const onAuthExpired = (callback: () => void) => {
 };
 
 /**
- * Set access token (stored in memory only)
+ * Set access token (stored in memory only — never persisted to localStorage)
  */
 export const setAccessToken = (token: string | null) => {
   accessToken = token;
-
-  // Also store in localStorage for persistence across page refreshes
-  // Note: This is the ACCESS token only, not the refresh token
-  if (typeof window !== 'undefined') {
-    if (token) {
-      localStorage.setItem('accessToken', token);
-    } else {
-      localStorage.removeItem('accessToken');
-    }
-  }
 };
 
 /**
- * Get access token from memory or localStorage
+ * Get access token from memory only.
+ * If null, initAuth() will call /refresh to restore it via httpOnly cookie.
  */
 export const getAccessToken = (): string | null => {
-  if (accessToken) return accessToken;
-
-  // Try to restore from localStorage (for page refreshes)
-  if (typeof window !== 'undefined') {
-    accessToken = localStorage.getItem('accessToken');
-  }
   return accessToken;
 };
 
 /**
- * Clear all tokens (logout)
+ * Clear access token from memory (logout).
+ * Refresh token cookie is cleared server-side on logout endpoint.
  */
 export const clearTokens = () => {
   accessToken = null;
-  if (typeof window !== 'undefined') {
-    localStorage.removeItem('accessToken');
-  }
   // Note: Refresh token cookie will be cleared by server on logout
 };
 

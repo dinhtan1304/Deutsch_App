@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { MainLayout } from '@/components/layout/MainLayout';
 import { useWritingHistory, useWritingStats, useDeleteWriting } from '@/hooks/useWriting';
 
 // ─── Inline SVG Icons ───
@@ -181,7 +180,6 @@ export default function WritingListPage() {
   };
 
   return (
-    <MainLayout>
       <div className="py-6">
 
         {/* ─── Header ─── */}
@@ -337,6 +335,5 @@ export default function WritingListPage() {
         )}
 
       </div>
-    </MainLayout>
   );
 }

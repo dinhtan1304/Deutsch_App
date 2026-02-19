@@ -3,7 +3,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { MainLayout } from '@/components/layout/MainLayout';
 import { useTopic, useUpdateTopicProgress } from '@/hooks/useTopics';
 import { useAuthStore } from '@/stores/authStore';
 import type { TopicWord } from '@/types/topic';
@@ -357,7 +356,6 @@ export default function TopicDetailPage() {
   // Loading state
   if (isLoading) {
     return (
-      <MainLayout>
         <div className="py-8">
           <div className="animate-pulse space-y-4">
             <div className="h-8 rounded-lg w-1/3" style={{ backgroundColor: 'var(--theme-bg-secondary)' }} />
@@ -370,14 +368,12 @@ export default function TopicDetailPage() {
             </div>
           </div>
         </div>
-      </MainLayout>
     );
   }
 
   // Error state
   if (error || !topic) {
     return (
-      <MainLayout>
         <div className="py-16 text-center">
           <div className="w-16 h-16 rounded-2xl mx-auto flex items-center justify-center mb-4"
             style={{ background: 'linear-gradient(135deg, rgba(239,68,68,.12), rgba(239,68,68,.06))' }}>
@@ -395,12 +391,10 @@ export default function TopicDetailPage() {
             <IconChevronLeft size={16} /> Quay lại danh sách
           </Link>
         </div>
-      </MainLayout>
     );
   }
 
   return (
-    <MainLayout>
       <div className="py-6">
         {/* Breadcrumb */}
         <div className="flex items-center gap-1.5 text-[13px] mb-5">
@@ -661,6 +655,5 @@ export default function TopicDetailPage() {
           )}
         </div>
       </div>
-    </MainLayout>
   );
 }

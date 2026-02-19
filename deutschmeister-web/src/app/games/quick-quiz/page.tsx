@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { MainLayout } from '@/components/layout/MainLayout';
 import { useRandomWords } from '@/hooks/useWords';
 import { Word, Gender, GenderInfo } from '@/types';
 import { speakGerman } from '@/lib/utils';
@@ -63,7 +62,6 @@ export default function QuickQuizPage() {
   // ─── Setup ───
   if (phase === 'setup') {
     return (
-      <MainLayout>
         <GameSetupCard icon={({ size }) => <IconZap size={size} style={{ color: 'white' }} />} iconColor="#F59E0B" title="Quick Quiz">
           <p className="text-[14px] mb-6" style={{ color: 'var(--theme-text-secondary)' }}>
             Chọn mạo từ đúng cho <span className="font-bold" style={{ color: '#F59E0B' }}>{TOTAL_QUESTIONS} từ</span> tiếng Đức
@@ -78,7 +76,6 @@ export default function QuickQuizPage() {
             <GameButton variant="outline" onClick={() => router.push('/games')}><IconChevronLeft size={16} /> Quay lại</GameButton>
           </div>
         </GameSetupCard>
-      </MainLayout>
     );
   }
 
@@ -87,7 +84,7 @@ export default function QuickQuizPage() {
     const percentage = Math.round((score / TOTAL_QUESTIONS) * 100);
 
     return (
-      <MainLayout>
+      <>
         <GameResultCard accuracy={percentage} title="Hoàn thành!">
           <p className="text-[15px] mb-4" style={{ color: 'var(--theme-text-secondary)' }}>
             Bạn đúng {score} trên {TOTAL_QUESTIONS} câu
@@ -110,7 +107,7 @@ export default function QuickQuizPage() {
             getSelectedLabel={a => !a.isCorrect ? GenderInfo[a.selected].article : null}
           />
         </div>
-      </MainLayout>
+      </>
     );
   }
 
@@ -122,7 +119,6 @@ export default function QuickQuizPage() {
   ];
 
   return (
-    <MainLayout>
       <div className="max-w-2xl mx-auto px-4 sm:px-6 py-5">
         {/* Header */}
         <div className="flex justify-between text-[13px] font-semibold mb-3" style={{ color: 'var(--theme-text-muted)' }}>
@@ -207,6 +203,5 @@ export default function QuickQuizPage() {
           </GameButton>
         </div>
       </div>
-    </MainLayout>
   );
 }

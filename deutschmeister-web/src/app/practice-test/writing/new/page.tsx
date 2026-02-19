@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { MainLayout } from '@/components/layout/MainLayout';
 import { useWritingTopics, useGeneratePrompt } from '@/hooks/useWriting';
 
 // ─── Inline SVG Icons ───
@@ -79,7 +78,6 @@ export default function NewWritingPage() {
   const activeColor = LEVEL_COLORS[level] || '#3B82F6';
 
   return (
-    <MainLayout>
       <div className="py-6">
 
         {/* Header */}
@@ -273,6 +271,5 @@ export default function NewWritingPage() {
 
         </div>
       </div>
-    </MainLayout>
   );
 }

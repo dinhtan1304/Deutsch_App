@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import { MainLayout } from '@/components/layout/MainLayout';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
 import {
   IconGamepad, IconTarget, IconClock, IconPenTool, IconLayers,
@@ -32,7 +31,6 @@ export default function GamesPage() {
   const { playClick } = useSoundEffects();
 
   return (
-    <MainLayout>
       <div className="py-6">
         {/* Header */}
         <div className="flex items-center gap-3 mb-6">
@@ -146,7 +144,6 @@ export default function GamesPage() {
           </div>
         </div>
       </div>
-    </MainLayout>
   );
 }
 

@@ -11,7 +11,6 @@ import { Button } from '@/components/ui/Button';
 import { IconArrowLeft, IconBookOpen, IconPenLine } from '@/components/ui/Icons';
 import Link from 'next/link';
 import { cn } from '@/lib/utils'; // Assuming utils exist
-import { MainLayout } from '@/components/layout/MainLayout';
 
 export default function GrammarLessonPage() {
     const params = useParams();
@@ -45,11 +44,14 @@ export default function GrammarLessonPage() {
         return await grammarApi.submitExercises(lesson.id, answers);
     };
 
-    if (loading) return <MainLayout><Loading /></MainLayout>;
-    if (!lesson) return <MainLayout><div className="text-center py-12">Lesson not found</div></MainLayout>;
+    if (loading) return
+<Loading />
+;
+    if (!lesson) return
+<div className="text-center py-12">Lesson not found</div>
+;
 
     return (
-        <MainLayout>
         <div className="py-8 max-w-4xl mx-auto">
             {/* Header */}
             <div className="mb-8">
@@ -122,6 +124,5 @@ export default function GrammarLessonPage() {
                 )}
             </div>
         </div>
-        </MainLayout>
     );
 }

@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { MainLayout } from '@/components/layout/MainLayout';
 import { useWritingSession } from '@/hooks/useWriting';
 import type { WritingError } from '@/lib/api/writing';
 
@@ -155,7 +154,6 @@ export default function WritingResultPage() {
 
   if (isLoading) {
     return (
-      <MainLayout>
         <div className="py-6 space-y-6">
           <div className="h-8 w-48 rounded-lg animate-pulse" style={{ backgroundColor: 'var(--theme-bg-secondary)' }} />
           <div className="grid grid-cols-1 md:grid-cols-5 gap-5">
@@ -166,13 +164,11 @@ export default function WritingResultPage() {
             </div>
           </div>
         </div>
-      </MainLayout>
     );
   }
 
   if (isError || !session || session.status !== 'GRADED') {
     return (
-      <MainLayout>
         <div className="py-20 text-center">
           <div className="w-16 h-16 rounded-2xl mx-auto flex items-center justify-center mb-4"
             style={{ background: 'linear-gradient(135deg, #6366F1, #8B5CF6)' }}>
@@ -185,7 +181,6 @@ export default function WritingResultPage() {
             ← Quay lại danh sách
           </Link>
         </div>
-      </MainLayout>
     );
   }
 
@@ -195,7 +190,6 @@ export default function WritingResultPage() {
   const filteredErrors = filterType ? errors.filter(e => e.errorType === filterType) : errors;
 
   return (
-    <MainLayout>
       <div className="py-6">
 
         {/* Header */}
@@ -357,6 +351,5 @@ export default function WritingResultPage() {
         </div>
 
       </div>
-    </MainLayout>
   );
 }

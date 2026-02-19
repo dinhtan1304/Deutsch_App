@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { MainLayout } from '@/components/layout/MainLayout';
 import { useRandomWords } from '@/hooks/useWords';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
@@ -106,7 +105,6 @@ export default function GenderQuizPage() {
   // ─── Setup Screen ───
   if (phase === 'setup') {
     return (
-      <MainLayout>
         <GameSetupCard icon={({ size }) => <IconTarget size={size} style={{ color: 'white' }} />} iconColor="#3B82F6" title="Gender Quiz">
           <p className="text-[14px] mb-1" style={{ color: 'var(--theme-text-secondary)' }}>
             Chọn mạo từ đúng cho <span className="font-bold" style={{ color: '#3B82F6' }}>{questionsCount} từ</span>
@@ -139,7 +137,6 @@ export default function GenderQuizPage() {
             </GameButton>
           </div>
         </GameSetupCard>
-      </MainLayout>
     );
   }
 
@@ -150,7 +147,7 @@ export default function GenderQuizPage() {
     const accuracy = Math.round((correctCount / questionsCount) * 100);
 
     return (
-      <MainLayout>
+      <>
         <GameResultCard accuracy={accuracy} title="Kết quả">
           {/* Score */}
           <div className="my-5">
@@ -178,13 +175,12 @@ export default function GenderQuizPage() {
             getSelectedLabel={a => !a.isCorrect ? GenderInfo[a.selectedAnswer].article : null}
           />
         </div>
-      </MainLayout>
+      </>
     );
   }
 
   // ─── Playing Screen ───
   return (
-    <MainLayout>
       <div className="max-w-2xl mx-auto px-4 sm:px-6 py-5">
         {/* Header */}
         <div className="flex justify-between items-center mb-3">
@@ -246,6 +242,5 @@ export default function GenderQuizPage() {
           </GameButton>
         </div>
       </div>
-    </MainLayout>
   );
 }

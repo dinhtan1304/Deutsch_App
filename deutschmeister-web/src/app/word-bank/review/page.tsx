@@ -2,7 +2,6 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import Link from 'next/link';
-import { MainLayout } from '@/components/layout/MainLayout';
 import { useSRSDue, useSRSStats, useReviewWord, SRSRating } from '@/hooks/usePersonalWords';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
 import { PersonalWord, getSRSStatus, getIntervalText, SRSStatusInfo, WordTypeInfo, GenderInfo } from '@/types/personalWord';
@@ -420,7 +419,6 @@ export default function WordBankReviewPage() {
   const handleRestart = useCallback(() => { setSession(null); refetch(); }, [refetch]);
 
   return (
-    <MainLayout>
       <div className="max-w-4xl mx-auto py-6">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
@@ -537,6 +535,5 @@ export default function WordBankReviewPage() {
           </div>
         </div>
       </div>
-    </MainLayout>
   );
 }

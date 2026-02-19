@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { MainLayout } from '@/components/layout/MainLayout';
 import { useWritingSession, useSaveDraft, useSubmitWriting } from '@/hooks/useWriting';
 
 // ─── Inline SVG Icons ───
@@ -139,7 +138,6 @@ export default function WritingEditorPage() {
   // Loading / Error
   if (isLoading) {
     return (
-      <MainLayout>
         <div className="py-6">
           <div className="space-y-4">
             <div className="h-8 w-48 rounded-lg animate-pulse" style={{ backgroundColor: 'var(--theme-bg-secondary)' }} />
@@ -147,13 +145,11 @@ export default function WritingEditorPage() {
             <div className="h-64 rounded-xl animate-pulse" style={{ backgroundColor: 'var(--theme-bg-secondary)' }} />
           </div>
         </div>
-      </MainLayout>
     );
   }
 
   if (isError || !session) {
     return (
-      <MainLayout>
         <div className="py-20 text-center">
           <div className="w-16 h-16 rounded-2xl mx-auto flex items-center justify-center mb-4"
             style={{ background: 'linear-gradient(135deg, #EF4444, #EF4444cc)' }}>
@@ -165,7 +161,6 @@ export default function WritingEditorPage() {
             <IconChevronLeft size={14} /> Quay lại danh sách
           </Link>
         </div>
-      </MainLayout>
     );
   }
 
@@ -177,7 +172,6 @@ export default function WritingEditorPage() {
   const progressColor = wordCount > session.wordCountMax ? '#F97316' : isInRange ? '#22C55E' : '#3B82F6';
 
   return (
-    <MainLayout>
       <div className="py-6">
 
         {/* Header */}
@@ -286,7 +280,7 @@ export default function WritingEditorPage() {
               {/* Textarea */}
               <textarea ref={textareaRef} value={text} onChange={e => setText(e.target.value)} autoFocus
                 placeholder={`Schreiben Sie hier Ihren Text...\n\nViết bài của bạn ở đây... (${session.wordCountMin}–${session.wordCountMax} từ)`}
-                className="w-full min-h-[28rem] p-5 bg-transparent resize-y focus:outline-none text-[15px] leading-relaxed"
+                className="w-full min-h-112 p-5 bg-transparent resize-y focus:outline-none text-[15px] leading-relaxed"
                 style={{ color: 'var(--theme-text-primary)' }} />
 
               {/* Progress bar */}
@@ -327,6 +321,5 @@ export default function WritingEditorPage() {
         </div>
 
       </div>
-    </MainLayout>
   );
 }

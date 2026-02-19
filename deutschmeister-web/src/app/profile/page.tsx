@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import { MainLayout } from '@/components/layout/MainLayout';
 import { useAuthStore } from '@/stores/authStore';
 import { useUserStats } from '@/hooks/useUser';
 
@@ -64,7 +63,6 @@ export default function ProfilePage() {
 
   if (!isAuthenticated) {
     return (
-      <MainLayout>
         <div className="max-w-md mx-auto py-20 text-center">
           <div className="w-16 h-16 rounded-2xl mx-auto flex items-center justify-center mb-4"
             style={{ background: 'linear-gradient(135deg, #3B82F6, #6366F1)' }}>
@@ -78,7 +76,6 @@ export default function ProfilePage() {
             <IconLogIn size={16} /> Đăng nhập
           </Link>
         </div>
-      </MainLayout>
     );
   }
 
@@ -96,7 +93,6 @@ export default function ProfilePage() {
   ];
 
   return (
-    <MainLayout>
       <div className="py-6">
 
         {/* Profile Header */}
@@ -171,6 +167,5 @@ export default function ProfilePage() {
           </Link>
         </div>
       </div>
-    </MainLayout>
   );
 }

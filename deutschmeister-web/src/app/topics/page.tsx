@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { MainLayout } from '@/components/layout/MainLayout';
 import { TopicCard } from '@/components/topics/TopicCard';
 import { useTopics, useUserTopicsProgress, useTopicsStats } from '@/hooks/useTopics';
 import { useAuthStore } from '@/stores/authStore';
@@ -149,7 +148,6 @@ export default function TopicsPage() {
   ];
 
   return (
-    <MainLayout>
       <div className="py-6">
         {/* Header */}
         <div className="flex items-center gap-3 mb-6">
@@ -286,6 +284,5 @@ export default function TopicsPage() {
           </div>
         </div>
       </div>
-    </MainLayout>
   );
 }

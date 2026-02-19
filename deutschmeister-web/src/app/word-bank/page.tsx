@@ -2,7 +2,6 @@
 
 import { useState, useCallback } from 'react';
 import Link from 'next/link';
-import { MainLayout } from '@/components/layout/MainLayout';
 import { WordBankCard } from '@/components/word-bank/WordBankCard';
 import { ImportModal } from '@/components/word-bank/ImportModal';
 import { useWordBankUI } from '@/stores/wordBankStore';
@@ -109,19 +108,17 @@ export default function WordBankPage() {
 
   if (isLoading) {
     return (
-      <MainLayout>
         <div className="flex items-center justify-center py-20">
           <div className="w-12 h-12 rounded-2xl flex items-center justify-center animate-pulse"
             style={{ background: 'linear-gradient(135deg, #8B5CF6, #6366F1)' }}>
             <IconNotebook size={24} className="text-white" />
           </div>
         </div>
-      </MainLayout>
     );
   }
 
   return (
-    <MainLayout>
+    <>
       <div className="py-6">
 
         {/* ─── Header ─── */}
@@ -532,6 +529,6 @@ export default function WordBankPage() {
         onClose={() => setShowImportModal(false)}
         onImport={handleImport}
       />
-    </MainLayout>
+    </>
   );
 }

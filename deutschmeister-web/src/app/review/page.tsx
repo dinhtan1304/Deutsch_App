@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { MainLayout } from '@/components/layout/MainLayout';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
 import { useRandomWords } from '@/hooks/useWords';
@@ -190,15 +189,18 @@ export default function SRSReviewPage() {
 
   // ─── LOADING ───
   if (phase === 'loading') {
-    return (<MainLayout><div className="flex items-center justify-center min-h-[60vh]">
+    return (
+<div className="flex items-center justify-center min-h-[60vh]">
       <div className="w-14 h-14 rounded-2xl flex items-center justify-center animate-pulse"
         style={{ background: 'linear-gradient(135deg, #3B82F6, #6366F1)' }}>
-        <IconBrain size={28} className="text-white" /></div></div></MainLayout>);
+        <IconBrain size={28} className="text-white" /></div></div>
+);
   }
 
   // ─── EMPTY ───
   if (phase === 'empty') {
-    return (<MainLayout><div className="max-w-2xl mx-auto py-12">
+    return (
+<div className="max-w-2xl mx-auto py-12">
       <div className="rounded-3xl p-8 text-center border"
         style={{ backgroundColor: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}>
         <div className="w-20 h-20 rounded-3xl mx-auto flex items-center justify-center mb-6"
@@ -222,7 +224,8 @@ export default function SRSReviewPage() {
           <p className="text-[13px]" style={{ color: 'var(--theme-text-secondary)' }}>
             SM-2 (SuperMemo 2) là thuật toán lặp lại ngắt quãng giúp bạn nhớ từ lâu hơn. Từ bạn nhớ tốt sẽ xuất hiện ít hơn, từ khó sẽ xuất hiện thường xuyên hơn.</p>
         </div>
-      </div></div></MainLayout>);
+      </div></div>
+);
   }
 
   // ─── SETUP ───
@@ -237,7 +240,8 @@ export default function SRSReviewPage() {
       { label: 'Tổng', value: stats?.total ?? 0, icon: IconBrain, color: '#6366F1',
         bg: 'linear-gradient(135deg, rgba(99,102,241,.12), rgba(99,102,241,.06))' },
     ];
-    return (<MainLayout><div className="max-w-2xl mx-auto py-12">
+    return (
+<div className="max-w-2xl mx-auto py-12">
       <div className="rounded-3xl p-8 text-center border"
         style={{ backgroundColor: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}>
         <div className="w-20 h-20 rounded-3xl mx-auto flex items-center justify-center mb-6"
@@ -295,7 +299,8 @@ export default function SRSReviewPage() {
         <div className="mt-6"><button onClick={() => router.push('/games')}
           className="flex items-center gap-1.5 mx-auto text-[13px] font-medium transition-all hover:opacity-70"
           style={{ color: 'var(--theme-text-muted)' }}><IconChevronLeft size={16} /> Quay lại</button></div>
-      </div></div></MainLayout>);
+      </div></div>
+);
   }
 
   // ─── COMPLETE ───
@@ -308,7 +313,8 @@ export default function SRSReviewPage() {
       { label: 'Chính xác', value: `${accuracy}%`, color: '#3B82F6', bg: 'linear-gradient(135deg, rgba(59,130,246,.12), rgba(59,130,246,.06))' },
       { label: 'Best Streak', value: sessionStats.bestStreak, color: '#F97316', bg: 'linear-gradient(135deg, rgba(249,115,22,.12), rgba(249,115,22,.06))' },
     ];
-    return (<MainLayout><div className="max-w-2xl mx-auto py-12">
+    return (
+<div className="max-w-2xl mx-auto py-12">
       <div className="rounded-3xl p-8 text-center border"
         style={{ backgroundColor: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}>
         <div className="w-20 h-20 rounded-3xl mx-auto flex items-center justify-center mb-4"
@@ -335,7 +341,8 @@ export default function SRSReviewPage() {
             className="flex items-center gap-1.5 mx-auto text-[13px] font-medium transition-all hover:opacity-70"
             style={{ color: 'var(--theme-text-muted)' }}><IconChevronLeft size={16} /> Quay lại</button>
         </div>
-      </div></div></MainLayout>);
+      </div></div>
+);
   }
 
   // ─── REVIEWING ───
@@ -407,7 +414,8 @@ export default function SRSReviewPage() {
     }
   };
 
-  return (<MainLayout><div className="max-w-2xl mx-auto py-6">
+  return (
+<div className="max-w-2xl mx-auto py-6">
     {/* Header */}
     <div className="flex justify-between items-center mb-4">
       <div className="text-[13px] font-semibold" style={{ color: 'var(--theme-text-muted)' }}>
@@ -479,5 +487,6 @@ export default function SRSReviewPage() {
         className="flex items-center gap-1.5 mx-auto text-[13px] font-medium transition-all hover:opacity-70"
         style={{ color: 'var(--theme-text-muted)' }}><IconX size={14} /> Dừng ôn tập</button>
     </div>
-  </div></MainLayout>);
+  </div>
+);
 }

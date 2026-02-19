@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { MainLayout } from '@/components/layout/MainLayout';
 import { useRandomWords } from '@/hooks/useWords';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
@@ -124,7 +123,6 @@ export default function TimedChallengePage() {
   // ─── Setup ───
   if (phase === 'setup') {
     return (
-      <MainLayout>
         <GameSetupCard icon={({ size }) => <IconClock size={size} style={{ color: 'white' }} />} iconColor="#EF4444" title="Timed Challenge">
           <p className="text-[14px] mb-1" style={{ color: 'var(--theme-text-secondary)' }}>
             Trả lời nhanh trong <span className="font-bold" style={{ color: '#EF4444' }}>{duration} giây</span>!
@@ -140,14 +138,12 @@ export default function TimedChallengePage() {
             <GameButton variant="outline" onClick={() => router.push('/games')}><IconChevronLeft size={16} /> Quay lại</GameButton>
           </div>
         </GameSetupCard>
-      </MainLayout>
     );
   }
 
   // ─── Countdown ───
   if (phase === 'countdown') {
     return (
-      <MainLayout>
         <div className="flex items-center justify-center min-h-[60vh]">
           <div className="text-center">
             <div className="w-32 h-32 rounded-full mx-auto flex items-center justify-center mb-4"
@@ -157,7 +153,6 @@ export default function TimedChallengePage() {
             <p className="text-xl font-semibold" style={{ color: 'var(--theme-text-muted)' }}>Chuẩn bị!</p>
           </div>
         </div>
-      </MainLayout>
     );
   }
 
@@ -168,7 +163,6 @@ export default function TimedChallengePage() {
     const wpm = Math.round((correct / duration) * 60);
 
     return (
-      <MainLayout>
         <GameResultCard accuracy={acc} title="Hết giờ!">
           <div className="my-5">
             <div className="text-5xl font-extrabold" style={{ color: '#3B82F6' }}>{score}</div>
@@ -189,7 +183,6 @@ export default function TimedChallengePage() {
             <GameButton variant="outline" onClick={() => router.push('/games')}><IconChevronLeft size={16} /> Quay lại</GameButton>
           </div>
         </GameResultCard>
-      </MainLayout>
     );
   }
 
@@ -198,7 +191,6 @@ export default function TimedChallengePage() {
   const timerColor = timeLeft <= 10 ? '#EF4444' : '#3B82F6';
 
   return (
-    <MainLayout>
       <div className="max-w-2xl mx-auto px-4 sm:px-6 py-5">
         {/* Timer + Score header */}
         <div className="flex justify-between items-center mb-3">
@@ -260,6 +252,5 @@ export default function TimedChallengePage() {
           </GameButton>
         </div>
       </div>
-    </MainLayout>
   );
 }

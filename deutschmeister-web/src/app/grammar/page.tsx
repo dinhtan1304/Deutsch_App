@@ -6,7 +6,6 @@ import { GrammarLesson, GrammarProgress } from '@/types/grammar';
 import { GrammarLessonCard } from '@/components/grammar/GrammarLessonCard';
 import { Loading } from '@/components/ui/Loading'; // Assuming Loading component exists
 import { Button } from '@/components/ui/Button';
-import { MainLayout } from '@/components/layout/MainLayout';
 
 export default function GrammarDashboardPage() {
     const [lessons, setLessons] = useState<GrammarLesson[]>([]);
@@ -42,10 +41,11 @@ export default function GrammarDashboardPage() {
         return progress.find(p => p.lessonId === lessonId);
     };
 
-    if (loading) return <MainLayout><Loading /></MainLayout>;
+    if (loading) return
+<Loading />
+;
 
     return (
-        <MainLayout>
         <div className="py-8">
             <div className="flex flex-col md:flex-row justify-between items-center mb-8">
                 <div className="flex items-center gap-3">
@@ -95,6 +95,5 @@ export default function GrammarDashboardPage() {
                 </div>
             )}
         </div>
-        </MainLayout>
     );
 }

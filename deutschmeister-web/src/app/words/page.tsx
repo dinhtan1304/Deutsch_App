@@ -2,7 +2,6 @@
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { MainLayout } from '@/components/layout/MainLayout';
 import { WordCard } from '@/components/words/WordCard';
 import { useWords } from '@/hooks/useWords';
 import { useFavorites, useToggleFavorite } from '@/hooks/useFavorites';
@@ -62,7 +61,6 @@ export default function WordsPage() {
   };
 
   return (
-    <MainLayout>
       <div className="py-6">
 
         {/* ─── Header ─── */}
@@ -359,6 +357,5 @@ export default function WordsPage() {
           </div>
         )}
       </div>
-    </MainLayout>
   );
 }

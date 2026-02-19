@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { MainLayout } from '@/components/layout/MainLayout';
 import { useSettingsStore, applyTheme } from '@/stores/settingsStore';
 import { useAuthStore } from '@/stores/authStore';
 import { IconSettings, IconChevronLeft } from '@/components/ui/Icons';
@@ -138,7 +137,7 @@ function SettingToggle({ label, desc, checked, onChange }: {
         <div className="text-[12px] mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>{desc}</div>
       </div>
       <button onClick={() => onChange(!checked)}
-        className="relative w-12 h-6 rounded-full transition-all duration-300 flex-shrink-0"
+        className="relative w-12 h-6 rounded-full transition-all duration-300 shrink-0"
         style={{ backgroundColor: checked ? '#3B82F6' : 'var(--theme-bg-secondary)' }}>
         <div className="absolute top-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-all duration-300"
           style={{ left: checked ? '1.625rem' : '0.125rem' }} />
@@ -244,19 +243,16 @@ export default function SettingsPage() {
 
   if (!isLoaded) {
     return (
-      <MainLayout>
         <div className="flex items-center justify-center min-h-[60vh]">
           <div className="w-14 h-14 rounded-2xl flex items-center justify-center animate-pulse"
             style={{ background: 'linear-gradient(135deg, #6366F1, #8B5CF6)' }}>
             <IconSettings size={28} className="text-white" />
           </div>
         </div>
-      </MainLayout>
     );
   }
 
   return (
-    <MainLayout>
       <div className="max-w-3xl mx-auto py-6">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
@@ -561,6 +557,5 @@ export default function SettingsPage() {
           </Link>
         </div>
       </div>
-    </MainLayout>
   );
 }
