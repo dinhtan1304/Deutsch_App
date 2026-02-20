@@ -20,6 +20,7 @@ import type { FullDashboard, DashboardStats, ActivityHeatmap as HeatmapData, Wee
 // ============================================
 function getLocalTopicProgress(topicId: string, totalWords: number): { wordsLearned: number; percent: number } {
   try {
+    if (typeof window === 'undefined') return { wordsLearned: 0, percent: 0 };
     const stored = localStorage.getItem(`topic-learned-${topicId}`);
     if (stored) {
       const learnedIds = JSON.parse(stored);
@@ -57,6 +58,8 @@ const getEmptyStats = (): DashboardStats => ({
   wordsToReview: 0,
   gamesPlayed: 0,
   startedAt: toLocalDateStr(new Date()),
+  grammarCompleted: 0,
+  grammarTotal: 0,
 });
 
 const getEmptyHeatmap = (): HeatmapData => {
@@ -103,8 +106,8 @@ const getEmptyWeeklyProgress = (): WeeklyProgress[] => {
 function DashboardSkeleton() {
   return (
     <div className="space-y-6 animate-pulse">
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-        {[...Array(6)].map((_, i) => (
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+        {[...Array(7)].map((_, i) => (
           <div
             key={i}
             className="h-32 rounded-2xl"

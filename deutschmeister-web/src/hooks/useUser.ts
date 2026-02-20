@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { usersApi, Settings } from '@/lib/api/users';
+import { usersApi, UpdateSettingsPayload } from '@/lib/api/users';
 
 export function useProfile() {
   return useQuery({
@@ -35,7 +35,7 @@ export function useUpdateSettings() {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: (data: Partial<Settings>) => usersApi.updateSettings(data),
+    mutationFn: (data: UpdateSettingsPayload) => usersApi.updateSettings(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users', 'settings'] });
     },

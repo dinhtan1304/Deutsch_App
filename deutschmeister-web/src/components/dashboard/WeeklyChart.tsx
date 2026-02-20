@@ -51,7 +51,7 @@ export function WeeklyChart({ data }: WeeklyChartProps) {
       </div>
 
       {/* Chart */}
-      <div className="flex items-end justify-between h-38 gap-2 mb-3">
+      <div className="flex items-end justify-between gap-2 mb-3" style={{ height: '9.5rem' }}>
         {data.map((day, i) => {
           const wH = (day.wordsLearned / maxWords) * 100;
           const gH = (day.gamesPlayed / maxGames) * 100;
@@ -59,24 +59,26 @@ export function WeeklyChart({ data }: WeeklyChartProps) {
 
           return (
             <div key={i} className="flex-1 flex flex-col items-center gap-1.5">
-              <div className="w-full flex items-end justify-center gap-1 h-36">
+              <div className="w-full flex items-end justify-center gap-1" style={{ height: '9rem' }}>
                 {/* Words bar */}
                 <div className="relative w-5 group cursor-pointer">
                   <div
                     className="w-full rounded-t-md transition-all duration-500 hover:opacity-85"
                     style={{
-                      height: `${Math.max(wH, 5)}%`,
+                      height: day.wordsLearned > 0 ? `${Math.max(wH, 8)}%` : '2px',
                       background: 'linear-gradient(180deg, #6366F1, #3B82F6)',
-                      minHeight: '3px',
+                      opacity: day.wordsLearned > 0 ? 1 : 0.15,
                     }}
                   />
-                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1
-                    text-[11px] font-medium rounded-md shadow-lg pointer-events-none
-                    opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10
-                    text-white"
-                    style={{ backgroundColor: '#3B82F6' }}>
-                    {day.wordsLearned} từ
-                  </div>
+                  {day.wordsLearned > 0 && (
+                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1
+                      text-[11px] font-medium rounded-md shadow-lg pointer-events-none
+                      opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10
+                      text-white"
+                      style={{ backgroundColor: '#3B82F6' }}>
+                      {day.wordsLearned} từ
+                    </div>
+                  )}
                 </div>
 
                 {/* Games bar */}
@@ -84,18 +86,20 @@ export function WeeklyChart({ data }: WeeklyChartProps) {
                   <div
                     className="w-full rounded-t-md transition-all duration-500 hover:opacity-85"
                     style={{
-                      height: `${Math.max(gH, 5)}%`,
+                      height: day.gamesPlayed > 0 ? `${Math.max(gH, 8)}%` : '2px',
                       background: 'linear-gradient(180deg, #34D399, #10B981)',
-                      minHeight: '3px',
+                      opacity: day.gamesPlayed > 0 ? 1 : 0.15,
                     }}
                   />
-                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1
-                    text-[11px] font-medium rounded-md shadow-lg pointer-events-none
-                    opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10
-                    text-white"
-                    style={{ backgroundColor: '#10B981' }}>
-                    {day.gamesPlayed} game
-                  </div>
+                  {day.gamesPlayed > 0 && (
+                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1
+                      text-[11px] font-medium rounded-md shadow-lg pointer-events-none
+                      opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10
+                      text-white"
+                      style={{ backgroundColor: '#10B981' }}>
+                      {day.gamesPlayed} game
+                    </div>
+                  )}
                 </div>
               </div>
 

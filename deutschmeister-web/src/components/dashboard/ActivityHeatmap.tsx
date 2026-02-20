@@ -23,43 +23,49 @@ export function ActivityHeatmap({ data }: ActivityHeatmapProps) {
   const [hoveredDay, setHoveredDay] = useState<ActivityDay | null>(null);
   const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 });
 
+  // Parse a YYYY-MM-DD string as local date (avoid UTC midnight → wrong day in GMT+7)
+  const parseLocalDate = (dateStr: string) => {
+    const [y, m, d] = dateStr.split('-').map(Number);
+    return new Date(y, m - 1, d);
+  };
+
   const weeks = useMemo(() => {
-    const result: ActivityDay[][] = [];
-    let currentWeek: ActivityDay[] = [];
-    const firstDate = new Date(data.data[0]?.date);
-    const firstDayOfWeek = firstDate.getDay();
+    const result: ActivityDay[][] = []
+    let currentWeek: ActivityDay[] = []
+    const firstDate = parseLocalDate(data.data[0]?.date)
+    const firstDayOfWeek = firstDate.getDay()
 
     for (let i = 0; i < firstDayOfWeek; i++) {
-      currentWeek.push({ date: '', count: -1, level: -1 });
+      currentWeek.push({ date: '', count: -1, level: -1 })
     }
 
     data.data.forEach((day) => {
-      currentWeek.push(day);
+      currentWeek.push(day)
       if (currentWeek.length === 7) {
-        result.push(currentWeek);
-        currentWeek = [];
+        result.push(currentWeek)
+        currentWeek = []
       }
-    });
+    })
 
-    if (currentWeek.length > 0) result.push(currentWeek);
-    return result;
-  }, [data.data]);
+    if (currentWeek.length > 0) result.push(currentWeek)
+    return result
+  }, [data.data])
 
   const monthLabels = useMemo(() => {
-    const labels: { month: string; position: number }[] = [];
-    let lastMonth = -1;
+    const labels: { month: string; position: number }[] = []
+    let lastMonth = -1
     weeks.forEach((week, weekIndex) => {
-      const firstValidDay = week.find((d) => d.date);
+      const firstValidDay = week.find((d) => d.date)
       if (firstValidDay) {
-        const month = new Date(firstValidDay.date).getMonth();
+        const month = parseLocalDate(firstValidDay.date).getMonth()
         if (month !== lastMonth) {
-          labels.push({ month: MONTHS[month], position: weekIndex });
-          lastMonth = month;
+          labels.push({ month: MONTHS[month], position: weekIndex })
+          lastMonth = month
         }
       }
-    });
-    return labels;
-  }, [weeks]);
+    })
+    return labels
+  }, [weeks])
 
   const handleMouseEnter = (day: ActivityDay, e: React.MouseEvent) => {
     if (day.count >= 0) {
@@ -70,15 +76,16 @@ export function ActivityHeatmap({ data }: ActivityHeatmapProps) {
   };
 
   const formatDate = (dateStr: string) => {
-    return new Date(dateStr).toLocaleDateString('vi-VN', {
+    const [y, m, d] = dateStr.split('-').map(Number);
+    return new Date(y, m - 1, d).toLocaleDateString('vi-VN', {
       weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
     });
   };
 
   return (
     <div
-      className="p-5 rounded-2xl border h-66"
-      style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}
+      className="p-5 rounded-2xl border"
+      style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)', minHeight: '16.5rem' }}
     >
       {/* Header */}
       <div className="flex items-center justify-between mb-4">

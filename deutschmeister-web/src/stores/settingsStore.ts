@@ -16,12 +16,19 @@ export interface AppSettings {
   timedChallengeSeconds: number;
 }
 
+// Fields that are persisted to the backend DB (subset of AppSettings)
+export const BACKEND_SETTINGS_KEYS: (keyof AppSettings)[] = [
+  'theme', 'soundEnabled', 'dailyGoal', 'preferredLevel', 'showVietnamese',
+];
+
 interface SettingsState {
   settings: AppSettings;
   isLoaded: boolean;
   updateSetting: <K extends keyof AppSettings>(key: K, value: AppSettings[K]) => void;
   resetSettings: () => void;
   loadSettings: () => void;
+  /** Called after fetching backend settings — merges into local store */
+  syncFromBackend: (backendSettings: Partial<AppSettings>) => void;
 }
 
 const defaultSettings: AppSettings = {
@@ -33,7 +40,7 @@ const defaultSettings: AppSettings = {
   speechRate: 0.8,
   autoPlaySound: false,
   dailyGoal: 20,
-  preferredLevel: 'all',
+  preferredLevel: 'A1',   // matches DB default
   questionsPerGame: 20,
   timedChallengeSeconds: 60,
 };
@@ -71,11 +78,21 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
     }
   },
 
+  syncFromBackend: (backendSettings) => {
+    // Backend settings take priority over localStorage for the fields it owns
+    const merged = { ...get().settings, ...backendSettings };
+    set({ settings: merged });
+    saveToStorage(merged);
+    if (backendSettings.theme) {
+      applyTheme(backendSettings.theme);
+    }
+  },
+
   updateSetting: (key, value) => {
     const newSettings = { ...get().settings, [key]: value };
     set({ settings: newSettings });
     saveToStorage(newSettings);
-    
+
     if (key === 'theme') {
       applyTheme(value as 'light' | 'dark' | 'system');
     }
@@ -94,31 +111,21 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
  */
 export function applyTheme(theme: 'light' | 'dark' | 'system') {
   if (typeof window === 'undefined') return;
-  
+
   const html = document.documentElement;
-  
-  // Determine actual theme
+
   let actualTheme: 'light' | 'dark';
-  
+
   if (theme === 'system') {
     actualTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   } else {
     actualTheme = theme;
   }
-  
-  // Apply BOTH data-theme attribute AND class for maximum compatibility
+
   html.setAttribute('data-theme', actualTheme);
-  
-  // Remove both classes first
   html.classList.remove('light', 'dark');
-  // Add the correct class
   html.classList.add(actualTheme);
-  
-  // Also set color-scheme for native elements (scrollbars, inputs, etc)
   html.style.colorScheme = actualTheme;
-  
-  console.log(`[Theme] Setting: ${theme} → Applied: ${actualTheme}`);
-  console.log(`[Theme] data-theme="${html.getAttribute('data-theme')}", class="${html.className}"`);
 }
 
 // Apply theme immediately when module loads (before React)
@@ -134,7 +141,7 @@ if (typeof window !== 'undefined') {
   } catch {
     applyTheme('system');
   }
-  
+
   // Listen for system preference changes
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
     const state = useSettingsStore.getState();

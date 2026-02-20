@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useSettingsStore, applyTheme } from '@/stores/settingsStore';
+import { useSettingsStore } from '@/stores/settingsStore';
 import { useAuthStore } from '@/stores/authStore';
 import { IconSettings, IconChevronLeft } from '@/components/ui/Icons';
 

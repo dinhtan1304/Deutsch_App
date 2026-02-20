@@ -69,7 +69,11 @@ const cardConfigs: StatCardConfig[] = [
       const m = s.totalMinutes % 60;
       return m > 0 ? `${h}h ${m}m` : `${h}h`;
     },
-    getSubValue: s => `Từ ${new Date(s.startedAt).toLocaleDateString('vi-VN')}`,
+    getSubValue: s => {
+      // Parse YYYY-MM-DD safely (avoid UTC timezone shift with new Date())
+      const [y, m, d] = s.startedAt.split('-').map(Number);
+      return `Từ ${new Date(y, m - 1, d).toLocaleDateString('vi-VN')}`;
+    },
     gradient: 'linear-gradient(135deg, rgba(139,92,246,.12), rgba(168,85,247,.08))',
     iconBg: 'linear-gradient(135deg, #8B5CF6, #A855F7)',
     accent: '#8B5CF6',
