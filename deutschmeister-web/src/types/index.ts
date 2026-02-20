@@ -78,7 +78,7 @@ export interface SearchWordsParams {
 }
 
 // Game types
-export type GameType = 'quick-quiz' | 'flashcard' | 'fill-blank' | 'timed-challenge';
+export type GameType = 'quick-quiz' | 'flashcard' | 'fill-blank' | 'timed-challenge' | 'gender-quiz' | 'matching' | 'sentence-builder';
 export type Difficulty = 'beginner' | 'intermediate' | 'advanced';
 
 export interface GameSession {

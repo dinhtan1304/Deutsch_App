@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation';
 import {
   IconHome, IconBook, IconNotebook, IconLayers, IconGamepad,
   IconPenLine, IconGraduationCap, IconRefresh, IconSettings,
-  IconZap, IconCards, IconTimer, IconPencil, IconList, IconBrain,
+  IconZap, IconCards, IconTimer, IconPencil, IconList, IconBrain, IconTarget,
   IconChevronRight, IconChevronLeft, IconBookOpen,
 } from '@/components/ui/Icons';
 
@@ -36,6 +36,7 @@ const navItems: NavItem[] = [
     label: 'Games', labelVi: 'Trò chơi', icon: IconGamepad, href: '/games',
     children: [
       { label: 'Quick Quiz', labelVi: 'Trắc nghiệm', icon: IconZap, href: '/games/quick-quiz' },
+      { label: 'Gender Quiz', labelVi: 'Der/Die/Das', icon: IconTarget, href: '/games/gender-quiz' },
       { label: 'Flashcards', labelVi: 'Thẻ ghi nhớ', icon: IconCards, href: '/games/flashcards' },
       { label: 'Fill Blank', labelVi: 'Điền từ', icon: IconPencil, href: '/games/fill-blank' },
       { label: 'Timed Challenge', labelVi: 'Thử thách', icon: IconTimer, href: '/games/timed-challenge' },

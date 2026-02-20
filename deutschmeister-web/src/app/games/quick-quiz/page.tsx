@@ -1,8 +1,12 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useRandomWords } from '@/hooks/useWords';
+import { useGameSession } from '@/hooks/useGameSession';
+import { useSettingsStore } from '@/stores/settingsStore';
+import { useSoundEffects } from '@/hooks/useSoundEffects';
+// BUG FIX 2: Added settings + sound effects (was the only game missing both)
 import { Word, Gender, GenderInfo } from '@/types';
 import { speakGerman } from '@/lib/utils';
 import {
@@ -13,12 +17,18 @@ import {
 } from '@/components/games/GameUI';
 
 const AC: Record<string, string> = { masculine: '#3B82F6', feminine: '#EC4899', neuter: '#22C55E' };
-const TOTAL_QUESTIONS = 20;
-
+// BUG FIX 2: Removed hardcoded TOTAL_QUESTIONS = 20, now reads from settings
 type GamePhase = 'setup' | 'playing' | 'result';
 
 export default function QuickQuizPage() {
   const router = useRouter();
+  const session = useGameSession('quick-quiz');
+  const { settings, isLoaded, loadSettings } = useSettingsStore();
+  const { playCorrect, playWrong, playCombo, playGameOver } = useSoundEffects();
+
+  // Use settings value — fall back to 20 until settings load
+  const TOTAL_QUESTIONS = isLoaded ? settings.questionsPerGame : 20;
+
   const [phase, setPhase] = useState<GamePhase>('setup');
   const [currentIndex, setCurrentIndex] = useState(0);
   const [score, setScore] = useState(0);
@@ -26,27 +36,62 @@ export default function QuickQuizPage() {
   const [showFeedback, setShowFeedback] = useState(false);
   const [answers, setAnswers] = useState<{ word: Word; selected: Gender; isCorrect: boolean }[]>([]);
 
+  // Refs for session.end() — avoid stale closure issues in useEffect
+  const scoreRef = useRef(0);
+  const correctRef = useRef(0);
+  const wrongRef = useRef(0);
+
   const { data: words, refetch, isLoading } = useRandomWords(TOTAL_QUESTIONS, {});
   const currentWord = words?.[currentIndex];
 
-  const handleStartGame = () => {
-    refetch();
+  useEffect(() => { loadSettings(); }, [loadSettings]);
+
+  const handleStartGame = async () => {
+    const result = await refetch();
+    if (!result.data?.length) { alert('Không có từ vựng!'); return; }
+
+    // Reset state
     setPhase('playing'); setCurrentIndex(0); setScore(0); setAnswers([]);
     setSelectedAnswer(null); setShowFeedback(false);
+
+    // Reset refs
+    scoreRef.current = 0;
+    correctRef.current = 0;
+    wrongRef.current = 0;
+
+    // Register session on backend
+    session.start(TOTAL_QUESTIONS);
   };
 
   const handleAnswer = useCallback((gender: Gender) => {
     if (showFeedback || !currentWord) return;
     setSelectedAnswer(gender); setShowFeedback(true);
     const isCorrect = gender === currentWord.gender;
-    if (isCorrect) setScore(s => s + 1);
+
+    if (isCorrect) {
+      playCorrect(); // BUG FIX 2: sound was missing
+      setScore(s => s + 1);
+      scoreRef.current += 1;
+      correctRef.current += 1;
+    } else {
+      playWrong(); // BUG FIX 2: sound was missing
+      wrongRef.current += 1;
+    }
+
     setAnswers(a => [...a, { word: currentWord, selected: gender, isCorrect }]);
 
     setTimeout(() => {
       if (currentIndex < TOTAL_QUESTIONS - 1) { setCurrentIndex(i => i + 1); setSelectedAnswer(null); setShowFeedback(false); }
-      else setPhase('result');
+      else { playGameOver(); setPhase('result'); } // BUG FIX 2: missing game over sound
     }, 1500);
   }, [showFeedback, currentWord, currentIndex]);
+
+  // Save session to backend when game finishes
+  useEffect(() => {
+    if (phase === 'result') {
+      session.end(scoreRef.current, 0, correctRef.current, wrongRef.current);
+    }
+  }, [phase, session]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -65,6 +110,8 @@ export default function QuickQuizPage() {
         <GameSetupCard icon={({ size }) => <IconZap size={size} style={{ color: 'white' }} />} iconColor="#F59E0B" title="Quick Quiz">
           <p className="text-[14px] mb-6" style={{ color: 'var(--theme-text-secondary)' }}>
             Chọn mạo từ đúng cho <span className="font-bold" style={{ color: '#F59E0B' }}>{TOTAL_QUESTIONS} từ</span> tiếng Đức
+          </p>
+          <p className="text-[12px] mb-6" style={{ color: 'var(--theme-text-muted)' }}>(Thay đổi số câu trong Settings → Học tập)
           </p>
           <GameInfoBox>
             <div className="flex items-center gap-2"><IconTarget size={14} style={{ color: '#F59E0B' }} /><span>Click hoặc dùng phím tắt để trả lời</span></div>
@@ -144,8 +191,13 @@ export default function QuickQuizPage() {
               {currentWord.word}
             </h2>
             <p className="text-[16px]" style={{ color: 'var(--theme-text-secondary)' }}>
-              {currentWord.translationEn}
+              {currentWord.translationVi || currentWord.translationEn}
             </p>
+            {currentWord.translationVi && currentWord.translationEn && (
+              <p className="text-[13px] mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>
+                {currentWord.translationEn}
+              </p>
+            )}
 
             {/* Feedback */}
             {showFeedback && (

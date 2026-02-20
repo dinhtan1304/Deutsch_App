@@ -56,9 +56,19 @@ export function HighlightedText({ text, className, style }: HighlightedTextProps
       const isWord = /^[a-zA-ZäöüÄÖÜß]+$/.test(token);
       if (!isWord) return <span key={i}>{token}</span>;
 
-      // Lookup level (lowercase, strip article)
-      const cleaned = token.toLowerCase();
-      const level = levelIndex[cleaned];
+      // BUG FIX 5: Skip standalone articles / function words — they appear in
+      // the DB as part of noun entries but shouldn't be highlighted on their own.
+      // "die" standalone = article, "die" in "Die Schule" = irrelevant highlight.
+      const SKIP_WORDS = new Set(['der','die','das','ein','eine','einer','einem','einen','eines',
+        'ist','sind','war','waren','hat','haben','ich','du','er','sie','es','wir','ihr',
+        'und','oder','aber','denn','weil','dass','mit','von','zu','in','an','auf','für',
+        'im','am','um','bei','nach','vor','über','unter','durch','ohne','gegen','nicht',
+        'auch','noch','nur','schon','sehr','wie','was','wer','wo','wenn','dann','als']);
+
+      const lower = token.toLowerCase();
+      if (SKIP_WORDS.has(lower)) return <span key={i}>{token}</span>;
+
+      const level = levelIndex[lower];
 
       if (!level || !LEVEL_COLORS[level]) {
         return <span key={i}>{token}</span>;

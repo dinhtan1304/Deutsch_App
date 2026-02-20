@@ -441,7 +441,8 @@ export const ExerciseList = ({ exercises, onSubmit }: ExerciseListProps) => {
                 {/* Question */}
                 <div className="px-6 py-5">
                     <h3 className="text-[16px] font-bold mb-1.5" style={{ color: 'var(--theme-text-primary)' }}>
-                        <HighlightedText text={exercise.questionVi as any} />
+                        {/* BUG FIX 5: Plain text for Vietnamese — HighlightedText only processes German */}
+                        {exercise.questionVi}
                     </h3>
                     {exercise.questionDe && exercise.questionDe !== exercise.questionVi && (
                         <p className="text-[13px] italic" style={{ color: 'var(--theme-text-muted)' }}>

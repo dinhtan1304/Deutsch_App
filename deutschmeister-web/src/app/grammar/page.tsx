@@ -1,8 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { grammarApi } from '@/lib/api/grammar';
-import { GrammarLesson, GrammarProgress } from '@/types/grammar';
+import { useState } from 'react';
+import { useGrammarLessons, useGrammarProgress } from '@/hooks/useGrammar';
 import { GrammarLessonCard } from '@/components/grammar/GrammarLessonCard';
 
 function IconBook({ size = 22 }: { size?: number }) {
@@ -18,28 +17,13 @@ function IconBook({ size = 22 }: { size?: number }) {
 const LEVELS = ['ALL', 'A1', 'A2', 'B1'] as const;
 
 export default function GrammarDashboardPage() {
-  const [lessons, setLessons] = useState<GrammarLesson[]>([]);
-  const [progress, setProgress] = useState<GrammarProgress[]>([]);
-  const [loading, setLoading] = useState(true);
   const [filterLevel, setFilterLevel] = useState<string>('ALL');
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [lessonsData, progressData] = await Promise.all([
-          grammarApi.getLessons(),
-          grammarApi.getUserProgress().catch(() => []),
-        ]);
-        setLessons(lessonsData);
-        setProgress(progressData);
-      } catch (error) {
-        console.error('Failed to fetch grammar data', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, []);
+  // React Query hooks — automatic caching, deduplication, retry on error.
+  // Previously this used manual useEffect + setState which refetched on every
+  // mount with no caching, and silently swallowed errors.
+  const { data: lessons = [], isLoading: lessonsLoading } = useGrammarLessons();
+  const { data: progress = [] } = useGrammarProgress();
 
   const filteredLessons = (
     filterLevel === 'ALL' ? lessons : lessons.filter(l => l.level === filterLevel)
@@ -48,8 +32,7 @@ export default function GrammarDashboardPage() {
   const getLessonProgress = (lessonId: string) =>
     progress.find(p => p.lessonId === lessonId);
 
-  // CRIT-1 fix: JSX phải cùng dòng với return hoặc trong ()
-  if (loading) {
+  if (lessonsLoading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="w-10 h-10 rounded-full border-4 border-t-transparent animate-spin"
@@ -77,8 +60,6 @@ export default function GrammarDashboardPage() {
           </div>
         </div>
 
-        {/* STYLE-3 fix: Filter tabs match design language (gradient pill giống settings/dashboard) */}
-        {/* DARK-1 fix: dùng var(--theme-*) thay bg-gray-100/bg-white */}
         <div className="flex gap-1.5 p-1 rounded-xl" style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
           {LEVELS.map(level => {
             const isActive = filterLevel === level;
@@ -114,7 +95,6 @@ export default function GrammarDashboardPage() {
         ))}
       </div>
 
-      {/* DARK-2 fix: empty state dùng theme var */}
       {filteredLessons.length === 0 && (
         <div className="text-center py-16">
           <div className="text-5xl mb-4">📚</div>

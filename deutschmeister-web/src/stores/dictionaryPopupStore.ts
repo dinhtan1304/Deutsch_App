@@ -24,7 +24,12 @@ export const useDictionaryPopupStore = create<DictionaryPopupState>((set) => ({
   openPopup: (word, position) =>
     set({
       isOpen: true,
-      selectedWord: word.trim().toLowerCase(),
+      // BUG FIX 6: Store original casing (trimmed only).
+      // Previously toLowerCase() caused API search for "schule" when user clicked
+      // "Schule" — backend fuzzy search handled it, but exact match logic in
+      // dictionary-lookup.ts compared w.word.toLowerCase() === lower correctly.
+      // Keeping original casing is cleaner and avoids edge cases with proper nouns.
+      selectedWord: word.trim(),
       position,
     }),
 

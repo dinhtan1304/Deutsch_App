@@ -98,22 +98,26 @@ export default function FillBlankPage() {
     if (e.key === 'Enter') { if (!answered) checkAnswer(); else nextQuestion(); }
   };
 
+  // BUG FIX 7: Removed unnecessary setTimeout(100) wrapper.
+  // Previously: setUserInput(article) ran immediately, then 100ms later the
+  // actual logic ran — during this window a second click could fire since
+  // `answered` was still false. The stale `combo` in the closure also meant
+  // the multiplier could use an outdated value in rapid clicks.
   const handleQuickAnswer = (article: string) => {
-    if (answered) return;
+    if (answered || !currentWord) return;
+    const correctAnswer = currentWord.article.toLowerCase();
+    const correct = article.toLowerCase() === correctAnswer;
     setUserInput(article);
-    setTimeout(() => {
-      const correctAnswer = currentWord?.article.toLowerCase();
-      const correct = article.toLowerCase() === correctAnswer;
-      setAnswered(true); setIsCorrect(correct);
-      setAnswers(prev => [...prev, { word: currentWord!, userInput: article, correctAnswer: currentWord!.article, isCorrect: correct }]);
-      if (correct) {
-        playCorrect(); correctRef.current++; const newCombo = combo + 1;
-        setScore(s => s + 10 * Math.min(newCombo, 4)); scoreRef.current += 10 * Math.min(newCombo, 4);
-        setCombo(newCombo);
-        if (newCombo > bestCombo) { setBestCombo(newCombo); bestComboRef.current = newCombo; }
-        if (newCombo === 3 || newCombo === 5 || newCombo === 10) setTimeout(() => playCombo(), 200);
-      } else { playWrong(); wrongRef.current++; setCombo(0); }
-    }, 100);
+    setAnswered(true); setIsCorrect(correct);
+    setAnswers(prev => [...prev, { word: currentWord, userInput: article, correctAnswer: currentWord.article, isCorrect: correct }]);
+    if (correct) {
+      playCorrect(); correctRef.current++; const newCombo = combo + 1;
+      const multiplier = Math.min(newCombo, 4);
+      setScore(s => s + 10 * multiplier); scoreRef.current += 10 * multiplier;
+      setCombo(newCombo);
+      if (newCombo > bestCombo) { setBestCombo(newCombo); bestComboRef.current = newCombo; }
+      if (newCombo === 3 || newCombo === 5 || newCombo === 10) setTimeout(() => playCombo(), 200);
+    } else { playWrong(); wrongRef.current++; setCombo(0); }
   };
 
   // Save game session to backend when game ends

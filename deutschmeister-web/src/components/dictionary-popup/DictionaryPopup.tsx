@@ -9,26 +9,6 @@ export function DictionaryPopup() {
   const popupRef = useRef<HTMLDivElement>(null);
   const [adjustedPos, setAdjustedPos] = useState<{ x: number; y: number } | null>(null);
 
-  // ── Đóng khi click bên ngoài ──
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const handleClickOutside = (e: MouseEvent) => {
-      if (popupRef.current && !popupRef.current.contains(e.target as Node)) {
-        closePopup();
-      }
-    };
-
-    const timer = setTimeout(() => {
-      document.addEventListener('mousedown', handleClickOutside);
-    }, 100);
-
-    return () => {
-      clearTimeout(timer);
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [isOpen, closePopup]);
-
   // ── Đóng khi Escape ──
   useEffect(() => {
     if (!isOpen) return;
@@ -46,20 +26,25 @@ export function DictionaryPopup() {
       return;
     }
 
+    // BUG FIX 3: Use fixed positioning (viewport-relative).
+    // Previous 'absolute' + scrollY calculation broke on pages where a parent
+    // element had position:relative — popup appeared far from the click point.
+    // With position:fixed, clientX/clientY from the click event map 1-to-1
+    // and no scrollY offset is needed.
     const popup = popupRef.current;
     const rect = popup.getBoundingClientRect();
     const viewportW = window.innerWidth;
     const viewportH = window.innerHeight;
-    const scrollY = window.scrollY;
 
     let x = position.x;
-    let y = position.y + scrollY + 12;
+    let y = position.y + 12;
 
     if (x + rect.width > viewportW - 16) x = viewportW - rect.width - 16;
     if (x < 16) x = 16;
-    if (position.y + rect.height + 12 > viewportH) {
-      y = position.y + scrollY - rect.height - 12;
+    if (y + rect.height > viewportH - 16) {
+      y = position.y - rect.height - 12;
     }
+    if (y < 16) y = 16;
 
     setAdjustedPos({ x, y });
   }, [isOpen, position]);
@@ -74,8 +59,8 @@ export function DictionaryPopup() {
         aria-label="Tra cứu từ điển"
         className="dictionary-popup"
         style={{
-          position: 'absolute',
-          top: adjustedPos?.y ?? position.y + window.scrollY + 12,
+          position: 'fixed',
+          top: adjustedPos?.y ?? position.y + 12,
           left: adjustedPos?.x ?? position.x,
           zIndex: 9999,
           width: '320px',

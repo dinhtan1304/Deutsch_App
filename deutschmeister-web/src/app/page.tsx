@@ -1,6 +1,5 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import {
   StatsCards,
   ActivityHeatmap,
@@ -10,43 +9,21 @@ import {
   QuickActions,
 } from '@/components/dashboard';
 import { useFullDashboard, usePublicStats } from '@/hooks/useDashboard';
-import { useTopics } from '@/hooks/useTopics';
 import { useAuthStore } from '@/stores/authStore';
 import Link from 'next/link';
-import type { FullDashboard, DashboardStats, ActivityHeatmap as HeatmapData, WeeklyProgress, TopicProgress } from '@/types/dashboard';
-
-// ============================================
-// Helper to get progress from localStorage
-// ============================================
-function getLocalTopicProgress(topicId: string, totalWords: number): { wordsLearned: number; percent: number } {
-  try {
-    if (typeof window === 'undefined') return { wordsLearned: 0, percent: 0 };
-    const stored = localStorage.getItem(`topic-learned-${topicId}`);
-    if (stored) {
-      const learnedIds = JSON.parse(stored);
-      const wordsLearned = Array.isArray(learnedIds) ? learnedIds.length : 0;
-      const percent = totalWords > 0 ? Math.round((wordsLearned / totalWords) * 100) : 0;
-      return { wordsLearned, percent };
-    }
-  } catch (e) {
-    console.error('Error reading localStorage:', e);
-  }
-  return { wordsLearned: 0, percent: 0 };
-}
-
-// ============================================
-// Helper: timezone-safe date string
-// ============================================
-const toLocalDateStr = (date: Date): string => {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, '0');
-  const d = String(date.getDate()).padStart(2, '0');
-  return `${y}-${m}-${d}`;
-};
+import type {
+  FullDashboard,
+  DashboardStats,
+  ActivityHeatmap as HeatmapData,
+  WeeklyProgress,
+} from '@/types/dashboard';
 
 // ============================================
 // Default/Empty Data
 // ============================================
+const toLocalDateStr = (date: Date): string =>
+  date.toISOString().slice(0, 10);
+
 const getEmptyStats = (): DashboardStats => ({
   streak: 0,
   totalWordsLearned: 0,
@@ -68,36 +45,24 @@ const getEmptyHeatmap = (): HeatmapData => {
   for (let i = 365; i >= 0; i--) {
     const date = new Date(today);
     date.setDate(date.getDate() - i);
-    data.push({
-      date: toLocalDateStr(date),
-      count: 0,
-      level: 0,
-    });
+    data.push({ date: toLocalDateStr(date), count: 0, level: 0 });
   }
-  return {
-    data,
-    totalActiveDays: 0,
-    currentStreak: 0,
-    longestStreak: 0,
-  };
+  return { data, totalActiveDays: 0, currentStreak: 0, longestStreak: 0 };
 };
 
 const getEmptyWeeklyProgress = (): WeeklyProgress[] => {
-  const days: WeeklyProgress[] = [];
   const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-  
-  for (let i = 6; i >= 0; i--) {
+  return Array.from({ length: 7 }, (_, i) => {
     const date = new Date();
-    date.setDate(date.getDate() - i);
-    days.push({
+    date.setDate(date.getDate() - (6 - i));
+    return {
       day: dayNames[date.getDay()],
       date: toLocalDateStr(date),
       wordsLearned: 0,
       gamesPlayed: 0,
       minutes: 0,
-    });
-  }
-  return days;
+    };
+  });
 };
 
 // ============================================
@@ -108,11 +73,8 @@ function DashboardSkeleton() {
     <div className="space-y-6 animate-pulse">
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
         {[...Array(7)].map((_, i) => (
-          <div
-            key={i}
-            className="h-32 rounded-2xl"
-            style={{ backgroundColor: 'var(--theme-bg-secondary)' }}
-          />
+          <div key={i} className="h-32 rounded-2xl"
+            style={{ backgroundColor: 'var(--theme-bg-secondary)' }} />
         ))}
       </div>
       <div className="grid lg:grid-cols-2 gap-6">
@@ -173,7 +135,8 @@ function GuestLanding() {
           { icon: '📚', title: '12 Chủ đề A1', desc: 'Theo chuẩn Goethe-Zertifikat' },
           { icon: '🇻🇳', title: 'Song ngữ Việt-Đức', desc: 'Giải thích dễ hiểu' },
         ].map((feature, i) => (
-          <div key={i} className="p-6 rounded-2xl border text-center" style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
+          <div key={i} className="p-6 rounded-2xl border text-center"
+            style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
             <div className="text-4xl mb-3">{feature.icon}</div>
             <h3 className="font-bold mb-1" style={{ color: 'var(--theme-text-primary)' }}>{feature.title}</h3>
             <p className="text-sm" style={{ color: 'var(--theme-text-muted)' }}>{feature.desc}</p>
@@ -196,7 +159,8 @@ function WelcomeBanner() {
           <h2 className="text-xl font-bold mb-1">Chào mừng bạn đến với Deutschmeister!</h2>
           <p className="text-white/80">Bắt đầu hành trình học tiếng Đức của bạn ngay hôm nay</p>
         </div>
-        <Link href="/topics" className="px-6 py-2 rounded-xl font-bold transition-colors" style={{ backgroundColor: 'white', color: '#2563EB' }}>
+        <Link href="/topics" className="px-6 py-2 rounded-xl font-bold transition-colors"
+          style={{ backgroundColor: 'white', color: '#2563EB' }}>
           Bắt đầu học
         </Link>
       </div>
@@ -208,73 +172,26 @@ function WelcomeBanner() {
 // Authenticated Dashboard
 // ============================================
 function AuthenticatedDashboard() {
-  const { data, isLoading, error } = useFullDashboard();
-  const { data: topicsData } = useTopics({ level: 'A1', isActive: true });
+  const { data, isLoading } = useFullDashboard();
   const { user } = useAuthStore();
-  
-  const [localTopicProgress, setLocalTopicProgress] = useState<TopicProgress[]>([]);
-  const [localStats, setLocalStats] = useState<{ wordsLearned: number; topicsCompleted: number }>({ wordsLearned: 0, topicsCompleted: 0 });
 
-  // Load progress from localStorage when topics are available
-  useEffect(() => {
-    if (topicsData?.data) {
-      let totalLearned = 0;
-      let completed = 0;
-      
-      const progressList: TopicProgress[] = topicsData.data.map((topic) => {
-        const { wordsLearned, percent } = getLocalTopicProgress(topic.id, topic.wordCount);
-        totalLearned += wordsLearned;
-        if (percent >= 100) completed++;
-        
-        return {
-          id: topic.id,
-          slug: topic.slug,
-          nameDe: topic.nameDe,
-          nameVi: topic.nameVi,
-          icon: topic.icon || '📚',
-          color: topic.color || '#3B82F6',
-          wordsLearned,
-          totalWords: topic.wordCount,
-          percent,
-        };
-      });
-      
-      setLocalTopicProgress(progressList);
-      setLocalStats({ wordsLearned: totalLearned, topicsCompleted: completed });
-    }
-  }, [topicsData]);
+  if (isLoading) return <DashboardSkeleton />;
 
-  if (isLoading) {
-    return <DashboardSkeleton />;
-  }
-
-  // Merge server data with localStorage data
-  const serverStats = data?.stats || getEmptyStats();
-  const mergedStats: DashboardStats = {
-    ...serverStats,
-    // Use localStorage data if server shows 0
-    totalWordsLearned: serverStats.totalWordsLearned > 0 ? serverStats.totalWordsLearned : localStats.wordsLearned,
-    topicsCompleted: serverStats.topicsCompleted > 0 ? serverStats.topicsCompleted : localStats.topicsCompleted,
-    totalWords: serverStats.totalWords || topicsData?.data.reduce((sum, t) => sum + t.wordCount, 0) || 0,
-    totalTopics: serverStats.totalTopics || topicsData?.data.length || 12,
-  };
-
-  // Use localStorage topic progress if server returns empty
-  const topicProgress = (data?.topicProgress && data.topicProgress.some(t => t.wordsLearned > 0))
-    ? data.topicProgress
-    : localTopicProgress;
+  // Trust server data as the single source of truth.
+  // Previously this merged server data with localStorage topic progress,
+  // which caused: (1) stale data masking genuine server zeros, (2) cross-user
+  // contamination on shared devices, (3) double-counting when both had data.
+  const stats = data?.stats ?? getEmptyStats();
 
   const dashboardData: FullDashboard = {
-    stats: mergedStats,
-    heatmap: data?.heatmap || getEmptyHeatmap(),
-    weeklyProgress: data?.weeklyProgress || getEmptyWeeklyProgress(),
-    topicProgress,
-    recentActivity: data?.recentActivity || [],
+    stats,
+    heatmap: data?.heatmap ?? getEmptyHeatmap(),
+    weeklyProgress: data?.weeklyProgress ?? getEmptyWeeklyProgress(),
+    topicProgress: data?.topicProgress ?? [],
+    recentActivity: data?.recentActivity ?? [],
   };
 
-  const isNewUser = dashboardData.stats.gamesPlayed === 0 && 
-                    dashboardData.stats.totalWordsLearned === 0 &&
-                    localStats.wordsLearned === 0;
+  const isNewUser = stats.gamesPlayed === 0 && stats.totalWordsLearned === 0;
 
   return (
     <div className="space-y-6">
@@ -285,10 +202,10 @@ function AuthenticatedDashboard() {
             Chào {user?.name || 'bạn'}! 👋
           </h1>
           <p style={{ color: 'var(--theme-text-muted)' }}>
-            {dashboardData.stats.streak > 0 ? (
-              <>Tuyệt vời! Bạn đã học <span className="text-orange-500 font-bold">{dashboardData.stats.streak} ngày</span> liên tiếp 🔥</>
-            ) : localStats.wordsLearned > 0 ? (
-              <>Bạn đã học <span className="text-blue-500 font-bold">{localStats.wordsLearned} từ</span>. Tiếp tục nhé!</>
+            {stats.streak > 0 ? (
+              <>Tuyệt vời! Bạn đã học <span className="text-orange-500 font-bold">{stats.streak} ngày</span> liên tiếp 🔥</>
+            ) : stats.totalWordsLearned > 0 ? (
+              <>Bạn đã học <span className="text-blue-500 font-bold">{stats.totalWordsLearned} từ</span>. Tiếp tục nhé!</>
             ) : isNewUser ? (
               'Hôm nay là ngày tuyệt vời để bắt đầu học tiếng Đức!'
             ) : (
@@ -298,21 +215,15 @@ function AuthenticatedDashboard() {
         </div>
         <div className="text-right text-sm" style={{ color: 'var(--theme-text-muted)' }}>
           {new Date().toLocaleDateString('vi-VN', {
-            weekday: 'long',
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
+            weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
           })}
         </div>
       </div>
 
-      {/* Welcome banner for new users */}
       {isNewUser && <WelcomeBanner />}
 
-      {/* Stats Cards */}
       <StatsCards stats={dashboardData.stats} />
 
-      {/* Main Content */}
       <div className="grid lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
           <WeeklyChart data={dashboardData.weeklyProgress} />
@@ -324,27 +235,29 @@ function AuthenticatedDashboard() {
         </div>
       </div>
 
-      {/* Topic Progress */}
       <TopicProgressList data={dashboardData.topicProgress} />
 
-      {/* Getting Started Tips for New Users */}
       {isNewUser && (
-        <div className="p-6 rounded-2xl border" style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
+        <div className="p-6 rounded-2xl border"
+          style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
           <h3 className="text-lg font-bold mb-4" style={{ color: 'var(--theme-text-primary)' }}>
             💡 Gợi ý để bắt đầu
           </h3>
           <div className="grid md:grid-cols-3 gap-4">
-            <Link href="/topics" className="p-4 rounded-xl transition-all hover:scale-[1.02]" style={{ backgroundColor: 'rgba(59, 130, 246, 0.1)' }}>
+            <Link href="/topics" className="p-4 rounded-xl transition-all hover:scale-[1.02]"
+              style={{ backgroundColor: 'rgba(59, 130, 246, 0.1)' }}>
               <div className="text-2xl mb-2">📚</div>
               <div className="font-medium text-blue-600">Học theo chủ đề</div>
               <div className="text-sm" style={{ color: 'var(--theme-text-muted)' }}>12 chủ đề A1 cơ bản</div>
             </Link>
-            <Link href="/games/quick-quiz" className="p-4 rounded-xl transition-all hover:scale-[1.02]" style={{ backgroundColor: 'rgba(16, 185, 129, 0.1)' }}>
+            <Link href="/games/quick-quiz" className="p-4 rounded-xl transition-all hover:scale-[1.02]"
+              style={{ backgroundColor: 'rgba(16, 185, 129, 0.1)' }}>
               <div className="text-2xl mb-2">🎮</div>
               <div className="font-medium text-green-600">Chơi Quick Quiz</div>
               <div className="text-sm" style={{ color: 'var(--theme-text-muted)' }}>Luyện tập Der/Die/Das</div>
             </Link>
-            <Link href="/dictionary" className="p-4 rounded-xl transition-all hover:scale-[1.02]" style={{ backgroundColor: 'rgba(139, 92, 246, 0.1)' }}>
+            <Link href="/dictionary" className="p-4 rounded-xl transition-all hover:scale-[1.02]"
+              style={{ backgroundColor: 'rgba(139, 92, 246, 0.1)' }}>
               <div className="text-2xl mb-2">📖</div>
               <div className="font-medium text-purple-600">Khám phá từ điển</div>
               <div className="text-sm" style={{ color: 'var(--theme-text-muted)' }}>Tra cứu từ vựng</div>
@@ -363,14 +276,14 @@ export default function HomePage() {
   const { isAuthenticated, isLoading: authLoading } = useAuthStore();
 
   return (
-      <div className="max-w-7xl mx-auto px-4 py-6">
-        {authLoading ? (
-          <DashboardSkeleton />
-        ) : isAuthenticated ? (
-          <AuthenticatedDashboard />
-        ) : (
-          <GuestLanding />
-        )}
-      </div>
+    <div className="max-w-7xl mx-auto px-4 py-6">
+      {authLoading ? (
+        <DashboardSkeleton />
+      ) : isAuthenticated ? (
+        <AuthenticatedDashboard />
+      ) : (
+        <GuestLanding />
+      )}
+    </div>
   );
 }

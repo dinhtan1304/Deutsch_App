@@ -9,6 +9,16 @@ interface PopupContentProps {
   word: string;
 }
 
+// BUG FIX 4: Level badge was always blue regardless of level.
+// Now each CEFR level gets its own color matching the HighlightedText system.
+const LEVEL_COLORS: Record<string, { bg: string; color: string }> = {
+  A1: { bg: 'rgba(34, 197, 94, 0.15)',   color: '#22C55E' },
+  A2: { bg: 'rgba(59, 130, 246, 0.15)',  color: '#3B82F6' },
+  B1: { bg: 'rgba(139, 92, 246, 0.15)', color: '#8B5CF6' },
+  B2: { bg: 'rgba(245, 158, 11, 0.15)', color: '#F59E0B' },
+  C1: { bg: 'rgba(239, 68, 68, 0.15)',  color: '#EF4444' },
+};
+
 const ARTICLE_STYLES: Record<string, { bg: string; label: string }> = {
   der: { bg: '#3B82F6', label: 'der' },
   die: { bg: '#EF4444', label: 'die' },
@@ -127,11 +137,21 @@ export function PopupContent({ word }: PopupContentProps) {
       </div>
 
       {/* ═══ BADGES: Level ═══ */}
-      {result.level && (
-        <div style={{ marginBottom: '10px' }}>
-          <span className="dict-badge-level">{result.level}</span>
-        </div>
-      )}
+      {result.level && (() => {
+        const lc = LEVEL_COLORS[result.level!] ?? { bg: 'rgba(59,130,246,0.15)', color: '#60A5FA' };
+        return (
+          <div style={{ marginBottom: '10px' }}>
+            <span style={{
+              fontSize: '11px',
+              fontWeight: 600,
+              padding: '2px 8px',
+              borderRadius: '4px',
+              background: lc.bg,
+              color: lc.color,
+            }}>{result.level}</span>
+          </div>
+        );
+      })()}
 
       {/* ═══ NGHĨA CHÍNH: Tiếng Việt (nổi bật nhất) ═══ */}
       {result.translationVi && (
@@ -243,20 +263,7 @@ function Style() {
         background: rgba(148, 163, 184, 0.2);
       }
 
-      /* ── Level badge ── */
-      .dict-badge-level {
-        font-size: 11px;
-        font-weight: 600;
-        padding: 2px 8px;
-        border-radius: 4px;
-        background: rgba(59, 130, 246, 0.15);
-        color: #60A5FA;
-      }
-      html:not(.dark) .dict-badge-level,
-      html[data-theme="light"] .dict-badge-level {
-        background: #DBEAFE;
-        color: #1D4ED8;
-      }
+      /* Level badge — replaced by dynamic inline style in JSX (LEVEL_COLORS) */
 
       /* ── NGHĨA TIẾNG VIỆT (nổi bật) ── */
       .dict-translation-vi {

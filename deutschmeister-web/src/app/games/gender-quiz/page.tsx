@@ -28,7 +28,9 @@ export default function GenderQuizPage() {
   const router = useRouter();
   const { settings, isLoaded, loadSettings } = useSettingsStore();
   const { playCorrect, playWrong, playCombo, playLevelUp, playGameOver, playClick } = useSoundEffects();
-  const session = useGameSession('quick-quiz');
+  // BUG FIX 1: was 'quick-quiz' — caused all GenderQuiz sessions to be
+  // recorded as QuickQuiz in the backend, corrupting game history stats.
+  const session = useGameSession('gender-quiz');
 
   const [phase, setPhase] = useState<Phase>('setup');
   const [index, setIndex] = useState(0);

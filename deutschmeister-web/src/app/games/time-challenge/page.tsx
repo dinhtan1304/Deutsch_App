@@ -2,17 +2,24 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { useRandomWords } from '@/hooks/useWords';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
 import { useGameSession } from '@/hooks/useGameSession';
-import { Gender, GenderInfo } from '@/types';
+import { wordsApi } from '@/lib/api/words';
+import { Gender, GenderInfo, Word } from '@/types';
 import {
   GameSetupCard, GameResultCard, GameButton, ComboBadge, StatCard,
   GenderButtons, GameInfoBox, KBD,
   IconClock, IconTarget, IconCheck, IconX, IconFlame, IconRocket, IconKeyboard, IconVolume,
   IconRefresh, IconChevronLeft, IconZap,
 } from '@/components/games/GameUI';
+
+// Batch size per API call. Small enough to keep initial load fast (<100ms),
+// large enough that a typical 60-second session never exhausts the buffer.
+// At ~1 word/sec average, 50 words = 50 seconds before needing next batch.
+const BATCH_SIZE = 50;
+// Start prefetching next batch when this many words remain in the buffer.
+const PREFETCH_THRESHOLD = 15;
 
 type Phase = 'setup' | 'countdown' | 'playing' | 'result';
 
@@ -34,6 +41,12 @@ export default function TimedChallengePage() {
   const [starting, setStarting] = useState(false);
   const [lastAnswer, setLastAnswer] = useState<'correct' | 'wrong' | null>(null);
 
+  // Word buffer: grows via batch fetching instead of one 200-word upfront load.
+  // ORDER BY RANDOM() LIMIT 200 forces PostgreSQL to score every row — at 3000+
+  // words this becomes slow. Fetching BATCH_SIZE=50 at a time cuts that cost by 4×.
+  const [words, setWords] = useState<Word[]>([]);
+  const isFetchingRef = useRef(false);
+
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const countdownRef = useRef<NodeJS.Timeout | null>(null);
   const scoreRef = useRef(0);
@@ -41,8 +54,7 @@ export default function TimedChallengePage() {
   const correctRef = useRef(0);
   const wrongRef = useRef(0);
 
-  const { data: words, refetch, isLoading } = useRandomWords(200, {});
-  const currentWord = words?.[index];
+  const currentWord = words[index];
   const duration = isLoaded ? settings.timedChallengeSeconds : 60;
 
   useEffect(() => { loadSettings(); }, [loadSettings]);
@@ -54,17 +66,49 @@ export default function TimedChallengePage() {
 
   useEffect(() => () => clearTimers(), [clearTimers]);
 
+  // Fetch one batch and append to the word buffer.
+  // isFetchingRef prevents concurrent fetches when multiple answers fire quickly.
+  const fetchBatch = useCallback(async () => {
+    if (isFetchingRef.current) return;
+    isFetchingRef.current = true;
+    try {
+      const batch = await wordsApi.getRandom(BATCH_SIZE, {});
+      setWords(prev => [...prev, ...batch]);
+    } catch {
+      // Silently ignore prefetch failures — user still has remaining words to answer
+      console.warn('[TimedChallenge] Prefetch failed');
+    } finally {
+      isFetchingRef.current = false;
+    }
+  }, []);
+
+  // Trigger prefetch when approaching end of current buffer
+  useEffect(() => {
+    if (phase !== 'playing') return;
+    const remaining = words.length - index;
+    if (remaining <= PREFETCH_THRESHOLD) {
+      fetchBatch();
+    }
+  }, [index, words.length, phase, fetchBatch]);
+
   const startGame = async () => {
     playClick(); setStarting(true); clearTimers();
     try {
-      const result = await refetch();
-      if (!result.data?.length) { alert('Không có từ vựng!'); setStarting(false); return; }
+      // Reset state
       setIndex(0); setTimeLeft(duration); setScore(0); setCombo(0); setBestCombo(0);
       setCorrect(0); setWrong(0); setCountdown(3); setLastAnswer(null);
       scoreRef.current = 0; bestComboRef.current = 0;
       correctRef.current = 0; wrongRef.current = 0;
+
+      // Fetch initial batch — much faster than ORDER BY RANDOM() LIMIT 200
+      isFetchingRef.current = true;
+      const firstBatch = await wordsApi.getRandom(BATCH_SIZE, {});
+      isFetchingRef.current = false;
+
+      if (!firstBatch.length) { alert('Không có từ vựng!'); setStarting(false); return; }
+      setWords(firstBatch);
       setPhase('countdown');
-      session.start(200);
+      session.start(BATCH_SIZE);
 
       let c = 3;
       countdownRef.current = setInterval(() => {
@@ -80,7 +124,7 @@ export default function TimedChallengePage() {
           }, 1000);
         }
       }, 1000);
-    } catch { alert('Lỗi tải từ vựng!'); }
+    } catch { alert('Lỗi tải từ vựng!'); isFetchingRef.current = false; }
     finally { setStarting(false); }
   };
 
@@ -99,8 +143,10 @@ export default function TimedChallengePage() {
     } else { playWrong(); wrongRef.current++; setWrong(w => w + 1); setCombo(0); setLastAnswer('wrong'); }
 
     setTimeout(() => setLastAnswer(null), 300);
-    setIndex(i => (i >= (words?.length || 1) - 1 ? 0 : i + 1));
-  }, [phase, currentWord, combo, bestCombo, words?.length, playCorrect, playWrong, playCombo]);
+    // Always increment — no wrap-around. The buffer grows via prefetch so we
+    // never reach the end of `words` under normal play conditions.
+    setIndex(i => i + 1);
+  }, [phase, currentWord, combo, bestCombo, playCorrect, playWrong, playCombo]);
 
   useEffect(() => {
     const handle = (e: KeyboardEvent) => {
@@ -113,7 +159,6 @@ export default function TimedChallengePage() {
     return () => window.removeEventListener('keydown', handle);
   }, [phase, answer]);
 
-  // Save game session to backend when game ends
   useEffect(() => {
     if (phase === 'result') {
       session.end(scoreRef.current, bestComboRef.current, correctRef.current, wrongRef.current);
@@ -134,7 +179,7 @@ export default function TimedChallengePage() {
             <div className="flex items-center gap-2"><IconVolume size={14} style={{ color: '#22C55E' }} /><span>Âm thanh: {settings.soundEnabled ? 'Bật' : 'Tắt'}</span></div>
           </GameInfoBox>
           <div className="flex gap-3 justify-center mt-6">
-            <GameButton onClick={startGame} loading={isLoading || starting} color="#EF4444"><IconRocket size={16} /> Bắt đầu</GameButton>
+            <GameButton onClick={startGame} loading={starting} color="#EF4444"><IconRocket size={16} /> Bắt đầu</GameButton>
             <GameButton variant="outline" onClick={() => router.push('/games')}><IconChevronLeft size={16} /> Quay lại</GameButton>
           </div>
         </GameSetupCard>
@@ -239,7 +284,9 @@ export default function TimedChallengePage() {
             <h2 className="text-4xl md:text-5xl font-bold mb-3" style={{ color: 'var(--theme-text-primary)' }}>
               {currentWord.word}
             </h2>
-            <p className="text-[16px]" style={{ color: 'var(--theme-text-secondary)' }}>{currentWord.translationEn}</p>
+            <p className="text-[16px]" style={{ color: 'var(--theme-text-secondary)' }}>
+              {currentWord.translationVi || currentWord.translationEn}
+            </p>
           </div>
         )}
 

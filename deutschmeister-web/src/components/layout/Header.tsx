@@ -20,7 +20,7 @@ export function Header({ sidebarCollapsed }: HeaderProps) {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      router.push(`/dictionary?search=${encodeURIComponent(searchQuery.trim())}`);
+      router.push(`/words?search=${encodeURIComponent(searchQuery.trim())}`);
     }
   };
 
