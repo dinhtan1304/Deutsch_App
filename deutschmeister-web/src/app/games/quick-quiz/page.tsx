@@ -24,7 +24,7 @@ export default function QuickQuizPage() {
   const router = useRouter();
   const session = useGameSession('quick-quiz');
   const { settings, isLoaded, loadSettings } = useSettingsStore();
-  const { playCorrect, playWrong, playCombo, playGameOver } = useSoundEffects();
+  const { playCorrect, playWrong, playGameOver } = useSoundEffects();
 
   // Use settings value — fall back to 20 until settings load
   const TOTAL_QUESTIONS = isLoaded ? settings.questionsPerGame : 20;
@@ -84,7 +84,7 @@ export default function QuickQuizPage() {
       if (currentIndex < TOTAL_QUESTIONS - 1) { setCurrentIndex(i => i + 1); setSelectedAnswer(null); setShowFeedback(false); }
       else { playGameOver(); setPhase('result'); } // BUG FIX 2: missing game over sound
     }, 1500);
-  }, [showFeedback, currentWord, currentIndex]);
+  }, [showFeedback, currentWord, currentIndex, playCorrect, playWrong, playGameOver, TOTAL_QUESTIONS]);
 
   // Save session to backend when game finishes
   useEffect(() => {
@@ -208,7 +208,7 @@ export default function QuickQuizPage() {
                 }}>
                 {selectedAnswer === currentWord.gender
                   ? <><IconCheck size={15} /> Chính xác!</>
-                  : <><IconX size={15} /> Sai! Đáp án: "{GenderInfo[currentWord.gender].article}"</>}
+                  : <><IconX size={15} /> Sai! Đáp án: &quot;{GenderInfo[currentWord.gender].article}&quot;</>}
               </div>
             )}
           </div>

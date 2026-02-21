@@ -6,11 +6,11 @@ import { useSettingsStore } from '@/stores/settingsStore';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
 import { useGameSession } from '@/hooks/useGameSession';
 import { wordsApi } from '@/lib/api/words';
-import { Gender, GenderInfo, Word } from '@/types';
+import { Gender, Word } from '@/types';
 import {
   GameSetupCard, GameResultCard, GameButton, ComboBadge, StatCard,
   GenderButtons, GameInfoBox, KBD,
-  IconClock, IconTarget, IconCheck, IconX, IconFlame, IconRocket, IconKeyboard, IconVolume,
+  IconClock, IconTarget, IconCheck, IconX, IconRocket, IconKeyboard, IconVolume,
   IconRefresh, IconChevronLeft, IconZap,
 } from '@/components/games/GameUI';
 

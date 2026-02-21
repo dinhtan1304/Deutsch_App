@@ -6,7 +6,7 @@ import { useRandomWords } from '@/hooks/useWords';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
 import { useGameSession } from '@/hooks/useGameSession';
-import { Gender, GenderInfo, Word } from '@/types';
+import { GenderInfo, Word } from '@/types';
 import {
   GameSetupCard, GameResultCard, GameButton, GameProgressBar,
   ComboBadge, StatCard, AnswerReview, GameInfoBox, KBD,
@@ -235,7 +235,7 @@ export default function FillBlankPage() {
               <div className="mt-5 pt-4 border-t" style={{ borderColor: 'var(--theme-border)' }}>
                 <p className="text-[16px] font-semibold flex items-center justify-center gap-1.5"
                   style={{ color: isCorrect ? '#22C55E' : '#EF4444' }}>
-                  {isCorrect ? <><IconCheck size={16} /> Chính xác!</> : <><IconX size={16} /> Sai rồi! Đáp án là "{currentWord.article}"</>}
+                  {isCorrect ? <><IconCheck size={16} /> Chính xác!</> : <><IconX size={16} /> Sai rồi! Đáp án là {"'"}{ currentWord.article}{"'"}</>}
                 </p>
               </div>
             )}
