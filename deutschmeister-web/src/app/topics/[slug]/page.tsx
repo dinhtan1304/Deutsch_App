@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { useTopic, useUpdateTopicProgress } from '@/hooks/useTopics';
@@ -280,6 +280,13 @@ export default function TopicDetailPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState<TabKey>('words');
 
+  // Debounce backend progress sync so rapid word toggles (e.g. marking 10 words
+  // at once) don't fire a PUT request on every single click — batches them into one.
+  const syncDebounceRef = useRef<NodeJS.Timeout | null>(null);
+  useEffect(() => () => {
+    if (syncDebounceRef.current) clearTimeout(syncDebounceRef.current);
+  }, []);
+
   useEffect(() => {
     if (topic) {
       const stored = localStorage.getItem(`topic-learned-${topic.id}`);
@@ -291,9 +298,12 @@ export default function TopicDetailPage() {
   }, [topic]);
 
   const syncProgressToServer = (newLearnedCount: number) => {
-    if (isAuthenticated && topic) {
+    if (!isAuthenticated || !topic) return;
+    if (syncDebounceRef.current) clearTimeout(syncDebounceRef.current);
+    syncDebounceRef.current = setTimeout(() => {
+      syncDebounceRef.current = null;
       updateProgressMutation.mutate({ topicId: topic.id, wordsLearned: newLearnedCount });
-    }
+    }, 600);
   };
 
   const saveLearned = (newSet: Set<string>) => {

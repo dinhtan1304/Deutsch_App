@@ -1,9 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useParams } from 'next/navigation';
-import { grammarApi } from '@/lib/api/grammar';
-import { GrammarLessonDetail } from '@/types/grammar';
+import { useGrammarLesson, useSubmitGrammarExercises } from '@/hooks/useGrammar';
 import { TheorySection } from '@/components/grammar/TheorySection';
 import { ExerciseList } from '@/components/grammar/ExerciseList';
 import { IconArrowLeft, IconBookOpen, IconPenLine } from '@/components/ui/Icons';
@@ -20,29 +19,20 @@ const LEVEL_STYLE: Record<string, { bg: string; color: string }> = {
 export default function GrammarLessonPage() {
   const params = useParams();
   const slug = params.slug as string;
-
-  const [lesson, setLesson] = useState<GrammarLessonDetail | null>(null);
-  const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'theory' | 'exercises'>('theory');
 
-  useEffect(() => {
-    if (!slug) return;
-    const fetchLesson = async () => {
-      try {
-        const data = await grammarApi.getLessonBySlug(slug);
-        setLesson(data);
-      } catch (error) {
-        console.error('Failed to fetch lesson', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchLesson();
-  }, [slug]);
+  // Dùng React Query hook thay vì manual useEffect + setState:
+  // - Cache 5 phút: vào lại bài học không refetch
+  // - Tự động dedup, retry, cleanup AbortController khi unmount
+  const { data: lesson, isLoading: loading } = useGrammarLesson(slug);
+
+  // Dùng mutation hook để invalidate progress cache sau khi submit:
+  // - Không dùng hook này thì trang danh sách vẫn hiện "Bắt đầu học" sau khi hoàn thành
+  const submitMutation = useSubmitGrammarExercises();
 
   const handleSubmitExercises = async (answers: Record<number, string | string[]>) => {
     if (!lesson) throw new Error('No lesson loaded');
-    return await grammarApi.submitExercises(lesson.id, answers);
+    return await submitMutation.mutateAsync({ lessonId: lesson.id, answers });
   };
 
   // CRIT-1 fix: JSX trong () thay vì trên dòng riêng

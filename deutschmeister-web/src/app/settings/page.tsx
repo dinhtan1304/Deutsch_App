@@ -1,10 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useSettingsStore } from '@/stores/settingsStore';
+import { useSettingsStore, BACKEND_SETTINGS_KEYS } from '@/stores/settingsStore';
 import { useAuthStore } from '@/stores/authStore';
+import { useUpdateSettings } from '@/hooks/useUser';
+import type { UpdateSettingsPayload } from '@/lib/api/users';
 import { IconSettings, IconChevronLeft } from '@/components/ui/Icons';
 
 // ─── Inline SVG Icons ───
@@ -209,22 +211,52 @@ export default function SettingsPage() {
   const router = useRouter();
   const { settings, isLoaded, updateSetting, resetSettings, loadSettings } = useSettingsStore();
   const { user, isAuthenticated, logout } = useAuthStore();
+  const updateSettingsMutation = useUpdateSettings();
 
   const [toast, setToast] = useState('');
   const [activeTab, setActiveTab] = useState<'display' | 'sound' | 'learning' | 'account'>('display');
 
+  // Track toast timer to cancel before setting a new one (prevents rapid-change race)
+  // and to clean up if the component unmounts before the timer fires.
+  const toastTimerRef = useRef<NodeJS.Timeout | null>(null);
+  // Accumulate backend-synced changes and debounce the PUT request so slider drags
+  // don't fire a network request on every pixel of movement.
+  const pendingBackendRef = useRef<UpdateSettingsPayload>({});
+  const backendDebounceRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => () => {
+    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+    if (backendDebounceRef.current) clearTimeout(backendDebounceRef.current);
+  }, []);
+
   useEffect(() => { loadSettings(); }, [loadSettings]);
 
-  const showToast = (msg: string) => { setToast(msg); setTimeout(() => setToast(''), 2000); };
+  const showToast = useCallback((msg: string) => {
+    setToast(msg);
+    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+    toastTimerRef.current = setTimeout(() => { toastTimerRef.current = null; setToast(''); }, 2000);
+  }, []);
 
   const handleChange = <K extends keyof typeof settings>(key: K, value: typeof settings[K]) => {
     updateSetting(key, value);
+    // Sync backend-owned settings to the server so they survive page refresh and
+    // device-switching. Accumulate changes and debounce to batch slider drags into
+    // one PUT request instead of firing on every drag step.
+    if (isAuthenticated && (BACKEND_SETTINGS_KEYS as readonly string[]).includes(key as string)) {
+      pendingBackendRef.current = { ...pendingBackendRef.current, [key]: value } as UpdateSettingsPayload;
+      if (backendDebounceRef.current) clearTimeout(backendDebounceRef.current);
+      backendDebounceRef.current = setTimeout(() => {
+        backendDebounceRef.current = null;
+        updateSettingsMutation.mutate(pendingBackendRef.current);
+        pendingBackendRef.current = {};
+      }, 500);
+    }
     showToast('Đã lưu!');
   };
 
+  // Route through handleChange so theme is also synced to the backend.
   const handleTheme = (theme: 'light' | 'dark' | 'system') => {
-    updateSetting('theme', theme);
-    showToast(`Theme: ${theme}`);
+    handleChange('theme', theme);
   };
 
   const handleReset = () => {

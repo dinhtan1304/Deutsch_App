@@ -15,6 +15,7 @@ interface WordHighlightState {
   setEnabled: (enabled: boolean) => void;
   fetchLevelIndex: () => Promise<void>;
   getLevel: (word: string) => string | null;
+  reset: () => void;
 }
 
 function loadEnabled(): boolean {
@@ -65,6 +66,9 @@ export const useWordHighlightStore = create<WordHighlightState>((set, get) => ({
       set({ isLoading: false });
     }
   },
+
+  // Reset để cho phép retry (dùng khi user vừa login và fetch trước đó đã fail)
+  reset: () => set({ levelIndex: null, hasFetched: false, isLoading: false }),
 
   /**
    * Lookup level cho 1 từ (lowercase, strip article)

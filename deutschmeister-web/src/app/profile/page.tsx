@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useMemo } from 'react';
 import { useAuthStore } from '@/stores/authStore';
 import { useUserStats } from '@/hooks/useUser';
 
@@ -58,8 +59,20 @@ function IconArrowRight({ size = 16, style }: { size?: number; style?: React.CSS
 }
 
 export default function ProfilePage() {
-  const { user, isAuthenticated } = useAuthStore();
-  const { data: stats, isLoading } = useUserStats();
+  const { user, isAuthenticated, _hasHydrated } = useAuthStore();
+  // Pass isAuthenticated as enabled — avoids a wasted 401 request when not logged in
+  const { data: stats, isLoading } = useUserStats(isAuthenticated);
+
+  // Show spinner while zustand hydrates from localStorage to avoid
+  // flashing the unauthenticated screen on every page load for logged-in users
+  if (!_hasHydrated) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="w-8 h-8 rounded-full border-4 border-t-transparent animate-spin"
+          style={{ borderColor: 'var(--theme-border)', borderTopColor: '#3B82F6' }} />
+      </div>
+    );
+  }
 
   if (!isAuthenticated) {
     return (
@@ -79,18 +92,19 @@ export default function ProfilePage() {
     );
   }
 
-  const statCards = [
+  // Memoized — only recomputed when stats data changes, not on every render
+  const statCards = useMemo(() => [
     { label: 'Trò chơi', value: stats?.gamesPlayed || 0, color: '#3B82F6' },
     { label: 'Chính xác', value: `${stats?.accuracy || 0}%`, color: '#22C55E' },
     { label: 'Yêu thích', value: stats?.favorites || 0, color: '#F59E0B' },
     { label: 'Đã học', value: stats?.wordsLearned || 0, color: '#8B5CF6' },
-  ];
+  ], [stats]);
 
-  const detailRows = [
+  const detailRows = useMemo(() => [
     { label: 'Tổng câu trả lời', value: stats?.totalAnswers || 0, color: 'var(--theme-text-primary)' },
     { label: 'Trả lời đúng', value: stats?.correctAnswers || 0, color: '#22C55E' },
     { label: 'Trả lời sai', value: stats?.wrongAnswers || 0, color: '#EF4444' },
-  ];
+  ], [stats]);
 
   return (
       <div className="py-6">

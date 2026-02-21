@@ -1,7 +1,7 @@
 'use client';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ErrorBoundary } from '@/components/ui';
 import { ApiError, clearTokens, initAuth } from '@/lib/api/client';
 import { useAuthStore } from '@/stores/authStore';
@@ -41,6 +41,10 @@ function handleGlobalError(error: unknown) {
 function AppInitializer({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuthStore();
   const { loadSettings, syncFromBackend, settings, isLoaded } = useSettingsStore();
+  // Prevents the double GET /users/settings that would otherwise fire on mount for
+  // authenticated users: Step 3 (mount effect) and Step 4 (isAuthenticated effect)
+  // both run on the same render when the user is already logged in.
+  const hasSyncedRef = useRef(false);
 
   // Step 1: Load settings from localStorage (synchronous, instant)
   useEffect(() => {
@@ -57,10 +61,14 @@ function AppInitializer({ children }: { children: React.ReactNode }) {
     const run = async () => {
       const zustandIsAuth = useAuthStore.getState().isAuthenticated;
       if (!zustandIsAuth) return;
+      // Mark synced BEFORE the first await so Step 4's synchronous check sees it
+      // and skips its own fetch — prevents two simultaneous GET /users/settings
+      // when the user is already authenticated on mount.
+      hasSyncedRef.current = true;
 
       // Verify token is still valid (refresh via httpOnly cookie)
       const tokenValid = await initAuth();
-      if (!tokenValid) return; // onAuthExpired callback already cleared zustand
+      if (!tokenValid) { hasSyncedRef.current = false; return; } // token expired → let Step 4 retry after re-login
 
       // Token is valid — fetch backend settings and merge
       // This syncs theme/soundEnabled/dailyGoal from server so device-switching works
@@ -81,9 +89,11 @@ function AppInitializer({ children }: { children: React.ReactNode }) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Only on mount — intentionally not re-running on isAuthenticated change
 
-  // Step 4: When user logs in during the session, also sync backend settings
+  // Step 4: When user logs in during the session, also sync backend settings.
+  // Skipped on initial mount if Step 3 already claimed the sync (hasSyncedRef).
   useEffect(() => {
-    if (!isAuthenticated) return;
+    if (!isAuthenticated || hasSyncedRef.current) return;
+    hasSyncedRef.current = true;
     usersApi.getSettings()
       .then((backendSettings) => {
         const picked = BACKEND_SETTINGS_KEYS.reduce((acc, key) => {

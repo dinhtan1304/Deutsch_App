@@ -5,7 +5,7 @@ import { useSoundEffects } from '@/hooks/useSoundEffects';
 import {
   IconGamepad, IconTarget, IconClock, IconPenTool, IconLayers,
   IconBookOpen, IconLink, IconHeadphones, IconSpellCheck,
-  IconLightbulb, IconKeyboard, IconFlame, IconZap,
+  IconLightbulb, IconKeyboard, IconFlame, IconZap, KBD,
 } from '@/components/games/GameUI';
 
 const games = [
@@ -147,11 +147,3 @@ export default function GamesPage() {
   );
 }
 
-function KBD({ children }: { children: React.ReactNode }) {
-  return (
-    <kbd className="inline-flex items-center justify-center min-w-5 px-1 py-0.5 mx-0.5 rounded text-[10px] font-bold"
-      style={{ backgroundColor: 'var(--theme-bg-card)', border: '1px solid var(--theme-border)', color: 'var(--theme-text-muted)' }}>
-      {children}
-    </kbd>
-  );
-}

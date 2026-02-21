@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { usePronunciation } from '@/hooks/usePronunciation';
 import { HighlightedText } from '@/components/word-highlight/HighlightedText';
 
@@ -69,13 +69,18 @@ function getAudioColumnIndex(headers: string[], rows: string[][]): number {
 export const TheorySection = ({ content }: TheorySectionProps) => {
     const { speak } = usePronunciation();
     const [playingCell, setPlayingCell] = useState<string | null>(null);
+    const speakTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    // Clear timer khi unmount tránh setState trên component đã unmount
+    useEffect(() => () => { if (speakTimerRef.current) clearTimeout(speakTimerRef.current); }, []);
 
     const handleSpeak = useCallback((text: string, cellKey: string) => {
         const german = extractGerman(text);
         if (!german) return;
+        if (speakTimerRef.current) clearTimeout(speakTimerRef.current);
         setPlayingCell(cellKey);
         speak(german);
-        setTimeout(() => setPlayingCell(null), 1800);
+        speakTimerRef.current = setTimeout(() => setPlayingCell(null), 1800);
     }, [speak]);
 
     return (

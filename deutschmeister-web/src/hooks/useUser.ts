@@ -1,7 +1,8 @@
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { usersApi, UpdateSettingsPayload } from '@/lib/api/users';
+import { usersApi, UpdateSettingsPayload, User } from '@/lib/api/users';
+import { useAuthStore } from '@/stores/authStore';
 
 export function useProfile() {
   return useQuery({
@@ -13,12 +14,24 @@ export function useProfile() {
 
 export function useUpdateProfile() {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
-    mutationFn: (data: { name?: string; avatar?: string }) => 
+    mutationFn: (data: { name?: string; avatar?: string }) =>
       usersApi.updateProfile(data),
-    onSuccess: () => {
+    onSuccess: (updatedUser: User) => {
       queryClient.invalidateQueries({ queryKey: ['users', 'profile'] });
+      // Sync updated name/avatar to authStore so the navbar/header
+      // reflects the change immediately without requiring re-login.
+      // Merge into current user to preserve fields (role, etc.) not
+      // returned by the update endpoint.
+      const currentUser = useAuthStore.getState().user;
+      if (currentUser) {
+        useAuthStore.getState().setUser({
+          ...currentUser,
+          name: updatedUser.name,
+          avatar: updatedUser.avatar,
+        });
+      }
     },
   });
 }
@@ -42,10 +55,11 @@ export function useUpdateSettings() {
   });
 }
 
-export function useUserStats() {
+export function useUserStats(enabled = true) {
   return useQuery({
     queryKey: ['users', 'stats'],
     queryFn: () => usersApi.getStats(),
     retry: false,
+    enabled,
   });
 }

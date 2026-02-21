@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { WordCard } from '@/components/words/WordCard';
 import { useWords } from '@/hooks/useWords';
@@ -25,7 +25,13 @@ const GENDERS: { value: Gender; article: string; label: string; color: string; b
 ];
 
 export default function WordsPage() {
+  // searchInput: immediate value shown in the input (updates on every keystroke)
+  // search: debounced value sent to the API (updates 300ms after typing stops)
+  const [searchInput, setSearchInput] = useState('');
   const [search, setSearch] = useState('');
+  const searchDebounceRef = useRef<NodeJS.Timeout | null>(null);
+  useEffect(() => () => { if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current); }, []);
+
   const [gender, setGender] = useState<Gender | ''>('');
   const [category, setCategory] = useState('');
   const [level, setLevel] = useState<CEFRLevel | ''>('');
@@ -49,10 +55,11 @@ export default function WordsPage() {
     } catch { /* ignore duplicate/not-found errors */ }
   };
 
-  const hasFilters = !!(search || gender || category || level);
+  const hasFilters = !!(searchInput || gender || category || level);
 
   const clearFilters = () => {
-    setSearch(''); setGender(''); setCategory(''); setLevel(''); setPage(1);
+    if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+    setSearchInput(''); setSearch(''); setGender(''); setCategory(''); setLevel(''); setPage(1);
   };
 
   const toggleGender = (g: Gender) => {
@@ -137,8 +144,17 @@ export default function WordsPage() {
             <input
               type="text"
               placeholder="Tìm từ vựng tiếng Đức hoặc nghĩa..."
-              value={search}
-              onChange={e => { setSearch(e.target.value); setPage(1); }}
+              value={searchInput}
+              onChange={e => {
+                const val = e.target.value;
+                setSearchInput(val);
+                setPage(1);
+                if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+                searchDebounceRef.current = setTimeout(() => {
+                  searchDebounceRef.current = null;
+                  setSearch(val);
+                }, 300);
+              }}
               className="w-full pl-11 pr-4 py-2.5 rounded-xl text-[14px] border
                 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500/50
                 transition-all duration-200"

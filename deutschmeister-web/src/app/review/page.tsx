@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
@@ -90,6 +90,22 @@ export default function SRSReviewPage() {
   const [sessionStats, setSessionStats] = useState({ correct: 0, wrong: 0, streak: 0, bestStreak: 0 });
   const [cardModes, setCardModes] = useState<Record<number, Exclude<QuizMode, 'mixed'>>>({});
 
+  // Stable ref for reviewMutation.mutate — avoids recreating handleReview on every
+  // mutation state change (idle→pending→success→idle), which would thrash the keydown listener.
+  const reviewMutateRef = useRef(reviewMutation.mutate);
+  useEffect(() => { reviewMutateRef.current = reviewMutation.mutate; }, [reviewMutation.mutate]);
+
+  // Tracked so we can cancel it on unmount and on rapid successive answers.
+  const nextCardTimerRef = useRef<NodeJS.Timeout | null>(null);
+  // Mirrors sessionStats.streak so handleReview can read it without adding sessionStats
+  // to its deps (which would recreate the callback and thrash the keydown listener).
+  const streakRef = useRef(0);
+
+  // Cancel pending card-advance timer on unmount to prevent state updates on unmounted component.
+  useEffect(() => () => {
+    if (nextCardTimerRef.current) clearTimeout(nextCardTimerRef.current);
+  }, []);
+
   useEffect(() => { loadSettings(); }, [loadSettings]);
 
   useEffect(() => {
@@ -115,7 +131,7 @@ export default function SRSReviewPage() {
     setReviewQueue(queue);
     setCurrentIndex(0);
     setIsFlipped(false);
-    setSessionStats({ correct: 0, wrong: 0, streak: 0, bestStreak: 0 });
+    setSessionStats({ correct: 0, wrong: 0, streak: 0, bestStreak: 0 }); streakRef.current = 0;
     const modes: Record<number, Exclude<QuizMode, 'mixed'>> = {};
     queue.forEach((card, i) => { modes[i] = getCardQuizMode(card); });
     setCardModes(modes);
@@ -134,24 +150,36 @@ export default function SRSReviewPage() {
 
   const handleReview = useCallback((rating: ReviewRating) => {
     if (!currentCard) return;
-    reviewMutation.mutate({ wordId: currentCard.wordId, rating });
+    // Use ref so this callback doesn't need reviewMutation in its deps — the mutation
+    // object changes identity on every API state transition (idle→pending→success→idle),
+    // which would force handleReview to recreate and thrash the keydown event listener.
+    reviewMutateRef.current({ wordId: currentCard.wordId, rating });
     const isCorrect = rating !== 'again';
     if (isCorrect) {
       playCorrect();
-      setSessionStats(prev => {
-        const s = prev.streak + 1;
-        if (s === 5 || s === 10) setTimeout(() => playCombo(), 200);
-        return { ...prev, correct: prev.correct + 1, streak: s, bestStreak: Math.max(prev.bestStreak, s) };
-      });
+      // Compute new streak from ref so we don't need sessionStats in deps (which would
+      // recreate handleReview on every review and thrash the keydown listener).
+      const newStreak = streakRef.current + 1;
+      streakRef.current = newStreak;
+      // Trigger combo sound BEFORE state update — keeps side effect out of the updater
+      // function, preventing double-fire in React 18 StrictMode.
+      if (newStreak === 5 || newStreak === 10) setTimeout(() => playCombo(), 200);
+      setSessionStats(prev => ({
+        ...prev, correct: prev.correct + 1, streak: newStreak, bestStreak: Math.max(prev.bestStreak, newStreak),
+      }));
     } else {
       playWrong();
+      streakRef.current = 0;
       setSessionStats(prev => ({ ...prev, wrong: prev.wrong + 1, streak: 0 }));
     }
-    setTimeout(() => {
+    // Cancel any previous pending card-advance to prevent stacking timers on fast clicks.
+    if (nextCardTimerRef.current) clearTimeout(nextCardTimerRef.current);
+    nextCardTimerRef.current = setTimeout(() => {
+      nextCardTimerRef.current = null;
       if (currentIndex + 1 >= reviewQueue.length) { playLevelUp(); setPhase('complete'); refetchDue(); }
       else { setCurrentIndex(i => i + 1); setIsFlipped(false); }
     }, 300);
-  }, [currentCard, currentIndex, reviewQueue.length, reviewMutation, playCorrect, playWrong, playCombo, playLevelUp, refetchDue]);
+  }, [currentCard, currentIndex, reviewQueue.length, playCorrect, playWrong, playCombo, playLevelUp, refetchDue]);
 
   useEffect(() => {
     const handle = (e: KeyboardEvent) => {

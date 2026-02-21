@@ -158,7 +158,15 @@ function TextInput({ value, onChange, disabled, placeholder, multiline, onEnter 
 function ReorderInput({ words, value, onChange, disabled }: {
     words: string[]; value: string[]; onChange: (v: string[]) => void; disabled: boolean;
 }) {
-    const available = words.filter(w => !value.includes(w));
+    // Lọc theo số lần xuất hiện — cho phép từ trùng lặp (VD: "der" 2 lần trong câu)
+    const available = (() => {
+        const remaining = [...words];
+        for (const selected of value) {
+            const idx = remaining.indexOf(selected);
+            if (idx !== -1) remaining.splice(idx, 1);
+        }
+        return remaining;
+    })();
 
     return (
         <div className="space-y-4">

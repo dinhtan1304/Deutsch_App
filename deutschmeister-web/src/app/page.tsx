@@ -1,5 +1,6 @@
 'use client';
 
+import { useMemo } from 'react';
 import {
   StatsCards,
   ActivityHeatmap,
@@ -181,17 +182,25 @@ function AuthenticatedDashboard() {
   // Previously this merged server data with localStorage topic progress,
   // which caused: (1) stale data masking genuine server zeros, (2) cross-user
   // contamination on shared devices, (3) double-counting when both had data.
-  const stats = data?.stats ?? getEmptyStats();
-
-  const dashboardData: FullDashboard = {
-    stats,
+  //
+  // Memoized: data from React Query is a stable reference that only changes on
+  // refetch, so dashboardData (and all its child props) stay stable between
+  // renders — preventing unnecessary re-renders of StatsCards, WeeklyChart, etc.
+  const dashboardData: FullDashboard = useMemo(() => ({
+    stats: data?.stats ?? getEmptyStats(),
     heatmap: data?.heatmap ?? getEmptyHeatmap(),
     weeklyProgress: data?.weeklyProgress ?? getEmptyWeeklyProgress(),
     topicProgress: data?.topicProgress ?? [],
     recentActivity: data?.recentActivity ?? [],
-  };
+  }), [data]);
 
+  const { stats } = dashboardData;
   const isNewUser = stats.gamesPlayed === 0 && stats.totalWordsLearned === 0;
+
+  // Computed once per render cycle — date doesn't change during a session.
+  const todayLabel = useMemo(() => new Date().toLocaleDateString('vi-VN', {
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+  }), []);
 
   return (
     <div className="space-y-6">
@@ -214,9 +223,7 @@ function AuthenticatedDashboard() {
           </p>
         </div>
         <div className="text-right text-sm" style={{ color: 'var(--theme-text-muted)' }}>
-          {new Date().toLocaleDateString('vi-VN', {
-            weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
-          })}
+          {todayLabel}
         </div>
       </div>
 

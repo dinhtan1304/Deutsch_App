@@ -25,6 +25,11 @@ export default function WritingEditorPage() {
   const { data: session, isLoading, isError } = useWritingSession(id);
   const saveDraftMutation = useSaveDraft();
   const submitMutation = useSubmitWriting();
+  // Ref để tránh saveDraftMutation object (unstable) vào deps của auto-save timer.
+  // saveDraftMutation.mutate function là stable, nhưng object thay reference mỗi khi
+  // state thay đổi (idle→pending→success→idle) → timer bị reset sau mỗi lần save.
+  const saveDraftMutateRef = useRef(saveDraftMutation.mutate);
+  saveDraftMutateRef.current = saveDraftMutation.mutate;
 
   const [text, setText] = useState('');
   const [showHints, setShowHints] = useState(true);
@@ -34,14 +39,14 @@ export default function WritingEditorPage() {
   useEffect(() => { if (session?.userText) setText(session.userText); }, [session?.userText]);
   useEffect(() => { if (session?.status === 'GRADED') router.replace(`/practice-test/writing/${id}/result`); }, [session?.status, id, router]);
 
-  // Auto-save every 30s
+  // Auto-save every 30s sau lần cuối user gõ phím
   useEffect(() => {
     if (!text.trim() || !id) return;
     const timer = setTimeout(() => {
-      saveDraftMutation.mutate({ id, userText: text }, { onSuccess: () => setLastSaved(new Date()) });
+      saveDraftMutateRef.current({ id, userText: text }, { onSuccess: () => setLastSaved(new Date()) });
     }, 30000);
     return () => clearTimeout(timer);
-  }, [text, id, saveDraftMutation]);
+  }, [text, id]); // saveDraftMutation sẽ không vào deps để tránh reset timer
 
   const handleSaveDraft = useCallback(() => {
     if (!text.trim()) return;

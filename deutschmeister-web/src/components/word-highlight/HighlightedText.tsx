@@ -15,6 +15,13 @@ interface HighlightedTextProps {
  * bg = màu nền nhẹ khi hover
  * dot = màu chấm indicator
  */
+// Module-level constant — không re-create trong mỗi lần render
+const SKIP_WORDS = new Set(['der','die','das','ein','eine','einer','einem','einen','eines',
+  'ist','sind','war','waren','hat','haben','ich','du','er','sie','es','wir','ihr',
+  'und','oder','aber','denn','weil','dass','mit','von','zu','in','an','auf','für',
+  'im','am','um','bei','nach','vor','über','unter','durch','ohne','gegen','nicht',
+  'auch','noch','nur','schon','sehr','wie','was','wer','wo','wenn','dann','als']);
+
 const LEVEL_COLORS: Record<string, { underline: string; bg: string; dot: string }> = {
   A1: { underline: '#22C55E', bg: 'rgba(34, 197, 94, 0.12)', dot: '#22C55E' },
   A2: { underline: '#3B82F6', bg: 'rgba(59, 130, 246, 0.12)', dot: '#3B82F6' },
@@ -55,15 +62,6 @@ export function HighlightedText({ text, className, style }: HighlightedTextProps
       // Chỉ check từ (bỏ qua khoảng trắng, dấu câu)
       const isWord = /^[a-zA-ZäöüÄÖÜß]+$/.test(token);
       if (!isWord) return <span key={i}>{token}</span>;
-
-      // BUG FIX 5: Skip standalone articles / function words — they appear in
-      // the DB as part of noun entries but shouldn't be highlighted on their own.
-      // "die" standalone = article, "die" in "Die Schule" = irrelevant highlight.
-      const SKIP_WORDS = new Set(['der','die','das','ein','eine','einer','einem','einen','eines',
-        'ist','sind','war','waren','hat','haben','ich','du','er','sie','es','wir','ihr',
-        'und','oder','aber','denn','weil','dass','mit','von','zu','in','an','auf','für',
-        'im','am','um','bei','nach','vor','über','unter','durch','ohne','gegen','nicht',
-        'auch','noch','nur','schon','sehr','wie','was','wer','wo','wenn','dann','als']);
 
       const lower = token.toLowerCase();
       if (SKIP_WORDS.has(lower)) return <span key={i}>{token}</span>;

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { TopicCard } from '@/components/topics/TopicCard';
 import { useTopics, useUserTopicsProgress, useTopicsStats } from '@/hooks/useTopics';
 import { useAuthStore } from '@/stores/authStore';
@@ -89,35 +89,44 @@ const LEVEL_COLORS: Record<string, { color: string; gradient: string }> = {
 export default function TopicsPage() {
   const { isAuthenticated } = useAuthStore();
   const [selectedLevel, setSelectedLevel] = useState<string>('A1');
-  const [localProgressMap, setLocalProgressMap] = useState<Map<string, { wordsLearned: number; percent: number }>>(new Map());
 
   const { data: topicsData, isLoading: topicsLoading } = useTopics({ level: selectedLevel, isActive: true });
-  const { data: serverProgressData } = useUserTopicsProgress();
+  // Gate on isAuthenticated: avoids a wasted 401 request when not logged in.
+  const { data: serverProgressData } = useUserTopicsProgress(isAuthenticated);
   const { data: stats } = useTopicsStats();
 
-  useEffect(() => {
-    if (topicsData?.data) {
-      const progressMap = new Map<string, { wordsLearned: number; percent: number }>();
-      topicsData.data.forEach(topic => {
-        progressMap.set(topic.id, getLocalProgress(topic.id, topic.wordCount));
-      });
-      setLocalProgressMap(progressMap);
-    }
+  // Replaced useState<Map> + useEffect with useMemo — eliminates the extra re-render
+  // that the state update caused every time topicsData changed.
+  // Reading localStorage during render is safe in a 'use client' component.
+  const localProgressMap = useMemo(() => {
+    if (!topicsData?.data) return new Map<string, { wordsLearned: number; percent: number }>();
+    const map = new Map<string, { wordsLearned: number; percent: number }>();
+    topicsData.data.forEach(topic => {
+      map.set(topic.id, getLocalProgress(topic.id, topic.wordCount));
+    });
+    return map;
   }, [topicsData]);
 
-  const topicsWithProgress = topicsData?.data.map(topic => {
-    const serverProgress = serverProgressData?.find(p => p.id === topic.id);
-    const localProgress = localProgressMap.get(topic.id) || { wordsLearned: 0, percent: 0 };
-    const hasServerProgress = serverProgress && serverProgress.wordsLearned > 0;
-    return {
-      ...topic,
-      wordsLearned: hasServerProgress ? serverProgress.wordsLearned : localProgress.wordsLearned,
-      wordsTotal: topic.wordCount,
-      masteryPercent: hasServerProgress ? serverProgress.masteryPercent : localProgress.percent,
-      lastStudiedAt: serverProgress?.lastStudiedAt || null,
-      completedAt: serverProgress?.completedAt || null,
-    };
-  });
+  // Memoized: recomputes only when data changes, not on every render.
+  // Pre-builds a Map from serverProgressData for O(1) per-topic lookup instead
+  // of O(M) Array.find per topic (was O(N×M) total on every render).
+  const topicsWithProgress = useMemo(() => {
+    if (!topicsData?.data) return undefined;
+    const serverMap = new Map((serverProgressData || []).map(p => [p.id, p]));
+    return topicsData.data.map(topic => {
+      const serverProgress = serverMap.get(topic.id);
+      const localProgress = localProgressMap.get(topic.id) || { wordsLearned: 0, percent: 0 };
+      const hasServerProgress = serverProgress && serverProgress.wordsLearned > 0;
+      return {
+        ...topic,
+        wordsLearned: hasServerProgress ? serverProgress.wordsLearned : localProgress.wordsLearned,
+        wordsTotal: topic.wordCount,
+        masteryPercent: hasServerProgress ? serverProgress.masteryPercent : localProgress.percent,
+        lastStudiedAt: serverProgress?.lastStudiedAt || null,
+        completedAt: serverProgress?.completedAt || null,
+      };
+    });
+  }, [topicsData, serverProgressData, localProgressMap]);
 
   const isLoading = topicsLoading;
   const totalWords = topicsWithProgress?.reduce((sum, t) => sum + t.wordCount, 0) || 0;

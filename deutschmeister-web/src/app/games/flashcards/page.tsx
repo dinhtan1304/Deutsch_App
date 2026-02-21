@@ -38,7 +38,6 @@ export default function FlashcardsPage() {
   const cardsCount = isLoaded ? settings.questionsPerGame : 20;
   const { data: words, refetch, isLoading } = useRandomWords(cardsCount, {});
   const currentWord = words?.[index];
-  const progress = words?.length ? (index / words.length) * 100 : 0;
 
   useEffect(() => { loadSettings(); }, [loadSettings]);
 
@@ -69,7 +68,9 @@ export default function FlashcardsPage() {
     setTimeout(() => {
       if (index + 1 >= (words?.length || 0)) {
         playGameOver();
-        if (bestStreak >= 5 || streak >= 5) setTimeout(() => playStreak(), 300);
+        // Use ref values — state updates from this render haven't flushed yet
+        // when this setTimeout fires, so bestStreak/streak would be stale.
+        if (bestStreakRef.current >= 5) setTimeout(() => playStreak(), 300);
         setPhase('result');
       } else { setIndex(i => i + 1); setIsFlipped(false); }
     }, 300);

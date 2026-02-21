@@ -49,6 +49,7 @@ export default function TimedChallengePage() {
 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const countdownRef = useRef<NodeJS.Timeout | null>(null);
+  const lastAnswerTimerRef = useRef<NodeJS.Timeout | null>(null);
   const scoreRef = useRef(0);
   const bestComboRef = useRef(0);
   const correctRef = useRef(0);
@@ -62,6 +63,7 @@ export default function TimedChallengePage() {
   const clearTimers = useCallback(() => {
     if (timerRef.current) clearInterval(timerRef.current);
     if (countdownRef.current) clearInterval(countdownRef.current);
+    if (lastAnswerTimerRef.current) clearTimeout(lastAnswerTimerRef.current);
   }, []);
 
   useEffect(() => () => clearTimers(), [clearTimers]);
@@ -142,7 +144,8 @@ export default function TimedChallengePage() {
       if (newCombo === 5 || newCombo === 10 || newCombo === 15 || newCombo === 20) setTimeout(() => playCombo(), 150);
     } else { playWrong(); wrongRef.current++; setWrong(w => w + 1); setCombo(0); setLastAnswer('wrong'); }
 
-    setTimeout(() => setLastAnswer(null), 300);
+    if (lastAnswerTimerRef.current) clearTimeout(lastAnswerTimerRef.current);
+    lastAnswerTimerRef.current = setTimeout(() => setLastAnswer(null), 300);
     // Always increment — no wrap-around. The buffer grows via prefetch so we
     // never reach the end of `words` under normal play conditions.
     setIndex(i => i + 1);

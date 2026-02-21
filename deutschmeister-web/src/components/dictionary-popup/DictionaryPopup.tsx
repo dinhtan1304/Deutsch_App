@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useDictionaryPopupStore } from '@/stores/dictionaryPopupStore';
 import { PopupContent } from './PopupContent';
 
@@ -19,34 +19,35 @@ export function DictionaryPopup() {
     return () => document.removeEventListener('keydown', handleEscape);
   }, [isOpen, closePopup]);
 
-  // ── Tính toán vị trí (tránh tràn viewport) ──
-  useEffect(() => {
-    if (!isOpen || !position || !popupRef.current) {
-      setAdjustedPos(null);
-      return;
-    }
-
-    // BUG FIX 3: Use fixed positioning (viewport-relative).
-    // Previous 'absolute' + scrollY calculation broke on pages where a parent
-    // element had position:relative — popup appeared far from the click point.
-    // With position:fixed, clientX/clientY from the click event map 1-to-1
-    // and no scrollY offset is needed.
-    const popup = popupRef.current;
-    const rect = popup.getBoundingClientRect();
+  // ── Helper tính toán vị trí tránh tràn viewport ──
+  const calcPos = () => {
+    if (!isOpen || !position || !popupRef.current) return;
+    const rect = popupRef.current.getBoundingClientRect();
     const viewportW = window.innerWidth;
     const viewportH = window.innerHeight;
-
     let x = position.x;
     let y = position.y + 12;
-
     if (x + rect.width > viewportW - 16) x = viewportW - rect.width - 16;
     if (x < 16) x = 16;
-    if (y + rect.height > viewportH - 16) {
-      y = position.y - rect.height - 12;
-    }
+    if (y + rect.height > viewportH - 16) y = position.y - rect.height - 12;
     if (y < 16) y = 16;
-
     setAdjustedPos({ x, y });
+  };
+
+  // Chạy trước paint — không bị flash ở vị trí sai lần đầu render
+  useLayoutEffect(() => {
+    if (!isOpen || !position) { setAdjustedPos(null); return; }
+    calcPos();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, position]);
+
+  // Cập nhật lại khi nội dung thay đổi chiều cao (loading → result)
+  useEffect(() => {
+    if (!isOpen || !position || !popupRef.current) return;
+    const observer = new ResizeObserver(calcPos);
+    observer.observe(popupRef.current);
+    return () => observer.disconnect();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, position]);
 
   if (!isOpen || !selectedWord || !position) return null;

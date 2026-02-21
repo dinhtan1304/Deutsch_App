@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useSRSDue, useSRSStats, useReviewWord, SRSRating } from '@/hooks/usePersonalWords';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
@@ -8,14 +8,6 @@ import { PersonalWord, getSRSStatus, getIntervalText, SRSStatusInfo, WordTypeInf
 import { IconRefresh, IconChevronLeft, IconBrain, IconTarget, IconFlame, IconBookOpen } from '@/components/ui/Icons';
 
 // ─── Inline SVG icons ───
-function IconCheck({ size = 16 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
-      strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}>
-      <polyline points="20 6 9 17 4 12" />
-    </svg>
-  );
-}
 function IconTrophy({ size = 16, ...props }: { size?: number, [key: string]: any }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -239,7 +231,7 @@ function RatingButtons({ word, onRate, isLoading }: RatingButtonsProps) {
 
   return (
     <div className="grid grid-cols-4 gap-2 sm:gap-3 mt-6 max-w-lg mx-auto">
-      {ratings.map(({ rating, label, color, gradient, hotkey }) => (
+      {ratings.map(({ rating, label, color, hotkey }) => (
         <button key={rating} onClick={() => onRate(rating)} disabled={isLoading}
           className="flex flex-col items-center p-3 sm:p-4 rounded-2xl transition-all duration-200
             hover:-translate-y-1 hover:shadow-lg active:translate-y-0 disabled:opacity-40"
@@ -364,6 +356,18 @@ export default function WordBankReviewPage() {
   const reviewMutation = useReviewWord();
   const { playCorrect, playWrong } = useSoundEffects();
 
+  // Stable ref for mutation.mutateAsync: avoids adding the entire mutation object
+  // to useCallback deps (mutation identity changes on every API state transition
+  // idle→pending→success→idle, which would thrash the keydown listener).
+  const reviewMutateRef = useRef(reviewMutation.mutateAsync);
+  useEffect(() => { reviewMutateRef.current = reviewMutation.mutateAsync; }, [reviewMutation.mutateAsync]);
+
+  // Refs so keydown handler can read current values without being in its dep array.
+  const sessionRef = useRef(session);
+  useEffect(() => { sessionRef.current = session; }, [session]);
+  const isFlippedRef = useRef(isFlipped);
+  useEffect(() => { isFlippedRef.current = isFlipped; }, [isFlipped]);
+
   useEffect(() => {
     if (dueData && !session) {
       const allWords = [...dueData.due, ...dueData.new];
@@ -373,32 +377,22 @@ export default function WordBankReviewPage() {
     }
   }, [dueData, session]);
 
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (!session || !currentWord) return;
-      if (e.key === ' ' || e.key === 'Enter') {
-        e.preventDefault();
-        setIsFlipped(!isFlipped);
-      }
-      if (isFlipped) {
-        const ratingMap: Record<string, SRSRating> = { '1': 'again', '2': 'hard', '3': 'good', '4': 'easy' };
-        if (ratingMap[e.key]) { e.preventDefault(); handleRate(ratingMap[e.key]); }
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [session, isFlipped]);
-
   const currentWord = session?.words[session.currentIndex];
   const isComplete = session && session.currentIndex >= session.words.length;
   const progress = session ? ((session.currentIndex / session.words.length) * 100) : 0;
 
-  const handleFlip = useCallback(() => setIsFlipped(!isFlipped), [isFlipped]);
+  // Stable: functional updater removes the need to capture isFlipped.
+  const handleFlip = useCallback(() => setIsFlipped(prev => !prev), []);
 
+  // Stable: reads current values from refs instead of closing over
+  // session/currentWord/reviewMutation — none of them appear in deps.
   const handleRate = useCallback(async (rating: SRSRating) => {
-    if (!currentWord || !session) return;
+    const currentSession = sessionRef.current;
+    if (!currentSession) return;
+    const word = currentSession.words[currentSession.currentIndex];
+    if (!word) return;
     try {
-      await reviewMutation.mutateAsync({ wordId: currentWord.id, rating });
+      await reviewMutateRef.current({ wordId: word.id, rating });
       if (rating === 'again') playWrong(); else playCorrect();
       setSession(prev => {
         if (!prev) return null;
@@ -410,11 +404,31 @@ export default function WordBankReviewPage() {
         };
       });
       setIsFlipped(false);
-      if (session.currentIndex + 1 >= session.words.length) playCorrect();
     } catch (error) {
       console.error('Review failed:', error);
     }
-  }, [currentWord, session, reviewMutation, playCorrect, playWrong]);
+  }, [playCorrect, playWrong]);
+
+  // handleRate and handleFlip are now stable so this effect runs only once,
+  // eliminating the keydown listener thrash that previously fired on every flip
+  // and every card advance.
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!sessionRef.current) return;
+      const word = sessionRef.current.words[sessionRef.current.currentIndex];
+      if (!word) return;
+      if (e.key === ' ' || e.key === 'Enter') {
+        e.preventDefault();
+        setIsFlipped(prev => !prev);
+      }
+      if (isFlippedRef.current) {
+        const ratingMap: Record<string, SRSRating> = { '1': 'again', '2': 'hard', '3': 'good', '4': 'easy' };
+        if (ratingMap[e.key]) { e.preventDefault(); handleRate(ratingMap[e.key]); }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleRate]);
 
   const handleRestart = useCallback(() => { setSession(null); refetch(); }, [refetch]);
 

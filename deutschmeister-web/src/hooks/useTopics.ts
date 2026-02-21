@@ -75,12 +75,15 @@ export function useTopicsStats() {
 
 /**
  * Hook lấy progress của user
+ * Pass enabled=false (or isAuthenticated) to skip when not logged in
+ * and avoid a wasted 401 request.
  */
-export function useUserTopicsProgress() {
+export function useUserTopicsProgress(enabled = true) {
   return useQuery({
     queryKey: topicsKeys.progress(),
     queryFn: getUserTopicsProgress,
     staleTime: 2 * 60 * 1000, // 2 minutes
+    enabled,
   });
 }
 

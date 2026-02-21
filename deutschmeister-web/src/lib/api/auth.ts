@@ -61,14 +61,4 @@ export const authApi = {
   getMe: async (): Promise<User> => {
     return apiGet<User>('/auth/me');
   },
-
-  /**
-   * Refresh access token
-   * The refresh token is sent automatically via httpOnly cookie
-   */
-  refresh: async (): Promise<AuthResponse> => {
-    const response = await apiPost<AuthResponse>('/auth/refresh', {});
-    setAccessToken(response.accessToken);
-    return response;
-  },
 };

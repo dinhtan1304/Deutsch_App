@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useCallback } from 'react';
+import { useRef, useCallback, useMemo } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { gamesApi } from '@/lib/api/games';
 import { GameType, Difficulty } from '@/types';
@@ -51,5 +51,8 @@ export function useGameSession(gameType: GameType, difficulty: Difficulty = 'beg
     }
   }, [queryClient]);
 
-  return { start, end };
+  // Stable object reference — prevents useEffect([phase, session]) from
+  // re-running on every render during the result phase, which would call
+  // session.end() multiple times before sessionIdRef.current is nullified.
+  return useMemo(() => ({ start, end }), [start, end]);
 }

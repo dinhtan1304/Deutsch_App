@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuthStore } from '@/stores/authStore';
@@ -25,21 +25,39 @@ function IconLogIn({ size = 16, style }: { size?: number; style?: React.CSSPrope
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login, isLoading } = useAuthStore();
+  const { login, isLoading, isAuthenticated, _hasHydrated } = useAuthStore();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+
+  // Redirect already-authenticated users away from login page
+  useEffect(() => {
+    if (_hasHydrated && isAuthenticated) {
+      router.replace('/');
+    }
+  }, [_hasHydrated, isAuthenticated, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     try {
-      await login({ email, password });
+      await login({ email: email.trim(), password });
       router.push('/');
     } catch (err: any) {
       setError(err.message || 'Đăng nhập thất bại. Vui lòng thử lại.');
     }
   };
+
+  // Avoid flashing form while hydration or redirect is in flight
+  if (!_hasHydrated || isAuthenticated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center"
+        style={{ backgroundColor: 'var(--theme-bg-primary)' }}>
+        <div className="w-8 h-8 rounded-full border-4 border-t-transparent animate-spin"
+          style={{ borderColor: 'var(--theme-border)', borderTopColor: '#3B82F6' }} />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4"

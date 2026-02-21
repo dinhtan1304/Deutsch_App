@@ -51,7 +51,7 @@ export function PopupContent({ word }: PopupContentProps) {
         translationVi: result.translationVi,
         translationEn: result.translationEn,
         wordType: result.wordType,
-        gender: result.article,
+        gender: result.gender,
         plural: result.plural,
         example: result.example,
         level: result.level,

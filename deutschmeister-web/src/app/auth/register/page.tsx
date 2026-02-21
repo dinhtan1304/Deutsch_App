@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/stores/authStore';
@@ -50,12 +50,15 @@ const PASSWORD_RULES = [
 
 function PasswordStrengthIndicator({ password }: { password: string }) {
   const strength = useMemo(() => {
-    const passed = PASSWORD_RULES.filter(r => r.test(password)).length;
+    // Compute each rule's result once — reused in both the bar and the rule list
+    const results = PASSWORD_RULES.map(r => ({ ...r, passed: r.test(password) }));
+    const score = results.filter(r => r.passed).length;
     return {
-      score: passed,
-      percent: (passed / PASSWORD_RULES.length) * 100,
-      label: passed === 0 ? '' : passed <= 1 ? 'Yếu' : passed <= 2 ? 'Trung bình' : passed <= 3 ? 'Khá' : 'Mạnh',
-      color: passed <= 1 ? '#EF4444' : passed <= 2 ? '#F97316' : passed <= 3 ? '#F59E0B' : '#22C55E',
+      results,
+      score,
+      percent: (score / PASSWORD_RULES.length) * 100,
+      label: score === 0 ? '' : score <= 1 ? 'Yếu' : score <= 2 ? 'Trung bình' : score <= 3 ? 'Khá' : 'Mạnh',
+      color: score <= 1 ? '#EF4444' : score <= 2 ? '#F97316' : score <= 3 ? '#F59E0B' : '#22C55E',
     };
   }, [password]);
 
@@ -72,16 +75,13 @@ function PasswordStrengthIndicator({ password }: { password: string }) {
         )}
       </div>
       <div className="grid grid-cols-2 gap-1">
-        {PASSWORD_RULES.map(rule => {
-          const passed = rule.test(password);
-          return (
-            <div key={rule.id} className="flex items-center gap-1.5 text-[11px] transition-colors"
-              style={{ color: passed ? '#22C55E' : 'var(--theme-text-muted)' }}>
-              <span className="text-[12px]">{passed ? '✓' : '○'}</span>
-              <span>{rule.label}</span>
-            </div>
-          );
-        })}
+        {strength.results.map(rule => (
+          <div key={rule.id} className="flex items-center gap-1.5 text-[11px] transition-colors"
+            style={{ color: rule.passed ? '#22C55E' : 'var(--theme-text-muted)' }}>
+            <span className="text-[12px]">{rule.passed ? '✓' : '○'}</span>
+            <span>{rule.label}</span>
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -89,7 +89,7 @@ function PasswordStrengthIndicator({ password }: { password: string }) {
 
 export default function RegisterPage() {
   const router = useRouter();
-  const { register, isLoading } = useAuthStore();
+  const { register, isLoading, isAuthenticated, _hasHydrated } = useAuthStore();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -97,8 +97,18 @@ export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
 
+  // Redirect already-authenticated users away from register page
+  useEffect(() => {
+    if (_hasHydrated && isAuthenticated) {
+      router.replace('/');
+    }
+  }, [_hasHydrated, isAuthenticated, router]);
+
   const isPasswordValid = useMemo(() => PASSWORD_RULES.every(r => r.test(password)), [password]);
-  const isFormValid = isPasswordValid && password === confirmPassword && name.trim().length >= 2;
+  const isFormValid = useMemo(
+    () => isPasswordValid && password === confirmPassword && name.trim().length >= 2,
+    [isPasswordValid, password, confirmPassword, name]
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -113,6 +123,17 @@ export default function RegisterPage() {
       setError(err.message || 'Đăng ký thất bại. Vui lòng thử lại.');
     }
   };
+
+  // Avoid flashing form while hydration or redirect is in flight
+  if (!_hasHydrated || isAuthenticated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center"
+        style={{ backgroundColor: 'var(--theme-bg-primary)' }}>
+        <div className="w-8 h-8 rounded-full border-4 border-t-transparent animate-spin"
+          style={{ borderColor: 'var(--theme-border)', borderTopColor: '#22C55E' }} />
+      </div>
+    );
+  }
 
   const inputStyle: React.CSSProperties = {
     borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-primary)',
