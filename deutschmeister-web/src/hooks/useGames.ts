@@ -27,7 +27,7 @@ export function useEndGame() {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: (data: { sessionId: string; score: number; bestStreak: number }) => 
+    mutationFn: (data: { sessionId: string; score: number; bestStreak: number; correctAnswers: number; wrongAnswers: number }) => 
       gamesApi.end(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['games', 'history'] });
