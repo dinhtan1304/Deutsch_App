@@ -1,7 +1,10 @@
 {
   "permissions": {
     "allow": [
-      "Bash(node debug-config3.js:*)"
+      "Bash(node debug-config3.js:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npx eslint:*)",
+      "Bash(npm run lint:*)"
     ]
   }
 }

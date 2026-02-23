@@ -9,15 +9,36 @@ import { useGameSession } from '@/hooks/useGameSession';
 import { GenderInfo, Word } from '@/types';
 import {
   GameSetupCard, GameResultCard, GameButton, GameProgressBar, StatCard,
-  AnswerReview, GameInfoBox, KBD,
+  GameInfoBox, KBD,
   IconLayers, IconCheck, IconX, IconFlame, IconRocket, IconKeyboard, IconVolume,
-  IconRefresh, IconChevronLeft,
+  IconRefresh, IconChevronLeft, IconChevronRight,
 } from '@/components/games/GameUI';
 
 const AC: Record<string, string> = { masculine: '#3B82F6', feminine: '#EC4899', neuter: '#22C55E' };
 
 type Phase = 'setup' | 'playing' | 'result';
 interface CardResult { word: Word; knew: boolean; }
+
+function IconShuffle({ size = 16 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}>
+      <path d="M2 18h1.4c1.3 0 2.5-.6 3.3-1.7l6.1-8.6c.7-1.1 2-1.7 3.3-1.7H22" />
+      <path d="m18 2 4 4-4 4" />
+      <path d="M2 6h1.9c1.5 0 2.9.9 3.6 2.2" />
+      <path d="M22 18h-5.9c-1.3 0-2.6-.7-3.3-1.8l-.5-.8" />
+      <path d="m18 14 4 4-4 4" />
+    </svg>
+  );
+}
+
+function speakWord(text: string) {
+  if (typeof window === 'undefined' || !window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'de-DE'; u.rate = 0.85;
+  window.speechSynthesis.speak(u);
+}
 
 export default function FlashcardsPage() {
   const router = useRouter();
@@ -51,7 +72,7 @@ export default function FlashcardsPage() {
     session.start(cardsCount);
   };
 
-  const flipCard = () => { playClick(); setIsFlipped(!isFlipped); };
+  const flipCard = useCallback(() => { playClick(); setIsFlipped(f => !f); }, [playClick]);
 
   const handleResponse = useCallback((knew: boolean) => {
     if (!currentWord) return;
@@ -68,13 +89,19 @@ export default function FlashcardsPage() {
     setTimeout(() => {
       if (index + 1 >= (words?.length || 0)) {
         playGameOver();
-        // Use ref values — state updates from this render haven't flushed yet
-        // when this setTimeout fires, so bestStreak/streak would be stale.
         if (bestStreakRef.current >= 5) setTimeout(() => playStreak(), 300);
         setPhase('result');
       } else { setIndex(i => i + 1); setIsFlipped(false); }
     }, 300);
   }, [currentWord, index, words?.length, streak, bestStreak, playCorrect, playWrong, playCombo, playGameOver, playStreak]);
+
+  const goToPrev = useCallback(() => {
+    if (index > 0) { setIndex(i => i - 1); setIsFlipped(false); }
+  }, [index]);
+
+  const goToNext = useCallback(() => {
+    if (words && index < words.length - 1) { setIndex(i => i + 1); setIsFlipped(false); }
+  }, [index, words]);
 
   useEffect(() => {
     const handle = (e: KeyboardEvent) => {
@@ -85,7 +112,7 @@ export default function FlashcardsPage() {
     };
     window.addEventListener('keydown', handle);
     return () => window.removeEventListener('keydown', handle);
-  }, [phase, isFlipped, handleResponse]);
+  }, [phase, isFlipped, flipCard, handleResponse]);
 
   // Save game session to backend when game ends
   useEffect(() => {
@@ -97,21 +124,21 @@ export default function FlashcardsPage() {
   // ─── Setup ───
   if (phase === 'setup') {
     return (
-        <GameSetupCard icon={({ size }) => <IconLayers size={size} style={{ color: 'white' }} />} iconColor="#22C55E" title="Flashcards">
-          <p className="text-[14px] mb-1" style={{ color: 'var(--theme-text-secondary)' }}>
-            Ôn tập <span className="font-bold" style={{ color: '#22C55E' }}>{cardsCount} từ</span> với thẻ ghi nhớ
-          </p>
-          <p className="text-[12px] mb-6" style={{ color: 'var(--theme-text-muted)' }}>(Thay đổi số thẻ trong Settings → Học tập)</p>
-          <GameInfoBox>
-            <div className="flex items-center gap-2"><IconLayers size={14} style={{ color: '#22C55E' }} /><span>Click thẻ hoặc nhấn <KBD>Space</KBD> để lật</span></div>
-            <div className="flex items-center gap-2"><IconKeyboard size={14} style={{ color: '#8B5CF6' }} /><span><KBD>←</KBD> Chưa nhớ · <KBD>→</KBD> Đã nhớ</span></div>
-            <div className="flex items-center gap-2"><IconVolume size={14} style={{ color: '#3B82F6' }} /><span>Âm thanh: {settings.soundEnabled ? 'Bật' : 'Tắt'}</span></div>
-          </GameInfoBox>
-          <div className="flex gap-3 justify-center mt-6">
-            <GameButton onClick={startGame} loading={isLoading} color="#22C55E"><IconRocket size={16} /> Bắt đầu</GameButton>
-            <GameButton variant="outline" onClick={() => router.push('/games')}><IconChevronLeft size={16} /> Quay lại</GameButton>
-          </div>
-        </GameSetupCard>
+      <GameSetupCard icon={({ size }) => <IconLayers size={size} style={{ color: 'white' }} />} iconColor="#22C55E" title="Flashcards">
+        <p className="text-[14px] mb-1" style={{ color: 'var(--theme-text-secondary)' }}>
+          Ôn tập <span className="font-bold" style={{ color: '#22C55E' }}>{cardsCount} từ</span> với thẻ ghi nhớ
+        </p>
+        <p className="text-[12px] mb-6" style={{ color: 'var(--theme-text-muted)' }}>(Thay đổi số thẻ trong Settings → Học tập)</p>
+        <GameInfoBox>
+          <div className="flex items-center gap-2"><IconLayers size={14} style={{ color: '#22C55E' }} /><span>Click thẻ hoặc nhấn <KBD>Space</KBD> để lật</span></div>
+          <div className="flex items-center gap-2"><IconKeyboard size={14} style={{ color: '#8B5CF6' }} /><span><KBD>←</KBD> Chưa nhớ · <KBD>→</KBD> Đã nhớ</span></div>
+          <div className="flex items-center gap-2"><IconVolume size={14} style={{ color: '#3B82F6' }} /><span>Nút 🔊 để nghe phát âm tiếng Đức</span></div>
+        </GameInfoBox>
+        <div className="flex gap-3 justify-center mt-6">
+          <GameButton onClick={startGame} loading={isLoading} color="#22C55E"><IconRocket size={16} /> Bắt đầu</GameButton>
+          <GameButton variant="outline" onClick={() => router.push('/games')}><IconChevronLeft size={16} /> Quay lại</GameButton>
+        </div>
+      </GameSetupCard>
     );
   }
 
@@ -173,94 +200,172 @@ export default function FlashcardsPage() {
   const genderColor = currentWord ? (AC[currentWord.gender] || '#3B82F6') : '#3B82F6';
 
   return (
-      <div className="max-w-2xl mx-auto px-4 sm:px-6 py-5">
-        {/* Header */}
-        <div className="flex justify-between items-center mb-3">
-          <div className="text-[13px] font-semibold" style={{ color: 'var(--theme-text-muted)' }}>
-            {index + 1} / {words?.length || 0}
-          </div>
-          {streak > 0 && (
-            <div className="flex items-center gap-1.5 px-3 py-1 rounded-full text-white text-[12px] font-bold"
-              style={{ background: 'linear-gradient(135deg, #F97316, #EF4444)' }}>
-              <IconFlame size={13} /> {streak} streak
-            </div>
-          )}
+    <div className="max-w-2xl mx-auto px-4 sm:px-6 py-5">
+      {/* Header */}
+      <div className="flex justify-between items-center mb-3">
+        <div className="flex items-center gap-2 text-[13px]">
+          <span style={{ color: '#22C55E' }}>✓ {results.filter(r => r.knew).length}</span>
+          <span style={{ color: '#EF4444' }}>✗ {results.filter(r => !r.knew).length}</span>
         </div>
+        <div className="text-[13px] font-semibold" style={{ color: 'var(--theme-text-muted)' }}>
+          {index + 1} / {words?.length || 0}
+        </div>
+        {streak > 0 && (
+          <div className="flex items-center gap-1.5 px-3 py-1 rounded-full text-white text-[12px] font-bold"
+            style={{ background: 'linear-gradient(135deg, #F97316, #EF4444)' }}>
+            <IconFlame size={13} /> {streak} streak
+          </div>
+        )}
+      </div>
 
-        <GameProgressBar current={index} total={words?.length || 1} color="#22C55E" />
+      <GameProgressBar current={index} total={words?.length || 1} color="#22C55E" />
 
-        {/* Flashcard */}
-        {currentWord && (
-          <div className="relative h-80 my-7">
-            {/* Front */}
-            <div
-              className={`absolute inset-0 rounded-2xl border-2 p-8 flex flex-col items-center justify-center
-                cursor-pointer transition-all duration-300
-                ${isFlipped ? 'opacity-0 pointer-events-none scale-95' : 'opacity-100 hover:-translate-y-1 hover:shadow-lg'}`}
-              style={{ borderColor: '#3B82F6', backgroundColor: 'var(--theme-bg-card)' }}
-              onClick={flipCard}>
+      {/* 3D Flashcard */}
+      {currentWord && (
+        <div className="my-7" style={{ perspective: '1200px' }}>
+          <div
+            onClick={flipCard}
+            className="relative cursor-pointer select-none transition-transform duration-500"
+            style={{
+              transformStyle: 'preserve-3d',
+              transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
+              minHeight: '300px',
+            }}
+          >
+            {/* ─── FRONT (Word — article hidden intentionally) ─── */}
+            <div className="absolute inset-0 rounded-2xl border-2 p-8 flex flex-col items-center justify-center"
+              style={{
+                backfaceVisibility: 'hidden',
+                WebkitBackfaceVisibility: 'hidden',
+                backgroundColor: 'var(--theme-bg-card)',
+                borderColor: '#3B82F6',
+              }}>
               <p className="text-[12px] mb-4" style={{ color: 'var(--theme-text-muted)' }}>Từ tiếng Đức</p>
-              <h2 className="text-4xl md:text-5xl font-bold mb-3" style={{ color: 'var(--theme-text-primary)' }}>
+
+              <h2 className="text-4xl md:text-5xl font-bold mb-2" style={{ color: 'var(--theme-text-primary)' }}>
                 {currentWord.word}
               </h2>
-              {currentWord.pronunciation && settings.showPronunciation && (
-                <p className="text-[14px]" style={{ color: 'var(--theme-text-muted)' }}>[{currentWord.pronunciation}]</p>
+
+              {/* Plural form */}
+              {currentWord.plural && (
+                <p className="text-[14px] mb-2" style={{ color: 'var(--theme-text-muted)' }}>
+                  Pl. {currentWord.plural}
+                </p>
               )}
-              <p className="mt-8 text-[13px] font-medium" style={{ color: '#3B82F6' }}>
-                Click để lật thẻ
+
+              {/* Pronunciation (IPA) */}
+              {currentWord.pronunciation && (
+                <p className="text-[13px] mb-4" style={{ color: 'var(--theme-text-muted)' }}>
+                  [{currentWord.pronunciation}]
+                </p>
+              )}
+
+              {/* Audio button */}
+              <button
+                onClick={(e) => { e.stopPropagation(); speakWord(currentWord.word); }}
+                className="w-10 h-10 rounded-xl flex items-center justify-center transition-all hover:scale-110 mb-5"
+                style={{ backgroundColor: 'rgba(59,130,246,.1)', color: '#3B82F6' }}>
+                <IconVolume size={20} />
+              </button>
+
+              <p className="text-[13px] font-medium" style={{ color: '#3B82F6' }}>
+                Click để lật thẻ · <KBD>Space</KBD>
               </p>
             </div>
 
-            {/* Back */}
-            <div
-              className={`absolute inset-0 rounded-2xl p-8 flex flex-col items-center justify-center
-                transition-all duration-300
-                ${isFlipped ? 'opacity-100' : 'opacity-0 pointer-events-none scale-95'}`}
-              style={{ background: `linear-gradient(135deg, ${genderColor}, ${genderColor}cc)` }}>
+            {/* ─── BACK (Answer) ─── */}
+            <div className="absolute inset-0 rounded-2xl p-8 flex flex-col items-center justify-center"
+              style={{
+                backfaceVisibility: 'hidden',
+                WebkitBackfaceVisibility: 'hidden',
+                transform: 'rotateY(180deg)',
+                background: `linear-gradient(135deg, ${genderColor}, ${genderColor}cc)`,
+                borderRadius: '1rem',
+              }}>
               <p className="text-white/70 text-[12px] mb-2">Đáp án</p>
               <h2 className="text-4xl md:text-5xl font-bold text-white mb-3">
                 {currentWord.article} {currentWord.word}
               </h2>
               <p className="text-white/90 text-[18px] mb-1">{currentWord.translationEn}</p>
               {settings.showVietnamese && currentWord.translationVi && (
-                <p className="text-white/60 text-[14px]">{currentWord.translationVi}</p>
+                <p className="text-white/70 text-[14px] mb-3">{currentWord.translationVi}</p>
               )}
-              <div className="mt-4 px-4 py-1.5 bg-white/15 rounded-full">
+              <div className="mb-3 px-4 py-1.5 bg-white/15 rounded-full">
                 <span className="text-white text-[13px] font-medium">{GenderInfo[currentWord.gender].label}</span>
               </div>
+
+              {/* Example sentence */}
+              {currentWord.examples && currentWord.examples.length > 0 && (
+                <div className="w-full mt-1 px-4">
+                  <div className="text-[12px] italic text-center py-2 px-3 rounded-xl bg-white/15 text-white/80">
+                    &bdquo;{currentWord.examples[0]}&ldquo;
+                  </div>
+                </div>
+              )}
             </div>
           </div>
-        )}
-
-        {/* Action Buttons */}
-        {isFlipped ? (
-          <div className="grid grid-cols-2 gap-3">
-            <button onClick={() => handleResponse(false)}
-              className="py-5 rounded-2xl font-bold text-[18px] text-white transition-all duration-200
-                hover:-translate-y-1 hover:shadow-lg active:scale-95 flex items-center justify-center gap-2"
-              style={{ background: 'linear-gradient(135deg, #EF4444, #DC2626)', boxShadow: '0 4px 16px rgba(239,68,68,.25)' }}>
-              <IconX size={18} /> Chưa nhớ
-              <span className="text-[11px] font-medium opacity-70 ml-1">← / 1</span>
-            </button>
-            <button onClick={() => handleResponse(true)}
-              className="py-5 rounded-2xl font-bold text-[18px] text-white transition-all duration-200
-                hover:-translate-y-1 hover:shadow-lg active:scale-95 flex items-center justify-center gap-2"
-              style={{ background: 'linear-gradient(135deg, #22C55E, #16A34A)', boxShadow: '0 4px 16px rgba(34,197,94,.25)' }}>
-              <IconCheck size={18} /> Đã nhớ
-              <span className="text-[11px] font-medium opacity-70 ml-1">→ / 2</span>
-            </button>
-          </div>
-        ) : (
-          <GameButton onClick={flipCard} className="w-full" color="#3B82F6">
-            <IconRefresh size={16} /> Lật thẻ (Space)
-          </GameButton>
-        )}
-
-        <div className="text-center mt-5">
-          <GameButton variant="ghost" onClick={() => { playClick(); router.push('/games'); }}>
-            <IconX size={14} /> Thoát
-          </GameButton>
         </div>
+      )}
+
+      {/* Action Buttons */}
+      {isFlipped ? (
+        <div className="grid grid-cols-2 gap-3">
+          <button onClick={() => handleResponse(false)}
+            className="py-5 rounded-2xl font-bold text-[18px] text-white transition-all duration-200
+              hover:-translate-y-1 hover:shadow-lg active:scale-95 flex items-center justify-center gap-2"
+            style={{ background: 'linear-gradient(135deg, #EF4444, #DC2626)', boxShadow: '0 4px 16px rgba(239,68,68,.25)' }}>
+            <IconX size={18} /> Chưa nhớ
+            <span className="text-[11px] font-medium opacity-70 ml-1">← / 1</span>
+          </button>
+          <button onClick={() => handleResponse(true)}
+            className="py-5 rounded-2xl font-bold text-[18px] text-white transition-all duration-200
+              hover:-translate-y-1 hover:shadow-lg active:scale-95 flex items-center justify-center gap-2"
+            style={{ background: 'linear-gradient(135deg, #22C55E, #16A34A)', boxShadow: '0 4px 16px rgba(34,197,94,.25)' }}>
+            <IconCheck size={18} /> Đã nhớ
+            <span className="text-[11px] font-medium opacity-70 ml-1">→ / 2</span>
+          </button>
+        </div>
+      ) : (
+        <GameButton onClick={flipCard} className="w-full" color="#3B82F6">
+          <IconRefresh size={16} /> Lật thẻ (Space)
+        </GameButton>
+      )}
+
+      {/* Navigation row */}
+      <div className="flex justify-center items-center gap-2 mt-4">
+        <button onClick={goToPrev} disabled={index === 0}
+          className="p-2.5 rounded-xl border transition-all disabled:opacity-30 hover:opacity-80"
+          style={{ color: 'var(--theme-text-muted)', borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}
+          title="Thẻ trước">
+          <IconChevronLeft size={18} />
+        </button>
+        <button
+          onClick={() => speakWord(currentWord?.word || '')}
+          className="p-2.5 rounded-xl border transition-all hover:opacity-80"
+          style={{ color: 'var(--theme-text-muted)', borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}
+          title="Phát âm">
+          <IconVolume size={18} />
+        </button>
+        <button
+          onClick={() => { window.speechSynthesis?.cancel(); playClick(); router.push('/games'); }}
+          className="px-3 py-2.5 rounded-xl border text-[12px] font-medium transition-all hover:opacity-80 flex items-center gap-1.5"
+          style={{ color: 'var(--theme-text-muted)', borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
+          <IconX size={13} /> Thoát
+        </button>
+        <button
+          onClick={() => { setIsFlipped(false); playClick(); startGame(); }}
+          className="p-2.5 rounded-xl border transition-all hover:opacity-80"
+          style={{ color: 'var(--theme-text-muted)', borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}
+          title="Xáo trộn lại">
+          <IconShuffle size={18} />
+        </button>
+        <button onClick={goToNext} disabled={!words || index >= words.length - 1}
+          className="p-2.5 rounded-xl border transition-all disabled:opacity-30 hover:opacity-80"
+          style={{ color: 'var(--theme-text-muted)', borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}
+          title="Thẻ tiếp">
+          <IconChevronRight size={20} />
+        </button>
       </div>
+    </div>
   );
 }

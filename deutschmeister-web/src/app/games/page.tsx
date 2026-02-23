@@ -20,11 +20,11 @@ const games = [
   { id: 'srs-review', name: 'SRS Review', description: 'Ôn tập thông minh với thuật toán SM-2',
     icon: IconBookOpen, color: '#F59E0B', href: '/review', badge: 'SM-2' },
   { id: 'word-match', name: 'Word Match', description: 'Ghép từ với nghĩa tương ứng',
-    icon: IconLink, color: '#06B6D4', href: '/games/word-match', comingSoon: true },
+    icon: IconLink, color: '#06B6D4', href: '/games/word-match' },
   { id: 'listening', name: 'Listening Quiz', description: 'Nghe và chọn từ đúng',
-    icon: IconHeadphones, color: '#F97316', href: '/games/listening', comingSoon: true },
+    icon: IconHeadphones, color: '#F97316', href: '/games/listening' },
   { id: 'spelling', name: 'Spelling Bee', description: 'Viết đúng chính tả từ tiếng Đức',
-    icon: IconSpellCheck, color: '#EC4899', href: '/games/spelling', comingSoon: true },
+    icon: IconSpellCheck, color: '#EC4899', href: '/games/spelling' },
 ];
 
 export default function GamesPage() {
@@ -52,32 +52,21 @@ export default function GamesPage() {
             const Ic = game.icon;
             return (
               <Link key={game.id}
-                href={game.comingSoon ? '#' : game.href}
-                onClick={() => !game.comingSoon && playClick()}
-                className={`group relative overflow-hidden rounded-2xl border p-5 transition-all duration-300
-                  ${game.comingSoon ? 'cursor-not-allowed opacity-50' : 'hover:-translate-y-1 hover:shadow-lg'}`}
+                href={game.href}
+                onClick={() => playClick()}
+                className="group relative overflow-hidden rounded-2xl border p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
                 style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
 
                 {/* Hover overlay */}
-                {!game.comingSoon && (
-                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                    style={{ background: `linear-gradient(135deg, ${game.color}06, ${game.color}03)` }} />
-                )}
+                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                  style={{ background: `linear-gradient(135deg, ${game.color}06, ${game.color}03)` }} />
 
                 {/* Decorative circle */}
                 <div className="absolute -top-6 -right-6 w-20 h-20 rounded-full transition-transform duration-300 group-hover:scale-110"
                   style={{ backgroundColor: game.color, opacity: 0.04 }} />
 
-                {/* Coming Soon Badge */}
-                {game.comingSoon && (
-                  <div className="absolute top-3 right-3 px-2 py-0.5 rounded-md text-[10px] font-bold"
-                    style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }}>
-                    Sắp ra mắt
-                  </div>
-                )}
-
                 {/* Special Badge */}
-                {game.badge && !game.comingSoon && (
+                {game.badge && (
                   <div className="absolute top-3 right-3 px-2 py-0.5 rounded-md text-[10px] font-bold text-white"
                     style={{ background: `linear-gradient(135deg, ${game.color}, ${game.color}cc)` }}>
                     {game.badge}
@@ -100,13 +89,11 @@ export default function GamesPage() {
                 </p>
 
                 {/* Play hint */}
-                {!game.comingSoon && (
-                  <div className="relative mt-3 text-[12px] font-semibold opacity-0 group-hover:opacity-100
-                    transition-all duration-300 translate-y-1 group-hover:translate-y-0"
-                    style={{ color: game.color }}>
-                    Chơi ngay →
-                  </div>
-                )}
+                <div className="relative mt-3 text-[12px] font-semibold opacity-0 group-hover:opacity-100
+                  transition-all duration-300 translate-y-1 group-hover:translate-y-0"
+                  style={{ color: game.color }}>
+                  Chơi ngay →
+                </div>
               </Link>
             );
           })}

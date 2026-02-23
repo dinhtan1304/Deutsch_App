@@ -43,6 +43,8 @@ function IconLightbulb({ size = 16, style }: { size?: number; style?: React.CSSP
 }
 
 /* ─── Shared ─── */
+const SPECIAL_CHARS = ['ä', 'ö', 'ü', 'Ä', 'Ö', 'Ü', 'ß'];
+
 interface ExerciseListProps {
     exercises: Exercise[];
     onSubmit: (answers: Record<number, string | string[]>) => Promise<SubmitResult>;
@@ -115,9 +117,9 @@ function MCQInput({ options, value, onChange, disabled }: {
 /* ═══════════════════════════════════════════ */
 /*  Text Input (fill blank, translate, error)  */
 /* ═══════════════════════════════════════════ */
-function TextInput({ value, onChange, disabled, placeholder, multiline, onEnter }: {
+function TextInput({ value, onChange, disabled, placeholder, multiline, onEnter, showSpecialChars }: {
     value: string; onChange: (v: string) => void; disabled: boolean;
-    placeholder: string; multiline?: boolean; onEnter?: () => void;
+    placeholder: string; multiline?: boolean; onEnter?: () => void; showSpecialChars?: boolean;
 }) {
     const inputRef = useRef<HTMLInputElement>(null);
     const textRef = useRef<HTMLTextAreaElement>(null);
@@ -125,30 +127,54 @@ function TextInput({ value, onChange, disabled, placeholder, multiline, onEnter 
         if (!disabled) { inputRef.current?.focus(); textRef.current?.focus(); }
     }, [disabled]);
 
-    const style: React.CSSProperties = {
+    const fieldStyle: React.CSSProperties = {
         borderColor: disabled ? 'var(--theme-border)' : '#8B5CF6',
         backgroundColor: 'var(--theme-bg-card)',
         color: 'var(--theme-text-primary)',
     };
 
-    if (multiline) {
-        return (
-            <textarea ref={textRef} value={value}
-                onChange={(e) => onChange(e.target.value)}
-                onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey && value.trim()) { e.preventDefault(); onEnter?.(); } }}
-                disabled={disabled} placeholder={placeholder} rows={2}
-                className="w-full px-4 py-3.5 rounded-xl border-2 text-[15px] font-medium transition-all outline-none resize-none"
-                style={style} />
-        );
-    }
+    const insertSpecial = (char: string) => {
+        const el: HTMLInputElement | HTMLTextAreaElement | null = multiline ? textRef.current : inputRef.current;
+        if (!el) { onChange(value + char); return; }
+        const start = el.selectionStart ?? value.length;
+        const end = el.selectionEnd ?? value.length;
+        const newVal = value.slice(0, start) + char + value.slice(end);
+        onChange(newVal);
+        setTimeout(() => {
+            el.setSelectionRange(start + char.length, start + char.length);
+            el.focus();
+        }, 0);
+    };
 
     return (
-        <input ref={inputRef} type="text" value={value} autoComplete="off"
-            onChange={(e) => onChange(e.target.value)}
-            onKeyDown={(e) => { if (e.key === 'Enter' && value.trim()) onEnter?.(); }}
-            disabled={disabled} placeholder={placeholder}
-            className="w-full px-4 py-3.5 rounded-xl border-2 text-[15px] font-medium transition-all outline-none"
-            style={style} />
+        <div>
+            {multiline ? (
+                <textarea ref={textRef} value={value}
+                    onChange={(e) => onChange(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey && value.trim()) { e.preventDefault(); onEnter?.(); } }}
+                    disabled={disabled} placeholder={placeholder} rows={2}
+                    className="w-full px-4 py-3.5 rounded-xl border-2 text-[15px] font-medium transition-all outline-none resize-none"
+                    style={fieldStyle} />
+            ) : (
+                <input ref={inputRef} type="text" value={value} autoComplete="off"
+                    onChange={(e) => onChange(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === 'Enter' && value.trim()) onEnter?.(); }}
+                    disabled={disabled} placeholder={placeholder}
+                    className="w-full px-4 py-3.5 rounded-xl border-2 text-[15px] font-medium transition-all outline-none"
+                    style={fieldStyle} />
+            )}
+            {showSpecialChars && !disabled && (
+                <div className="flex flex-wrap gap-1.5 mt-2">
+                    {SPECIAL_CHARS.map(ch => (
+                        <button key={ch} type="button" onClick={() => insertSpecial(ch)}
+                            className="w-9 h-9 rounded-lg text-[14px] font-bold border transition-all hover:scale-105 active:scale-95"
+                            style={{ borderColor: '#8B5CF6', color: '#8B5CF6', backgroundColor: 'rgba(139,92,246,.06)' }}>
+                            {ch}
+                        </button>
+                    ))}
+                </div>
+            )}
+        </div>
     );
 }
 
@@ -477,6 +503,7 @@ export const ExerciseList = ({ exercises, onSubmit }: ExerciseListProps) => {
                             disabled={false}
                             placeholder="Điền câu trả lời..."
                             onEnter={isLast ? handleSubmit : handleNext}
+                            showSpecialChars
                         />
                     )}
 
@@ -487,6 +514,7 @@ export const ExerciseList = ({ exercises, onSubmit }: ExerciseListProps) => {
                             disabled={false} multiline
                             placeholder="Nhập bản dịch..."
                             onEnter={isLast ? handleSubmit : handleNext}
+                            showSpecialChars
                         />
                     )}
 
@@ -497,6 +525,7 @@ export const ExerciseList = ({ exercises, onSubmit }: ExerciseListProps) => {
                             disabled={false} multiline
                             placeholder="Nhập câu đã sửa..."
                             onEnter={isLast ? handleSubmit : handleNext}
+                            showSpecialChars
                         />
                     )}
 
