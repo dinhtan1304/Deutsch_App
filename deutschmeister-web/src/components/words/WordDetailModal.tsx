@@ -5,6 +5,7 @@ import { Word, GenderInfo } from '@/types';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { GenderTip } from './GenderTip';
 import { IconStar } from '@/components/ui/Icons';
+import { dictionaryLookupApi } from '@/lib/api/dictionary-lookup';
 
 interface WordDetailModalProps {
   word: Word | null;
@@ -66,6 +67,8 @@ export function WordDetailModal({
   const { settings } = useSettingsStore();
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const [addedToBank, setAddedToBank] = useState(false);
+  const [addingToBank, setAddingToBank] = useState(false);
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
@@ -79,7 +82,7 @@ export function WordDetailModal({
     };
   }, [isOpen, onClose]);
 
-  useEffect(() => { setImageError(false); }, [word?.id]);
+  useEffect(() => { setImageError(false); setAddedToBank(false); }, [word?.id]);
 
   const speak = useCallback((text: string) => {
     if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
@@ -99,6 +102,29 @@ export function WordDetailModal({
       return () => clearTimeout(t);
     }
   }, [isOpen, word, settings.autoPlaySound, settings.soundEnabled, speak]);
+
+  const handleAddToWordBank = useCallback(async () => {
+    if (!word || addingToBank || addedToBank) return;
+    setAddingToBank(true);
+    try {
+      await dictionaryLookupApi.quickAdd({
+        word: word.word,
+        translationVi: word.translationVi,
+        translationEn: word.translationEn,
+        wordType: 'Nomen',
+        gender: word.gender,
+        plural: word.plural,
+        example: word.examples?.[0],
+        level: word.level,
+      });
+      setAddedToBank(true);
+    } catch {
+      // Nếu đã tồn tại, coi như thêm thành công
+      setAddedToBank(true);
+    } finally {
+      setAddingToBank(false);
+    }
+  }, [word, addingToBank, addedToBank]);
 
   if (!isOpen || !word) return null;
 
@@ -283,7 +309,18 @@ export function WordDetailModal({
         </div>
 
         {/* ─── Footer ─── */}
-        <div className="p-5 pt-0">
+        <div className="p-5 pt-0 flex flex-col gap-2">
+          <button
+            onClick={addedToBank ? undefined : handleAddToWordBank}
+            disabled={addedToBank || addingToBank}
+            className="w-full py-2.5 rounded-xl font-semibold text-[14px] border-2 transition-all duration-200"
+            style={addedToBank
+              ? { borderColor: 'var(--theme-border)', color: 'var(--theme-text-muted)', cursor: 'default', backgroundColor: 'var(--theme-bg-secondary)' }
+              : { borderColor: gs.text, color: gs.text, backgroundColor: 'transparent' }
+            }
+          >
+            {addingToBank ? '⏳ Đang thêm...' : addedToBank ? '✅ Đã có trong Word Bank' : '➕ Thêm vào Word Bank'}
+          </button>
           <button
             onClick={onClose}
             className="w-full py-3 rounded-xl font-semibold text-white text-[14px]

@@ -8,6 +8,7 @@ import {
   IconPenLine, IconGraduationCap, IconRefresh, IconSettings,
   IconZap, IconCards, IconTimer, IconPencil, IconList, IconBrain, IconTarget,
   IconChevronRight, IconChevronLeft, IconBookOpen,
+  IconHeadphones, IconSpellCheck, IconLink,
 } from '@/components/ui/Icons';
 
 // ============================================
@@ -40,6 +41,9 @@ const navItems: NavItem[] = [
       { label: 'Flashcards', labelVi: 'Thẻ ghi nhớ', icon: IconCards, href: '/games/flashcards' },
       { label: 'Fill Blank', labelVi: 'Điền từ', icon: IconPencil, href: '/games/fill-blank' },
       { label: 'Timed Challenge', labelVi: 'Thử thách', icon: IconTimer, href: '/games/timed-challenge' },
+      { label: 'Word Match', labelVi: 'Ghép từ', icon: IconLink, href: '/games/word-match' },
+      { label: 'Listening', labelVi: 'Nghe từ', icon: IconHeadphones, href: '/games/listening' },
+      { label: 'Spelling Bee', labelVi: 'Chính tả', icon: IconSpellCheck, href: '/games/spelling' },
     ],
   },
   { label: 'Grammar', labelVi: 'Ngữ pháp', icon: IconBookOpen, href: '/grammar' },

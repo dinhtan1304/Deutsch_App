@@ -283,3 +283,38 @@ export function IconArrowLeft({ size, ...props }: IconProps) {
     </svg>
   );
 }
+
+export function IconHeadphones({ size, ...props }: IconProps) {
+  return (
+    <svg {...defaults(size)} {...props}>
+      <path d="M3 18v-6a9 9 0 0 1 18 0v6" />
+      <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3z" />
+      <path d="M3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z" />
+    </svg>
+  );
+}
+
+export function IconSpellCheck({ size, ...props }: IconProps) {
+  return (
+    <svg {...defaults(size)} {...props}>
+      <path d="m6 16 6-12 6 12" /><path d="M8 12h8" /><path d="m16 20 2 2 4-4" />
+    </svg>
+  );
+}
+
+export function IconLink({ size, ...props }: IconProps) {
+  return (
+    <svg {...defaults(size)} {...props}>
+      <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+      <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+    </svg>
+  );
+}
+
+export function IconPlus({ size, ...props }: IconProps) {
+  return (
+    <svg {...defaults(size)} {...props}>
+      <path d="M5 12h14" /><path d="M12 5v14" />
+    </svg>
+  );
+}

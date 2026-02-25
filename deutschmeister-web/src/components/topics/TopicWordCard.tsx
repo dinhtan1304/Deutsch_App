@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import type { TopicWord } from '@/types/topic';
 import { ArticleColor } from '@/types/topic';
+import { dictionaryLookupApi } from '@/lib/api/dictionary-lookup';
 
 // ─── Inline SVG icons ───
 function IconVolume({ size = 16, ...props }: { size?: number, [key: string]: any }) {
@@ -19,6 +20,14 @@ function IconCheck({ size = 16 }: { size?: number }) {
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
       strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}>
       <polyline points="20 6 9 17 4 12" />
+    </svg>
+  );
+}
+function IconPlus({ size = 16 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}>
+      <path d="M5 12h14" /><path d="M12 5v14" />
     </svg>
   );
 }
@@ -60,7 +69,32 @@ export function TopicWordCard({
   word, index, isLearned = false, onMarkLearned, onPlayAudio,
 }: TopicWordCardProps) {
   const [showDetails, setShowDetails] = useState(false);
+  const [addedToBank, setAddedToBank] = useState(false);
+  const [addingToBank, setAddingToBank] = useState(false);
   const ac = AC_STYLES[word.article] || DEFAULT_AC;
+
+  const handleAddToWordBank = useCallback(async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (addingToBank || addedToBank) return;
+    setAddingToBank(true);
+    try {
+      await dictionaryLookupApi.quickAdd({
+        word: word.word,
+        translationVi: word.translationVi,
+        translationEn: word.translationEn,
+        wordType: 'Nomen',
+        gender: word.gender,
+        plural: word.plural,
+        example: word.examples?.[0],
+        // level: word.level,
+      });
+      setAddedToBank(true);
+    } catch {
+      setAddedToBank(true);
+    } finally {
+      setAddingToBank(false);
+    }
+  }, [word, addingToBank, addedToBank]);
 
   const handlePlayAudio = () => {
     const fullWord = word.article ? `${word.article} ${word.word}` : word.word;
@@ -138,6 +172,22 @@ export function TopicWordCard({
               style={{ backgroundColor: ac.bg, color: ac.color }}
               title="Nghe phát âm">
               <IconVolume size={16} />
+            </button>
+
+            {/* Nút Add to Word Bank */}
+            <button
+              onClick={handleAddToWordBank}
+              disabled={addingToBank}
+              className="w-8 h-8 rounded-lg flex items-center justify-center border transition-all duration-200 hover:scale-110"
+              style={addedToBank
+                ? { backgroundColor: 'rgba(34,197,94,.1)', borderColor: '#22C55E', color: '#22C55E' }
+                : { backgroundColor: 'transparent', borderColor: 'var(--theme-border)', color: 'var(--theme-text-muted)' }
+              }
+              title={addedToBank ? 'Đã thêm vào Word Bank' : 'Thêm vào Word Bank'}>
+              {addedToBank
+                ? <IconCheck size={13} />
+                : <IconPlus size={13} />
+              }
             </button>
 
             {onMarkLearned && (

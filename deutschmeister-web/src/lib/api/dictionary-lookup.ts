@@ -110,13 +110,13 @@ export const dictionaryLookupApi = {
    */
   quickAdd: async (data: {
     word: string;
-    translationVi?: string;
-    translationEn?: string;
-    wordType?: string;
-    gender?: string;
-    plural?: string;
-    example?: string;
-    level?: string;
+    translationVi?: string | null;
+    translationEn?: string | null; 
+    wordType?: string | null;
+    gender?: string | null;
+    plural?: string | null;
+    example?: string | null;
+    level?: string | null;
   }): Promise<void> => {
     await apiPost('/personal-words/quick-add', data);
   },
