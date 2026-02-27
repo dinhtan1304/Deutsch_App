@@ -4,7 +4,15 @@
       "Bash(node debug-config3.js:*)",
       "Bash(npx tsc:*)",
       "Bash(npx eslint:*)",
-      "Bash(npm run lint:*)"
+      "Bash(npm run lint:*)",
+      "Bash(npx next build)",
+      "Bash(npx nest build)",
+      "Bash(NODE_OPTIONS=\"--stack-trace-limit=50\" npx next build)",
+      "Bash(npx next build --debug)",
+      "Bash(npx prisma db push)",
+      "Bash(npx prisma generate)",
+      "Bash(wc -l e:/Deutsch_App/deutschmeister-web/src/app/practice-test/reading/exam/[id]/page.tsx e:/Deutsch_App/deutschmeister-web/src/app/practice-test/reading/exam/[id]/result/page.tsx e:/Deutsch_App/deutschmeister-web/src/app/practice-test/writing/exam/[id]/page.tsx e:/Deutsch_App/deutschmeister-web/src/app/practice-test/writing/exam/[id]/result/page.tsx)",
+      "Bash(npm run build)"
     ]
   }
 }

@@ -129,11 +129,18 @@ export default function WritingListPage() {
               </p>
             </div>
           </div>
-          <Link href="/practice-test/writing/new"
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-[14px] font-semibold text-white transition-all duration-200 hover:-translate-y-0.5"
-            style={{ background: 'linear-gradient(135deg, #6366F1, #8B5CF6)', boxShadow: '0 4px 12px rgba(99,102,241,.3)' }}>
-            <IconDice size={16} /> Tạo đề mới
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link href="/practice-test/writing/exam"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-[13px] font-semibold border transition-all hover:-translate-y-0.5"
+              style={{ borderColor: 'rgba(168,85,247,.4)', color: '#A855F7', backgroundColor: 'rgba(168,85,247,.06)' }}>
+              Theo đề chuẩn →
+            </Link>
+            <Link href="/practice-test/writing/new"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-[14px] font-semibold text-white transition-all duration-200 hover:-translate-y-0.5"
+              style={{ background: 'linear-gradient(135deg, #6366F1, #8B5CF6)', boxShadow: '0 4px 12px rgba(99,102,241,.3)' }}>
+              <IconDice size={16} /> Tạo đề mới
+            </Link>
+          </div>
         </div>
 
         {/* ─── Stats ─── */}

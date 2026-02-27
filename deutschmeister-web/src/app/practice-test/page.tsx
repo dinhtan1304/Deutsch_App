@@ -63,15 +63,36 @@ const testTypes = [
   },
   {
     title: 'Luyện Nghe', titleDe: 'Hörübung',
-    description: 'Nghe audio và trả lời câu hỏi',
+    description: 'AI tạo audio tiếng Đức, nghe và trả lời câu hỏi',
     icon: IconHeadphones, href: '/practice-test/listening',
-    gradient: 'linear-gradient(135deg, #EC4899, #8B5CF6)', available: false,
+    gradient: 'linear-gradient(135deg, #EC4899, #8B5CF6)', available: true,
+  },
+  {
+    title: 'Nghe Theo Đề', titleDe: 'Prüfungshören',
+    description: 'Goethe & TELC · A1/A2/B1 · Đầy đủ tất cả Teile Hören như đề thi thật',
+    icon: IconHeadphones, href: '/practice-test/listening/exam',
+    gradient: 'linear-gradient(135deg, #EC4899, #A855F7)', available: true,
+    badge: 'Đề chuẩn',
   },
   {
     title: 'Luyện Đọc', titleDe: 'Leseübung',
     description: 'Đọc hiểu văn bản tiếng Đức',
     icon: IconBookOpen, href: '/practice-test/reading',
-    gradient: 'linear-gradient(135deg, #22C55E, #14B8A6)', available: false,
+    gradient: 'linear-gradient(135deg, #22C55E, #14B8A6)', available: true,
+  },
+  {
+    title: 'Đọc Theo Đề', titleDe: 'Prüfungslesen',
+    description: 'Goethe & TELC · A1/A2/B1 · Đầy đủ tất cả Teile như đề thi thật',
+    icon: IconBookOpen, href: '/practice-test/reading/exam',
+    gradient: 'linear-gradient(135deg, #22C55E, #0EA5E9)', available: true,
+    badge: 'Đề chuẩn',
+  },
+  {
+    title: 'Viết Theo Đề', titleDe: 'Prüfungsschreiben',
+    description: 'Goethe & TELC · A1/A2/B1 · AI chấm theo tiêu chí chính thức',
+    icon: IconPenLine, href: '/practice-test/writing/exam',
+    gradient: 'linear-gradient(135deg, #A855F7, #6366F1)', available: true,
+    badge: 'Đề chuẩn',
   },
 ];
 
@@ -97,10 +118,17 @@ export default function PracticeTestPage() {
           {testTypes.map(type => {
             const Ic = type.icon;
             if (type.available) {
+              const hasBadge = 'badge' in type && type.badge;
               return (
                 <Link key={type.href} href={type.href}
-                  className="group block rounded-2xl border p-6 transition-all duration-200 hover:-translate-y-1"
+                  className="group block rounded-2xl border p-6 transition-all duration-200 hover:-translate-y-1 relative overflow-hidden"
                   style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)', boxShadow: '0 2px 8px rgba(0,0,0,.04)' }}>
+                  {hasBadge && (
+                    <span className="absolute top-3 right-3 text-[10px] font-extrabold px-2 py-0.5 rounded-full text-white"
+                      style={{ background: type.gradient }}>
+                      {type.badge}
+                    </span>
+                  )}
                   <div className="w-14 h-14 rounded-xl flex items-center justify-center mb-4 transition-transform group-hover:scale-110"
                     style={{ background: type.gradient }}>
                     <Ic size={26} style={{ color: 'white' }} />

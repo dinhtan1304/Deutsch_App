@@ -1,6 +1,6 @@
 'use client';
 
-import { PersonalWord, WordTypeInfo, GenderInfo } from '@/types/personalWord';
+import { PersonalWord, WordTypeInfo, GenderInfo, Gender } from '@/types/personalWord';
 
 interface WordBankCardProps {
   word: PersonalWord;
@@ -36,11 +36,11 @@ function IconStarFilled({ size = 16, style }: { size?: number; style?: React.CSS
 }
 
 export function WordBankCard({ word, onToggleFavorite, onSpeak }: WordBankCardProps) {
-  const typeInfo = WordTypeInfo[word.wordType];
+  const typeInfo = WordTypeInfo[word.wordType] ?? WordTypeInfo['andere'];
 
   const displayWord = () => {
     if (word.wordType === 'nomen' && word.nomenData) {
-      const gc = GenderInfo[word.nomenData.gender];
+      const gc = GenderInfo[word.nomenData.gender as Gender] ?? GenderInfo['neuter'];
       return (
         <span>
           <span style={{ color: gc.color }} className="font-bold">{word.nomenData.article}</span>{' '}

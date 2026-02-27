@@ -116,8 +116,10 @@ function WordCard({ word, index, isLearned, onToggleLearned }: WordCardProps) {
       ${isLearned ? 'opacity-50' : ''}
       ${showDetails ? 'shadow-md' : 'hover:-translate-y-0.5 hover:shadow-sm'}`}
       style={{
-        borderColor: showDetails ? ac.color : 'var(--theme-border)',
         backgroundColor: 'var(--theme-bg-card)',
+        borderTopColor: showDetails ? ac.color : 'var(--theme-border)',
+        borderRightColor: showDetails ? ac.color : 'var(--theme-border)',
+        borderBottomColor: showDetails ? ac.color : 'var(--theme-border)',
         borderLeftWidth: '3px',
         borderLeftColor: ac.color,
       }}>

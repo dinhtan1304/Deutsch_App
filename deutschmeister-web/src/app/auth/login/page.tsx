@@ -54,7 +54,7 @@ export default function LoginPage() {
       <div className="min-h-screen flex items-center justify-center"
         style={{ backgroundColor: 'var(--theme-bg-primary)' }}>
         <div className="w-8 h-8 rounded-full border-4 border-t-transparent animate-spin"
-          style={{ borderColor: 'var(--theme-border)', borderTopColor: '#3B82F6' }} />
+          style={{ borderRightColor: 'var(--theme-border)', borderBottomColor: 'var(--theme-border)', borderLeftColor: 'var(--theme-border)', borderTopColor: '#3B82F6' }} />
       </div>
     );
   }
