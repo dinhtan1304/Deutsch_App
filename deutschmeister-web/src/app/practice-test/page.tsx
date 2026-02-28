@@ -5,6 +5,7 @@ import {
   IconPenLine, IconHeadphones, IconBookOpen, IconMic,
   IconArrowRight, IconStar, IconZap, IconGraduationCap,
 } from '@/components/ui/Icons';
+import { useAuthStore } from '@/stores/authStore';
 
 // ─── Data ──────────────────────────────────────────────────────────────────────
 type CardDef = {
@@ -68,8 +69,27 @@ const examCards: CardDef[] = [
 ];
 
 // ─── Card ──────────────────────────────────────────────────────────────────────
-function Card({ card }: { card: CardDef }) {
+function Card({ card, premiumLocked }: { card: CardDef; premiumLocked?: boolean }) {
   const Ic = card.icon;
+  if (premiumLocked) {
+    return (
+      <Link href="/billing"
+        className="group block rounded-2xl border p-5 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg relative overflow-hidden"
+        style={{ borderColor: '#6366F1', backgroundColor: 'var(--theme-bg-card)' }}>
+        <div className="absolute top-3 right-3">
+          <span style={{ fontSize: 10, fontWeight: 800, padding: '3px 8px', borderRadius: 20, backgroundColor: 'rgba(99,102,241,.2)', color: '#818CF8', letterSpacing: '0.05em' }}>⭐ PREMIUM</span>
+        </div>
+        <div className="relative w-12 h-12 rounded-xl flex items-center justify-center mb-4"
+          style={{ background: card.gradient, opacity: 0.6 }}>
+          <Ic size={22} className="text-white" />
+        </div>
+        <p className="text-[11px] font-semibold mb-0.5" style={{ color: 'var(--theme-text-muted)' }}>{card.titleDe}</p>
+        <h3 className="text-[16px] font-bold mb-2" style={{ color: 'var(--theme-text-primary)' }}>{card.title}</h3>
+        <p className="text-[12.5px] leading-relaxed mb-3" style={{ color: 'var(--theme-text-secondary)' }}>{card.description}</p>
+        <div className="text-[12px] font-semibold" style={{ color: '#6366F1' }}>Nâng cấp để mở khóa →</div>
+      </Link>
+    );
+  }
   if (card.locked) {
     return (
       <div className="rounded-2xl border p-5 opacity-55 cursor-not-allowed select-none"
@@ -139,6 +159,13 @@ function SectionHeader({
 
 // ─── Page ──────────────────────────────────────────────────────────────────────
 export default function PracticeTestPage() {
+  const { user } = useAuthStore();
+  const sub = user?.subscription;
+  const isPremium =
+    sub?.plan === 'premium' &&
+    sub?.status === 'active' &&
+    (!sub?.expiresAt || new Date(sub.expiresAt) > new Date());
+
   return (
     <div className="py-6 max-w-7xl mx-auto px-4">
 
@@ -156,12 +183,29 @@ export default function PracticeTestPage() {
         </div>
       </div>
 
+      {/* Upgrade banner for free users */}
+      {!isPremium && user && (
+        <div className="flex items-center gap-4 rounded-2xl border p-4 mb-8 flex-wrap"
+          style={{ borderColor: '#6366F1', backgroundColor: 'rgba(99,102,241,.08)' }}>
+          <div style={{ flex: 1, minWidth: 200 }}>
+            <p className="text-[13px] font-bold" style={{ color: '#818CF8' }}>⭐ Nâng cấp Premium</p>
+            <p className="text-[12px] mt-0.5" style={{ color: '#64748B' }}>
+              Mở khóa 4 chế độ thi thử chuẩn Goethe/TELC + luyện tập không giới hạn.
+            </p>
+          </div>
+          <Link href="/billing"
+            style={{ padding: '8px 18px', borderRadius: 10, backgroundColor: '#6366F1', color: '#fff', fontSize: 13, fontWeight: 700, textDecoration: 'none', whiteSpace: 'nowrap' }}>
+            Xem gói Premium →
+          </Link>
+        </div>
+      )}
+
       {/* ── Luyện tự do ── */}
       <SectionHeader
         icon={IconZap}
         iconGradient="linear-gradient(135deg, #6366F1, #8B5CF6)"
         label="Luyện tự do"
-        sub="AI tạo đề ngẫu nhiên, phù hợp mọi cấp độ"
+        sub={isPremium ? 'AI tạo đề ngẫu nhiên, phù hợp mọi cấp độ' : 'AI tạo đề ngẫu nhiên · Tối đa 3 lượt/ngày (Free)'}
       />
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-10">
         {freeCards.map(card => <Card key={card.href} card={card} />)}
@@ -182,11 +226,11 @@ export default function PracticeTestPage() {
         icon={IconGraduationCap}
         iconGradient="linear-gradient(135deg, #F59E0B, #EF4444)"
         label="Theo đề chuẩn"
-        sub="Goethe & TELC · A1/A2/B1 · Đầy đủ tất cả Teile như đề thi thật"
+        sub={isPremium ? 'Goethe & TELC · A1/A2/B1 · Đầy đủ tất cả Teile như đề thi thật' : 'Yêu cầu gói Premium · Goethe & TELC · A1/A2/B1'}
         badge="Đề chuẩn"
       />
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {examCards.map(card => <Card key={card.href} card={card} />)}
+        {examCards.map(card => <Card key={card.href} card={card} premiumLocked={!isPremium} />)}
       </div>
     </div>
   );

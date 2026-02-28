@@ -217,7 +217,7 @@ export default function TopicDetailPage() {
   const params = useParams();
   const slug = params.slug as string;
 
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, user } = useAuthStore();
   const { data: topic, isLoading, error } = useTopic(slug);
   const updateProgressMutation = useUpdateTopicProgress();
 
@@ -225,6 +225,11 @@ export default function TopicDetailPage() {
   const [filterMode, setFilterMode] = useState<FilterMode>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState<TabKey>('words');
+
+  // localStorage key scoped per user so different accounts on the same browser
+  // don't share or overwrite each other's progress.
+  const lsKey = (topicId: string) =>
+    user?.id ? `topic-learned-${user.id}-${topicId}` : null;
 
   // Debounce backend progress sync so rapid word toggles (e.g. marking 10 words
   // at once) don't fire a PUT request on every single click — batches them into one.
@@ -234,14 +239,18 @@ export default function TopicDetailPage() {
   }, []);
 
   useEffect(() => {
-    if (topic) {
-      const stored = localStorage.getItem(`topic-learned-${topic.id}`);
+    if (topic && user?.id) {
+      const key = lsKey(topic.id);
+      const stored = key ? localStorage.getItem(key) : null;
       if (stored) {
         try { setLearnedWords(new Set(JSON.parse(stored))); }
         catch (e) { console.error('Error loading learned words:', e); }
+      } else {
+        // Clear stale state when switching users or no key available
+        setLearnedWords(new Set());
       }
     }
-  }, [topic]);
+  }, [topic, user?.id]);
 
   const syncProgressToServer = (newLearnedCount: number) => {
     if (!isAuthenticated || !topic) return;
@@ -254,7 +263,8 @@ export default function TopicDetailPage() {
 
   const saveLearned = (newSet: Set<string>) => {
     if (topic) {
-      localStorage.setItem(`topic-learned-${topic.id}`, JSON.stringify([...newSet]));
+      const key = lsKey(topic.id);
+      if (key) localStorage.setItem(key, JSON.stringify([...newSet]));
       syncProgressToServer(newSet.size);
     }
   };

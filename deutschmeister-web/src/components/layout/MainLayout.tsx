@@ -12,7 +12,7 @@ interface MainLayoutProps {
 const SIDEBAR_COLLAPSED_KEY = 'deutschmeister-sidebar-collapsed';
 
 // Routes that should render WITHOUT sidebar/header (full-screen)
-const BARE_ROUTES = ['/auth/login', '/auth/register', '/auth', '/', '/landing'];
+const BARE_ROUTES = ['/auth/login', '/auth/register', '/auth', '/', '/landing', '/admin'];
 
 export function MainLayout({ children }: MainLayoutProps) {
   const pathname = usePathname();

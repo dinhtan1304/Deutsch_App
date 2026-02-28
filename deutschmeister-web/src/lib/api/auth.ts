@@ -32,6 +32,11 @@ export interface User {
   avatar: string | null;
   role: string;
   createdAt: string;
+  subscription?: {
+    plan: 'free' | 'premium';
+    status: string;
+    expiresAt: string | null;
+  };
 }
 
 export const authApi = {

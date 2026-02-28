@@ -19,7 +19,7 @@ const HIGHLIGHTS = [
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login, isLoading, isAuthenticated, _hasHydrated } = useAuthStore();
+  const { login, isLoading, isAuthenticated, user, _hasHydrated } = useAuthStore();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPw, setShowPw] = useState(false);
@@ -27,15 +27,18 @@ export default function LoginPage() {
   const [focused, setFocused] = useState<string | null>(null);
 
   useEffect(() => {
-    if (_hasHydrated && isAuthenticated) router.replace('/dashboard');
-  }, [_hasHydrated, isAuthenticated, router]);
+    if (_hasHydrated && isAuthenticated) {
+      router.replace(user?.role === 'admin' ? '/admin' : '/dashboard');
+    }
+  }, [_hasHydrated, isAuthenticated, user, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     try {
       await login({ email: email.trim(), password });
-      router.push('/dashboard');
+      const { user: loggedInUser } = useAuthStore.getState();
+      router.push(loggedInUser?.role === 'admin' ? '/admin' : '/dashboard');
     } catch (err: any) {
       setError(err.message || 'Đăng nhập thất bại. Vui lòng thử lại.');
     }
