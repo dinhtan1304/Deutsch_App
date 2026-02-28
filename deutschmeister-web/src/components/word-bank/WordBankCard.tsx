@@ -1,38 +1,12 @@
 'use client';
 
 import { PersonalWord, WordTypeInfo, GenderInfo, Gender } from '@/types/personalWord';
+import { IconVolume, IconStar, IconLightbulb } from '@/components/ui/Icons';
 
 interface WordBankCardProps {
   word: PersonalWord;
   onToggleFavorite: (id: string) => void;
   onSpeak?: (text: string) => void;
-}
-
-// ─── Inline SVG Icons ───
-function IconVolume({ size = 16, style }: { size?: number; style?: React.CSSProperties }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
-      strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}>
-      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
-      <path d="M15.54 8.46a5 5 0 0 1 0 7.07" /><path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
-    </svg>
-  );
-}
-function IconStar({ size = 16, style }: { size?: number; style?: React.CSSProperties }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
-      strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}>
-      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-    </svg>
-  );
-}
-function IconStarFilled({ size = 16, style }: { size?: number; style?: React.CSSProperties }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="#F59E0B" stroke="#F59E0B"
-      strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}>
-      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-    </svg>
-  );
 }
 
 export function WordBankCard({ word, onToggleFavorite, onSpeak }: WordBankCardProps) {
@@ -125,19 +99,30 @@ export function WordBankCard({ word, onToggleFavorite, onSpeak }: WordBankCardPr
           <button onClick={() => onToggleFavorite(word.id)}
             className="w-8 h-8 flex items-center justify-center rounded-lg transition-all"
             title="Yêu thích">
-            {word.isFavorite ? <IconStarFilled size={16} /> : <IconStar size={16} style={{ color: 'var(--theme-text-muted)', opacity: 0.5 }} />}
+            <IconStar size={16} style={word.isFavorite
+              ? { fill: '#F59E0B', color: '#F59E0B' }
+              : { color: 'var(--theme-text-muted)', opacity: 0.5 }} />
           </button>
         </div>
       </div>
 
-      <div className="flex gap-4 text-[12px] mt-2">
-        <span style={{ color: 'var(--theme-text-muted)' }}>🇬🇧 {word.translationEn}</span>
-        <span style={{ color: 'var(--theme-text-muted)' }}>🇻🇳 {word.translationVi}</span>
+      <div className="flex gap-3 text-[12px] mt-2">
+        <span className="flex items-center gap-1.5" style={{ color: 'var(--theme-text-muted)' }}>
+          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded"
+            style={{ backgroundColor: 'rgba(59,130,246,.1)', color: '#3B82F6' }}>EN</span>
+          {word.translationEn}
+        </span>
+        <span className="flex items-center gap-1.5" style={{ color: 'var(--theme-text-muted)' }}>
+          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded"
+            style={{ backgroundColor: 'rgba(239,68,68,.08)', color: '#EF4444' }}>VN</span>
+          {word.translationVi}
+        </span>
       </div>
 
       {word.examples?.length > 0 && (
-        <div className="mt-2 text-[11px] italic truncate" style={{ color: 'var(--theme-text-muted)' }}>
-          💬 {word.examples[0]}
+        <div className="flex items-center gap-1.5 mt-2 text-[11px] italic truncate" style={{ color: 'var(--theme-text-muted)' }}>
+          <IconVolume size={12} style={{ opacity: 0.5, flexShrink: 0 }} />
+          {word.examples[0]}
         </div>
       )}
 
@@ -153,7 +138,10 @@ export function WordBankCard({ word, onToggleFavorite, onSpeak }: WordBankCardPr
       )}
 
       {word.notes && (
-        <div className="mt-2 text-[11px]" style={{ color: 'var(--theme-text-muted)' }}>📝 {word.notes}</div>
+        <div className="flex items-center gap-1.5 mt-2 text-[11px]" style={{ color: 'var(--theme-text-muted)' }}>
+          <IconLightbulb size={12} style={{ opacity: 0.5, flexShrink: 0 }} />
+          {word.notes}
+        </div>
       )}
     </div>
   );

@@ -4,7 +4,7 @@ import { useEffect, useCallback, useState } from 'react';
 import { Word, GenderInfo } from '@/types';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { GenderTip } from './GenderTip';
-import { IconStar } from '@/components/ui/Icons';
+import { IconStar, IconX, IconVolume, IconCheck, IconPlus, IconLoader, IconBookOpen, IconLightbulb } from '@/components/ui/Icons';
 import { dictionaryLookupApi } from '@/lib/api/dictionary-lookup';
 
 interface WordDetailModalProps {
@@ -15,42 +15,21 @@ interface WordDetailModalProps {
   isFavorite?: boolean;
 }
 
-// ─── Inline SVG icons ───
-function IconX({ size = 20 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
-      strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}>
-      <path d="M18 6 6 18" /><path d="m6 6 12 12" />
-    </svg>
-  );
-}
-
-function IconVolume({ size = 20, className = '' }: { size?: number; className?: string }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
-      strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round"
-      className={className} style={{ display: 'block' }}>
-      <path d="M11 5 6 9H2v6h4l5 4zM15.54 8.46a5 5 0 0 1 0 7.07" />
-      <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
-    </svg>
-  );
-}
-
 const GENDER_STYLES = {
   masculine: {
-    gradient: 'linear-gradient(135deg, #3B82F6, #1D4ED8)',
+    gradient: 'linear-gradient(135deg,#3B82F6,#1D4ED8)',
     bg: 'rgba(59,130,246,.1)',
     text: '#3B82F6',
     light: 'rgba(59,130,246,.06)',
   },
   feminine: {
-    gradient: 'linear-gradient(135deg, #EC4899, #BE185D)',
+    gradient: 'linear-gradient(135deg,#EC4899,#BE185D)',
     bg: 'rgba(236,72,153,.1)',
     text: '#EC4899',
     light: 'rgba(236,72,153,.06)',
   },
   neuter: {
-    gradient: 'linear-gradient(135deg, #22C55E, #15803D)',
+    gradient: 'linear-gradient(135deg,#22C55E,#15803D)',
     bg: 'rgba(34,197,94,.1)',
     text: '#22C55E',
     light: 'rgba(34,197,94,.06)',
@@ -119,7 +98,6 @@ export function WordDetailModal({
       });
       setAddedToBank(true);
     } catch {
-      // Nếu đã tồn tại, coi như thêm thành công
       setAddedToBank(true);
     } finally {
       setAddingToBank(false);
@@ -132,8 +110,7 @@ export function WordDetailModal({
   const gs = GENDER_STYLES[word.gender];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm"
         style={{ animation: 'fadeIn 0.2s ease-out' }} />
@@ -146,25 +123,22 @@ export function WordDetailModal({
       >
         {/* ─── Header ─── */}
         <div className="relative p-6 pb-8 text-white overflow-hidden" style={{ background: gs.gradient }}>
-          {/* Decorative circles */}
           <div className="absolute -top-12 -right-12 w-40 h-40 rounded-full bg-white/10" />
           <div className="absolute -bottom-8 -left-8 w-28 h-28 rounded-full bg-white/5" />
 
           {/* Top actions */}
           <div className="relative flex items-center justify-between mb-6">
-            {onFavoriteToggle && (
+            {onFavoriteToggle ? (
               <button
                 onClick={() => onFavoriteToggle(word.id)}
                 className="w-10 h-10 rounded-xl flex items-center justify-center bg-white/15 hover:bg-white/25 transition-all"
-              >
+                title={isFavorite ? 'Bỏ yêu thích' : 'Thêm yêu thích'}>
                 <IconStar size={20} style={isFavorite ? { fill: '#FBBF24', color: '#FBBF24' } : { color: 'white' }} />
               </button>
-            )}
-            {!onFavoriteToggle && <div />}
+            ) : <div />}
             <button
               onClick={onClose}
-              className="w-10 h-10 rounded-xl flex items-center justify-center bg-white/15 hover:bg-white/25 transition-all"
-            >
+              className="w-10 h-10 rounded-xl flex items-center justify-center bg-white/15 hover:bg-white/25 transition-all">
               <IconX size={18} />
             </button>
           </div>
@@ -176,10 +150,8 @@ export function WordDetailModal({
               <span className="text-3xl md:text-4xl font-bold">{word.word}</span>
               <button
                 onClick={() => speak(`${word.article} ${word.word}`)}
-                className={`w-11 h-11 rounded-xl flex items-center justify-center bg-white/15
-                  hover:bg-white/25 transition-all ${isSpeaking ? 'animate-pulse' : ''}`}
-                disabled={isSpeaking}
-              >
+                className={`w-11 h-11 rounded-xl flex items-center justify-center bg-white/15 hover:bg-white/25 transition-all ${isSpeaking ? 'animate-pulse' : ''}`}
+                disabled={isSpeaking}>
                 <IconVolume size={20} />
               </button>
             </div>
@@ -197,8 +169,7 @@ export function WordDetailModal({
             {/* Badges */}
             <div className="flex justify-center gap-2 mt-4 flex-wrap">
               {[genderInfo.label, word.level, word.category].map((badge, i) => (
-                <span key={i}
-                  className="px-3 py-1 rounded-lg text-[12px] font-medium bg-white/15 backdrop-blur-sm">
+                <span key={i} className="px-3 py-1 rounded-lg text-[12px] font-medium bg-white/15 backdrop-blur-sm">
                   {badge}
                 </span>
               ))}
@@ -222,16 +193,18 @@ export function WordDetailModal({
 
           {/* Translations */}
           <div>
-            <h3 className="text-[12px] font-bold uppercase tracking-wider mb-3 flex items-center gap-2"
+            <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3 flex items-center gap-2"
               style={{ color: gs.text }}>
-              <span className="w-6 h-6 rounded-md flex items-center justify-center text-[12px]"
-                style={{ backgroundColor: gs.bg }}>📖</span>
+              <span className="w-6 h-6 rounded-md flex items-center justify-center shrink-0"
+                style={{ backgroundColor: gs.bg }}>
+                <IconBookOpen size={13} style={{ color: gs.text }} />
+              </span>
               Nghĩa
             </h3>
             <div className="space-y-2">
               <div className="flex items-center gap-3 p-3 rounded-xl"
                 style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-md"
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-md shrink-0"
                   style={{ backgroundColor: gs.bg, color: gs.text }}>EN</span>
                 <span className="text-[15px]" style={{ color: 'var(--theme-text-primary)' }}>
                   {word.translationEn}
@@ -240,8 +213,8 @@ export function WordDetailModal({
               {settings.showVietnamese && word.translationVi && (
                 <div className="flex items-center gap-3 p-3 rounded-xl"
                   style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-md"
-                    style={{ backgroundColor: 'rgba(234,179,8,.1)', color: '#EAB308' }}>VN</span>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-md shrink-0"
+                    style={{ backgroundColor: 'rgba(239,68,68,.08)', color: '#EF4444' }}>VN</span>
                   <span className="text-[15px]" style={{ color: 'var(--theme-text-primary)' }}>
                     {word.translationVi}
                   </span>
@@ -253,27 +226,25 @@ export function WordDetailModal({
           {/* Examples */}
           {settings.showExamples && word.examples && word.examples.length > 0 && (
             <div>
-              <h3 className="text-[12px] font-bold uppercase tracking-wider mb-3 flex items-center gap-2"
+              <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3 flex items-center gap-2"
                 style={{ color: gs.text }}>
-                <span className="w-6 h-6 rounded-md flex items-center justify-center text-[12px]"
-                  style={{ backgroundColor: gs.bg }}>💬</span>
+                <span className="w-6 h-6 rounded-md flex items-center justify-center shrink-0"
+                  style={{ backgroundColor: gs.bg }}>
+                  <IconVolume size={13} style={{ color: gs.text }} />
+                </span>
                 Ví dụ ({word.examples.length})
               </h3>
               <div className="space-y-2">
                 {word.examples.map((example, i) => (
-                  <div key={i}
-                    className="p-3 rounded-xl border-l-3"
-                    style={{ backgroundColor: gs.light, borderLeftColor: gs.text, borderLeftWidth: '3px' }}>
+                  <div key={i} className="p-3 rounded-xl"
+                    style={{ backgroundColor: gs.light, borderLeft: `3px solid ${gs.text}` }}>
                     <div className="flex items-start justify-between gap-2">
-                      <p className="italic flex-1 text-[14px]"
-                        style={{ color: 'var(--theme-text-primary)' }}>
-                        „{example}"
+                      <p className="italic flex-1 text-[14px]" style={{ color: 'var(--theme-text-primary)' }}>
+                        {'„'}{example}{'"'}
                       </p>
-                      <button
-                        onClick={() => speak(example)}
+                      <button onClick={() => speak(example)}
                         className="shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-all hover:scale-110"
-                        style={{ backgroundColor: gs.bg, color: gs.text }}
-                      >
+                        style={{ backgroundColor: gs.bg, color: gs.text }}>
                         <IconVolume size={14} />
                       </button>
                     </div>
@@ -286,20 +257,18 @@ export function WordDetailModal({
           {/* Tips */}
           {word.tips && word.tips.length > 0 && (
             <div>
-              <h3 className="text-[12px] font-bold uppercase tracking-wider mb-3 flex items-center gap-2"
+              <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3 flex items-center gap-2"
                 style={{ color: '#EAB308' }}>
-                <span className="w-6 h-6 rounded-md flex items-center justify-center text-[12px]"
-                  style={{ backgroundColor: 'rgba(234,179,8,.1)' }}>🎯</span>
+                <span className="w-6 h-6 rounded-md flex items-center justify-center shrink-0"
+                  style={{ backgroundColor: 'rgba(234,179,8,.1)' }}>
+                  <IconLightbulb size={13} style={{ color: '#EAB308' }} />
+                </span>
                 Ghi chú ({word.tips.length})
               </h3>
               <div className="space-y-2">
                 {word.tips.map((tip, i) => (
-                  <div key={i}
-                    className="p-3 rounded-xl"
-                    style={{
-                      backgroundColor: 'rgba(234,179,8,.06)',
-                      borderLeft: '3px solid #EAB308',
-                    }}>
+                  <div key={i} className="p-3 rounded-xl"
+                    style={{ backgroundColor: 'rgba(234,179,8,.06)', borderLeft: '3px solid #EAB308' }}>
                     <p className="text-[14px]" style={{ color: 'var(--theme-text-primary)' }}>{tip}</p>
                   </div>
                 ))}
@@ -313,20 +282,23 @@ export function WordDetailModal({
           <button
             onClick={addedToBank ? undefined : handleAddToWordBank}
             disabled={addedToBank || addingToBank}
-            className="w-full py-2.5 rounded-xl font-semibold text-[14px] border-2 transition-all duration-200"
+            className="w-full py-2.5 rounded-xl font-semibold text-[14px] border-2 transition-all duration-200 flex items-center justify-center gap-2"
             style={addedToBank
               ? { borderColor: 'var(--theme-border)', color: 'var(--theme-text-muted)', cursor: 'default', backgroundColor: 'var(--theme-bg-secondary)' }
               : { borderColor: gs.text, color: gs.text, backgroundColor: 'transparent' }
             }
           >
-            {addingToBank ? '⏳ Đang thêm...' : addedToBank ? '✅ Đã có trong Word Bank' : '➕ Thêm vào Word Bank'}
+            {addingToBank
+              ? <><IconLoader size={15} /> Đang thêm...</>
+              : addedToBank
+              ? <><IconCheck size={15} /> Đã có trong Word Bank</>
+              : <><IconPlus size={15} /> Thêm vào Word Bank</>
+            }
           </button>
           <button
             onClick={onClose}
-            className="w-full py-3 rounded-xl font-semibold text-white text-[14px]
-              transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0"
-            style={{ background: gs.gradient }}
-          >
+            className="w-full py-3 rounded-xl font-semibold text-white text-[14px] transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0"
+            style={{ background: gs.gradient }}>
             Đóng
           </button>
         </div>

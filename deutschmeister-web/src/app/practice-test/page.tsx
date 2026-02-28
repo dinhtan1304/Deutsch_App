@@ -1,166 +1,193 @@
 'use client';
 
 import Link from 'next/link';
+import {
+  IconPenLine, IconHeadphones, IconBookOpen, IconMic,
+  IconArrowRight, IconStar, IconZap, IconGraduationCap,
+} from '@/components/ui/Icons';
 
-// ─── Inline SVG Icons ───
-function IconPenLine({ size = 16, style }: { size?: number; style?: React.CSSProperties }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
-      strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}>
-      <path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
-    </svg>
-  );
-}
-function IconHeadphones({ size = 16, style }: { size?: number; style?: React.CSSProperties }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
-      strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}>
-      <path d="M3 18v-6a9 9 0 0 1 18 0v6" />
-      <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z" />
-    </svg>
-  );
-}
-function IconBookOpen({ size = 16, style }: { size?: number; style?: React.CSSProperties }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
-      strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}>
-      <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" /><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
-    </svg>
-  );
-}
-function IconClipboard({ size = 16, style }: { size?: number; style?: React.CSSProperties }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
-      strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}>
-      <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
-      <rect width="8" height="4" x="8" y="2" rx="1" ry="1" />
-    </svg>
-  );
-}
-function IconLock({ size = 16, style }: { size?: number; style?: React.CSSProperties }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
-      strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}>
-      <rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" />
-    </svg>
-  );
-}
-function IconArrowRight({ size = 16, style }: { size?: number; style?: React.CSSProperties }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
-      strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}>
-      <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
-    </svg>
-  );
-}
+// ─── Data ──────────────────────────────────────────────────────────────────────
+type CardDef = {
+  title: string; titleDe: string; description: string;
+  icon: React.ComponentType<{ size?: number; className?: string }>;
+  href: string; gradient: string; color: string; locked?: boolean;
+};
 
-const testTypes = [
+const freeCards: CardDef[] = [
   {
-    title: 'Luyện Viết', titleDe: 'Schreibübung',
-    description: 'AI tạo đề bài tiếng Đức, chấm và sửa lỗi chi tiết',
-    icon: IconPenLine, href: '/practice-test/writing',
-    gradient: 'linear-gradient(135deg, #6366F1, #8B5CF6)', available: true,
+    title: 'Luyện Đọc', titleDe: 'Leseübung',
+    description: 'AI tạo bài đọc tiếng Đức, hỏi và kiểm tra hiểu bài',
+    icon: IconBookOpen, href: '/practice-test/reading',
+    gradient: 'linear-gradient(135deg, #22C55E, #14B8A6)', color: '#22C55E',
   },
   {
     title: 'Luyện Nghe', titleDe: 'Hörübung',
     description: 'AI tạo audio tiếng Đức, nghe và trả lời câu hỏi',
     icon: IconHeadphones, href: '/practice-test/listening',
-    gradient: 'linear-gradient(135deg, #EC4899, #8B5CF6)', available: true,
+    gradient: 'linear-gradient(135deg, #EC4899, #8B5CF6)', color: '#EC4899',
+  },
+  {
+    title: 'Luyện Viết', titleDe: 'Schreibübung',
+    description: 'AI tạo đề bài tiếng Đức, chấm và sửa lỗi chi tiết',
+    icon: IconPenLine, href: '/practice-test/writing',
+    gradient: 'linear-gradient(135deg, #6366F1, #8B5CF6)', color: '#6366F1',
+  },
+  {
+    title: 'Luyện Nói', titleDe: 'Sprechübung',
+    description: 'AI tạo prompt tiếng Đức, ghi âm trả lời, Gemini chấm điểm chi tiết',
+    icon: IconMic, href: '/practice-test/speaking',
+    gradient: 'linear-gradient(135deg, #F59E0B, #EF4444)', color: '#F59E0B',
+  },
+];
+
+const examCards: CardDef[] = [
+  {
+    title: 'Đọc Theo Đề', titleDe: 'Prüfungslesen',
+    description: 'Goethe & TELC · A1/A2/B1 · Đầy đủ tất cả Teile như đề thi thật',
+    icon: IconBookOpen, href: '/practice-test/reading/exam',
+    gradient: 'linear-gradient(135deg, #22C55E, #0EA5E9)', color: '#22C55E',
   },
   {
     title: 'Nghe Theo Đề', titleDe: 'Prüfungshören',
     description: 'Goethe & TELC · A1/A2/B1 · Đầy đủ tất cả Teile Hören như đề thi thật',
     icon: IconHeadphones, href: '/practice-test/listening/exam',
-    gradient: 'linear-gradient(135deg, #EC4899, #A855F7)', available: true,
-    badge: 'Đề chuẩn',
-  },
-  {
-    title: 'Luyện Đọc', titleDe: 'Leseübung',
-    description: 'Đọc hiểu văn bản tiếng Đức',
-    icon: IconBookOpen, href: '/practice-test/reading',
-    gradient: 'linear-gradient(135deg, #22C55E, #14B8A6)', available: true,
-  },
-  {
-    title: 'Đọc Theo Đề', titleDe: 'Prüfungslesen',
-    description: 'Goethe & TELC · A1/A2/B1 · Đầy đủ tất cả Teile như đề thi thật',
-    icon: IconBookOpen, href: '/practice-test/reading/exam',
-    gradient: 'linear-gradient(135deg, #22C55E, #0EA5E9)', available: true,
-    badge: 'Đề chuẩn',
+    gradient: 'linear-gradient(135deg, #EC4899, #A855F7)', color: '#EC4899',
   },
   {
     title: 'Viết Theo Đề', titleDe: 'Prüfungsschreiben',
     description: 'Goethe & TELC · A1/A2/B1 · AI chấm theo tiêu chí chính thức',
     icon: IconPenLine, href: '/practice-test/writing/exam',
-    gradient: 'linear-gradient(135deg, #A855F7, #6366F1)', available: true,
-    badge: 'Đề chuẩn',
+    gradient: 'linear-gradient(135deg, #A855F7, #6366F1)', color: '#A855F7',
+  },
+  {
+    title: 'Nói Theo Đề', titleDe: 'Prüfungssprechen',
+    description: 'Goethe & TELC · A1/A2/B1 · Đầy đủ tất cả Teile Sprechen như đề thi thật',
+    icon: IconMic, href: '/practice-test/speaking/exam',
+    gradient: 'linear-gradient(135deg, #F59E0B, #EF4444)', color: '#F59E0B',
   },
 ];
 
+// ─── Card ──────────────────────────────────────────────────────────────────────
+function Card({ card }: { card: CardDef }) {
+  const Ic = card.icon;
+  if (card.locked) {
+    return (
+      <div className="rounded-2xl border p-5 opacity-55 cursor-not-allowed select-none"
+        style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
+        <div className="relative w-12 h-12 rounded-xl flex items-center justify-center mb-4"
+          style={{ background: card.gradient }}>
+          <Ic size={22} className="text-white" />
+          <span className="absolute -top-1.5 -right-1.5 text-[9px] font-extrabold px-1.5 py-0.5 rounded-full text-white"
+            style={{ backgroundColor: '#6B7280' }}>Soon</span>
+        </div>
+        <p className="text-[11px] font-semibold mb-0.5" style={{ color: 'var(--theme-text-muted)' }}>{card.titleDe}</p>
+        <h3 className="text-[16px] font-bold mb-2" style={{ color: 'var(--theme-text-primary)' }}>{card.title}</h3>
+        <p className="text-[12.5px] leading-relaxed" style={{ color: 'var(--theme-text-secondary)' }}>{card.description}</p>
+      </div>
+    );
+  }
+  return (
+    <Link href={card.href}
+      className="group block rounded-2xl border p-5 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg"
+      style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
+      {/* Icon */}
+      <div className="relative w-12 h-12 rounded-xl flex items-center justify-center mb-4 transition-transform duration-200 group-hover:scale-110"
+        style={{ background: card.gradient }}>
+        <Ic size={22} className="text-white" />
+      </div>
+      {/* Text */}
+      <p className="text-[11px] font-semibold mb-0.5" style={{ color: 'var(--theme-text-muted)' }}>{card.titleDe}</p>
+      <h3 className="text-[16px] font-bold mb-2" style={{ color: 'var(--theme-text-primary)' }}>{card.title}</h3>
+      <p className="text-[12.5px] leading-relaxed mb-4" style={{ color: 'var(--theme-text-secondary)' }}>{card.description}</p>
+      {/* CTA */}
+      <div className="flex items-center gap-1.5 text-[12.5px] font-semibold opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+        style={{ color: card.color }}>
+        Bắt đầu <IconArrowRight size={13} />
+      </div>
+    </Link>
+  );
+}
+
+// ─── Section header ────────────────────────────────────────────────────────────
+function SectionHeader({
+  icon: Icon, iconGradient, label, sub, badge,
+}: {
+  icon: React.ComponentType<{ size?: number; className?: string }>;
+  iconGradient: string; label: string; sub: string; badge?: string;
+}) {
+  return (
+    <div className="flex items-center gap-3 mb-5">
+      <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+        style={{ background: iconGradient }}>
+        <Icon size={18} className="text-white" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-[15px] font-bold" style={{ color: 'var(--theme-text-primary)' }}>{label}</span>
+          {badge && (
+            <span className="inline-flex items-center gap-1 text-[10px] font-extrabold px-2 py-0.5 rounded-full text-white"
+              style={{ background: 'linear-gradient(135deg, #F59E0B, #EF4444)' }}>
+              <IconStar size={8} /> {badge}
+            </span>
+          )}
+        </div>
+        <p className="text-[12px] mt-0.5 truncate" style={{ color: 'var(--theme-text-muted)' }}>{sub}</p>
+      </div>
+    </div>
+  );
+}
+
+// ─── Page ──────────────────────────────────────────────────────────────────────
 export default function PracticeTestPage() {
   return (
-      <div className="py-6">
-        {/* Header */}
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-11 h-11 rounded-2xl flex items-center justify-center"
-            style={{ background: 'linear-gradient(135deg, #6366F1, #8B5CF6)' }}>
-            <IconClipboard size={22} style={{ color: 'white' }} />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold" style={{ color: 'var(--theme-text-primary)' }}>Luyện Test</h1>
-            <p className="text-[13px] mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>
-              Chọn dạng bài luyện tập phù hợp với trình độ của bạn
-            </p>
-          </div>
-        </div>
+    <div className="py-6 max-w-7xl mx-auto px-4">
 
-        {/* Cards */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {testTypes.map(type => {
-            const Ic = type.icon;
-            if (type.available) {
-              const hasBadge = 'badge' in type && type.badge;
-              return (
-                <Link key={type.href} href={type.href}
-                  className="group block rounded-2xl border p-6 transition-all duration-200 hover:-translate-y-1 relative overflow-hidden"
-                  style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)', boxShadow: '0 2px 8px rgba(0,0,0,.04)' }}>
-                  {hasBadge && (
-                    <span className="absolute top-3 right-3 text-[10px] font-extrabold px-2 py-0.5 rounded-full text-white"
-                      style={{ background: type.gradient }}>
-                      {type.badge}
-                    </span>
-                  )}
-                  <div className="w-14 h-14 rounded-xl flex items-center justify-center mb-4 transition-transform group-hover:scale-110"
-                    style={{ background: type.gradient }}>
-                    <Ic size={26} style={{ color: 'white' }} />
-                  </div>
-                  <h3 className="text-[17px] font-bold" style={{ color: 'var(--theme-text-primary)' }}>{type.title}</h3>
-                  <p className="text-[12px] font-medium mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>{type.titleDe}</p>
-                  <p className="text-[13px] mt-3 leading-relaxed" style={{ color: 'var(--theme-text-secondary)' }}>{type.description}</p>
-                  <div className="flex items-center gap-1 mt-4 text-[13px] font-semibold opacity-0 group-hover:opacity-100 transition-opacity"
-                    style={{ color: '#6366F1' }}>
-                    Bắt đầu <IconArrowRight size={14} />
-                  </div>
-                </Link>
-              );
-            }
-            return (
-              <div key={type.href} className="rounded-2xl border p-6 opacity-50"
-                style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-secondary)' }}>
-                <div className="w-14 h-14 rounded-xl flex items-center justify-center mb-4"
-                  style={{ backgroundColor: 'var(--theme-bg-secondary)', border: '1px solid var(--theme-border)' }}>
-                  <Ic size={26} style={{ color: 'var(--theme-text-muted)' }} />
-                </div>
-                <h3 className="text-[17px] font-bold" style={{ color: 'var(--theme-text-muted)' }}>{type.title}</h3>
-                <p className="text-[12px] font-medium mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>{type.titleDe}</p>
-                <p className="text-[13px] mt-3 leading-relaxed" style={{ color: 'var(--theme-text-muted)' }}>{type.description}</p>
-                <span className="mt-3 inline-flex items-center gap-1 text-[12px] font-bold px-3 py-1 rounded-full"
-                  style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)', border: '1px solid var(--theme-border)' }}>
-                  <IconLock size={12} /> Sắp ra mắt
-                </span>
-              </div>
-            );
-          })}
+      {/* Page header */}
+      <div className="flex items-start gap-4 mb-8">
+        <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0"
+          style={{ background: 'linear-gradient(135deg, #6366F1, #8B5CF6)' }}>
+          <IconGraduationCap size={24} className="text-white" />
+        </div>
+        <div>
+          <h1 className="text-2xl font-bold" style={{ color: 'var(--theme-text-primary)' }}>Luyện Test</h1>
+          <p className="text-[13px] mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>
+            Chọn dạng bài luyện tập phù hợp — từ luyện tự do đến đề thi chuẩn Goethe & TELC
+          </p>
         </div>
       </div>
+
+      {/* ── Luyện tự do ── */}
+      <SectionHeader
+        icon={IconZap}
+        iconGradient="linear-gradient(135deg, #6366F1, #8B5CF6)"
+        label="Luyện tự do"
+        sub="AI tạo đề ngẫu nhiên, phù hợp mọi cấp độ"
+      />
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-10">
+        {freeCards.map(card => <Card key={card.href} card={card} />)}
+      </div>
+
+      {/* Divider */}
+      <div className="flex items-center gap-3 mb-8">
+        <div className="flex-1 h-px" style={{ backgroundColor: 'var(--theme-border)' }} />
+        <span className="text-[10px] font-bold uppercase tracking-[0.15em] px-3 py-1 rounded-full"
+          style={{ color: 'var(--theme-text-muted)', backgroundColor: 'var(--theme-bg-secondary)' }}>
+          Đề chuẩn
+        </span>
+        <div className="flex-1 h-px" style={{ backgroundColor: 'var(--theme-border)' }} />
+      </div>
+
+      {/* ── Theo đề chuẩn ── */}
+      <SectionHeader
+        icon={IconGraduationCap}
+        iconGradient="linear-gradient(135deg, #F59E0B, #EF4444)"
+        label="Theo đề chuẩn"
+        sub="Goethe & TELC · A1/A2/B1 · Đầy đủ tất cả Teile như đề thi thật"
+        badge="Đề chuẩn"
+      />
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {examCards.map(card => <Card key={card.href} card={card} />)}
+      </div>
+    </div>
   );
 }

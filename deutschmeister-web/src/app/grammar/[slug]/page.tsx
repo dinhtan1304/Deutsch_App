@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation';
 import { useGrammarLesson, useSubmitGrammarExercises } from '@/hooks/useGrammar';
 import { TheorySection } from '@/components/grammar/TheorySection';
 import { ExerciseList } from '@/components/grammar/ExerciseList';
-import { IconArrowLeft, IconBookOpen, IconPenLine } from '@/components/ui/Icons';
+import { IconArrowLeft, IconBookOpen, IconPenLine, IconSearch } from '@/components/ui/Icons';
 import Link from 'next/link';
 
 // DARK-6 fix: level badge dùng semi-transparent color, readable ở cả light/dark
@@ -48,12 +48,17 @@ export default function GrammarLessonPage() {
   if (!lesson) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-3">
-        <div className="text-5xl">📭</div>
+        <div className="w-14 h-14 rounded-2xl flex items-center justify-center"
+          style={{ background: 'linear-gradient(135deg,rgba(139,92,246,.12),rgba(139,92,246,.06))' }}>
+          <IconSearch size={26} style={{ color: '#8B5CF6' }} />
+        </div>
         <p className="text-[15px] font-medium" style={{ color: 'var(--theme-text-secondary)' }}>
           Không tìm thấy bài học này.
         </p>
-        <Link href="/grammar" className="text-[14px] font-semibold" style={{ color: '#3B82F6' }}>
-          ← Quay lại danh sách
+        <Link href="/grammar"
+          className="inline-flex items-center gap-1.5 text-[14px] font-semibold transition-opacity hover:opacity-70"
+          style={{ color: '#8B5CF6' }}>
+          <IconArrowLeft size={15} /> Quay lại danh sách
         </Link>
       </div>
     );

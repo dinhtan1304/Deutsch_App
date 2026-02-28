@@ -113,6 +113,14 @@ export default function WritingListPage() {
   return (
       <div className="py-6">
 
+        {/* ─── Back ─── */}
+        <div className="flex items-center gap-2 mb-5">
+          <Link href="/practice-test" className="flex items-center gap-1 text-[13px] font-medium transition-opacity hover:opacity-70"
+            style={{ color: 'var(--theme-text-muted)' }}>
+            <IconChevronLeft size={14} /> Luyện Test
+          </Link>
+        </div>
+
         {/* ─── Header ─── */}
         <div className="flex items-start justify-between mb-6">
           <div className="flex items-center gap-3">
@@ -233,10 +241,9 @@ export default function WritingListPage() {
                   {/* Score */}
                   {item.overallScore !== null && (
                     <div className="text-right shrink-0">
-                      <div className="text-[22px] font-extrabold" style={{ color: getScoreColor(item.overallScore) }}>
-                        {Math.round(item.overallScore)}
+                      <div className="text-[18px] font-extrabold" style={{ color: getScoreColor(item.overallScore) }}>
+                        {Math.round(item.overallScore)}%
                       </div>
-                      <div className="text-[11px]" style={{ color: 'var(--theme-text-muted)' }}>/100</div>
                     </div>
                   )}
 

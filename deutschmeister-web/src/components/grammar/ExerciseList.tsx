@@ -3,44 +3,10 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { Exercise, SubmitResult } from '@/types/grammar';
 import { HighlightedText } from '@/components/word-highlight/HighlightedText';
-
-/* ─── Inline Icons ─── */
-function IconCheck({ size = 16, style }: { size?: number; style?: React.CSSProperties }) {
-    return (<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
-        strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}>
-        <polyline points="20 6 9 17 4 12" /></svg>);
-}
-function IconX({ size = 16, style }: { size?: number; style?: React.CSSProperties }) {
-    return (<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
-        strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}>
-        <line x1="18" x2="6" y1="6" y2="18" /><line x1="6" x2="18" y1="6" y2="18" /></svg>);
-}
-function IconArrowRight({ size = 16, style }: { size?: number; style?: React.CSSProperties }) {
-    return (<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
-        strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}>
-        <line x1="5" x2="19" y1="12" y2="12" /><polyline points="12 5 19 12 12 19" /></svg>);
-}
-function IconRefresh({ size = 16, style }: { size?: number; style?: React.CSSProperties }) {
-    return (<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
-        strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}>
-        <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
-        <path d="M21 3v5h-5" /><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
-        <path d="M8 16H3v5" /></svg>);
-}
-function IconTrophy({ size = 16, style }: { size?: number; style?: React.CSSProperties }) {
-    return (<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
-        strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}>
-        <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" /><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
-        <path d="M4 22h16" /><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20 7 22" />
-        <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20 17 22" />
-        <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" /></svg>);
-}
-function IconLightbulb({ size = 16, style }: { size?: number; style?: React.CSSProperties }) {
-    return (<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
-        strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}>
-        <path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5" />
-        <path d="M9 18h6" /><path d="M10 22h4" /></svg>);
-}
+import {
+    IconCheck, IconX, IconArrowRight, IconRefresh,
+    IconTrophy, IconLightbulb, IconLoader,
+} from '@/components/ui/Icons';
 
 /* ─── Shared ─── */
 const SPECIAL_CHARS = ['ä', 'ö', 'ü', 'Ä', 'Ö', 'Ü', 'ß'];
@@ -552,10 +518,7 @@ export const ExerciseList = ({ exercises, onSubmit }: ExerciseListProps) => {
                         }}>
                         {isSubmitting ? (
                             <>
-                                <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                                </svg>
+                                <IconLoader size={16} />
                                 Đang chấm...
                             </>
                         ) : isLast ? (

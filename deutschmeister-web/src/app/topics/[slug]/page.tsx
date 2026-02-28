@@ -6,70 +6,14 @@ import Link from 'next/link';
 import { useTopic, useUpdateTopicProgress } from '@/hooks/useTopics';
 import { useAuthStore } from '@/stores/authStore';
 import type { TopicWord } from '@/types/topic';
-import { IconSearch, IconChevronLeft, IconChevronRight } from '@/components/ui/Icons';
+import {
+  IconSearch, IconChevronLeft, IconChevronRight,
+  IconVolume, IconCheck, IconCheckAll, IconRotateCcw,
+  IconLightbulb, IconStar, IconBookOpen, IconCards, IconPenLine, IconLink,
+} from '@/components/ui/Icons';
 import { TopicFlashcard } from '@/components/topics/TopicFlashcard';
 import { TopicQuiz } from '@/components/topics/TopicQuiz';
 import { TopicMatching } from '@/components/topics/TopicMatching';
-
-// ─── Inline SVG icons ───
-function IconVolume({ size = 16, ...props }: { size?: number, [key: string]: any }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
-      strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }} {...props}>
-      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
-      <path d="M15.54 8.46a5 5 0 0 1 0 7.07" /><path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
-    </svg>
-  );
-}
-function IconCheck({ size = 16 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
-      strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}>
-      <polyline points="20 6 9 17 4 12" />
-    </svg>
-  );
-}
-function IconCheckAll({ size = 16 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
-      strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}>
-      <path d="M18 6 7 17l-5-5" /><path d="m22 10-9.5 9.5L10 17" />
-    </svg>
-  );
-}
-function IconRotateCcw({ size = 16 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
-      strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}>
-      <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" />
-    </svg>
-  );
-}
-function IconFilter({ size = 16 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
-      strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}>
-      <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
-    </svg>
-  );
-}
-function IconLightbulb({ size = 16, ...props }: { size?: number, [key: string]: any }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
-      strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }} {...props}>
-      <path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5" />
-      <path d="M9 18h6" /><path d="M10 22h4" />
-    </svg>
-  );
-}
-function IconStar({ size = 16 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" stroke="currentColor"
-      strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}>
-      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-    </svg>
-  );
-}
 
 // ─── Article Colors ───
 const ArticleColor: Record<string, { color: string; gradient: string; bg: string }> = {
@@ -81,11 +25,11 @@ const ArticleColor: Record<string, { color: string; gradient: string; bg: string
 // ─── Tab type ───
 type TabKey = 'words' | 'flashcard' | 'quiz' | 'matching';
 
-const TABS: { key: TabKey; label: string; icon: string }[] = [
-  { key: 'words', label: 'Từ vựng', icon: '📖' },
-  { key: 'flashcard', label: 'Flashcard', icon: '🃏' },
-  { key: 'quiz', label: 'Quiz', icon: '📝' },
-  { key: 'matching', label: 'Nối từ', icon: '🔗' },
+const TABS: { key: TabKey; label: string; icon: React.ComponentType<{ size?: number; className?: string }> }[] = [
+  { key: 'words',     label: 'Từ vựng',  icon: IconBookOpen },
+  { key: 'flashcard', label: 'Flashcard', icon: IconCards    },
+  { key: 'quiz',      label: 'Quiz',      icon: IconPenLine  },
+  { key: 'matching',  label: 'Nối từ',   icon: IconLink     },
 ];
 
 // ============================================
@@ -505,6 +449,7 @@ export default function TopicDetailPage() {
           style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
           {TABS.map(tab => {
             const isActive = activeTab === tab.key;
+            const TabIcon = tab.icon;
             return (
               <button key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
@@ -517,7 +462,7 @@ export default function TopicDetailPage() {
                   }
                   : { color: 'var(--theme-text-muted)' }
                 }>
-                <span>{tab.icon}</span>
+                <TabIcon size={15} />
                 <span className="hidden sm:inline">{tab.label}</span>
               </button>
             );

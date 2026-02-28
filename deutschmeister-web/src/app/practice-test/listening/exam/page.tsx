@@ -116,9 +116,9 @@ export default function ExamListeningListPage() {
     <div className="py-6">
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
-        <Link href="/practice-test/listening" className="flex items-center gap-1 text-[13px] font-medium transition-opacity hover:opacity-70"
+        <Link href="/practice-test" className="flex items-center gap-1 text-[13px] font-medium transition-opacity hover:opacity-70"
           style={{ color: 'var(--theme-text-muted)' }}>
-          <IconChevronLeft size={14} /> Luyện nghe
+          <IconChevronLeft size={14} /> Luyện Test
         </Link>
         <div className="flex-1" />
         <Link href="/practice-test/listening/exam/new"

@@ -65,6 +65,38 @@ export const EXAM_LISTENING_DISPLAY: Record<string, Record<string, {
   },
 };
 
+export const EXAM_SPEAKING_DISPLAY: Record<string, Record<string, {
+  teile: number;
+  timeMin: number;
+  totalPoints: number;
+  structure: string[];
+}>> = {
+  GOETHE: {
+    A1: {
+      teile: 3, timeMin: 8, totalPoints: 15,
+      structure: ['Sich vorstellen (60 giây)', 'Um etwas bitten — word cards (60 giây)', 'Auf Bitten reagieren (60 giây)'],
+    },
+    A2: {
+      teile: 3, timeMin: 10, totalPoints: 15,
+      structure: ['Über sich sprechen — picture card (90 giây)', 'Gemeinsam planen (90 giây)', 'Bitten & reagieren (60 giây)'],
+    },
+    B1: {
+      teile: 3, timeMin: 15, totalPoints: 15,
+      structure: ['Gemeinsam planen (120 giây)', 'Präsentation halten (30 giây chuẩn bị + 120 giây)', 'Auf Präsentation reagieren (90 giây)'],
+    },
+  },
+  TELC: {
+    A2: {
+      teile: 3, timeMin: 10, totalPoints: 15,
+      structure: ['Sich vorstellen (60 giây)', 'Informationen erfragen und geben (90 giây)', 'Bitten reagieren (60 giây)'],
+    },
+    B1: {
+      teile: 3, timeMin: 12, totalPoints: 15,
+      structure: ['Gespräch führen (120 giây)', 'Monolog halten (90 giây)', 'Gemeinsam Aufgabe lösen (90 giây)'],
+    },
+  },
+};
+
 export const EXAM_WRITING_DISPLAY: Record<string, Record<string, {
   teile: number;
   timeMin: number;

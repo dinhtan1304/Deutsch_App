@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/stores/authStore';
-import { IconSearch, IconGamepad, IconBrain } from '@/components/ui/Icons';
+import { IconSearch, IconGamepad, IconBrain, IconUser, IconSettings, IconLogOut } from '@/components/ui/Icons';
 import { SIDEBAR_WIDTH, SIDEBAR_COLLAPSED_WIDTH } from './Sidebar';
 
 interface HeaderProps {
@@ -72,9 +72,10 @@ export function Header({ sidebarCollapsed }: HeaderProps) {
         <div className="hidden md:flex items-center gap-1.5">
           <Link
             href="/games"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[13px] font-medium
-              transition-all duration-200 hover:bg-(--theme-bg-secondary)"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[13px] font-medium transition-all duration-200"
             style={{ color: 'var(--theme-text-secondary)' }}
+            onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'var(--theme-bg-secondary)')}
+            onMouseLeave={e => (e.currentTarget.style.backgroundColor = '')}
           >
             <IconGamepad size={16} />
             Chơi game
@@ -129,30 +130,36 @@ export function Header({ sidebarCollapsed }: HeaderProps) {
                   </div>
 
                   {[
-                    { href: '/profile', icon: '👤', label: 'Hồ sơ' },
-                    { href: '/settings', icon: '⚙️', label: 'Cài đặt' },
-                  ].map(item => (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      className="flex items-center gap-2.5 px-4 py-2 text-[13px] transition-colors
-                        hover:bg-(--theme-bg-secondary)"
-                      style={{ color: 'var(--theme-text-secondary)' }}
-                      onClick={() => setShowUserMenu(false)}
-                    >
-                      <span className="text-sm">{item.icon}</span>
-                      {item.label}
-                    </Link>
-                  ))}
+                    { href: '/profile', icon: IconUser, label: 'Hồ sơ' },
+                    { href: '/settings', icon: IconSettings, label: 'Cài đặt' },
+                  ].map(item => {
+                    const ItemIcon = item.icon;
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        className="flex items-center gap-2.5 px-4 py-2 text-[13px] transition-colors"
+                        style={{ color: 'var(--theme-text-secondary)' }}
+                        onClick={() => setShowUserMenu(false)}
+                        onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'var(--theme-bg-secondary)')}
+                        onMouseLeave={e => (e.currentTarget.style.backgroundColor = '')}
+                      >
+                        <ItemIcon size={15} />
+                        {item.label}
+                      </Link>
+                    );
+                  })}
 
                   <div className="my-1" style={{ borderTop: '1px solid var(--theme-border)' }} />
 
                   <button
                     onClick={() => { logout(); setShowUserMenu(false); router.push('/'); }}
-                    className="flex items-center gap-2.5 px-4 py-2 text-[13px] w-full text-left
-                      text-red-500 hover:bg-red-500/8 transition-colors"
+                    className="flex items-center gap-2.5 px-4 py-2 text-[13px] w-full text-left transition-colors"
+                    style={{ color: '#EF4444' }}
+                    onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'rgba(239,68,68,.08)')}
+                    onMouseLeave={e => (e.currentTarget.style.backgroundColor = '')}
                   >
-                    <span className="text-sm">🚪</span>
+                    <IconLogOut size={15} />
                     Đăng xuất
                   </button>
                 </div>

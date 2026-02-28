@@ -58,7 +58,8 @@ function StatusBadge({ status }: { status: string }) {
 
 function HistoryCard({ item, onDelete }: { item: ExamWritingHistoryItem; onDelete: () => void }) {
   const isGraded = item.status === 'GRADED';
-  const href = isGraded
+  const isGrading = item.status === 'GRADING';
+  const href = (isGraded || isGrading)
     ? `/practice-test/writing/exam/${item.id}/result`
     : `/practice-test/writing/exam/${item.id}`;
 
@@ -114,15 +115,16 @@ export default function ExamWritingListPage() {
     { key: 'all',    label: 'Tất cả' },
     { key: 'DRAFT',  label: 'Chưa nộp' },
     { key: 'GRADED', label: 'Đã chấm' },
+    { key: 'ERROR',  label: 'Lỗi' },
   ];
 
   return (
     <div className="py-6">
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
-        <Link href="/practice-test/writing" className="flex items-center gap-1 text-[13px] font-medium transition-opacity hover:opacity-70"
+        <Link href="/practice-test" className="flex items-center gap-1 text-[13px] font-medium transition-opacity hover:opacity-70"
           style={{ color: 'var(--theme-text-muted)' }}>
-          <IconChevronLeft size={14} /> Luyện viết
+          <IconChevronLeft size={14} /> Luyện Test
         </Link>
         <div className="flex-1" />
         <Link href="/practice-test/writing/exam/new"
@@ -133,7 +135,7 @@ export default function ExamWritingListPage() {
       </div>
 
       <div className="flex items-center gap-3 mb-4">
-        <div className="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0"
+        <div className="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0"
           style={{ background: GRADIENT }}>
           <IconPencil size={22} style={{ color: 'white' }} />
         </div>

@@ -141,18 +141,30 @@ export default function ExamWritingPage() {
   const [confirmSubmit, setConfirmSubmit] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const autoSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Ref mirrors userTexts — lets the debounced callback read latest value
+  // without adding userTexts to useCallback deps (would recreate on every keystroke)
+  const userTextsRef = useRef<Record<string, string>>({});
 
   useEffect(() => {
     if (session?.userTexts && Object.keys(userTexts).length === 0) {
       setUserTexts(session.userTexts);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session]);
 
   useEffect(() => {
     if (session?.status === 'GRADED') {
       router.replace(`/practice-test/writing/exam/${id}/result`);
     }
-  }, [session?.status]);
+  }, [session?.status, id, router]);
+
+  // Cancel pending autosave on unmount — prevents state updates after navigation
+  useEffect(() => {
+    return () => { if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current); };
+  }, []);
+
+  // Keep ref in sync with latest state value
+  useEffect(() => { userTextsRef.current = userTexts; }, [userTexts]);
 
   const handleTextChange = useCallback((teilNum: number, value: string) => {
     const key = `teil_${teilNum}`;
@@ -162,12 +174,13 @@ export default function ExamWritingPage() {
     autoSaveTimer.current = setTimeout(async () => {
       setSaveState('saving');
       try {
-        await saveDraft.mutateAsync({ id, userTexts: { ...userTexts, [key]: value } });
+        // Use ref instead of stale closure — always contains latest texts
+        await saveDraft.mutateAsync({ id, userTexts: { ...userTextsRef.current, [key]: value } });
         setSaveState('saved');
         setTimeout(() => setSaveState('idle'), 2500);
       } catch { setSaveState('idle'); }
     }, 1800);
-  }, [id, userTexts, saveDraft]);
+  }, [id, saveDraft]); // userTexts removed — accessed via ref
 
   const handleSubmit = async () => {
     setConfirmSubmit(false);

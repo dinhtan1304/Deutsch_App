@@ -1,70 +1,330 @@
 'use client';
 
 import Link from 'next/link';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useAuthStore } from '@/stores/authStore';
 import { useUserStats } from '@/hooks/useUser';
+import { useGrammarLessons, useGrammarProgress } from '@/hooks/useGrammar';
+import type { GrammarProgress } from '@/types/grammar';
+import {
+  IconUser, IconSettings, IconGamepad, IconBook, IconLogIn, IconArrowRight,
+  IconGraduationCap, IconBookOpen, IconCheck, IconLock, IconChevronRight,
+  IconTarget, IconStar, IconBrain, IconX, IconCheckAll,
+} from '@/components/ui/Icons';
 
-// ─── Inline SVG Icons ───
-function IconUser({ size = 16, style }: { size?: number; style?: React.CSSProperties }) {
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+type LessonStatus = 'passed' | 'needs_review' | 'not_started';
+
+function getLessonStatus(progress: GrammarProgress | undefined): LessonStatus {
+  if (!progress) return 'not_started';
+  if (progress.status === 'completed' && (progress.score ?? 0) >= 80) return 'passed';
+  return 'needs_review';
+}
+
+const LEVELS = ['A1', 'A2', 'B1'] as const;
+type Level = typeof LEVELS[number];
+
+const LEVEL_COLORS: Record<Level, string> = {
+  A1: '#22C55E',
+  A2: '#3B82F6',
+  B1: '#8B5CF6',
+};
+
+// ─── Stat Card ────────────────────────────────────────────────────────────────
+
+function StatCard({
+  label, value, color, icon: Icon,
+}: {
+  label: string; value: string | number; color: string;
+  icon: React.FC<{ size?: number; style?: React.CSSProperties }>;
+}) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
-      strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}>
-      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
-    </svg>
+    <div className="rounded-xl border p-4 text-center relative overflow-hidden transition-all duration-200 hover:-translate-y-0.5"
+      style={{
+        borderColor: 'var(--theme-border)',
+        background: `linear-gradient(135deg, ${color}12, ${color}06)`,
+      }}>
+      <div className="absolute -top-5 -right-5 w-14 h-14 rounded-full"
+        style={{ backgroundColor: color, opacity: 0.06 }} />
+      <div className="w-9 h-9 rounded-xl mx-auto flex items-center justify-center mb-2.5"
+        style={{ background: `linear-gradient(135deg, ${color}, ${color}cc)` }}>
+        <Icon size={17} style={{ color: 'white' }} />
+      </div>
+      <div className="text-[22px] font-extrabold leading-none mb-1" style={{ color }}>{value}</div>
+      <div className="text-[11px] font-medium" style={{ color: 'var(--theme-text-muted)' }}>{label}</div>
+    </div>
   );
 }
-function IconSettings({ size = 16, style }: { size?: number; style?: React.CSSProperties }) {
+
+// ─── Roadmap Section ─────────────────────────────────────────────────────────
+
+function LearningRoadmap() {
+  const [selectedLevel, setSelectedLevel] = useState<Level>('A1');
+
+  const { data: allLessons = [], isLoading: loadingLessons } = useGrammarLessons();
+  const { data: progressData = [] } = useGrammarProgress();
+
+  const progressMap = useMemo(() => {
+    const map = new Map<string, GrammarProgress>();
+    progressData.forEach(p => map.set(p.lessonId, p));
+    return map;
+  }, [progressData]);
+
+  const levelStats = useMemo(() => {
+    return LEVELS.map(level => {
+      const lessons = allLessons.filter(l => l.level === level);
+      const passed = lessons.filter(l => getLessonStatus(progressMap.get(l.id)) === 'passed').length;
+      const needsReview = lessons.filter(l => getLessonStatus(progressMap.get(l.id)) === 'needs_review').length;
+      const pct = lessons.length > 0 ? Math.round((passed / lessons.length) * 100) : 0;
+      return { level, total: lessons.length, passed, needsReview, pct };
+    });
+  }, [allLessons, progressMap]);
+
+  const selectedLessons = useMemo(() => {
+    return allLessons
+      .filter(l => l.level === selectedLevel)
+      .map(lesson => ({
+        ...lesson,
+        progress: progressMap.get(lesson.id),
+        status: getLessonStatus(progressMap.get(lesson.id)),
+      }));
+  }, [allLessons, selectedLevel, progressMap]);
+
+  const selStats = levelStats.find(s => s.level === selectedLevel)!;
+  const color = LEVEL_COLORS[selectedLevel];
+  const notPassed = selectedLessons.filter(l => l.status !== 'passed');
+
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
-      strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}>
-      <circle cx="12" cy="12" r="3" />
-      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
-    </svg>
+    <div className="rounded-2xl border mb-6 overflow-hidden"
+      style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
+
+      {/* Header */}
+      <div className="px-5 py-4 flex items-center justify-between"
+        style={{ borderBottom: '1px solid var(--theme-border)' }}>
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center"
+            style={{ background: 'linear-gradient(135deg, #3B82F6, #8B5CF6)' }}>
+            <IconGraduationCap size={16} style={{ color: 'white' }} />
+          </div>
+          <div>
+            <h2 className="text-[15px] font-bold" style={{ color: 'var(--theme-text-primary)' }}>Lộ trình học tập</h2>
+            <p className="text-[11px]" style={{ color: 'var(--theme-text-muted)' }}>Theo dõi tiến độ ngữ pháp từng trình độ</p>
+          </div>
+        </div>
+        <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold"
+          style={{ background: `${color}18`, color }}>
+          <IconGraduationCap size={12} />
+          Trình độ: {selectedLevel}
+        </span>
+      </div>
+
+      {/* Level track */}
+      <div className="px-5 py-5" style={{ borderBottom: '1px solid var(--theme-border)' }}>
+        <div className="flex items-start justify-between gap-2 relative">
+          <div className="absolute top-5 h-px mx-10"
+            style={{ left: 0, right: 0, backgroundColor: 'var(--theme-border)', zIndex: 0 }} />
+
+          {LEVELS.map(level => {
+            const stat = levelStats.find(s => s.level === level)!;
+            const isSel = level === selectedLevel;
+            const lColor = LEVEL_COLORS[level];
+            return (
+              <button key={level} onClick={() => setSelectedLevel(level)}
+                className="flex-1 flex flex-col items-center gap-2 relative z-10 outline-none">
+                <div className="w-10 h-10 rounded-full flex items-center justify-center text-[13px] font-extrabold transition-all duration-200"
+                  style={{
+                    background: isSel ? `linear-gradient(135deg, ${lColor}, ${lColor}cc)` : 'var(--theme-bg-secondary)',
+                    color: isSel ? 'white' : 'var(--theme-text-muted)',
+                    boxShadow: isSel ? `0 4px 12px ${lColor}40` : undefined,
+                    border: `2px solid ${isSel ? lColor : 'var(--theme-border)'}`,
+                    transform: isSel ? 'scale(1.1)' : undefined,
+                  }}>
+                  {level}
+                </div>
+                <div className="text-[12px] font-bold" style={{ color: stat.pct > 0 ? lColor : 'var(--theme-text-muted)' }}>
+                  {loadingLessons ? '—' : `${stat.pct}%`}
+                </div>
+                <div className="w-full max-w-16 h-1.5 rounded-full overflow-hidden"
+                  style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
+                  <div className="h-full rounded-full transition-all duration-700"
+                    style={{ width: `${stat.pct}%`, background: `linear-gradient(90deg, ${lColor}, ${lColor}cc)` }} />
+                </div>
+                <div className="text-[10.5px] font-medium"
+                  style={{ color: isSel ? lColor : 'var(--theme-text-muted)' }}>
+                  {stat.passed}/{stat.total} bài
+                </div>
+              </button>
+            );
+          })}
+
+          {/* B2 locked */}
+          <div className="flex-1 flex flex-col items-center gap-2 relative z-10 opacity-35">
+            <div className="w-10 h-10 rounded-full flex items-center justify-center"
+              style={{ background: 'var(--theme-bg-secondary)', border: '2px solid var(--theme-border)' }}>
+              <IconLock size={15} style={{ color: 'var(--theme-text-muted)' }} />
+            </div>
+            <div className="text-[12px] font-bold" style={{ color: 'var(--theme-text-muted)' }}>B2</div>
+            <div className="w-full max-w-16 h-1.5 rounded-full" style={{ backgroundColor: 'var(--theme-bg-secondary)' }} />
+            <div className="text-[10.5px] font-medium" style={{ color: 'var(--theme-text-muted)' }}>Sắp ra mắt</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Grammar progress body */}
+      <div className="px-5 py-4">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <IconBookOpen size={15} style={{ color }} />
+            <span className="text-[14px] font-bold" style={{ color: 'var(--theme-text-primary)' }}>
+              Ngữ pháp {selectedLevel}
+            </span>
+          </div>
+          <span className="text-[12px] font-semibold px-2 py-0.5 rounded-md"
+            style={{ background: `${color}12`, color }}>
+            {selStats?.passed || 0}/{selStats?.total || 0} đạt qua thi
+          </span>
+        </div>
+
+        {/* Progress bar */}
+        <div className="h-2 rounded-full overflow-hidden mb-1.5"
+          style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
+          <div className="h-full rounded-full transition-all duration-700"
+            style={{ width: `${selStats?.pct || 0}%`, background: `linear-gradient(90deg, ${color}, ${color}cc)` }} />
+        </div>
+        {!loadingLessons && selStats && (
+          <div className="text-[11px] mb-4 text-right" style={{ color: 'var(--theme-text-muted)' }}>
+            {selStats.passed}/{selStats.total} đã kiểm tra qua bài thi
+          </div>
+        )}
+
+        {/* Lesson list */}
+        {loadingLessons ? (
+          <div className="space-y-2 mb-4">
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="h-10 rounded-xl animate-pulse"
+                style={{ backgroundColor: 'var(--theme-bg-secondary)' }} />
+            ))}
+          </div>
+        ) : (
+          <div className="space-y-1 mb-4">
+            {selectedLessons.map((lesson, i) => {
+              const st = lesson.status;
+              const dotColor = st === 'passed' ? '#22C55E' : st === 'needs_review' ? '#F59E0B' : 'var(--theme-border)';
+              const statusLabel = st === 'passed'
+                ? `Đạt${lesson.progress?.score ? ` ${Math.round(lesson.progress.score)}%` : ''}`
+                : st === 'needs_review'
+                  ? `Cần bổ sung${lesson.progress?.score ? ` ${Math.round(lesson.progress.score)}%` : ''}`
+                  : 'chưa thi';
+              const statusColor = st === 'passed' ? '#22C55E' : st === 'needs_review' ? '#F59E0B' : 'var(--theme-text-muted)';
+
+              return (
+                <Link key={lesson.id} href={`/grammar/${lesson.slug}`}
+                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-150"
+                  style={{ backgroundColor: 'var(--theme-bg-secondary)' }}
+                  onMouseEnter={e => (e.currentTarget.style.backgroundColor = `${color}10`)}
+                  onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'var(--theme-bg-secondary)')}>
+
+                  {/* Status circle */}
+                  <div className="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all"
+                    style={{
+                      borderColor: dotColor,
+                      backgroundColor: st === 'passed' ? `${dotColor}22` : 'transparent',
+                    }}>
+                    {st === 'passed' && <IconCheck size={10} style={{ color: dotColor }} />}
+                  </div>
+
+                  {/* Number */}
+                  <span className="shrink-0 w-5 h-5 rounded-md flex items-center justify-center text-[10px] font-bold"
+                    style={{ backgroundColor: `${color}15`, color }}>
+                    {i + 1}
+                  </span>
+
+                  <span className="flex-1 text-[13px] font-medium truncate"
+                    style={{ color: 'var(--theme-text-primary)' }}>
+                    {lesson.titleVi}
+                  </span>
+
+                  <span className="text-[11px] font-semibold shrink-0" style={{ color: statusColor }}>
+                    {statusLabel}
+                  </span>
+
+                  <IconChevronRight size={13} style={{ color: 'var(--theme-text-muted)', opacity: 0.4 }} />
+                </Link>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Summary row */}
+        {!loadingLessons && selStats && (
+          <div className="flex items-center gap-3 mb-4 px-1 flex-wrap">
+            {[
+              { dot: '#22C55E', label: 'Đạt', value: selStats.passed },
+              { dot: '#F59E0B', label: 'Cần bổ sung', value: selStats.needsReview },
+              { dot: 'var(--theme-border)', label: 'Chưa thi', value: selStats.total - selStats.passed - selStats.needsReview, border: true },
+            ].map(s => (
+              <span key={s.label} className="flex items-center gap-1.5 text-[12px]">
+                <span className="w-2.5 h-2.5 rounded-full shrink-0 border"
+                  style={{ backgroundColor: s.border ? 'transparent' : s.dot, borderColor: s.dot }} />
+                <span style={{ color: 'var(--theme-text-secondary)' }}>
+                  {s.label}: <b style={{ color: 'var(--theme-text-primary)' }}>{s.value}</b>
+                </span>
+              </span>
+            ))}
+          </div>
+        )}
+
+        {/* Not-passed chips */}
+        {!loadingLessons && notPassed.length > 0 && (
+          <div className="rounded-xl p-3.5 mb-4"
+            style={{ background: 'rgba(245,158,11,.06)', border: '1px solid rgba(245,158,11,.18)' }}>
+            <p className="text-[11.5px] font-semibold mb-2 flex items-center gap-1.5" style={{ color: '#F59E0B' }}>
+              <span className="w-4 h-4 rounded-full flex items-center justify-center text-white text-[10px]"
+                style={{ background: '#F59E0B' }}>!</span>
+              Chưa đạt ({notPassed.length} bài)
+            </p>
+            <div className="flex flex-wrap gap-1.5">
+              {notPassed.map(l => (
+                <Link key={l.id} href={`/grammar/${l.slug}`}
+                  className="px-2.5 py-1 rounded-lg text-[11px] font-medium hover:opacity-80 transition-opacity"
+                  style={{
+                    backgroundColor: l.status === 'needs_review' ? 'rgba(245,158,11,.15)' : 'rgba(107,114,128,.1)',
+                    color: l.status === 'needs_review' ? '#F59E0B' : 'var(--theme-text-muted)',
+                  }}>
+                  {l.titleVi}
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Actions */}
+        <div className="flex gap-2">
+          <Link href="/grammar"
+            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-[13px] font-semibold text-white transition-all hover:-translate-y-0.5"
+            style={{ background: `linear-gradient(135deg, ${color}, ${color}cc)`, boxShadow: `0 4px 12px ${color}28` }}>
+            <IconBookOpen size={15} />
+            Luyện tập {selectedLevel}
+          </Link>
+          <Link href="/practice-test"
+            className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-[13px] font-semibold transition-all hover:-translate-y-0.5"
+            style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-secondary)', border: '1px solid var(--theme-border)' }}>
+            <IconGraduationCap size={15} />
+            Đề kiểm tra
+          </Link>
+        </div>
+      </div>
+    </div>
   );
 }
-function IconGamepad({ size = 16, style }: { size?: number; style?: React.CSSProperties }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
-      strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}>
-      <line x1="6" y1="12" x2="10" y2="12" /><line x1="8" y1="10" x2="8" y2="14" />
-      <line x1="15" y1="13" x2="15.01" y2="13" /><line x1="18" y1="11" x2="18.01" y2="11" />
-      <rect width="20" height="12" x="2" y="6" rx="2" />
-    </svg>
-  );
-}
-function IconBook({ size = 16, style }: { size?: number; style?: React.CSSProperties }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
-      strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}>
-      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
-    </svg>
-  );
-}
-function IconLogIn({ size = 16, style }: { size?: number; style?: React.CSSProperties }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
-      strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}>
-      <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" /><polyline points="10 17 15 12 10 7" /><line x1="15" y1="12" x2="3" y2="12" />
-    </svg>
-  );
-}
-function IconArrowRight({ size = 16, style }: { size?: number; style?: React.CSSProperties }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
-      strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}>
-      <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
-    </svg>
-  );
-}
+
+// ─── Profile Page ─────────────────────────────────────────────────────────────
 
 export default function ProfilePage() {
   const { user, isAuthenticated, _hasHydrated } = useAuthStore();
-  // Pass isAuthenticated as enabled — avoids a wasted 401 request when not logged in
   const { data: stats, isLoading } = useUserStats(isAuthenticated);
 
-  // Show spinner while zustand hydrates from localStorage to avoid
-  // flashing the unauthenticated screen on every page load for logged-in users
   if (!_hasHydrated) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
@@ -76,110 +336,197 @@ export default function ProfilePage() {
 
   if (!isAuthenticated) {
     return (
-        <div className="max-w-md mx-auto py-20 text-center">
-          <div className="w-16 h-16 rounded-2xl mx-auto flex items-center justify-center mb-4"
-            style={{ background: 'linear-gradient(135deg, #3B82F6, #6366F1)' }}>
-            <IconUser size={28} style={{ color: 'white' }} />
-          </div>
-          <h1 className="text-xl font-bold mb-2" style={{ color: 'var(--theme-text-primary)' }}>Đăng nhập để xem hồ sơ</h1>
-          <p className="text-[13px] mb-6" style={{ color: 'var(--theme-text-muted)' }}>Theo dõi tiến trình và thống kê học tập</p>
-          <Link href="/auth/login"
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-[14px] font-semibold text-white"
-            style={{ background: 'linear-gradient(135deg, #3B82F6, #6366F1)' }}>
-            <IconLogIn size={16} /> Đăng nhập
-          </Link>
+      <div className="max-w-md mx-auto py-24 text-center">
+        <div className="w-20 h-20 rounded-3xl mx-auto flex items-center justify-center mb-5"
+          style={{ background: 'linear-gradient(135deg, #3B82F6, #6366F1)', boxShadow: '0 8px 24px rgba(59,130,246,.3)' }}>
+          <IconUser size={32} style={{ color: 'white' }} />
         </div>
+        <h1 className="text-2xl font-bold mb-2" style={{ color: 'var(--theme-text-primary)' }}>
+          Đăng nhập để xem hồ sơ
+        </h1>
+        <p className="text-[14px] mb-8" style={{ color: 'var(--theme-text-muted)' }}>
+          Theo dõi tiến trình và thống kê học tập của bạn
+        </p>
+        <Link href="/auth/login"
+          className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-[14px] font-semibold text-white transition-all hover:-translate-y-0.5"
+          style={{ background: 'linear-gradient(135deg, #3B82F6, #6366F1)', boxShadow: '0 4px 16px rgba(59,130,246,.35)' }}>
+          <IconLogIn size={16} />
+          Đăng nhập
+        </Link>
+      </div>
     );
   }
 
-  // Memoized — only recomputed when stats data changes, not on every render
-  const statCards = useMemo(() => [
-    { label: 'Trò chơi', value: stats?.gamesPlayed || 0, color: '#3B82F6' },
-    { label: 'Chính xác', value: `${stats?.accuracy || 0}%`, color: '#22C55E' },
-    { label: 'Yêu thích', value: stats?.favorites || 0, color: '#F59E0B' },
-    { label: 'Đã học', value: stats?.wordsLearned || 0, color: '#8B5CF6' },
-  ], [stats]);
+  const total = stats?.totalAnswers || 0;
+  const correct = stats?.correctAnswers || 0;
+  const wrong = stats?.wrongAnswers || 0;
+  const accuracyPct = total > 0 ? Math.round((correct / total) * 100) : 0;
 
-  const detailRows = useMemo(() => [
-    { label: 'Tổng câu trả lời', value: stats?.totalAnswers || 0, color: 'var(--theme-text-primary)' },
-    { label: 'Trả lời đúng', value: stats?.correctAnswers || 0, color: '#22C55E' },
-    { label: 'Trả lời sai', value: stats?.wrongAnswers || 0, color: '#EF4444' },
-  ], [stats]);
+  const statCards = [
+    { label: 'Trò chơi', value: stats?.gamesPlayed ?? 0, color: '#3B82F6', icon: IconGamepad },
+    { label: 'Chính xác', value: `${stats?.accuracy ?? 0}%`, color: '#22C55E', icon: IconTarget },
+    { label: 'Yêu thích', value: stats?.favorites ?? 0, color: '#F59E0B', icon: IconStar },
+    { label: 'Đã học', value: stats?.wordsLearned ?? 0, color: '#8B5CF6', icon: IconBrain },
+  ];
+
+  const quickActions = [
+    { href: '/games', label: 'Chơi game', sub: 'Luyện mạo từ', icon: IconGamepad, gradient: 'linear-gradient(135deg, #3B82F6, #6366F1)', shadow: 'rgba(59,130,246,.28)' },
+    { href: '/words', label: 'Từ điển', sub: 'Học từ mới', icon: IconBook, gradient: 'linear-gradient(135deg, #22C55E, #14B8A6)', shadow: 'rgba(34,197,94,.28)' },
+    { href: '/grammar', label: 'Ngữ pháp', sub: 'Luyện bài tập', icon: IconBookOpen, gradient: 'linear-gradient(135deg, #8B5CF6, #6366F1)', shadow: 'rgba(139,92,246,.28)' },
+    { href: '/practice-test', label: 'Luyện thi', sub: 'Đề Goethe/TELC', icon: IconGraduationCap, gradient: 'linear-gradient(135deg, #F59E0B, #EF4444)', shadow: 'rgba(245,158,11,.28)' },
+  ];
 
   return (
-      <div className="py-6">
+    <div className="py-6 max-w-3xl mx-auto">
 
-        {/* Profile Header */}
-        <div className="rounded-2xl border p-6 mb-6 flex items-center gap-5"
-          style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
-          <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-white text-2xl font-extrabold shrink-0"
-            style={{ background: 'linear-gradient(135deg, #3B82F6, #8B5CF6)' }}>
-            {user?.name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || 'U'}
-          </div>
-          <div className="flex-1 min-w-0">
-            <h1 className="text-xl font-bold truncate" style={{ color: 'var(--theme-text-primary)' }}>
-              {user?.name || 'User'}
-            </h1>
-            <p className="text-[13px] truncate" style={{ color: 'var(--theme-text-muted)' }}>{user?.email}</p>
-          </div>
+      {/* ─── Hero Card ─── */}
+      <div className="rounded-2xl border mb-6 overflow-hidden"
+        style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
+        {/* Banner */}
+        <div className="h-24 relative"
+          style={{ background: 'linear-gradient(135deg, rgba(59,130,246,.18) 0%, rgba(139,92,246,.14) 50%, rgba(34,197,94,.1) 100%)' }}>
+          {/* Decorative circles */}
+          <div className="absolute top-2 left-8 w-16 h-16 rounded-full opacity-15"
+            style={{ background: '#3B82F6' }} />
+          <div className="absolute bottom-1 right-12 w-10 h-10 rounded-full opacity-10"
+            style={{ background: '#8B5CF6' }} />
+          {/* Settings */}
           <Link href="/settings"
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-[13px] font-semibold transition-all duration-200 hover:-translate-y-0.5 shrink-0"
-            style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)', border: '1px solid var(--theme-border)' }}>
-            <IconSettings size={14} /> Cài đặt
+            className="absolute top-3 right-3 flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[12px] font-medium transition-all hover:-translate-y-0.5"
+            style={{ backgroundColor: 'rgba(255,255,255,.12)', color: 'rgba(255,255,255,.85)', backdropFilter: 'blur(8px)' }}>
+            <IconSettings size={13} />
+            Cài đặt
           </Link>
         </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-          {statCards.map((card, i) => (
-            <div key={i} className="rounded-xl border p-4 text-center transition-all duration-200 hover:-translate-y-0.5"
-              style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
-              <div className="text-[26px] font-extrabold" style={{ color: card.color }}>
-                {isLoading ? '—' : card.value}
-              </div>
-              <div className="text-[12px] font-medium mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>{card.label}</div>
+        {/* Avatar + info */}
+        <div className="px-6 pb-5">
+          <div className="-mt-9 mb-3 flex items-end justify-between">
+            {/* Avatar */}
+            <div className="rounded-2xl flex items-center justify-center text-white text-2xl font-extrabold shrink-0 border-4"
+              style={{
+                width: 72, height: 72,
+                background: 'linear-gradient(135deg, #3B82F6, #8B5CF6)',
+                borderColor: 'var(--theme-bg-card)',
+                boxShadow: '0 4px 16px rgba(59,130,246,.35)',
+              }}>
+              {user?.name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || 'U'}
             </div>
-          ))}
-        </div>
+          </div>
 
-        {/* Detailed Stats */}
-        <div className="rounded-2xl border p-5 mb-6"
+          <div className="flex items-center gap-2 flex-wrap mb-0.5">
+            <h1 className="text-xl font-bold" style={{ color: 'var(--theme-text-primary)' }}>
+              {user?.name || 'User'}
+            </h1>
+            <span className="px-2 py-0.5 rounded-full text-[11px] font-extrabold text-white"
+              style={{ background: 'linear-gradient(135deg, #22C55E, #14B8A6)' }}>
+              A1
+            </span>
+          </div>
+          <p className="text-[13px]" style={{ color: 'var(--theme-text-muted)' }}>{user?.email}</p>
+        </div>
+      </div>
+
+      {/* ─── Stat Cards ─── */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+        {statCards.map((card, i) => (
+          <StatCard
+            key={i}
+            label={card.label}
+            value={isLoading ? '—' : card.value}
+            color={card.color}
+            icon={card.icon}
+          />
+        ))}
+      </div>
+
+      {/* ─── Learning Roadmap ─── */}
+      <LearningRoadmap />
+
+      {/* ─── Bottom grid ─── */}
+      <div className="grid md:grid-cols-2 gap-4">
+
+        {/* Thống kê chi tiết */}
+        <div className="rounded-2xl border p-5"
           style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
-          <h2 className="text-[16px] font-bold mb-4" style={{ color: 'var(--theme-text-primary)' }}>Thống kê chi tiết</h2>
-          <div className="space-y-2">
-            {detailRows.map((row, i) => (
-              <div key={i} className="flex justify-between items-center p-3.5 rounded-xl"
-                style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
-                <span className="text-[13px]" style={{ color: 'var(--theme-text-muted)' }}>{row.label}</span>
-                <span className="text-[14px] font-bold" style={{ color: row.color }}>{row.value}</span>
+          <h2 className="text-[15px] font-bold mb-4" style={{ color: 'var(--theme-text-primary)' }}>
+            Thống kê trả lời
+          </h2>
+
+          {/* Accuracy bar */}
+          <div className="mb-4 p-3.5 rounded-xl" style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-1.5 text-[13px] font-medium"
+                style={{ color: 'var(--theme-text-secondary)' }}>
+                <IconTarget size={14} style={{ color: '#22C55E' }} />
+                Tỉ lệ chính xác
               </div>
-            ))}
+              <span className="text-[14px] font-extrabold" style={{ color: '#22C55E' }}>
+                {isLoading ? '—' : `${accuracyPct}%`}
+              </span>
+            </div>
+            <div className="h-2 rounded-full overflow-hidden" style={{ backgroundColor: 'var(--theme-border)' }}>
+              <div className="h-full rounded-full transition-all duration-700"
+                style={{ width: `${accuracyPct}%`, background: 'linear-gradient(90deg, #22C55E, #14B8A6)' }} />
+            </div>
+            <div className="flex justify-between mt-1.5 text-[10.5px]" style={{ color: 'var(--theme-text-muted)' }}>
+              <span>{correct} đúng</span>
+              <span>{wrong} sai</span>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            {[
+              { label: 'Tổng câu trả lời', value: stats?.totalAnswers ?? 0, color: 'var(--theme-text-primary)', icon: IconBrain, accent: '#3B82F6' },
+              { label: 'Trả lời đúng', value: stats?.correctAnswers ?? 0, color: '#22C55E', icon: IconCheckAll, accent: '#22C55E' },
+              { label: 'Trả lời sai', value: stats?.wrongAnswers ?? 0, color: '#EF4444', icon: IconX, accent: '#EF4444' },
+            ].map((row, i) => {
+              const RowIcon = row.icon;
+              return (
+                <div key={i} className="flex items-center gap-3 p-3 rounded-xl"
+                  style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
+                  <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
+                    style={{ background: `${row.accent}15` }}>
+                    <RowIcon size={14} style={{ color: row.accent }} />
+                  </div>
+                  <span className="flex-1 text-[13px]" style={{ color: 'var(--theme-text-muted)' }}>{row.label}</span>
+                  <span className="text-[14px] font-bold" style={{ color: row.color }}>
+                    {isLoading ? '—' : row.value}
+                  </span>
+                </div>
+              );
+            })}
           </div>
         </div>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-2 gap-3">
-          <Link href="/games"
-            className="group rounded-xl p-4 flex items-center gap-3 text-white transition-all duration-200 hover:-translate-y-0.5"
-            style={{ background: 'linear-gradient(135deg, #3B82F6, #6366F1)', boxShadow: '0 4px 12px rgba(59,130,246,.3)' }}>
-            <IconGamepad size={24} style={{ color: 'white' }} />
-            <div className="flex-1">
-              <div className="text-[14px] font-bold">Chơi game</div>
-              <div className="text-[11px] opacity-80">Luyện mạo từ</div>
-            </div>
-            <IconArrowRight size={16} style={{ color: 'white', opacity: 0.6 }} />
-          </Link>
-          <Link href="/words"
-            className="group rounded-xl p-4 flex items-center gap-3 text-white transition-all duration-200 hover:-translate-y-0.5"
-            style={{ background: 'linear-gradient(135deg, #22C55E, #14B8A6)', boxShadow: '0 4px 12px rgba(34,197,94,.3)' }}>
-            <IconBook size={24} style={{ color: 'white' }} />
-            <div className="flex-1">
-              <div className="text-[14px] font-bold">Từ điển</div>
-              <div className="text-[11px] opacity-80">Học từ mới</div>
-            </div>
-            <IconArrowRight size={16} style={{ color: 'white', opacity: 0.6 }} />
-          </Link>
+        <div className="rounded-2xl border p-5"
+          style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
+          <h2 className="text-[15px] font-bold mb-4" style={{ color: 'var(--theme-text-primary)' }}>
+            Truy cập nhanh
+          </h2>
+          <div className="grid grid-cols-2 gap-2.5">
+            {quickActions.map((qa, i) => {
+              const QaIcon = qa.icon;
+              return (
+                <Link key={i} href={qa.href}
+                  className="flex flex-col gap-2 p-3.5 rounded-xl text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
+                  style={{ background: qa.gradient, boxShadow: `0 4px 12px ${qa.shadow}` }}>
+                  <QaIcon size={20} style={{ color: 'white' }} />
+                  <div>
+                    <div className="text-[13px] font-bold leading-tight">{qa.label}</div>
+                    <div className="text-[11px] opacity-75 mt-0.5">{qa.sub}</div>
+                  </div>
+                  <div className="flex justify-end">
+                    <IconArrowRight size={14} style={{ color: 'white', opacity: 0.6 }} />
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
         </div>
+
       </div>
+    </div>
   );
 }

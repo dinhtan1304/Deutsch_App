@@ -110,6 +110,14 @@ export default function ReadingListPage() {
   return (
     <div className="py-6">
 
+      {/* ─── Back ─── */}
+      <div className="flex items-center gap-2 mb-5">
+        <Link href="/practice-test" className="flex items-center gap-1 text-[13px] font-medium transition-opacity hover:opacity-70"
+          style={{ color: 'var(--theme-text-muted)' }}>
+          <IconChevronLeft size={14} /> Luyện Test
+        </Link>
+      </div>
+
       {/* ─── Header ─── */}
       <div className="flex items-start justify-between mb-6">
         <div className="flex items-center gap-3">

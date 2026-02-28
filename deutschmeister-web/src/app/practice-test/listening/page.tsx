@@ -102,29 +102,40 @@ export default function ListeningPage() {
 
   return (
     <div className="py-6">
-      {/* Header */}
-      <div className="flex items-center gap-3 mb-6">
-        <Link href="/practice-test" className="p-2 rounded-xl transition-all hover:scale-110"
-          style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }}>
-          <IconChevronLeft size={18} />
+      {/* ─── Back ─── */}
+      <div className="flex items-center gap-2 mb-5">
+        <Link href="/practice-test" className="flex items-center gap-1 text-[13px] font-medium transition-opacity hover:opacity-70"
+          style={{ color: 'var(--theme-text-muted)' }}>
+          <IconChevronLeft size={14} /> Luyện Test
         </Link>
-        <div className="w-11 h-11 rounded-2xl flex items-center justify-center" style={{ background: GRADIENT }}>
-          <IconHeadphones size={22} style={{ color: 'white' }} />
+      </div>
+
+      {/* ─── Header ─── */}
+      <div className="flex items-start justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <div className="w-11 h-11 rounded-2xl flex items-center justify-center"
+            style={{ background: GRADIENT }}>
+            <IconHeadphones size={22} style={{ color: 'white' }} />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold" style={{ color: 'var(--theme-text-primary)' }}>
+              Luyện Nghe
+            </h1>
+            <p className="text-[13px] mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>
+              AI tạo bài nghe tiếng Đức — Luyện kỹ năng nghe hiểu Goethe/TELC
+            </p>
+          </div>
         </div>
-        <div>
-          <h1 className="text-xl font-bold" style={{ color: 'var(--theme-text-primary)' }}>Luyện Nghe</h1>
-          <p className="text-[12px]" style={{ color: 'var(--theme-text-muted)' }}>Hörübung tự do</p>
-        </div>
-        <div className="ml-auto flex items-center gap-2">
+        <div className="flex items-center gap-2">
           <Link href="/practice-test/listening/exam"
-            className="px-3 py-1.5 rounded-xl border text-[13px] font-semibold transition-all hover:scale-105"
-            style={{ borderColor: ACCENT, color: ACCENT }}>
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-[13px] font-semibold border transition-all hover:-translate-y-0.5"
+            style={{ borderColor: ACCENT, color: ACCENT, backgroundColor: `${ACCENT}0d` }}>
             Theo đề chuẩn →
           </Link>
           <Link href="/practice-test/listening/new"
-            className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[13px] font-bold text-white transition-all hover:scale-105"
-            style={{ background: GRADIENT }}>
-            <IconPlus size={14} /> Bài mới
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-[14px] font-semibold text-white transition-all duration-200 hover:-translate-y-0.5"
+            style={{ background: GRADIENT, boxShadow: '0 4px 12px rgba(236,72,153,.3)' }}>
+            <IconPlus size={16} /> Bài nghe mới
           </Link>
         </div>
       </div>

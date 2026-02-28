@@ -10,17 +10,18 @@ const EXCLUDED_PATHS = ['/dictionary', '/word-bank'];
 // German-only: allow Umlauts and ß, nothing else
 const GERMAN_WORD_REGEX = /^[a-zA-ZäöüÄÖÜß]+$/;
 
-const EXCLUDED_TAGS = ['INPUT', 'TEXTAREA', 'SELECT', 'BUTTON', 'A'];
+const EXCLUDED_TAGS = new Set(['INPUT', 'TEXTAREA', 'SELECT', 'BUTTON', 'A', 'HEADER', 'ASIDE', 'NAV']);
 const EXCLUDED_CLASSES = ['dictionary-popup', 'no-dictionary'];
 
 function isExcludedElement(element: HTMLElement | null): boolean {
   if (!element) return false;
-  if (EXCLUDED_TAGS.includes(element.tagName)) return true;
-  if (element.isContentEditable) return true;
-  if (element.getAttribute('role') === 'textbox') return true;
 
+  // Walk up DOM tree — check both tags AND classes at every ancestor level
   let current: HTMLElement | null = element;
-  for (let depth = 0; current && depth < 5; depth++, current = current.parentElement) {
+  for (let depth = 0; current && depth < 8; depth++, current = current.parentElement) {
+    if (EXCLUDED_TAGS.has(current.tagName)) return true;
+    if (current.isContentEditable) return true;
+    if (current.getAttribute('role') === 'textbox') return true;
     for (const cls of EXCLUDED_CLASSES) {
       if (current.classList?.contains(cls)) return true;
     }
@@ -145,10 +146,12 @@ export function DictionaryProvider({ children }: { children: ReactNode }) {
   );
 
   /**
-   * Double-click: user chủ động select nguyên từ.
-   * Nhận từ từ window.getSelection() thay vì getWordAtPoint().
+   * MouseUp: xử lý cả drag-select lẫn double-click.
+   * - Drag select (kéo chuột bôi đen): mousedown → mousemove → mouseup (không có click)
+   * - Double-click: mouseup lần 2 → browser đã tự select từ → detection từ selection
+   * - Single click: mouseup nhưng selection collapsed → bỏ qua (handleClick lo)
    */
-  const handleDoubleClick = useCallback(
+  const handleMouseUp = useCallback(
     (e: MouseEvent) => {
       if (isExcludedPath) return;
 
@@ -171,13 +174,13 @@ export function DictionaryProvider({ children }: { children: ReactNode }) {
     if (isExcludedPath) return;
 
     document.addEventListener('click', handleClick);
-    document.addEventListener('dblclick', handleDoubleClick);
+    document.addEventListener('mouseup', handleMouseUp);
 
     return () => {
       document.removeEventListener('click', handleClick);
-      document.removeEventListener('dblclick', handleDoubleClick);
+      document.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [handleClick, handleDoubleClick, isExcludedPath]);
+  }, [handleClick, handleMouseUp, isExcludedPath]);
 
   return (
     <>

@@ -3,20 +3,8 @@
 import type { DashboardStats } from '@/types/dashboard';
 import {
   IconFlame, IconBookOpen, IconTarget,
-  IconClock, IconLayers, IconBrain,
+  IconClock, IconLayers, IconBrain, IconGraduationCap,
 } from '@/components/ui/Icons';
-
-// Inline grammar icon (no dependency on lucide for this one)
-function IconGraduationCap({ size = 16, className }: { size?: number; className?: string }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
-      strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round"
-      className={className} style={{ display: 'block' }}>
-      <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
-      <path d="M6 12v5c3 3 9 3 12 0v-5" />
-    </svg>
-  );
-}
 
 interface StatsCardsProps {
   stats: DashboardStats;

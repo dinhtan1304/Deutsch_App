@@ -20,49 +20,12 @@ import {
 } from '@/types/personalWord';
 import {
   IconNotebook, IconSearch, IconStar, IconRefresh, IconChevronLeft, IconChevronRight,
+  IconDownload, IconUpload, IconFilter, IconBrain, IconTarget, IconFlame,
 } from '@/components/ui/Icons';
 
 const wordTypes: WordType[] = ['nomen', 'verb', 'adjektiv', 'adverb', 'praposition', 'konjunktion', 'pronomen', 'partikel', 'andere'];
 const levels: Level[] = ['A1', 'A2', 'B1', 'B2', 'C1'];
 const genders: Gender[] = ['masculine', 'feminine', 'neuter'];
-
-// ─── Inline SVG icons ───
-function IconDownload({ size = 16 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
-      strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}>
-      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-      <polyline points="7 10 12 15 17 10" /><line x1="12" x2="12" y1="15" y2="3" />
-    </svg>
-  );
-}
-function IconUpload({ size = 16 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
-      strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}>
-      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-      <polyline points="17 8 12 3 7 8" /><line x1="12" x2="12" y1="3" y2="15" />
-    </svg>
-  );
-}
-function IconFilter({ size = 16 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
-      strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}>
-      <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
-    </svg>
-  );
-}
-function IconBrain({ size = 16, ...props }: { size?: number, [key: string]: any }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
-      strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }} {...props}>
-      <path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z" />
-      <path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z" />
-      <path d="M15 13a4.5 4.5 0 0 1-3-4 4.5 4.5 0 0 1-3 4" />
-    </svg>
-  );
-}
 
 export default function WordBankPage() {
   const { filters, page, limit, setFilters, resetFilters, setPage, getApiParams } = useWordBankUI();
@@ -184,7 +147,7 @@ export default function WordBankPage() {
                         )}
                       </>
                     ) : (
-                      'Tuyệt vời! Bạn đã ôn hết cho hôm nay 🎉'
+                      'Tuyệt vời! Bạn đã ôn hết cho hôm nay'
                     )}
                   </p>
                 </div>
@@ -193,15 +156,20 @@ export default function WordBankPage() {
               <div className="flex items-center gap-3">
                 <div className="hidden sm:flex gap-2 text-[12px]">
                   {[
-                    { label: srsStats.learning, color: '#F59E0B', bg: 'rgba(245,158,11,.1)', icon: '📖' },
-                    { label: srsStats.mature, color: '#22C55E', bg: 'rgba(34,197,94,.1)', icon: '🎯' },
-                    { label: `${srsStats.retentionRate}%`, color: '#3B82F6', bg: 'rgba(59,130,246,.1)', icon: '📊' },
-                  ].map((s, i) => (
-                    <span key={i} className="px-2.5 py-1 rounded-lg font-medium"
-                      style={{ backgroundColor: s.bg, color: s.color }}>
-                      {s.icon} {s.label}
-                    </span>
-                  ))}
+                    { label: srsStats.learning, color: '#F59E0B', bg: 'rgba(245,158,11,.1)', icon: IconFlame, title: 'Đang học' },
+                    { label: srsStats.mature,   color: '#22C55E', bg: 'rgba(34,197,94,.1)',  icon: IconTarget, title: 'Thuộc lòng' },
+                    { label: `${srsStats.retentionRate}%`, color: '#3B82F6', bg: 'rgba(59,130,246,.1)', icon: IconBrain, title: 'Retention' },
+                  ].map((s, i) => {
+                    const Ic = s.icon;
+                    return (
+                      <span key={i} className="flex items-center gap-1 px-2.5 py-1 rounded-lg font-medium"
+                        style={{ backgroundColor: s.bg, color: s.color }}
+                        title={s.title}>
+                        <Ic size={12} />
+                        {s.label}
+                      </span>
+                    );
+                  })}
                 </div>
 
                 <Link href="/word-bank/review"
@@ -413,9 +381,9 @@ export default function WordBankPage() {
                   )}
                 </div>
                 <button onClick={resetFilters}
-                  className="text-[12px] font-medium transition-all hover:opacity-70"
+                  className="flex items-center gap-1.5 text-[12px] font-medium transition-all hover:opacity-70"
                   style={{ color: '#3B82F6' }}>
-                  ↺ Reset bộ lọc
+                  <IconRefresh size={13} /> Reset bộ lọc
                 </button>
               </div>
             )}
@@ -432,7 +400,10 @@ export default function WordBankPage() {
           <div className="text-center py-16">
             {statTotal === 0 ? (
               <>
-                <div className="text-5xl mb-4">📒</div>
+                <div className="w-16 h-16 rounded-2xl mx-auto flex items-center justify-center mb-4"
+                  style={{ background: 'linear-gradient(135deg, rgba(139,92,246,.12), rgba(139,92,246,.06))' }}>
+                  <IconNotebook size={30} style={{ color: '#8B5CF6' }} />
+                </div>
                 <h3 className="text-[18px] font-bold mb-2" style={{ color: 'var(--theme-text-primary)' }}>
                   Sổ từ vựng trống
                 </h3>
@@ -448,7 +419,10 @@ export default function WordBankPage() {
               </>
             ) : (
               <>
-                <div className="text-4xl mb-4">🔍</div>
+                <div className="w-14 h-14 rounded-2xl mx-auto flex items-center justify-center mb-4"
+                  style={{ background: 'linear-gradient(135deg, rgba(59,130,246,.12), rgba(59,130,246,.06))' }}>
+                  <IconSearch size={26} style={{ color: '#3B82F6' }} />
+                </div>
                 <h3 className="text-[16px] font-bold mb-2" style={{ color: 'var(--theme-text-primary)' }}>
                   Không tìm thấy từ nào
                 </h3>

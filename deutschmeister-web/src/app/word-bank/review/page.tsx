@@ -5,30 +5,7 @@ import Link from 'next/link';
 import { useSRSDue, useSRSStats, useReviewWord, SRSRating } from '@/hooks/usePersonalWords';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
 import { PersonalWord, getSRSStatus, getIntervalText, SRSStatusInfo, WordTypeInfo, GenderInfo } from '@/types/personalWord';
-import { IconRefresh, IconChevronLeft, IconBrain, IconTarget, IconFlame, IconBookOpen } from '@/components/ui/Icons';
-
-// ─── Inline SVG icons ───
-function IconTrophy({ size = 16, ...props }: { size?: number, [key: string]: any }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
-      strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }} {...props}>
-      <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" /><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
-      <path d="M4 22h16" /><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20 7 22h10c0-2-1-3.25-2.03-3.79A1.07 1.07 0 0 1 14 17v-2.34" />
-      <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" />
-    </svg>
-  );
-}
-function IconKeyboard({ size = 16, ...props }: { size?: number, [key: string]: any }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
-      strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }} {...props}>
-      <rect width="20" height="16" x="2" y="4" rx="2" />
-      <path d="M6 8h.001" /><path d="M10 8h.001" /><path d="M14 8h.001" /><path d="M18 8h.001" />
-      <path d="M8 12h.001" /><path d="M12 12h.001" /><path d="M16 12h.001" />
-      <path d="M7 16h10" />
-    </svg>
-  );
-}
+import { IconRefresh, IconChevronLeft, IconBrain, IconTarget, IconFlame, IconBookOpen, IconTrophy, IconKeyboard } from '@/components/ui/Icons';
 
 // ─── Types ───
 interface ReviewSession {

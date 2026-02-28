@@ -12,7 +12,13 @@
       "Bash(npx prisma db push)",
       "Bash(npx prisma generate)",
       "Bash(wc -l e:/Deutsch_App/deutschmeister-web/src/app/practice-test/reading/exam/[id]/page.tsx e:/Deutsch_App/deutschmeister-web/src/app/practice-test/reading/exam/[id]/result/page.tsx e:/Deutsch_App/deutschmeister-web/src/app/practice-test/writing/exam/[id]/page.tsx e:/Deutsch_App/deutschmeister-web/src/app/practice-test/writing/exam/[id]/result/page.tsx)",
-      "Bash(npm run build)"
+      "Bash(npm run build)",
+      "Bash(\"e:/Deutsch_App/deutschmeister-api/prisma/schema.prisma\":*)",
+      "Bash(grep -n \"useRef\\\\|useEffect\" /e/Deutsch_App/deutschmeister-web/src/app/practice-test/speaking/exam/[id]/page.tsx)",
+      "Bash(grep -n \"refetchInterval\\\\|polling\\\\|useEffect\" /e/Deutsch_App/deutschmeister-web/src/app/practice-test/writing/exam/[id]/result/page.tsx)",
+      "Bash(grep -n \"export default\\\\|function.*Page\" /e/Deutsch_App/deutschmeister-web/src/app/practice-test/writing/exam/[id]/result/page.tsx)",
+      "Bash(grep -n \"GradingInProgress\\\\|function Grading\" /e/Deutsch_App/deutschmeister-web/src/app/practice-test/writing/exam/[id]/result/page.tsx)",
+      "Bash(grep -A 2 \"useCallback.*=>\\\\|useMemo.*=>\" /e/Deutsch_App/deutschmeister-web/src/app/practice-test/reading/exam/[id]/page.tsx)"
     ]
   }
 }
