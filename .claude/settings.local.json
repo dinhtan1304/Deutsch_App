@@ -19,7 +19,10 @@
       "Bash(grep -n \"export default\\\\|function.*Page\" /e/Deutsch_App/deutschmeister-web/src/app/practice-test/writing/exam/[id]/result/page.tsx)",
       "Bash(grep -n \"GradingInProgress\\\\|function Grading\" /e/Deutsch_App/deutschmeister-web/src/app/practice-test/writing/exam/[id]/result/page.tsx)",
       "Bash(grep -A 2 \"useCallback.*=>\\\\|useMemo.*=>\" /e/Deutsch_App/deutschmeister-web/src/app/practice-test/reading/exam/[id]/page.tsx)",
-      "Bash(find \"e:/Deutsch_App/deutschmeister-api/src/modules\" -name \"*.controller.ts\" -exec grep -l \"AdminGuard\" {} ;)"
+      "Bash(find \"e:/Deutsch_App/deutschmeister-api/src/modules\" -name \"*.controller.ts\" -exec grep -l \"AdminGuard\" {} ;)",
+      "Bash(npx jest --testPathPattern=\"spec\" --no-coverage)",
+      "Bash(npm install jest-util --save-dev)",
+      "Bash(npm install helmet compression @types/compression --save)"
     ]
   }
 }
