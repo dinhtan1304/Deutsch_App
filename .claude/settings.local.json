@@ -31,7 +31,11 @@
       "Bash(git push origin main)",
       "Bash(git submodule status)",
       "Bash(git ls-tree HEAD)",
-      "Bash(git add .gitmodules)"
+      "Bash(git add .gitmodules)",
+      "mcp__claude_ai_Vercel__list_teams",
+      "mcp__claude_ai_Vercel__list_projects",
+      "Bash(echo \"Exit: $?\")",
+      "Bash(git add deutschmeister-web/src/app/admin/topics/[id]/page.tsx)"
     ]
   }
 }
