@@ -1,0 +1,3 @@
+[submodule "deutschmeister-api"]
+	path = deutschmeister-api
+	url = https://github.com/dinhtan1304/deutschmeister-api.git
