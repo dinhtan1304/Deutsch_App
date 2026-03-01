@@ -35,7 +35,11 @@
       "mcp__claude_ai_Vercel__list_teams",
       "mcp__claude_ai_Vercel__list_projects",
       "Bash(echo \"Exit: $?\")",
-      "Bash(git add deutschmeister-web/src/app/admin/topics/[id]/page.tsx)"
+      "Bash(git add deutschmeister-web/src/app/admin/topics/[id]/page.tsx)",
+      "mcp__claude_ai_Vercel__web_fetch_vercel_url",
+      "mcp__claude_ai_Vercel__get_project",
+      "mcp__claude_ai_Vercel__get_deployment",
+      "mcp__claude_ai_Vercel__get_deployment_build_logs"
     ]
   }
 }
