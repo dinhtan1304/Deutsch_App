@@ -39,7 +39,12 @@
       "mcp__claude_ai_Vercel__web_fetch_vercel_url",
       "mcp__claude_ai_Vercel__get_project",
       "mcp__claude_ai_Vercel__get_deployment",
-      "mcp__claude_ai_Vercel__get_deployment_build_logs"
+      "mcp__claude_ai_Vercel__get_deployment_build_logs",
+      "Bash(ls -la \"e:\\\\Deutsch_App\\\\deutschmeister-api\\\\src\\\\modules\"\" | grep -E \"favorites)",
+      "Bash(personal-words \")",
+      "Bash(git add -A)",
+      "Bash(git add deutschmeister-web/src/app/word-bank/page.tsx deutschmeister-web/src/components/word-bank/WordBankCard.tsx deutschmeister-web/src/hooks/usePersonalWords.ts deutschmeister-web/src/lib/api/personal-words.ts deutschmeister-web/src/types/personalWord.ts)",
+      "Bash(git add deutschmeister-web/.gitignore deutschmeister-web/.env.production)"
     ]
   }
 }
