@@ -170,12 +170,12 @@ export default function AdminTopicEditPage() {
         </div>
 
         {/* Search results */}
-        {wordSearch.length >= 2 && searchData?.data && (
+        {wordSearch.length >= 2 && searchData?.items && (
           <div style={{ backgroundColor: '#0F172A', borderRadius: 8, border: '1px solid #334155', marginBottom: 12, overflow: 'hidden' }}>
-            {searchData.data.length === 0 ? (
+            {searchData.items.length === 0 ? (
               <p style={{ padding: '12px 14px', fontSize: 13, color: '#475569' }}>Không tìm thấy từ nào.</p>
             ) : (
-              searchData.data.map(w => (
+              searchData.items.map(w => (
                 <div key={w.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 14px', borderBottom: '1px solid #1E293B' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <span style={{ fontSize: 10, fontWeight: 700, padding: '1px 5px', borderRadius: 4, backgroundColor: `${ARTICLE_COLORS[w.article] || '#475569'}20`, color: ARTICLE_COLORS[w.article] || '#475569' }}>{w.article}</span>
