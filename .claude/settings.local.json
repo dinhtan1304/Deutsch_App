@@ -22,7 +22,13 @@
       "Bash(find \"e:/Deutsch_App/deutschmeister-api/src/modules\" -name \"*.controller.ts\" -exec grep -l \"AdminGuard\" {} ;)",
       "Bash(npx jest --testPathPattern=\"spec\" --no-coverage)",
       "Bash(npm install jest-util --save-dev)",
-      "Bash(npm install helmet compression @types/compression --save)"
+      "Bash(npm install helmet compression @types/compression --save)",
+      "Bash(git add Dockerfile railway.toml src/app.controller.ts src/app.module.ts package.json)",
+      "Bash(git push)",
+      "Bash(git add Dockerfile railway.toml)",
+      "Bash(git commit:*)",
+      "Bash(git push origin master)",
+      "Bash(git push origin main)"
     ]
   }
 }
