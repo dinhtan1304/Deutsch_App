@@ -28,7 +28,10 @@
       "Bash(git add Dockerfile railway.toml)",
       "Bash(git commit:*)",
       "Bash(git push origin master)",
-      "Bash(git push origin main)"
+      "Bash(git push origin main)",
+      "Bash(git submodule status)",
+      "Bash(git ls-tree HEAD)",
+      "Bash(git add .gitmodules)"
     ]
   }
 }
