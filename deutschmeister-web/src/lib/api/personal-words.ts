@@ -6,7 +6,7 @@
 import { apiGet, apiPost, apiPut, apiDelete, api } from './client';
 import {
   PersonalWord, WordType, Level, Gender,
-  ImportResult, WordBankFilters,
+  ImportResult, WordBankFilters, WordCollection, WordCollectionRef,
 } from '@/types/personalWord';
 
 // ============================================
@@ -40,6 +40,7 @@ export interface PersonalWordsListParams {
   gender?: Gender | 'all';
   category?: string;
   favoritesOnly?: boolean;
+  collectionId?: string;
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
   page?: number;
@@ -101,6 +102,7 @@ export const personalWordsApi = {
     if (params?.gender && params.gender !== 'all') searchParams.set('gender', params.gender);
     if (params?.category) searchParams.set('category', params.category);
     if (params?.favoritesOnly) searchParams.set('favoritesOnly', 'true');
+    if (params?.collectionId) searchParams.set('collectionId', params.collectionId);
     if (params?.sortBy) searchParams.set('sortBy', params.sortBy);
     if (params?.sortOrder) searchParams.set('sortOrder', params.sortOrder);
     if (params?.page) searchParams.set('page', params.page.toString());
@@ -259,3 +261,28 @@ export interface IntervalPreview {
   good: number;
   easy: number;
 }
+
+// ── Collections ──────────────────────────────────────────────────────────────
+
+export const collectionsApi = {
+  list: (): Promise<WordCollection[]> =>
+    apiGet('/personal-words/collections'),
+
+  create: (data: { name: string; color?: string; icon?: string }): Promise<WordCollection> =>
+    apiPost('/personal-words/collections', data),
+
+  update: (id: string, data: { name?: string; color?: string; icon?: string }): Promise<WordCollection> =>
+    api(`/personal-words/collections/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+
+  delete: (id: string): Promise<void> =>
+    api(`/personal-words/collections/${id}`, { method: 'DELETE' }),
+
+  addWord: (collectionId: string, personalWordId: string): Promise<WordCollection> =>
+    apiPost(`/personal-words/collections/${collectionId}/words`, { personalWordId }),
+
+  removeWord: (collectionId: string, personalWordId: string): Promise<void> =>
+    api(`/personal-words/collections/${collectionId}/words/${personalWordId}`, { method: 'DELETE' }),
+
+  getWordCollections: (personalWordId: string): Promise<WordCollectionRef[]> =>
+    apiGet(`/personal-words/${personalWordId}/collections`),
+};

@@ -115,3 +115,20 @@ export interface WordBankFilters {
   category: string; favoritesOnly: boolean;
   sortBy: 'word' | 'createdAt' | 'updatedAt' | 'level' | 'wordType'; sortOrder: 'asc' | 'desc';
 }
+
+export interface WordCollection {
+  id: string;
+  name: string;
+  color: string;
+  icon: string;
+  wordCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface WordCollectionRef {
+  id: string;
+  name: string;
+  color: string;
+  icon: string;
+}

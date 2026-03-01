@@ -1,15 +1,94 @@
 'use client';
 
-import { PersonalWord, WordTypeInfo, GenderInfo, Gender } from '@/types/personalWord';
-import { IconVolume, IconStar, IconLightbulb } from '@/components/ui/Icons';
+import { useState, useEffect, useRef } from 'react';
+import { PersonalWord, WordTypeInfo, GenderInfo, Gender, WordCollection } from '@/types/personalWord';
+import { IconVolume, IconStar, IconLightbulb, IconCheck } from '@/components/ui/Icons';
+import { useWordCollections, useAddToCollection, useRemoveFromCollection } from '@/hooks/usePersonalWords';
+
+// ── Collection Popover ────────────────────────────────────────────────────────
+
+interface CollectionPopoverProps {
+  wordId: string;
+  collections: WordCollection[];
+  onClose: () => void;
+}
+
+function CollectionPopover({ wordId, collections, onClose }: CollectionPopoverProps) {
+  const ref = useRef<HTMLDivElement>(null);
+  const { data: wordCollections = [] } = useWordCollections(wordId);
+  const addMutation = useAddToCollection();
+  const removeMutation = useRemoveFromCollection();
+
+  const wordCollectionIds = new Set(wordCollections.map(c => c.id));
+
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) onClose();
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [onClose]);
+
+  const toggle = (col: WordCollection) => {
+    if (wordCollectionIds.has(col.id)) {
+      removeMutation.mutate({ collectionId: col.id, personalWordId: wordId });
+    } else {
+      addMutation.mutate({ collectionId: col.id, personalWordId: wordId });
+    }
+  };
+
+  return (
+    <div ref={ref}
+      className="absolute right-0 top-full mt-1 z-50 w-48 rounded-xl border shadow-lg overflow-hidden"
+      style={{ backgroundColor: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}>
+      <p className="px-3 py-2 text-[11px] font-semibold uppercase tracking-wide"
+        style={{ color: 'var(--theme-text-muted)', borderBottom: '1px solid var(--theme-border)' }}>
+        Thêm vào thư mục
+      </p>
+      {collections.length === 0 ? (
+        <p className="px-3 py-3 text-[12px]" style={{ color: 'var(--theme-text-muted)' }}>
+          Chưa có thư mục nào
+        </p>
+      ) : (
+        collections.map(col => {
+          const checked = wordCollectionIds.has(col.id);
+          const isPending = addMutation.isPending || removeMutation.isPending;
+          return (
+            <button key={col.id}
+              onClick={() => !isPending && toggle(col)}
+              className="w-full flex items-center gap-2.5 px-3 py-2 text-[13px] transition-all text-left hover:opacity-80"
+              style={{ color: 'var(--theme-text-primary)' }}>
+              <div className="w-4 h-4 rounded flex items-center justify-center shrink-0 border"
+                style={{
+                  backgroundColor: checked ? col.color : 'transparent',
+                  borderColor: checked ? col.color : 'var(--theme-border)',
+                }}>
+                {checked && <IconCheck size={10} className="text-white" />}
+              </div>
+              <span className="text-[14px] shrink-0">{col.icon}</span>
+              <span className="flex-1 truncate">{col.name}</span>
+              <span className="text-[11px] shrink-0" style={{ color: 'var(--theme-text-muted)' }}>
+                {col.wordCount}
+              </span>
+            </button>
+          );
+        })
+      )}
+    </div>
+  );
+}
+
+// ── WordBankCard ──────────────────────────────────────────────────────────────
 
 interface WordBankCardProps {
   word: PersonalWord;
   onToggleFavorite: (id: string) => void;
   onSpeak?: (text: string) => void;
+  collections?: WordCollection[];
 }
 
-export function WordBankCard({ word, onToggleFavorite, onSpeak }: WordBankCardProps) {
+export function WordBankCard({ word, onToggleFavorite, onSpeak, collections = [] }: WordBankCardProps) {
+  const [showCollPopover, setShowCollPopover] = useState(false);
   const typeInfo = WordTypeInfo[word.wordType] ?? WordTypeInfo['andere'];
 
   const displayWord = () => {
@@ -89,7 +168,7 @@ export function WordBankCard({ word, onToggleFavorite, onSpeak }: WordBankCardPr
           <div className="text-xl">{displayWord()}</div>
           <div className="mt-1">{renderDetails()}</div>
         </div>
-        <div className="flex items-center gap-0.5 shrink-0">
+        <div className="relative flex items-center gap-0.5 shrink-0">
           <button onClick={handleSpeak}
             className="w-8 h-8 flex items-center justify-center rounded-lg transition-all opacity-50 hover:opacity-100"
             style={{ color: 'var(--theme-text-muted)' }}
@@ -103,6 +182,21 @@ export function WordBankCard({ word, onToggleFavorite, onSpeak }: WordBankCardPr
               ? { fill: '#F59E0B', color: '#F59E0B' }
               : { color: 'var(--theme-text-muted)', opacity: 0.5 }} />
           </button>
+          {/* Add to collection */}
+          <button
+            onClick={() => setShowCollPopover(v => !v)}
+            className="w-8 h-8 flex items-center justify-center rounded-lg transition-all text-[16px]"
+            title="Thêm vào thư mục"
+            style={{ opacity: showCollPopover ? 1 : 0.45 }}>
+            🗂
+          </button>
+          {showCollPopover && (
+            <CollectionPopover
+              wordId={word.id}
+              collections={collections}
+              onClose={() => setShowCollPopover(false)}
+            />
+          )}
         </div>
       </div>
 

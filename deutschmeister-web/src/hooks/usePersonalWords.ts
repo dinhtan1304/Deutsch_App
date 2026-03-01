@@ -10,6 +10,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   personalWordsApi,
+  collectionsApi,
   PersonalWordsListParams,
   CreatePersonalWordDto,
   UpdatePersonalWordDto,
@@ -285,3 +286,83 @@ export function useResetAllSRS() {
 
 // Re-export types for convenience
 export type { SRSRating, SRSQueryParams, ReviewWordDto };
+
+// ── Collection Hooks ──────────────────────────────────────────────────────────
+
+const collectionKeys = {
+  all: ['collections'] as const,
+  wordCollections: (wordId: string) => ['word-collections', wordId] as const,
+};
+
+export function useCollections() {
+  return useQuery({
+    queryKey: collectionKeys.all,
+    queryFn: () => collectionsApi.list(),
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
+export function useCreateCollection() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { name: string; color?: string; icon?: string }) =>
+      collectionsApi.create(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: collectionKeys.all });
+    },
+  });
+}
+
+export function useUpdateCollection() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: { name?: string; color?: string; icon?: string } }) =>
+      collectionsApi.update(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: collectionKeys.all });
+    },
+  });
+}
+
+export function useDeleteCollection() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => collectionsApi.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: collectionKeys.all });
+    },
+  });
+}
+
+export function useWordCollections(personalWordId: string) {
+  return useQuery({
+    queryKey: collectionKeys.wordCollections(personalWordId),
+    queryFn: () => collectionsApi.getWordCollections(personalWordId),
+    enabled: !!personalWordId,
+    staleTime: 2 * 60 * 1000,
+  });
+}
+
+export function useAddToCollection() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ collectionId, personalWordId }: { collectionId: string; personalWordId: string }) =>
+      collectionsApi.addWord(collectionId, personalWordId),
+    onSuccess: (_data, { personalWordId }) => {
+      queryClient.invalidateQueries({ queryKey: collectionKeys.all });
+      queryClient.invalidateQueries({ queryKey: collectionKeys.wordCollections(personalWordId) });
+    },
+  });
+}
+
+export function useRemoveFromCollection() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ collectionId, personalWordId }: { collectionId: string; personalWordId: string }) =>
+      collectionsApi.removeWord(collectionId, personalWordId),
+    onSuccess: (_data, { personalWordId }) => {
+      queryClient.invalidateQueries({ queryKey: collectionKeys.all });
+      queryClient.invalidateQueries({ queryKey: collectionKeys.wordCollections(personalWordId) });
+    },
+  });
+}
