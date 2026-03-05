@@ -199,7 +199,7 @@ export default function HomePage() {
         </div>
 
         <h1 className="fade-up-1 hero-title" style={{ fontSize: '4rem', fontWeight: 900, lineHeight: 1.1, textAlign: 'center', maxWidth: 800, margin: '0 0 20px', letterSpacing: '-1.5px' }}>
-          Học tiếng Đức thật sự <span className="gradient-text">thông minh</span><br />cùng AI
+          Học tiếng Đức <span className="gradient-text">thông minh</span><br />cùng AI
         </h1>
 
         <p className="fade-up-2" style={{ fontSize: 18, color: 'rgba(255,255,255,.6)', textAlign: 'center', maxWidth: 560, lineHeight: 1.7, marginBottom: 40 }}>
