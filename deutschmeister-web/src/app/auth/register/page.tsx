@@ -81,7 +81,7 @@ export default function RegisterPage() {
     if (password !== confirmPassword) { setError('Mật khẩu xác nhận không khớp'); return; }
     try {
       await register({ name: name.trim(), email, password });
-      router.push('/dashboard');
+      router.push(`/auth/verify-email?email=${encodeURIComponent(email)}`);
     } catch (err: any) {
       setError(err.message || 'Đăng ký thất bại. Vui lòng thử lại.');
     }

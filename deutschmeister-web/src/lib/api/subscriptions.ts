@@ -1,5 +1,3 @@
-'use client';
-
 import { apiGet, apiPost } from './client';
 
 export interface Plan {

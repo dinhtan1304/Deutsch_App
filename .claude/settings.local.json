@@ -46,7 +46,11 @@
       "Bash(git add deutschmeister-web/src/app/word-bank/page.tsx deutschmeister-web/src/components/word-bank/WordBankCard.tsx deutschmeister-web/src/hooks/usePersonalWords.ts deutschmeister-web/src/lib/api/personal-words.ts deutschmeister-web/src/types/personalWord.ts)",
       "Bash(git add deutschmeister-web/.gitignore deutschmeister-web/.env.production)",
       "Bash(npm install passport-google-oauth20 passport-facebook)",
-      "Bash(npm install -D @types/passport-google-oauth20 @types/passport-facebook)"
+      "Bash(npm install -D @types/passport-google-oauth20 @types/passport-facebook)",
+      "Bash(npm install nodemailer @types/nodemailer --save)",
+      "Bash(node -e \"require\\(''nodemailer''\\); console.log\\(''ok''\\)\")",
+      "Bash(npx tsx prisma/seeds/grammar-a2.ts)",
+      "Bash(npx tsx prisma/seeds/seed.ts)"
     ]
   }
 }

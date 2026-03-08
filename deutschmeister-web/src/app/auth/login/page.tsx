@@ -40,7 +40,11 @@ export default function LoginPage() {
       const { user: loggedInUser } = useAuthStore.getState();
       router.push(loggedInUser?.role === 'admin' ? '/admin' : '/dashboard');
     } catch (err: any) {
-      setError(err.message || 'Đăng nhập thất bại. Vui lòng thử lại.');
+      if (err.message === 'EMAIL_NOT_VERIFIED') {
+        setError('Email chưa được xác nhận. Vui lòng kiểm tra hộp thư và nhấn link xác nhận.');
+      } else {
+        setError(err.message || 'Đăng nhập thất bại. Vui lòng thử lại.');
+      }
     }
   };
 
@@ -196,7 +200,12 @@ export default function LoginPage() {
 
               {/* Password */}
               <div>
-                <label style={{ display: 'block', color: 'rgba(255,255,255,0.65)', fontSize: '13px', fontWeight: 600, marginBottom: '8px' }}>Mật khẩu</label>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                  <label style={{ color: 'rgba(255,255,255,0.65)', fontSize: '13px', fontWeight: 600 }}>Mật khẩu</label>
+                  <Link href="/auth/forgot-password" style={{ color: '#818CF8', fontSize: '12px', textDecoration: 'none', fontWeight: 500 }}>
+                    Quên mật khẩu?
+                  </Link>
+                </div>
                 <div style={{ position: 'relative' }}>
                   <div style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.3)', pointerEvents: 'none', display: 'flex' }}>
                     <IconLock />

@@ -2,7 +2,7 @@
 
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { authApi, LoginDto, RegisterDto, User } from '@/lib/api/auth';
+import { authApi, LoginDto, RegisterDto, MessageResponse, User } from '@/lib/api/auth';
 import { clearTokens, getAccessToken, onAuthExpired, setAccessToken } from '@/lib/api/client';
 
 interface AuthState {
@@ -12,7 +12,7 @@ interface AuthState {
   _hasHydrated: boolean;
   
   login: (data: LoginDto) => Promise<void>;
-  register: (data: RegisterDto) => Promise<void>;
+  register: (data: RegisterDto) => Promise<MessageResponse>;
   logout: () => Promise<void>;
   fetchUser: () => Promise<void>;
   loginWithOAuth: (token: string) => Promise<void>;
@@ -45,9 +45,9 @@ export const useAuthStore = create<AuthState>()(
       register: async (data) => {
         set({ isLoading: true });
         try {
-          await authApi.register(data);
-          const user = await authApi.getMe();
-          set({ user, isAuthenticated: true, isLoading: false });
+          const result = await authApi.register(data);
+          set({ isLoading: false });
+          return result;
         } catch (error) {
           set({ isLoading: false });
           throw error;

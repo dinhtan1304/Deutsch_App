@@ -1,4 +1,4 @@
-import { apiPost, apiGet, setAccessToken, clearTokens } from './client';
+import { apiPost, apiGet, api, setAccessToken, clearTokens } from './client';
 
 /**
  * Auth response from server
@@ -12,6 +12,10 @@ export interface AuthResponse {
     name: string | null;
     role: string;
   };
+}
+
+export interface MessageResponse {
+  message: string;
 }
 
 export interface LoginDto {
@@ -40,24 +44,31 @@ export interface User {
 }
 
 export const authApi = {
-  register: async (data: RegisterDto): Promise<AuthResponse> => {
-    const response = await apiPost<AuthResponse>('/auth/register', data);
-    setAccessToken(response.accessToken);
-    // Note: refreshToken is automatically set as httpOnly cookie by server
-    return response;
+  register: async (data: RegisterDto): Promise<MessageResponse> => {
+    return apiPost<MessageResponse>('/auth/register', data);
   },
 
   login: async (data: LoginDto): Promise<AuthResponse> => {
     const response = await apiPost<AuthResponse>('/auth/login', data);
     setAccessToken(response.accessToken);
-    // Note: refreshToken is automatically set as httpOnly cookie by server
     return response;
+  },
+
+  verifyEmail: async (token: string): Promise<MessageResponse> => {
+    return api<MessageResponse>(`/auth/verify-email?token=${encodeURIComponent(token)}`, { method: 'GET' });
+  },
+
+  forgotPassword: async (email: string): Promise<MessageResponse> => {
+    return apiPost<MessageResponse>('/auth/forgot-password', { email });
+  },
+
+  resetPassword: async (token: string, password: string): Promise<MessageResponse> => {
+    return apiPost<MessageResponse>('/auth/reset-password', { token, password });
   },
 
   logout: async (): Promise<void> => {
     try {
       await apiPost('/auth/logout');
-      // Server will clear the httpOnly cookie
     } finally {
       clearTokens();
     }

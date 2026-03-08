@@ -4,8 +4,9 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/stores/authStore';
-import { IconSearch, IconGamepad, IconBrain, IconUser, IconSettings, IconLogOut } from '@/components/ui/Icons';
+import { IconSearch, IconGamepad, IconBrain, IconUser, IconSettings, IconLogOut, IconMessageCircle } from '@/components/ui/Icons';
 import { SIDEBAR_WIDTH, SIDEBAR_COLLAPSED_WIDTH } from './Sidebar';
+import { FeedbackModal } from './FeedbackModal';
 
 interface HeaderProps {
   sidebarCollapsed: boolean;
@@ -16,6 +17,7 @@ export function Header({ sidebarCollapsed }: HeaderProps) {
   const { user, isAuthenticated, logout } = useAuthStore();
   const [searchQuery, setSearchQuery] = useState('');
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showFeedback, setShowFeedback] = useState(false);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,6 +27,7 @@ export function Header({ sidebarCollapsed }: HeaderProps) {
   };
 
   return (
+    <>
     <header
       className="fixed top-0 right-0 h-16 z-30 backdrop-blur-xl border-b flex items-center justify-between px-6"
       style={{
@@ -68,6 +71,19 @@ export function Header({ sidebarCollapsed }: HeaderProps) {
 
       {/* Right side */}
       <div className="flex items-center gap-3">
+        {/* Feedback button */}
+        <button
+          onClick={() => setShowFeedback(true)}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[13px] font-medium transition-all duration-200"
+          style={{ color: 'var(--theme-text-muted)' }}
+          onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'var(--theme-bg-secondary)'; e.currentTarget.style.color = '#6366F1'; }}
+          onMouseLeave={e => { e.currentTarget.style.backgroundColor = ''; e.currentTarget.style.color = 'var(--theme-text-muted)'; }}
+          title="Phản hồi & Báo lỗi"
+        >
+          <IconMessageCircle size={16} />
+          <span className="hidden md:inline">Phản hồi</span>
+        </button>
+
         {/* Quick actions */}
         <div className="hidden md:flex items-center gap-1.5">
           <Link
@@ -188,5 +204,8 @@ export function Header({ sidebarCollapsed }: HeaderProps) {
         )}
       </div>
     </header>
+
+    {showFeedback && <FeedbackModal onClose={() => setShowFeedback(false)} />}
+    </>
   );
 }
