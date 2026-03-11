@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useExamReadingSession } from '@/hooks/useExamReading';
@@ -240,10 +240,13 @@ export default function ExamReadingResultPage() {
   }
 
   // If session is still DRAFT (not submitted), redirect back
-  if (session.status === 'DRAFT') {
-    router.replace(`/practice-test/reading/exam/${id}`);
-    return null;
-  }
+  useEffect(() => {
+    if (session?.status === 'DRAFT') {
+      router.replace(`/practice-test/reading/exam/${id}`);
+    }
+  }, [session?.status, id, router]);
+
+  if (session.status === 'DRAFT') return null;
 
   const score = session.score ?? 0;
   const passed = score >= 60;

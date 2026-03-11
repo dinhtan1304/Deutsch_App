@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useExamListeningSession } from '@/hooks/useExamListening';
@@ -252,10 +252,13 @@ export default function ExamListeningResultPage() {
     );
   }
 
-  if (session.status === 'DRAFT') {
-    router.replace(`/practice-test/listening/exam/${id}`);
-    return null;
-  }
+  useEffect(() => {
+    if (session?.status === 'DRAFT') {
+      router.replace(`/practice-test/listening/exam/${id}`);
+    }
+  }, [session?.status, id, router]);
+
+  if (session.status === 'DRAFT') return null;
 
   const score = session.score ?? 0;
   const passed = score >= 60;

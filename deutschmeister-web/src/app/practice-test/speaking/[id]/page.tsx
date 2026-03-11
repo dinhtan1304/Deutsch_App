@@ -233,10 +233,13 @@ export default function FreeSpeakingSessionPage() {
   );
 
   // If already graded, redirect to result
-  if (session.status === 'GRADED' || session.status === 'GRADING') {
-    router.push(`/practice-test/speaking/${id}/result`);
-    return null;
-  }
+  useEffect(() => {
+    if (session?.status === 'GRADED' || session?.status === 'GRADING') {
+      router.push(`/practice-test/speaking/${id}/result`);
+    }
+  }, [session?.status, id, router]);
+
+  if (session?.status === 'GRADED' || session?.status === 'GRADING') return null;
 
   const remaining = MAX_RECORD_SECS - elapsed;
 

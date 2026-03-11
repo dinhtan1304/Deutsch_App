@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useExamListeningSession, useSubmitExamListening } from '@/hooks/useExamListening';
@@ -245,10 +245,13 @@ export default function ExamListeningPage() {
     );
   }
 
-  if (session.status === 'GRADED') {
-    router.replace(`/practice-test/listening/exam/${id}/result`);
-    return null;
-  }
+  useEffect(() => {
+    if (session?.status === 'GRADED') {
+      router.replace(`/practice-test/listening/exam/${id}/result`);
+    }
+  }, [session?.status, id, router]);
+
+  if (session.status === 'GRADED') return null;
 
   const teile = session.teile as ExamListeningTeil[];
   const teil = teile[currentTeil];

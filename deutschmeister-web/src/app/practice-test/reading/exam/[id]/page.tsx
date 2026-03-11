@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useExamReadingSession, useSubmitExamReading } from '@/hooks/useExamReading';
@@ -340,10 +340,13 @@ export default function ExamReadingPage() {
     );
   }
 
-  if (session.status === 'GRADED') {
-    router.replace(`/practice-test/reading/exam/${id}/result`);
-    return null;
-  }
+  useEffect(() => {
+    if (session?.status === 'GRADED') {
+      router.replace(`/practice-test/reading/exam/${id}/result`);
+    }
+  }, [session?.status, id, router]);
+
+  if (session.status === 'GRADED') return null;
 
   const teile = session.teile as ExamReadingTeil[];
   const teil = teile[currentTeil];
