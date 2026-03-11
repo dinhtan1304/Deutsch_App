@@ -195,7 +195,7 @@ export default function HomePage() {
         <div style={{ position: 'absolute', bottom: '20%', left: '20%', width: 300, height: 300, borderRadius: '50%', background: 'radial-gradient(circle, rgba(236,72,153,.1) 0%, transparent 70%)', pointerEvents: 'none' }} />
 
         <div className="fade-up shimmer-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 14px', borderRadius: 100, marginBottom: 24, fontSize: 13, fontWeight: 600 }}>
-          <IconSparkles /><span>Powered by Gemini AI · Chuẩn Goethe/TELC</span>
+          <IconSparkles /><span>Chuẩn Goethe/TELC</span>
         </div>
 
         <h1 className="fade-up-1 hero-title" style={{ fontSize: '4rem', fontWeight: 900, lineHeight: 1.1, textAlign: 'center', maxWidth: 800, margin: '0 0 20px', letterSpacing: '-1.5px' }}>
@@ -204,7 +204,7 @@ export default function HomePage() {
 
         <p className="fade-up-2" style={{ fontSize: 18, color: 'rgba(255,255,255,.6)', textAlign: 'center', maxWidth: 560, lineHeight: 1.7, marginBottom: 40 }}>
           Nền tảng luyện thi tiếng Đức toàn diện — từ từ vựng cơ bản đến đề thi Goethe/TELC A1/A2/B1.
-          AI tạo đề, chấm điểm và nhận xét chi tiết bằng tiếng Việt.
+          Tạo đề theo yêu cầu dựa vào hơn 100 bộ đề, chấm điểm và nhận xét chi tiết bằng tiếng Việt.
         </p>
 
         <div className="fade-up-3" style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center', marginBottom: 64 }}>
@@ -287,7 +287,7 @@ export default function HomePage() {
               <IconSparkles /> POWERED BY GEMINI AI
             </div>
             <h2 style={{ fontSize: '2.5rem', fontWeight: 900, letterSpacing: '-1px', marginBottom: 12 }}>AI làm thầy giáo <span className="gradient-text-amber">24/7 của bạn</span></h2>
-            <p style={{ color: 'rgba(255,255,255,.5)', fontSize: 16, maxWidth: 560, margin: '0 auto' }}>Không chỉ tạo đề — Gemini phân tích, chấm điểm và nhận xét chi tiết bằng tiếng Việt giúp bạn cải thiện từng ngày.</p>
+            <p style={{ color: 'rgba(255,255,255,.5)', fontSize: 16, maxWidth: 560, margin: '0 auto' }}>Không chỉ tạo đề — phân tích, chấm điểm và nhận xét chi tiết bằng tiếng Việt giúp bạn cải thiện từng ngày.</p>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 20 }}>
             {AI_FEATURES.map((f, i) => {
@@ -310,7 +310,7 @@ export default function HomePage() {
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, padding: '12px 24px', borderRadius: 14, background: 'rgba(255,255,255,.03)', border: '1px solid rgba(255,255,255,.08)' }}>
               <div style={{ width: 32, height: 32, borderRadius: 8, background: 'linear-gradient(135deg, #4285F4, #34A853, #FBBC04, #EA4335)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, fontWeight: 900, color: 'white' }}>G</div>
               <div style={{ textAlign: 'left' }}>
-                <div style={{ fontSize: 13, fontWeight: 700, color: 'white' }}>Gemini 2.5 Flash</div>
+                <div style={{ fontSize: 13, fontWeight: 700, color: 'white' }}>Gemini AI</div>
                 <div style={{ fontSize: 11, color: 'rgba(255,255,255,.4)' }}>Multimodal AI — phân tích audio, text & hình ảnh</div>
               </div>
             </div>
@@ -404,7 +404,7 @@ export default function HomePage() {
             Sẵn sàng bắt đầu <span className="gradient-text">hành trình</span> của bạn?
           </h2>
           <p style={{ color: 'rgba(255,255,255,.5)', fontSize: 16, lineHeight: 1.7, marginBottom: 40 }}>
-            Bắt đầu học tiếng Đức ngay hôm nay với sự hỗ trợ của Gemini AI.
+            Bắt đầu học tiếng Đức ngay hôm nay với sự hỗ trợ của AI.
           </p>
           <Link href="/auth/register" className="btn-glow" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '16px 36px', borderRadius: 16, background: 'linear-gradient(135deg, #6366F1, #8B5CF6)', color: 'white', fontWeight: 800, fontSize: 16, textDecoration: 'none', boxShadow: '0 12px 40px rgba(99,102,241,.5)' }}>
             Tạo tài khoản <IconArrow />
@@ -437,7 +437,7 @@ export default function HomePage() {
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '8px 12px', borderRadius: 10, background: 'rgba(255,255,255,.04)', border: '1px solid rgba(255,255,255,.08)' }}>
               <div style={{ width: 26, height: 26, borderRadius: 7, background: 'linear-gradient(135deg, #4285F4, #34A853, #FBBC04, #EA4335)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 900, color: 'white', flexShrink: 0 }}>G</div>
               <div>
-                <div style={{ fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,.8)' }}>Gemini 2.5 Flash</div>
+                <div style={{ fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,.8)' }}>Gemini AI</div>
                 <div style={{ fontSize: 10.5, color: 'rgba(255,255,255,.35)' }}>Multimodal AI Engine</div>
               </div>
             </div>
@@ -513,7 +513,7 @@ export default function HomePage() {
         {/* Bottom bar */}
         <div style={{ borderTop: '1px solid rgba(255,255,255,.05)', padding: '20px 24px' }}>
           <div style={{ maxWidth: 1200, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
-            <div style={{ fontSize: 12.5, color: 'rgba(255,255,255,.25)' }}>© 2025 Deutschmeister · Made with ❤️ in Vietnam</div>
+            <div style={{ fontSize: 12.5, color: 'rgba(255,255,255,.25)' }}>© 2025 Deutschmeister · Made with Yuii in Vietnam</div>
             <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
               {[
                 { label: 'A1', color: '#22C55E' },

@@ -138,7 +138,7 @@ function QuestionReview({ teil, details }: { teil: ExamReadingTeil; details: Tei
               style={{ backgroundColor: detail.isCorrect ? 'rgba(34,197,94,.05)' : 'rgba(239,68,68,.05)' }}
               onClick={() => setExpandedQ(expanded ? null : q.id)}
             >
-              <span className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${detail.isCorrect ? 'bg-green-500' : 'bg-red-500'}`}>
+              <span className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${detail.isCorrect ? 'bg-green-500' : 'bg-red-500'}`}>
                 {detail.isCorrect ? <IconCheck size={12} /> : <IconX size={12} />}
               </span>
               <div className="flex-1 min-w-0">
@@ -151,7 +151,7 @@ function QuestionReview({ teil, details }: { teil: ExamReadingTeil; details: Tei
                   </p>
                 )}
               </div>
-              <span className="flex-shrink-0 mt-1" style={{ color: 'var(--theme-text-muted)' }}>
+              <span className="shrink-0 mt-1" style={{ color: 'var(--theme-text-muted)' }}>
                 {expanded ? <IconChevronUp size={14} /> : <IconChevronDown size={14} />}
               </span>
             </button>
@@ -186,7 +186,7 @@ function QuestionReview({ teil, details }: { teil: ExamReadingTeil; details: Tei
                             backgroundColor: isCorrect ? 'rgba(34,197,94,.08)' : isUser && !isCorrect ? 'rgba(239,68,68,.08)' : 'transparent',
                             color: isCorrect ? '#22C55E' : isUser && !isCorrect ? '#EF4444' : 'var(--theme-text-secondary)',
                           }}>
-                          <span className="font-bold w-4 flex-shrink-0">{opt.id.toUpperCase()})</span>
+                          <span className="font-bold w-4 shrink-0">{opt.id.toUpperCase()})</span>
                           <span>{opt.text}</span>
                           {isCorrect && <IconCheck size={13} />}
                           {isUser && !isCorrect && <IconX size={13} />}
@@ -267,7 +267,7 @@ export default function ExamReadingResultPage() {
             <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
             Danh sách
           </Link>
-          <div className="w-px h-4 flex-shrink-0" style={{ backgroundColor: 'var(--theme-border)' }} />
+          <div className="w-px h-4 shrink-0" style={{ backgroundColor: 'var(--theme-border)' }} />
           <p className="text-[13px] font-bold" style={{ color: 'var(--theme-text-primary)' }}>
             {session.examType} {session.cefrLevel} · Lesen · Ergebnis
           </p>
@@ -334,7 +334,7 @@ export default function ExamReadingResultPage() {
         {/* Trophy / encouragement */}
         <div className="rounded-2xl border p-4 flex items-center gap-4"
           style={{ borderColor: passed ? 'rgba(34,197,94,.3)' : 'rgba(239,68,68,.2)', backgroundColor: passed ? 'rgba(34,197,94,.04)' : 'rgba(239,68,68,.04)' }}>
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
             style={{ background: GRADIENT }}>
             <IconTrophy size={20} />
           </div>

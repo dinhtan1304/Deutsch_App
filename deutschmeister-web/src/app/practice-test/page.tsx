@@ -16,25 +16,25 @@ type CardDef = {
 const freeCards: CardDef[] = [
   {
     title: 'Luyện Đọc', titleDe: 'Leseübung',
-    description: 'AI tạo bài đọc tiếng Đức, hỏi và kiểm tra hiểu bài',
+    description: 'Tạo bài đọc tiếng Đức, hỏi và kiểm tra hiểu bài',
     icon: IconBookOpen, href: '/practice-test/reading',
     gradient: 'linear-gradient(135deg, #22C55E, #14B8A6)', color: '#22C55E',
   },
   {
     title: 'Luyện Nghe', titleDe: 'Hörübung',
-    description: 'AI tạo audio tiếng Đức, nghe và trả lời câu hỏi',
+    description: 'Tạo audio tiếng Đức, nghe và trả lời câu hỏi',
     icon: IconHeadphones, href: '/practice-test/listening',
     gradient: 'linear-gradient(135deg, #EC4899, #8B5CF6)', color: '#EC4899',
   },
   {
     title: 'Luyện Viết', titleDe: 'Schreibübung',
-    description: 'AI tạo đề bài tiếng Đức, chấm và sửa lỗi chi tiết',
+    description: 'Tạo đề bài tiếng Đức, chấm và sửa lỗi chi tiết',
     icon: IconPenLine, href: '/practice-test/writing',
     gradient: 'linear-gradient(135deg, #6366F1, #8B5CF6)', color: '#6366F1',
   },
   {
     title: 'Luyện Nói', titleDe: 'Sprechübung',
-    description: 'AI tạo prompt tiếng Đức, ghi âm trả lời, Gemini chấm điểm chi tiết',
+    description: 'Tạo prompt tiếng Đức, ghi âm trả lời, Gemini chấm điểm chi tiết',
     icon: IconMic, href: '/practice-test/speaking',
     gradient: 'linear-gradient(135deg, #F59E0B, #EF4444)', color: '#F59E0B',
   },
@@ -55,7 +55,7 @@ const examCards: CardDef[] = [
   },
   {
     title: 'Viết Theo Đề', titleDe: 'Prüfungsschreiben',
-    description: 'Goethe & TELC · A1/A2/B1 · AI chấm theo tiêu chí chính thức',
+    description: 'Goethe & TELC · A1/A2/B1 · Chấm theo tiêu chí chính thức',
     icon: IconPenLine, href: '/practice-test/writing/exam',
     gradient: 'linear-gradient(135deg, #A855F7, #6366F1)', color: '#A855F7',
   },

@@ -426,18 +426,18 @@ export default function SRSReviewPage() {
           <span className="text-white font-semibold text-[13px]">{currentWord.article} {currentWord.word} • {genderInfo?.label}</span></div>}
         {currentWord.examples?.[0] && <div className="relative mt-3 p-3 bg-white/10 rounded-xl max-w-sm">
           <p className="text-[12px] text-white/50 mb-0.5">Ví dụ:</p>
-          <p className="text-white/90 italic text-[13px]">„{currentWord.examples[0]}"</p></div>}
+          <p className="text-white/90 italic text-[13px]">„{currentWord.examples[0]}</p></div>}
       </>);
       case 'vi-de': return (<>
         <p className="relative text-white/70 text-[13px] mb-2">Từ tiếng Đức</p>
         <h2 className="relative text-4xl md:text-5xl font-bold text-white mb-3">
-          {currentWord.article && <span className="text-white/70">{currentWord.article} </span>}{currentWord.word}</h2>
+          {currentWord.article && <span className="text-white/70">{currentWord.article}</span>}{currentWord.word}</h2>
         {currentWord.pronunciation && <p className="relative text-white/60 text-[14px]">[{currentWord.pronunciation}]</p>}
         {genderInfo && <div className="relative mt-3 px-4 py-1.5 bg-white/15 rounded-lg backdrop-blur-sm">
           <span className="text-white font-semibold text-[13px]">{genderInfo.label}</span></div>}
         {currentWord.examples?.[0] && <div className="relative mt-3 p-3 bg-white/10 rounded-xl max-w-sm">
           <p className="text-[12px] text-white/50 mb-0.5">Ví dụ:</p>
-          <p className="text-white/90 italic text-[13px]">„{currentWord.examples[0]}"</p></div>}
+          <p className="text-white/90 italic text-[13px]">„{currentWord.examples[0]}</p></div>}
       </>);
     }
   };

@@ -159,7 +159,7 @@ export default function ExamReadingListPage() {
       </div>
 
       <div className="flex items-center gap-3 mb-4">
-        <div className="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0"
+        <div className="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0"
           style={{ background: GRADIENT }}>
           <IconBookOpen size={22} style={{ color: 'white' }} />
         </div>
