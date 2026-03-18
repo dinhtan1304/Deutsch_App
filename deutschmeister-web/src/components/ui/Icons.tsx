@@ -559,3 +559,46 @@ export function IconLogOut({ size, ...props }: IconProps) {
     </svg>
   );
 }
+
+export function IconAward({ size, ...props }: IconProps) {
+  return (
+    <svg {...defaults(size)} {...props}>
+      <path d="m15.477 12.89 1.515 8.526a.5.5 0 0 1-.81.47l-3.58-2.687a1 1 0 0 0-1.197 0l-3.586 2.686a.5.5 0 0 1-.81-.469l1.514-8.526" />
+      <circle cx="12" cy="8" r="6" />
+    </svg>
+  );
+}
+
+export function IconMedal({ size, ...props }: IconProps) {
+  return (
+    <svg {...defaults(size)} {...props}>
+      <path d="M7.21 15 2.66 7.14a2 2 0 0 1 .13-2.2L4.4 2.8A2 2 0 0 1 6 2h12a2 2 0 0 1 1.6.8l1.6 2.14a2 2 0 0 1 .14 2.2L16.79 15" />
+      <path d="M11 12 5.12 2.2" />
+      <path d="m13 12 5.88-9.8" />
+      <path d="M8 7h8" />
+      <circle cx="12" cy="17" r="5" />
+      <path d="M12 18v-2h-.5" />
+    </svg>
+  );
+}
+
+export function IconBarChart({ size, ...props }: IconProps) {
+  return (
+    <svg {...defaults(size)} {...props}>
+      <line x1="12" x2="12" y1="20" y2="10" />
+      <line x1="18" x2="18" y1="20" y2="4" />
+      <line x1="6" x2="6" y1="20" y2="16" />
+    </svg>
+  );
+}
+
+export function IconUsers({ size, ...props }: IconProps) {
+  return (
+    <svg {...defaults(size)} {...props}>
+      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+      <circle cx="9" cy="7" r="4" />
+      <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+    </svg>
+  );
+}

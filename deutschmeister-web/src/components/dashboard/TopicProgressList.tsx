@@ -6,13 +6,15 @@ import { IconLayers, IconArrowRight } from '@/components/ui/Icons';
 
 interface TopicProgressListProps {
   data: TopicProgress[];
+  limit?: number;
 }
 
-export function TopicProgressList({ data }: TopicProgressListProps) {
+export function TopicProgressList({ data, limit }: TopicProgressListProps) {
   const sortedData = [...data].sort((a, b) => {
     if (b.percent !== a.percent) return b.percent - a.percent;
     return a.nameDe.localeCompare(b.nameDe);
   });
+  const visibleData = limit ? sortedData.slice(0, limit) : sortedData;
 
   const completedCount = data.filter(t => t.percent >= 100).length;
   const overallProgress = data.length > 0
@@ -71,8 +73,8 @@ export function TopicProgressList({ data }: TopicProgressListProps) {
       </div>
 
       {/* Topic list */}
-      <div className="space-y-1.5 max-h-100 overflow-y-auto pr-1">
-        {sortedData.map((topic) => {
+      <div className="space-y-1.5">
+        {visibleData.map((topic) => {
           const isComplete = topic.percent >= 100;
 
           return (

@@ -75,9 +75,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       }}>
         {/* Logo */}
         <div style={{ padding: '20px 16px 16px', display: 'flex', alignItems: 'center', gap: 10, borderBottom: '1px solid #1E293B' }}>
-          <div style={{ width: 32, height: 32, borderRadius: 8, background: 'linear-gradient(135deg, #6366F1, #8B5CF6)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <IconShield size={16} />
-          </div>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo.png" width={32} height={32} alt="Deutschmeister" style={{ borderRadius: 8, flexShrink: 0 }} />
           {sidebarOpen && (
             <div>
               <p style={{ fontSize: 13, fontWeight: 700, color: '#F1F5F9', lineHeight: 1 }}>Admin</p>

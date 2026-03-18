@@ -144,9 +144,8 @@ export default function RegisterPage() {
           {/* Brand + heading */}
           <div style={{ marginBottom: '28px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
-              <div style={{ width: '48px', height: '48px', borderRadius: '16px', background: 'linear-gradient(135deg, #22C55E, #14B8A6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', boxShadow: '0 6px 20px rgba(34,197,94,0.35)', flexShrink: 0 }}>
-                🇩🇪
-              </div>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/logo.png" width={48} height={48} alt="Deutschmeister" style={{ borderRadius: '16px', boxShadow: '0 6px 20px rgba(34,197,94,0.35)', flexShrink: 0 }} />
               <div style={{ background: 'linear-gradient(135deg, #4ADE80, #2DD4BF)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', fontSize: '20px', fontWeight: 800 }}>
                 Deutschmeister
               </div>

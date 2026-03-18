@@ -10,6 +10,7 @@ import { usersApi } from '@/lib/api/users';
 import { DictionaryProvider } from '@/providers/DictionaryProvider';
 import { WordHighlightProvider } from '@/providers/WordHighlightProvider';
 import { GrammarAnalyzerProvider } from '@/providers/GrammarAnalyzerProvider';
+import { AchievementToastProvider } from '@/components/ui/AchievementToast';
 
 function handleGlobalError(error: unknown) {
   if (error instanceof ApiError && error.status === 401) {
@@ -137,6 +138,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
             <DictionaryProvider>
               <GrammarAnalyzerProvider>
                 {children}
+                <AchievementToastProvider />
               </GrammarAnalyzerProvider>
             </DictionaryProvider>
           </WordHighlightProvider>

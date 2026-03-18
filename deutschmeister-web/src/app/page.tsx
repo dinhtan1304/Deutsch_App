@@ -155,7 +155,8 @@ export default function HomePage() {
       }}>
         <div style={{ maxWidth: 1200, margin: '0 auto', display: 'flex', alignItems: 'center', height: 64 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1 }}>
-            <div style={{ width: 36, height: 36, borderRadius: 10, background: 'linear-gradient(135deg, #3B82F6, #8B5CF6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: 18, color: 'white' }}>D</div>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.png" width={36} height={36} alt="Deutschmeister" style={{ borderRadius: 10 }} />
             <span style={{ fontWeight: 800, fontSize: 17, color: 'white', letterSpacing: '-0.3px' }}>Deutschmeister</span>
           </div>
           <div className="hide-mobile" style={{ display: 'flex', alignItems: 'center', gap: 32, marginRight: 32 }}>
@@ -427,7 +428,8 @@ export default function HomePage() {
           {/* Brand col */}
           <div style={{ gridColumn: 'span 1' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-              <div style={{ width: 38, height: 38, borderRadius: 11, background: 'linear-gradient(135deg, #3B82F6, #8B5CF6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: 20, color: 'white', flexShrink: 0 }}>D</div>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/logo.png" width={38} height={38} alt="Deutschmeister" style={{ borderRadius: 11, flexShrink: 0 }} />
               <span style={{ fontWeight: 800, fontSize: 16, color: 'white' }}>Deutschmeister</span>
             </div>
             <p style={{ fontSize: 13, color: 'rgba(255,255,255,.45)', lineHeight: 1.7, marginBottom: 20, maxWidth: 240 }}>

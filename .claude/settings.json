@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/Users/ADMIN/**)",
+      "Bash(ls -la \"e:/Deutsch_App/deutschmeister-mobile/app/\\(auth\\)/\")",
+      "Bash(npx expo:*)",
+      "Bash(./node_modules/.bin/tsc --noEmit --pretty)",
+      "Bash(ls \"e:/Deutsch_App/deutschmeister-mobile/node_modules/.bin/tsc\"*)",
+      "Bash(ls \"e:/Deutsch_App/deutschmeister-mobile/node_modules/typescript/bin/\"*)",
+      "Bash(ls e:/Deutsch_App/deutschmeister-mobile/node_modules/.bin/tsc*)",
+      "Bash(node -e \"try { require\\(''typescript''\\); console.log\\(''found''\\); } catch\\(e\\) { console.log\\(''not found''\\); }\")",
+      "Bash(find \"e:/Deutsch_App/deutschmeister-mobile/app/\\(tabs\\)/words\" -name \"*.tsx\" -type f)",
+      "Bash(node_modules/.bin/tsc --noEmit)",
+      "Bash(wc -l e:/Deutsch_App/deutschmeister-mobile/app/\\\\\\(tabs\\\\\\)/games/*.tsx)",
+      "Bash(npm ls:*)",
+      "Bash(node node_modules/typescript/lib/tsc.js --noEmit --pretty false)"
+    ],
+    "additionalDirectories": [
+      "e:\\Deutsch_App\\.claude"
+    ]
+  }
+}

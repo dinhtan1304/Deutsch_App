@@ -61,7 +61,7 @@ export function WeeklyChart({ data }: WeeklyChartProps) {
             <div key={i} className="flex-1 flex flex-col items-center gap-1.5">
               <div className="w-full flex items-end justify-center gap-1" style={{ height: '9rem' }}>
                 {/* Words bar */}
-                <div className="relative w-5 group cursor-pointer">
+                <div className="relative w-5 group cursor-pointer self-stretch flex flex-col justify-end">
                   <div
                     className="w-full rounded-t-md transition-all duration-500 hover:opacity-85"
                     style={{
@@ -82,7 +82,7 @@ export function WeeklyChart({ data }: WeeklyChartProps) {
                 </div>
 
                 {/* Games bar */}
-                <div className="relative w-5 group cursor-pointer">
+                <div className="relative w-5 group cursor-pointer self-stretch flex flex-col justify-end">
                   <div
                     className="w-full rounded-t-md transition-all duration-500 hover:opacity-85"
                     style={{

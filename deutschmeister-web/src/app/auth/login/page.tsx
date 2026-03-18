@@ -108,9 +108,8 @@ export default function LoginPage() {
 
           {/* Brand */}
           <div style={{ marginBottom: '48px' }}>
-            <div style={{ width: '64px', height: '64px', borderRadius: '20px', background: 'linear-gradient(135deg, #3B82F6, #6366F1)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 8px 32px rgba(99,102,241,0.4)', marginBottom: '20px' }}>
-              <span style={{ fontFamily: 'Georgia, serif', fontWeight: 900, fontSize: '34px', color: 'white', lineHeight: 1, letterSpacing: '-1px' }}>D</span>
-            </div>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.png" width={64} height={64} alt="Deutschmeister" style={{ borderRadius: '20px', boxShadow: '0 8px 32px rgba(99,102,241,0.4)', marginBottom: '20px' }} />
             <div style={{ background: 'linear-gradient(135deg, #60A5FA, #A78BFA)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', fontSize: '28px', fontWeight: 800, lineHeight: 1.1, marginBottom: '12px' }}>
               Deutschmeister
             </div>
@@ -155,9 +154,8 @@ export default function LoginPage() {
             {/* Mobile brand logo */}
             <div style={{ textAlign: 'center', marginBottom: '32px' }} className="mobile-brand">
               <style>{`.mobile-brand { display: block; } @media(min-width:1024px){.mobile-brand{display:none}}`}</style>
-              <div style={{ width: '56px', height: '56px', borderRadius: '18px', background: 'linear-gradient(135deg, #3B82F6, #6366F1)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 8px 24px rgba(99,102,241,0.35)', margin: '0 auto 12px' }}>
-                <span style={{ fontFamily: 'Georgia, serif', fontWeight: 900, fontSize: '30px', color: 'white', lineHeight: 1, letterSpacing: '-1px' }}>D</span>
-              </div>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/logo.png" width={56} height={56} alt="Deutschmeister" style={{ borderRadius: '18px', boxShadow: '0 8px 24px rgba(99,102,241,0.35)', margin: '0 auto 12px' }} />
               <div style={{ background: 'linear-gradient(135deg, #60A5FA, #A78BFA)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', fontSize: '20px', fontWeight: 800 }}>
                 Deutschmeister
               </div>

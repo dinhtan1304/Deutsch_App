@@ -10,6 +10,7 @@ import {
   IconChevronRight, IconChevronLeft, IconBookOpen,
   IconHeadphones, IconSpellCheck, IconLink, IconMic,
 } from '@/components/ui/Icons';
+import { useXp } from '@/hooks/useXp';
 
 // ============================================
 // Navigation Data
@@ -86,6 +87,14 @@ const navSections: NavSection[] = [
     ],
   },
   {
+    label: 'Cộng đồng',
+    items: [
+      { label: 'Achievements', labelVi: 'Thành tích', icon: IconTarget, href: '/achievements' },
+      { label: 'Leaderboard', labelVi: 'Bảng xếp hạng', icon: IconZap, href: '/leaderboard' },
+      { label: 'Challenges', labelVi: 'Thử thách', icon: IconBrain, href: '/challenges' },
+    ],
+  },
+  {
     items: [
       { label: 'Settings', labelVi: 'Cài đặt', icon: IconSettings, href: '/settings' },
     ],
@@ -109,6 +118,7 @@ interface SidebarProps {
 
 export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
   const pathname = usePathname();
+  const { data: xpInfo } = useXp();
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
   const [tooltip, setTooltip] = useState<{ href: string; top: number } | null>(null);
 
@@ -356,12 +366,8 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
 
       {/* ─── Logo ─── */}
       <div className="h-16 flex items-center gap-3 px-5 shrink-0 overflow-hidden">
-        <div
-          className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 text-lg font-black text-white"
-          style={{ background: 'linear-gradient(135deg, #3B82F6, #8B5CF6)' }}
-        >
-          D
-        </div>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/logo.png" width={36} height={36} alt="Deutschmeister" className="rounded-xl shrink-0" />
         <span
           className="font-bold text-[15px] tracking-tight whitespace-nowrap"
           style={{
@@ -405,14 +411,32 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
         ))}
       </nav>
 
-      {/* ─── Footer ─── */}
-      {!isCollapsed && (
-        <div className="px-5 py-4 shrink-0" style={{ borderTop: '1px solid var(--theme-border)' }}>
+      {/* ─── XP Bar + Footer ─── */}
+      <div className="px-3 py-3 shrink-0" style={{ borderTop: '1px solid var(--theme-border)' }}>
+        {xpInfo && !isCollapsed && (
+          <div style={{ marginBottom: 10 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+              <span style={{ fontSize: 11, fontWeight: 700, color: '#F59E0B' }}>Lv.{xpInfo.level} {xpInfo.nameVi}</span>
+              <span style={{ fontSize: 10, color: 'var(--theme-text-muted)' }}>{xpInfo.xp} / {xpInfo.nextLevelXp} XP</span>
+            </div>
+            <div style={{ height: 4, borderRadius: 999, background: 'var(--theme-border)', overflow: 'hidden' }}>
+              <div style={{ height: '100%', borderRadius: 999, background: 'linear-gradient(90deg, #F59E0B, #EF4444)', width: `${xpInfo.progress}%`, transition: 'width 0.5s' }} />
+            </div>
+          </div>
+        )}
+        {xpInfo && isCollapsed && (
+          <div style={{ display: 'flex', justifyContent: 'center' }}>
+            <div title={`Lv.${xpInfo.level} · ${xpInfo.xp} XP`} style={{ width: 32, height: 32, borderRadius: '50%', background: 'linear-gradient(135deg, #F59E0B, #EF4444)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 800, color: '#fff' }}>
+              {xpInfo.level}
+            </div>
+          </div>
+        )}
+        {!isCollapsed && (
           <div className="text-[11px] text-center whitespace-nowrap" style={{ color: 'var(--theme-text-muted)' }}>
             v1.0.0 · Made with Yuii ❤️
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </aside>
   );
 }
