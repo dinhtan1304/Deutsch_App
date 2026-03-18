@@ -115,7 +115,7 @@ export default function TopicsPage() {
               Chủ đề từ vựng
             </h1>
             <p className="text-[13px]" style={{ color: 'var(--theme-text-muted)' }}>
-              Học từ vựng theo 12 chủ đề chuẩn Goethe A1
+              Học từ vựng theo chủ đề chuẩn Goethe
             </p>
           </div>
         </div>

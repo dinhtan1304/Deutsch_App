@@ -45,7 +45,7 @@ const navSections: NavSection[] = [
           { label: 'SRS Review', labelVi: 'Ôn tập SRS', icon: IconBrain, href: '/word-bank/review' },
         ],
       },
-      { label: 'Topics', labelVi: 'Chủ đề A1', icon: IconLayers, href: '/topics' },
+      { label: 'Topics', labelVi: 'Chủ đề', icon: IconLayers, href: '/topics' },
     ],
   },
   {
