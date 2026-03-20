@@ -1,42 +1,54 @@
+import { useMemo } from 'react';
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useColorScheme } from 'react-native';
+import { radius, typography, floatShadow } from '@/theme';
+import { useThemeStore } from '@/stores/themeStore';
 
 type TabIconName = React.ComponentProps<typeof Ionicons>['name'];
 
-const TAB_CONFIG: Array<{
+interface TabConfig {
   name: string;
   title: string;
   icon: TabIconName;
   iconFocused: TabIconName;
-}> = [
-  { name: 'index', title: 'Home', icon: 'home-outline', iconFocused: 'home' },
-  { name: 'words', title: 'Words', icon: 'book-outline', iconFocused: 'book' },
-  { name: 'games', title: 'Games', icon: 'game-controller-outline', iconFocused: 'game-controller' },
-  { name: 'practice', title: 'Practice', icon: 'school-outline', iconFocused: 'school' },
-  { name: 'more', title: 'More', icon: 'menu-outline', iconFocused: 'menu' },
+  colorKey: 'lime' | 'sky' | 'lavender' | 'mint' | 'peach';
+}
+
+const TAB_CONFIG: TabConfig[] = [
+  { name: 'index', title: 'Home', icon: 'home-outline', iconFocused: 'home', colorKey: 'lime' },
+  { name: 'words', title: 'Từ vựng', icon: 'book-outline', iconFocused: 'book', colorKey: 'sky' },
+  { name: 'games', title: 'Trò chơi', icon: 'game-controller-outline', iconFocused: 'game-controller', colorKey: 'lavender' },
+  { name: 'practice', title: 'Luyện tập', icon: 'school-outline', iconFocused: 'school', colorKey: 'mint' },
+  { name: 'more', title: 'Thêm', icon: 'menu-outline', iconFocused: 'menu', colorKey: 'peach' },
 ];
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const colors = useThemeStore((s) => s.colors);
 
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: '#6366F1',
-        tabBarInactiveTintColor: isDark ? '#9CA3AF' : '#6B7280',
+        tabBarActiveTintColor: colors.pastel.lime.base,
+        tabBarInactiveTintColor: colors.text.tertiary,
         tabBarStyle: {
-          backgroundColor: isDark ? '#1F2937' : '#FFFFFF',
-          borderTopColor: isDark ? '#374151' : '#E5E7EB',
-          height: 85,
-          paddingBottom: 25,
-          paddingTop: 8,
+          position: 'absolute',
+          bottom: 12,
+          marginHorizontal: 12,
+          backgroundColor: colors.bg.b2 + 'CC',
+          borderTopWidth: 0,
+          borderRadius: radius.pill,
+          height: 60,
+          paddingBottom: 0,
+          paddingTop: 6,
+          borderWidth: 1,
+          borderColor: colors.border.subtle,
+          ...floatShadow,
         },
         tabBarLabelStyle: {
           fontSize: 11,
           fontWeight: '600',
+          fontFamily: typography.fontFamily.bodySemibold,
         },
       }}
     >
@@ -46,6 +58,7 @@ export default function TabLayout() {
           name={tab.name}
           options={{
             title: tab.title,
+            tabBarActiveTintColor: colors.pastel[tab.colorKey].base,
             tabBarIcon: ({ focused, color, size }) => (
               <Ionicons
                 name={focused ? tab.iconFocused : tab.icon}

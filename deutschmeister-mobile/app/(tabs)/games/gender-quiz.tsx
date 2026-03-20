@@ -1,23 +1,34 @@
-import { View, Text, TouchableOpacity, Animated, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, Animated, ActivityIndicator, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useRandomWords } from '@/hooks/useWords';
 import { useGameSession } from '@/hooks/useGameSession';
 import { Difficulty, Word, GenderInfo, Gender } from '@/types';
 import * as Haptics from 'expo-haptics';
+import { spacing, radius, typography } from '@/theme';
+import { useXPStore, calculateGameXP } from '@/stores/xpStore';
+import { XPToast } from '@/components/ui/XPToast';
+import { XPSummary } from '@/components/ui/XPSummary';
+import { ComboBadge } from '@/components/ui/ComboBadge';
+import { useThemeStore } from '@/stores/themeStore';
+import type { ThemeColors } from '@/theme/colors';
 
 type Phase = 'playing' | 'result';
 
-const GENDER_BUTTONS: { gender: Gender; article: string; color: string; bgColor: string }[] = [
-  { gender: 'masculine', article: 'der', color: '#3B82F6', bgColor: 'rgba(59, 130, 246, 0.15)' },
-  { gender: 'feminine', article: 'die', color: '#EC4899', bgColor: 'rgba(236, 72, 153, 0.15)' },
-  { gender: 'neuter', article: 'das', color: '#10B981', bgColor: 'rgba(16, 185, 129, 0.15)' },
-];
+function getGenderButtons(colors: ThemeColors) {
+  return [
+    { gender: 'masculine' as Gender, article: 'der', label: 'Maskulin', base: colors.pastel.sky.base, dim: colors.pastel.sky.dim },
+    { gender: 'feminine' as Gender, article: 'die', label: 'Feminin', base: colors.pastel.rose.base, dim: colors.pastel.rose.dim },
+    { gender: 'neuter' as Gender, article: 'das', label: 'Neutrum', base: colors.pastel.mint.base, dim: colors.pastel.mint.dim },
+  ];
+}
 
 export default function GenderQuizScreen() {
+  const colors = useThemeStore((s) => s.colors);
+  const s = useMemo(() => createS(colors), [colors]);
+  const genderButtons = useMemo(() => getGenderButtons(colors), [colors]);
   const router = useRouter();
   const { difficulty = 'beginner', count = '10', category } = useLocalSearchParams<{
     difficulty: Difficulty;
@@ -49,6 +60,17 @@ export default function GenderQuizScreen() {
   const [selectedGender, setSelectedGender] = useState<Gender | null>(null);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [sessionStarted, setSessionStarted] = useState(false);
+  const [xpToastAmount, setXpToastAmount] = useState(0);
+  const [xpToastKey, setXpToastKey] = useState(0);
+  const [sessionXP, setSessionXP] = useState(0);
+  const [isNewBest, setIsNewBest] = useState(false);
+  const [leveledUp, setLeveledUp] = useState(false);
+
+  const addXP = useXPStore((s) => s.addXP);
+  const updateBestScore = useXPStore((s) => s.updateBestScore);
+  const xpLevel = useXPStore((s) => s.level);
+  const xpInCurrentLevel = useXPStore((s) => s.xpInCurrentLevel);
+  const xpNeededForLevel = useXPStore((s) => s.xpNeededForLevel);
 
   // Animations
   const scaleAnim = useRef(new Animated.Value(1)).current;
@@ -93,6 +115,11 @@ export default function GenderQuizScreen() {
           return newStreak;
         });
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
+        // XP toast
+        const xpGain = 10 + (streak >= 10 ? 40 : streak >= 5 ? 20 : streak >= 3 ? 10 : 0);
+        setXpToastAmount(xpGain);
+        setXpToastKey((k) => k + 1);
+        setSessionXP((x) => x + xpGain);
         // Pop animation
         Animated.sequence([
           Animated.timing(scaleAnim, { toValue: 1.1, duration: 150, useNativeDriver: true }),
@@ -134,6 +161,14 @@ export default function GenderQuizScreen() {
     if (phase === 'result' && !sessionEndedRef.current) {
       sessionEndedRef.current = true;
       session.end(score, bestStreak, correctCount, wrongCount);
+      // XP + Best Score
+      const finalAccuracy = questions.length > 0 ? Math.round((correctCount / questions.length) * 100) : 0;
+      const totalXP = calculateGameXP(correctCount, bestStreak, finalAccuracy);
+      setSessionXP(totalXP);
+      const { leveledUp: didLevelUp } = addXP(totalXP);
+      setLeveledUp(didLevelUp);
+      const newBest = updateBestScore('gender-quiz', score);
+      setIsNewBest(newBest);
     }
   }, [phase]);
 
@@ -154,9 +189,11 @@ export default function GenderQuizScreen() {
 
   if (isLoading || questions.length === 0) {
     return (
-      <SafeAreaView className="flex-1 items-center justify-center bg-dark-bg">
-        <ActivityIndicator size="large" color="#6366F1" />
-        <Text className="mt-4 text-gray-400">Đang tải câu hỏi...</Text>
+      <SafeAreaView style={s.safeArea}>
+        <View style={s.loadingContainer}>
+          <ActivityIndicator size="large" color={colors.pastel.lavender.base} />
+          <Text style={s.loadingText}>Đang tải câu hỏi...</Text>
+        </View>
       </SafeAreaView>
     );
   }
@@ -167,78 +204,77 @@ export default function GenderQuizScreen() {
       questions.length > 0 ? Math.round((correctCount / questions.length) * 100) : 0;
 
     return (
-      <SafeAreaView className="flex-1 bg-dark-bg">
-        <View className="flex-1 items-center justify-center px-6">
-          <LinearGradient
-            colors={['#6366F1', '#4F46E5']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={{ borderRadius: 24, padding: 32, width: '100%', alignItems: 'center' }}
-          >
-            <View className="mb-4 h-16 w-16 items-center justify-center rounded-full bg-white/20">
+      <SafeAreaView style={s.safeArea}>
+        <View style={s.resultCenter}>
+          {/* Result Hero Card */}
+          <View style={s.resultHero}>
+            <View style={s.resultIconCircle}>
               <Ionicons
                 name={accuracy >= 70 ? 'trophy' : accuracy >= 40 ? 'thumbs-up' : 'refresh'}
                 size={32}
-                color="#FFFFFF"
+                color={colors.pastel.lime.on}
               />
             </View>
-            <Text className="text-2xl font-bold text-white">
+            <Text style={s.resultTitle}>
               {accuracy >= 70 ? 'Xuất sắc!' : accuracy >= 40 ? 'Khá tốt!' : 'Cần luyện thêm!'}
             </Text>
-            <Text className="mt-1 text-white/70">Gender Quiz hoàn thành</Text>
-          </LinearGradient>
+            <Text style={s.resultSubtitle}>Gender Quiz hoàn thành</Text>
+          </View>
 
-          <View className="mt-6 w-full flex-row" style={{ gap: 12 }}>
-            <View className="flex-1 items-center rounded-2xl bg-dark-card p-4">
-              <Text className="text-2xl font-bold text-white">{score}</Text>
-              <Text className="text-xs text-gray-400">Điểm</Text>
+          {/* Score / Accuracy / Streak */}
+          <View style={s.statRow}>
+            <View style={s.statCard}>
+              <Text style={s.statValueWhite}>{score}</Text>
+              <Text style={s.statLabel}>Điểm</Text>
             </View>
-            <View className="flex-1 items-center rounded-2xl bg-dark-card p-4">
-              <Text className="text-2xl font-bold text-emerald-400">{accuracy}%</Text>
-              <Text className="text-xs text-gray-400">Chính xác</Text>
+            <View style={s.statCard}>
+              <Text style={[s.statValueWhite, { color: colors.pastel.mint.base }]}>{accuracy}%</Text>
+              <Text style={s.statLabel}>Chính xác</Text>
             </View>
-            <View className="flex-1 items-center rounded-2xl bg-dark-card p-4">
-              <Text className="text-2xl font-bold text-amber-400">{bestStreak}</Text>
-              <Text className="text-xs text-gray-400">Streak</Text>
+            <View style={s.statCard}>
+              <Text style={[s.statValueWhite, { color: colors.pastel.peach.base }]}>{bestStreak}</Text>
+              <Text style={s.statLabel}>Chuỗi</Text>
             </View>
           </View>
 
-          <View className="mt-4 w-full flex-row" style={{ gap: 12 }}>
-            <View className="flex-1 items-center rounded-2xl bg-dark-card p-4">
-              <Text className="text-lg font-bold text-emerald-400">{correctCount}</Text>
-              <Text className="text-xs text-gray-400">Đúng</Text>
+          {/* Correct / Wrong */}
+          <View style={s.statRow}>
+            <View style={s.statCard}>
+              <Text style={[s.statValueSmall, { color: colors.pastel.mint.base }]}>{correctCount}</Text>
+              <Text style={s.statLabel}>Đúng</Text>
             </View>
-            <View className="flex-1 items-center rounded-2xl bg-dark-card p-4">
-              <Text className="text-lg font-bold text-red-400">{wrongCount}</Text>
-              <Text className="text-xs text-gray-400">Sai</Text>
+            <View style={s.statCard}>
+              <Text style={[s.statValueSmall, { color: colors.pastel.rose.base }]}>{wrongCount}</Text>
+              <Text style={s.statLabel}>Sai</Text>
             </View>
           </View>
 
-          <View className="mt-8 w-full" style={{ gap: 12 }}>
-            <TouchableOpacity activeOpacity={0.8} onPress={handlePlayAgain}>
-              <LinearGradient
-                colors={['#6366F1', '#4F46E5']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={{
-                  borderRadius: 16,
-                  paddingVertical: 14,
-                  alignItems: 'center',
-                  flexDirection: 'row',
-                  justifyContent: 'center',
-                }}
-              >
-                <Ionicons name="refresh" size={20} color="#FFFFFF" />
-                <Text className="ml-2 text-base font-bold text-white">Chơi lại</Text>
-              </LinearGradient>
+          <XPSummary
+            xpEarned={sessionXP}
+            isNewBest={isNewBest}
+            level={xpLevel}
+            leveledUp={leveledUp}
+            xpInCurrentLevel={xpInCurrentLevel}
+            xpNeededForLevel={xpNeededForLevel}
+          />
+
+          {/* Actions */}
+          <View style={s.resultActions}>
+            <TouchableOpacity
+              activeOpacity={0.8}
+              onPress={handlePlayAgain}
+              style={s.playAgainBtn}
+            >
+              <Ionicons name="refresh" size={20} color={colors.pastel.lime.on} />
+              <Text style={s.playAgainText}>Chơi lại</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               activeOpacity={0.7}
               onPress={() => router.back()}
-              className="items-center rounded-2xl bg-dark-card py-4"
+              style={s.goBackBtn}
             >
-              <Text className="text-base font-semibold text-gray-300">Quay về</Text>
+              <Text style={s.goBackText}>Quay về</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -252,76 +288,89 @@ export default function GenderQuizScreen() {
     : null;
 
   return (
-    <SafeAreaView className="flex-1 bg-dark-bg">
+    <SafeAreaView style={s.safeArea}>
       {/* Top Bar */}
-      <View className="flex-row items-center justify-between px-4 pt-3 pb-2">
+      <View style={s.topBar}>
         <TouchableOpacity
           onPress={() => router.back()}
-          className="h-10 w-10 items-center justify-center rounded-full bg-dark-card"
+          style={s.closeBtn}
         >
-          <Ionicons name="close" size={20} color="#9CA3AF" />
+          <Ionicons name="close" size={20} color={colors.text.secondary} />
         </TouchableOpacity>
 
-        <View className="flex-row items-center">
-          <Ionicons name="flame" size={18} color="#F59E0B" />
-          <Text className="ml-1 text-sm font-bold text-amber-400">{streak}</Text>
+        <View style={s.streakContainer}>
+          <Ionicons name="flame" size={18} color={colors.pastel.peach.base} />
+          <Text style={s.streakText}>{streak}</Text>
         </View>
 
-        <View className="flex-row items-center rounded-lg bg-dark-card px-3 py-1.5">
-          <Ionicons name="star" size={16} color="#6366F1" />
-          <Text className="ml-1 text-sm font-bold text-white">{score}</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+          <ComboBadge streak={streak} />
+          <View style={s.scoreBadge}>
+            <Ionicons name="star" size={16} color={colors.pastel.lavender.base} />
+            <Text style={s.scoreText}>{score}</Text>
+            <XPToast amount={xpToastAmount} triggerKey={xpToastKey} />
+          </View>
         </View>
       </View>
 
       {/* Progress Bar */}
-      <View className="mx-4 mt-1 h-2 overflow-hidden rounded-full bg-dark-secondary">
+      <View style={s.progressTrack}>
         <Animated.View
-          className="h-full rounded-full"
-          style={{
-            backgroundColor: '#6366F1',
-            width: progressAnim.interpolate({
-              inputRange: [0, 1],
-              outputRange: ['0%', '100%'],
-            }),
-          }}
+          style={[
+            s.progressFill,
+            {
+              width: progressAnim.interpolate({
+                inputRange: [0, 1],
+                outputRange: ['0%', '100%'],
+              }),
+            },
+          ]}
         />
       </View>
 
-      <View className="mx-4 mt-2 flex-row items-center justify-between">
-        <Text className="text-xs text-gray-400">
+      <View style={s.progressInfo}>
+        <Text style={s.progressLabel}>
           Câu {currentIndex + 1}/{questions.length}
         </Text>
-        <View className="flex-row items-center" style={{ gap: 8 }}>
-          <Text className="text-xs text-emerald-400">{correctCount} đúng</Text>
-          <Text className="text-xs text-red-400">{wrongCount} sai</Text>
+        <View style={s.progressStats}>
+          <Text style={[s.progressStatText, { color: colors.pastel.mint.base }]}>
+            {correctCount} đúng
+          </Text>
+          <Text style={[s.progressStatText, { color: colors.pastel.rose.base }]}>
+            {wrongCount} sai
+          </Text>
         </View>
       </View>
 
       {/* Question Card */}
-      <View className="flex-1 items-center justify-center px-6">
+      <View style={s.questionArea}>
         <Animated.View style={{ transform: [{ scale: scaleAnim }], width: '100%' }}>
-          <View className="items-center rounded-2xl bg-dark-card p-8">
-            <Text className="mb-2 text-sm text-gray-400">Danh từ này thuộc giống nào?</Text>
-            <Text className="text-4xl font-bold text-white">{currentWord?.word}</Text>
+          <View style={s.questionCard}>
+            <Text style={s.questionHint}>Danh từ này thuộc giống nào?</Text>
+            <Text style={s.questionWord}>{currentWord?.word}</Text>
             {currentWord?.pronunciation && (
-              <Text className="mt-2 text-sm text-gray-500">[{currentWord.pronunciation}]</Text>
+              <Text style={s.pronunciation}>[{currentWord.pronunciation}]</Text>
             )}
 
             {/* Translation hint (shows after answer) */}
             {selectedGender !== null && (
-              <View className="mt-4 items-center">
+              <View style={s.translationContainer}>
                 <View
-                  className="rounded-full px-4 py-1.5"
-                  style={{ backgroundColor: correctGenderInfo?.bgColor }}
+                  style={[
+                    s.correctArticleBadge,
+                    { backgroundColor: correctGenderInfo?.bgColor },
+                  ]}
                 >
                   <Text
-                    style={{ color: correctGenderInfo?.color }}
-                    className="text-sm font-bold"
+                    style={[
+                      s.correctArticleText,
+                      { color: correctGenderInfo?.color },
+                    ]}
                   >
                     {correctGenderInfo?.article} {currentWord?.word}
                   </Text>
                 </View>
-                <Text className="mt-2 text-sm text-gray-400">
+                <Text style={s.translationText}>
                   {currentWord?.translationVi || currentWord?.translationEn}
                 </Text>
               </View>
@@ -331,21 +380,24 @@ export default function GenderQuizScreen() {
 
         {/* Feedback overlay */}
         <Animated.View
-          className="absolute items-center"
-          style={{ opacity: feedbackOpacity }}
+          style={[s.feedbackOverlay, { opacity: feedbackOpacity }]}
           pointerEvents="none"
         >
           {isCorrect !== null && (
             <View
-              className="rounded-full p-4"
-              style={{
-                backgroundColor: isCorrect ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)',
-              }}
+              style={[
+                s.feedbackCircle,
+                {
+                  backgroundColor: isCorrect
+                    ? colors.pastel.mint.dim
+                    : colors.pastel.rose.dim,
+                },
+              ]}
             >
               <Ionicons
                 name={isCorrect ? 'checkmark-circle' : 'close-circle'}
                 size={48}
-                color={isCorrect ? '#10B981' : '#EF4444'}
+                color={isCorrect ? colors.pastel.mint.base : colors.pastel.rose.base}
               />
             </View>
           )}
@@ -353,25 +405,25 @@ export default function GenderQuizScreen() {
       </View>
 
       {/* Gender Buttons */}
-      <View className="px-6 pb-8" style={{ gap: 12 }}>
-        <View className="flex-row" style={{ gap: 12 }}>
-          {GENDER_BUTTONS.map((btn) => {
+      <View style={s.buttonsArea}>
+        <View style={s.buttonsRow}>
+          {genderButtons.map((btn) => {
             const isSelected = selectedGender === btn.gender;
             const isCorrectAnswer = currentWord?.gender === btn.gender;
             const showResult = selectedGender !== null;
 
             let borderColor = 'transparent';
-            let bgOpacity = 0.15;
+            let bgColor = btn.dim;
 
             if (showResult) {
               if (isCorrectAnswer) {
-                borderColor = btn.color;
-                bgOpacity = 0.25;
+                borderColor = btn.base;
+                bgColor = btn.dim;
               } else if (isSelected && !isCorrectAnswer) {
-                borderColor = '#EF4444';
-                bgOpacity = 0.1;
+                borderColor = colors.pastel.rose.base;
+                bgColor = colors.pastel.rose.dim;
               } else {
-                bgOpacity = 0.05;
+                bgColor = colors.bg.b3;
               }
             }
 
@@ -381,55 +433,51 @@ export default function GenderQuizScreen() {
                 activeOpacity={0.7}
                 disabled={selectedGender !== null}
                 onPress={() => handleAnswer(btn.gender)}
-                className="flex-1 items-center rounded-2xl py-5"
-                style={{
-                  backgroundColor:
-                    showResult && isSelected && !isCorrectAnswer
-                      ? 'rgba(239, 68, 68, 0.1)'
-                      : btn.bgColor.replace(
-                          /[\d.]+\)$/,
-                          `${bgOpacity})`,
-                        ),
-                  borderWidth: showResult ? 2 : 0,
-                  borderColor,
-                }}
+                style={[
+                  s.genderBtn,
+                  {
+                    backgroundColor: bgColor,
+                    borderWidth: showResult ? 2 : 1,
+                    borderColor: showResult ? borderColor : btn.base + '33',
+                  },
+                ]}
               >
                 <Text
-                  className="text-3xl font-bold"
-                  style={{
-                    color:
-                      showResult && isSelected && !isCorrectAnswer
-                        ? '#EF4444'
-                        : showResult && !isCorrectAnswer && !isSelected
-                          ? '#6B7280'
-                          : btn.color,
-                  }}
+                  style={[
+                    s.genderArticle,
+                    {
+                      color:
+                        showResult && isSelected && !isCorrectAnswer
+                          ? colors.pastel.rose.base
+                          : showResult && !isCorrectAnswer && !isSelected
+                            ? colors.text.tertiary
+                            : btn.base,
+                    },
+                  ]}
                 >
                   {btn.article}
                 </Text>
                 <Text
-                  className="mt-1 text-xs font-medium"
-                  style={{
-                    color:
-                      showResult && !isCorrectAnswer
-                        ? '#6B7280'
-                        : btn.color,
-                  }}
+                  style={[
+                    s.genderLabel,
+                    {
+                      color:
+                        showResult && !isCorrectAnswer
+                          ? colors.text.tertiary
+                          : btn.base,
+                    },
+                  ]}
                 >
-                  {btn.gender === 'masculine'
-                    ? 'Maskulin'
-                    : btn.gender === 'feminine'
-                      ? 'Feminin'
-                      : 'Neutrum'}
+                  {btn.label}
                 </Text>
                 {showResult && isCorrectAnswer && (
-                  <View className="mt-2">
-                    <Ionicons name="checkmark-circle" size={18} color={btn.color} />
+                  <View style={s.genderIcon}>
+                    <Ionicons name="checkmark-circle" size={18} color={btn.base} />
                   </View>
                 )}
                 {showResult && isSelected && !isCorrectAnswer && (
-                  <View className="mt-2">
-                    <Ionicons name="close-circle" size={18} color="#EF4444" />
+                  <View style={s.genderIcon}>
+                    <Ionicons name="close-circle" size={18} color={colors.pastel.rose.base} />
                   </View>
                 )}
               </TouchableOpacity>
@@ -440,3 +488,310 @@ export default function GenderQuizScreen() {
     </SafeAreaView>
   );
 }
+
+const createS = (colors: any) => StyleSheet.create({
+  /* ── Layout ──────────────────────────────── */
+  safeArea: {
+    flex: 1,
+    backgroundColor: colors.bg.b0,
+  },
+  loadingContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  loadingText: {
+    marginTop: spacing.lg,
+    fontSize: typography.fontSize.base,
+    fontFamily: typography.fontFamily.body,
+    color: colors.text.secondary,
+  },
+
+  /* ── Top Bar ─────────────────────────────── */
+  topBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.sm,
+  },
+  closeBtn: {
+    height: 40,
+    width: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: radius.pill,
+    backgroundColor: colors.bg.b2,
+    borderWidth: 1,
+    borderColor: colors.border.default,
+  },
+  streakContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  streakText: {
+    marginLeft: spacing.xs,
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.bodyBold,
+    color: colors.pastel.peach.base,
+  },
+  scoreBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: radius.md,
+    backgroundColor: colors.bg.b2,
+    borderWidth: 1,
+    borderColor: colors.border.default,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs + 2,
+  },
+  scoreText: {
+    marginLeft: spacing.xs,
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.bodyBold,
+    color: colors.text.primary,
+  },
+
+  /* ── Progress ────────────────────────────── */
+  progressTrack: {
+    marginHorizontal: spacing.lg,
+    marginTop: spacing.xs,
+    height: 8,
+    borderRadius: radius.pill,
+    backgroundColor: colors.bg.b3,
+    overflow: 'hidden',
+  },
+  progressFill: {
+    height: '100%',
+    borderRadius: radius.pill,
+    backgroundColor: colors.pastel.lime.base,
+  },
+  progressInfo: {
+    marginHorizontal: spacing.lg,
+    marginTop: spacing.sm,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  progressLabel: {
+    fontSize: typography.fontSize.xs,
+    fontFamily: typography.fontFamily.body,
+    color: colors.text.secondary,
+  },
+  progressStats: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  progressStatText: {
+    fontSize: typography.fontSize.xs,
+    fontWeight: typography.fontWeight.medium,
+    fontFamily: typography.fontFamily.bodyMedium,
+  },
+
+  /* ── Question Card ───────────────────────── */
+  questionArea: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: spacing.xl + 4,
+  },
+  questionCard: {
+    alignItems: 'center',
+    borderRadius: radius.stone,
+    backgroundColor: colors.bg.b2,
+    borderWidth: 1,
+    borderColor: colors.border.default,
+    paddingVertical: spacing['3xl'],
+    paddingHorizontal: spacing['2xl'],
+  },
+  questionHint: {
+    marginBottom: spacing.sm,
+    fontSize: typography.fontSize.sm,
+    fontFamily: typography.fontFamily.body,
+    color: colors.text.secondary,
+  },
+  questionWord: {
+    fontSize: 36,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.bodyBold,
+    color: colors.text.primary,
+  },
+  pronunciation: {
+    marginTop: spacing.sm,
+    fontSize: typography.fontSize.sm,
+    fontFamily: typography.fontFamily.body,
+    color: colors.text.tertiary,
+  },
+  translationContainer: {
+    marginTop: spacing.lg,
+    alignItems: 'center',
+  },
+  correctArticleBadge: {
+    borderRadius: radius.pill,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.xs + 2,
+  },
+  correctArticleText: {
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.bodyBold,
+  },
+  translationText: {
+    marginTop: spacing.sm,
+    fontSize: typography.fontSize.sm,
+    fontFamily: typography.fontFamily.body,
+    color: colors.text.secondary,
+  },
+
+  /* ── Feedback Overlay ────────────────────── */
+  feedbackOverlay: {
+    position: 'absolute',
+    alignItems: 'center',
+  },
+  feedbackCircle: {
+    borderRadius: radius.pill,
+    padding: spacing.lg,
+  },
+
+  /* ── Gender Buttons ──────────────────────── */
+  buttonsArea: {
+    paddingHorizontal: spacing.xl + 4,
+    paddingBottom: spacing['3xl'],
+  },
+  buttonsRow: {
+    flexDirection: 'row',
+    gap: spacing.md,
+  },
+  genderBtn: {
+    flex: 1,
+    alignItems: 'center',
+    borderRadius: radius.stone,
+    paddingVertical: spacing.xl,
+  },
+  genderArticle: {
+    fontSize: 28,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.bodyBold,
+  },
+  genderLabel: {
+    marginTop: spacing.xs,
+    fontSize: typography.fontSize.xs,
+    fontWeight: typography.fontWeight.medium,
+    fontFamily: typography.fontFamily.bodyMedium,
+  },
+  genderIcon: {
+    marginTop: spacing.sm,
+  },
+
+  /* ── Result Screen ───────────────────────── */
+  resultCenter: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: spacing.xl + 4,
+  },
+  resultHero: {
+    width: '100%',
+    alignItems: 'center',
+    borderRadius: radius['2xl'],
+    backgroundColor: colors.bg.b2,
+    borderWidth: 1,
+    borderColor: colors.pastel.lime.base + '33',
+    paddingVertical: spacing['3xl'],
+    paddingHorizontal: spacing['2xl'],
+  },
+  resultIconCircle: {
+    marginBottom: spacing.lg,
+    height: 64,
+    width: 64,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 32,
+    backgroundColor: colors.pastel.lime.base,
+  },
+  resultTitle: {
+    fontSize: typography.fontSize.xl,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.heading,
+    color: colors.text.primary,
+  },
+  resultSubtitle: {
+    marginTop: spacing.xs,
+    fontSize: typography.fontSize.base,
+    fontFamily: typography.fontFamily.body,
+    color: colors.text.secondary,
+  },
+
+  /* ── Stat Cards ──────────────────────────── */
+  statRow: {
+    marginTop: spacing.lg,
+    width: '100%',
+    flexDirection: 'row',
+    gap: spacing.md,
+  },
+  statCard: {
+    flex: 1,
+    alignItems: 'center',
+    borderRadius: radius.stone,
+    backgroundColor: colors.bg.b2,
+    borderWidth: 1,
+    borderColor: colors.border.default,
+    paddingVertical: spacing.lg,
+  },
+  statValueWhite: {
+    fontSize: typography.fontSize.xl,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.bodyBold,
+    color: colors.text.primary,
+  },
+  statValueSmall: {
+    fontSize: typography.fontSize.lg,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.bodyBold,
+  },
+  statLabel: {
+    fontSize: typography.fontSize.xs,
+    color: colors.text.secondary,
+    marginTop: 2,
+  },
+
+  /* ── Result Actions ──────────────────────── */
+  resultActions: {
+    marginTop: spacing['2xl'],
+    width: '100%',
+    gap: spacing.md,
+  },
+  playAgainBtn: {
+    borderRadius: radius.pill,
+    paddingVertical: 14,
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    backgroundColor: colors.pastel.lime.base,
+  },
+  playAgainText: {
+    marginLeft: spacing.sm,
+    fontSize: typography.fontSize.md,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.bodyBold,
+    color: colors.pastel.lime.on,
+  },
+  goBackBtn: {
+    alignItems: 'center',
+    borderRadius: radius.stone,
+    backgroundColor: colors.bg.b2,
+    borderWidth: 1,
+    borderColor: colors.border.default,
+    paddingVertical: 14,
+  },
+  goBackText: {
+    fontSize: typography.fontSize.md,
+    fontWeight: typography.fontWeight.semibold,
+    fontFamily: typography.fontFamily.bodySemibold,
+    color: colors.text.secondary,
+  },
+});

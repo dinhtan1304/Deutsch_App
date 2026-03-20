@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, Animated, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, Animated, ActivityIndicator, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -8,6 +8,12 @@ import { useRandomWords } from '@/hooks/useWords';
 import { useGameSession } from '@/hooks/useGameSession';
 import { Difficulty, Word } from '@/types';
 import * as Haptics from 'expo-haptics';
+import { spacing, radius, typography } from '@/theme';
+import { useXPStore, calculateGameXP } from '@/stores/xpStore';
+import { XPToast } from '@/components/ui/XPToast';
+import { XPSummary } from '@/components/ui/XPSummary';
+import { ComboBadge } from '@/components/ui/ComboBadge';
+import { useThemeStore } from '@/stores/themeStore';
 
 type Phase = 'playing' | 'result';
 
@@ -39,6 +45,8 @@ function buildQuestions(words: Word[]): QuizQuestion[] {
 }
 
 export default function QuickQuizScreen() {
+  const colors = useThemeStore((s) => s.colors);
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const router = useRouter();
   const { difficulty = 'beginner', count = '10', category } = useLocalSearchParams<{
     difficulty: Difficulty;
@@ -74,6 +82,19 @@ export default function QuickQuizScreen() {
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [timeLeft, setTimeLeft] = useState(15);
   const [sessionStarted, setSessionStarted] = useState(false);
+
+  // XP state
+  const [xpToastAmount, setXpToastAmount] = useState(0);
+  const [xpToastKey, setXpToastKey] = useState(0);
+  const [sessionXP, setSessionXP] = useState(0);
+  const [isNewBest, setIsNewBest] = useState(false);
+  const [leveledUp, setLeveledUp] = useState(false);
+
+  const addXP = useXPStore((s) => s.addXP);
+  const updateBestScore = useXPStore((s) => s.updateBestScore);
+  const xpLevel = useXPStore((s) => s.level);
+  const xpInCurrentLevel = useXPStore((s) => s.xpInCurrentLevel);
+  const xpNeededForLevel = useXPStore((s) => s.xpNeededForLevel);
 
   // Animations
   const bgFlash = useRef(new Animated.Value(0)).current;
@@ -176,6 +197,12 @@ export default function QuickQuizScreen() {
         });
         triggerCorrectAnimation();
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
+
+        // XP toast
+        const xpGain = 10 + (streak >= 10 ? 40 : streak >= 5 ? 20 : streak >= 3 ? 10 : 0);
+        setXpToastAmount(xpGain);
+        setXpToastKey((k) => k + 1);
+        setSessionXP((x) => x + xpGain);
       } else {
         setWrongCount((w) => w + 1);
         setStreak(0);
@@ -194,6 +221,15 @@ export default function QuickQuizScreen() {
     if (phase === 'result' && !sessionEndedRef.current) {
       sessionEndedRef.current = true;
       session.end(score, bestStreak, correctCount, wrongCount);
+
+      // XP + Best Score
+      const finalAccuracy = questions.length > 0 ? Math.round((correctCount / questions.length) * 100) : 0;
+      const totalXP = calculateGameXP(correctCount, bestStreak, finalAccuracy);
+      setSessionXP(totalXP);
+      const { leveledUp: didLevelUp } = addXP(totalXP);
+      setLeveledUp(didLevelUp);
+      const newBest = updateBestScore('quick-quiz', score);
+      setIsNewBest(newBest);
     }
   }, [phase]);
 
@@ -210,6 +246,11 @@ export default function QuickQuizScreen() {
     setTimeLeft(15);
     setSessionStarted(false);
     sessionEndedRef.current = false;
+    setSessionXP(0);
+    setXpToastAmount(0);
+    setXpToastKey(0);
+    setIsNewBest(false);
+    setLeveledUp(false);
     refetch();
   };
 
@@ -221,9 +262,9 @@ export default function QuickQuizScreen() {
   // Loading state
   if (isLoading || questions.length === 0) {
     return (
-      <SafeAreaView className="flex-1 items-center justify-center bg-dark-bg">
-        <ActivityIndicator size="large" color="#8B5CF6" />
-        <Text className="mt-4 text-gray-400">Đang tải câu hỏi...</Text>
+      <SafeAreaView style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={colors.pastel.lavender.base} />
+        <Text style={styles.loadingText}>Đang tải câu hỏi...</Text>
       </SafeAreaView>
     );
   }
@@ -232,78 +273,81 @@ export default function QuickQuizScreen() {
   if (phase === 'result') {
     const accuracy = questions.length > 0 ? Math.round((correctCount / questions.length) * 100) : 0;
     return (
-      <SafeAreaView className="flex-1 bg-dark-bg">
-        <View className="flex-1 items-center justify-center px-6">
+      <SafeAreaView style={styles.safeArea}>
+        <View style={styles.resultCenter}>
           <LinearGradient
-            colors={['#8B5CF6', '#7C3AED']}
+            colors={colors.gradient.quiz}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
-            style={{ borderRadius: 24, padding: 32, width: '100%', alignItems: 'center' }}
+            style={styles.resultGradient}
           >
-            <View className="mb-4 h-16 w-16 items-center justify-center rounded-full bg-white/20">
+            <View style={styles.resultIconCircle}>
               <Ionicons
                 name={accuracy >= 70 ? 'trophy' : accuracy >= 40 ? 'thumbs-up' : 'refresh'}
                 size={32}
-                color="#FFFFFF"
+                color={colors.text.primary}
               />
             </View>
-            <Text className="text-2xl font-bold text-white">
+            <Text style={styles.resultTitle}>
               {accuracy >= 70 ? 'Xuất sắc!' : accuracy >= 40 ? 'Khá tốt!' : 'Cần luyện thêm!'}
             </Text>
-            <Text className="mt-1 text-white/70">Quick Quiz hoàn thành</Text>
+            <Text style={styles.resultSubtitle}>Quick Quiz hoàn thành</Text>
           </LinearGradient>
 
-          <View className="mt-6 w-full flex-row" style={{ gap: 12 }}>
-            <View className="flex-1 items-center rounded-2xl bg-dark-card p-4">
-              <Text className="text-2xl font-bold text-white">{score}</Text>
-              <Text className="text-xs text-gray-400">Điểm</Text>
+          <View style={styles.statsRow}>
+            <View style={styles.statCard}>
+              <Text style={styles.statValuePrimary}>{score}</Text>
+              <Text style={styles.statLabel}>Điểm</Text>
             </View>
-            <View className="flex-1 items-center rounded-2xl bg-dark-card p-4">
-              <Text className="text-2xl font-bold text-emerald-400">{accuracy}%</Text>
-              <Text className="text-xs text-gray-400">Chính xác</Text>
+            <View style={styles.statCard}>
+              <Text style={[styles.statValuePrimary, { color: colors.pastel.mint.base }]}>{accuracy}%</Text>
+              <Text style={styles.statLabel}>Chính xác</Text>
             </View>
-            <View className="flex-1 items-center rounded-2xl bg-dark-card p-4">
-              <Text className="text-2xl font-bold text-amber-400">{bestStreak}</Text>
-              <Text className="text-xs text-gray-400">Streak</Text>
-            </View>
-          </View>
-
-          <View className="mt-4 w-full flex-row" style={{ gap: 12 }}>
-            <View className="flex-1 items-center rounded-2xl bg-dark-card p-4">
-              <Text className="text-lg font-bold text-emerald-400">{correctCount}</Text>
-              <Text className="text-xs text-gray-400">Đúng</Text>
-            </View>
-            <View className="flex-1 items-center rounded-2xl bg-dark-card p-4">
-              <Text className="text-lg font-bold text-red-400">{wrongCount}</Text>
-              <Text className="text-xs text-gray-400">Sai</Text>
+            <View style={styles.statCard}>
+              <Text style={[styles.statValuePrimary, { color: colors.pastel.peach.base }]}>{bestStreak}</Text>
+              <Text style={styles.statLabel}>Chuỗi</Text>
             </View>
           </View>
 
-          <View className="mt-8 w-full" style={{ gap: 12 }}>
+          <View style={styles.statsRow2}>
+            <View style={styles.statCard}>
+              <Text style={[styles.statValueSecondary, { color: colors.pastel.mint.base }]}>{correctCount}</Text>
+              <Text style={styles.statLabel}>Đúng</Text>
+            </View>
+            <View style={styles.statCard}>
+              <Text style={[styles.statValueSecondary, { color: colors.pastel.rose.base }]}>{wrongCount}</Text>
+              <Text style={styles.statLabel}>Sai</Text>
+            </View>
+          </View>
+
+          <XPSummary
+            xpEarned={sessionXP}
+            isNewBest={isNewBest}
+            level={xpLevel}
+            leveledUp={leveledUp}
+            xpInCurrentLevel={xpInCurrentLevel}
+            xpNeededForLevel={xpNeededForLevel}
+          />
+
+          <View style={styles.resultActions}>
             <TouchableOpacity activeOpacity={0.8} onPress={handlePlayAgain}>
               <LinearGradient
-                colors={['#8B5CF6', '#7C3AED']}
+                colors={colors.gradient.quiz}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
-                style={{
-                  borderRadius: 16,
-                  paddingVertical: 14,
-                  alignItems: 'center',
-                  flexDirection: 'row',
-                  justifyContent: 'center',
-                }}
+                style={styles.playAgainGradient}
               >
-                <Ionicons name="refresh" size={20} color="#FFFFFF" />
-                <Text className="ml-2 text-base font-bold text-white">Chơi lại</Text>
+                <Ionicons name="refresh" size={20} color={colors.text.primary} />
+                <Text style={styles.playAgainText}>Chơi lại</Text>
               </LinearGradient>
             </TouchableOpacity>
 
             <TouchableOpacity
               activeOpacity={0.7}
               onPress={() => router.back()}
-              className="items-center rounded-2xl bg-dark-card py-4"
+              style={styles.backToMenuBtn}
             >
-              <Text className="text-base font-semibold text-gray-300">Quay về</Text>
+              <Text style={styles.backToMenuText}>Quay về</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -313,55 +357,63 @@ export default function QuickQuizScreen() {
 
   // Playing state
   return (
-    <SafeAreaView className="flex-1 bg-dark-bg">
-      <Animated.View className="flex-1" style={{ backgroundColor: bgColor }}>
+    <SafeAreaView style={styles.safeArea}>
+      <Animated.View style={[styles.flex1, { backgroundColor: bgColor }]}>
         {/* Top Bar */}
-        <View className="flex-row items-center justify-between px-4 pt-3 pb-2">
+        <View style={styles.topBar}>
           <TouchableOpacity
             onPress={() => router.back()}
-            className="h-10 w-10 items-center justify-center rounded-full bg-dark-card"
+            style={styles.closeButton}
           >
-            <Ionicons name="close" size={20} color="#9CA3AF" />
+            <Ionicons name="close" size={20} color={colors.text.secondary} />
           </TouchableOpacity>
 
-          <View className="flex-row items-center">
-            <Ionicons name="flame" size={18} color="#F59E0B" />
-            <Text className="ml-1 text-sm font-bold text-amber-400">{streak}</Text>
+          <View style={styles.streakRow}>
+            <Ionicons name="flame" size={18} color={colors.pastel.peach.base} />
+            <Text style={styles.streakText}>{streak}</Text>
           </View>
 
-          <View className="flex-row items-center rounded-lg bg-dark-card px-3 py-1.5">
-            <Ionicons name="star" size={16} color="#8B5CF6" />
-            <Text className="ml-1 text-sm font-bold text-white">{score}</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+            <ComboBadge streak={streak} />
+            <View style={styles.scoreBadge}>
+              <Ionicons name="star" size={16} color={colors.pastel.lavender.base} />
+              <Text style={styles.scoreText}>{score}</Text>
+              <XPToast amount={xpToastAmount} triggerKey={xpToastKey} />
+            </View>
           </View>
         </View>
 
         {/* Progress Bar */}
-        <View className="mx-4 mt-1 h-2 overflow-hidden rounded-full bg-dark-secondary">
+        <View style={styles.progressBarTrack}>
           <Animated.View
-            className="h-full rounded-full bg-primary-500"
-            style={{
-              width: progressAnim.interpolate({
-                inputRange: [0, 1],
-                outputRange: ['0%', '100%'],
-              }),
-            }}
+            style={[
+              styles.progressBarFill,
+              {
+                backgroundColor: colors.pastel.lavender.base,
+                width: progressAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: ['0%', '100%'],
+                }),
+              },
+            ]}
           />
         </View>
 
-        <View className="mx-4 mt-2 flex-row items-center justify-between">
-          <Text className="text-xs text-gray-400">
+        <View style={styles.progressInfo}>
+          <Text style={styles.progressLabel}>
             Câu {currentIndex + 1}/{questions.length}
           </Text>
-          <View className="flex-row items-center">
+          <View style={styles.timerRow}>
             <Ionicons
               name="timer-outline"
               size={14}
-              color={timeLeft <= 5 ? '#EF4444' : '#9CA3AF'}
+              color={timeLeft <= 5 ? colors.pastel.rose.base : colors.text.secondary}
             />
             <Text
-              className={`ml-1 text-xs font-bold ${
-                timeLeft <= 5 ? 'text-red-400' : 'text-gray-400'
-              }`}
+              style={[
+                styles.timerText,
+                { color: timeLeft <= 5 ? colors.pastel.rose.base : colors.text.secondary },
+              ]}
             >
               {timeLeft}s
             </Text>
@@ -370,48 +422,50 @@ export default function QuickQuizScreen() {
 
         {/* Question */}
         <Animated.View
-          className="mx-4 mt-6"
-          style={{ transform: [{ translateX: shakeAnim }] }}
+          style={[styles.questionWrapper, { transform: [{ translateX: shakeAnim }] }]}
         >
-          <View className="items-center rounded-2xl bg-dark-card p-6">
+          <View style={styles.questionCard}>
             {currentQuestion?.word.article && (
-              <Text className="mb-1 text-sm text-gray-400">{currentQuestion.word.article}</Text>
+              <Text style={styles.articleText}>{currentQuestion.word.article}</Text>
             )}
-            <Text className="text-3xl font-bold text-white">{currentQuestion?.word.word}</Text>
+            <Text style={styles.wordText}>{currentQuestion?.word.word}</Text>
             {currentQuestion?.word.pronunciation && (
-              <Text className="mt-2 text-sm text-gray-500">
+              <Text style={styles.pronunciationText}>
                 [{currentQuestion.word.pronunciation}]
               </Text>
             )}
-            <View className="mt-3 rounded-lg bg-dark-secondary px-3 py-1">
-              <Text className="text-xs text-gray-400">{currentQuestion?.word.category}</Text>
+            <View style={styles.categoryBadge}>
+              <Text style={styles.categoryBadgeText}>{currentQuestion?.word.category}</Text>
             </View>
           </View>
         </Animated.View>
 
         {/* Answer Options */}
-        <View className="mx-4 mt-6" style={{ gap: 10 }}>
+        <View style={styles.optionsContainer}>
           {currentQuestion?.options.map((option, index) => {
             const isSelected = selectedAnswer === option;
             const isCorrectOption = option === currentQuestion.correctAnswer;
             const showResult = selectedAnswer !== null;
 
-            let bgClass = 'bg-dark-card';
-            let borderClass = '';
-            let textClass = 'text-white';
+            let bgStyle = colors.bg.b2;
+            let borderColor = 'transparent';
+            let borderW = 0;
+            let textColor = colors.text.primary;
 
             if (showResult) {
               if (isCorrectOption) {
-                bgClass = 'bg-emerald-500/10';
-                borderClass = 'border border-emerald-500';
-                textClass = 'text-emerald-400';
+                bgStyle = colors.pastel.mint.dim;
+                borderColor = colors.pastel.mint.base;
+                borderW = 1;
+                textColor = colors.pastel.mint.base;
               } else if (isSelected && !isCorrectOption) {
-                bgClass = 'bg-red-500/10';
-                borderClass = 'border border-red-500';
-                textClass = 'text-red-400';
+                bgStyle = colors.pastel.rose.dim;
+                borderColor = colors.pastel.rose.base;
+                borderW = 1;
+                textColor = colors.pastel.rose.base;
               } else {
-                bgClass = 'bg-dark-card';
-                textClass = 'text-gray-500';
+                bgStyle = colors.bg.b2;
+                textColor = colors.text.tertiary;
               }
             }
 
@@ -423,35 +477,50 @@ export default function QuickQuizScreen() {
                 activeOpacity={0.7}
                 disabled={selectedAnswer !== null}
                 onPress={() => handleAnswer(option)}
-                className={`flex-row items-center rounded-xl p-4 ${bgClass} ${borderClass}`}
+                style={[
+                  styles.optionItem,
+                  {
+                    backgroundColor: bgStyle,
+                    borderWidth: borderW,
+                    borderColor,
+                  },
+                ]}
               >
                 <View
-                  className={`mr-3 h-8 w-8 items-center justify-center rounded-lg ${
-                    showResult && isCorrectOption
-                      ? 'bg-emerald-500/20'
-                      : showResult && isSelected
-                        ? 'bg-red-500/20'
-                        : 'bg-dark-secondary'
-                  }`}
+                  style={[
+                    styles.optionLetterBox,
+                    {
+                      backgroundColor:
+                        showResult && isCorrectOption
+                          ? colors.pastel.mint.dim
+                          : showResult && isSelected
+                            ? colors.pastel.rose.dim
+                            : colors.bg.b3,
+                    },
+                  ]}
                 >
                   <Text
-                    className={`text-xs font-bold ${
-                      showResult && isCorrectOption
-                        ? 'text-emerald-400'
-                        : showResult && isSelected
-                          ? 'text-red-400'
-                          : 'text-gray-400'
-                    }`}
+                    style={[
+                      styles.optionLetter,
+                      {
+                        color:
+                          showResult && isCorrectOption
+                            ? colors.pastel.mint.base
+                            : showResult && isSelected
+                              ? colors.pastel.rose.base
+                              : colors.text.secondary,
+                      },
+                    ]}
                   >
                     {optionLetters[index]}
                   </Text>
                 </View>
-                <Text className={`flex-1 text-sm font-medium ${textClass}`}>{option}</Text>
+                <Text style={[styles.optionText, { color: textColor }]}>{option}</Text>
                 {showResult && isCorrectOption && (
-                  <Ionicons name="checkmark-circle" size={20} color="#10B981" />
+                  <Ionicons name="checkmark-circle" size={20} color={colors.pastel.mint.base} />
                 )}
                 {showResult && isSelected && !isCorrectOption && (
-                  <Ionicons name="close-circle" size={20} color="#EF4444" />
+                  <Ionicons name="close-circle" size={20} color={colors.pastel.rose.base} />
                 )}
               </TouchableOpacity>
             );
@@ -461,3 +530,274 @@ export default function QuickQuizScreen() {
     </SafeAreaView>
   );
 }
+
+const createStyles = (colors: any) => StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: colors.bg.b0,
+  },
+  flex1: {
+    flex: 1,
+  },
+  loadingContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.bg.b0,
+  },
+  loadingText: {
+    marginTop: spacing.lg,
+    color: colors.text.secondary,
+    fontSize: typography.fontSize.base,
+    fontFamily: typography.fontFamily.body,
+  },
+  resultCenter: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: spacing['2xl'],
+  },
+  resultGradient: {
+    borderRadius: radius['2xl'],
+    padding: 32,
+    width: '100%',
+    alignItems: 'center',
+  },
+  resultIconCircle: {
+    marginBottom: spacing.lg,
+    height: 64,
+    width: 64,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 32,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+  },
+  resultTitle: {
+    fontSize: typography.fontSize.xl,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.heading,
+    color: colors.text.primary,
+  },
+  resultSubtitle: {
+    marginTop: spacing.xs,
+    color: 'rgba(255,255,255,0.7)',
+    fontSize: typography.fontSize.base,
+  },
+  statsRow: {
+    marginTop: spacing['2xl'],
+    width: '100%',
+    flexDirection: 'row',
+    gap: 12,
+  },
+  statsRow2: {
+    marginTop: spacing.lg,
+    width: '100%',
+    flexDirection: 'row',
+    gap: 12,
+  },
+  statCard: {
+    flex: 1,
+    alignItems: 'center',
+    borderRadius: radius.stone,
+    backgroundColor: colors.bg.b2,
+    padding: spacing.lg,
+    borderWidth: 1,
+    borderColor: colors.border.subtle,
+  },
+  statValuePrimary: {
+    fontSize: typography.fontSize.xl,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.bodyBold,
+    color: colors.text.primary,
+  },
+  statValueSecondary: {
+    fontSize: typography.fontSize.lg,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.bodyBold,
+  },
+  statLabel: {
+    fontSize: typography.fontSize.xs,
+    color: colors.text.secondary,
+  },
+  resultActions: {
+    marginTop: spacing['3xl'],
+    width: '100%',
+    gap: 12,
+  },
+  playAgainGradient: {
+    borderRadius: radius.stone,
+    paddingVertical: 14,
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  playAgainText: {
+    marginLeft: spacing.sm,
+    fontSize: typography.fontSize.md,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.bodyBold,
+    color: colors.text.primary,
+  },
+  backToMenuBtn: {
+    alignItems: 'center',
+    borderRadius: radius.stone,
+    backgroundColor: colors.bg.b2,
+    paddingVertical: spacing.lg,
+    borderWidth: 1,
+    borderColor: colors.border.subtle,
+  },
+  backToMenuText: {
+    fontSize: typography.fontSize.md,
+    fontWeight: typography.fontWeight.semibold,
+    fontFamily: typography.fontFamily.bodySemibold,
+    color: colors.text.secondary,
+  },
+  topBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.sm,
+  },
+  closeButton: {
+    height: 40,
+    width: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 20,
+    backgroundColor: colors.bg.b2,
+  },
+  streakRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  streakText: {
+    marginLeft: spacing.xs,
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.bodyBold,
+    color: colors.pastel.peach.base,
+  },
+  scoreBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: radius.sm,
+    backgroundColor: colors.bg.b2,
+    paddingHorizontal: spacing.md,
+    paddingVertical: 6,
+  },
+  scoreText: {
+    marginLeft: spacing.xs,
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.bodyBold,
+    color: colors.text.primary,
+  },
+  progressBarTrack: {
+    marginHorizontal: spacing.lg,
+    marginTop: spacing.xs,
+    height: 8,
+    overflow: 'hidden',
+    borderRadius: radius.pill,
+    backgroundColor: colors.bg.b3,
+  },
+  progressBarFill: {
+    height: '100%',
+    borderRadius: radius.pill,
+  },
+  progressInfo: {
+    marginHorizontal: spacing.lg,
+    marginTop: spacing.sm,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  progressLabel: {
+    fontSize: typography.fontSize.xs,
+    fontFamily: typography.fontFamily.body,
+    color: colors.text.secondary,
+  },
+  timerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  timerText: {
+    marginLeft: spacing.xs,
+    fontSize: typography.fontSize.xs,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.bodyBold,
+  },
+  questionWrapper: {
+    marginHorizontal: spacing.lg,
+    marginTop: spacing['2xl'],
+  },
+  questionCard: {
+    alignItems: 'center',
+    borderRadius: radius.stone,
+    backgroundColor: colors.bg.b2,
+    padding: spacing['2xl'],
+    borderWidth: 1,
+    borderColor: colors.border.subtle,
+  },
+  articleText: {
+    marginBottom: spacing.xs,
+    fontSize: typography.fontSize.sm,
+    fontFamily: typography.fontFamily.body,
+    color: colors.text.secondary,
+  },
+  wordText: {
+    fontSize: 30,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.bodyBold,
+    color: colors.text.primary,
+  },
+  pronunciationText: {
+    marginTop: spacing.sm,
+    fontSize: typography.fontSize.sm,
+    fontFamily: typography.fontFamily.body,
+    color: colors.text.tertiary,
+  },
+  categoryBadge: {
+    marginTop: spacing.md,
+    borderRadius: radius.sm,
+    backgroundColor: colors.bg.b3,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+  },
+  categoryBadgeText: {
+    fontSize: typography.fontSize.xs,
+    fontFamily: typography.fontFamily.body,
+    color: colors.text.secondary,
+  },
+  optionsContainer: {
+    marginHorizontal: spacing.lg,
+    marginTop: spacing['2xl'],
+    gap: 10,
+  },
+  optionItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: radius.lg,
+    padding: spacing.lg,
+  },
+  optionLetterBox: {
+    marginRight: spacing.md,
+    height: 32,
+    width: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: radius.sm,
+  },
+  optionLetter: {
+    fontSize: typography.fontSize.xs,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.bodyBold,
+  },
+  optionText: {
+    flex: 1,
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.medium,
+    fontFamily: typography.fontFamily.bodyMedium,
+  },
+});

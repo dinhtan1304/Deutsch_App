@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
   Pressable,
   Alert,
+  StyleSheet,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -15,8 +16,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { subscriptionsApi } from '@/lib/api/subscriptions';
 import type { Plan, MySubscription, BankInfo } from '@/lib/api/subscriptions';
-
-const PREMIUM = '#A855F7';
+import { spacing, radius, typography } from '@/theme';
+import { useThemeStore } from '@/stores/themeStore';
 
 function FeatureRow({
   text,
@@ -25,23 +26,24 @@ function FeatureRow({
   text: string;
   included: boolean;
 }) {
+  const colors = useThemeStore((s) => s.colors);
+  const styles = useMemo(() => createStyles(colors), [colors]);
   return (
-    <View className="flex-row items-center py-2">
+    <View style={styles.featureRow}>
       <View
-        className="mr-3 h-6 w-6 items-center justify-center rounded-full"
-        style={{
-          backgroundColor: included ? '#22C55E20' : '#EF444420',
-        }}
+        style={[
+          styles.featureIcon,
+          { backgroundColor: included ? `${colors.pastel.mint.base}20` : `${colors.pastel.rose.base}20` },
+        ]}
       >
         <Ionicons
           name={included ? 'checkmark' : 'close'}
           size={14}
-          color={included ? '#22C55E' : '#EF4444'}
+          color={included ? colors.pastel.mint.base : colors.pastel.rose.base}
         />
       </View>
       <Text
-        className="flex-1 text-sm"
-        style={{ color: included ? '#FFFFFF' : '#6B7280' }}
+        style={[styles.featureText, { color: included ? colors.text.primary : colors.text.tertiary }]}
       >
         {text}
       </Text>
@@ -50,33 +52,35 @@ function FeatureRow({
 }
 
 function BankInfoCard({ bankInfo }: { bankInfo: BankInfo }) {
+  const colors = useThemeStore((s) => s.colors);
+  const styles = useMemo(() => createStyles(colors), [colors]);
   return (
-    <View className="mt-4 rounded-2xl bg-dark-card p-4">
-      <Text className="mb-3 text-base font-semibold text-white">
-        Thong tin chuyen khoan
+    <View style={styles.bankCard}>
+      <Text style={styles.bankTitle}>
+        Thông tin chuyển khoản
       </Text>
-      <View className="space-y-2">
-        <View className="flex-row justify-between py-1">
-          <Text className="text-sm text-gray-400">Ngan hang</Text>
-          <Text className="text-sm font-medium text-white">{bankInfo.bankName}</Text>
+      <View style={{ gap: 8 }}>
+        <View style={styles.bankRow}>
+          <Text style={styles.bankLabel}>Ngân hàng</Text>
+          <Text style={styles.bankValue}>{bankInfo.bankName}</Text>
         </View>
-        <View className="flex-row justify-between py-1">
-          <Text className="text-sm text-gray-400">So tai khoan</Text>
-          <Text className="text-sm font-medium text-white">{bankInfo.accountNumber}</Text>
+        <View style={styles.bankRow}>
+          <Text style={styles.bankLabel}>Số tài khoản</Text>
+          <Text style={styles.bankValue}>{bankInfo.accountNumber}</Text>
         </View>
-        <View className="flex-row justify-between py-1">
-          <Text className="text-sm text-gray-400">Chu tai khoan</Text>
-          <Text className="text-sm font-medium text-white">{bankInfo.accountName}</Text>
+        <View style={styles.bankRow}>
+          <Text style={styles.bankLabel}>Chủ tài khoản</Text>
+          <Text style={styles.bankValue}>{bankInfo.accountName}</Text>
         </View>
-        <View className="flex-row justify-between py-1">
-          <Text className="text-sm text-gray-400">Noi dung</Text>
-          <Text className="text-sm font-bold" style={{ color: PREMIUM }}>
+        <View style={styles.bankRow}>
+          <Text style={styles.bankLabel}>Nội dung</Text>
+          <Text style={[styles.bankValueBold, { color: colors.pastel.lavender.base }]}>
             {bankInfo.content}
           </Text>
         </View>
-        <View className="flex-row justify-between py-1">
-          <Text className="text-sm text-gray-400">So tien</Text>
-          <Text className="text-sm font-bold" style={{ color: '#22C55E' }}>
+        <View style={styles.bankRow}>
+          <Text style={styles.bankLabel}>Số tiền</Text>
+          <Text style={[styles.bankValueBold, { color: colors.pastel.mint.base }]}>
             {bankInfo.amount.toLocaleString('vi-VN')} VND
           </Text>
         </View>
@@ -86,6 +90,8 @@ function BankInfoCard({ bankInfo }: { bankInfo: BankInfo }) {
 }
 
 export default function PricingScreen() {
+  const colors = useThemeStore((s) => s.colors);
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const router = useRouter();
   const queryClient = useQueryClient();
   const [selectedPeriod, setSelectedPeriod] = useState<'monthly' | 'yearly'>('monthly');
@@ -118,12 +124,12 @@ export default function PricingScreen() {
       setBankInfo(data.bankInfo);
       queryClient.invalidateQueries({ queryKey: ['subscriptions', 'me'] });
       Alert.alert(
-        'Yeu cau nang cap',
-        'Vui long chuyen khoan theo thong tin ben duoi de hoan tat nang cap.'
+        'Yêu cầu nâng cấp',
+        'Vui lòng chuyển khoản theo thông tin bên dưới để hoàn tất nâng cấp.'
       );
     },
     onError: () => {
-      Alert.alert('Loi', 'Khong the yeu cau nang cap. Vui long thu lai.');
+      Alert.alert('Lỗi', 'Không thể yêu cầu nâng cấp. Vui lòng thử lại.');
     },
   });
 
@@ -145,12 +151,12 @@ export default function PricingScreen() {
 
   const handleUpgrade = useCallback(() => {
     Alert.alert(
-      'Nang cap Premium',
-      `Ban muon nang cap goi ${selectedPeriod === 'monthly' ? 'thang' : 'nam'} voi gia ${displayPrice.toLocaleString('vi-VN')} VND?`,
+      'Nâng cấp Premium',
+      `Bạn muốn nâng cấp gói ${selectedPeriod === 'monthly' ? 'tháng' : 'năm'} với giá ${displayPrice.toLocaleString('vi-VN')} VND?`,
       [
-        { text: 'Huy', style: 'cancel' },
+        { text: 'Hủy', style: 'cancel' },
         {
-          text: 'Nang cap',
+          text: 'Nâng cấp',
           onPress: () => upgradeMutation.mutate(selectedPeriod),
         },
       ]
@@ -158,47 +164,41 @@ export default function PricingScreen() {
   }, [selectedPeriod, displayPrice, upgradeMutation]);
 
   return (
-    <SafeAreaView className="flex-1 bg-dark-bg" edges={['top']}>
+    <SafeAreaView style={styles.container} edges={['top']}>
       {/* Header */}
-      <View className="flex-row items-center px-4 pb-3 pt-2">
-        <Pressable onPress={() => router.back()} className="mr-3 p-1">
-          <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
+      <View style={styles.header}>
+        <Pressable onPress={() => router.back()} style={styles.backBtn}>
+          <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
         </Pressable>
-        <Text className="flex-1 text-xl font-bold text-white">Goi dang ky</Text>
+        <Text style={styles.headerTitle}>Gói đăng ký</Text>
       </View>
 
       <ScrollView
-        className="flex-1 px-4"
+        style={styles.scrollView}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
             refreshing={isRefetching}
             onRefresh={onRefresh}
-            tintColor={PREMIUM}
-            colors={[PREMIUM]}
+            tintColor={colors.pastel.lavender.base}
+            colors={[colors.pastel.lavender.base]}
           />
         }
       >
         {isLoading ? (
-          <View className="items-center py-20">
-            <ActivityIndicator size="large" color={PREMIUM} />
+          <View style={styles.centered}>
+            <ActivityIndicator size="large" color={colors.pastel.lavender.base} />
           </View>
         ) : (
           <>
             {/* Current Plan Badge */}
-            <View className="mb-4 rounded-2xl bg-dark-card p-4">
-              <View className="flex-row items-center">
+            <View style={styles.card}>
+              <View style={styles.planBadgeRow}>
                 <LinearGradient
-                  colors={isPremium ? ['#A855F7', '#6366F1'] : ['#4B5563', '#374151']}
+                  colors={isPremium ? ['#B8A9D4', '#8EAD92'] : ['#4B5563', '#374151']}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 1 }}
-                  style={{
-                    width: 44,
-                    height: 44,
-                    borderRadius: 12,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
+                  style={styles.planGradientIcon}
                 >
                   <Ionicons
                     name={isPremium ? 'diamond' : 'person'}
@@ -206,21 +206,21 @@ export default function PricingScreen() {
                     color="#FFFFFF"
                   />
                 </LinearGradient>
-                <View className="ml-3 flex-1">
-                  <Text className="text-lg font-bold text-white">
+                <View style={styles.planInfo}>
+                  <Text style={styles.planName}>
                     {isPremium ? 'Premium' : 'Free'}
                   </Text>
-                  <Text className="text-sm text-gray-400">
+                  <Text style={styles.planDesc}>
                     {isPremium
                       ? mySub?.expiresAt
-                        ? `Het han: ${new Date(mySub.expiresAt).toLocaleDateString('vi-VN')}`
-                        : 'Vinh vien'
-                      : 'Goi co ban'}
+                        ? `Hết hạn: ${new Date(mySub.expiresAt).toLocaleDateString('vi-VN')}`
+                        : 'Vĩnh viễn'
+                      : 'Gói cơ bản'}
                   </Text>
                 </View>
                 {isPremium && (
-                  <View className="rounded-lg px-3 py-1" style={{ backgroundColor: `${PREMIUM}20` }}>
-                    <Text className="text-xs font-bold" style={{ color: PREMIUM }}>
+                  <View style={styles.activeBadge}>
+                    <Text style={styles.activeBadgeText}>
                       ACTIVE
                     </Text>
                   </View>
@@ -230,49 +230,51 @@ export default function PricingScreen() {
 
             {/* Period Toggle (only if not premium) */}
             {!isPremium && premiumPlan && (
-              <View className="mb-4 flex-row overflow-hidden rounded-xl bg-dark-card p-1">
+              <View style={styles.periodToggle}>
                 <Pressable
                   onPress={() => setSelectedPeriod('monthly')}
-                  className={`flex-1 items-center rounded-lg py-2.5 ${
-                    selectedPeriod === 'monthly' ? '' : ''
-                  }`}
-                  style={{
-                    backgroundColor: selectedPeriod === 'monthly' ? PREMIUM : 'transparent',
-                  }}
+                  style={[
+                    styles.periodBtn,
+                    { backgroundColor: selectedPeriod === 'monthly' ? colors.pastel.lavender.base : 'transparent' },
+                  ]}
                 >
                   <Text
-                    className={`text-sm font-semibold ${
-                      selectedPeriod === 'monthly' ? 'text-white' : 'text-gray-400'
-                    }`}
+                    style={[
+                      styles.periodBtnLabel,
+                      { color: selectedPeriod === 'monthly' ? colors.text.primary : colors.text.secondary },
+                    ]}
                   >
-                    Thang
+                    Tháng
                   </Text>
                   <Text
-                    className={`text-xs ${
-                      selectedPeriod === 'monthly' ? 'text-white/80' : 'text-gray-500'
-                    }`}
+                    style={[
+                      styles.periodBtnPrice,
+                      { color: selectedPeriod === 'monthly' ? 'rgba(255,255,255,0.8)' : colors.text.tertiary },
+                    ]}
                   >
                     {premiumPlan.monthlyPrice.toLocaleString('vi-VN')} VND
                   </Text>
                 </Pressable>
                 <Pressable
                   onPress={() => setSelectedPeriod('yearly')}
-                  className="flex-1 items-center rounded-lg py-2.5"
-                  style={{
-                    backgroundColor: selectedPeriod === 'yearly' ? PREMIUM : 'transparent',
-                  }}
+                  style={[
+                    styles.periodBtn,
+                    { backgroundColor: selectedPeriod === 'yearly' ? colors.pastel.lavender.base : 'transparent' },
+                  ]}
                 >
                   <Text
-                    className={`text-sm font-semibold ${
-                      selectedPeriod === 'yearly' ? 'text-white' : 'text-gray-400'
-                    }`}
+                    style={[
+                      styles.periodBtnLabel,
+                      { color: selectedPeriod === 'yearly' ? colors.text.primary : colors.text.secondary },
+                    ]}
                   >
-                    Nam
+                    Năm
                   </Text>
                   <Text
-                    className={`text-xs ${
-                      selectedPeriod === 'yearly' ? 'text-white/80' : 'text-gray-500'
-                    }`}
+                    style={[
+                      styles.periodBtnPrice,
+                      { color: selectedPeriod === 'yearly' ? 'rgba(255,255,255,0.8)' : colors.text.tertiary },
+                    ]}
                   >
                     {premiumPlan.yearlyPrice.toLocaleString('vi-VN')} VND
                   </Text>
@@ -281,66 +283,59 @@ export default function PricingScreen() {
             )}
 
             {/* Plan Comparison */}
-            <View className="mb-4">
-              <Text className="mb-2 text-sm font-semibold uppercase tracking-wider text-gray-500">
-                So sanh goi
+            <View style={styles.comparisonSection}>
+              <Text style={styles.sectionLabel}>
+                So sánh gói
               </Text>
 
               {/* Free Plan */}
-              <View className="mb-3 rounded-2xl bg-dark-card p-4">
-                <View className="mb-3 flex-row items-center">
-                  <View className="h-10 w-10 items-center justify-center rounded-xl bg-gray-600/20">
-                    <Ionicons name="person-outline" size={20} color="#9CA3AF" />
+              <View style={styles.comparisonCard}>
+                <View style={styles.comparisonHeader}>
+                  <View style={styles.freeIconBox}>
+                    <Ionicons name="person-outline" size={20} color={colors.text.secondary} />
                   </View>
-                  <View className="ml-3">
-                    <Text className="text-base font-bold text-white">Free</Text>
-                    <Text className="text-xs text-gray-500">Mien phi</Text>
+                  <View style={{ marginLeft: spacing.md }}>
+                    <Text style={styles.comparisonTitle}>Free</Text>
+                    <Text style={styles.comparisonSubtitle}>Miễn phí</Text>
                   </View>
                 </View>
                 {freePlan?.features.map((feature, idx) => (
                   <FeatureRow key={idx} text={feature} included={true} />
                 )) ?? (
                   <>
-                    <FeatureRow text="Hoc tu vung co ban" included={true} />
-                    <FeatureRow text="Tro choi co ban" included={true} />
-                    <FeatureRow text="Gioi han luyen tap moi ngay" included={true} />
-                    <FeatureRow text="Bai thi thu" included={false} />
+                    <FeatureRow text="Học từ vựng cơ bản" included={true} />
+                    <FeatureRow text="Trò chơi cơ bản" included={true} />
+                    <FeatureRow text="Giới hạn luyện tập mỗi ngày" included={true} />
+                    <FeatureRow text="Bài thi thử" included={false} />
                     <FeatureRow text="AI grading" included={false} />
                   </>
                 )}
               </View>
 
               {/* Premium Plan */}
-              <View
-                className="mb-3 overflow-hidden rounded-2xl p-4"
-                style={{ backgroundColor: `${PREMIUM}10`, borderWidth: 1, borderColor: `${PREMIUM}40` }}
-              >
-                <View className="mb-3 flex-row items-center">
+              <View style={styles.premiumCard}>
+                <View style={styles.comparisonHeader}>
                   <LinearGradient
-                    colors={['#A855F7', '#6366F1']}
+                    colors={['#B8A9D4', '#8EAD92']}
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 1 }}
-                    style={{
-                      width: 40,
-                      height: 40,
-                      borderRadius: 12,
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}
+                    style={styles.premiumIconGradient}
                   >
                     <Ionicons name="diamond" size={20} color="#FFFFFF" />
                   </LinearGradient>
-                  <View className="ml-3 flex-1">
-                    <Text className="text-base font-bold text-white">Premium</Text>
-                    <Text className="text-xs" style={{ color: PREMIUM }}>
-                      Tat ca tinh nang
+                  <View style={styles.premiumInfo}>
+                    <Text style={styles.comparisonTitle}>Premium</Text>
+                    <Text style={{ fontSize: typography.fontSize.xs, color: colors.pastel.lavender.base }}>,
+                    fontFamily: typography.fontFamily.body,
+                      Tất cả tính năng
                     </Text>
                   </View>
                   {!isPremium && (
-                    <Text className="text-lg font-bold" style={{ color: PREMIUM }}>
+                    <Text style={{ fontSize: typography.fontSize.lg, fontWeight: typography.fontWeight.bold, color: colors.pastel.lavender.base }}>,
+                    fontFamily: typography.fontFamily.bodyBold,
                       {displayPrice.toLocaleString('vi-VN')}
-                      <Text className="text-xs text-gray-400">
-                        /{selectedPeriod === 'monthly' ? 'thang' : 'nam'}
+                      <Text style={{ fontSize: typography.fontSize.xs, color: colors.text.secondary }}>,
+                        /{selectedPeriod === 'monthly' ? 'tháng' : 'năm'}
                       </Text>
                     </Text>
                   )}
@@ -349,12 +344,12 @@ export default function PricingScreen() {
                   <FeatureRow key={idx} text={feature} included={true} />
                 )) ?? (
                   <>
-                    <FeatureRow text="Hoc tu vung co ban" included={true} />
-                    <FeatureRow text="Tro choi khong gioi han" included={true} />
-                    <FeatureRow text="Luyen tap khong gioi han" included={true} />
-                    <FeatureRow text="Bai thi thu day du" included={true} />
+                    <FeatureRow text="Học từ vựng cơ bản" included={true} />
+                    <FeatureRow text="Trò chơi không giới hạn" included={true} />
+                    <FeatureRow text="Luyện tập không giới hạn" included={true} />
+                    <FeatureRow text="Bài thi thử đầy đủ" included={true} />
                     <FeatureRow text="AI grading" included={true} />
-                    <FeatureRow text="Ho tro uu tien" included={true} />
+                    <FeatureRow text="Hỗ trợ ưu tiên" included={true} />
                   </>
                 )}
               </View>
@@ -365,25 +360,21 @@ export default function PricingScreen() {
               <Pressable
                 onPress={handleUpgrade}
                 disabled={upgradeMutation.isPending}
-                className="mb-4 overflow-hidden rounded-2xl active:opacity-80"
+                style={styles.upgradeBtn}
               >
                 <LinearGradient
-                  colors={['#A855F7', '#6366F1']}
+                  colors={['#B8A9D4', '#8EAD92']}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 0 }}
-                  style={{
-                    paddingVertical: 16,
-                    alignItems: 'center',
-                    borderRadius: 16,
-                  }}
+                  style={styles.upgradeGradient}
                 >
                   {upgradeMutation.isPending ? (
                     <ActivityIndicator size="small" color="#FFFFFF" />
                   ) : (
-                    <View className="flex-row items-center">
+                    <View style={styles.upgradeBtnContent}>
                       <Ionicons name="diamond" size={20} color="#FFFFFF" />
-                      <Text className="ml-2 text-base font-bold text-white">
-                        Nang cap Premium
+                      <Text style={styles.upgradeBtnText}>
+                        Nâng cấp Premium
                       </Text>
                     </View>
                   )}
@@ -396,53 +387,57 @@ export default function PricingScreen() {
 
             {/* Pending Payments */}
             {mySub?.payments && mySub.payments.length > 0 && (
-              <View className="mb-4">
-                <Text className="mb-2 text-sm font-semibold uppercase tracking-wider text-gray-500">
-                  Lich su thanh toan
+              <View style={styles.paymentsSection}>
+                <Text style={styles.sectionLabel}>
+                  Lịch sử thanh toán
                 </Text>
                 {mySub.payments.map((payment) => (
-                  <View key={payment.id} className="mb-2 rounded-2xl bg-dark-card p-4">
-                    <View className="flex-row items-center justify-between">
+                  <View key={payment.id} style={styles.paymentCard}>
+                    <View style={styles.paymentRow}>
                       <View>
-                        <Text className="text-sm font-medium text-white">
+                        <Text style={styles.paymentName}>
                           {payment.plan === 'premium' ? 'Premium' : 'Free'} -{' '}
-                          {payment.period === 'monthly' ? 'Thang' : 'Nam'}
+                          {payment.period === 'monthly' ? 'Tháng' : 'Năm'}
                         </Text>
-                        <Text className="text-xs text-gray-500">
+                        <Text style={styles.paymentDate}>
                           {new Date(payment.createdAt).toLocaleDateString('vi-VN')}
                         </Text>
                       </View>
                       <View
-                        className="rounded-lg px-2.5 py-1"
-                        style={{
-                          backgroundColor:
-                            payment.status === 'confirmed'
-                              ? '#22C55E20'
-                              : payment.status === 'rejected'
-                                ? '#EF444420'
-                                : '#F59E0B20',
-                        }}
+                        style={[
+                          styles.paymentStatusBadge,
+                          {
+                            backgroundColor:
+                              payment.status === 'confirmed'
+                                ? `${colors.pastel.mint.base}20`
+                                : payment.status === 'rejected'
+                                  ? `${colors.pastel.rose.base}20`
+                                  : `${colors.pastel.peach.base}20`,
+                          },
+                        ]}
                       >
                         <Text
-                          className="text-xs font-bold"
-                          style={{
-                            color:
-                              payment.status === 'confirmed'
-                                ? '#22C55E'
-                                : payment.status === 'rejected'
-                                  ? '#EF4444'
-                                  : '#F59E0B',
-                          }}
+                          style={[
+                            styles.paymentStatusText,
+                            {
+                              color:
+                                payment.status === 'confirmed'
+                                  ? colors.pastel.mint.base
+                                  : payment.status === 'rejected'
+                                    ? colors.pastel.rose.base
+                                    : colors.pastel.peach.base,
+                            },
+                          ]}
                         >
                           {payment.status === 'confirmed'
-                            ? 'Da xac nhan'
+                            ? 'Đã xác nhận'
                             : payment.status === 'rejected'
-                              ? 'Tu choi'
-                              : 'Dang cho'}
+                              ? 'Từ chối'
+                              : 'Đang chờ'}
                         </Text>
                       </View>
                     </View>
-                    <Text className="mt-1 text-sm font-semibold" style={{ color: '#22C55E' }}>
+                    <Text style={styles.paymentAmount}>
                       {payment.amount.toLocaleString('vi-VN')} VND
                     </Text>
                   </View>
@@ -452,8 +447,295 @@ export default function PricingScreen() {
           </>
         )}
 
-        <View className="h-6" />
+        <View style={{ height: 24 }} />
       </ScrollView>
     </SafeAreaView>
   );
 }
+
+const createStyles = (colors: any) => StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.bg.b0,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.md,
+    paddingTop: spacing.sm,
+  },
+  backBtn: {
+    marginRight: spacing.md,
+    padding: spacing.xs,
+  },
+  headerTitle: {
+    flex: 1,
+    fontSize: typography.fontSize.xl,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.heading,
+    color: colors.text.primary,
+  },
+  scrollView: {
+    flex: 1,
+    paddingHorizontal: spacing.lg,
+  },
+  centered: {
+    alignItems: 'center',
+    paddingVertical: 80,
+  },
+  card: {
+    marginBottom: spacing.lg,
+    borderRadius: radius.stone,
+    backgroundColor: colors.bg.b2,
+    borderWidth: 1,
+    borderColor: colors.border.strong,
+    padding: spacing.lg,
+  },
+  planBadgeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  planGradientIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  planInfo: {
+    marginLeft: spacing.md,
+    flex: 1,
+  },
+  planName: {
+    fontSize: typography.fontSize.lg,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.heading,
+    color: colors.text.primary,
+  },
+  planDesc: {
+    fontSize: typography.fontSize.sm,
+    fontFamily: typography.fontFamily.body,
+    color: colors.text.secondary,
+  },
+  activeBadge: {
+    borderRadius: radius.sm,
+    paddingHorizontal: spacing.md,
+    paddingVertical: 4,
+    backgroundColor: colors.pastel.lavender.dim,
+  },
+  activeBadgeText: {
+    fontSize: typography.fontSize.xs,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.bodyBold,
+    color: colors.pastel.lavender.base,
+  },
+  periodToggle: {
+    marginBottom: spacing.lg,
+    flexDirection: 'row',
+    overflow: 'hidden',
+    borderRadius: radius.lg,
+    backgroundColor: colors.bg.b2,
+    borderWidth: 1,
+    borderColor: colors.border.strong,
+    padding: 4,
+  },
+  periodBtn: {
+    flex: 1,
+    alignItems: 'center',
+    borderRadius: radius.sm,
+    paddingVertical: 10,
+  },
+  periodBtnLabel: {
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.semibold,
+    fontFamily: typography.fontFamily.bodySemibold,
+  },
+  periodBtnPrice: {
+    fontSize: typography.fontSize.xs,
+    fontFamily: typography.fontFamily.body,
+  },
+  comparisonSection: {
+    marginBottom: spacing.lg,
+  },
+  sectionLabel: {
+    marginBottom: spacing.sm,
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.semibold,
+    fontFamily: typography.fontFamily.heading,
+    textTransform: 'uppercase',
+    letterSpacing: typography.letterSpacing.widest,
+    color: colors.text.tertiary,
+  },
+  comparisonCard: {
+    marginBottom: spacing.md,
+    borderRadius: radius.stone,
+    backgroundColor: colors.bg.b2,
+    borderWidth: 1,
+    borderColor: colors.border.strong,
+    padding: spacing.lg,
+  },
+  comparisonHeader: {
+    marginBottom: spacing.md,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  freeIconBox: {
+    height: 40,
+    width: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: radius.lg,
+    backgroundColor: `${colors.text.secondary}20`,
+  },
+  comparisonTitle: {
+    fontSize: typography.fontSize.md,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.heading,
+    color: colors.text.primary,
+  },
+  comparisonSubtitle: {
+    fontSize: typography.fontSize.xs,
+    fontFamily: typography.fontFamily.body,
+    color: colors.text.tertiary,
+  },
+  premiumCard: {
+    marginBottom: spacing.md,
+    overflow: 'hidden',
+    borderRadius: radius.stone,
+    padding: spacing.lg,
+    backgroundColor: `${colors.pastel.lavender.base}10`,
+    borderWidth: 1,
+    borderColor: `${colors.pastel.lavender.base}40`,
+  },
+  premiumIconGradient: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  premiumInfo: {
+    marginLeft: spacing.md,
+    flex: 1,
+  },
+  featureRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 8,
+  },
+  featureIcon: {
+    marginRight: spacing.md,
+    height: 24,
+    width: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 12,
+  },
+  featureText: {
+    flex: 1,
+    fontSize: typography.fontSize.sm,
+    fontFamily: typography.fontFamily.body,
+  },
+  upgradeBtn: {
+    marginBottom: spacing.lg,
+    overflow: 'hidden',
+    borderRadius: radius.stone,
+  },
+  upgradeGradient: {
+    paddingVertical: spacing.lg,
+    alignItems: 'center',
+    borderRadius: radius.stone,
+  },
+  upgradeBtnContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  upgradeBtnText: {
+    marginLeft: 8,
+    fontSize: typography.fontSize.md,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.bodyBold,
+    color: colors.text.primary,
+  },
+  bankCard: {
+    marginTop: spacing.lg,
+    borderRadius: radius.stone,
+    backgroundColor: colors.bg.b2,
+    borderWidth: 1,
+    borderColor: colors.border.strong,
+    padding: spacing.lg,
+  },
+  bankTitle: {
+    marginBottom: spacing.md,
+    fontSize: typography.fontSize.md,
+    fontWeight: typography.fontWeight.semibold,
+    fontFamily: typography.fontFamily.heading,
+    color: colors.text.primary,
+  },
+  bankRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: 4,
+  },
+  bankLabel: {
+    fontSize: typography.fontSize.sm,
+    fontFamily: typography.fontFamily.body,
+    color: colors.text.secondary,
+  },
+  bankValue: {
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.medium,
+    fontFamily: typography.fontFamily.bodyMedium,
+    color: colors.text.primary,
+  },
+  bankValueBold: {
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.heading,
+  },
+  paymentsSection: {
+    marginBottom: spacing.lg,
+  },
+  paymentCard: {
+    marginBottom: spacing.sm,
+    borderRadius: radius.stone,
+    backgroundColor: colors.bg.b2,
+    borderWidth: 1,
+    borderColor: colors.border.strong,
+    padding: spacing.lg,
+  },
+  paymentRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  paymentName: {
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.medium,
+    fontFamily: typography.fontFamily.bodyMedium,
+    color: colors.text.primary,
+  },
+  paymentDate: {
+    fontSize: typography.fontSize.xs,
+    fontFamily: typography.fontFamily.body,
+    color: colors.text.tertiary,
+  },
+  paymentStatusBadge: {
+    borderRadius: radius.sm,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+  },
+  paymentStatusText: {
+    fontSize: typography.fontSize.xs,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.bodyBold,
+  },
+  paymentAmount: {
+    marginTop: 4,
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.semibold,
+    fontFamily: typography.fontFamily.bodySemibold,
+    color: colors.pastel.mint.base,
+  },
+});

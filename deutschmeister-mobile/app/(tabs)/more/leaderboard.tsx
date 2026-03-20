@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -6,6 +6,7 @@ import {
   RefreshControl,
   ActivityIndicator,
   Pressable,
+  StyleSheet,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -14,22 +15,21 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useLeaderboard } from '@/hooks/useLeaderboard';
 import { useAuthStore } from '@/stores/authStore';
 import type { LeaderboardEntry } from '@/lib/api/leaderboard';
-
-const GOLD = '#F59E0B';
-const SILVER = '#9CA3AF';
-const BRONZE = '#CD7F32';
+import { spacing, radius, typography } from '@/theme';
+import { useThemeStore } from '@/stores/themeStore';
+import type { ThemeColors } from '@/theme/colors';
 
 const PERIODS = [
-  { key: 'weekly' as const, label: 'Tuan' },
-  { key: 'monthly' as const, label: 'Thang' },
-  { key: 'all-time' as const, label: 'Tat ca' },
+  { key: 'weekly' as const, label: 'Tuần' },
+  { key: 'monthly' as const, label: 'Tháng' },
+  { key: 'all-time' as const, label: 'Tất cả' },
 ];
 
-function getMedalColor(rank: number): string {
-  if (rank === 1) return GOLD;
-  if (rank === 2) return SILVER;
-  if (rank === 3) return BRONZE;
-  return '#4B5563';
+function getMedalColor(rank: number, colors: ThemeColors): string {
+  if (rank === 1) return colors.pastel.peach.base;
+  if (rank === 2) return colors.pastel.sky.base;
+  if (rank === 3) return colors.pastel.peach.base;
+  return colors.text.tertiary;
 }
 
 function getMedalIcon(rank: number): React.ComponentProps<typeof Ionicons>['name'] {
@@ -46,32 +46,35 @@ function PodiumUser({
   rank: number;
   isCurrentUser: boolean;
 }) {
-  const medalColor = getMedalColor(rank);
-  // Heights: 1st = tallest, 2nd = medium, 3rd = shorter
+  const colors = useThemeStore((s) => s.colors);
+  const ps = useMemo(() => createPs(colors), [colors]);
+  const s = useMemo(() => createS(colors), [colors]);
+  const medalColor = getMedalColor(rank, colors);
   const podiumHeight = rank === 1 ? 80 : rank === 2 ? 60 : 48;
   const avatarSize = rank === 1 ? 64 : 52;
   const gradientColors =
     rank === 1
-      ? (['#F59E0B', '#F97316'] as const)
+      ? (colors.gradient.warning as readonly [string, string])
       : rank === 2
-        ? (['#9CA3AF', '#6B7280'] as const)
-        : (['#CD7F32', '#A0522D'] as const);
+        ? ([colors.pastel.sky.base, '#6B9FCF'] as const)
+        : ([colors.pastel.peach.base, '#D4956A'] as const);
 
   return (
-    <View className="flex-1 items-center" style={{ marginTop: rank === 1 ? 0 : 20 }}>
+    <View style={[ps.column, { marginTop: rank === 1 ? 0 : 20 }]}>
       {/* Avatar */}
       <View
-        className="items-center justify-center rounded-full"
-        style={{
-          width: avatarSize,
-          height: avatarSize,
-          borderWidth: 3,
-          borderColor: medalColor,
-          backgroundColor: `${medalColor}20`,
-        }}
+        style={[
+          ps.avatar,
+          {
+            width: avatarSize,
+            height: avatarSize,
+            borderColor: medalColor,
+            backgroundColor: `${medalColor}20`,
+          },
+        ]}
       >
         {entry.avatar ? (
-          <Text style={{ fontSize: rank === 1 ? 28 : 22 }}>{entry.avatar}</Text>
+          <Text style={{ fontSize: rank === 1 ? 28 : 22, fontFamily: typography.fontFamily.body }}>{entry.avatar}</Text>
         ) : (
           <Ionicons name="person" size={rank === 1 ? 28 : 22} color={medalColor} />
         )}
@@ -79,15 +82,17 @@ function PodiumUser({
 
       {/* Name */}
       <Text
-        className="mt-1.5 text-center text-xs font-semibold text-white"
+        style={[
+          ps.name,
+          isCurrentUser ? { color: colors.pastel.lavender.base } : undefined,
+        ]}
         numberOfLines={1}
-        style={isCurrentUser ? { color: '#6366F1' } : undefined}
       >
-        {entry.name || 'Nguoi dung'}
+        {entry.name || 'Người dùng'}
       </Text>
 
       {/* XP */}
-      <Text className="text-xs font-medium" style={{ color: medalColor }}>
+      <Text style={[ps.xp, { color: medalColor }]}>
         {entry.xp.toLocaleString()} XP
       </Text>
 
@@ -99,14 +104,14 @@ function PodiumUser({
         style={{
           width: '80%',
           height: podiumHeight,
-          borderTopLeftRadius: 12,
-          borderTopRightRadius: 12,
-          marginTop: 8,
+          borderTopLeftRadius: radius.md,
+          borderTopRightRadius: radius.md,
+          marginTop: spacing.sm,
           alignItems: 'center',
           justifyContent: 'center',
         }}
       >
-        <Text className="text-xl font-bold text-white">{rank}</Text>
+        <Text style={ps.podiumRank}>{rank}</Text>
       </LinearGradient>
     </View>
   );
@@ -119,51 +124,59 @@ function RankRow({
   entry: LeaderboardEntry;
   isCurrentUser: boolean;
 }) {
+  const colors = useThemeStore((s) => s.colors);
+  const ps = useMemo(() => createPs(colors), [colors]);
+  const s = useMemo(() => createS(colors), [colors]);
   return (
     <View
-      className={`mb-2 flex-row items-center rounded-2xl p-3 ${
-        isCurrentUser ? '' : 'bg-dark-card'
-      }`}
-      style={isCurrentUser ? { backgroundColor: '#6366F115' } : undefined}
+      style={[
+        s.rankRow,
+        isCurrentUser
+          ? { backgroundColor: colors.pastel.lavender.dim }
+          : { backgroundColor: colors.bg.b2 },
+      ]}
     >
       {/* Rank */}
-      <View className="mr-3 h-8 w-8 items-center justify-center rounded-lg bg-dark-border">
-        <Text className="text-sm font-bold text-gray-400">{entry.rank}</Text>
+      <View style={s.rankBadge}>
+        <Text style={s.rankNum}>{entry.rank}</Text>
       </View>
 
       {/* Avatar */}
-      <View className="mr-3 h-10 w-10 items-center justify-center rounded-full bg-dark-secondary">
+      <View style={s.rankAvatar}>
         {entry.avatar ? (
-          <Text className="text-lg">{entry.avatar}</Text>
+          <Text style={s.rankAvatarEmoji}>{entry.avatar}</Text>
         ) : (
-          <Ionicons name="person" size={18} color="#9CA3AF" />
+          <Ionicons name="person" size={18} color={colors.text.secondary} />
         )}
       </View>
 
       {/* Info */}
-      <View className="flex-1">
+      <View style={s.flex1}>
         <Text
-          className="text-base font-semibold"
-          style={{ color: isCurrentUser ? '#6366F1' : '#FFFFFF' }}
+          style={[
+            s.rankName,
+            { color: isCurrentUser ? colors.pastel.lavender.base : colors.text.primary },
+          ]}
         >
-          {entry.name || 'Nguoi dung'}
-          {isCurrentUser ? ' (Ban)' : ''}
+          {entry.name || 'Người dùng'}
+          {isCurrentUser ? ' (Bạn)' : ''}
         </Text>
-        <Text className="text-xs text-gray-500">
+        <Text style={s.rankSub}>
           Level {entry.level} - {entry.levelName}
         </Text>
       </View>
 
       {/* XP */}
-      <Text className="text-base font-bold" style={{ color: GOLD }}>
-        {entry.xp.toLocaleString()}
-      </Text>
-      <Text className="ml-1 text-xs text-gray-500">XP</Text>
+      <Text style={s.rankXp}>{entry.xp.toLocaleString()}</Text>
+      <Text style={s.rankXpLabel}>XP</Text>
     </View>
   );
 }
 
 export default function LeaderboardScreen() {
+  const colors = useThemeStore((s) => s.colors);
+  const ps = useMemo(() => createPs(colors), [colors]);
+  const s = useMemo(() => createS(colors), [colors]);
   const router = useRouter();
   const [period, setPeriod] = useState<'weekly' | 'monthly' | 'all-time'>('weekly');
   const { data: entries, isLoading, refetch, isRefetching } = useLeaderboard(period, 50);
@@ -182,31 +195,37 @@ export default function LeaderboardScreen() {
     : top3;
 
   return (
-    <SafeAreaView className="flex-1 bg-dark-bg" edges={['top']}>
+    <SafeAreaView style={s.container} edges={['top']}>
       {/* Header */}
-      <View className="flex-row items-center px-4 pb-3 pt-2">
-        <Pressable onPress={() => router.back()} className="mr-3 p-1">
-          <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
+      <View style={s.header}>
+        <Pressable onPress={() => router.back()} style={s.backBtn}>
+          <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
         </Pressable>
-        <Text className="flex-1 text-xl font-bold text-white">Bang xep hang</Text>
+        <Text style={s.headerTitle}>Bảng xếp hạng</Text>
       </View>
 
       {/* Period Tabs */}
-      <View className="flex-row gap-2 px-4 pb-3">
+      <View style={s.tabRow}>
         {PERIODS.map((p) => {
           const isActive = period === p.key;
           return (
             <Pressable
               key={p.key}
               onPress={() => setPeriod(p.key)}
-              className={`flex-1 items-center rounded-full py-2 ${
-                isActive ? 'bg-primary-500' : 'bg-dark-card'
-              }`}
+              style={[
+                s.tab,
+                isActive
+                  ? { backgroundColor: colors.pastel.lime.base }
+                  : { backgroundColor: colors.bg.b2 },
+              ]}
             >
               <Text
-                className={`text-sm font-semibold ${
-                  isActive ? 'text-white' : 'text-gray-400'
-                }`}
+                style={[
+                  s.tabLabel,
+                  isActive
+                    ? { color: colors.pastel.lime.on }
+                    : { color: colors.text.secondary },
+                ]}
               >
                 {p.label}
               </Text>
@@ -216,35 +235,33 @@ export default function LeaderboardScreen() {
       </View>
 
       <ScrollView
-        className="flex-1 px-4"
+        style={s.scroll}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
             refreshing={isRefetching}
             onRefresh={onRefresh}
-            tintColor={GOLD}
-            colors={[GOLD]}
+            tintColor={colors.pastel.peach.base}
+            colors={[colors.pastel.peach.base]}
           />
         }
       >
         {isLoading ? (
-          <View className="items-center py-20">
-            <ActivityIndicator size="large" color={GOLD} />
+          <View style={s.emptyWrap}>
+            <ActivityIndicator size="large" color={colors.pastel.peach.base} />
           </View>
         ) : !entries || entries.length === 0 ? (
-          <View className="items-center py-20">
-            <Ionicons name="podium-outline" size={48} color="#4B5563" />
-            <Text className="mt-3 text-base text-gray-500">
-              Chua co du lieu xep hang
-            </Text>
+          <View style={s.emptyWrap}>
+            <Ionicons name="podium-outline" size={48} color={colors.text.tertiary} />
+            <Text style={s.emptyText}>Chưa có dữ liệu xếp hạng</Text>
           </View>
         ) : (
           <>
             {/* Podium */}
             {top3.length >= 3 && (
-              <View className="mb-4 rounded-2xl bg-dark-card p-4 pb-0">
-                <View className="flex-row items-end">
-                  {podiumOrder.map((entry, idx) => {
+              <View style={s.podiumCard}>
+                <View style={s.podiumRow}>
+                  {podiumOrder.map((entry) => {
                     const rank = entry.rank;
                     return (
                       <PodiumUser
@@ -271,7 +288,7 @@ export default function LeaderboardScreen() {
 
             {/* Remaining Rows */}
             {rest.length > 0 && (
-              <View className="mt-2">
+              <View style={{ marginTop: spacing.sm }}>
                 {rest.map((entry) => (
                   <RankRow
                     key={entry.userId ?? `rank-${entry.rank}`}
@@ -284,8 +301,171 @@ export default function LeaderboardScreen() {
           </>
         )}
 
-        <View className="h-6" />
+        <View style={{ height: 24 }} />
       </ScrollView>
     </SafeAreaView>
   );
 }
+
+const createPs = (colors: any) => StyleSheet.create({
+  column: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  avatar: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 999,
+    borderWidth: 3,
+  },
+  name: {
+    marginTop: 6,
+    textAlign: 'center',
+    fontSize: typography.fontSize.xs,
+    fontWeight: typography.fontWeight.semibold,
+    fontFamily: typography.fontFamily.heading,
+    color: colors.text.primary,
+  },
+  xp: {
+    fontSize: typography.fontSize.xs,
+    fontWeight: typography.fontWeight.medium,
+    fontFamily: typography.fontFamily.bodyMedium,
+  },
+  podiumRank: {
+    fontSize: typography.fontSize.xl,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.bodyBold,
+    color: '#FFFFFF',
+  },
+});
+
+const createS = (colors: any) => StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.bg.b0,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.md,
+    paddingTop: spacing.sm,
+  },
+  backBtn: {
+    marginRight: spacing.md,
+    padding: spacing.xs,
+  },
+  headerTitle: {
+    flex: 1,
+    fontSize: typography.fontSize.xl,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.heading,
+    color: colors.text.primary,
+  },
+  tabRow: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.md,
+  },
+  tab: {
+    flex: 1,
+    alignItems: 'center',
+    borderRadius: radius.pill,
+    paddingVertical: spacing.sm,
+  },
+  tabLabel: {
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.semibold,
+    fontFamily: typography.fontFamily.bodySemibold,
+  },
+  scroll: {
+    flex: 1,
+    paddingHorizontal: spacing.lg,
+  },
+  emptyWrap: {
+    alignItems: 'center',
+    paddingVertical: 80,
+  },
+  emptyText: {
+    marginTop: spacing.md,
+    fontSize: typography.fontSize.md,
+    fontFamily: typography.fontFamily.body,
+    color: colors.text.tertiary,
+  },
+  podiumCard: {
+    marginBottom: spacing.lg,
+    borderRadius: radius.stone,
+    backgroundColor: colors.bg.b2,
+    padding: spacing.lg,
+    paddingBottom: 0,
+    borderWidth: 1,
+    borderColor: colors.border.subtle,
+  },
+  podiumRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+  },
+  rankRow: {
+    marginBottom: spacing.sm,
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: radius.stone,
+    padding: spacing.md,
+    borderWidth: 1,
+    borderColor: colors.border.subtle,
+  },
+  rankBadge: {
+    marginRight: spacing.md,
+    height: 32,
+    width: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: radius.sm,
+    backgroundColor: colors.bg.b3,
+  },
+  rankNum: {
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.bodyBold,
+    color: colors.text.secondary,
+  },
+  rankAvatar: {
+    marginRight: spacing.md,
+    height: 40,
+    width: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 20,
+    backgroundColor: colors.bg.b3,
+  },
+  rankAvatarEmoji: {
+    fontSize: typography.fontSize.lg,
+    fontFamily: typography.fontFamily.body,
+  },
+  flex1: {
+    flex: 1,
+  },
+  rankName: {
+    fontSize: typography.fontSize.md,
+    fontWeight: typography.fontWeight.semibold,
+    fontFamily: typography.fontFamily.heading,
+  },
+  rankSub: {
+    fontSize: typography.fontSize.xs,
+    fontFamily: typography.fontFamily.body,
+    color: colors.text.tertiary,
+  },
+  rankXp: {
+    fontSize: typography.fontSize.md,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.bodyBold,
+    color: colors.pastel.peach.base,
+  },
+  rankXpLabel: {
+    marginLeft: 4,
+    fontSize: typography.fontSize.xs,
+    fontFamily: typography.fontFamily.body,
+    color: colors.text.tertiary,
+  },
+});

@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -7,263 +7,152 @@ import {
   TextInput,
   RefreshControl,
   ActivityIndicator,
+  ScrollView,
+  StyleSheet,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { usePersonalWords, usePersonalWordStats } from '@/hooks/usePersonalWords';
+import {
+  usePersonalWords,
+  usePersonalWordStats,
+  useToggleFavorite,
+} from '@/hooks/usePersonalWords';
 import type { PersonalWord, WordType, Level } from '@/lib/api/personal-words';
-import { WordTypeInfo, getSRSStatus, SRSStatusInfo } from '@/lib/api/personal-words';
+import { WordTypeInfo } from '@/lib/api/personal-words';
+import { spacing, radius, typography, pastelSurface } from '@/theme';
+import { useThemeStore } from '@/stores/themeStore';
+import type { ThemeColors } from '@/theme/colors';
+
+// ── Constants ────────────────────────────────────────────────
+const PAGE_LIMIT = 30;
 
 const WORD_TYPES: Array<{ key: WordType | 'all'; label: string }> = [
-  { key: 'all', label: 'Tat ca' },
+  { key: 'all', label: 'Tất cả' },
   { key: 'nomen', label: 'Nomen' },
   { key: 'verb', label: 'Verb' },
   { key: 'adjektiv', label: 'Adjektiv' },
   { key: 'adverb', label: 'Adverb' },
-  { key: 'praposition', label: 'Prap.' },
 ];
 
 const LEVEL_FILTERS: Array<{ key: Level | 'all'; label: string }> = [
-  { key: 'all', label: 'Tat ca' },
+  { key: 'all', label: 'Tất cả' },
   { key: 'A1', label: 'A1' },
   { key: 'A2', label: 'A2' },
   { key: 'B1', label: 'B1' },
 ];
 
-function WordCard({ word }: { word: PersonalWord }) {
-  const srsStatus = getSRSStatus(word);
-  const statusInfo = SRSStatusInfo[srsStatus];
+function buildLevelColor(colors: ThemeColors): Record<string, string> {
+  return {
+    A1: colors.pastel.mint.base,
+    A2: colors.pastel.sky.base,
+    B1: colors.pastel.lavender.base,
+    B2: colors.pastel.peach.base,
+    C1: colors.pastel.rose.base,
+  };
+}
+
+// ── WordCard ─────────────────────────────────────────────────
+function WordCard({
+  word,
+  onToggleFavorite,
+}: {
+  word: PersonalWord;
+  onToggleFavorite: (id: string) => void;
+}) {
+  const colors = useThemeStore((s) => s.colors);
+  const wc = useMemo(() => createWc(colors), [colors]);
+  const s = useMemo(() => createS(colors), [colors]);
+  const levelColorMap = useMemo(() => buildLevelColor(colors), [colors]);
+  const article = word.nomenData?.article;
+  const genderPastel =
+    article === 'der'
+      ? colors.pastel.sky
+      : article === 'die'
+      ? colors.pastel.rose
+      : article === 'das'
+      ? colors.pastel.mint
+      : null;
+
   const typeInfo = WordTypeInfo[word.wordType];
+  const levelColor = levelColorMap[word.level] ?? colors.pastel.lavender.base;
 
   return (
-    <View className="mb-2 rounded-2xl bg-dark-card p-4">
-      <View className="flex-row items-start">
-        <View className="flex-1">
-          <View className="flex-row items-center gap-2">
-            <Text className="text-base font-bold text-white">{word.word}</Text>
-            {word.nomenData && (
-              <Text
-                className="text-sm font-medium"
-                style={{
-                  color:
-                    word.nomenData.article === 'der'
-                      ? '#3B82F6'
-                      : word.nomenData.article === 'die'
-                      ? '#EC4899'
-                      : '#10B981',
-                }}
-              >
-                {word.nomenData.article}
-              </Text>
-            )}
-          </View>
-          <Text className="mt-0.5 text-sm text-gray-400">
-            {word.translationVi || word.translationEn}
+    <View style={wc.card}>
+      {/* Top row: article + word on left, level badge on right */}
+      <View style={wc.topRow}>
+        <View style={wc.wordSection}>
+          {article && (
+            <Text style={[wc.article, { color: genderPastel?.base }]}>
+              {article}
+            </Text>
+          )}
+          <Text style={wc.word} numberOfLines={1}>
+            {word.word}
           </Text>
         </View>
 
-        <View className="items-end gap-1">
-          {/* Word Type Badge */}
+        <View style={[wc.levelPill, { backgroundColor: levelColor + '22' }]}>
+          <Text style={[wc.levelText, { color: levelColor }]}>
+            {word.level}
+          </Text>
+        </View>
+      </View>
+
+      {/* Vietnamese translation */}
+      <Text style={wc.translation} numberOfLines={2}>
+        {word.translationVi || word.translationEn}
+      </Text>
+
+      {/* Bottom row: gender + type badges on left, heart on right */}
+      <View style={wc.bottomRow}>
+        <View style={wc.badges}>
+          {genderPastel && (
+            <View style={[wc.badge, { backgroundColor: genderPastel.dim }]}>
+              <Text style={[wc.badgeText, { color: genderPastel.base }]}>
+                {article}
+              </Text>
+            </View>
+          )}
           <View
-            className="rounded-md px-2 py-0.5"
-            style={{ backgroundColor: `${typeInfo?.color ?? '#64748b'}20` }}
+            style={[
+              wc.badge,
+              { backgroundColor: (typeInfo?.color ?? '#64748b') + '18' },
+            ]}
           >
             <Text
-              className="text-xs font-semibold"
-              style={{ color: typeInfo?.color ?? '#64748b' }}
+              style={[
+                wc.badgeText,
+                { color: typeInfo?.color ?? '#64748b' },
+              ]}
             >
               {typeInfo?.labelDe ?? word.wordType}
             </Text>
           </View>
-
-          {/* SRS Status */}
-          <View
-            className="rounded-md px-2 py-0.5"
-            style={{ backgroundColor: `${statusInfo.color}20` }}
-          >
-            <Text
-              className="text-xs font-medium"
-              style={{ color: statusInfo.color }}
-            >
-              {statusInfo.label}
-            </Text>
-          </View>
         </View>
-      </View>
 
-      {/* Level + Favorite */}
-      <View className="mt-2 flex-row items-center">
-        <View className="rounded bg-dark-border px-1.5 py-0.5">
-          <Text className="text-xs font-medium text-gray-400">{word.level}</Text>
-        </View>
-        {word.isFavorite && (
+        <Pressable
+          onPress={() => onToggleFavorite(word.id)}
+          hitSlop={12}
+          style={wc.heartBtn}
+        >
           <Ionicons
-            name="heart"
-            size={14}
-            color="#EF4444"
-            style={{ marginLeft: 6 }}
+            name={word.isFavorite ? 'heart' : 'heart-outline'}
+            size={22}
+            color={
+              word.isFavorite
+                ? colors.pastel.rose.base
+                : colors.text.disabled
+            }
           />
-        )}
+        </Pressable>
       </View>
     </View>
   );
 }
 
-export default function WordBankScreen() {
-  const router = useRouter();
-  const [search, setSearch] = useState('');
-  const [wordType, setWordType] = useState<WordType | 'all'>('all');
-  const [level, setLevel] = useState<Level | 'all'>('all');
-  const [page, setPage] = useState(1);
-
-  const { data, isLoading, refetch, isRefetching } = usePersonalWords({
-    search: search || undefined,
-    wordType,
-    level,
-    page,
-    limit: 30,
-  });
-  const { data: stats } = usePersonalWordStats();
-
-  const words = data?.data ?? [];
-  const total = data?.total ?? 0;
-
-  const onRefresh = useCallback(() => {
-    refetch();
-  }, [refetch]);
-
-  const renderItem = useCallback(
-    ({ item }: { item: PersonalWord }) => <WordCard word={item} />,
-    [],
-  );
-
-  return (
-    <SafeAreaView className="flex-1 bg-dark-bg" edges={['top']}>
-      {/* Header */}
-      <View className="flex-row items-center px-4 pb-2 pt-2">
-        <Pressable onPress={() => router.back()} className="mr-3 p-1">
-          <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
-        </Pressable>
-        <Text className="flex-1 text-xl font-bold text-white">Word Bank</Text>
-        <View className="rounded-lg bg-dark-card px-2.5 py-1">
-          <Text className="text-xs font-medium text-gray-400">
-            {total} tu
-          </Text>
-        </View>
-      </View>
-
-      {/* Stats Bar */}
-      {stats && (
-        <View className="mx-4 mb-2 flex-row gap-2">
-          <View className="flex-1 rounded-xl bg-dark-card px-3 py-2">
-            <Text className="text-xs text-gray-500">Tong</Text>
-            <Text className="text-base font-bold text-white">{stats.total}</Text>
-          </View>
-          <View className="flex-1 rounded-xl bg-dark-card px-3 py-2">
-            <Text className="text-xs text-gray-500">Yeu thich</Text>
-            <Text className="text-base font-bold text-red-400">{stats.favorites}</Text>
-          </View>
-        </View>
-      )}
-
-      {/* Search */}
-      <View className="mx-4 mb-2 flex-row items-center rounded-xl bg-dark-card px-3">
-        <Ionicons name="search" size={18} color="#6B7280" />
-        <TextInput
-          className="ml-2 flex-1 py-2.5 text-base text-white"
-          placeholder="Tim tu vung..."
-          placeholderTextColor="#6B7280"
-          value={search}
-          onChangeText={(t) => {
-            setSearch(t);
-            setPage(1);
-          }}
-        />
-        {search.length > 0 && (
-          <Pressable onPress={() => setSearch('')}>
-            <Ionicons name="close-circle" size={18} color="#6B7280" />
-          </Pressable>
-        )}
-      </View>
-
-      {/* Word Type Filter */}
-      <ScrollableChips
-        items={WORD_TYPES}
-        selected={wordType}
-        onSelect={(k) => {
-          setWordType(k as WordType | 'all');
-          setPage(1);
-        }}
-      />
-
-      {/* Level Filter */}
-      <ScrollableChips
-        items={LEVEL_FILTERS}
-        selected={level}
-        onSelect={(k) => {
-          setLevel(k as Level | 'all');
-          setPage(1);
-        }}
-      />
-
-      {/* List */}
-      <FlatList
-        data={words}
-        keyExtractor={(item) => item.id}
-        renderItem={renderItem}
-        contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 100 }}
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl
-            refreshing={isRefetching}
-            onRefresh={onRefresh}
-            tintColor="#6366F1"
-            colors={['#6366F1']}
-          />
-        }
-        ListEmptyComponent={
-          isLoading ? (
-            <View className="items-center py-20">
-              <ActivityIndicator size="large" color="#6366F1" />
-            </View>
-          ) : (
-            <View className="items-center py-20">
-              <Ionicons name="folder-open-outline" size={48} color="#4B5563" />
-              <Text className="mt-3 text-base text-gray-500">
-                Chua co tu nao
-              </Text>
-              <Text className="mt-1 text-sm text-gray-600">
-                Them tu vung cua ban vao day
-              </Text>
-            </View>
-          )
-        }
-        onEndReached={() => {
-          if (data && page < data.totalPages) {
-            setPage((p) => p + 1);
-          }
-        }}
-        onEndReachedThreshold={0.5}
-      />
-
-      {/* FAB - Add Word */}
-      <Pressable
-        className="absolute bottom-6 right-6 h-14 w-14 items-center justify-center rounded-full bg-primary-500 shadow-lg active:bg-primary-600"
-        onPress={() => {
-          // Could navigate to an add word screen
-        }}
-      >
-        <Ionicons name="add" size={28} color="#FFFFFF" />
-      </Pressable>
-    </SafeAreaView>
-  );
-}
-
-// Reusable horizontal chips
-import { ScrollView } from 'react-native';
-
-function ScrollableChips({
+// ── Filter Chips ─────────────────────────────────────────────
+function FilterChips({
   items,
   selected,
   onSelect,
@@ -272,12 +161,15 @@ function ScrollableChips({
   selected: string;
   onSelect: (key: string) => void;
 }) {
+  const colors = useThemeStore((s) => s.colors);
+  const wc = useMemo(() => createWc(colors), [colors]);
+  const s = useMemo(() => createS(colors), [colors]);
   return (
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
-      className="mb-2 px-4"
-      contentContainerStyle={{ gap: 8 }}
+      style={s.chipScroll}
+      contentContainerStyle={s.chipContainer}
     >
       {items.map((item) => {
         const isActive = selected === item.key;
@@ -285,14 +177,18 @@ function ScrollableChips({
           <Pressable
             key={item.key}
             onPress={() => onSelect(item.key)}
-            className={`rounded-full px-3.5 py-1.5 ${
-              isActive ? 'bg-primary-500' : 'bg-dark-card'
-            }`}
+            style={[
+              s.chip,
+              isActive
+                ? { backgroundColor: colors.pastel.lime.base }
+                : { backgroundColor: colors.bg.b3 },
+            ]}
           >
             <Text
-              className={`text-sm font-medium ${
-                isActive ? 'text-white' : 'text-gray-400'
-              }`}
+              style={[
+                s.chipLabel,
+                { color: isActive ? colors.pastel.lime.on : colors.text.secondary },
+              ]}
             >
               {item.label}
             </Text>
@@ -302,3 +198,571 @@ function ScrollableChips({
     </ScrollView>
   );
 }
+
+// ── Main Screen ──────────────────────────────────────────────
+export default function WordBankScreen() {
+  const colors = useThemeStore((s) => s.colors);
+  const wc = useMemo(() => createWc(colors), [colors]);
+  const s = useMemo(() => createS(colors), [colors]);
+  const router = useRouter();
+
+  // Filter state
+  const [searchText, setSearchText] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [wordType, setWordType] = useState<WordType | 'all'>('all');
+  const [level, setLevel] = useState<Level | 'all'>('all');
+  const [page, setPage] = useState(1);
+
+  // Debounce search (300ms)
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const handleSearchChange = useCallback((text: string) => {
+    setSearchText(text);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      setDebouncedSearch(text);
+      setPage(1);
+    }, 300);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, []);
+
+  // Queries
+  const {
+    data,
+    isLoading,
+    isFetching,
+    refetch,
+    isRefetching,
+  } = usePersonalWords({
+    search: debouncedSearch || undefined,
+    wordType,
+    level,
+    page,
+    limit: PAGE_LIMIT,
+    sortBy: 'createdAt',
+    sortOrder: 'desc',
+  });
+
+  const { data: stats } = usePersonalWordStats();
+  const toggleFavoriteMutation = useToggleFavorite();
+
+  // Accumulated words for infinite scroll
+  const [accumulatedWords, setAccumulatedWords] = useState<PersonalWord[]>([]);
+
+  // Reset accumulated words when filters change, append on page increment
+  useEffect(() => {
+    if (data) {
+      if (page === 1) {
+        setAccumulatedWords(data.data);
+      } else {
+        setAccumulatedWords((prev) => {
+          const existingIds = new Set(prev.map((w) => w.id));
+          const newWords = data.data.filter((w) => !existingIds.has(w.id));
+          return [...prev, ...newWords];
+        });
+      }
+    }
+  }, [data, page]);
+
+  const total = data?.total ?? 0;
+  const totalPages = data?.totalPages ?? 1;
+  const hasMore = page < totalPages;
+
+  // Derived stats
+  const statsTotal = stats?.total ?? 0;
+  const statsFavorites = stats?.favorites ?? 0;
+  const statsLearned = useMemo(() => {
+    if (!stats) return 0;
+    return stats.total;
+  }, [stats]);
+
+  const onRefresh = useCallback(() => {
+    setPage(1);
+    refetch();
+  }, [refetch]);
+
+  const onToggleFavorite = useCallback(
+    (id: string) => {
+      // Optimistic UI update in local list
+      setAccumulatedWords((prev) =>
+        prev.map((w) =>
+          w.id === id ? { ...w, isFavorite: !w.isFavorite } : w
+        )
+      );
+      toggleFavoriteMutation.mutate(id);
+    },
+    [toggleFavoriteMutation]
+  );
+
+  const handleLoadMore = useCallback(() => {
+    if (hasMore && !isFetching) {
+      setPage((p) => p + 1);
+    }
+  }, [hasMore, isFetching]);
+
+  const handleWordTypeChange = useCallback((key: string) => {
+    setWordType(key as WordType | 'all');
+    setPage(1);
+  }, []);
+
+  const handleLevelChange = useCallback((key: string) => {
+    setLevel(key as Level | 'all');
+    setPage(1);
+  }, []);
+
+  const clearSearch = useCallback(() => {
+    setSearchText('');
+    setDebouncedSearch('');
+    setPage(1);
+  }, []);
+
+  const renderItem = useCallback(
+    ({ item }: { item: PersonalWord }) => (
+      <WordCard word={item} onToggleFavorite={onToggleFavorite} />
+    ),
+    [onToggleFavorite]
+  );
+
+  const keyExtractor = useCallback((item: PersonalWord) => item.id, []);
+
+  // Footer
+  const ListFooter = useCallback(() => {
+    if (isFetching && page > 1) {
+      return (
+        <View style={s.footerLoader}>
+          <ActivityIndicator size="small" color={colors.pastel.lavender.base} />
+        </View>
+      );
+    }
+    if (hasMore && accumulatedWords.length > 0) {
+      return (
+        <Pressable style={s.loadMoreBtn} onPress={handleLoadMore}>
+          <Text style={s.loadMoreText}>Tải thêm</Text>
+        </Pressable>
+      );
+    }
+    return null;
+  }, [isFetching, page, hasMore, accumulatedWords.length, handleLoadMore]);
+
+  // Empty / Loading state
+  const ListEmpty = useCallback(() => {
+    if (isLoading) {
+      return (
+        <View style={s.emptyWrap}>
+          <ActivityIndicator size="large" color={colors.pastel.lavender.base} />
+          <Text style={s.emptyTitle}>Đang tải...</Text>
+        </View>
+      );
+    }
+    return (
+      <View style={s.emptyWrap}>
+        <View style={[s.emptyIcon, pastelSurface('lavender')]}>
+          <Ionicons
+            name="folder-open-outline"
+            size={40}
+            color={colors.pastel.lavender.base}
+          />
+        </View>
+        <Text style={s.emptyTitle}>Chưa có từ nào</Text>
+        <Text style={s.emptySub}>
+          Thêm từ vựng của bạn vào kho từ vựng cá nhân
+        </Text>
+      </View>
+    );
+  }, [isLoading]);
+
+  return (
+    <SafeAreaView style={s.container} edges={['top']}>
+      {/* ── Header ── */}
+      <View style={s.header}>
+        <Pressable onPress={() => router.back()} hitSlop={8} style={s.backBtn}>
+          <Ionicons name="arrow-back" size={22} color={colors.text.primary} />
+        </Pressable>
+        <View style={[s.headerIconBox, pastelSurface('peach')]}>
+          <Ionicons name="book" size={20} color={colors.pastel.peach.base} />
+        </View>
+        <View style={s.headerTextWrap}>
+          <Text style={s.headerTitle}>Kho từ vựng</Text>
+          <Text style={s.headerSubtitle}>Từ vựng cá nhân</Text>
+        </View>
+      </View>
+
+      {/* ── Stats Row ── */}
+      <View style={s.statsRow}>
+        <View style={s.statCard}>
+          <View style={[s.statIconBox, { backgroundColor: colors.pastel.lavender.dim }]}>
+            <Ionicons name="library" size={16} color={colors.pastel.lavender.base} />
+          </View>
+          <Text style={[s.statValue, { color: colors.pastel.lavender.base }]}>
+            {statsTotal}
+          </Text>
+          <Text style={s.statLabel}>Tổng từ</Text>
+        </View>
+
+        <View style={s.statCard}>
+          <View style={[s.statIconBox, { backgroundColor: colors.pastel.rose.dim }]}>
+            <Ionicons name="heart" size={16} color={colors.pastel.rose.base} />
+          </View>
+          <Text style={[s.statValue, { color: colors.pastel.rose.base }]}>
+            {statsFavorites}
+          </Text>
+          <Text style={s.statLabel}>Yêu thích</Text>
+        </View>
+
+        <View style={s.statCard}>
+          <View style={[s.statIconBox, { backgroundColor: colors.pastel.mint.dim }]}>
+            <Ionicons name="checkmark-circle" size={16} color={colors.pastel.mint.base} />
+          </View>
+          <Text style={[s.statValue, { color: colors.pastel.mint.base }]}>
+            {statsLearned}
+          </Text>
+          <Text style={s.statLabel}>Đã học</Text>
+        </View>
+      </View>
+
+      {/* ── Search Bar ── */}
+      <View style={s.searchRow}>
+        <Ionicons
+          name="search"
+          size={18}
+          color={colors.text.tertiary}
+          style={s.searchIcon}
+        />
+        <TextInput
+          style={s.searchInput}
+          placeholder="Tìm từ vựng..."
+          placeholderTextColor={colors.text.disabled}
+          value={searchText}
+          onChangeText={handleSearchChange}
+          autoCorrect={false}
+          autoCapitalize="none"
+        />
+        {searchText.length > 0 && (
+          <Pressable onPress={clearSearch} hitSlop={8}>
+            <Ionicons
+              name="close-circle"
+              size={18}
+              color={colors.text.tertiary}
+            />
+          </Pressable>
+        )}
+      </View>
+
+      {/* ── Word Type Filter Chips ── */}
+      <FilterChips
+        items={WORD_TYPES}
+        selected={wordType}
+        onSelect={handleWordTypeChange}
+      />
+
+      {/* ── Level Filter Chips ── */}
+      <FilterChips
+        items={LEVEL_FILTERS}
+        selected={level}
+        onSelect={handleLevelChange}
+      />
+
+      {/* ── Word Count ── */}
+      <Text style={s.wordCountLabel}>{total} TỪ</Text>
+
+      {/* ── Word FlatList ── */}
+      <FlatList
+        data={accumulatedWords}
+        keyExtractor={keyExtractor}
+        renderItem={renderItem}
+        contentContainerStyle={s.listContent}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefetching}
+            onRefresh={onRefresh}
+            tintColor={colors.pastel.lavender.base}
+            colors={[colors.pastel.lavender.base]}
+          />
+        }
+        ListEmptyComponent={ListEmpty}
+        ListFooterComponent={ListFooter}
+        onEndReached={handleLoadMore}
+        onEndReachedThreshold={0.4}
+        initialNumToRender={15}
+        maxToRenderPerBatch={10}
+        windowSize={7}
+      />
+    </SafeAreaView>
+  );
+}
+
+// ── Word Card Styles ─────────────────────────────────────────
+const createWc = (colors: any) => StyleSheet.create({
+  card: {
+    marginBottom: spacing.sm,
+    borderRadius: radius.stone,
+    backgroundColor: colors.bg.b2,
+    padding: 16,
+  },
+  topRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  wordSection: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    gap: 6,
+    flex: 1,
+    marginRight: spacing.sm,
+  },
+  article: {
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.semibold,
+    fontFamily: typography.fontFamily.bodySemibold,
+  },
+  word: {
+    fontSize: 18,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.bodyBold,
+    color: colors.text.primary,
+    flexShrink: 1,
+  },
+  levelPill: {
+    borderRadius: radius.pill,
+    paddingHorizontal: 10,
+    paddingVertical: 2,
+  },
+  levelText: {
+    fontSize: typography.fontSize.xs,
+    fontWeight: typography.fontWeight.semibold,
+    fontFamily: typography.fontFamily.bodySemibold,
+  },
+  translation: {
+    marginTop: 4,
+    fontSize: typography.fontSize.sm,
+    fontFamily: typography.fontFamily.body,
+    color: colors.text.secondary,
+    lineHeight: typography.lineHeight.snug,
+  },
+  bottomRow: {
+    marginTop: spacing.sm,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  badges: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  badge: {
+    borderRadius: radius.md,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+  },
+  badgeText: {
+    fontSize: typography.fontSize.xs,
+    fontWeight: typography.fontWeight.medium,
+    fontFamily: typography.fontFamily.bodyMedium,
+  },
+  heartBtn: {
+    padding: 4,
+  },
+});
+
+// ── Screen Styles ────────────────────────────────────────────
+const createS = (colors: any) => StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.bg.b0,
+  },
+
+  // Header
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.sm,
+    paddingBottom: spacing.md,
+  },
+  backBtn: {
+    marginRight: spacing.sm,
+    padding: spacing.xs,
+  },
+  headerIconBox: {
+    width: 40,
+    height: 40,
+    borderRadius: radius.lg,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    marginRight: spacing.sm,
+  },
+  headerTextWrap: {
+    flex: 1,
+  },
+  headerTitle: {
+    fontSize: typography.fontSize.xl,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.heading,
+    color: colors.text.primary,
+    letterSpacing: typography.letterSpacing.tight,
+  },
+  headerSubtitle: {
+    fontSize: typography.fontSize.sm,
+    fontFamily: typography.fontFamily.body,
+    color: colors.text.tertiary,
+    marginTop: 1,
+  },
+
+  // Stats
+  statsRow: {
+    flexDirection: 'row',
+    paddingHorizontal: spacing.lg,
+    gap: spacing.sm,
+    marginBottom: spacing.md,
+  },
+  statCard: {
+    flex: 1,
+    borderRadius: radius.lg,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.sm,
+    alignItems: 'center',
+    backgroundColor: colors.bg.b2,
+    borderWidth: 1,
+    borderColor: colors.border.default,
+  },
+  statIconBox: {
+    width: 30,
+    height: 30,
+    borderRadius: radius.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 4,
+  },
+  statValue: {
+    fontSize: typography.fontSize.lg,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.bodyBold,
+  },
+  statLabel: {
+    fontSize: typography.fontSize.xs,
+    fontFamily: typography.fontFamily.body,
+    color: colors.text.tertiary,
+    marginTop: 2,
+  },
+
+  // Search
+  searchRow: {
+    marginHorizontal: spacing.lg,
+    marginBottom: spacing.sm,
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: radius.stone,
+    backgroundColor: colors.bg.b3,
+    paddingHorizontal: spacing.md,
+    height: 44,
+  },
+  searchIcon: {
+    marginRight: spacing.sm,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: typography.fontSize.base,
+    fontFamily: typography.fontFamily.body,
+    color: colors.text.primary,
+    paddingVertical: 0,
+  },
+
+  // Chips
+  chipScroll: {
+    marginBottom: spacing.xs,
+    paddingHorizontal: spacing.lg,
+  },
+  chipContainer: {
+    gap: 6,
+  },
+  chip: {
+    borderRadius: radius.md,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    height: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  chipLabel: {
+    fontSize: typography.fontSize.xs,
+    fontWeight: typography.fontWeight.semibold,
+    fontFamily: typography.fontFamily.bodySemibold,
+    lineHeight: 16,
+  },
+
+  // Word count
+  wordCountLabel: {
+    paddingHorizontal: spacing.lg,
+    marginBottom: spacing.sm,
+    fontSize: typography.fontSize.xs,
+    fontWeight: typography.fontWeight.semibold,
+    fontFamily: typography.fontFamily.bodySemibold,
+    color: colors.text.tertiary,
+    letterSpacing: typography.letterSpacing.widest,
+  },
+
+  // List
+  listContent: {
+    paddingHorizontal: spacing.lg,
+    paddingBottom: 100,
+  },
+
+  // Footer / Load more
+  footerLoader: {
+    paddingVertical: spacing.lg,
+    alignItems: 'center',
+  },
+  loadMoreBtn: {
+    marginVertical: spacing.md,
+    alignSelf: 'center',
+    borderRadius: radius.pill,
+    backgroundColor: colors.bg.b2,
+    paddingHorizontal: 24,
+    paddingVertical: 10,
+    borderWidth: 1,
+    borderColor: colors.border.subtle,
+  },
+  loadMoreText: {
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.semibold,
+    fontFamily: typography.fontFamily.bodySemibold,
+    color: colors.text.secondary,
+  },
+
+  // Empty state
+  emptyWrap: {
+    alignItems: 'center',
+    paddingVertical: 80,
+  },
+  emptyIcon: {
+    width: 72,
+    height: 72,
+    borderRadius: radius.stone,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    marginBottom: spacing.md,
+  },
+  emptyTitle: {
+    fontSize: typography.fontSize.md,
+    fontWeight: typography.fontWeight.semibold,
+    fontFamily: typography.fontFamily.heading,
+    color: colors.text.secondary,
+  },
+  emptySub: {
+    marginTop: spacing.xs,
+    fontSize: typography.fontSize.sm,
+    fontFamily: typography.fontFamily.body,
+    color: colors.text.tertiary,
+    textAlign: 'center',
+    paddingHorizontal: spacing.xl,
+  },
+});

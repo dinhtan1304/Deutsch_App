@@ -1,6 +1,10 @@
-import { View, Text, Pressable } from 'react-native';
+import { useMemo } from 'react';
+import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { spacing, radius, typography } from '@/theme';
+import { useThemeStore } from '@/stores/themeStore';
+import type { ThemeColors } from '@/theme/colors';
 
 interface ActionItem {
   label: string;
@@ -10,62 +14,65 @@ interface ActionItem {
   route: string;
 }
 
-const ACTIONS: ActionItem[] = [
-  {
-    label: 'Học từ vựng',
-    icon: 'book',
-    color: '#3B82F6',
-    bgColor: 'rgba(59,130,246,0.15)',
-    route: '/(tabs)/words',
-  },
-  {
-    label: 'Chơi game',
-    icon: 'game-controller',
-    color: '#22C55E',
-    bgColor: 'rgba(34,197,94,0.15)',
-    route: '/(tabs)/games',
-  },
-  {
-    label: 'Luyện thi',
-    icon: 'school',
-    color: '#A855F7',
-    bgColor: 'rgba(168,85,247,0.15)',
-    route: '/(tabs)/practice',
-  },
-  {
-    label: 'Ôn tập SRS',
-    icon: 'refresh-circle',
-    color: '#F97316',
-    bgColor: 'rgba(249,115,22,0.15)',
-    route: '/(tabs)/words',
-  },
-];
+function getActions(colors: ThemeColors): ActionItem[] {
+  return [
+    {
+      label: 'Học từ vựng',
+      icon: 'book',
+      color: colors.pastel.sky.base,
+      bgColor: colors.pastel.sky.dim,
+      route: '/(tabs)/words',
+    },
+    {
+      label: 'Chơi game',
+      icon: 'game-controller',
+      color: colors.pastel.mint.base,
+      bgColor: colors.pastel.mint.dim,
+      route: '/(tabs)/games',
+    },
+    {
+      label: 'Luyện thi',
+      icon: 'school',
+      color: colors.pastel.lavender.base,
+      bgColor: colors.pastel.lavender.dim,
+      route: '/(tabs)/practice',
+    },
+    {
+      label: 'Ôn tập SRS',
+      icon: 'refresh-circle',
+      color: colors.pastel.peach.base,
+      bgColor: colors.pastel.peach.dim,
+      route: '/(tabs)/words',
+    },
+  ];
+}
 
 export function QuickActions() {
+  const colors = useThemeStore((s) => s.colors);
+  const styles = useMemo(() => createStyles(colors), [colors]);
+  const actions = useMemo(() => getActions(colors), [colors]);
   const router = useRouter();
 
   return (
-    <View className="mx-4">
-      <Text className="mb-3 text-sm font-bold text-white">Hành động nhanh</Text>
-      <View className="flex-row flex-wrap gap-3">
-        {ACTIONS.map((action) => (
+    <View style={styles.container}>
+      <Text style={styles.sectionTitle}>Hành động nhanh</Text>
+      <View style={styles.grid}>
+        {actions.map((action) => (
           <Pressable
             key={action.label}
             onPress={() => router.push(action.route as any)}
-            className="rounded-2xl bg-dark-card p-4 active:opacity-80"
-            style={{ width: '47.5%' }}
+            style={styles.actionCard}
           >
             <View
-              className="mb-3 h-11 w-11 items-center justify-center rounded-xl"
-              style={{ backgroundColor: action.bgColor }}
+              style={[styles.iconContainer, { backgroundColor: action.bgColor }]}
             >
               <Ionicons name={action.icon} size={22} color={action.color} />
             </View>
-            <Text className="text-sm font-semibold text-white">
+            <Text style={styles.actionLabel}>
               {action.label}
             </Text>
-            <View className="mt-2 flex-row items-center gap-1">
-              <Text className="text-xs" style={{ color: action.color }}>
+            <View style={styles.ctaRow}>
+              <Text style={[styles.ctaText, { color: action.color }]}>
                 Bắt đầu
               </Text>
               <Ionicons
@@ -80,3 +87,53 @@ export function QuickActions() {
     </View>
   );
 }
+
+const createStyles = (colors: any) => StyleSheet.create({
+  container: {
+    marginHorizontal: spacing.lg,
+  },
+  sectionTitle: {
+    marginBottom: spacing.md,
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.heading,
+    color: colors.text.primary,
+  },
+  grid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.md,
+  },
+  actionCard: {
+    borderRadius: radius.stone,
+    backgroundColor: colors.bg.b2,
+    borderWidth: 1,
+    borderColor: colors.border.strong,
+    padding: spacing.lg,
+    width: '47.5%',
+  },
+  iconContainer: {
+    marginBottom: spacing.md,
+    height: 44,
+    width: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: radius.stone,
+  },
+  actionLabel: {
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.semibold,
+    fontFamily: typography.fontFamily.bodySemibold,
+    color: colors.text.primary,
+  },
+  ctaRow: {
+    marginTop: spacing.sm,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+  },
+  ctaText: {
+    fontSize: typography.fontSize.xs,
+    fontFamily: typography.fontFamily.body,
+  },
+});

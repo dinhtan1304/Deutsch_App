@@ -1,25 +1,24 @@
 /**
- * MMKV-based storage adapter for Zustand persist middleware.
- * MMKV is synchronous and 30x faster than AsyncStorage.
+ * Storage adapter for Zustand persist middleware.
+ * Uses AsyncStorage (compatible with Expo Go).
+ * Can be swapped to MMKV in a development build for better performance.
  */
 
-import { MMKV } from 'react-native-mmkv';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StateStorage } from 'zustand/middleware';
 
-export const mmkv = new MMKV({ id: 'deutschmeister-storage' });
-
 /**
- * Zustand-compatible storage using MMKV (synchronous read/write)
+ * Zustand-compatible storage using AsyncStorage
  */
 export const mmkvStorage: StateStorage = {
-  getItem: (name: string) => {
-    const value = mmkv.getString(name);
+  getItem: async (name: string) => {
+    const value = await AsyncStorage.getItem(name);
     return value ?? null;
   },
-  setItem: (name: string, value: string) => {
-    mmkv.set(name, value);
+  setItem: async (name: string, value: string) => {
+    await AsyncStorage.setItem(name, value);
   },
-  removeItem: (name: string) => {
-    mmkv.delete(name);
+  removeItem: async (name: string) => {
+    await AsyncStorage.removeItem(name);
   },
 };

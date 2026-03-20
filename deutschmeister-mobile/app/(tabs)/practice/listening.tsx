@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useMemo, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -9,19 +9,23 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
+  StyleSheet,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import * as Speech from 'expo-speech';
 import { useGenerateListening, useSubmitListening } from '@/hooks/useListening';
 import type { ListeningSession } from '@/lib/api/listening';
+import { spacing, radius, typography } from '@/theme';
+import { useThemeStore } from '@/stores/themeStore';
 
 const LEVELS = ['A1', 'A2', 'B1'] as const;
 
 const SCRIPT_TYPES = [
-  { value: 'dialog', labelVi: 'Hội thoại', icon: 'chatbubbles-outline' as const },
-  { value: 'monolog', labelVi: 'Độc thoại', icon: 'person-outline' as const },
+  { value: 'dialogue', labelVi: 'Hội thoại', icon: 'chatbubbles-outline' as const },
+  { value: 'monologue', labelVi: 'Độc thoại', icon: 'person-outline' as const },
   { value: 'announcement', labelVi: 'Thông báo', icon: 'megaphone-outline' as const },
   { value: 'interview', labelVi: 'Phỏng vấn', icon: 'mic-outline' as const },
 ];
@@ -29,18 +33,43 @@ const SCRIPT_TYPES = [
 // ── Screen ──
 
 export default function ListeningPracticeScreen() {
+  const colors = useThemeStore((s) => s.colors);
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const router = useRouter();
   const scrollRef = useRef<ScrollView>(null);
 
   // Setup state
   const [selectedLevel, setSelectedLevel] = useState<string>('A1');
-  const [selectedScriptType, setSelectedScriptType] = useState('dialog');
+  const [selectedScriptType, setSelectedScriptType] = useState('dialogue');
 
   // Session state
   const [session, setSession] = useState<ListeningSession | null>(null);
   const [userAnswers, setUserAnswers] = useState<Record<string, string>>({});
   const [showResults, setShowResults] = useState(false);
   const [showTranscript, setShowTranscript] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+
+  // Cleanup TTS on unmount or session change
+  useEffect(() => {
+    return () => { Speech.stop(); };
+  }, [session]);
+
+  const handlePlayAudio = useCallback(() => {
+    if (!session?.transcript) return;
+    if (isSpeaking) {
+      Speech.stop();
+      setIsSpeaking(false);
+      return;
+    }
+    setIsSpeaking(true);
+    Speech.speak(session.transcript, {
+      language: 'de-DE',
+      rate: 0.85,
+      onDone: () => setIsSpeaking(false),
+      onStopped: () => setIsSpeaking(false),
+      onError: () => setIsSpeaking(false),
+    });
+  }, [session?.transcript, isSpeaking]);
 
   // Queries / mutations
   const generateMutation = useGenerateListening();
@@ -95,57 +124,57 @@ export default function ListeningPracticeScreen() {
   // ── Render ──
 
   return (
-    <SafeAreaView className="flex-1 bg-dark-bg" edges={['top']}>
+    <SafeAreaView style={styles.safeArea} edges={['top']}>
       <KeyboardAvoidingView
-        className="flex-1"
+        style={styles.flex1}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         {/* Header */}
-        <View className="flex-row items-center gap-3 px-4 pb-3 pt-3">
-          <TouchableOpacity onPress={() => router.back()} className="p-1">
-            <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+            <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
           </TouchableOpacity>
           <LinearGradient
-            colors={['#F59E0B', '#F97316']}
+            colors={colors.gradient.listening}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
-            className="h-9 w-9 items-center justify-center rounded-xl"
+            style={styles.headerIcon}
           >
             <Ionicons name="ear-outline" size={18} color="#FFFFFF" />
           </LinearGradient>
-          <View className="flex-1">
-            <Text className="text-lg font-bold text-white">Luyện Nghe</Text>
-            <Text className="text-xs text-gray-400">Hörübung</Text>
+          <View style={styles.flex1}>
+            <Text style={styles.headerTitle}>Luyện Nghe</Text>
+            <Text style={styles.headerSubtitle}>Hörübung</Text>
           </View>
         </View>
 
-        <ScrollView ref={scrollRef} className="flex-1" showsVerticalScrollIndicator={false}>
+        <ScrollView ref={scrollRef} style={styles.flex1} showsVerticalScrollIndicator={false}>
           {/* ====== Results Banner ====== */}
           {showResults && session?.status === 'GRADED' && (
-            <View className="mx-4 mb-4 rounded-2xl overflow-hidden">
+            <View style={styles.resultsBannerWrap}>
               <LinearGradient
                 colors={
                   (session.score ?? 0) >= 70
-                    ? ['#22C55E', '#14B8A6']
+                    ? colors.gradient.correct
                     : (session.score ?? 0) >= 40
-                    ? ['#F59E0B', '#F97316']
-                    : ['#EF4444', '#F97316']
+                    ? colors.gradient.warning
+                    : colors.gradient.danger
                 }
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
-                className="p-5"
+                style={styles.resultsBannerGradient}
               >
-                <View className="flex-row items-center justify-between">
+                <View style={styles.resultsBannerRow}>
                   <View>
-                    <Text className="text-sm font-semibold text-white/80">Kết quả</Text>
-                    <Text className="text-3xl font-bold text-white">
+                    <Text style={styles.resultLabel}>Kết quả</Text>
+                    <Text style={styles.resultScore}>
                       {session.correctCount}/{session.totalQ}
                     </Text>
-                    <Text className="mt-1 text-xs text-white/70">
+                    <Text style={styles.resultPercent}>
                       Điểm: {Math.round(session.score ?? 0)}%
                     </Text>
                   </View>
-                  <View className="h-16 w-16 items-center justify-center rounded-full bg-white/20">
+                  <View style={styles.resultIconCircle}>
                     <Ionicons
                       name={(session.score ?? 0) >= 70 ? 'trophy' : 'refresh'}
                       size={28}
@@ -154,11 +183,8 @@ export default function ListeningPracticeScreen() {
                   </View>
                 </View>
 
-                <TouchableOpacity
-                  onPress={handleReset}
-                  className="mt-4 items-center rounded-xl bg-white/20 py-2.5"
-                >
-                  <Text className="text-sm font-bold text-white">Làm bài mới</Text>
+                <TouchableOpacity onPress={handleReset} style={styles.resultResetBtn}>
+                  <Text style={styles.resultResetText}>Làm bài mới</Text>
                 </TouchableOpacity>
               </LinearGradient>
             </View>
@@ -166,27 +192,28 @@ export default function ListeningPracticeScreen() {
 
           {/* ====== Setup Section ====== */}
           {!session && (
-            <View className="px-4">
+            <View style={styles.sectionPadding}>
               {/* Level Selection */}
-              <Text className="mb-2 text-sm font-bold text-white">Trình độ</Text>
-              <View className="mb-4 flex-row gap-2">
+              <Text style={styles.sectionLabel}>Trình độ</Text>
+              <View style={styles.levelRow}>
                 {LEVELS.map((level) => (
                   <TouchableOpacity
                     key={level}
                     onPress={() => setSelectedLevel(level)}
-                    className={`flex-1 items-center rounded-xl py-3 ${
-                      selectedLevel === level ? '' : 'bg-dark-card'
-                    }`}
-                    style={
+                    style={[
+                      styles.levelBtn,
                       selectedLevel === level
-                        ? { backgroundColor: 'rgba(245,158,11,0.15)' }
-                        : undefined
-                    }
+                        ? styles.levelBtnActiveListening
+                        : styles.levelBtnInactive,
+                    ]}
                   >
                     <Text
-                      className={`text-sm font-bold ${
-                        selectedLevel === level ? 'text-amber-400' : 'text-gray-400'
-                      }`}
+                      style={[
+                        styles.levelBtnText,
+                        selectedLevel === level
+                          ? styles.levelBtnTextActiveListening
+                          : styles.levelBtnTextInactive,
+                      ]}
                     >
                       {level}
                     </Text>
@@ -195,30 +222,31 @@ export default function ListeningPracticeScreen() {
               </View>
 
               {/* Script Type Selection */}
-              <Text className="mb-2 text-sm font-bold text-white">Dạng bài nghe</Text>
-              <View className="mb-4 flex-row flex-wrap gap-2">
+              <Text style={styles.sectionLabel}>Dạng bài nghe</Text>
+              <View style={styles.scriptTypeWrap}>
                 {SCRIPT_TYPES.map((st) => (
                   <TouchableOpacity
                     key={st.value}
                     onPress={() => setSelectedScriptType(st.value)}
-                    className={`flex-row items-center gap-1.5 rounded-xl px-4 py-2.5 ${
-                      selectedScriptType === st.value ? '' : 'bg-dark-card'
-                    }`}
-                    style={
+                    style={[
+                      styles.scriptTypeChip,
                       selectedScriptType === st.value
-                        ? { backgroundColor: 'rgba(245,158,11,0.15)' }
-                        : undefined
-                    }
+                        ? styles.scriptTypeChipActive
+                        : styles.scriptTypeChipInactive,
+                    ]}
                   >
                     <Ionicons
                       name={st.icon}
                       size={16}
-                      color={selectedScriptType === st.value ? '#FBBF24' : '#9CA3AF'}
+                      color={selectedScriptType === st.value ? colors.pastel.peach.base : colors.text.secondary}
                     />
                     <Text
-                      className={`text-xs font-semibold ${
-                        selectedScriptType === st.value ? 'text-amber-400' : 'text-gray-400'
-                      }`}
+                      style={[
+                        styles.scriptTypeChipText,
+                        selectedScriptType === st.value
+                          ? styles.scriptTypeChipTextActive
+                          : styles.scriptTypeChipTextInactive,
+                      ]}
                     >
                       {st.labelVi}
                     </Text>
@@ -233,20 +261,20 @@ export default function ListeningPracticeScreen() {
                 activeOpacity={0.8}
               >
                 <LinearGradient
-                  colors={['#F59E0B', '#F97316']}
+                  colors={colors.gradient.listening}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 1 }}
-                  className="items-center rounded-2xl py-4"
+                  style={styles.generateBtn}
                 >
                   {generateMutation.isPending ? (
-                    <View className="flex-row items-center gap-2">
+                    <View style={styles.btnInnerRow}>
                       <ActivityIndicator color="#FFFFFF" size="small" />
-                      <Text className="text-sm font-bold text-white">Đang tạo bài nghe...</Text>
+                      <Text style={styles.btnText}>Đang tạo bài nghe...</Text>
                     </View>
                   ) : (
-                    <View className="flex-row items-center gap-2">
+                    <View style={styles.btnInnerRow}>
                       <Ionicons name="sparkles" size={18} color="#FFFFFF" />
-                      <Text className="text-sm font-bold text-white">Tạo bài nghe</Text>
+                      <Text style={styles.btnText}>Tạo bài nghe</Text>
                     </View>
                   )}
                 </LinearGradient>
@@ -256,44 +284,49 @@ export default function ListeningPracticeScreen() {
 
           {/* ====== Session Content ====== */}
           {session && (
-            <View className="px-4">
+            <View style={styles.sectionPadding}>
               {/* Title Card */}
-              <View className="mb-4 rounded-2xl bg-dark-card p-4">
-                <View className="mb-2 flex-row items-center gap-2">
-                  <View className="rounded-md px-2 py-0.5" style={{ backgroundColor: 'rgba(245,158,11,0.15)' }}>
-                    <Text className="text-xs font-bold text-amber-400">{session.cefrLevel}</Text>
+              <View style={styles.card}>
+                <View style={styles.tagRow}>
+                  <View style={styles.levelTagListening}>
+                    <Text style={styles.levelTagTextListening}>{session.cefrLevel}</Text>
                   </View>
-                  <Text className="text-xs text-gray-500">{session.scriptType}</Text>
+                  <Text style={styles.textTypeLabelSmall}>{session.scriptType}</Text>
                 </View>
-                <Text className="text-lg font-bold text-white">{session.title}</Text>
+                <Text style={styles.sessionTitle}>{session.title}</Text>
               </View>
 
-              {/* Audio Placeholder */}
-              <View className="mb-4 rounded-2xl bg-dark-card p-4">
-                <View className="flex-row items-center gap-3">
-                  <TouchableOpacity
-                    className="h-12 w-12 items-center justify-center rounded-full"
-                    style={{ backgroundColor: 'rgba(245,158,11,0.15)' }}
-                  >
-                    <Ionicons name="play" size={24} color="#F59E0B" />
+              {/* Audio Player (TTS) */}
+              <View style={styles.card}>
+                <View style={styles.audioRow}>
+                  <TouchableOpacity style={styles.playBtn} onPress={handlePlayAudio}>
+                    <Ionicons
+                      name={isSpeaking ? 'stop' : 'play'}
+                      size={24}
+                      color={colors.pastel.peach.base}
+                    />
                   </TouchableOpacity>
-                  <View className="flex-1">
-                    <Text className="text-sm font-semibold text-white">Nghe bài</Text>
-                    <Text className="text-xs text-gray-400">Đọc transcript bên dưới để luyện tập</Text>
+                  <View style={styles.flex1}>
+                    <Text style={styles.audioLabel}>
+                      {isSpeaking ? 'Đang phát...' : 'Nghe bài'}
+                    </Text>
+                    <Text style={styles.audioHint}>
+                      {isSpeaking ? 'Nhấn để dừng' : 'Nhấn để nghe phát âm tiếng Đức'}
+                    </Text>
                   </View>
                 </View>
 
                 {/* Transcript toggle */}
                 <TouchableOpacity
                   onPress={() => setShowTranscript(!showTranscript)}
-                  className="mt-3 flex-row items-center gap-1.5"
+                  style={styles.transcriptToggle}
                 >
                   <Ionicons
                     name={showTranscript ? 'eye-off-outline' : 'eye-outline'}
                     size={16}
-                    color="#FBBF24"
+                    color={colors.pastel.peach.base}
                   />
-                  <Text className="text-xs font-semibold text-amber-400">
+                  <Text style={styles.transcriptToggleText}>
                     {showTranscript ? 'Ẩn transcript' : 'Hiện transcript'}
                   </Text>
                 </TouchableOpacity>
@@ -301,14 +334,14 @@ export default function ListeningPracticeScreen() {
 
               {/* Transcript */}
               {showTranscript && session.transcript && (
-                <View className="mb-4 rounded-2xl bg-dark-card p-4">
-                  <Text className="mb-2 text-sm font-bold text-amber-400">Transcript</Text>
-                  <Text className="text-sm leading-6 text-gray-200">{session.transcript}</Text>
+                <View style={styles.card}>
+                  <Text style={styles.transcriptTitle}>Transcript</Text>
+                  <Text style={styles.transcriptBody}>{session.transcript}</Text>
                 </View>
               )}
 
               {/* Questions */}
-              <Text className="mb-3 text-base font-bold text-white">
+              <Text style={styles.questionsHeader}>
                 Câu hỏi ({session.questions.length})
               </Text>
 
@@ -316,24 +349,21 @@ export default function ListeningPracticeScreen() {
                 const isGraded = showResults && session.status === 'GRADED';
 
                 return (
-                  <View key={q.id} className="mb-3 rounded-2xl bg-dark-card p-4">
-                    <View className="mb-2 flex-row items-center gap-2">
-                      <View
-                        className="rounded px-1.5 py-0.5"
-                        style={{ backgroundColor: 'rgba(245,158,11,0.15)' }}
-                      >
-                        <Text className="text-[10px] font-bold text-amber-400">
+                  <View key={q.id} style={styles.card}>
+                    <View style={styles.qTypeRow}>
+                      <View style={styles.qTypeBadge}>
+                        <Text style={styles.qTypeBadgeText}>
                           {q.type === 'richtig_falsch' ? 'R/F' : 'MC'}
                         </Text>
                       </View>
                     </View>
-                    <Text className="mb-3 text-sm font-semibold text-white">
+                    <Text style={styles.questionText}>
                       {qIndex + 1}. {q.questionText}
                     </Text>
 
                     {q.type === 'richtig_falsch' ? (
                       // Richtig / Falsch buttons
-                      <View className="flex-row gap-2">
+                      <View style={styles.rfRow}>
                         {[
                           { id: 'richtig', label: 'Richtig' },
                           { id: 'falsch', label: 'Falsch' },
@@ -351,35 +381,38 @@ export default function ListeningPracticeScreen() {
                                 }
                               }}
                               disabled={showResults}
-                              className="flex-1 items-center rounded-xl px-4 py-3"
-                              style={{
-                                borderWidth: isSelected || (isGraded && isCorrect) ? 1.5 : 0,
-                                borderColor: isGraded && isCorrect
-                                  ? '#22C55E'
-                                  : isGraded && isWrong
-                                  ? '#EF4444'
-                                  : isSelected
-                                  ? '#F59E0B'
-                                  : 'transparent',
-                                backgroundColor: isGraded && isCorrect
-                                  ? 'rgba(34,197,94,0.1)'
-                                  : isGraded && isWrong
-                                  ? 'rgba(239,68,68,0.1)'
-                                  : isSelected
-                                  ? 'rgba(245,158,11,0.1)'
-                                  : '#1E2433',
-                              }}
+                              style={[
+                                styles.rfBtn,
+                                {
+                                  borderWidth: isSelected || (isGraded && isCorrect) ? 1.5 : 0,
+                                  borderColor: isGraded && isCorrect
+                                    ? colors.semantic.correct
+                                    : isGraded && isWrong
+                                    ? colors.semantic.wrong
+                                    : isSelected
+                                    ? colors.pastel.peach.base
+                                    : 'transparent',
+                                  backgroundColor: isGraded && isCorrect
+                                    ? colors.pastel.mint.dim
+                                    : isGraded && isWrong
+                                    ? colors.pastel.rose.dim
+                                    : isSelected
+                                    ? colors.pastel.peach.dim
+                                    : colors.bg.b3,
+                                },
+                              ]}
                             >
                               <Text
-                                className={`text-sm font-semibold ${
+                                style={[
+                                  styles.rfBtnText,
                                   isGraded && isCorrect
-                                    ? 'text-green-400'
+                                    ? { color: colors.pastel.mint.base }
                                     : isGraded && isWrong
-                                    ? 'text-red-400'
+                                    ? { color: colors.pastel.rose.base }
                                     : isSelected
-                                    ? 'text-amber-400'
-                                    : 'text-gray-300'
-                                }`}
+                                    ? { color: colors.pastel.peach.base }
+                                    : { color: colors.text.secondary },
+                                ]}
                               >
                                 {opt.label}
                               </Text>
@@ -403,55 +436,60 @@ export default function ListeningPracticeScreen() {
                               }
                             }}
                             disabled={showResults}
-                            className="mb-2 flex-row items-center rounded-xl px-4 py-3"
-                            style={{
-                              borderWidth: (isSelected || (isGraded && isCorrect)) ? 1.5 : 0,
-                              borderColor: isGraded && isCorrect
-                                ? '#22C55E'
-                                : isGraded && isWrong
-                                ? '#EF4444'
-                                : isSelected
-                                ? '#F59E0B'
-                                : 'transparent',
-                              backgroundColor: isGraded && isCorrect
-                                ? 'rgba(34,197,94,0.1)'
-                                : isGraded && isWrong
-                                ? 'rgba(239,68,68,0.1)'
-                                : isSelected
-                                ? 'rgba(245,158,11,0.1)'
-                                : '#1E2433',
-                            }}
+                            style={[
+                              styles.mcOptionBtn,
+                              {
+                                borderWidth: (isSelected || (isGraded && isCorrect)) ? 1.5 : 0,
+                                borderColor: isGraded && isCorrect
+                                  ? colors.semantic.correct
+                                  : isGraded && isWrong
+                                  ? colors.semantic.wrong
+                                  : isSelected
+                                  ? colors.pastel.peach.base
+                                  : 'transparent',
+                                backgroundColor: isGraded && isCorrect
+                                  ? colors.pastel.mint.dim
+                                  : isGraded && isWrong
+                                  ? colors.pastel.rose.dim
+                                  : isSelected
+                                  ? colors.pastel.peach.dim
+                                  : colors.bg.b3,
+                              },
+                            ]}
                           >
                             <View
-                              className="mr-3 h-6 w-6 items-center justify-center rounded-full"
-                              style={{
-                                backgroundColor: isGraded && isCorrect
-                                  ? '#22C55E'
-                                  : isGraded && isWrong
-                                  ? '#EF4444'
-                                  : isSelected
-                                  ? '#F59E0B'
-                                  : '#374151',
-                              }}
+                              style={[
+                                styles.optionCircle,
+                                {
+                                  backgroundColor: isGraded && isCorrect
+                                    ? colors.semantic.correct
+                                    : isGraded && isWrong
+                                    ? colors.semantic.wrong
+                                    : isSelected
+                                    ? colors.pastel.peach.base
+                                    : colors.bg.b3,
+                                },
+                              ]}
                             >
                               {isGraded && isCorrect ? (
                                 <Ionicons name="checkmark" size={14} color="#FFFFFF" />
                               ) : isGraded && isWrong ? (
                                 <Ionicons name="close" size={14} color="#FFFFFF" />
                               ) : (
-                                <Text className="text-[10px] font-bold text-gray-400">
+                                <Text style={styles.optionCircleText}>
                                   {opt.id.toUpperCase()}
                                 </Text>
                               )}
                             </View>
                             <Text
-                              className={`flex-1 text-sm ${
+                              style={[
+                                styles.optionText,
                                 isGraded && isCorrect
-                                  ? 'font-semibold text-green-400'
+                                  ? styles.optionTextCorrect
                                   : isGraded && isWrong
-                                  ? 'text-red-400'
-                                  : 'text-gray-300'
-                              }`}
+                                  ? styles.optionTextWrong
+                                  : styles.optionTextDefault,
+                              ]}
                             >
                               {opt.text}
                             </Text>
@@ -463,14 +501,16 @@ export default function ListeningPracticeScreen() {
                     {/* Explanation (after grading) */}
                     {isGraded && (
                       <View
-                        className="mt-2 rounded-lg p-3"
-                        style={{
-                          backgroundColor: userAnswers[q.id] === q.correctAnswer
-                            ? 'rgba(34,197,94,0.08)'
-                            : 'rgba(239,68,68,0.08)',
-                        }}
+                        style={[
+                          styles.explanationBox,
+                          {
+                            backgroundColor: userAnswers[q.id] === q.correctAnswer
+                              ? colors.pastel.mint.dim
+                              : colors.pastel.rose.dim,
+                          },
+                        ]}
                       >
-                        <Text className="text-xs text-gray-300">{q.explanationVi}</Text>
+                        <Text style={styles.explanationText}>{q.explanationVi}</Text>
                       </View>
                     )}
                   </View>
@@ -483,36 +523,415 @@ export default function ListeningPracticeScreen() {
                   onPress={handleSubmit}
                   disabled={submitMutation.isPending}
                   activeOpacity={0.8}
-                  className="mb-4"
+                  style={styles.mb4}
                 >
                   <LinearGradient
-                    colors={['#F59E0B', '#F97316']}
+                    colors={colors.gradient.listening}
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 1 }}
-                    className="items-center rounded-2xl py-4"
+                    style={styles.generateBtn}
                   >
                     {submitMutation.isPending ? (
-                      <View className="flex-row items-center gap-2">
+                      <View style={styles.btnInnerRow}>
                         <ActivityIndicator color="#FFFFFF" size="small" />
-                        <Text className="text-sm font-bold text-white">Đang chấm điểm...</Text>
+                        <Text style={styles.btnText}>Đang chấm điểm...</Text>
                       </View>
                     ) : (
-                      <View className="flex-row items-center gap-2">
+                      <View style={styles.btnInnerRow}>
                         <Ionicons name="checkmark-circle" size={18} color="#FFFFFF" />
-                        <Text className="text-sm font-bold text-white">Nộp bài</Text>
+                        <Text style={styles.btnText}>Nộp bài</Text>
                       </View>
                     )}
                   </LinearGradient>
                 </TouchableOpacity>
               )}
 
-              <View className="h-8" />
+              <View style={styles.spacer8} />
             </View>
           )}
 
-          <View className="h-4" />
+          <View style={styles.spacer4} />
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
+
+const createStyles = (colors: any) => StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: colors.bg.b0,
+  },
+  flex1: {
+    flex: 1,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingHorizontal: spacing.md,
+    paddingBottom: 12,
+    paddingTop: 12,
+  },
+  backBtn: {
+    padding: 4,
+  },
+  headerIcon: {
+    height: 36,
+    width: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: radius.stone,
+  },
+  headerTitle: {
+    fontSize: typography.fontSize.lg,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.heading,
+    color: colors.text.primary,
+  },
+  headerSubtitle: {
+    fontSize: typography.fontSize.xs,
+    fontFamily: typography.fontFamily.body,
+    color: colors.text.secondary,
+  },
+  // Results Banner
+  resultsBannerWrap: {
+    marginHorizontal: spacing.md,
+    marginBottom: spacing.md,
+    borderRadius: radius['2xl'],
+    overflow: 'hidden',
+  },
+  resultsBannerGradient: {
+    padding: 20,
+  },
+  resultsBannerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  resultLabel: {
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.semibold,
+    fontFamily: typography.fontFamily.bodySemibold,
+    color: 'rgba(255,255,255,0.8)',
+  },
+  resultScore: {
+    fontSize: 30,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.bodyBold,
+    color: '#FFFFFF',
+  },
+  resultPercent: {
+    marginTop: 4,
+    fontSize: typography.fontSize.xs,
+    fontFamily: typography.fontFamily.body,
+    color: 'rgba(255,255,255,0.7)',
+  },
+  resultIconCircle: {
+    height: 64,
+    width: 64,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 32,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+  },
+  resultResetBtn: {
+    marginTop: 16,
+    alignItems: 'center',
+    borderRadius: radius.stone,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    paddingVertical: 10,
+  },
+  resultResetText: {
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.heading,
+    color: '#FFFFFF',
+  },
+  // Setup Section
+  sectionPadding: {
+    paddingHorizontal: spacing.md,
+  },
+  sectionLabel: {
+    marginBottom: 8,
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.heading,
+    color: colors.text.primary,
+  },
+  levelRow: {
+    marginBottom: spacing.md,
+    flexDirection: 'row',
+    gap: 8,
+  },
+  levelBtn: {
+    flex: 1,
+    alignItems: 'center',
+    borderRadius: radius.stone,
+    paddingVertical: 12,
+  },
+  levelBtnActiveListening: {
+    backgroundColor: colors.pastel.peach.dim,
+  },
+  levelBtnInactive: {
+    backgroundColor: colors.bg.b2,
+  },
+  levelBtnText: {
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.bodyBold,
+  },
+  levelBtnTextActiveListening: {
+    color: colors.pastel.peach.base,
+  },
+  levelBtnTextInactive: {
+    color: colors.text.secondary,
+  },
+  // Script Type
+  scriptTypeWrap: {
+    marginBottom: spacing.md,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  scriptTypeChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    borderRadius: radius.stone,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+  },
+  scriptTypeChipActive: {
+    backgroundColor: colors.pastel.peach.dim,
+  },
+  scriptTypeChipInactive: {
+    backgroundColor: colors.bg.b2,
+  },
+  scriptTypeChipText: {
+    fontSize: typography.fontSize.xs,
+    fontWeight: typography.fontWeight.semibold,
+    fontFamily: typography.fontFamily.bodySemibold,
+  },
+  scriptTypeChipTextActive: {
+    color: colors.pastel.peach.base,
+  },
+  scriptTypeChipTextInactive: {
+    color: colors.text.secondary,
+  },
+  // Generate Button
+  generateBtn: {
+    alignItems: 'center',
+    borderRadius: radius['2xl'],
+    paddingVertical: 16,
+  },
+  btnInnerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  btnText: {
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.bodyBold,
+    color: '#FFFFFF',
+  },
+  // Card
+  card: {
+    marginBottom: spacing.md,
+    borderRadius: radius['2xl'],
+    backgroundColor: colors.bg.b2,
+    borderWidth: 1,
+    borderColor: colors.border.strong,
+    padding: 16,
+  },
+  tagRow: {
+    marginBottom: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  levelTagListening: {
+    borderRadius: radius.md,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    backgroundColor: colors.pastel.peach.dim,
+  },
+  levelTagTextListening: {
+    fontSize: typography.fontSize.xs,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.bodyBold,
+    color: colors.pastel.peach.base,
+  },
+  textTypeLabelSmall: {
+    fontSize: typography.fontSize.xs,
+    fontFamily: typography.fontFamily.body,
+    color: colors.text.tertiary,
+  },
+  sessionTitle: {
+    fontSize: typography.fontSize.lg,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.heading,
+    color: colors.text.primary,
+  },
+  // Audio
+  audioRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  playBtn: {
+    height: 48,
+    width: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 24,
+    backgroundColor: colors.pastel.peach.dim,
+  },
+  audioLabel: {
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.semibold,
+    fontFamily: typography.fontFamily.bodySemibold,
+    color: colors.text.primary,
+  },
+  audioHint: {
+    fontSize: typography.fontSize.xs,
+    fontFamily: typography.fontFamily.body,
+    color: colors.text.secondary,
+  },
+  transcriptToggle: {
+    marginTop: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  transcriptToggleText: {
+    fontSize: typography.fontSize.xs,
+    fontWeight: typography.fontWeight.semibold,
+    fontFamily: typography.fontFamily.heading,
+    color: colors.pastel.peach.base,
+  },
+  // Transcript
+  transcriptTitle: {
+    marginBottom: 8,
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.heading,
+    color: colors.pastel.peach.base,
+  },
+  transcriptBody: {
+    fontSize: typography.fontSize.sm,
+    lineHeight: 24,
+    color: colors.text.secondary,
+  },
+  // Questions
+  questionsHeader: {
+    marginBottom: 12,
+    fontSize: typography.fontSize.base,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.heading,
+    color: colors.text.primary,
+  },
+  qTypeRow: {
+    marginBottom: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  qTypeBadge: {
+    borderRadius: radius.sm,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    backgroundColor: colors.pastel.peach.dim,
+  },
+  qTypeBadgeText: {
+    fontSize: 10,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.bodyBold,
+    color: colors.pastel.peach.base,
+  },
+  questionText: {
+    marginBottom: 12,
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.semibold,
+    fontFamily: typography.fontFamily.bodySemibold,
+    color: colors.text.primary,
+  },
+  // Richtig/Falsch
+  rfRow: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  rfBtn: {
+    flex: 1,
+    alignItems: 'center',
+    borderRadius: radius.stone,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  rfBtnText: {
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.semibold,
+    fontFamily: typography.fontFamily.bodySemibold,
+  },
+  // MC options
+  mcOptionBtn: {
+    marginBottom: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: radius.stone,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  optionCircle: {
+    marginRight: 12,
+    height: 24,
+    width: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 12,
+  },
+  optionCircleText: {
+    fontSize: 10,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.bodyBold,
+    color: colors.text.secondary,
+  },
+  optionText: {
+    flex: 1,
+    fontSize: typography.fontSize.sm,
+    fontFamily: typography.fontFamily.body,
+  },
+  optionTextCorrect: {
+    fontWeight: typography.fontWeight.semibold,
+    fontFamily: typography.fontFamily.bodySemibold,
+    color: colors.pastel.mint.base,
+  },
+  optionTextWrong: {
+    color: colors.pastel.rose.base,
+  },
+  optionTextDefault: {
+    color: colors.text.secondary,
+  },
+  // Explanation
+  explanationBox: {
+    marginTop: 8,
+    borderRadius: radius.lg,
+    padding: 12,
+  },
+  explanationText: {
+    fontSize: typography.fontSize.xs,
+    fontFamily: typography.fontFamily.body,
+    color: colors.text.secondary,
+  },
+  // Misc
+  mb4: {
+    marginBottom: spacing.md,
+  },
+  spacer8: {
+    height: 32,
+  },
+  spacer4: {
+    height: 16,
+  },
+});

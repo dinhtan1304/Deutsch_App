@@ -9,7 +9,6 @@ export default function PracticeLayout() {
       <Stack.Screen name="listening" />
       <Stack.Screen name="speaking" />
       <Stack.Screen name="grammar" />
-      <Stack.Screen name="grammar-lesson" />
     </Stack>
   );
 }

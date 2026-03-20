@@ -1,6 +1,8 @@
 import { useMemo } from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
+import { spacing, radius, typography } from '@/theme';
 import type { WeeklyProgress } from '@/types/dashboard';
+import { useThemeStore } from '@/stores/themeStore';
 
 interface WeeklyChartProps {
   data: WeeklyProgress[];
@@ -23,6 +25,8 @@ function isToday(dateStr: string): boolean {
 }
 
 export function WeeklyChart({ data }: WeeklyChartProps) {
+  const colors = useThemeStore((s) => s.colors);
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const maxWords = useMemo(
     () => Math.max(...data.map((d) => d.wordsLearned), 1),
     [data],
@@ -40,43 +44,34 @@ export function WeeklyChart({ data }: WeeklyChartProps) {
   const BAR_MAX_HEIGHT = 100;
 
   return (
-    <View className="mx-4 rounded-2xl bg-dark-card p-4">
+    <View style={styles.container}>
       {/* Header */}
-      <View className="mb-1 flex-row items-center justify-between">
-        <View className="flex-row items-center gap-2">
-          <Text className="text-base">📊</Text>
-          <Text className="text-sm font-bold text-white">
+      <View style={styles.header}>
+        <View style={styles.headerLeft}>
+          <Text style={styles.headerEmoji}>📊</Text>
+          <Text style={styles.headerTitle}>
             Tiến độ 7 ngày qua
           </Text>
         </View>
       </View>
 
       {/* Summary row */}
-      <View className="mb-4 flex-row gap-4">
-        <View className="flex-row items-center gap-1">
-          <View
-            className="h-2 w-2 rounded-full"
-            style={{ backgroundColor: '#6366F1' }}
-          />
-          <Text className="text-xs text-gray-400">
+      <View style={styles.summaryRow}>
+        <View style={styles.summaryItem}>
+          <View style={[styles.dot, { backgroundColor: colors.pastel.lavender.base }]} />
+          <Text style={styles.summaryText}>
             {totals.words} từ
           </Text>
         </View>
-        <View className="flex-row items-center gap-1">
-          <View
-            className="h-2 w-2 rounded-full"
-            style={{ backgroundColor: '#22C55E' }}
-          />
-          <Text className="text-xs text-gray-400">
+        <View style={styles.summaryItem}>
+          <View style={[styles.dot, { backgroundColor: colors.pastel.mint.base }]} />
+          <Text style={styles.summaryText}>
             {totals.games} games
           </Text>
         </View>
-        <View className="flex-row items-center gap-1">
-          <View
-            className="h-2 w-2 rounded-full"
-            style={{ backgroundColor: '#A855F7' }}
-          />
-          <Text className="text-xs text-gray-400">
+        <View style={styles.summaryItem}>
+          <View style={[styles.dot, { backgroundColor: colors.pastel.lavender.base }]} />
+          <Text style={styles.summaryText}>
             {totals.minutes} phút
           </Text>
         </View>
@@ -84,8 +79,7 @@ export function WeeklyChart({ data }: WeeklyChartProps) {
 
       {/* Chart bars */}
       <View
-        className="flex-row items-end justify-between"
-        style={{ height: BAR_MAX_HEIGHT + 24 }}
+        style={[styles.chartRow, { height: BAR_MAX_HEIGHT + 24 }]}
       >
         {data.map((day) => {
           const barHeight = Math.max(
@@ -93,39 +87,45 @@ export function WeeklyChart({ data }: WeeklyChartProps) {
             4,
           );
           const today = isToday(day.date);
-          const barColor = today ? '#6366F1' : '#374151';
+          const barColor = today ? colors.pastel.lavender.base : colors.bg.b4;
           const labelVi = DAY_LABELS[day.day] ?? day.day;
 
           return (
-            <View key={day.date} className="flex-1 items-center">
+            <View key={day.date} style={styles.barColumn}>
               {/* Value label */}
               {day.wordsLearned > 0 && (
                 <Text
-                  className="mb-1 text-center text-xs font-semibold"
-                  style={{ color: today ? '#6366F1' : '#9CA3AF' }}
+                  style={[
+                    styles.barValue,
+                    { color: today ? colors.pastel.lavender.base : colors.text.secondary },
+                  ]}
                 >
                   {day.wordsLearned}
                 </Text>
               )}
               {/* Bar */}
               <View
-                className="w-7 rounded-lg"
-                style={{
-                  height: barHeight,
-                  backgroundColor: barColor,
-                  ...(today && {
-                    shadowColor: '#6366F1',
-                    shadowOffset: { width: 0, height: 2 },
-                    shadowOpacity: 0.4,
-                    shadowRadius: 4,
-                    elevation: 4,
-                  }),
-                }}
+                style={[
+                  styles.bar,
+                  {
+                    height: barHeight,
+                    backgroundColor: barColor,
+                    ...(today && {
+                      shadowColor: colors.pastel.lavender.base,
+                      shadowOffset: { width: 0, height: 2 },
+                      shadowOpacity: 0.4,
+                      shadowRadius: 4,
+                      elevation: 4,
+                    }),
+                  },
+                ]}
               />
               {/* Day label */}
               <Text
-                className="mt-2 text-xs font-medium"
-                style={{ color: today ? '#FFFFFF' : '#6B7280' }}
+                style={[
+                  styles.dayLabel,
+                  { color: today ? colors.text.primary : colors.text.tertiary },
+                ]}
               >
                 {labelVi}
               </Text>
@@ -138,23 +138,118 @@ export function WeeklyChart({ data }: WeeklyChartProps) {
 }
 
 export function WeeklyChartSkeleton() {
+  const colors = useThemeStore((s) => s.colors);
+  const styles = useMemo(() => createStyles(colors), [colors]);
   return (
-    <View className="mx-4 rounded-2xl bg-dark-card p-4">
-      <View className="mb-4 h-5 w-40 rounded bg-dark-secondary" />
-      <View
-        className="flex-row items-end justify-between"
-        style={{ height: 124 }}
-      >
+    <View style={styles.container}>
+      <View style={styles.skeletonTitle} />
+      <View style={[styles.chartRow, { height: 124 }]}>
         {Array.from({ length: 7 }).map((_, i) => (
-          <View key={i} className="flex-1 items-center">
+          <View key={i} style={styles.barColumn}>
             <View
-              className="w-7 rounded-lg bg-dark-secondary"
-              style={{ height: 20 + Math.random() * 60 }}
+              style={[styles.skeletonBar, { height: 20 + Math.random() * 60 }]}
             />
-            <View className="mt-2 h-3 w-5 rounded bg-dark-secondary" />
+            <View style={styles.skeletonDayLabel} />
           </View>
         ))}
       </View>
     </View>
   );
 }
+
+const createStyles = (colors: any) => StyleSheet.create({
+  container: {
+    marginHorizontal: spacing.lg,
+    borderRadius: radius.stone,
+    backgroundColor: colors.bg.b2,
+    borderWidth: 1,
+    borderColor: colors.border.strong,
+    padding: spacing.lg,
+  },
+  header: {
+    marginBottom: spacing.xs,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  headerEmoji: {
+    fontSize: typography.fontSize.base,
+    fontFamily: typography.fontFamily.body,
+  },
+  headerTitle: {
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.heading,
+    color: colors.text.primary,
+  },
+  summaryRow: {
+    marginBottom: spacing.lg,
+    flexDirection: 'row',
+    gap: spacing.lg,
+  },
+  summaryItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+  },
+  dot: {
+    height: 8,
+    width: 8,
+    borderRadius: 4,
+  },
+  summaryText: {
+    fontSize: typography.fontSize.xs,
+    fontFamily: typography.fontFamily.body,
+    color: colors.text.secondary,
+  },
+  chartRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    justifyContent: 'space-between',
+  },
+  barColumn: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  barValue: {
+    marginBottom: spacing.xs,
+    textAlign: 'center',
+    fontSize: typography.fontSize.xs,
+    fontWeight: typography.fontWeight.semibold,
+    fontFamily: typography.fontFamily.bodySemibold,
+  },
+  bar: {
+    width: 28,
+    borderRadius: radius.sm,
+  },
+  dayLabel: {
+    marginTop: spacing.sm,
+    fontSize: typography.fontSize.xs,
+    fontWeight: typography.fontWeight.medium,
+    fontFamily: typography.fontFamily.bodyMedium,
+  },
+  skeletonTitle: {
+    marginBottom: spacing.lg,
+    height: 20,
+    width: 160,
+    borderRadius: radius.sm,
+    backgroundColor: colors.bg.b3,
+  },
+  skeletonBar: {
+    width: 28,
+    borderRadius: radius.sm,
+    backgroundColor: colors.bg.b3,
+  },
+  skeletonDayLabel: {
+    marginTop: spacing.sm,
+    height: 12,
+    width: 20,
+    borderRadius: radius.sm,
+    backgroundColor: colors.bg.b3,
+  },
+});

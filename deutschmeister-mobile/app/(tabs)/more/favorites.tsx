@@ -1,4 +1,4 @@
-import { useCallback, useRef } from 'react';
+import { useCallback, useRef, useMemo } from 'react';
 import {
   View,
   Text,
@@ -10,6 +10,7 @@ import {
   PanResponder,
   Dimensions,
   Alert,
+  StyleSheet,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -17,6 +18,8 @@ import { useRouter } from 'expo-router';
 import { useFavorites, useRemoveFavorite } from '@/hooks/useFavorites';
 import type { Favorite } from '@/types';
 import { GenderInfo } from '@/types';
+import { spacing, radius, typography } from '@/theme';
+import { useThemeStore } from '@/stores/themeStore';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SWIPE_THRESHOLD = -80;
@@ -28,6 +31,8 @@ function SwipeableFavoriteItem({
   item: Favorite;
   onRemove: (wordId: string) => void;
 }) {
+  const colors = useThemeStore((s) => s.colors);
+  const s = useMemo(() => createS(colors), [colors]);
   const translateX = useRef(new Animated.Value(0)).current;
 
   const panResponder = useRef(
@@ -58,15 +63,15 @@ function SwipeableFavoriteItem({
   const genderInfo = item.word.gender ? GenderInfo[item.word.gender] : null;
 
   return (
-    <View className="mb-2 overflow-hidden rounded-2xl">
+    <View style={s.swipeContainer}>
       {/* Delete button behind */}
-      <View className="absolute right-0 top-0 bottom-0 w-24 items-center justify-center rounded-r-2xl bg-red-500">
+      <View style={s.deleteBackdrop}>
         <Pressable
           onPress={() => onRemove(item.wordId)}
-          className="items-center"
+          style={s.deleteBtn}
         >
           <Ionicons name="trash-outline" size={22} color="#FFFFFF" />
-          <Text className="mt-1 text-xs font-medium text-white">Xoa</Text>
+          <Text style={s.deleteBtnText}>Xóa</Text>
         </Pressable>
       </View>
 
@@ -75,47 +80,44 @@ function SwipeableFavoriteItem({
         style={{ transform: [{ translateX }] }}
         {...panResponder.panHandlers}
       >
-        <View className="rounded-2xl bg-dark-card p-4">
-          <View className="flex-row items-center">
+        <View style={s.favCard}>
+          <View style={s.favRow}>
             {/* Gender colored dot */}
             {genderInfo && (
               <View
-                className="mr-3 h-3 w-3 rounded-full"
-                style={{ backgroundColor: genderInfo.color }}
+                style={[s.genderDot, { backgroundColor: genderInfo.color }]}
               />
             )}
 
-            <View className="flex-1">
-              <View className="flex-row items-baseline gap-2">
+            <View style={s.flex1}>
+              <View style={s.wordRow}>
                 {item.word.article && (
                   <Text
-                    className="text-sm font-medium"
-                    style={{ color: genderInfo?.color ?? '#9CA3AF' }}
+                    style={[
+                      s.articleText,
+                      { color: genderInfo?.color ?? colors.text.secondary },
+                    ]}
                   >
                     {item.word.article}
                   </Text>
                 )}
-                <Text className="text-base font-bold text-white">
-                  {item.word.word}
-                </Text>
+                <Text style={s.wordText}>{item.word.word}</Text>
               </View>
-              <Text className="mt-0.5 text-sm text-gray-400">
+              <Text style={s.translationText}>
                 {item.word.translationVi || item.word.translationEn}
               </Text>
             </View>
 
             {/* Level Badge */}
-            <View className="rounded-md bg-dark-border px-2 py-0.5">
-              <Text className="text-xs font-medium text-gray-400">
-                {item.word.level}
-              </Text>
+            <View style={s.levelBadge}>
+              <Text style={s.levelText}>{item.word.level}</Text>
             </View>
 
             <Ionicons
               name="heart"
               size={18}
-              color="#EF4444"
-              style={{ marginLeft: 8 }}
+              color={colors.pastel.rose.base}
+              style={{ marginLeft: spacing.sm }}
             />
           </View>
         </View>
@@ -125,16 +127,18 @@ function SwipeableFavoriteItem({
 }
 
 export default function FavoritesScreen() {
+  const colors = useThemeStore((s) => s.colors);
+  const s = useMemo(() => createS(colors), [colors]);
   const router = useRouter();
   const { data: favorites, isLoading, refetch, isRefetching } = useFavorites();
   const removeFavorite = useRemoveFavorite();
 
   const handleRemove = useCallback(
     (wordId: string) => {
-      Alert.alert('Xoa yeu thich', 'Ban co chac muon xoa tu nay khoi danh sach yeu thich?', [
-        { text: 'Huy', style: 'cancel' },
+      Alert.alert('Xóa yêu thích', 'Bạn có chắc muốn xóa từ này khỏi danh sách yêu thích?', [
+        { text: 'Hủy', style: 'cancel' },
         {
-          text: 'Xoa',
+          text: 'Xóa',
           style: 'destructive',
           onPress: () => removeFavorite.mutate(wordId),
         },
@@ -155,26 +159,24 @@ export default function FavoritesScreen() {
   );
 
   return (
-    <SafeAreaView className="flex-1 bg-dark-bg" edges={['top']}>
+    <SafeAreaView style={s.container} edges={['top']}>
       {/* Header */}
-      <View className="flex-row items-center px-4 pb-3 pt-2">
-        <Pressable onPress={() => router.back()} className="mr-3 p-1">
-          <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
+      <View style={s.header}>
+        <Pressable onPress={() => router.back()} style={s.backBtn}>
+          <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
         </Pressable>
-        <Text className="flex-1 text-xl font-bold text-white">Yeu thich</Text>
-        <View className="flex-row items-center gap-1.5 rounded-lg bg-dark-card px-2.5 py-1">
-          <Ionicons name="heart" size={14} color="#EF4444" />
-          <Text className="text-xs font-medium text-gray-400">
-            {favorites?.length ?? 0}
-          </Text>
+        <Text style={s.headerTitle}>Yêu thích</Text>
+        <View style={s.countBadge}>
+          <Ionicons name="heart" size={14} color={colors.pastel.rose.base} />
+          <Text style={s.countText}>{favorites?.length ?? 0}</Text>
         </View>
       </View>
 
       {/* Hint */}
-      <View className="mx-4 mb-3 flex-row items-center gap-2 rounded-xl bg-dark-card px-3 py-2">
-        <Ionicons name="information-circle-outline" size={16} color="#6B7280" />
-        <Text className="flex-1 text-xs text-gray-500">
-          Vuot sang trai de xoa khoi yeu thich
+      <View style={s.hintRow}>
+        <Ionicons name="information-circle-outline" size={16} color={colors.text.tertiary} />
+        <Text style={s.hintText}>
+          Vuốt sang trái để xóa khỏi yêu thích
         </Text>
       </View>
 
@@ -183,31 +185,29 @@ export default function FavoritesScreen() {
         data={favorites ?? []}
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
-        contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 32 }}
+        contentContainerStyle={{ paddingHorizontal: spacing.lg, paddingBottom: 32 }}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
             refreshing={isRefetching}
             onRefresh={onRefresh}
-            tintColor="#6366F1"
-            colors={['#6366F1']}
+            tintColor={colors.pastel.lavender.base}
+            colors={[colors.pastel.lavender.base]}
           />
         }
         ListEmptyComponent={
           isLoading ? (
-            <View className="items-center py-20">
-              <ActivityIndicator size="large" color="#6366F1" />
+            <View style={s.emptyWrap}>
+              <ActivityIndicator size="large" color={colors.pastel.lavender.base} />
             </View>
           ) : (
-            <View className="items-center py-20">
-              <View className="mb-4 h-20 w-20 items-center justify-center rounded-full bg-dark-card">
-                <Ionicons name="heart-outline" size={40} color="#4B5563" />
+            <View style={s.emptyWrap}>
+              <View style={s.emptyIcon}>
+                <Ionicons name="heart-outline" size={40} color={colors.text.tertiary} />
               </View>
-              <Text className="text-lg font-semibold text-gray-400">
-                Chua co tu yeu thich
-              </Text>
-              <Text className="mt-1 max-w-[240px] text-center text-sm text-gray-600">
-                Nhan vao bieu tuong trai tim khi xem tu vung de them vao danh sach yeu thich
+              <Text style={s.emptyTitle}>Chưa có từ yêu thích</Text>
+              <Text style={s.emptySubtitle}>
+                Nhấn vào biểu tượng trái tim khi xem từ vựng để thêm vào danh sách yêu thích
               </Text>
             </View>
           )
@@ -216,3 +216,169 @@ export default function FavoritesScreen() {
     </SafeAreaView>
   );
 }
+
+const createS = (colors: any) => StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.bg.b0,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.md,
+    paddingTop: spacing.sm,
+  },
+  backBtn: {
+    marginRight: spacing.md,
+    padding: spacing.xs,
+  },
+  headerTitle: {
+    flex: 1,
+    fontSize: typography.fontSize.xl,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.heading,
+    color: colors.text.primary,
+  },
+  countBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    borderRadius: radius.lg,
+    backgroundColor: colors.bg.b2,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+  },
+  countText: {
+    fontSize: typography.fontSize.xs,
+    fontWeight: typography.fontWeight.medium,
+    fontFamily: typography.fontFamily.bodyMedium,
+    color: colors.text.secondary,
+  },
+  hintRow: {
+    marginHorizontal: spacing.lg,
+    marginBottom: spacing.md,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    borderRadius: radius.stone,
+    backgroundColor: colors.bg.b2,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderWidth: 1,
+    borderColor: colors.border.subtle,
+  },
+  hintText: {
+    flex: 1,
+    fontSize: typography.fontSize.xs,
+    fontFamily: typography.fontFamily.body,
+    color: colors.text.tertiary,
+  },
+  swipeContainer: {
+    marginBottom: spacing.sm,
+    overflow: 'hidden',
+    borderRadius: radius.stone,
+  },
+  deleteBackdrop: {
+    position: 'absolute',
+    right: 0,
+    top: 0,
+    bottom: 0,
+    width: 96,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderTopRightRadius: radius.xl,
+    borderBottomRightRadius: radius.xl,
+    backgroundColor: colors.pastel.rose.base,
+  },
+  deleteBtn: {
+    alignItems: 'center',
+  },
+  deleteBtnText: {
+    marginTop: 4,
+    fontSize: typography.fontSize.xs,
+    fontWeight: typography.fontWeight.medium,
+    fontFamily: typography.fontFamily.bodyMedium,
+    color: '#FFFFFF',
+  },
+  favCard: {
+    borderRadius: radius.stone,
+    backgroundColor: colors.bg.b2,
+    padding: spacing.lg,
+    borderWidth: 1,
+    borderColor: colors.border.subtle,
+  },
+  favRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  genderDot: {
+    marginRight: spacing.md,
+    height: 12,
+    width: 12,
+    borderRadius: 6,
+  },
+  flex1: {
+    flex: 1,
+  },
+  wordRow: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    gap: 8,
+  },
+  articleText: {
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.medium,
+    fontFamily: typography.fontFamily.bodyMedium,
+  },
+  wordText: {
+    fontSize: typography.fontSize.md,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.bodyBold,
+    color: colors.text.primary,
+  },
+  translationText: {
+    marginTop: 2,
+    fontSize: typography.fontSize.sm,
+    fontFamily: typography.fontFamily.body,
+    color: colors.text.secondary,
+  },
+  levelBadge: {
+    borderRadius: radius.md,
+    backgroundColor: colors.bg.b3,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 2,
+  },
+  levelText: {
+    fontSize: typography.fontSize.xs,
+    fontWeight: typography.fontWeight.medium,
+    fontFamily: typography.fontFamily.bodyMedium,
+    color: colors.text.secondary,
+  },
+  emptyWrap: {
+    alignItems: 'center',
+    paddingVertical: 80,
+  },
+  emptyIcon: {
+    marginBottom: spacing.lg,
+    height: 80,
+    width: 80,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 40,
+    backgroundColor: colors.bg.b2,
+  },
+  emptyTitle: {
+    fontSize: typography.fontSize.lg,
+    fontWeight: typography.fontWeight.semibold,
+    fontFamily: typography.fontFamily.heading,
+    color: colors.text.secondary,
+  },
+  emptySubtitle: {
+    marginTop: spacing.xs,
+    maxWidth: 240,
+    textAlign: 'center',
+    fontSize: typography.fontSize.sm,
+    color: colors.text.tertiary,
+  },
+});

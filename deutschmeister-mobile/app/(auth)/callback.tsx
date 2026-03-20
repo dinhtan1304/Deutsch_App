@@ -1,8 +1,10 @@
-import { useEffect, useState } from 'react';
-import { View, Text, ActivityIndicator } from 'react-native';
+import { useEffect, useState, useMemo } from 'react';
+import { View, Text, ActivityIndicator, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useAuthStore } from '@/stores/authStore';
+import { spacing, radius, typography } from '@/theme';
+import { useThemeStore } from '@/stores/themeStore';
 
 /**
  * OAuth callback screen.
@@ -18,6 +20,8 @@ import { useAuthStore } from '@/stores/authStore';
  * (e.g., from an email link or if the browser flow doesn't return to the app properly).
  */
 export default function OAuthCallbackScreen() {
+  const colors = useThemeStore((s) => s.colors);
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const router = useRouter();
   const params = useLocalSearchParams<{
     accessToken?: string;
@@ -38,7 +42,7 @@ export default function OAuthCallbackScreen() {
       const { accessToken, refreshToken } = params;
 
       if (!accessToken || !refreshToken) {
-        setErrorMsg('Khong nhan duoc thong tin xac thuc. Vui long thu lai.');
+        setErrorMsg('Không nhận được thông tin xác thực. Vui lòng thử lại.');
         setTimeout(() => router.replace('/(auth)/login'), 2000);
         return;
       }
@@ -47,7 +51,7 @@ export default function OAuthCallbackScreen() {
         await loginWithOAuth(accessToken, refreshToken);
         // AuthProvider will handle redirect to main app
       } catch {
-        setErrorMsg('Dang nhap that bai. Vui long thu lai.');
+        setErrorMsg('Đăng nhập thất bại. Vui lòng thử lại.');
         setTimeout(() => router.replace('/(auth)/login'), 2000);
       }
     };
@@ -56,31 +60,31 @@ export default function OAuthCallbackScreen() {
   }, [params.accessToken, params.refreshToken, params.error]);
 
   return (
-    <SafeAreaView className="flex-1 bg-dark-bg">
-      <View className="flex-1 items-center justify-center px-6">
+    <SafeAreaView style={styles.container}>
+      <View style={styles.content}>
         {errorMsg ? (
-          <View className="items-center">
-            <View className="w-14 h-14 rounded-full bg-red-500/20 items-center justify-center mb-4">
-              <Text className="text-red-400 text-2xl">!</Text>
+          <View style={styles.centerItems}>
+            <View style={styles.errorIconCircle}>
+              <Text style={styles.errorExclamation}>!</Text>
             </View>
-            <Text className="text-red-400 text-base font-semibold mb-2">
-              Loi xac thuc
+            <Text style={styles.errorTitle}>
+              Lỗi xác thực
             </Text>
-            <Text className="text-gray-400 text-sm text-center leading-5">
+            <Text style={styles.errorMessage}>
               {errorMsg}
             </Text>
-            <Text className="text-gray-500 text-xs mt-4">
-              Dang chuyen huong ve trang dang nhap...
+            <Text style={styles.redirectText}>
+              Đang chuyển hướng về trang đăng nhập...
             </Text>
           </View>
         ) : (
-          <View className="items-center">
-            <ActivityIndicator size="large" color="#6366F1" />
-            <Text className="text-white text-base font-semibold mt-4">
-              Dang xac thuc...
+          <View style={styles.centerItems}>
+            <ActivityIndicator size="large" color={colors.pastel.lavender.base} />
+            <Text style={styles.loadingTitle}>
+              Đang xác thực...
             </Text>
-            <Text className="text-gray-400 text-sm mt-1">
-              Vui long doi trong giay lat
+            <Text style={styles.loadingSubtitle}>
+              Vui lòng đợi trong giây lát
             </Text>
           </View>
         )}
@@ -88,3 +92,64 @@ export default function OAuthCallbackScreen() {
     </SafeAreaView>
   );
 }
+
+const createStyles = (colors: any) => StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.bg.b0,
+  },
+  content: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: spacing.xl,
+  },
+  centerItems: {
+    alignItems: 'center',
+  },
+  errorIconCircle: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: colors.pastel.rose.dim,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing.lg,
+  },
+  errorExclamation: {
+    color: colors.pastel.rose.base,
+    fontSize: typography.fontSize.xl,
+    fontFamily: typography.fontFamily.body,
+  },
+  errorTitle: {
+    color: colors.pastel.rose.base,
+    fontSize: typography.fontSize.base,
+    fontWeight: typography.fontWeight.semibold,
+    fontFamily: typography.fontFamily.heading,
+    marginBottom: spacing.sm,
+  },
+  errorMessage: {
+    color: colors.text.secondary,
+    fontSize: typography.fontSize.sm,
+    textAlign: 'center',
+    lineHeight: typography.fontSize.sm * typography.lineHeight.normal,
+  },
+  redirectText: {
+    color: colors.text.tertiary,
+    fontSize: typography.fontSize.xs,
+    fontFamily: typography.fontFamily.body,
+    marginTop: spacing.lg,
+  },
+  loadingTitle: {
+    color: colors.text.primary,
+    fontSize: typography.fontSize.base,
+    fontWeight: typography.fontWeight.semibold,
+    fontFamily: typography.fontFamily.heading,
+    marginTop: spacing.lg,
+  },
+  loadingSubtitle: {
+    color: colors.text.secondary,
+    fontSize: typography.fontSize.sm,
+    marginTop: spacing.xs,
+  },
+});

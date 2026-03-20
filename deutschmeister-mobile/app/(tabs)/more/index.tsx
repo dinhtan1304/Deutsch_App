@@ -1,101 +1,210 @@
-import { View, Text, Pressable, ScrollView } from 'react-native';
+import { useMemo } from 'react';
+import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import Animated, { FadeInDown } from 'react-native-reanimated';
+import { spacing, radius, typography } from '@/theme';
+import { useThemeStore } from '@/stores/themeStore';
 
 type IoniconsName = React.ComponentProps<typeof Ionicons>['name'];
 
-interface MenuItemProps {
-  icon: IoniconsName;
-  label: string;
-  sublabel?: string;
-  color?: string;
-  onPress: () => void;
-}
-
-function MenuItem({ icon, label, sublabel, color = '#9CA3AF', onPress }: MenuItemProps) {
+function MenuItem({ icon, label, sublabel, color, dimColor, onPress, isLast }: {
+  icon: IoniconsName; label: string; sublabel?: string;
+  color: string; dimColor: string; onPress: () => void; isLast?: boolean;
+}) {
+  const colors = useThemeStore((s) => s.colors);
+  const styles = useMemo(() => createStyles(colors), [colors]);
   return (
-    <Pressable
+    <TouchableOpacity
+      activeOpacity={0.7}
       onPress={onPress}
-      className="flex-row items-center px-4 py-3.5 active:bg-dark-secondary"
+      style={[styles.menuItem, !isLast && styles.menuItemBorder]}
     >
-      <View
-        className="h-10 w-10 items-center justify-center rounded-xl"
-        style={{ backgroundColor: `${color}20` }}
-      >
-        <Ionicons name={icon} size={20} color={color} />
+      <View style={StyleSheet.flatten([styles.menuIconWrap, { backgroundColor: dimColor }])}>
+        <Ionicons name={icon} size={18} color={color} />
       </View>
-      <View className="ml-3 flex-1">
-        <Text className="text-base font-medium text-white">{label}</Text>
-        {sublabel && <Text className="text-sm text-gray-500">{sublabel}</Text>}
+      <View style={styles.menuTextWrap}>
+        <Text style={styles.menuLabel} numberOfLines={1}>{label}</Text>
+        {sublabel ? <Text style={styles.menuSublabel} numberOfLines={1}>{sublabel}</Text> : null}
       </View>
-      <Ionicons name="chevron-forward" size={18} color="#4B5563" />
-    </Pressable>
+      <Ionicons name="chevron-forward" size={16} color={colors.text.tertiary} />
+    </TouchableOpacity>
   );
 }
 
 const MENU_SECTIONS = [
   {
-    title: 'Learning',
+    title: 'HỌC TẬP',
     items: [
-      { icon: 'library-outline' as IoniconsName, label: 'Topics', sublabel: 'A1-B1 vocabulary topics', color: '#22C55E', route: '/more/topics' },
-      { icon: 'folder-outline' as IoniconsName, label: 'Word Bank', sublabel: 'Personal vocabulary', color: '#3B82F6', route: '/more/word-bank' },
-      { icon: 'document-text-outline' as IoniconsName, label: 'Grammar', sublabel: 'Lessons & exercises', color: '#F59E0B', route: '/more/grammar' },
-      { icon: 'refresh-outline' as IoniconsName, label: 'SRS Review', sublabel: 'Spaced repetition', color: '#8B5CF6', route: '/more/review' },
+      { icon: 'library-outline' as IoniconsName, label: 'Chủ đề', sublabel: 'Từ vựng A1–B1', pastel: 'mint' as const, route: '/more/topics' },
+      { icon: 'folder-outline' as IoniconsName, label: 'Kho từ vựng', sublabel: 'Từ vựng cá nhân', pastel: 'peach' as const, route: '/more/word-bank' },
+      { icon: 'document-text-outline' as IoniconsName, label: 'Ngữ pháp', sublabel: 'Bài học & bài tập', pastel: 'lavender' as const, route: '/(tabs)/practice/grammar' },
+      { icon: 'refresh-outline' as IoniconsName, label: 'Ôn tập SRS', sublabel: 'Lặp lại ngắt quãng', pastel: 'rose' as const, route: '/more/review' },
     ],
   },
   {
-    title: 'Community',
+    title: 'CỘNG ĐỒNG',
     items: [
-      { icon: 'trophy-outline' as IoniconsName, label: 'Achievements', sublabel: 'Badges & rewards', color: '#F59E0B', route: '/more/achievements' },
-      { icon: 'podium-outline' as IoniconsName, label: 'Leaderboard', sublabel: 'Weekly rankings', color: '#EF4444', route: '/more/leaderboard' },
-      { icon: 'flag-outline' as IoniconsName, label: 'Challenges', sublabel: 'Weekly challenges', color: '#6366F1', route: '/more/challenges' },
+      { icon: 'trophy-outline' as IoniconsName, label: 'Thành tựu', sublabel: 'Huy hiệu & phần thưởng', pastel: 'lavender' as const, route: '/more/achievements' },
+      { icon: 'podium-outline' as IoniconsName, label: 'Bảng xếp hạng', sublabel: 'Xếp hạng tuần', pastel: 'peach' as const, route: '/more/leaderboard' },
+      { icon: 'flag-outline' as IoniconsName, label: 'Thách thức', sublabel: 'Thách thức hàng tuần', pastel: 'mint' as const, route: '/more/challenges' },
     ],
   },
   {
-    title: 'Account',
+    title: 'TÀI KHOẢN',
     items: [
-      { icon: 'person-outline' as IoniconsName, label: 'Profile', color: '#9CA3AF', route: '/more/profile' },
-      { icon: 'settings-outline' as IoniconsName, label: 'Settings', color: '#9CA3AF', route: '/more/settings' },
-      { icon: 'heart-outline' as IoniconsName, label: 'Favorites', color: '#EF4444', route: '/more/favorites' },
-      { icon: 'time-outline' as IoniconsName, label: 'History', color: '#9CA3AF', route: '/more/history' },
-      { icon: 'diamond-outline' as IoniconsName, label: 'Subscription', color: '#A855F7', route: '/more/pricing' },
+      { icon: 'person-outline' as IoniconsName, label: 'Hồ sơ', sublabel: 'Thông tin cá nhân', pastel: 'lavender' as const, route: '/more/profile' },
+      { icon: 'heart-outline' as IoniconsName, label: 'Yêu thích', sublabel: 'Từ đã lưu', pastel: 'rose' as const, route: '/more/favorites' },
+      { icon: 'time-outline' as IoniconsName, label: 'Lịch sử', sublabel: 'Từ đã xem', pastel: 'sky' as const, route: '/more/history' },
+      { icon: 'settings-outline' as IoniconsName, label: 'Cài đặt', sublabel: 'Giao diện & âm thanh', pastel: 'sky' as const, route: '/more/settings' },
+      { icon: 'diamond-outline' as IoniconsName, label: 'Gói đăng ký', sublabel: 'Nâng cấp Premium', pastel: 'lime' as const, route: '/more/pricing' },
     ],
   },
 ];
 
 export default function MoreScreen() {
+  const colors = useThemeStore((s) => s.colors);
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const router = useRouter();
 
   return (
-    <SafeAreaView className="flex-1 bg-dark-bg">
-      <ScrollView className="flex-1">
-        <Text className="px-4 pt-4 text-2xl font-bold text-white">More</Text>
+    <SafeAreaView style={styles.safeArea} edges={['top']}>
+      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+        {/* Header */}
+        <Animated.View entering={FadeInDown.duration(400)} style={styles.header}>
+          <View style={styles.headerIconWrap}>
+            <Ionicons name="apps" size={22} color={colors.pastel.lavender.base} />
+          </View>
+          <View style={styles.headerTextWrap}>
+            <Text style={styles.headerTitle}>Cài đặt & Thêm</Text>
+            <Text style={styles.headerSubtitle}>Quản lý tài khoản và tùy chỉnh</Text>
+          </View>
+        </Animated.View>
 
-        {MENU_SECTIONS.map((section) => (
-          <View key={section.title} className="mt-4">
-            <Text className="px-4 pb-2 text-xs font-semibold uppercase tracking-wider text-gray-500">
-              {section.title}
-            </Text>
-            <View className="mx-4 overflow-hidden rounded-2xl bg-dark-card">
+        {MENU_SECTIONS.map((section, sectionIdx) => (
+          <Animated.View
+            key={section.title}
+            entering={FadeInDown.duration(400).delay((sectionIdx + 1) * 100)}
+            style={styles.sectionWrap}
+          >
+            <Text style={styles.sectionTitle}>{section.title}</Text>
+            <View style={styles.sectionCard}>
               {section.items.map((item, idx) => (
-                <View key={item.label}>
-                  {idx > 0 && <View className="ml-16 h-px bg-dark-border" />}
-                  <MenuItem
-                    icon={item.icon}
-                    label={item.label}
-                    sublabel={item.sublabel}
-                    color={item.color}
-                    onPress={() => router.push(item.route as any)}
-                  />
-                </View>
+                <MenuItem
+                  key={item.route}
+                  icon={item.icon}
+                  label={item.label}
+                  sublabel={item.sublabel}
+                  color={colors.pastel[item.pastel].base}
+                  dimColor={colors.pastel[item.pastel].dim}
+                  onPress={() => router.push(item.route as any)}
+                  isLast={idx === section.items.length - 1}
+                />
               ))}
             </View>
-          </View>
+          </Animated.View>
         ))}
 
-        <View className="h-8" />
+        <View style={styles.bottomSpacer} />
       </ScrollView>
     </SafeAreaView>
   );
 }
+
+const createStyles = (colors: any) => StyleSheet.create({
+  safeArea: { flex: 1, backgroundColor: colors.bg.b0 },
+  scrollView: { flex: 1 },
+
+  // Header
+  header: {
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    paddingHorizontal: spacing.screenH,
+    paddingTop: spacing.lg,
+    paddingBottom: spacing.sm,
+  },
+  headerIconWrap: {
+    width: 44,
+    height: 44,
+    borderRadius: radius.lg,
+    backgroundColor: colors.pastel.lavender.dim,
+    borderWidth: 1,
+    borderColor: colors.pastel.lavender.base + '33',
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+    marginRight: spacing.md,
+  },
+  headerTextWrap: { flex: 1 },
+  headerTitle: {
+    fontSize: typography.fontSize.xl,
+    fontWeight: typography.fontWeight.black,
+    fontFamily: typography.fontFamily.heading,
+    color: colors.text.primary,
+  },
+  headerSubtitle: {
+    fontSize: typography.fontSize.sm,
+    fontFamily: typography.fontFamily.body,
+    color: colors.text.secondary,
+    marginTop: 2,
+  },
+
+  // Sections
+  sectionWrap: { marginTop: spacing.xl },
+  sectionTitle: {
+    paddingHorizontal: spacing.screenH,
+    paddingBottom: spacing.sm,
+    fontSize: typography.fontSize.xs,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.heading,
+    textTransform: 'uppercase' as const,
+    letterSpacing: typography.letterSpacing.widest,
+    color: colors.text.tertiary,
+  },
+  sectionCard: {
+    marginHorizontal: spacing.screenH,
+    borderRadius: radius.stone,
+    backgroundColor: colors.bg.b2,
+    borderWidth: 1,
+    borderColor: colors.border.default,
+    overflow: 'hidden' as const,
+  },
+
+  // Menu items — single row: [icon] [label + sublabel] [chevron]
+  menuItem: {
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    paddingVertical: 14,
+    paddingHorizontal: spacing.md,
+    gap: 12,
+  },
+  menuItemBorder: {
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border.subtle,
+  },
+  menuIconWrap: {
+    width: 36,
+    height: 36,
+    borderRadius: radius.md,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+  },
+  menuTextWrap: {
+    flex: 1,
+  },
+  menuLabel: {
+    fontSize: typography.fontSize.base,
+    fontWeight: '600' as const,
+    fontFamily: typography.fontFamily.bodySemibold,
+    color: colors.text.primary,
+  },
+  menuSublabel: {
+    fontSize: typography.fontSize.xs,
+    fontFamily: typography.fontFamily.body,
+    color: colors.text.secondary,
+    marginTop: 2,
+  },
+
+  // Bottom
+  bottomSpacer: { height: spacing['3xl'] + 20 },
+});

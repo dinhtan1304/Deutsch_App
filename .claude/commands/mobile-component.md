@@ -30,17 +30,16 @@ $ARGUMENTS — Either a web component path (e.g., `ui/Button`, `dashboard/StatsC
 ## Component Conventions
 
 - Always use TypeScript with explicit `interface Props`
-- Use NativeWind `className` for styling
-- Support dark/light mode via `useColorScheme()` or NativeWind dark: prefix
+- **Theme**: Import `colors`, `spacing`, `radius`, `typography` from `@/theme`
+- **Fonts**: Every `Text` style MUST have `fontFamily` from `typography.fontFamily.*`:
+  - Headings: `typography.fontFamily.heading` (Quicksand Bold)
+  - Body: `typography.fontFamily.body` (Nunito Regular), `.bodyBold`, `.bodySemibold`, etc.
+  - Match fontFamily to fontWeight: black→bodyBlack, bold→bodyBold, semibold→bodySemibold
+- **Border radius**: `radius.stone` (24px) for cards, `radius.pill` for pills/buttons
+- **Shadows**: `zenGlow` for sage glow effect, `floatShadow` for elevated elements
 - Use `Pressable` (not `TouchableOpacity`) for touchable elements
 - Add `expo-haptics` feedback on important interactions
 - Export as named export AND default export
-- Follow the web component's variant/size pattern for consistency:
-  ```tsx
-  interface ButtonProps {
-    variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
-    size?: 'sm' | 'md' | 'lg';
-  }
-  ```
+- Existing reusable components: `PastelCard`, `PrimaryButton`, `GhostButton`, `GenderBadge`, `QuizOption`, `EmptyState`, `Skeleton`, `XPSummary`, `ComboBadge`, `SRSChip`
 - Use `react-native-reanimated` for animations (not Animated from react-native)
 - Use `@gorhom/bottom-sheet` for bottom sheets/modals

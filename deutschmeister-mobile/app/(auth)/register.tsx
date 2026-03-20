@@ -1,94 +1,84 @@
 import { useState, useMemo } from 'react';
 import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  ScrollView,
-  KeyboardAvoidingView,
-  Platform,
-  ActivityIndicator,
-  Alert,
+  View, Text, TextInput, TouchableOpacity, ScrollView,
+  KeyboardAvoidingView, Platform, ActivityIndicator, Alert, StyleSheet,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import { Ionicons } from '@expo/vector-icons';
-import { useAuthStore } from '@/stores/authStore';
 import Svg, { Path } from 'react-native-svg';
+import Animated, { FadeInDown } from 'react-native-reanimated';
+
+import { useAuthStore } from '@/stores/authStore';
+import { spacing, radius, typography } from '@/theme';
+import { useThemeStore } from '@/stores/themeStore';
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000/api';
 
-// Password strength rules
+// ── Password rules ────────────────────────────────────
 const PW_RULES = [
-  { id: 'length', label: 'It nhat 8 ky tu', test: (p: string) => p.length >= 8 },
-  { id: 'lower', label: 'Chu thuong (a-z)', test: (p: string) => /[a-z]/.test(p) },
-  { id: 'upper', label: 'Chu hoa (A-Z)', test: (p: string) => /[A-Z]/.test(p) },
-  { id: 'number', label: 'Co so (0-9)', test: (p: string) => /\d/.test(p) },
+  { id: 'length', label: 'Ít nhất 8 ký tự', test: (p: string) => p.length >= 8 },
+  { id: 'lower', label: 'Chữ thường (a-z)', test: (p: string) => /[a-z]/.test(p) },
+  { id: 'upper', label: 'Chữ hoa (A-Z)', test: (p: string) => /[A-Z]/.test(p) },
+  { id: 'number', label: 'Có số (0-9)', test: (p: string) => /\d/.test(p) },
 ];
 
+const STRENGTH_LABELS = ['', 'Yếu', 'Trung bình', 'Khá', 'Mạnh'];
+
+function getStrengthColors(colors: any) {
+  return [
+    '',
+    colors.pastel.rose.base,
+    colors.pastel.peach.base,
+    colors.pastel.sky.base,
+    colors.pastel.mint.base,
+  ];
+}
+
 function PasswordStrength({ password }: { password: string }) {
+  const colors = useThemeStore((s) => s.colors);
+  const ps = useMemo(() => createPs(colors), [colors]);
+  const s = useMemo(() => createS(colors), [colors]);
+  const strengthColors = useMemo(() => getStrengthColors(colors), [colors]);
   const strength = useMemo(() => {
     const results = PW_RULES.map((r) => ({ ...r, ok: r.test(password) }));
     const score = results.filter((r) => r.ok).length;
-    const colors = ['', '#EF4444', '#F97316', '#F59E0B', '#22C55E'];
-    const labels = ['', 'Yeu', 'Trung binh', 'Kha', 'Manh'];
     return {
       results,
       score,
       pct: (score / PW_RULES.length) * 100,
-      color: colors[score],
-      label: labels[score],
+      color: strengthColors[score],
+      label: STRENGTH_LABELS[score],
     };
-  }, [password]);
+  }, [password, strengthColors]);
 
   if (!password) return null;
 
   return (
-    <View className="mt-2">
-      {/* Strength bar */}
-      <View className="flex-row items-center mb-2">
-        <View className="flex-1 h-1 rounded-full bg-dark-secondary overflow-hidden">
+    <View style={ps.wrap}>
+      <View style={ps.barRow}>
+        <View style={ps.barOuter}>
           <View
-            className="h-full rounded-full"
-            style={{
-              width: `${strength.pct}%`,
-              backgroundColor: strength.color,
-            }}
+            style={[
+              ps.barInner,
+              { width: `${strength.pct}%` as any, backgroundColor: strength.color },
+            ]}
           />
         </View>
         {strength.label ? (
-          <Text
-            className="ml-2 text-xs font-bold"
-            style={{ color: strength.color, minWidth: 60, textAlign: 'right' }}
-          >
-            {strength.label}
-          </Text>
+          <Text style={[ps.label, { color: strength.color }]}>{strength.label}</Text>
         ) : null}
       </View>
-
-      {/* Rule checklist */}
-      <View className="flex-row flex-wrap">
+      <View style={ps.rulesWrap}>
         {strength.results.map((r) => (
-          <View key={r.id} className="flex-row items-center w-1/2 mb-1">
-            <View
-              className="w-4 h-4 rounded-full items-center justify-center mr-1.5"
-              style={{
-                borderWidth: 1.5,
-                borderColor: r.ok ? '#4ADE80' : 'rgba(255,255,255,0.2)',
-                backgroundColor: r.ok ? 'rgba(74,222,128,0.15)' : 'transparent',
-              }}
-            >
+          <View key={r.id} style={ps.ruleRow}>
+            <View style={[ps.ruleCircle, r.ok && ps.ruleCircleOk]}>
               {r.ok ? (
-                <Ionicons name="checkmark" size={10} color="#4ADE80" />
+                <Ionicons name="checkmark" size={10} color={colors.pastel.mint.base} />
               ) : null}
             </View>
-            <Text
-              className="text-xs"
-              style={{ color: r.ok ? '#4ADE80' : 'rgba(255,255,255,0.35)' }}
-            >
-              {r.label}
-            </Text>
+            <Text style={[ps.ruleText, r.ok && ps.ruleTextOk]}>{r.label}</Text>
           </View>
         ))}
       </View>
@@ -96,7 +86,59 @@ function PasswordStrength({ password }: { password: string }) {
   );
 }
 
+const createPs = (colors: any) => StyleSheet.create({
+  wrap: { marginTop: spacing.sm },
+  barRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: spacing.sm,
+  },
+  barOuter: {
+    flex: 1,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: colors.bg.b3,
+    overflow: 'hidden',
+  },
+  barInner: { height: 4, borderRadius: 2 },
+  label: {
+    marginLeft: spacing.sm,
+    fontSize: typography.fontSize.xs,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.bodyBold,
+    minWidth: 60,
+    textAlign: 'right',
+  },
+  rulesWrap: { flexDirection: 'row', flexWrap: 'wrap' },
+  ruleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '50%',
+    marginBottom: 4,
+  },
+  ruleCircle: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    borderWidth: 1.5,
+    borderColor: colors.text.tertiary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 6,
+  },
+  ruleCircleOk: {
+    borderColor: colors.pastel.mint.base,
+    backgroundColor: colors.pastel.mint.dim,
+  },
+  ruleText: { fontSize: typography.fontSize.xs, color: colors.text.tertiary, fontFamily: typography.fontFamily.body },
+  ruleTextOk: { color: colors.pastel.mint.base },
+});
+
+// ── SVG Icons ─────────────────────────────────────────
 function GoogleIcon() {
+  const colors = useThemeStore((s) => s.colors);
+  const ps = useMemo(() => createPs(colors), [colors]);
+  const s = useMemo(() => createS(colors), [colors]);
   return (
     <Svg width={20} height={20} viewBox="0 0 24 24">
       <Path
@@ -120,6 +162,9 @@ function GoogleIcon() {
 }
 
 function FacebookIcon() {
+  const colors = useThemeStore((s) => s.colors);
+  const ps = useMemo(() => createPs(colors), [colors]);
+  const s = useMemo(() => createS(colors), [colors]);
   return (
     <Svg width={20} height={20} viewBox="0 0 24 24">
       <Path
@@ -130,7 +175,11 @@ function FacebookIcon() {
   );
 }
 
+// ── Main Screen ───────────────────────────────────────
 export default function RegisterScreen() {
+  const colors = useThemeStore((s) => s.colors);
+  const ps = useMemo(() => createPs(colors), [colors]);
+  const s = useMemo(() => createS(colors), [colors]);
   const router = useRouter();
   const { register, isLoading } = useAuthStore();
 
@@ -144,42 +193,40 @@ export default function RegisterScreen() {
 
   const isPasswordValid = useMemo(
     () => PW_RULES.every((r) => r.test(password)),
-    [password]
+    [password],
   );
-
   const isFormValid = useMemo(
     () =>
       isPasswordValid &&
       password === confirmPassword &&
       name.trim().length >= 2 &&
       email.trim().length > 0,
-    [isPasswordValid, password, confirmPassword, name, email]
+    [isPasswordValid, password, confirmPassword, name, email],
   );
 
   const handleRegister = async () => {
     setError('');
     if (name.trim().length < 2) {
-      setError('Ten phai co it nhat 2 ky tu.');
+      setError('Tên phải có ít nhất 2 ký tự.');
       return;
     }
     if (!isPasswordValid) {
-      setError('Mat khau chua du manh.');
+      setError('Mật khẩu chưa đủ mạnh.');
       return;
     }
     if (password !== confirmPassword) {
-      setError('Mat khau xac nhan khong khop.');
+      setError('Mật khẩu xác nhận không khớp.');
       return;
     }
-
     try {
       await register({ name: name.trim(), email: email.trim(), password });
       Alert.alert(
-        'Dang ky thanh cong!',
-        'Chung toi da gui email xac nhan den dia chi email cua ban. Vui long kiem tra hop thu va nhan link xac nhan de hoan tat dang ky.',
-        [{ text: 'OK', onPress: () => router.replace('/(auth)/login') }]
+        'Đăng ký thành công!',
+        'Chúng tôi đã gửi email xác nhận. Vui lòng kiểm tra hộp thư.',
+        [{ text: 'OK', onPress: () => router.replace('/(auth)/login') }],
       );
     } catch (err: any) {
-      setError(err.message || 'Dang ky that bai. Vui long thu lai.');
+      setError(err.message || 'Đăng ký thất bại. Vui lòng thử lại.');
     }
   };
 
@@ -189,285 +236,383 @@ export default function RegisterScreen() {
       const callbackUrl = 'deutschmeister://callback';
       const url = `${API_URL}/auth/${provider}?redirect_uri=${encodeURIComponent(callbackUrl)}&platform=mobile`;
       const result = await WebBrowser.openAuthSessionAsync(url, callbackUrl);
-
       if (result.type === 'success' && result.url) {
         const params = new URL(result.url).searchParams;
         const accessToken = params.get('accessToken');
         const refreshToken = params.get('refreshToken');
-
         if (accessToken && refreshToken) {
-          const { loginWithOAuth } = useAuthStore.getState();
-          await loginWithOAuth(accessToken, refreshToken);
+          await useAuthStore.getState().loginWithOAuth(accessToken, refreshToken);
         } else {
-          setError('Dang nhap OAuth that bai. Khong nhan duoc token.');
+          setError('Đăng nhập OAuth thất bại.');
         }
       }
     } catch (err: any) {
-      setError(err.message || 'Dang nhap OAuth that bai.');
+      setError(err.message || 'Đăng nhập OAuth thất bại.');
     } finally {
       setOauthLoading(false);
     }
   };
 
+  const confirmBorderColor = !confirmPassword
+    ? colors.border.default
+    : confirmPassword === password
+      ? colors.pastel.mint.base + '80'
+      : colors.pastel.rose.base + '80';
+
   return (
-    <SafeAreaView className="flex-1 bg-dark-bg">
+    <SafeAreaView style={s.safe}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        className="flex-1"
+        style={s.flex}
       >
         <ScrollView
-          className="flex-1"
-          contentContainerStyle={{ flexGrow: 1, paddingHorizontal: 24, paddingVertical: 24 }}
+          style={s.flex}
+          contentContainerStyle={s.scrollContent}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          {/* Back button */}
-          <TouchableOpacity
-            className="flex-row items-center mb-6"
-            onPress={() => router.back()}
-          >
-            <Ionicons name="arrow-back" size={20} color="#9CA3AF" />
-            <Text className="text-gray-400 text-sm ml-1">Quay lai</Text>
-          </TouchableOpacity>
-
-          {/* Logo & Heading */}
-          <View className="mb-6">
-            <View className="flex-row items-center mb-4">
-              <View className="w-12 h-12 rounded-2xl bg-primary-500 items-center justify-center mr-3">
-                <Text className="text-white text-lg font-bold">D</Text>
-              </View>
-              <Text className="text-primary-400 text-xl font-extrabold">
-                Deutschmeister
-              </Text>
+          {/* ── Logo Row ── */}
+          <Animated.View entering={FadeInDown.duration(400)} style={s.logoRow}>
+            <View style={s.logoCircle}>
+              <Text style={s.logoText}>D</Text>
             </View>
-            <Text className="text-white text-2xl font-bold mb-1">
-              Tao tai khoan mien phi
-            </Text>
-            <Text className="text-gray-400 text-sm">
-              Bat dau hanh trinh chinh phuc tieng Duc ngay hom nay!
-            </Text>
-          </View>
+            <Text style={s.brandText}>Deutschmeister</Text>
+          </Animated.View>
 
-          {/* Error Message */}
+          {/* ── Title + Subtitle ── */}
+          <Animated.View entering={FadeInDown.delay(60).duration(400)} style={s.headingWrap}>
+            <Text style={s.title}>Tạo tài khoản miễn phí</Text>
+            <Text style={s.subtitle}>
+              Bắt đầu hành trình chinh phục tiếng Đức ngay hôm nay!
+            </Text>
+          </Animated.View>
+
+          {/* ── Error ── */}
           {error ? (
-            <View className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/25">
-              <Text className="text-red-400 text-xs leading-5">{error}</Text>
+            <View style={s.errorBox}>
+              <Ionicons name="alert-circle" size={16} color={colors.pastel.rose.base} />
+              <Text style={s.errorText}>{error}</Text>
             </View>
           ) : null}
 
-          {/* Card */}
-          <View className="bg-dark-card/50 rounded-3xl p-5 border border-dark-border mb-4">
-            {/* Name Field */}
-            <View className="mb-4">
-              <Text className="text-gray-300 text-xs font-semibold mb-2">
-                Ho ten
-              </Text>
-              <View className="flex-row items-center bg-dark-card rounded-xl border border-dark-border px-3 h-12">
-                <Ionicons
-                  name="person-outline"
-                  size={18}
-                  color="#9CA3AF"
-                  style={{ marginRight: 10 }}
-                />
-                <TextInput
-                  className="flex-1 text-white text-sm"
-                  placeholder="Nguyen Van A"
-                  placeholderTextColor="#6B7280"
-                  value={name}
-                  onChangeText={setName}
-                  autoCapitalize="words"
-                  autoCorrect={false}
-                  maxLength={100}
-                />
-              </View>
+          {/* ── Form Card ── */}
+          <Animated.View entering={FadeInDown.delay(120).duration(400)} style={s.formCard}>
+            {/* Name */}
+            <Text style={s.fieldLabel}>Họ tên</Text>
+            <View style={s.inputRow}>
+              <Ionicons name="person-outline" size={18} color={colors.text.tertiary} />
+              <TextInput
+                style={s.input}
+                placeholder="Nguyen Van A"
+                placeholderTextColor={colors.text.tertiary}
+                value={name}
+                onChangeText={setName}
+                autoCapitalize="words"
+                maxLength={100}
+              />
             </View>
 
-            {/* Email Field */}
-            <View className="mb-4">
-              <Text className="text-gray-300 text-xs font-semibold mb-2">
-                Email
-              </Text>
-              <View className="flex-row items-center bg-dark-card rounded-xl border border-dark-border px-3 h-12">
-                <Ionicons
-                  name="mail-outline"
-                  size={18}
-                  color="#9CA3AF"
-                  style={{ marginRight: 10 }}
-                />
-                <TextInput
-                  className="flex-1 text-white text-sm"
-                  placeholder="email@example.com"
-                  placeholderTextColor="#6B7280"
-                  value={email}
-                  onChangeText={setEmail}
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                  autoComplete="email"
-                />
-              </View>
+            {/* Email */}
+            <Text style={[s.fieldLabel, { marginTop: spacing.lg }]}>Email</Text>
+            <View style={s.inputRow}>
+              <Ionicons name="mail-outline" size={18} color={colors.text.tertiary} />
+              <TextInput
+                style={s.input}
+                placeholder="email@example.com"
+                placeholderTextColor={colors.text.tertiary}
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoCorrect={false}
+                autoComplete="email"
+              />
             </View>
 
-            {/* Password Field */}
-            <View className="mb-4">
-              <Text className="text-gray-300 text-xs font-semibold mb-2">
-                Mat khau
-              </Text>
-              <View className="flex-row items-center bg-dark-card rounded-xl border border-dark-border px-3 h-12">
-                <Ionicons
-                  name="lock-closed-outline"
-                  size={18}
-                  color="#9CA3AF"
-                  style={{ marginRight: 10 }}
-                />
-                <TextInput
-                  className="flex-1 text-white text-sm"
-                  placeholder="Nhap mat khau"
-                  placeholderTextColor="#6B7280"
-                  value={password}
-                  onChangeText={setPassword}
-                  secureTextEntry={!showPassword}
-                  maxLength={50}
-                />
-                <TouchableOpacity
-                  onPress={() => setShowPassword((v) => !v)}
-                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                >
-                  <Ionicons
-                    name={showPassword ? 'eye-off-outline' : 'eye-outline'}
-                    size={20}
-                    color="#6B7280"
-                  />
-                </TouchableOpacity>
-              </View>
-              <PasswordStrength password={password} />
-            </View>
-
-            {/* Confirm Password Field */}
-            <View className="mb-2">
-              <Text className="text-gray-300 text-xs font-semibold mb-2">
-                Xac nhan mat khau
-              </Text>
-              <View
-                className="flex-row items-center bg-dark-card rounded-xl px-3 h-12"
-                style={{
-                  borderWidth: 1,
-                  borderColor:
-                    confirmPassword && confirmPassword !== password
-                      ? 'rgba(239,68,68,0.5)'
-                      : confirmPassword && confirmPassword === password
-                        ? 'rgba(74,222,128,0.5)'
-                        : '#374151',
-                }}
+            {/* Password */}
+            <Text style={[s.fieldLabel, { marginTop: spacing.lg }]}>Mật khẩu</Text>
+            <View style={s.inputRow}>
+              <Ionicons name="lock-closed-outline" size={18} color={colors.text.tertiary} />
+              <TextInput
+                style={s.input}
+                placeholder="Nhập mật khẩu"
+                placeholderTextColor={colors.text.tertiary}
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry={!showPassword}
+                maxLength={50}
+              />
+              <TouchableOpacity
+                onPress={() => setShowPassword((v) => !v)}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
               >
                 <Ionicons
-                  name="lock-closed-outline"
-                  size={18}
-                  color="#9CA3AF"
-                  style={{ marginRight: 10 }}
+                  name={showPassword ? 'eye-off-outline' : 'eye-outline'}
+                  size={20}
+                  color={colors.text.tertiary}
                 />
-                <TextInput
-                  className="flex-1 text-white text-sm"
-                  placeholder="Nhap lai mat khau"
-                  placeholderTextColor="#6B7280"
-                  value={confirmPassword}
-                  onChangeText={setConfirmPassword}
-                  secureTextEntry={!showPassword}
-                />
-                {confirmPassword ? (
-                  confirmPassword === password ? (
-                    <Ionicons name="checkmark-circle" size={20} color="#4ADE80" />
-                  ) : (
-                    <Ionicons name="close-circle" size={20} color="#EF4444" />
-                  )
-                ) : null}
-              </View>
-              {confirmPassword && confirmPassword !== password ? (
-                <Text className="text-red-400 text-xs mt-1">
-                  Mat khau khong khop
-                </Text>
+              </TouchableOpacity>
+            </View>
+            <PasswordStrength password={password} />
+
+            {/* Confirm Password */}
+            <Text style={[s.fieldLabel, { marginTop: spacing.lg }]}>Xác nhận mật khẩu</Text>
+            <View style={[s.inputRow, { borderColor: confirmBorderColor }]}>
+              <Ionicons name="lock-closed-outline" size={18} color={colors.text.tertiary} />
+              <TextInput
+                style={s.input}
+                placeholder="Nhập lại mật khẩu"
+                placeholderTextColor={colors.text.tertiary}
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+                secureTextEntry={!showPassword}
+              />
+              {confirmPassword ? (
+                confirmPassword === password ? (
+                  <Ionicons name="checkmark-circle" size={20} color={colors.pastel.mint.base} />
+                ) : (
+                  <Ionicons name="close-circle" size={20} color={colors.pastel.rose.base} />
+                )
               ) : null}
             </View>
+            {confirmPassword && confirmPassword !== password ? (
+              <Text style={s.mismatchText}>Mật khẩu không khớp</Text>
+            ) : null}
+          </Animated.View>
 
-            {/* Register Button */}
+          {/* ── Register Button ── */}
+          <TouchableOpacity
+            style={[s.registerBtn, (!isFormValid || isLoading) && { opacity: 0.5 }]}
+            onPress={handleRegister}
+            disabled={!isFormValid || isLoading || oauthLoading}
+            activeOpacity={0.85}
+          >
+            {isLoading ? (
+              <ActivityIndicator color={colors.pastel.lime.on} size="small" />
+            ) : (
+              <Text style={s.registerBtnText}>Đăng ký</Text>
+            )}
+          </TouchableOpacity>
+
+          {/* ── Divider ── */}
+          <View style={s.divider}>
+            <View style={s.dividerLine} />
+            <Text style={s.dividerText}>hoặc đăng ký với</Text>
+            <View style={s.dividerLine} />
+          </View>
+
+          {/* ── OAuth ── */}
+          <Animated.View entering={FadeInDown.delay(200).duration(400)}>
             <TouchableOpacity
-              className="mt-4 h-12 rounded-xl items-center justify-center flex-row"
-              style={{
-                backgroundColor:
-                  !isFormValid || isLoading
-                    ? 'rgba(34,197,94,0.4)'
-                    : '#22C55E',
-              }}
-              onPress={handleRegister}
-              disabled={!isFormValid || isLoading || oauthLoading}
-              activeOpacity={0.8}
+              style={s.oauthBtn}
+              onPress={() => handleOAuth('google')}
+              disabled={isLoading || oauthLoading}
+              activeOpacity={0.7}
             >
-              {isLoading ? (
-                <>
-                  <ActivityIndicator color="white" size="small" />
-                  <Text className="text-white font-bold text-sm ml-2">
-                    Dang dang ky...
-                  </Text>
-                </>
-              ) : (
-                <>
-                  <Ionicons name="person-add-outline" size={20} color="white" />
-                  <Text className="text-white font-bold text-sm ml-2">
-                    Dang ky
-                  </Text>
-                </>
-              )}
+              <GoogleIcon />
+              <Text style={s.oauthBtnText}>Tiếp tục với Google</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[s.oauthBtn, { marginTop: spacing.sm }]}
+              onPress={() => handleOAuth('facebook')}
+              disabled={isLoading || oauthLoading}
+              activeOpacity={0.7}
+            >
+              <FacebookIcon />
+              <Text style={s.oauthBtnText}>Tiếp tục với Facebook</Text>
+            </TouchableOpacity>
+          </Animated.View>
+
+          {/* ── Login Link ── */}
+          <View style={s.loginRow}>
+            <Text style={s.loginText}>Đã có tài khoản? </Text>
+            <TouchableOpacity onPress={() => router.replace('/(auth)/login')}>
+              <Text style={s.loginLink}>Đăng nhập</Text>
             </TouchableOpacity>
           </View>
 
-          {/* Divider */}
-          <View className="flex-row items-center my-4">
-            <View className="flex-1 h-px bg-dark-border" />
-            <Text className="text-gray-500 text-xs mx-3">
-              hoac dang ky voi
-            </Text>
-            <View className="flex-1 h-px bg-dark-border" />
-          </View>
-
-          {/* Google OAuth Button */}
-          <TouchableOpacity
-            className="flex-row items-center justify-center h-12 rounded-xl border border-dark-border bg-dark-card mb-3"
-            onPress={() => handleOAuth('google')}
-            disabled={isLoading || oauthLoading}
-            activeOpacity={0.7}
-          >
-            <GoogleIcon />
-            <Text className="text-gray-200 text-sm font-medium ml-3">
-              Tiep tuc voi Google
-            </Text>
-          </TouchableOpacity>
-
-          {/* Facebook OAuth Button */}
-          <TouchableOpacity
-            className="flex-row items-center justify-center h-12 rounded-xl border border-dark-border bg-dark-card"
-            onPress={() => handleOAuth('facebook')}
-            disabled={isLoading || oauthLoading}
-            activeOpacity={0.7}
-          >
-            <FacebookIcon />
-            <Text className="text-gray-200 text-sm font-medium ml-3">
-              Tiep tuc voi Facebook
-            </Text>
-          </TouchableOpacity>
-
-          {/* Login Link */}
-          <View className="flex-row items-center justify-center mt-6 mb-4">
-            <Text className="text-gray-400 text-sm">Da co tai khoan? </Text>
-            <TouchableOpacity
-              onPress={() => router.replace('/(auth)/login')}
-            >
-              <Text className="text-primary-400 text-sm font-semibold">
-                Dang nhap
-              </Text>
-            </TouchableOpacity>
-          </View>
+          <View style={{ height: 20 }} />
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
+
+// ── Styles ────────────────────────────────────────────
+const createS = (colors: any) => StyleSheet.create({
+  safe: { flex: 1, backgroundColor: colors.bg.b0 },
+  flex: { flex: 1 },
+  scrollContent: { flexGrow: 1, paddingHorizontal: 24, paddingTop: 16, paddingBottom: 24 },
+
+  // Logo row
+  logoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: spacing.xl,
+  },
+  logoCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: colors.pastel.lavender.base,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: spacing.sm,
+  },
+  logoText: {
+    fontSize: 18,
+    fontWeight: typography.fontWeight.black,
+    fontFamily: typography.fontFamily.bodyBlack,
+    color: colors.pastel.lavender.on,
+  },
+  brandText: {
+    fontSize: typography.fontSize.lg,
+    fontWeight: typography.fontWeight.black,
+    fontFamily: typography.fontFamily.heading,
+    color: colors.text.primary,
+  },
+
+  // Heading
+  headingWrap: { marginBottom: spacing.xl },
+  title: {
+    fontSize: 26,
+    fontWeight: typography.fontWeight.black,
+    fontFamily: typography.fontFamily.heading,
+    color: colors.text.primary,
+    marginBottom: 6,
+  },
+  subtitle: {
+    fontSize: typography.fontSize.base,
+    fontFamily: typography.fontFamily.body,
+    color: colors.text.secondary,
+    lineHeight: 20,
+  },
+
+  // Error
+  errorBox: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: spacing.sm,
+    marginBottom: spacing.lg,
+    padding: spacing.md,
+    borderRadius: radius.md,
+    backgroundColor: colors.pastel.rose.dim,
+    borderWidth: 1,
+    borderColor: colors.pastel.rose.base + '40',
+  },
+  errorText: {
+    flex: 1,
+    fontSize: typography.fontSize.sm,
+    fontFamily: typography.fontFamily.body,
+    color: colors.pastel.rose.base,
+    lineHeight: 18,
+  },
+
+  // Form Card
+  formCard: {
+    backgroundColor: colors.bg.b1,
+    borderRadius: radius.stone,
+    borderWidth: 1,
+    borderColor: colors.border.default,
+    padding: 20,
+  },
+  fieldLabel: {
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.medium,
+    fontFamily: typography.fontFamily.bodyMedium,
+    color: colors.text.secondary,
+    marginBottom: spacing.sm,
+  },
+  inputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.bg.b2,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: colors.border.default,
+    paddingHorizontal: spacing.md,
+    height: 50,
+    gap: spacing.sm,
+  },
+  input: {
+    flex: 1,
+    fontSize: typography.fontSize.md,
+    fontFamily: typography.fontFamily.body,
+    color: colors.text.primary,
+  },
+  mismatchText: {
+    fontSize: typography.fontSize.xs,
+    fontFamily: typography.fontFamily.body,
+    color: colors.pastel.rose.base,
+    marginTop: 4,
+  },
+
+  // Register Button
+  registerBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 50,
+    borderRadius: 999,
+    backgroundColor: colors.pastel.lime.base,
+    marginTop: spacing.xl,
+  },
+  registerBtnText: {
+    fontSize: typography.fontSize.md,
+    fontWeight: typography.fontWeight.black,
+    fontFamily: typography.fontFamily.bodyBlack,
+    color: colors.pastel.lime.on,
+  },
+
+  // Divider
+  divider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: spacing.xl,
+  },
+  dividerLine: { flex: 1, height: 1, backgroundColor: colors.border.subtle },
+  dividerText: {
+    fontSize: typography.fontSize.sm,
+    fontFamily: typography.fontFamily.body,
+    color: colors.text.tertiary,
+    marginHorizontal: spacing.md,
+  },
+
+  // OAuth
+  oauthBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 50,
+    borderRadius: radius.lg,
+    backgroundColor: colors.bg.b2,
+    borderWidth: 1,
+    borderColor: colors.border.default,
+    gap: spacing.md,
+  },
+  oauthBtnText: {
+    fontSize: typography.fontSize.md,
+    fontWeight: typography.fontWeight.medium,
+    fontFamily: typography.fontFamily.bodyMedium,
+    color: colors.text.primary,
+  },
+
+  // Login link
+  loginRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: spacing.xl,
+  },
+  loginText: {
+    fontSize: typography.fontSize.base,
+    fontFamily: typography.fontFamily.body,
+    color: colors.text.secondary,
+  },
+  loginLink: {
+    fontSize: typography.fontSize.base,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.bodyBold,
+    color: colors.pastel.lime.base,
+  },
+});

@@ -1,13 +1,19 @@
-import { View, Text, TouchableOpacity, Animated, ActivityIndicator, Dimensions } from 'react-native';
+import { View, Text, TouchableOpacity, Animated, ActivityIndicator, Dimensions, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useRandomWords } from '@/hooks/useWords';
 import { useGameSession } from '@/hooks/useGameSession';
 import { Difficulty, Word } from '@/types';
 import * as Haptics from 'expo-haptics';
+import { spacing, radius, typography } from '@/theme';
+import { useXPStore, calculateGameXP } from '@/stores/xpStore';
+import { XPToast } from '@/components/ui/XPToast';
+import { XPSummary } from '@/components/ui/XPSummary';
+import { ComboBadge } from '@/components/ui/ComboBadge';
+import { useThemeStore } from '@/stores/themeStore';
 
 type Phase = 'playing' | 'result';
 
@@ -46,7 +52,12 @@ function buildCards(words: Word[]): MatchCard[] {
   return shuffleArray(cards);
 }
 
+const screenWidth = Dimensions.get('window').width;
+const cardWidth = (screenWidth - 24 - 16 - 8) / 2;
+
 export default function MatchingScreen() {
+  const colors = useThemeStore((s) => s.colors);
+  const s = useMemo(() => createS(colors), [colors]);
   const router = useRouter();
   const { difficulty = 'beginner', count = '10', category } = useLocalSearchParams<{
     difficulty: Difficulty;
@@ -80,6 +91,21 @@ export default function MatchingScreen() {
   const [wrongCount, setWrongCount] = useState(0);
   const [elapsedTime, setElapsedTime] = useState(0);
   const [sessionStarted, setSessionStarted] = useState(false);
+  const [streak, setStreak] = useState(0);
+  const [bestStreak, setBestStreak] = useState(0);
+
+  // XP state
+  const [xpToastAmount, setXpToastAmount] = useState(0);
+  const [xpToastKey, setXpToastKey] = useState(0);
+  const [sessionXP, setSessionXP] = useState(0);
+  const [isNewBest, setIsNewBest] = useState(false);
+  const [leveledUp, setLeveledUp] = useState(false);
+
+  const addXP = useXPStore((s) => s.addXP);
+  const updateBestScore = useXPStore((s) => s.updateBestScore);
+  const xpLevel = useXPStore((s) => s.level);
+  const xpInCurrentLevel = useXPStore((s) => s.xpInCurrentLevel);
+  const xpNeededForLevel = useXPStore((s) => s.xpNeededForLevel);
 
   // Animations
   const shakeAnim = useRef(new Animated.Value(0)).current;
@@ -145,6 +171,15 @@ export default function MatchingScreen() {
         setScore((s) => s + points);
         setCorrectCount((c) => c + 1);
 
+        const newStreak = streak + 1;
+        setStreak(newStreak);
+        if (newStreak > bestStreak) setBestStreak(newStreak);
+
+        // XP toast
+        const xpGain = 10 + (newStreak >= 10 ? 40 : newStreak >= 5 ? 20 : newStreak >= 3 ? 10 : 0);
+        setXpToastAmount(xpGain);
+        setXpToastKey((k) => k + 1);
+
         const newMatched = new Set(matchedPairs);
         newMatched.add(card.pairId);
         setMatchedPairs(newMatched);
@@ -159,6 +194,7 @@ export default function MatchingScreen() {
       } else {
         // Wrong match
         setWrongCount((w) => w + 1);
+        setStreak(0);
         setWrongPair([selectedId, card.id]);
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error).catch(() => {});
 
@@ -177,15 +213,25 @@ export default function MatchingScreen() {
         }, 800);
       }
     },
-    [selectedId, matchedPairs, cards, wrongPair, elapsedTime, totalPairs, shakeAnim],
+    [selectedId, matchedPairs, cards, wrongPair, elapsedTime, totalPairs, shakeAnim, streak, bestStreak],
   );
 
-  // End session when result phase
+  // End session when result phase + XP
   const sessionEndedRef = useRef(false);
   useEffect(() => {
     if (phase === 'result' && !sessionEndedRef.current) {
       sessionEndedRef.current = true;
       session.end(score, correctCount, correctCount, wrongCount);
+
+      const finalAccuracy = moves > 0 ? (correctCount / moves) * 100 : 0;
+      const earned = calculateGameXP(correctCount, bestStreak, finalAccuracy);
+      setSessionXP(earned);
+
+      const { leveledUp: didLevel } = addXP(earned);
+      setLeveledUp(didLevel);
+
+      const newBest = updateBestScore('matching', score);
+      setIsNewBest(newBest);
     }
   }, [phase]);
 
@@ -200,8 +246,15 @@ export default function MatchingScreen() {
     setCorrectCount(0);
     setWrongCount(0);
     setElapsedTime(0);
+    setStreak(0);
+    setBestStreak(0);
     setSessionStarted(false);
     sessionEndedRef.current = false;
+    setXpToastAmount(0);
+    setXpToastKey(0);
+    setSessionXP(0);
+    setIsNewBest(false);
+    setLeveledUp(false);
     refetch();
   };
 
@@ -214,9 +267,9 @@ export default function MatchingScreen() {
   // Loading state
   if (isLoading || cards.length === 0) {
     return (
-      <SafeAreaView className="flex-1 items-center justify-center bg-dark-bg">
-        <ActivityIndicator size="large" color="#10B981" />
-        <Text className="mt-4 text-gray-400">Đang tải trò chơi...</Text>
+      <SafeAreaView style={s.screenCenter}>
+        <ActivityIndicator size="large" color={colors.pastel.lime.base} />
+        <Text style={s.loadingText}>Đang tải trò chơi...</Text>
       </SafeAreaView>
     );
   }
@@ -225,82 +278,80 @@ export default function MatchingScreen() {
   if (phase === 'result') {
     const accuracy = moves > 0 ? Math.round((correctCount / moves) * 100) : 0;
     return (
-      <SafeAreaView className="flex-1 bg-dark-bg">
-        <View className="flex-1 items-center justify-center px-6">
+      <SafeAreaView style={s.screen}>
+        <View style={s.resultContainer}>
           <LinearGradient
-            colors={['#10B981', '#059669']}
+            colors={[colors.pastel.lime.base, colors.pastel.mint.base]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
-            style={{ borderRadius: 24, padding: 32, width: '100%', alignItems: 'center' }}
+            style={s.resultGradient}
           >
-            <View className="mb-4 h-16 w-16 items-center justify-center rounded-full bg-white/20">
+            <View style={s.resultIconCircle}>
               <Ionicons
                 name={accuracy >= 70 ? 'trophy' : accuracy >= 40 ? 'thumbs-up' : 'refresh'}
                 size={32}
-                color="#FFFFFF"
+                color={colors.pastel.lime.on}
               />
             </View>
-            <Text className="text-2xl font-bold text-white">
+            <Text style={s.resultTitle}>
               {accuracy >= 70 ? 'Xuất sắc!' : accuracy >= 40 ? 'Khá tốt!' : 'Cần luyện thêm!'}
             </Text>
-            <Text className="mt-1 text-white/70">Word Match hoàn thành</Text>
+            <Text style={s.resultSubtitle}>Word Match hoàn thành</Text>
           </LinearGradient>
 
-          <View className="mt-6 w-full flex-row" style={{ gap: 12 }}>
-            <View className="flex-1 items-center rounded-2xl bg-dark-card p-4">
-              <Text className="text-2xl font-bold text-white">{score}</Text>
-              <Text className="text-xs text-gray-400">Điểm</Text>
+          <View style={s.statsRow}>
+            <View style={s.statCard}>
+              <Text style={s.statValueWhite}>{score}</Text>
+              <Text style={s.statLabel}>Điểm</Text>
             </View>
-            <View className="flex-1 items-center rounded-2xl bg-dark-card p-4">
-              <Text className="text-2xl font-bold text-emerald-400">{accuracy}%</Text>
-              <Text className="text-xs text-gray-400">Chính xác</Text>
+            <View style={s.statCard}>
+              <Text style={[s.statValueAccent, { color: colors.pastel.mint.base }]}>{accuracy}%</Text>
+              <Text style={s.statLabel}>Chính xác</Text>
             </View>
-            <View className="flex-1 items-center rounded-2xl bg-dark-card p-4">
-              <Text className="text-2xl font-bold text-amber-400">{formatTime(elapsedTime)}</Text>
-              <Text className="text-xs text-gray-400">Thời gian</Text>
-            </View>
-          </View>
-
-          <View className="mt-4 w-full flex-row" style={{ gap: 12 }}>
-            <View className="flex-1 items-center rounded-2xl bg-dark-card p-4">
-              <Text className="text-lg font-bold text-emerald-400">{correctCount}</Text>
-              <Text className="text-xs text-gray-400">Đúng</Text>
-            </View>
-            <View className="flex-1 items-center rounded-2xl bg-dark-card p-4">
-              <Text className="text-lg font-bold text-red-400">{wrongCount}</Text>
-              <Text className="text-xs text-gray-400">Sai</Text>
-            </View>
-            <View className="flex-1 items-center rounded-2xl bg-dark-card p-4">
-              <Text className="text-lg font-bold text-blue-400">{moves}</Text>
-              <Text className="text-xs text-gray-400">Lượt chơi</Text>
+            <View style={s.statCard}>
+              <Text style={[s.statValueAccent, { color: colors.pastel.peach.base }]}>{formatTime(elapsedTime)}</Text>
+              <Text style={s.statLabel}>Thời gian</Text>
             </View>
           </View>
 
-          <View className="mt-8 w-full" style={{ gap: 12 }}>
+          <View style={s.statsRow}>
+            <View style={s.statCard}>
+              <Text style={[s.statValueSmall, { color: colors.pastel.mint.base }]}>{correctCount}</Text>
+              <Text style={s.statLabel}>Đúng</Text>
+            </View>
+            <View style={s.statCard}>
+              <Text style={[s.statValueSmall, { color: colors.pastel.rose.base }]}>{wrongCount}</Text>
+              <Text style={s.statLabel}>Sai</Text>
+            </View>
+            <View style={s.statCard}>
+              <Text style={[s.statValueSmall, { color: colors.pastel.sky.base }]}>{moves}</Text>
+              <Text style={s.statLabel}>Lượt chơi</Text>
+            </View>
+          </View>
+
+          <XPSummary
+            xpEarned={sessionXP}
+            isNewBest={isNewBest}
+            level={xpLevel}
+            leveledUp={leveledUp}
+            xpInCurrentLevel={xpInCurrentLevel}
+            xpNeededForLevel={xpNeededForLevel}
+          />
+
+          <View style={s.resultActions}>
             <TouchableOpacity activeOpacity={0.8} onPress={handlePlayAgain}>
-              <LinearGradient
-                colors={['#10B981', '#059669']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={{
-                  borderRadius: 16,
-                  paddingVertical: 14,
-                  alignItems: 'center',
-                  flexDirection: 'row',
-                  justifyContent: 'center',
-                }}
-              >
-                <Ionicons name="refresh" size={20} color="#FFFFFF" />
-                <Text className="ml-2 text-base font-bold text-white">Chơi lại</Text>
-              </LinearGradient>
+              <View style={s.primaryButton}>
+                <Ionicons name="refresh" size={20} color={colors.pastel.lime.on} />
+                <Text style={s.primaryButtonText}>Chơi lại</Text>
+              </View>
             </TouchableOpacity>
 
             <TouchableOpacity
               activeOpacity={0.7}
               onPress={() => router.back()}
-              className="items-center rounded-2xl bg-dark-card py-4"
+              style={s.ghostButton}
             >
-              <Text className="text-base font-semibold text-gray-300">Quay về</Text>
+              <Text style={s.ghostButtonText}>Quay về</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -310,69 +361,77 @@ export default function MatchingScreen() {
 
   // Playing state
   return (
-    <SafeAreaView className="flex-1 bg-dark-bg">
+    <SafeAreaView style={s.screen}>
       {/* Top Bar */}
-      <View className="flex-row items-center justify-between px-4 pt-3 pb-2">
+      <View style={s.topBar}>
         <TouchableOpacity
           onPress={() => router.back()}
-          className="h-10 w-10 items-center justify-center rounded-full bg-dark-card"
+          style={s.closeButton}
         >
-          <Ionicons name="close" size={20} color="#9CA3AF" />
+          <Ionicons name="close" size={20} color={colors.text.secondary} />
         </TouchableOpacity>
 
-        <View className="flex-row items-center">
-          <Ionicons name="timer-outline" size={16} color="#9CA3AF" />
-          <Text className="ml-1 text-sm font-bold text-white">{formatTime(elapsedTime)}</Text>
+        <View style={s.timerRow}>
+          <Ionicons name="timer-outline" size={16} color={colors.text.secondary} />
+          <Text style={s.timerText}>{formatTime(elapsedTime)}</Text>
         </View>
 
-        <View className="flex-row items-center rounded-lg bg-dark-card px-3 py-1.5">
-          <Ionicons name="star" size={16} color="#10B981" />
-          <Text className="ml-1 text-sm font-bold text-white">{score}</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+          <ComboBadge streak={streak} />
+          <View style={s.scoreBadge}>
+            <Ionicons name="star" size={16} color={colors.pastel.lime.base} />
+            <Text style={s.scoreText}>{score}</Text>
+          </View>
+          <XPToast amount={xpToastAmount} triggerKey={xpToastKey} />
         </View>
       </View>
 
       {/* Progress Bar */}
-      <View className="mx-4 mt-1 h-2 overflow-hidden rounded-full bg-dark-secondary">
+      <View style={s.progressTrack}>
         <View
-          className="h-full rounded-full bg-emerald-500"
-          style={{ width: `${(matchedPairs.size / totalPairs) * 100}%` }}
+          style={[s.progressFill, { width: `${(matchedPairs.size / totalPairs) * 100}%` }]}
         />
       </View>
 
-      <View className="mx-4 mt-2 flex-row items-center justify-between">
-        <Text className="text-xs text-gray-400">
+      <View style={s.progressInfo}>
+        <Text style={s.progressLabel}>
           {matchedPairs.size}/{totalPairs} cặp
         </Text>
-        <Text className="text-xs text-gray-400">{moves} lượt</Text>
+        <Text style={s.progressLabel}>{moves} lượt</Text>
       </View>
 
       {/* Card Grid */}
       <Animated.View
-        className="mx-3 mt-4 flex-1 flex-row flex-wrap content-start"
-        style={{ transform: [{ translateX: shakeAnim }], gap: 8 }}
+        style={[s.cardGrid, { transform: [{ translateX: shakeAnim }] }]}
       >
         {cards.map((card) => {
           const isSelected = selectedId === card.id;
           const isMatched = matchedPairs.has(card.pairId);
           const isWrong = wrongPair !== null && (wrongPair[0] === card.id || wrongPair[1] === card.id);
 
-          // Calculate card width: 2 columns with gap
-          const screenWidth = Dimensions.get('window').width;
-          const cardWidth = (screenWidth - 24 - 16 - 8) / 2; // mx-3 (12*2=24), padding, gap
+          const cardBg = isMatched
+            ? colors.pastel.mint.dim
+            : isWrong
+              ? colors.pastel.rose.dim
+              : isSelected
+                ? colors.pastel.lavender.dim
+                : colors.bg.b2;
 
-          let bgClass = 'bg-dark-card';
-          let borderColor = 'transparent';
+          const cardBorder = isMatched
+            ? colors.pastel.mint.base
+            : isWrong
+              ? colors.pastel.rose.base
+              : isSelected
+                ? colors.pastel.lavender.base
+                : colors.border.default;
 
-          if (isMatched) {
-            bgClass = 'bg-emerald-500/15';
-            borderColor = '#10B981';
-          } else if (isWrong) {
-            bgClass = 'bg-red-500/15';
-            borderColor = '#EF4444';
-          } else if (isSelected) {
-            bgClass = 'bg-dark-secondary';
-            borderColor = '#10B981';
-          }
+          const textColor = isMatched
+            ? colors.pastel.mint.base
+            : isWrong
+              ? colors.pastel.rose.base
+              : isSelected
+                ? colors.pastel.lavender.base
+                : colors.text.primary;
 
           return (
             <TouchableOpacity
@@ -380,40 +439,24 @@ export default function MatchingScreen() {
               activeOpacity={0.7}
               disabled={isMatched || wrongPair !== null}
               onPress={() => handleCardTap(card)}
-              style={{
-                width: cardWidth,
-                borderWidth: isSelected || isMatched || isWrong ? 2 : 0,
-                borderColor,
-                borderRadius: 12,
-                paddingVertical: 14,
-                paddingHorizontal: 10,
-                alignItems: 'center',
-                justifyContent: 'center',
-                backgroundColor: isMatched
-                  ? 'rgba(16, 185, 129, 0.15)'
-                  : isWrong
-                    ? 'rgba(239, 68, 68, 0.15)'
-                    : isSelected
-                      ? '#1F2937'
-                      : '#111827',
-                opacity: isMatched ? 0.6 : 1,
-              }}
+              style={[
+                s.matchCard,
+                {
+                  width: cardWidth,
+                  backgroundColor: cardBg,
+                  borderColor: cardBorder,
+                  borderWidth: (isSelected || isMatched || isWrong) ? 2 : 1,
+                  opacity: isMatched ? 0.6 : 1,
+                },
+              ]}
             >
               <Text
-                className={`text-center text-sm font-medium ${
-                  isMatched
-                    ? 'text-emerald-400'
-                    : isWrong
-                      ? 'text-red-400'
-                      : isSelected
-                        ? 'text-emerald-300'
-                        : 'text-white'
-                }`}
+                style={[s.cardText, { color: textColor }]}
                 numberOfLines={2}
               >
                 {card.text}
               </Text>
-              <Text className="mt-1 text-xs text-gray-500">
+              <Text style={s.cardTypeLabel}>
                 {card.type === 'word' ? 'DE' : 'VI'}
               </Text>
             </TouchableOpacity>
@@ -423,3 +466,234 @@ export default function MatchingScreen() {
     </SafeAreaView>
   );
 }
+
+const createS = (colors: any) => StyleSheet.create({
+  // ── Layout ────────────────────────────────────────
+  screen: {
+    flex: 1,
+    backgroundColor: colors.bg.b0,
+  },
+  screenCenter: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.bg.b0,
+  },
+  loadingText: {
+    marginTop: spacing.lg,
+    color: colors.text.secondary,
+    fontSize: typography.fontSize.base,
+    fontFamily: typography.fontFamily.body,
+  },
+
+  // ── Top Bar ───────────────────────────────────────
+  topBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.sm,
+  },
+  closeButton: {
+    height: 40,
+    width: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: radius.pill,
+    backgroundColor: colors.bg.b2,
+  },
+  timerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  timerText: {
+    marginLeft: spacing.xs,
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.bodyBold,
+    color: colors.text.primary,
+  },
+  scoreBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: radius.md,
+    backgroundColor: colors.bg.b2,
+    paddingHorizontal: spacing.md,
+    paddingVertical: 6,
+  },
+  scoreText: {
+    marginLeft: spacing.xs,
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.bodyBold,
+    color: colors.text.primary,
+  },
+
+  // ── Progress ──────────────────────────────────────
+  progressTrack: {
+    marginHorizontal: spacing.lg,
+    marginTop: spacing.xs,
+    height: 8,
+    borderRadius: radius.pill,
+    backgroundColor: colors.bg.b3,
+    overflow: 'hidden',
+  },
+  progressFill: {
+    height: '100%',
+    borderRadius: radius.pill,
+    backgroundColor: colors.pastel.lime.base,
+  },
+  progressInfo: {
+    marginHorizontal: spacing.lg,
+    marginTop: spacing.sm,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  progressLabel: {
+    fontSize: typography.fontSize.xs,
+    fontFamily: typography.fontFamily.body,
+    color: colors.text.secondary,
+  },
+
+  // ── Card Grid ─────────────────────────────────────
+  cardGrid: {
+    marginHorizontal: spacing.md,
+    marginTop: spacing.lg,
+    flex: 1,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignContent: 'flex-start',
+    gap: spacing.sm,
+  },
+  matchCard: {
+    borderRadius: radius.md,
+    paddingVertical: 14,
+    paddingHorizontal: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cardText: {
+    textAlign: 'center',
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.medium,
+    fontFamily: typography.fontFamily.bodyMedium,
+  },
+  cardTypeLabel: {
+    marginTop: spacing.xs,
+    fontSize: typography.fontSize.xs,
+    fontFamily: typography.fontFamily.body,
+    color: colors.text.tertiary,
+  },
+
+  // ── Result Screen ─────────────────────────────────
+  resultContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: spacing['2xl'],
+  },
+  resultGradient: {
+    borderRadius: radius['2xl'],
+    padding: spacing['3xl'],
+    width: '100%',
+    alignItems: 'center',
+  },
+  resultIconCircle: {
+    marginBottom: spacing.lg,
+    height: 64,
+    width: 64,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 32,
+    backgroundColor: 'rgba(0,0,0,0.15)',
+  },
+  resultTitle: {
+    fontSize: typography.fontSize.xl,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.heading,
+    color: colors.pastel.lime.on,
+  },
+  resultSubtitle: {
+    marginTop: spacing.xs,
+    fontSize: typography.fontSize.base,
+    fontFamily: typography.fontFamily.body,
+    color: colors.pastel.lime.on,
+    opacity: 0.7,
+  },
+
+  // ── Stats ─────────────────────────────────────────
+  statsRow: {
+    marginTop: spacing.lg,
+    width: '100%',
+    flexDirection: 'row',
+    gap: spacing.md,
+  },
+  statCard: {
+    flex: 1,
+    alignItems: 'center',
+    borderRadius: radius.stone,
+    backgroundColor: colors.bg.b2,
+    borderWidth: 1,
+    borderColor: colors.border.default,
+    padding: spacing.lg,
+  },
+  statValueWhite: {
+    fontSize: typography.fontSize.xl,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.bodyBold,
+    color: colors.text.primary,
+  },
+  statValueAccent: {
+    fontSize: typography.fontSize.xl,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.bodyBold,
+  },
+  statValueSmall: {
+    fontSize: typography.fontSize.lg,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.bodyBold,
+  },
+  statLabel: {
+    fontSize: typography.fontSize.xs,
+    color: colors.text.secondary,
+    marginTop: spacing.xs,
+  },
+
+  // ── Buttons ───────────────────────────────────────
+  resultActions: {
+    marginTop: spacing['2xl'],
+    width: '100%',
+    gap: spacing.md,
+  },
+  primaryButton: {
+    backgroundColor: colors.pastel.lime.base,
+    borderRadius: radius.stone,
+    paddingVertical: 14,
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  primaryButtonText: {
+    marginLeft: spacing.sm,
+    fontSize: typography.fontSize.md,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.bodyBold,
+    color: colors.pastel.lime.on,
+  },
+  ghostButton: {
+    alignItems: 'center',
+    borderRadius: radius.stone,
+    backgroundColor: colors.bg.b2,
+    borderWidth: 1,
+    borderColor: colors.border.default,
+    paddingVertical: spacing.lg,
+  },
+  ghostButtonText: {
+    fontSize: typography.fontSize.md,
+    fontWeight: typography.fontWeight.semibold,
+    fontFamily: typography.fontFamily.bodySemibold,
+    color: colors.text.secondary,
+  },
+});

@@ -9,18 +9,19 @@ $ARGUMENTS — Optional: platform to run on (android, ios, web). Default: start 
 ## Steps
 
 1. `cd e:/Deutsch_App/deutschmeister-mobile`
-2. Check if `node_modules/` exists. If not, run `npm install` first.
-3. Run the appropriate command based on arguments:
-   - No args or "start": `npx expo start`
-   - "android": `npx expo start --android`
-   - "ios": `npx expo start --ios`
-   - "web": `npx expo start --web`
-   - "clear": `npx expo start --clear` (clears Metro cache)
+2. Check if `node_modules/` exists. If not, run `npm install --legacy-peer-deps` first.
+3. **IMPORTANT**: Node v24+ requires `NODE_OPTIONS=--no-experimental-strip-types` for Expo SDK 52. Always set this env var before running expo commands.
+4. Run the appropriate command based on arguments:
+   - No args or "start": `npm run dev`
+   - "android": `npm run dev:android`
+   - "ios": `npm run dev:ios`
+   - "web": `npm run dev:web`
+   - "clear": `NODE_OPTIONS=--no-experimental-strip-types npx expo start --clear` (clears Metro cache)
    - "build-dev": `npx eas build --profile development --platform all`
    - "build-preview": `npx eas build --profile preview --platform android`
    - "doctor": `npx expo-doctor` (check for issues)
 
-4. Report the dev server URL and any warnings/errors.
+5. Report the dev server URL and any warnings/errors.
 
 ## Prerequisites
 

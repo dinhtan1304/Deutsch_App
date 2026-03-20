@@ -1,6 +1,9 @@
-import { View, Text, ScrollView } from 'react-native';
+import { useMemo } from 'react';
+import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { spacing, radius, typography } from '@/theme';
 import type { DashboardStats } from '@/types/dashboard';
+import { useThemeStore } from '@/stores/themeStore';
 
 interface StatsCardsProps {
   stats: DashboardStats;
@@ -14,88 +17,87 @@ interface StatCard {
   bgColor: string;
 }
 
-function buildCards(stats: DashboardStats): StatCard[] {
+function buildCards(stats: DashboardStats, colors: any): StatCard[] {
   return [
     {
       label: 'Chuỗi ngày',
       value: stats.streak,
       icon: 'flame',
-      color: '#F97316',
-      bgColor: 'rgba(249,115,22,0.15)',
+      color: colors.pastel.peach.base,
+      bgColor: colors.pastel.peach.dim,
     },
     {
       label: 'Từ đã học',
       value: `${stats.totalWordsLearned}/${stats.totalWords}`,
       icon: 'book',
-      color: '#3B82F6',
-      bgColor: 'rgba(59,130,246,0.15)',
+      color: colors.pastel.sky.base,
+      bgColor: colors.pastel.sky.dim,
     },
     {
       label: 'Chính xác',
       value: `${stats.accuracy}%`,
       icon: 'checkmark-circle',
-      color: '#22C55E',
-      bgColor: 'rgba(34,197,94,0.15)',
+      color: colors.pastel.mint.base,
+      bgColor: colors.pastel.mint.dim,
     },
     {
       label: 'Phút học',
       value: stats.totalMinutes,
       icon: 'time',
-      color: '#A855F7',
-      bgColor: 'rgba(168,85,247,0.15)',
+      color: colors.pastel.lavender.base,
+      bgColor: colors.pastel.lavender.dim,
     },
     {
       label: 'Games',
       value: stats.gamesPlayed,
       icon: 'game-controller',
-      color: '#6366F1',
-      bgColor: 'rgba(99,102,241,0.15)',
+      color: colors.pastel.lavender.base,
+      bgColor: colors.pastel.lavender.dim,
     },
     {
       label: 'Chủ đề',
       value: `${stats.topicsCompleted}/${stats.totalTopics}`,
       icon: 'layers',
-      color: '#14B8A6',
-      bgColor: 'rgba(20,184,166,0.15)',
+      color: colors.pastel.mint.base,
+      bgColor: colors.pastel.mint.dim,
     },
     {
       label: 'Cần ôn tập',
       value: stats.wordsToReview,
       icon: 'refresh-circle',
-      color: '#EF4444',
-      bgColor: 'rgba(239,68,68,0.15)',
+      color: colors.pastel.rose.base,
+      bgColor: colors.pastel.rose.dim,
     },
   ];
 }
 
 export function StatsCards({ stats }: StatsCardsProps) {
-  const cards = buildCards(stats);
+  const colors = useThemeStore((s) => s.colors);
+  const styles = useMemo(() => createStyles(colors), [colors]);
+  const cards = buildCards(stats, colors);
 
   return (
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
-      contentContainerStyle={{ paddingHorizontal: 16, gap: 12 }}
+      contentContainerStyle={{ paddingHorizontal: spacing.lg, gap: spacing.md }}
     >
       {cards.map((card) => (
         <View
           key={card.label}
-          className="rounded-2xl bg-dark-card p-4"
-          style={{ width: 130 }}
+          style={styles.card}
         >
           <View
-            className="mb-3 h-10 w-10 items-center justify-center rounded-xl"
-            style={{ backgroundColor: card.bgColor }}
+            style={[styles.iconContainer, { backgroundColor: card.bgColor }]}
           >
             <Ionicons name={card.icon} size={20} color={card.color} />
           </View>
           <Text
-            className="text-xl font-bold"
-            style={{ color: card.color }}
+            style={[styles.valueText, { color: card.color }]}
           >
             {card.value}
           </Text>
-          <Text className="mt-1 text-xs text-gray-400">{card.label}</Text>
+          <Text style={styles.labelText}>{card.label}</Text>
         </View>
       ))}
     </ScrollView>
@@ -103,23 +105,74 @@ export function StatsCards({ stats }: StatsCardsProps) {
 }
 
 export function StatsCardsSkeleton() {
+  const colors = useThemeStore((s) => s.colors);
+  const styles = useMemo(() => createStyles(colors), [colors]);
   return (
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
-      contentContainerStyle={{ paddingHorizontal: 16, gap: 12 }}
+      contentContainerStyle={{ paddingHorizontal: spacing.lg, gap: spacing.md }}
     >
       {Array.from({ length: 5 }).map((_, i) => (
         <View
           key={i}
-          className="rounded-2xl bg-dark-card p-4"
-          style={{ width: 130, height: 120 }}
+          style={[styles.card, { height: 120 }]}
         >
-          <View className="mb-3 h-10 w-10 rounded-xl bg-dark-secondary" />
-          <View className="h-6 w-16 rounded bg-dark-secondary" />
-          <View className="mt-2 h-3 w-12 rounded bg-dark-secondary" />
+          <View style={styles.skeletonIcon} />
+          <View style={styles.skeletonValue} />
+          <View style={styles.skeletonLabel} />
         </View>
       ))}
     </ScrollView>
   );
 }
+
+const createStyles = (colors: any) => StyleSheet.create({
+  card: {
+    borderRadius: radius.stone,
+    backgroundColor: colors.bg.b2,
+    borderWidth: 1,
+    borderColor: colors.border.strong,
+    padding: spacing.lg,
+    width: 130,
+  },
+  iconContainer: {
+    marginBottom: spacing.md,
+    height: 40,
+    width: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: radius.stone,
+  },
+  valueText: {
+    fontSize: typography.fontSize.xl,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.bodyBold,
+  },
+  labelText: {
+    marginTop: spacing.xs,
+    fontSize: typography.fontSize.xs,
+    fontFamily: typography.fontFamily.body,
+    color: colors.text.secondary,
+  },
+  skeletonIcon: {
+    marginBottom: spacing.md,
+    height: 40,
+    width: 40,
+    borderRadius: radius.stone,
+    backgroundColor: colors.bg.b3,
+  },
+  skeletonValue: {
+    height: 24,
+    width: 64,
+    borderRadius: radius.sm,
+    backgroundColor: colors.bg.b3,
+  },
+  skeletonLabel: {
+    marginTop: spacing.sm,
+    height: 12,
+    width: 48,
+    borderRadius: radius.sm,
+    backgroundColor: colors.bg.b3,
+  },
+});

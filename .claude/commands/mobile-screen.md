@@ -35,11 +35,13 @@ $ARGUMENTS — The web page path to convert (e.g., `dashboard`, `games/quick-qui
 ## Conventions
 
 - Wrap screens with `<SafeAreaView>` from `react-native-safe-area-context`
-- Use `className` with NativeWind (Tailwind) classes
-- Use `useColorScheme()` for dark/light mode
-- Use `<Ionicons>` from `@expo/vector-icons` for icons (map web SVG icons to closest Ionicons name)
-- Loading state: `<ActivityIndicator>` centered in the screen
-- Error state: custom `<ErrorView>` component with retry button
+- **Theme**: Zen Focus Dark Mode — use `colors`, `spacing`, `radius`, `typography` from `@/theme`
+- **Fonts**: Every `Text` style MUST have `fontFamily` from `typography.fontFamily.*` (heading/body variants)
+- **Colors**: `colors.bg.b0` (background), `colors.bg.b2` (surface/cards), `colors.pastel.lime.base` (CTA)
+- **Border radius**: `radius.stone` (24px) for cards, `radius.pill` for buttons
+- Use `<Ionicons>` from `@expo/vector-icons` for icons
+- Loading state: Use `Skeleton` component from `@/components/ui/Skeleton`
 - Lists: use `<FlatList>` for long lists (not `.map()` in ScrollView)
 - Pull-to-refresh: add `refreshControl` to ScrollView/FlatList
 - Haptic feedback on important button presses via `expo-haptics`
+- Tab bar is floating pill style — add `paddingBottom: 80` to scroll content for clearance

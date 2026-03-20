@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, Animated, ActivityIndicator, TextInput, Keyboard } from 'react-native';
+import { View, Text, TouchableOpacity, Animated, ActivityIndicator, TextInput, Keyboard, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -8,6 +8,12 @@ import { useRandomWords } from '@/hooks/useWords';
 import { useGameSession } from '@/hooks/useGameSession';
 import { Difficulty, Word } from '@/types';
 import * as Haptics from 'expo-haptics';
+import { spacing, radius, typography } from '@/theme';
+import { useXPStore, calculateGameXP } from '@/stores/xpStore';
+import { XPToast } from '@/components/ui/XPToast';
+import { XPSummary } from '@/components/ui/XPSummary';
+import { ComboBadge } from '@/components/ui/ComboBadge';
+import { useThemeStore } from '@/stores/themeStore';
 
 type Phase = 'playing' | 'result';
 
@@ -44,6 +50,8 @@ function buildQuestions(words: Word[]): BlankQuestion[] {
 }
 
 export default function FillBlankScreen() {
+  const colors = useThemeStore((s) => s.colors);
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const router = useRouter();
   const { difficulty = 'beginner', count = '10', category } = useLocalSearchParams<{
     difficulty: Difficulty;
@@ -77,6 +85,19 @@ export default function FillBlankScreen() {
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [hintUsed, setHintUsed] = useState(false);
   const [sessionStarted, setSessionStarted] = useState(false);
+
+  // XP state
+  const [xpToastAmount, setXpToastAmount] = useState(0);
+  const [xpToastKey, setXpToastKey] = useState(0);
+  const [sessionXP, setSessionXP] = useState(0);
+  const [isNewBest, setIsNewBest] = useState(false);
+  const [leveledUp, setLeveledUp] = useState(false);
+
+  const addXP = useXPStore((s) => s.addXP);
+  const updateBestScore = useXPStore((s) => s.updateBestScore);
+  const xpLevel = useXPStore((s) => s.level);
+  const xpInCurrentLevel = useXPStore((s) => s.xpInCurrentLevel);
+  const xpNeededForLevel = useXPStore((s) => s.xpNeededForLevel);
 
   // Animations
   const shakeAnim = useRef(new Animated.Value(0)).current;
@@ -143,6 +164,12 @@ export default function FillBlankScreen() {
         return newStreak;
       });
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
+
+      // XP toast
+      const xpGain = 10 + (streak >= 10 ? 40 : streak >= 5 ? 20 : streak >= 3 ? 10 : 0);
+      setXpToastAmount(xpGain);
+      setXpToastKey((k) => k + 1);
+      setSessionXP((x) => x + xpGain);
     } else {
       setWrongCount((w) => w + 1);
       setStreak(0);
@@ -185,6 +212,15 @@ export default function FillBlankScreen() {
     if (phase === 'result' && !sessionEndedRef.current) {
       sessionEndedRef.current = true;
       session.end(score, bestStreak, correctCount, wrongCount);
+
+      // XP + Best Score
+      const finalAccuracy = questions.length > 0 ? Math.round((correctCount / questions.length) * 100) : 0;
+      const totalXP = calculateGameXP(correctCount, bestStreak, finalAccuracy);
+      setSessionXP(totalXP);
+      const { leveledUp: didLevelUp } = addXP(totalXP);
+      setLeveledUp(didLevelUp);
+      const newBest = updateBestScore('fill-blank', score);
+      setIsNewBest(newBest);
     }
   }, [phase]);
 
@@ -203,15 +239,20 @@ export default function FillBlankScreen() {
     setSessionStarted(false);
     sessionEndedRef.current = false;
     feedbackScale.setValue(0);
+    setSessionXP(0);
+    setXpToastAmount(0);
+    setXpToastKey(0);
+    setIsNewBest(false);
+    setLeveledUp(false);
     refetch();
   };
 
   // Loading state
   if (isLoading || questions.length === 0) {
     return (
-      <SafeAreaView className="flex-1 items-center justify-center bg-dark-bg">
-        <ActivityIndicator size="large" color="#F59E0B" />
-        <Text className="mt-4 text-gray-400">Đang tải câu hỏi...</Text>
+      <SafeAreaView style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={colors.pastel.peach.base} />
+        <Text style={styles.loadingText}>Đang tải câu hỏi...</Text>
       </SafeAreaView>
     );
   }
@@ -220,78 +261,81 @@ export default function FillBlankScreen() {
   if (phase === 'result') {
     const accuracy = questions.length > 0 ? Math.round((correctCount / questions.length) * 100) : 0;
     return (
-      <SafeAreaView className="flex-1 bg-dark-bg">
-        <View className="flex-1 items-center justify-center px-6">
+      <SafeAreaView style={styles.safeArea}>
+        <View style={styles.resultCenter}>
           <LinearGradient
-            colors={['#F59E0B', '#D97706']}
+            colors={colors.gradient.warning}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
-            style={{ borderRadius: 24, padding: 32, width: '100%', alignItems: 'center' }}
+            style={styles.resultGradient}
           >
-            <View className="mb-4 h-16 w-16 items-center justify-center rounded-full bg-white/20">
+            <View style={styles.resultIconCircle}>
               <Ionicons
                 name={accuracy >= 70 ? 'trophy' : accuracy >= 40 ? 'thumbs-up' : 'refresh'}
                 size={32}
-                color="#FFFFFF"
+                color={colors.text.primary}
               />
             </View>
-            <Text className="text-2xl font-bold text-white">
+            <Text style={styles.resultTitle}>
               {accuracy >= 70 ? 'Xuất sắc!' : accuracy >= 40 ? 'Khá tốt!' : 'Cần luyện thêm!'}
             </Text>
-            <Text className="mt-1 text-white/70">Fill in Blank hoàn thành</Text>
+            <Text style={styles.resultSubtitle}>Fill in Blank hoàn thành</Text>
           </LinearGradient>
 
-          <View className="mt-6 w-full flex-row" style={{ gap: 12 }}>
-            <View className="flex-1 items-center rounded-2xl bg-dark-card p-4">
-              <Text className="text-2xl font-bold text-white">{score}</Text>
-              <Text className="text-xs text-gray-400">Điểm</Text>
+          <View style={styles.statsRow}>
+            <View style={styles.statCard}>
+              <Text style={styles.statValuePrimary}>{score}</Text>
+              <Text style={styles.statLabel}>Điểm</Text>
             </View>
-            <View className="flex-1 items-center rounded-2xl bg-dark-card p-4">
-              <Text className="text-2xl font-bold text-emerald-400">{accuracy}%</Text>
-              <Text className="text-xs text-gray-400">Chính xác</Text>
+            <View style={styles.statCard}>
+              <Text style={[styles.statValuePrimary, { color: colors.pastel.mint.base }]}>{accuracy}%</Text>
+              <Text style={styles.statLabel}>Chính xác</Text>
             </View>
-            <View className="flex-1 items-center rounded-2xl bg-dark-card p-4">
-              <Text className="text-2xl font-bold text-amber-400">{bestStreak}</Text>
-              <Text className="text-xs text-gray-400">Streak</Text>
-            </View>
-          </View>
-
-          <View className="mt-4 w-full flex-row" style={{ gap: 12 }}>
-            <View className="flex-1 items-center rounded-2xl bg-dark-card p-4">
-              <Text className="text-lg font-bold text-emerald-400">{correctCount}</Text>
-              <Text className="text-xs text-gray-400">Đúng</Text>
-            </View>
-            <View className="flex-1 items-center rounded-2xl bg-dark-card p-4">
-              <Text className="text-lg font-bold text-red-400">{wrongCount}</Text>
-              <Text className="text-xs text-gray-400">Sai</Text>
+            <View style={styles.statCard}>
+              <Text style={[styles.statValuePrimary, { color: colors.pastel.peach.base }]}>{bestStreak}</Text>
+              <Text style={styles.statLabel}>Chuỗi</Text>
             </View>
           </View>
 
-          <View className="mt-8 w-full" style={{ gap: 12 }}>
+          <View style={styles.statsRow2}>
+            <View style={styles.statCard}>
+              <Text style={[styles.statValueSecondary, { color: colors.pastel.mint.base }]}>{correctCount}</Text>
+              <Text style={styles.statLabel}>Đúng</Text>
+            </View>
+            <View style={styles.statCard}>
+              <Text style={[styles.statValueSecondary, { color: colors.pastel.rose.base }]}>{wrongCount}</Text>
+              <Text style={styles.statLabel}>Sai</Text>
+            </View>
+          </View>
+
+          <XPSummary
+            xpEarned={sessionXP}
+            isNewBest={isNewBest}
+            level={xpLevel}
+            leveledUp={leveledUp}
+            xpInCurrentLevel={xpInCurrentLevel}
+            xpNeededForLevel={xpNeededForLevel}
+          />
+
+          <View style={styles.resultActions}>
             <TouchableOpacity activeOpacity={0.8} onPress={handlePlayAgain}>
               <LinearGradient
-                colors={['#F59E0B', '#D97706']}
+                colors={colors.gradient.warning}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
-                style={{
-                  borderRadius: 16,
-                  paddingVertical: 14,
-                  alignItems: 'center',
-                  flexDirection: 'row',
-                  justifyContent: 'center',
-                }}
+                style={styles.playAgainGradient}
               >
-                <Ionicons name="refresh" size={20} color="#FFFFFF" />
-                <Text className="ml-2 text-base font-bold text-white">Chơi lại</Text>
+                <Ionicons name="refresh" size={20} color={colors.text.primary} />
+                <Text style={styles.playAgainText}>Chơi lại</Text>
               </LinearGradient>
             </TouchableOpacity>
 
             <TouchableOpacity
               activeOpacity={0.7}
               onPress={() => router.back()}
-              className="items-center rounded-2xl bg-dark-card py-4"
+              style={styles.backToMenuBtn}
             >
-              <Text className="text-base font-semibold text-gray-300">Quay về</Text>
+              <Text style={styles.backToMenuText}>Quay về</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -301,65 +345,70 @@ export default function FillBlankScreen() {
 
   // Playing state
   return (
-    <SafeAreaView className="flex-1 bg-dark-bg">
+    <SafeAreaView style={styles.safeArea}>
       {/* Top Bar */}
-      <View className="flex-row items-center justify-between px-4 pt-3 pb-2">
+      <View style={styles.topBar}>
         <TouchableOpacity
           onPress={() => router.back()}
-          className="h-10 w-10 items-center justify-center rounded-full bg-dark-card"
+          style={styles.closeButton}
         >
-          <Ionicons name="close" size={20} color="#9CA3AF" />
+          <Ionicons name="close" size={20} color={colors.text.secondary} />
         </TouchableOpacity>
 
-        <View className="flex-row items-center">
-          <Ionicons name="flame" size={18} color="#F59E0B" />
-          <Text className="ml-1 text-sm font-bold text-amber-400">{streak}</Text>
+        <View style={styles.streakRow}>
+          <Ionicons name="flame" size={18} color={colors.pastel.peach.base} />
+          <Text style={styles.streakText}>{streak}</Text>
         </View>
 
-        <View className="flex-row items-center rounded-lg bg-dark-card px-3 py-1.5">
-          <Ionicons name="star" size={16} color="#F59E0B" />
-          <Text className="ml-1 text-sm font-bold text-white">{score}</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+          <ComboBadge streak={streak} />
+          <View style={styles.scoreBadge}>
+            <Ionicons name="star" size={16} color={colors.pastel.peach.base} />
+            <Text style={styles.scoreText}>{score}</Text>
+            <XPToast amount={xpToastAmount} triggerKey={xpToastKey} />
+          </View>
         </View>
       </View>
 
       {/* Progress Bar */}
-      <View className="mx-4 mt-1 h-2 overflow-hidden rounded-full bg-dark-secondary">
+      <View style={styles.progressBarTrack}>
         <Animated.View
-          className="h-full rounded-full"
-          style={{
-            backgroundColor: '#F59E0B',
-            width: progressAnim.interpolate({
-              inputRange: [0, 1],
-              outputRange: ['0%', '100%'],
-            }),
-          }}
+          style={[
+            styles.progressBarFill,
+            {
+              backgroundColor: colors.pastel.peach.base,
+              width: progressAnim.interpolate({
+                inputRange: [0, 1],
+                outputRange: ['0%', '100%'],
+              }),
+            },
+          ]}
         />
       </View>
 
-      <View className="mx-4 mt-2 flex-row items-center justify-between">
-        <Text className="text-xs text-gray-400">
+      <View style={styles.progressInfo}>
+        <Text style={styles.progressLabel}>
           Câu {currentIndex + 1}/{questions.length}
         </Text>
-        <View className="flex-row items-center" style={{ gap: 8 }}>
-          <Text className="text-xs text-emerald-400">{correctCount} đúng</Text>
-          <Text className="text-xs text-red-400">{wrongCount} sai</Text>
+        <View style={styles.correctWrongRow}>
+          <Text style={styles.correctCountText}>{correctCount} đúng</Text>
+          <Text style={styles.wrongCountText}>{wrongCount} sai</Text>
         </View>
       </View>
 
       {/* Sentence Card */}
       <Animated.View
-        className="mx-4 mt-6"
-        style={{ transform: [{ translateX: shakeAnim }] }}
+        style={[styles.sentenceWrapper, { transform: [{ translateX: shakeAnim }] }]}
       >
-        <View className="rounded-2xl bg-dark-card p-6">
-          <Text className="mb-2 text-center text-sm text-gray-400">Điền từ còn thiếu</Text>
-          <Text className="text-center text-lg leading-7 text-white">
+        <View style={styles.sentenceCard}>
+          <Text style={styles.sentenceLabel}>Điền từ còn thiếu</Text>
+          <Text style={styles.sentenceText}>
             {currentQuestion?.sentence}
           </Text>
           {currentQuestion?.word.category && (
-            <View className="mt-3 items-center">
-              <View className="rounded-lg bg-dark-secondary px-3 py-1">
-                <Text className="text-xs text-gray-400">{currentQuestion.word.category}</Text>
+            <View style={styles.categoryCenter}>
+              <View style={styles.categoryBadge}>
+                <Text style={styles.categoryBadgeText}>{currentQuestion.word.category}</Text>
               </View>
             </View>
           )}
@@ -367,49 +416,52 @@ export default function FillBlankScreen() {
       </Animated.View>
 
       {/* Input + Hint */}
-      <View className="mx-4 mt-6">
-        <View className="flex-row items-center" style={{ gap: 10 }}>
+      <View style={styles.inputSection}>
+        <View style={styles.inputRow}>
           <TextInput
             ref={inputRef}
             value={userInput}
             onChangeText={setUserInput}
             placeholder="Nhập từ tiếng Đức..."
-            placeholderTextColor="#6B7280"
+            placeholderTextColor={colors.text.tertiary}
             editable={!checked}
             autoCapitalize="none"
             autoCorrect={false}
             onSubmitEditing={handleCheck}
             returnKeyType="done"
-            className="flex-1 rounded-xl bg-dark-card px-4 py-3.5 text-base text-white"
-            style={{
-              borderWidth: checked ? 2 : 1,
-              borderColor: checked
-                ? isCorrect
-                  ? '#10B981'
-                  : '#EF4444'
-                : '#374151',
-            }}
+            style={[
+              styles.textInput,
+              {
+                borderWidth: checked ? 2 : 1,
+                borderColor: checked
+                  ? isCorrect
+                    ? colors.pastel.mint.base
+                    : colors.pastel.rose.base
+                  : colors.border.strong,
+              },
+            ]}
           />
           {!checked && (
             <TouchableOpacity
               activeOpacity={0.7}
               onPress={handleHint}
               disabled={hintUsed}
-              className={`h-12 w-12 items-center justify-center rounded-xl ${
-                hintUsed ? 'bg-dark-secondary' : 'bg-amber-500/15'
-              }`}
+              style={[
+                styles.hintButton,
+                { backgroundColor: hintUsed ? colors.bg.b3 : colors.pastel.peach.dim },
+              ]}
             >
               <Ionicons
                 name="bulb-outline"
                 size={22}
-                color={hintUsed ? '#6B7280' : '#F59E0B'}
+                color={hintUsed ? colors.text.tertiary : colors.pastel.peach.base}
               />
             </TouchableOpacity>
           )}
         </View>
 
         {hintUsed && !checked && (
-          <Text className="mt-2 text-xs text-amber-400">
+          <Text style={styles.hintText}>
             Gợi ý: Bắt đầu bằng "{currentQuestion?.answer.charAt(0)}" ({currentQuestion?.answer.length} ký tự)
           </Text>
         )}
@@ -418,34 +470,36 @@ export default function FillBlankScreen() {
       {/* Feedback */}
       {checked && (
         <Animated.View
-          className="mx-4 mt-4"
-          style={{ transform: [{ scale: feedbackScale }] }}
+          style={[styles.feedbackWrapper, { transform: [{ scale: feedbackScale }] }]}
         >
           <View
-            className="rounded-xl p-4"
-            style={{
-              backgroundColor: isCorrect ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)',
-              borderWidth: 1,
-              borderColor: isCorrect ? '#10B981' : '#EF4444',
-            }}
+            style={[
+              styles.feedbackCard,
+              {
+                backgroundColor: isCorrect ? colors.pastel.mint.dim : colors.pastel.rose.dim,
+                borderWidth: 1,
+                borderColor: isCorrect ? colors.pastel.mint.base : colors.pastel.rose.base,
+              },
+            ]}
           >
-            <View className="flex-row items-center">
+            <View style={styles.feedbackRow}>
               <Ionicons
                 name={isCorrect ? 'checkmark-circle' : 'close-circle'}
                 size={22}
-                color={isCorrect ? '#10B981' : '#EF4444'}
+                color={isCorrect ? colors.pastel.mint.base : colors.pastel.rose.base}
               />
               <Text
-                className={`ml-2 text-sm font-bold ${
-                  isCorrect ? 'text-emerald-400' : 'text-red-400'
-                }`}
+                style={[
+                  styles.feedbackLabel,
+                  { color: isCorrect ? colors.pastel.mint.base : colors.pastel.rose.base },
+                ]}
               >
                 {isCorrect ? 'Chính xác!' : 'Chưa đúng!'}
               </Text>
             </View>
             {!isCorrect && (
-              <Text className="mt-2 text-sm text-gray-300">
-                Đáp án đúng: <Text className="font-bold text-emerald-400">{currentQuestion?.answer}</Text>
+              <Text style={styles.feedbackAnswer}>
+                Đáp án đúng: <Text style={styles.feedbackAnswerBold}>{currentQuestion?.answer}</Text>
               </Text>
             )}
           </View>
@@ -453,7 +507,7 @@ export default function FillBlankScreen() {
       )}
 
       {/* Action Button */}
-      <View className="mx-4 mt-6">
+      <View style={styles.actionSection}>
         {!checked ? (
           <TouchableOpacity
             activeOpacity={0.8}
@@ -461,39 +515,27 @@ export default function FillBlankScreen() {
             onPress={handleCheck}
           >
             <LinearGradient
-              colors={userInput.trim() === '' ? ['#374151', '#374151'] : ['#F59E0B', '#D97706']}
+              colors={userInput.trim() === '' ? [colors.bg.b3, colors.bg.b3] : colors.gradient.warning}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
-              style={{
-                borderRadius: 16,
-                paddingVertical: 14,
-                alignItems: 'center',
-                flexDirection: 'row',
-                justifyContent: 'center',
-              }}
+              style={styles.actionGradient}
             >
-              <Ionicons name="checkmark" size={20} color="#FFFFFF" />
-              <Text className="ml-2 text-base font-bold text-white">Kiểm tra</Text>
+              <Ionicons name="checkmark" size={20} color={colors.text.primary} />
+              <Text style={styles.actionText}>Kiểm tra</Text>
             </LinearGradient>
           </TouchableOpacity>
         ) : (
           <TouchableOpacity activeOpacity={0.8} onPress={handleNext}>
             <LinearGradient
-              colors={['#F59E0B', '#D97706']}
+              colors={colors.gradient.warning}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
-              style={{
-                borderRadius: 16,
-                paddingVertical: 14,
-                alignItems: 'center',
-                flexDirection: 'row',
-                justifyContent: 'center',
-              }}
+              style={styles.actionGradient}
             >
-              <Text className="text-base font-bold text-white">
+              <Text style={styles.actionText}>
                 {currentIndex + 1 >= questions.length ? 'Xem kết quả' : 'Câu tiếp theo'}
               </Text>
-              <Ionicons name="arrow-forward" size={20} color="#FFFFFF" style={{ marginLeft: 8 }} />
+              <Ionicons name="arrow-forward" size={20} color={colors.text.primary} style={{ marginLeft: spacing.sm }} />
             </LinearGradient>
           </TouchableOpacity>
         )}
@@ -501,3 +543,323 @@ export default function FillBlankScreen() {
     </SafeAreaView>
   );
 }
+
+const createStyles = (colors: any) => StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: colors.bg.b0,
+  },
+  loadingContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.bg.b0,
+  },
+  loadingText: {
+    marginTop: spacing.lg,
+    color: colors.text.secondary,
+    fontSize: typography.fontSize.base,
+    fontFamily: typography.fontFamily.body,
+  },
+  resultCenter: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: spacing['2xl'],
+  },
+  resultGradient: {
+    borderRadius: radius['2xl'],
+    padding: 32,
+    width: '100%',
+    alignItems: 'center',
+  },
+  resultIconCircle: {
+    marginBottom: spacing.lg,
+    height: 64,
+    width: 64,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 32,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+  },
+  resultTitle: {
+    fontSize: typography.fontSize.xl,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.heading,
+    color: colors.text.primary,
+  },
+  resultSubtitle: {
+    marginTop: spacing.xs,
+    color: 'rgba(255,255,255,0.7)',
+    fontSize: typography.fontSize.base,
+  },
+  statsRow: {
+    marginTop: spacing['2xl'],
+    width: '100%',
+    flexDirection: 'row',
+    gap: 12,
+  },
+  statsRow2: {
+    marginTop: spacing.lg,
+    width: '100%',
+    flexDirection: 'row',
+    gap: 12,
+  },
+  statCard: {
+    flex: 1,
+    alignItems: 'center',
+    borderRadius: radius.stone,
+    backgroundColor: colors.bg.b2,
+    padding: spacing.lg,
+    borderWidth: 1,
+    borderColor: colors.border.subtle,
+  },
+  statValuePrimary: {
+    fontSize: typography.fontSize.xl,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.bodyBold,
+    color: colors.text.primary,
+  },
+  statValueSecondary: {
+    fontSize: typography.fontSize.lg,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.bodyBold,
+  },
+  statLabel: {
+    fontSize: typography.fontSize.xs,
+    color: colors.text.secondary,
+  },
+  resultActions: {
+    marginTop: spacing['3xl'],
+    width: '100%',
+    gap: 12,
+  },
+  playAgainGradient: {
+    borderRadius: radius.stone,
+    paddingVertical: 14,
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  playAgainText: {
+    marginLeft: spacing.sm,
+    fontSize: typography.fontSize.md,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.bodyBold,
+    color: colors.text.primary,
+  },
+  backToMenuBtn: {
+    alignItems: 'center',
+    borderRadius: radius.stone,
+    backgroundColor: colors.bg.b2,
+    paddingVertical: spacing.lg,
+    borderWidth: 1,
+    borderColor: colors.border.subtle,
+  },
+  backToMenuText: {
+    fontSize: typography.fontSize.md,
+    fontWeight: typography.fontWeight.semibold,
+    fontFamily: typography.fontFamily.bodySemibold,
+    color: colors.text.secondary,
+  },
+  topBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.sm,
+  },
+  closeButton: {
+    height: 40,
+    width: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 20,
+    backgroundColor: colors.bg.b2,
+  },
+  streakRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  streakText: {
+    marginLeft: spacing.xs,
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.bodyBold,
+    color: colors.pastel.peach.base,
+  },
+  scoreBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: radius.sm,
+    backgroundColor: colors.bg.b2,
+    paddingHorizontal: spacing.md,
+    paddingVertical: 6,
+  },
+  scoreText: {
+    marginLeft: spacing.xs,
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.bodyBold,
+    color: colors.text.primary,
+  },
+  progressBarTrack: {
+    marginHorizontal: spacing.lg,
+    marginTop: spacing.xs,
+    height: 8,
+    overflow: 'hidden',
+    borderRadius: radius.pill,
+    backgroundColor: colors.bg.b3,
+  },
+  progressBarFill: {
+    height: '100%',
+    borderRadius: radius.pill,
+  },
+  progressInfo: {
+    marginHorizontal: spacing.lg,
+    marginTop: spacing.sm,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  progressLabel: {
+    fontSize: typography.fontSize.xs,
+    fontFamily: typography.fontFamily.body,
+    color: colors.text.secondary,
+  },
+  correctWrongRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  correctCountText: {
+    fontSize: typography.fontSize.xs,
+    fontFamily: typography.fontFamily.body,
+    color: colors.pastel.mint.base,
+  },
+  wrongCountText: {
+    fontSize: typography.fontSize.xs,
+    fontFamily: typography.fontFamily.body,
+    color: colors.pastel.rose.base,
+  },
+  sentenceWrapper: {
+    marginHorizontal: spacing.lg,
+    marginTop: spacing['2xl'],
+  },
+  sentenceCard: {
+    borderRadius: radius.stone,
+    backgroundColor: colors.bg.b2,
+    padding: spacing['2xl'],
+    borderWidth: 1,
+    borderColor: colors.border.subtle,
+  },
+  sentenceLabel: {
+    marginBottom: spacing.sm,
+    textAlign: 'center',
+    fontSize: typography.fontSize.sm,
+    fontFamily: typography.fontFamily.body,
+    color: colors.text.secondary,
+  },
+  sentenceText: {
+    textAlign: 'center',
+    fontSize: typography.fontSize.lg,
+    fontFamily: typography.fontFamily.body,
+    lineHeight: 28,
+    color: colors.text.primary,
+  },
+  categoryCenter: {
+    marginTop: spacing.md,
+    alignItems: 'center',
+  },
+  categoryBadge: {
+    borderRadius: radius.sm,
+    backgroundColor: colors.bg.b3,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+  },
+  categoryBadgeText: {
+    fontSize: typography.fontSize.xs,
+    fontFamily: typography.fontFamily.body,
+    color: colors.text.secondary,
+  },
+  inputSection: {
+    marginHorizontal: spacing.lg,
+    marginTop: spacing['2xl'],
+  },
+  inputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  textInput: {
+    flex: 1,
+    borderRadius: radius.lg,
+    backgroundColor: colors.bg.b2,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: 14,
+    fontSize: typography.fontSize.md,
+    fontFamily: typography.fontFamily.body,
+    color: colors.text.primary,
+  },
+  hintButton: {
+    height: 48,
+    width: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: radius.lg,
+  },
+  hintText: {
+    marginTop: spacing.sm,
+    fontSize: typography.fontSize.xs,
+    fontFamily: typography.fontFamily.body,
+    color: colors.pastel.peach.base,
+  },
+  feedbackWrapper: {
+    marginHorizontal: spacing.lg,
+    marginTop: spacing.lg,
+  },
+  feedbackCard: {
+    borderRadius: radius.lg,
+    padding: spacing.lg,
+  },
+  feedbackRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  feedbackLabel: {
+    marginLeft: spacing.sm,
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.bodyBold,
+  },
+  feedbackAnswer: {
+    marginTop: spacing.sm,
+    fontSize: typography.fontSize.sm,
+    fontFamily: typography.fontFamily.body,
+    color: colors.text.secondary,
+  },
+  feedbackAnswerBold: {
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.heading,
+    color: colors.pastel.mint.base,
+  },
+  actionSection: {
+    marginHorizontal: spacing.lg,
+    marginTop: spacing['2xl'],
+  },
+  actionGradient: {
+    borderRadius: radius.stone,
+    paddingVertical: 14,
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  actionText: {
+    marginLeft: spacing.sm,
+    fontSize: typography.fontSize.md,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.bodyBold,
+    color: colors.text.primary,
+  },
+});

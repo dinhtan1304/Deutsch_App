@@ -8,34 +8,30 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // Brand colors
-        primary: {
-          50: '#EEF2FF',
-          100: '#E0E7FF',
-          200: '#C7D2FE',
-          300: '#A5B4FC',
-          400: '#818CF8',
-          500: '#6366F1',
-          600: '#4F46E5',
-          700: '#4338CA',
-          800: '#3730A3',
-          900: '#312E81',
-        },
-        // Feature accent colors
-        reading: '#22C55E',
-        writing: '#6366F1',
-        listening: '#F59E0B',
-        speaking: '#EF4444',
-        exam: '#A855F7',
-        // Dark theme colors
+        // Zen Focus primary
+        primary: '#8EAD92',
+        accent: '#D4B483',
+        background: '#1A2421',
+        surface: '#25332E',
+        'surface-elevated': '#2D3E38',
+        // Semantic
+        correct: '#7BC88C',
+        wrong: '#D4838E',
+        // Feature accent colors (muted)
+        reading: '#7BC88C',
+        writing: '#8BB5CF',
+        listening: '#D4B483',
+        speaking: '#D4838E',
+        exam: '#B8A9D4',
+        // Dark theme colors (Zen Focus)
         dark: {
-          bg: '#111827',
-          card: '#1F2937',
-          secondary: '#374151',
-          tertiary: '#4B5563',
-          border: '#374151',
+          bg: '#1A2421',
+          card: '#25332E',
+          secondary: '#2D3E38',
+          tertiary: '#354842',
+          border: '#2D3E38',
         },
-        // Light theme colors
+        // Light theme colors (kept for reference)
         light: {
           bg: '#F9FAFB',
           card: '#FFFFFF',
@@ -43,9 +39,16 @@ module.exports = {
           tertiary: '#E5E7EB',
           border: '#E5E7EB',
         },
+        // Text
+        'zen-text': '#E1E8E4',
+        'zen-muted': '#4A5D57',
       },
       fontFamily: {
-        sans: ['Inter'],
+        heading: ['Quicksand'],
+        body: ['Nunito'],
+      },
+      borderRadius: {
+        stone: '24px',
       },
     },
   },

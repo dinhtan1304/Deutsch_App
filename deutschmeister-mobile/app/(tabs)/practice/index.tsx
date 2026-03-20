@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -6,20 +6,24 @@ import {
   TouchableOpacity,
   Dimensions,
   RefreshControl,
-  ActivityIndicator,
+  StyleSheet,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useReadingHistory } from '@/hooks/useReading';
 import { useWritingHistory } from '@/hooks/useWriting';
+import { spacing, radius, typography } from '@/theme';
+import { PastelCard } from '@/components/ui/PastelCard';
+import type { PastelKey } from '@/theme';
+import { useThemeStore } from '@/stores/themeStore';
 
 // ── Types ──
 
 const { width } = Dimensions.get('window');
-const CARD_GAP = 12;
-const CARD_WIDTH = (width - 32 - CARD_GAP) / 2;
+const CARD_GAP = spacing.md;
+const CARD_WIDTH = (width - spacing.screenH * 2 - CARD_GAP) / 2;
 
 type IoniconsName = React.ComponentProps<typeof Ionicons>['name'];
 
@@ -29,7 +33,7 @@ interface SkillCard {
   nameDe: string;
   description: string;
   icon: IoniconsName;
-  colors: [string, string];
+  pastel: PastelKey;
   freeRoute: string;
   examRoute?: string;
 }
@@ -40,7 +44,7 @@ interface ExamCard {
   nameDe: string;
   description: string;
   icon: IoniconsName;
-  colors: [string, string];
+  pastel: PastelKey;
   route: string;
 }
 
@@ -53,7 +57,7 @@ const SKILL_CARDS: SkillCard[] = [
     nameDe: 'Leseübung',
     description: 'Tạo bài đọc tiếng Đức, trả lời câu hỏi',
     icon: 'book-outline',
-    colors: ['#22C55E', '#14B8A6'],
+    pastel: 'sky',
     freeRoute: '/(tabs)/practice/reading',
   },
   {
@@ -62,7 +66,7 @@ const SKILL_CARDS: SkillCard[] = [
     nameDe: 'Schreibübung',
     description: 'Viết bài tiếng Đức, AI chấm điểm',
     icon: 'create-outline',
-    colors: ['#6366F1', '#8B5CF6'],
+    pastel: 'lavender',
     freeRoute: '/(tabs)/practice/writing',
   },
   {
@@ -71,7 +75,7 @@ const SKILL_CARDS: SkillCard[] = [
     nameDe: 'Hörübung',
     description: 'Nghe tiếng Đức, trả lời câu hỏi',
     icon: 'ear-outline',
-    colors: ['#F59E0B', '#F97316'],
+    pastel: 'mint',
     freeRoute: '/(tabs)/practice/listening',
   },
   {
@@ -80,7 +84,7 @@ const SKILL_CARDS: SkillCard[] = [
     nameDe: 'Sprechübung',
     description: 'Nói tiếng Đức, AI chấm phát âm',
     icon: 'mic-outline',
-    colors: ['#EF4444', '#F97316'],
+    pastel: 'peach',
     freeRoute: '/(tabs)/practice/speaking',
   },
 ];
@@ -92,7 +96,7 @@ const EXAM_CARDS: ExamCard[] = [
     nameDe: 'Prüfungslesen',
     description: 'Goethe & TELC A1/A2/B1',
     icon: 'book-outline',
-    colors: ['#22C55E', '#0EA5E9'],
+    pastel: 'sky',
     route: '/(tabs)/practice/reading',
   },
   {
@@ -101,7 +105,7 @@ const EXAM_CARDS: ExamCard[] = [
     nameDe: 'Prüfungsschreiben',
     description: 'Goethe & TELC A1/A2/B1',
     icon: 'create-outline',
-    colors: ['#A855F7', '#6366F1'],
+    pastel: 'lavender',
     route: '/(tabs)/practice/writing',
   },
   {
@@ -110,7 +114,7 @@ const EXAM_CARDS: ExamCard[] = [
     nameDe: 'Prüfungshören',
     description: 'Goethe & TELC A1/A2/B1',
     icon: 'ear-outline',
-    colors: ['#EC4899', '#A855F7'],
+    pastel: 'mint',
     route: '/(tabs)/practice/listening',
   },
   {
@@ -119,7 +123,7 @@ const EXAM_CARDS: ExamCard[] = [
     nameDe: 'Prüfungssprechen',
     description: 'Goethe & TELC A1/A2/B1',
     icon: 'mic-outline',
-    colors: ['#F59E0B', '#EF4444'],
+    pastel: 'peach',
     route: '/(tabs)/practice/speaking',
   },
 ];
@@ -137,9 +141,16 @@ function formatTimeAgo(dateStr: string): string {
   return `${days} ngày trước`;
 }
 
+const HISTORY_PASTEL: Record<string, PastelKey> = {
+  reading: 'sky',
+  writing: 'lavender',
+};
+
 // ── Screen ──
 
 export default function PracticeHubScreen() {
+  const colors = useThemeStore((s) => s.colors);
+  const s = useMemo(() => createS(colors), [colors]);
   const router = useRouter();
   const [refreshing, setRefreshing] = useState(false);
 
@@ -177,220 +188,488 @@ export default function PracticeHubScreen() {
     .slice(0, 5);
 
   return (
-    <SafeAreaView className="flex-1 bg-dark-bg" edges={['top']}>
+    <SafeAreaView style={s.safeArea} edges={['top']}>
       <ScrollView
-        className="flex-1"
+        style={s.flex1}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            tintColor="#6366F1"
-            colors={['#6366F1']}
+            tintColor={colors.pastel.lavender.base}
+            colors={[colors.pastel.lavender.base]}
           />
         }
       >
         {/* ====== Header ====== */}
-        <View className="px-4 pb-2 pt-4">
-          <View className="flex-row items-center gap-3">
-            <LinearGradient
-              colors={['#6366F1', '#8B5CF6']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              className="h-11 w-11 items-center justify-center rounded-2xl"
-            >
-              <Ionicons name="school" size={22} color="#FFFFFF" />
-            </LinearGradient>
-            <View className="flex-1">
-              <Text className="text-2xl font-bold text-white">Luyện Test</Text>
-              <Text className="mt-0.5 text-xs text-gray-400">
-                Luyện tập tự do hoặc theo đề chuẩn Goethe & TELC
-              </Text>
-            </View>
+        <Animated.View entering={FadeInDown.duration(400).delay(0)} style={s.header}>
+          <View style={s.headerIconWrap}>
+            <Ionicons name="school" size={24} color={colors.pastel.lavender.base} />
           </View>
-        </View>
+          <View>
+            <Text style={s.headerTitle}>Luyện tập</Text>
+            <Text style={s.headerSubtitle}>Rèn luyện kỹ năng tiếng Đức mỗi ngày</Text>
+          </View>
+        </Animated.View>
 
         {/* ====== Free Practice Section ====== */}
-        <View className="mt-5 px-4">
-          <View className="mb-4 flex-row items-center gap-2.5">
-            <LinearGradient
-              colors={['#6366F1', '#8B5CF6']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              className="h-8 w-8 items-center justify-center rounded-xl"
-            >
-              <Ionicons name="flash" size={16} color="#FFFFFF" />
-            </LinearGradient>
-            <View>
-              <Text className="text-sm font-bold text-white">Luyện tự do</Text>
-              <Text className="text-xs text-gray-500">AI tạo đề ngẫu nhiên</Text>
-            </View>
-          </View>
+        <Animated.View entering={FadeInDown.duration(400).delay(80)} style={s.section}>
+          <Text style={s.sectionLabel}>LUYỆN TỰ DO</Text>
+          <Text style={s.sectionHint}>AI tạo đề ngẫu nhiên</Text>
 
-          <View className="flex-row flex-wrap" style={{ gap: CARD_GAP }}>
-            {SKILL_CARDS.map((card) => (
-              <TouchableOpacity
+          <View style={s.cardGrid}>
+            {SKILL_CARDS.map((card, index) => (
+              <Animated.View
                 key={card.key}
-                activeOpacity={0.8}
-                onPress={() => router.push(card.freeRoute as any)}
+                entering={FadeInDown.duration(350).delay(150 + index * 70)}
                 style={{ width: CARD_WIDTH }}
               >
-                <LinearGradient
-                  colors={card.colors}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                  style={{ borderRadius: 16, padding: 16, minHeight: 150 }}
+                <TouchableOpacity
+                  activeOpacity={0.8}
+                  onPress={() => router.push(card.freeRoute as any)}
                 >
-                  <View className="mb-3 h-10 w-10 items-center justify-center rounded-xl bg-white/20">
-                    <Ionicons name={card.icon} size={22} color="#FFFFFF" />
-                  </View>
-                  <Text className="text-[10px] font-semibold text-white/60">{card.nameDe}</Text>
-                  <Text className="text-base font-bold text-white">{card.name}</Text>
-                  <Text className="mt-1 text-xs text-white/70" numberOfLines={2}>
-                    {card.description}
-                  </Text>
-                </LinearGradient>
-              </TouchableOpacity>
+                  <PastelCard color={card.pastel} style={s.skillCard}>
+                    <View
+                      style={[
+                        s.skillIconWrap,
+                        { backgroundColor: colors.pastel[card.pastel].base + '22' },
+                      ]}
+                    >
+                      <Ionicons
+                        name={card.icon}
+                        size={22}
+                        color={colors.pastel[card.pastel].base}
+                      />
+                    </View>
+                    <Text
+                      style={[s.skillNameDe, { color: colors.pastel[card.pastel].base }]}
+                    >
+                      {card.nameDe}
+                    </Text>
+                    <Text style={s.skillName}>{card.name}</Text>
+                    <Text style={s.skillDesc} numberOfLines={2}>
+                      {card.description}
+                    </Text>
+                  </PastelCard>
+                </TouchableOpacity>
+              </Animated.View>
             ))}
           </View>
-        </View>
+        </Animated.View>
 
         {/* ====== Divider ====== */}
-        <View className="mx-4 my-6 flex-row items-center gap-3">
-          <View className="flex-1 h-px bg-dark-border" />
-          <View className="rounded-full bg-dark-secondary px-3 py-1">
-            <Text className="text-[10px] font-bold uppercase tracking-widest text-gray-400">
-              Đề chuẩn
-            </Text>
+        <Animated.View entering={FadeInDown.duration(400).delay(450)} style={s.dividerRow}>
+          <View style={s.dividerLine} />
+          <View style={s.dividerBadge}>
+            <Text style={s.dividerText}>ĐỀ CHUẨN</Text>
           </View>
-          <View className="flex-1 h-px bg-dark-border" />
-        </View>
+          <View style={s.dividerLine} />
+        </Animated.View>
 
         {/* ====== Exam Practice Section ====== */}
-        <View className="px-4">
-          <View className="mb-4 flex-row items-center gap-2.5">
-            <LinearGradient
-              colors={['#F59E0B', '#EF4444']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              className="h-8 w-8 items-center justify-center rounded-xl"
-            >
-              <Ionicons name="trophy" size={16} color="#FFFFFF" />
-            </LinearGradient>
-            <View className="flex-1">
-              <View className="flex-row items-center gap-2">
-                <Text className="text-sm font-bold text-white">Theo đề chuẩn</Text>
-                <View className="rounded-full px-2 py-0.5" style={{ backgroundColor: 'rgba(245,158,11,0.15)' }}>
-                  <Text className="text-[9px] font-extrabold text-amber-400">Đề chuẩn</Text>
-                </View>
-              </View>
-              <Text className="text-xs text-gray-500">
-                Goethe & TELC · Đầy đủ tất cả Teile
-              </Text>
+        <Animated.View entering={FadeInDown.duration(400).delay(500)} style={s.section}>
+          <View style={s.examLabelRow}>
+            <Text style={s.sectionLabel}>THEO ĐỀ CHUẨN</Text>
+            <View style={s.examBadge}>
+              <Text style={s.examBadgeText}>Goethe & TELC</Text>
             </View>
           </View>
+          <Text style={s.sectionHint}>Đầy đủ tất cả Teile</Text>
 
-          <View className="flex-row flex-wrap" style={{ gap: CARD_GAP }}>
-            {EXAM_CARDS.map((card) => (
-              <TouchableOpacity
+          <View style={s.cardGrid}>
+            {EXAM_CARDS.map((card, index) => (
+              <Animated.View
                 key={card.key}
-                activeOpacity={0.8}
-                onPress={() => router.push(card.route as any)}
+                entering={FadeInDown.duration(350).delay(550 + index * 70)}
                 style={{ width: CARD_WIDTH }}
               >
-                <View
-                  className="rounded-2xl border border-dark-border bg-dark-card p-4"
-                  style={{ minHeight: 120 }}
+                <TouchableOpacity
+                  activeOpacity={0.8}
+                  onPress={() => router.push(card.route as any)}
                 >
-                  <LinearGradient
-                    colors={card.colors}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                    className="mb-3 h-9 w-9 items-center justify-center rounded-lg"
-                  >
-                    <Ionicons name={card.icon} size={18} color="#FFFFFF" />
-                  </LinearGradient>
-                  <Text className="text-[10px] font-semibold text-gray-500">{card.nameDe}</Text>
-                  <Text className="text-sm font-bold text-white">{card.name}</Text>
-                  <Text className="mt-1 text-[11px] text-gray-400" numberOfLines={1}>
-                    {card.description}
-                  </Text>
-                </View>
-              </TouchableOpacity>
+                  <PastelCard color={card.pastel} style={s.examCard}>
+                    <View
+                      style={[
+                        s.examIconWrap,
+                        { backgroundColor: colors.pastel[card.pastel].base + '22' },
+                      ]}
+                    >
+                      <Ionicons
+                        name={card.icon}
+                        size={18}
+                        color={colors.pastel[card.pastel].base}
+                      />
+                    </View>
+                    <Text
+                      style={[s.examNameDe, { color: colors.pastel[card.pastel].base }]}
+                    >
+                      {card.nameDe}
+                    </Text>
+                    <Text style={s.examName}>{card.name}</Text>
+                    <Text style={s.examDesc} numberOfLines={1}>
+                      {card.description}
+                    </Text>
+                  </PastelCard>
+                </TouchableOpacity>
+              </Animated.View>
             ))}
           </View>
-        </View>
+        </Animated.View>
 
         {/* ====== Grammar Section ====== */}
-        <View className="mt-6 px-4">
+        <Animated.View entering={FadeInDown.duration(400).delay(830)} style={s.grammarSection}>
           <TouchableOpacity
             activeOpacity={0.8}
             onPress={() => router.push('/(tabs)/practice/grammar' as any)}
           >
-            <LinearGradient
-              colors={['#8B5CF6', '#6366F1']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              className="flex-row items-center rounded-2xl p-4"
-            >
-              <View className="mr-3 h-11 w-11 items-center justify-center rounded-xl bg-white/20">
-                <Ionicons name="library-outline" size={24} color="#FFFFFF" />
+            <PastelCard color="rose" style={s.grammarCard}>
+              <View style={s.grammarIconWrap}>
+                <Ionicons name="library-outline" size={24} color={colors.pastel.rose.base} />
               </View>
-              <View className="flex-1">
-                <Text className="text-[10px] font-semibold text-white/60">Grammatik</Text>
-                <Text className="text-base font-bold text-white">Ngữ pháp</Text>
-                <Text className="mt-0.5 text-xs text-white/70">
-                  Bài học + bài tập ngữ pháp theo cấp độ
-                </Text>
+              <View style={s.flex1}>
+                <Text style={s.grammarNameDe}>Grammatik</Text>
+                <Text style={s.grammarName}>Ngữ pháp</Text>
+                <Text style={s.grammarDesc}>Bài học + bài tập ngữ pháp theo cấp độ</Text>
               </View>
-              <Ionicons name="chevron-forward" size={20} color="rgba(255,255,255,0.7)" />
-            </LinearGradient>
+              <Ionicons name="chevron-forward" size={20} color={colors.text.tertiary} />
+            </PastelCard>
           </TouchableOpacity>
-        </View>
+        </Animated.View>
 
         {/* ====== Recent History ====== */}
         {recentHistory.length > 0 && (
-          <View className="mt-6 px-4 pb-8">
-            <Text className="mb-3 text-lg font-bold text-white">Luyện tập gần đây</Text>
-            {recentHistory.map((item) => {
-              const isReading = item.type === 'reading';
-              const color = isReading ? '#22C55E' : '#6366F1';
-              const icon: IoniconsName = isReading ? 'book-outline' : 'create-outline';
+          <Animated.View entering={FadeInDown.duration(400).delay(900)} style={s.historySection}>
+            <Text style={s.historyTitle}>Luyện tập gần đây</Text>
+            {recentHistory.map((item, index) => {
+              const pastel = HISTORY_PASTEL[item.type] || 'lavender';
+              const accentColor = colors.pastel[pastel].base;
+              const icon: IoniconsName =
+                item.type === 'reading' ? 'book-outline' : 'create-outline';
 
               return (
-                <View
+                <Animated.View
                   key={`${item.type}-${item.id}`}
-                  className="mb-2 flex-row items-center rounded-xl bg-dark-card p-3"
+                  entering={FadeInDown.duration(300).delay(950 + index * 60)}
                 >
-                  <View
-                    className="mr-3 h-10 w-10 items-center justify-center rounded-lg"
-                    style={{ backgroundColor: color + '20' }}
-                  >
-                    <Ionicons name={icon} size={20} color={color} />
-                  </View>
-                  <View className="flex-1">
-                    <Text className="text-sm font-semibold text-white" numberOfLines={1}>
-                      {item.title}
-                    </Text>
-                    <Text className="text-xs text-gray-400">
-                      {item.level} · {item.status === 'GRADED' ? 'Đã chấm' : 'Nháp'} · {formatTimeAgo(item.createdAt)}
-                    </Text>
-                  </View>
-                  {item.score != null && (
-                    <View className="items-end">
-                      <Text className="text-sm font-bold text-white">{Math.round(item.score)}%</Text>
-                      <Text className="text-xs text-gray-500">điểm</Text>
+                  <View style={s.historyRow}>
+                    <View
+                      style={[s.historyIcon, { backgroundColor: accentColor + '18' }]}
+                    >
+                      <Ionicons name={icon} size={20} color={accentColor} />
                     </View>
-                  )}
-                </View>
+                    <View style={s.flex1}>
+                      <Text style={s.historyItemTitle} numberOfLines={1}>
+                        {item.title}
+                      </Text>
+                      <Text style={s.historyItemMeta}>
+                        {item.level} ·{' '}
+                        {item.status === 'GRADED' ? 'Đã chấm' : 'Nháp'} ·{' '}
+                        {formatTimeAgo(item.createdAt)}
+                      </Text>
+                    </View>
+                    {item.score != null && (
+                      <View style={s.historyScore}>
+                        <Text style={[s.historyScoreNum, { color: accentColor }]}>
+                          {Math.round(item.score)}%
+                        </Text>
+                        <Text style={s.historyScoreLabel}>điểm</Text>
+                      </View>
+                    )}
+                  </View>
+                </Animated.View>
               );
             })}
-          </View>
+          </Animated.View>
         )}
 
         {/* Bottom spacer */}
-        <View className="h-4" />
+        <View style={{ height: spacing['2xl'] }} />
       </ScrollView>
     </SafeAreaView>
   );
 }
+
+// ── Styles ──
+
+const createS = (colors: any) => StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: colors.bg.b0,
+  },
+  flex1: {
+    flex: 1,
+  },
+
+  // Header
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    paddingHorizontal: spacing.screenH,
+    paddingTop: spacing.lg,
+    paddingBottom: spacing.md,
+  },
+  headerIconWrap: {
+    width: 48,
+    height: 48,
+    borderRadius: radius.lg,
+    backgroundColor: colors.pastel.lavender.dim,
+    borderWidth: 1,
+    borderColor: colors.pastel.lavender.base + '33',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  headerTitle: {
+    fontSize: typography.fontSize.xl,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.heading,
+    color: colors.text.primary,
+  },
+  headerSubtitle: {
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.regular,
+    fontFamily: typography.fontFamily.body,
+    color: colors.text.secondary,
+    marginTop: 2,
+  },
+
+  // Section
+  section: {
+    marginTop: spacing.xl,
+    paddingHorizontal: spacing.screenH,
+  },
+  sectionLabel: {
+    fontSize: typography.fontSize.xs,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.heading,
+    color: colors.text.tertiary,
+    letterSpacing: typography.letterSpacing.widest,
+    textTransform: 'uppercase',
+  },
+  sectionHint: {
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.regular,
+    fontFamily: typography.fontFamily.body,
+    color: colors.text.secondary,
+    marginTop: 2,
+    marginBottom: spacing.md,
+  },
+
+  // Card grid
+  cardGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: CARD_GAP,
+  },
+
+  // Skill cards (free practice)
+  skillCard: {
+    height: 160,
+  },
+  skillIconWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: radius.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing.md,
+  },
+  skillNameDe: {
+    fontSize: typography.fontSize.xs,
+    fontWeight: typography.fontWeight.semibold,
+    fontFamily: typography.fontFamily.heading,
+    marginBottom: 2,
+  },
+  skillName: {
+    fontSize: typography.fontSize.md,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.heading,
+    color: colors.text.primary,
+  },
+  skillDesc: {
+    fontSize: typography.fontSize.xs,
+    fontWeight: typography.fontWeight.regular,
+    fontFamily: typography.fontFamily.body,
+    color: colors.text.secondary,
+    marginTop: spacing.xs,
+    lineHeight: typography.fontSize.xs * typography.lineHeight.normal,
+  },
+
+  // Divider
+  dividerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    marginHorizontal: spacing.screenH,
+    marginVertical: spacing.xl,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: colors.border.subtle,
+  },
+  dividerBadge: {
+    borderRadius: radius.pill,
+    backgroundColor: colors.bg.b3,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+  },
+  dividerText: {
+    fontSize: typography.fontSize.xs,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.bodyBold,
+    color: colors.text.tertiary,
+    letterSpacing: typography.letterSpacing.widest,
+    textTransform: 'uppercase',
+  },
+
+  // Exam label row
+  examLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  examBadge: {
+    borderRadius: radius.pill,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 2,
+    backgroundColor: colors.pastel.peach.dim,
+    borderWidth: 1,
+    borderColor: colors.pastel.peach.base + '33',
+  },
+  examBadgeText: {
+    fontSize: 9,
+    fontWeight: typography.fontWeight.black,
+    fontFamily: typography.fontFamily.bodyBlack,
+    color: colors.pastel.peach.base,
+  },
+
+  // Exam cards
+  examCard: {
+    height: 130,
+  },
+  examIconWrap: {
+    width: 36,
+    height: 36,
+    borderRadius: radius.sm,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing.md,
+  },
+  examNameDe: {
+    fontSize: typography.fontSize.xs,
+    fontWeight: typography.fontWeight.semibold,
+    fontFamily: typography.fontFamily.heading,
+    marginBottom: 2,
+  },
+  examName: {
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.heading,
+    color: colors.text.primary,
+  },
+  examDesc: {
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.regular,
+    fontFamily: typography.fontFamily.body,
+    color: colors.text.secondary,
+    marginTop: spacing.xs,
+  },
+
+  // Grammar section
+  grammarSection: {
+    marginTop: spacing.xl,
+    paddingHorizontal: spacing.screenH,
+  },
+  grammarCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  grammarIconWrap: {
+    width: 44,
+    height: 44,
+    borderRadius: radius.md,
+    backgroundColor: colors.pastel.rose.base + '22',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: spacing.md,
+  },
+  grammarNameDe: {
+    fontSize: typography.fontSize.xs,
+    fontWeight: typography.fontWeight.semibold,
+    fontFamily: typography.fontFamily.heading,
+    color: colors.pastel.rose.base,
+  },
+  grammarName: {
+    fontSize: typography.fontSize.md,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.heading,
+    color: colors.text.primary,
+  },
+  grammarDesc: {
+    fontSize: typography.fontSize.xs,
+    fontWeight: typography.fontWeight.regular,
+    fontFamily: typography.fontFamily.body,
+    color: colors.text.secondary,
+    marginTop: 2,
+  },
+
+  // Recent history
+  historySection: {
+    marginTop: spacing.xl,
+    paddingHorizontal: spacing.screenH,
+    paddingBottom: spacing['2xl'],
+  },
+  historyTitle: {
+    fontSize: typography.fontSize.lg,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.heading,
+    color: colors.text.primary,
+    marginBottom: spacing.md,
+  },
+  historyRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: radius.md,
+    backgroundColor: colors.bg.b2,
+    borderWidth: 1,
+    borderColor: colors.border.default,
+    padding: spacing.md,
+    marginBottom: spacing.sm,
+  },
+  historyIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: radius.sm,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: spacing.md,
+  },
+  historyItemTitle: {
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.semibold,
+    fontFamily: typography.fontFamily.heading,
+    color: colors.text.primary,
+  },
+  historyItemMeta: {
+    fontSize: typography.fontSize.xs,
+    fontWeight: typography.fontWeight.regular,
+    fontFamily: typography.fontFamily.body,
+    color: colors.text.secondary,
+    marginTop: 2,
+  },
+  historyScore: {
+    alignItems: 'flex-end',
+  },
+  historyScoreNum: {
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.bodyBold,
+  },
+  historyScoreLabel: {
+    fontSize: typography.fontSize.xs,
+    fontWeight: typography.fontWeight.regular,
+    fontFamily: typography.fontFamily.body,
+    color: colors.text.tertiary,
+  },
+});

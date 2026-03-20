@@ -11,7 +11,7 @@
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#111827"
+      "backgroundColor": "#1A2421"
     },
     "ios": {
       "supportsTablet": true,
@@ -24,7 +24,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#111827"
+        "backgroundColor": "#1A2421"
       },
       "package": "com.deutschmeister.app",
       "permissions": [
@@ -44,7 +44,7 @@
         "expo-notifications",
         {
           "icon": "./assets/notification-icon.png",
-          "color": "#6366F1"
+          "color": "#8EAD92"
         }
       ],
       [
@@ -52,8 +52,7 @@
         {
           "microphonePermission": "Allow DeutschMeister to access your microphone for speaking practice."
         }
-      ],
-      "expo-speech"
+      ]
     ],
     "experiments": {
       "typedRoutes": true

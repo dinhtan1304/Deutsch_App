@@ -1,13 +1,18 @@
-import { View, Text, TouchableOpacity, Animated, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, Animated, ActivityIndicator, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useRandomWords } from '@/hooks/useWords';
 import { useGameSession } from '@/hooks/useGameSession';
 import { Difficulty, Word } from '@/types';
 import * as Haptics from 'expo-haptics';
+import { spacing, radius, typography } from '@/theme';
+import { useXPStore, calculateGameXP } from '@/stores/xpStore';
+import { XPToast } from '@/components/ui/XPToast';
+import { XPSummary } from '@/components/ui/XPSummary';
+import { ComboBadge } from '@/components/ui/ComboBadge';
+import { useThemeStore } from '@/stores/themeStore';
 
 type Phase = 'playing' | 'result';
 
@@ -40,6 +45,8 @@ function buildQuestions(words: Word[]): QuizQuestion[] {
 }
 
 export default function TimedChallengeScreen() {
+  const colors = useThemeStore((s) => s.colors);
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const router = useRouter();
   const { difficulty = 'beginner', count = '10', category } = useLocalSearchParams<{
     difficulty: Difficulty;
@@ -75,6 +82,19 @@ export default function TimedChallengeScreen() {
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [timeLeft, setTimeLeft] = useState(TIME_PER_QUESTION);
   const [sessionStarted, setSessionStarted] = useState(false);
+
+  // XP state
+  const [xpToastAmount, setXpToastAmount] = useState(0);
+  const [xpToastKey, setXpToastKey] = useState(0);
+  const [sessionXP, setSessionXP] = useState(0);
+  const [isNewBest, setIsNewBest] = useState(false);
+  const [leveledUp, setLeveledUp] = useState(false);
+
+  const addXP = useXPStore((s) => s.addXP);
+  const updateBestScore = useXPStore((s) => s.updateBestScore);
+  const xpLevel = useXPStore((s) => s.level);
+  const xpInCurrentLevel = useXPStore((s) => s.xpInCurrentLevel);
+  const xpNeededForLevel = useXPStore((s) => s.xpNeededForLevel);
 
   // Animations
   const bgFlash = useRef(new Animated.Value(0)).current;
@@ -198,6 +218,12 @@ export default function TimedChallengeScreen() {
         });
         triggerCorrectAnimation();
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
+
+        // XP toast
+        const xpGain = 10 + (streak >= 10 ? 40 : streak >= 5 ? 20 : streak >= 3 ? 10 : 0);
+        setXpToastAmount(xpGain);
+        setXpToastKey((k) => k + 1);
+        setSessionXP((x) => x + xpGain);
       } else {
         setWrongCount((w) => w + 1);
         setStreak(0);
@@ -216,6 +242,15 @@ export default function TimedChallengeScreen() {
     if (phase === 'result' && !sessionEndedRef.current) {
       sessionEndedRef.current = true;
       session.end(score, bestStreak, correctCount, wrongCount);
+
+      // XP + Best Score
+      const finalAccuracy = questions.length > 0 ? Math.round((correctCount / questions.length) * 100) : 0;
+      const totalXP = calculateGameXP(correctCount, bestStreak, finalAccuracy);
+      setSessionXP(totalXP);
+      const { leveledUp: didLevelUp } = addXP(totalXP);
+      setLeveledUp(didLevelUp);
+      const newBest = updateBestScore('timed-challenge', score);
+      setIsNewBest(newBest);
     }
   }, [phase]);
 
@@ -232,26 +267,31 @@ export default function TimedChallengeScreen() {
     setTimeLeft(TIME_PER_QUESTION);
     setSessionStarted(false);
     sessionEndedRef.current = false;
+    setSessionXP(0);
+    setXpToastAmount(0);
+    setXpToastKey(0);
+    setIsNewBest(false);
+    setLeveledUp(false);
     timerBarAnim.setValue(1);
     refetch();
   };
 
   const bgColor = bgFlash.interpolate({
     inputRange: [0, 1],
-    outputRange: ['rgba(16, 185, 129, 0)', 'rgba(16, 185, 129, 0.15)'],
+    outputRange: ['rgba(142, 173, 146, 0)', 'rgba(142, 173, 146, 0.12)'],
   });
 
   const timerBarColor = timerBarAnim.interpolate({
     inputRange: [0, 0.3, 0.6, 1],
-    outputRange: ['#EF4444', '#EF4444', '#F59E0B', '#10B981'],
+    outputRange: [colors.pastel.rose.base, colors.pastel.rose.base, colors.pastel.peach.base, colors.pastel.lime.base],
   });
 
   // Loading state
   if (isLoading || questions.length === 0) {
     return (
-      <SafeAreaView className="flex-1 items-center justify-center bg-dark-bg">
-        <ActivityIndicator size="large" color="#EF4444" />
-        <Text className="mt-4 text-gray-400">Đang tải câu hỏi...</Text>
+      <SafeAreaView style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={colors.pastel.lime.base} />
+        <Text style={styles.loadingText}>Đang tải câu hỏi...</Text>
       </SafeAreaView>
     );
   }
@@ -260,78 +300,77 @@ export default function TimedChallengeScreen() {
   if (phase === 'result') {
     const accuracy = questions.length > 0 ? Math.round((correctCount / questions.length) * 100) : 0;
     return (
-      <SafeAreaView className="flex-1 bg-dark-bg">
-        <View className="flex-1 items-center justify-center px-6">
-          <LinearGradient
-            colors={['#EF4444', '#DC2626']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={{ borderRadius: 24, padding: 32, width: '100%', alignItems: 'center' }}
-          >
-            <View className="mb-4 h-16 w-16 items-center justify-center rounded-full bg-white/20">
+      <SafeAreaView style={styles.safeArea}>
+        <View style={styles.resultContainer}>
+          {/* Result Hero */}
+          <View style={styles.resultHero}>
+            <View style={styles.resultIconCircle}>
               <Ionicons
                 name={accuracy >= 70 ? 'trophy' : accuracy >= 40 ? 'thumbs-up' : 'refresh'}
                 size={32}
-                color="#FFFFFF"
+                color={colors.pastel.lime.on}
               />
             </View>
-            <Text className="text-2xl font-bold text-white">
+            <Text style={styles.resultTitle}>
               {accuracy >= 70 ? 'Tốc độ tuyệt vời!' : accuracy >= 40 ? 'Khá nhanh!' : 'Cần luyện thêm!'}
             </Text>
-            <Text className="mt-1 text-white/70">Time Challenge hoàn thành</Text>
-          </LinearGradient>
+            <Text style={styles.resultSubtitle}>Time Challenge hoàn thành</Text>
+          </View>
 
-          <View className="mt-6 w-full flex-row" style={{ gap: 12 }}>
-            <View className="flex-1 items-center rounded-2xl bg-dark-card p-4">
-              <Text className="text-2xl font-bold text-white">{score}</Text>
-              <Text className="text-xs text-gray-400">Điểm</Text>
+          {/* Top Stats Row */}
+          <View style={styles.statsRow}>
+            <View style={styles.statCard}>
+              <Text style={styles.statValueWhite}>{score}</Text>
+              <Text style={styles.statLabel}>Điểm</Text>
             </View>
-            <View className="flex-1 items-center rounded-2xl bg-dark-card p-4">
-              <Text className="text-2xl font-bold text-emerald-400">{accuracy}%</Text>
-              <Text className="text-xs text-gray-400">Chính xác</Text>
+            <View style={styles.statCard}>
+              <Text style={styles.statValueLime}>{accuracy}%</Text>
+              <Text style={styles.statLabel}>Chính xác</Text>
             </View>
-            <View className="flex-1 items-center rounded-2xl bg-dark-card p-4">
-              <Text className="text-2xl font-bold text-amber-400">{bestStreak}</Text>
-              <Text className="text-xs text-gray-400">Streak</Text>
+            <View style={styles.statCard}>
+              <Text style={styles.statValuePeach}>{bestStreak}</Text>
+              <Text style={styles.statLabel}>Chuỗi</Text>
             </View>
           </View>
 
-          <View className="mt-4 w-full flex-row" style={{ gap: 12 }}>
-            <View className="flex-1 items-center rounded-2xl bg-dark-card p-4">
-              <Text className="text-lg font-bold text-emerald-400">{correctCount}</Text>
-              <Text className="text-xs text-gray-400">Đúng</Text>
+          {/* Correct/Wrong Row */}
+          <View style={styles.statsRowSmall}>
+            <View style={styles.statCard}>
+              <Text style={styles.statValueMint}>{correctCount}</Text>
+              <Text style={styles.statLabel}>Đúng</Text>
             </View>
-            <View className="flex-1 items-center rounded-2xl bg-dark-card p-4">
-              <Text className="text-lg font-bold text-red-400">{wrongCount}</Text>
-              <Text className="text-xs text-gray-400">Sai</Text>
+            <View style={styles.statCard}>
+              <Text style={styles.statValueRose}>{wrongCount}</Text>
+              <Text style={styles.statLabel}>Sai</Text>
             </View>
           </View>
 
-          <View className="mt-8 w-full" style={{ gap: 12 }}>
-            <TouchableOpacity activeOpacity={0.8} onPress={handlePlayAgain}>
-              <LinearGradient
-                colors={['#EF4444', '#DC2626']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={{
-                  borderRadius: 16,
-                  paddingVertical: 14,
-                  alignItems: 'center',
-                  flexDirection: 'row',
-                  justifyContent: 'center',
-                }}
-              >
-                <Ionicons name="refresh" size={20} color="#FFFFFF" />
-                <Text className="ml-2 text-base font-bold text-white">Chơi lại</Text>
-              </LinearGradient>
+          <XPSummary
+            xpEarned={sessionXP}
+            isNewBest={isNewBest}
+            level={xpLevel}
+            leveledUp={leveledUp}
+            xpInCurrentLevel={xpInCurrentLevel}
+            xpNeededForLevel={xpNeededForLevel}
+          />
+
+          {/* Action Buttons */}
+          <View style={styles.resultActions}>
+            <TouchableOpacity
+              activeOpacity={0.8}
+              onPress={handlePlayAgain}
+              style={styles.ctaButton}
+            >
+              <Ionicons name="refresh" size={20} color={colors.pastel.lime.on} />
+              <Text style={styles.ctaButtonText}>Chơi lại</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               activeOpacity={0.7}
               onPress={() => router.back()}
-              className="items-center rounded-2xl bg-dark-card py-4"
+              style={styles.backButton}
             >
-              <Text className="text-base font-semibold text-gray-300">Quay về</Text>
+              <Text style={styles.backButtonText}>Quay về</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -341,73 +380,81 @@ export default function TimedChallengeScreen() {
 
   // Playing state
   return (
-    <SafeAreaView className="flex-1 bg-dark-bg">
-      <Animated.View className="flex-1" style={{ backgroundColor: bgColor }}>
+    <SafeAreaView style={styles.safeArea}>
+      <Animated.View style={[styles.playingContainer, { backgroundColor: bgColor }]}>
         {/* Top Bar */}
-        <View className="flex-row items-center justify-between px-4 pt-3 pb-2">
+        <View style={styles.topBar}>
           <TouchableOpacity
             onPress={() => router.back()}
-            className="h-10 w-10 items-center justify-center rounded-full bg-dark-card"
+            style={styles.closeButton}
           >
-            <Ionicons name="close" size={20} color="#9CA3AF" />
+            <Ionicons name="close" size={20} color={colors.text.secondary} />
           </TouchableOpacity>
 
-          <View className="flex-row items-center">
-            <Ionicons name="flame" size={18} color="#F59E0B" />
-            <Text className="ml-1 text-sm font-bold text-amber-400">{streak}</Text>
+          <View style={styles.streakContainer}>
+            <Ionicons name="flame" size={18} color={colors.pastel.peach.base} />
+            <Text style={styles.streakText}>{streak}</Text>
           </View>
 
-          <View className="flex-row items-center rounded-lg bg-dark-card px-3 py-1.5">
-            <Ionicons name="star" size={16} color="#EF4444" />
-            <Text className="ml-1 text-sm font-bold text-white">{score}</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+            <ComboBadge streak={streak} />
+            <View style={styles.scoreChip}>
+              <Ionicons name="star" size={16} color={colors.pastel.lime.base} />
+              <Text style={styles.scoreChipText}>{score}</Text>
+              <XPToast amount={xpToastAmount} triggerKey={xpToastKey} />
+            </View>
           </View>
         </View>
 
         {/* Progress Bar */}
-        <View className="mx-4 mt-1 h-2 overflow-hidden rounded-full bg-dark-secondary">
+        <View style={styles.progressBarTrack}>
           <Animated.View
-            className="h-full rounded-full"
-            style={{
-              backgroundColor: '#EF4444',
-              width: progressAnim.interpolate({
-                inputRange: [0, 1],
-                outputRange: ['0%', '100%'],
-              }),
-            }}
+            style={[
+              styles.progressBarFill,
+              {
+                backgroundColor: colors.pastel.lime.base,
+                width: progressAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: ['0%', '100%'],
+                }),
+              },
+            ]}
           />
         </View>
 
         {/* Timer Bar - prominent, shrinking */}
-        <View className="mx-4 mt-3 h-3 overflow-hidden rounded-full bg-dark-secondary">
+        <View style={styles.timerBarTrack}>
           <Animated.View
-            className="h-full rounded-full"
-            style={{
-              backgroundColor: timerBarColor,
-              width: timerBarAnim.interpolate({
-                inputRange: [0, 1],
-                outputRange: ['0%', '100%'],
-              }),
-            }}
+            style={[
+              styles.timerBarFill,
+              {
+                backgroundColor: timerBarColor,
+                width: timerBarAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: ['0%', '100%'],
+                }),
+              },
+            ]}
           />
         </View>
 
-        <View className="mx-4 mt-2 flex-row items-center justify-between">
-          <Text className="text-xs text-gray-400">
+        <View style={styles.questionMeta}>
+          <Text style={styles.questionCounter}>
             Câu {currentIndex + 1}/{questions.length}
           </Text>
           <Animated.View
-            className="flex-row items-center"
-            style={{ transform: [{ scale: pulseAnim }] }}
+            style={[styles.timerDisplay, { transform: [{ scale: pulseAnim }] }]}
           >
             <Ionicons
               name="timer-outline"
               size={16}
-              color={timeLeft <= 2 ? '#EF4444' : '#F59E0B'}
+              color={timeLeft <= 2 ? colors.pastel.rose.base : colors.pastel.lime.base}
             />
             <Text
-              className={`ml-1 text-sm font-bold ${
-                timeLeft <= 2 ? 'text-red-400' : 'text-amber-400'
-              }`}
+              style={[
+                styles.timerText,
+                { color: timeLeft <= 2 ? colors.pastel.rose.base : colors.pastel.lime.base },
+              ]}
             >
               {timeLeft}s
             </Text>
@@ -416,48 +463,50 @@ export default function TimedChallengeScreen() {
 
         {/* Question */}
         <Animated.View
-          className="mx-4 mt-4"
-          style={{ transform: [{ translateX: shakeAnim }] }}
+          style={[styles.questionWrapper, { transform: [{ translateX: shakeAnim }] }]}
         >
-          <View className="items-center rounded-2xl bg-dark-card p-6">
+          <View style={styles.questionCard}>
             {currentQuestion?.word.article && (
-              <Text className="mb-1 text-sm text-gray-400">{currentQuestion.word.article}</Text>
+              <Text style={styles.articleText}>{currentQuestion.word.article}</Text>
             )}
-            <Text className="text-3xl font-bold text-white">{currentQuestion?.word.word}</Text>
+            <Text style={styles.wordText}>{currentQuestion?.word.word}</Text>
             {currentQuestion?.word.pronunciation && (
-              <Text className="mt-2 text-sm text-gray-500">
+              <Text style={styles.pronunciationText}>
                 [{currentQuestion.word.pronunciation}]
               </Text>
             )}
-            <View className="mt-3 flex-row items-center rounded-lg bg-red-500/10 px-3 py-1">
-              <Ionicons name="flash" size={12} color="#EF4444" />
-              <Text className="ml-1 text-xs font-bold text-red-400">SPEED ROUND</Text>
+            <View style={styles.speedBadge}>
+              <Ionicons name="flash" size={12} color={colors.pastel.lime.base} />
+              <Text style={styles.speedBadgeText}>SPEED ROUND</Text>
             </View>
           </View>
         </Animated.View>
 
         {/* Answer Options */}
-        <View className="mx-4 mt-5" style={{ gap: 8 }}>
+        <View style={styles.optionsContainer}>
           {currentQuestion?.options.map((option, index) => {
             const isSelected = selectedAnswer === option;
             const isCorrectOption = option === currentQuestion.correctAnswer;
             const showResult = selectedAnswer !== null;
 
-            let bgStyle = '#111827';
-            let borderColor = 'transparent';
-            let textColor = '#FFFFFF';
+            let optionBg = colors.bg.b2;
+            let borderClr = colors.border.default;
+            let textClr = colors.text.primary;
+            let borderW = 1;
 
             if (showResult) {
               if (isCorrectOption) {
-                bgStyle = 'rgba(16, 185, 129, 0.1)';
-                borderColor = '#10B981';
-                textColor = '#34D399';
+                optionBg = colors.pastel.mint.dim;
+                borderClr = colors.pastel.mint.base + '4D'; // 30%
+                textClr = colors.pastel.mint.base;
+                borderW = 1.5;
               } else if (isSelected && !isCorrectOption) {
-                bgStyle = 'rgba(239, 68, 68, 0.1)';
-                borderColor = '#EF4444';
-                textColor = '#F87171';
+                optionBg = colors.pastel.rose.dim;
+                borderClr = colors.pastel.rose.base + '40'; // 25%
+                textClr = colors.pastel.rose.base;
+                borderW = 1.5;
               } else {
-                textColor = '#6B7280';
+                textClr = colors.text.tertiary;
               }
             }
 
@@ -469,53 +518,50 @@ export default function TimedChallengeScreen() {
                 activeOpacity={0.7}
                 disabled={selectedAnswer !== null}
                 onPress={() => handleAnswer(option)}
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  borderRadius: 12,
-                  padding: 14,
-                  backgroundColor: bgStyle,
-                  borderWidth: showResult && (isCorrectOption || isSelected) ? 1 : 0,
-                  borderColor,
-                }}
+                style={[
+                  styles.optionButton,
+                  {
+                    backgroundColor: optionBg,
+                    borderWidth: borderW,
+                    borderColor: borderClr,
+                  },
+                ]}
               >
                 <View
-                  style={{
-                    marginRight: 12,
-                    height: 32,
-                    width: 32,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    borderRadius: 8,
-                    backgroundColor: showResult && isCorrectOption
-                      ? 'rgba(16, 185, 129, 0.2)'
-                      : showResult && isSelected
-                        ? 'rgba(239, 68, 68, 0.2)'
-                        : '#1F2937',
-                  }}
+                  style={[
+                    styles.optionLetter,
+                    {
+                      backgroundColor: showResult && isCorrectOption
+                        ? colors.pastel.mint.dim
+                        : showResult && isSelected
+                          ? colors.pastel.rose.dim
+                          : colors.bg.b3,
+                    },
+                  ]}
                 >
                   <Text
-                    style={{
-                      fontSize: 12,
-                      fontWeight: '700',
-                      color: showResult && isCorrectOption
-                        ? '#34D399'
-                        : showResult && isSelected
-                          ? '#F87171'
-                          : '#9CA3AF',
-                    }}
+                    style={[
+                      styles.optionLetterText,
+                      {
+                        color: showResult && isCorrectOption
+                          ? colors.pastel.mint.base
+                          : showResult && isSelected
+                            ? colors.pastel.rose.base
+                            : colors.text.secondary,
+                      },
+                    ]}
                   >
                     {optionLetters[index]}
                   </Text>
                 </View>
-                <Text style={{ flex: 1, fontSize: 14, fontWeight: '500', color: textColor }}>
+                <Text style={[styles.optionText, { color: textClr }]}>
                   {option}
                 </Text>
                 {showResult && isCorrectOption && (
-                  <Ionicons name="checkmark-circle" size={20} color="#10B981" />
+                  <Ionicons name="checkmark-circle" size={20} color={colors.pastel.mint.base} />
                 )}
                 {showResult && isSelected && !isCorrectOption && (
-                  <Ionicons name="close-circle" size={20} color="#EF4444" />
+                  <Ionicons name="close-circle" size={20} color={colors.pastel.rose.base} />
                 )}
               </TouchableOpacity>
             );
@@ -525,3 +571,341 @@ export default function TimedChallengeScreen() {
     </SafeAreaView>
   );
 }
+
+const createStyles = (colors: any) => StyleSheet.create({
+  /* ── Loading ──────────────────────────── */
+  loadingContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.bg.b0,
+  },
+  loadingText: {
+    marginTop: spacing.lg,
+    color: colors.text.secondary,
+    fontSize: typography.fontSize.base,
+    fontFamily: typography.fontFamily.body,
+  },
+
+  /* ── Shared ───────────────────────────── */
+  safeArea: {
+    flex: 1,
+    backgroundColor: colors.bg.b0,
+  },
+
+  /* ── Result Screen ────────────────────── */
+  resultContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: spacing.xl + 4, // ~24
+  },
+  resultHero: {
+    backgroundColor: colors.pastel.lime.base,
+    borderRadius: radius['2xl'],
+    padding: spacing['3xl'] - 4, // ~32
+    width: '100%',
+    alignItems: 'center',
+  },
+  resultIconCircle: {
+    marginBottom: spacing.lg,
+    height: 64,
+    width: 64,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 32,
+    backgroundColor: 'rgba(0,0,0,0.15)',
+  },
+  resultTitle: {
+    fontSize: typography.fontSize.xl,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.heading,
+    color: colors.pastel.lime.on,
+  },
+  resultSubtitle: {
+    marginTop: spacing.xs,
+    fontSize: typography.fontSize.base,
+    fontFamily: typography.fontFamily.body,
+    color: colors.pastel.lime.on + 'B3', // 70%
+  },
+
+  /* ── Stat Cards ───────────────────────── */
+  statsRow: {
+    marginTop: spacing.xl + 4,
+    width: '100%',
+    flexDirection: 'row',
+    gap: spacing.md,
+  },
+  statsRowSmall: {
+    marginTop: spacing.lg,
+    width: '100%',
+    flexDirection: 'row',
+    gap: spacing.md,
+  },
+  statCard: {
+    flex: 1,
+    alignItems: 'center',
+    borderRadius: radius.stone,
+    backgroundColor: colors.bg.b2,
+    borderWidth: 1,
+    borderColor: colors.border.default,
+    paddingVertical: spacing.lg,
+    paddingHorizontal: spacing.sm,
+  },
+  statValueWhite: {
+    fontSize: typography.fontSize.xl,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.bodyBold,
+    color: colors.text.primary,
+  },
+  statValueLime: {
+    fontSize: typography.fontSize.xl,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.bodyBold,
+    color: colors.pastel.lime.base,
+  },
+  statValuePeach: {
+    fontSize: typography.fontSize.xl,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.bodyBold,
+    color: colors.pastel.peach.base,
+  },
+  statValueMint: {
+    fontSize: typography.fontSize.lg,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.bodyBold,
+    color: colors.pastel.mint.base,
+  },
+  statValueRose: {
+    fontSize: typography.fontSize.lg,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.bodyBold,
+    color: colors.pastel.rose.base,
+  },
+  statLabel: {
+    fontSize: typography.fontSize.xs,
+    fontFamily: typography.fontFamily.body,
+    color: colors.text.secondary,
+    marginTop: spacing.xs,
+  },
+
+  /* ── Result Actions ───────────────────── */
+  resultActions: {
+    marginTop: spacing['2xl'] + 4, // ~32
+    width: '100%',
+    gap: spacing.md,
+  },
+  ctaButton: {
+    backgroundColor: colors.pastel.lime.base,
+    borderRadius: radius.stone,
+    paddingVertical: 14,
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  ctaButtonText: {
+    marginLeft: spacing.sm,
+    fontSize: typography.fontSize.md,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.bodyBold,
+    color: colors.pastel.lime.on,
+  },
+  backButton: {
+    alignItems: 'center',
+    borderRadius: radius.stone,
+    backgroundColor: colors.bg.b2,
+    borderWidth: 1,
+    borderColor: colors.border.default,
+    paddingVertical: spacing.lg,
+  },
+  backButtonText: {
+    fontSize: typography.fontSize.md,
+    fontWeight: typography.fontWeight.semibold,
+    fontFamily: typography.fontFamily.bodySemibold,
+    color: colors.text.secondary,
+  },
+
+  /* ── Playing Screen ───────────────────── */
+  playingContainer: {
+    flex: 1,
+  },
+
+  /* ── Top Bar ──────────────────────────── */
+  topBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.sm,
+  },
+  closeButton: {
+    height: 40,
+    width: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 20,
+    backgroundColor: colors.bg.b2,
+    borderWidth: 1,
+    borderColor: colors.border.default,
+  },
+  streakContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  streakText: {
+    marginLeft: spacing.xs,
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.bodyBold,
+    color: colors.pastel.peach.base,
+  },
+  scoreChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: radius.sm,
+    backgroundColor: colors.bg.b2,
+    borderWidth: 1,
+    borderColor: colors.border.default,
+    paddingHorizontal: spacing.md,
+    paddingVertical: 6,
+  },
+  scoreChipText: {
+    marginLeft: spacing.xs,
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.bodyBold,
+    color: colors.text.primary,
+  },
+
+  /* ── Progress & Timer Bars ────────────── */
+  progressBarTrack: {
+    marginHorizontal: spacing.lg,
+    marginTop: spacing.xs,
+    height: 8,
+    overflow: 'hidden',
+    borderRadius: radius.pill,
+    backgroundColor: colors.bg.b3,
+  },
+  progressBarFill: {
+    height: '100%',
+    borderRadius: radius.pill,
+  },
+  timerBarTrack: {
+    marginHorizontal: spacing.lg,
+    marginTop: spacing.md,
+    height: 12,
+    overflow: 'hidden',
+    borderRadius: radius.pill,
+    backgroundColor: colors.bg.b3,
+  },
+  timerBarFill: {
+    height: '100%',
+    borderRadius: radius.pill,
+  },
+
+  /* ── Question Meta ────────────────────── */
+  questionMeta: {
+    marginHorizontal: spacing.lg,
+    marginTop: spacing.sm,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  questionCounter: {
+    fontSize: typography.fontSize.xs,
+    fontFamily: typography.fontFamily.body,
+    color: colors.text.secondary,
+  },
+  timerDisplay: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  timerText: {
+    marginLeft: spacing.xs,
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.bodyBold,
+  },
+
+  /* ── Question Card ────────────────────── */
+  questionWrapper: {
+    marginHorizontal: spacing.lg,
+    marginTop: spacing.lg,
+  },
+  questionCard: {
+    alignItems: 'center',
+    borderRadius: radius.stone,
+    backgroundColor: colors.bg.b2,
+    borderWidth: 1,
+    borderColor: colors.border.default,
+    paddingVertical: spacing.xl + 4,
+    paddingHorizontal: spacing.xl,
+  },
+  articleText: {
+    marginBottom: spacing.xs,
+    fontSize: typography.fontSize.sm,
+    fontFamily: typography.fontFamily.body,
+    color: colors.text.secondary,
+  },
+  wordText: {
+    fontSize: 28,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.bodyBold,
+    color: colors.text.primary,
+  },
+  pronunciationText: {
+    marginTop: spacing.sm,
+    fontSize: typography.fontSize.sm,
+    fontFamily: typography.fontFamily.body,
+    color: colors.text.tertiary,
+  },
+  speedBadge: {
+    marginTop: spacing.md,
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: radius.sm,
+    backgroundColor: colors.pastel.lime.dim,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+  },
+  speedBadgeText: {
+    marginLeft: spacing.xs,
+    fontSize: typography.fontSize.xs,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.bodyBold,
+    color: colors.pastel.lime.base,
+  },
+
+  /* ── Answer Options ───────────────────── */
+  optionsContainer: {
+    marginHorizontal: spacing.lg,
+    marginTop: spacing.xl,
+    gap: spacing.sm,
+  },
+  optionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: radius.md,
+    padding: 14,
+  },
+  optionLetter: {
+    marginRight: spacing.md,
+    height: 32,
+    width: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: radius.sm,
+  },
+  optionLetterText: {
+    fontSize: typography.fontSize.xs,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.bodyBold,
+  },
+  optionText: {
+    flex: 1,
+    fontSize: typography.fontSize.base,
+    fontWeight: typography.fontWeight.medium,
+    fontFamily: typography.fontFamily.bodyMedium,
+  },
+});

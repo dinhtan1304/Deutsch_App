@@ -7,15 +7,19 @@ import {
   Pressable,
   ActivityIndicator,
   RefreshControl,
+  StyleSheet,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { wordsApi } from '@/lib/api/words';
 import { Word, Gender, CEFRLevel, PaginatedResponse } from '@/types';
 import WordCard from '@/components/words/WordCard';
 import FilterChips from '@/components/words/FilterChips';
+import { spacing, radius, typography } from '@/theme';
+import { useThemeStore } from '@/stores/themeStore';
 
 const PAGE_LIMIT = 20;
 
@@ -35,6 +39,8 @@ function useDebounce(value: string, delay: number): string {
 }
 
 export default function WordsScreen() {
+  const colors = useThemeStore((s) => s.colors);
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const router = useRouter();
 
   // Search and filter state
@@ -111,12 +117,12 @@ export default function WordsScreen() {
     () => (
       <View>
         {/* Search bar */}
-        <View className="mx-4 mt-3 flex-row items-center rounded-xl border border-dark-border bg-dark-card px-4 py-3">
-          <Ionicons name="search" size={20} color="#6B7280" />
+        <View style={styles.searchBar}>
+          <Ionicons name="search" size={20} color={colors.text.tertiary} />
           <TextInput
-            className="ml-3 flex-1 text-base text-white"
-            placeholder="Search words..."
-            placeholderTextColor="#6B7280"
+            style={styles.searchInput}
+            placeholder="Tìm kiếm từ vựng..."
+            placeholderTextColor={colors.text.tertiary}
             value={searchText}
             onChangeText={setSearchText}
             autoCapitalize="none"
@@ -125,7 +131,7 @@ export default function WordsScreen() {
           />
           {searchText.length > 0 && (
             <Pressable onPress={() => setSearchText('')} hitSlop={8}>
-              <Ionicons name="close-circle" size={20} color="#6B7280" />
+              <Ionicons name="close-circle" size={20} color={colors.text.secondary} />
             </Pressable>
           )}
         </View>
@@ -140,11 +146,11 @@ export default function WordsScreen() {
           onCategoryChange={setSelectedCategory}
         />
 
-        {/* Results count */}
+        {/* Section label + results count */}
         {!isLoading && (
-          <View className="mx-4 mb-3 flex-row items-center">
-            <Ionicons name="library-outline" size={14} color="#6B7280" />
-            <Text className="ml-1.5 text-sm text-gray-500">
+          <View style={styles.resultsRow}>
+            <Ionicons name="library-outline" size={14} color={colors.text.tertiary} />
+            <Text style={styles.sectionLabel}>
               {totalCount} {totalCount === 1 ? 'word' : 'words'} found
             </Text>
           </View>
@@ -157,15 +163,15 @@ export default function WordsScreen() {
   const ListFooter = useMemo(() => {
     if (isFetchingNextPage) {
       return (
-        <View className="py-6">
-          <ActivityIndicator color="#6366F1" />
+        <View style={styles.footerContainer}>
+          <ActivityIndicator color={colors.pastel.lavender.base} />
         </View>
       );
     }
     if (words.length > 0 && !hasNextPage) {
       return (
-        <View className="items-center py-6">
-          <Text className="text-sm text-gray-500">All words loaded</Text>
+        <View style={styles.footerContainer}>
+          <Text style={styles.footerText}>Đã tải hết từ vựng</Text>
         </View>
       );
     }
@@ -175,50 +181,50 @@ export default function WordsScreen() {
   const ListEmpty = useMemo(() => {
     if (isLoading) {
       return (
-        <View className="flex-1 items-center justify-center py-20">
-          <ActivityIndicator size="large" color="#6366F1" />
-          <Text className="mt-3 text-gray-400">Loading words...</Text>
+        <View style={styles.emptyContainer}>
+          <ActivityIndicator size="large" color={colors.pastel.lavender.base} />
+          <Text style={styles.emptyTitle}>Đang tải từ vựng...</Text>
         </View>
       );
     }
     if (isError) {
       return (
-        <View className="flex-1 items-center justify-center px-8 py-20">
-          <Ionicons name="warning-outline" size={48} color="#EF4444" />
-          <Text className="mt-3 text-center text-base text-gray-400">
-            Failed to load words
+        <View style={styles.emptyContainer}>
+          <Ionicons name="warning-outline" size={48} color={colors.pastel.rose.base} />
+          <Text style={styles.emptyTitle}>
+            Không thể tải từ vựng
           </Text>
-          <Text className="mt-1 text-center text-sm text-gray-500">
-            {(error as Error)?.message || 'Unknown error'}
+          <Text style={styles.emptySubtitle}>
+            {(error as Error)?.message || 'Lỗi không xác định'}
           </Text>
         </View>
       );
     }
     return (
-      <View className="flex-1 items-center justify-center px-8 py-20">
-        <Ionicons name="search-outline" size={48} color="#6B7280" />
-        <Text className="mt-3 text-center text-base text-gray-400">
-          No words found
+      <View style={styles.emptyContainer}>
+        <Ionicons name="search-outline" size={48} color={colors.text.tertiary} />
+        <Text style={styles.emptyTitle}>
+          Không tìm thấy từ vựng
         </Text>
-        <Text className="mt-1 text-center text-sm text-gray-500">
-          Try adjusting your search or filters
+        <Text style={styles.emptySubtitle}>
+          Thử thay đổi từ khoá hoặc bộ lọc
         </Text>
       </View>
     );
   }, [isLoading, isError, error]);
 
   return (
-    <SafeAreaView className="flex-1 bg-dark-bg" edges={['top']}>
-      {/* Title */}
-      <View className="flex-row items-center justify-between px-4 pt-2 pb-1">
-        <View>
-          <Text className="text-2xl font-bold text-white">Dictionary</Text>
-          <Text className="mt-0.5 text-sm text-gray-400">German vocabulary</Text>
+    <SafeAreaView style={styles.safeArea} edges={['top']}>
+      {/* Header */}
+      <Animated.View entering={FadeInDown.duration(500).springify()} style={styles.header}>
+        <View style={styles.headerIconWrap}>
+          <Ionicons name="book" size={22} color={colors.pastel.lavender.on} />
         </View>
-        <View className="rounded-full bg-primary-500/20 p-2">
-          <Ionicons name="book" size={22} color="#6366F1" />
+        <View style={styles.headerTextWrap}>
+          <Text style={styles.headerTitle}>Từ điển</Text>
+          <Text style={styles.headerSubtitle}>Tra cứu và học từ vựng tiếng Đức</Text>
         </View>
-      </View>
+      </Animated.View>
 
       {/* Word list */}
       <FlatList
@@ -235,13 +241,128 @@ export default function WordsScreen() {
           <RefreshControl
             refreshing={isRefetching && !isFetchingNextPage}
             onRefresh={refetch}
-            tintColor="#6366F1"
-            colors={['#6366F1']}
+            tintColor={colors.pastel.lavender.base}
+            colors={[colors.pastel.lavender.base]}
           />
         }
-        contentContainerStyle={words.length === 0 ? { flexGrow: 1 } : { paddingBottom: 20 }}
+        contentContainerStyle={words.length === 0 ? { flexGrow: 1 } : { paddingBottom: spacing.xl }}
         keyboardDismissMode="on-drag"
       />
     </SafeAreaView>
   );
 }
+
+const createStyles = (colors: any) => StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: colors.bg.b0,
+  },
+
+  /* ── Header ───────────────────────────────── */
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    paddingHorizontal: spacing.screenH,
+    paddingTop: spacing.lg,
+    paddingBottom: spacing.md,
+  },
+  headerIconWrap: {
+    width: 44,
+    height: 44,
+    borderRadius: radius.lg,
+    backgroundColor: colors.pastel.lavender.base,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  headerTextWrap: {
+    flex: 1,
+  },
+  headerTitle: {
+    fontSize: typography.fontSize.xl,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.heading,
+    color: colors.text.primary,
+    letterSpacing: typography.letterSpacing.snug,
+  },
+  headerSubtitle: {
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.regular,
+    fontFamily: typography.fontFamily.body,
+    color: colors.text.secondary,
+    marginTop: 2,
+  },
+
+  /* ── Search bar ───────────────────────────── */
+  searchBar: {
+    marginHorizontal: spacing.screenH,
+    marginTop: spacing.md,
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: radius.stone,
+    borderWidth: 1,
+    borderColor: colors.border.default,
+    backgroundColor: colors.bg.b3,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+  },
+  searchInput: {
+    flex: 1,
+    marginLeft: spacing.md,
+    fontSize: typography.fontSize.base,
+    fontWeight: typography.fontWeight.regular,
+    fontFamily: typography.fontFamily.body,
+    color: colors.text.primary,
+  },
+
+  /* ── Results label ────────────────────────── */
+  resultsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: spacing.screenH,
+    marginBottom: spacing.md,
+  },
+  sectionLabel: {
+    marginLeft: spacing.xs + 2,
+    fontSize: typography.fontSize.xs,
+    fontWeight: typography.fontWeight.semibold,
+    fontFamily: typography.fontFamily.heading,
+    color: colors.text.tertiary,
+    textTransform: 'uppercase',
+    letterSpacing: typography.letterSpacing.widest,
+  },
+
+  /* ── Footer ───────────────────────────────── */
+  footerContainer: {
+    alignItems: 'center',
+    paddingVertical: spacing.xl + 4,
+  },
+  footerText: {
+    fontSize: typography.fontSize.sm,
+    fontFamily: typography.fontFamily.body,
+    color: colors.text.secondary,
+  },
+
+  /* ── Empty states ─────────────────────────── */
+  emptyContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: spacing['2xl'] + 4,
+    paddingVertical: 80,
+  },
+  emptyTitle: {
+    marginTop: spacing.md,
+    textAlign: 'center',
+    fontSize: typography.fontSize.base,
+    fontWeight: typography.fontWeight.medium,
+    fontFamily: typography.fontFamily.bodyMedium,
+    color: colors.text.secondary,
+  },
+  emptySubtitle: {
+    marginTop: spacing.xs,
+    textAlign: 'center',
+    fontSize: typography.fontSize.sm,
+    color: colors.text.tertiary,
+  },
+});

@@ -163,9 +163,9 @@ export const GenderInfo = {
 } as const;
 
 export const CATEGORIES = [
-  'animals', 'body', 'clothing', 'colors', 'education', 'family',
-  'food', 'health', 'home', 'nature', 'numbers', 'occupations',
-  'places', 'sports', 'technology', 'time', 'transport', 'travel', 'weather', 'other'
+  'persoenliche-angaben', 'familie-freunde', 'wohnen', 'essen-trinken',
+  'einkaufen', 'koerper-gesundheit', 'arbeit-beruf', 'schule-ausbildung',
+  'freizeit-hobbys', 'reisen-verkehr', 'natur-wetter', 'medien-kommunikation',
 ] as const;
 
 export const LEVELS: CEFRLevel[] = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];

@@ -13,11 +13,18 @@ import {
 
 // ─── Category display names (Vietnamese) ───
 const CATEGORY_VI: Record<string, string> = {
-  animals: 'Động vật', body: 'Cơ thể', clothing: 'Quần áo', colors: 'Màu sắc',
-  education: 'Giáo dục', family: 'Gia đình', food: 'Thực phẩm', health: 'Sức khỏe',
-  home: 'Nhà cửa', nature: 'Thiên nhiên', numbers: 'Số đếm', occupations: 'Nghề nghiệp',
-  places: 'Địa điểm', sports: 'Thể thao', technology: 'Công nghệ', time: 'Thời gian',
-  transport: 'Giao thông', travel: 'Du lịch', weather: 'Thời tiết', other: 'Khác',
+  'persoenliche-angaben': 'Thông tin cá nhân',
+  'familie-freunde': 'Gia đình & Bạn bè',
+  'wohnen': 'Nhà ở',
+  'essen-trinken': 'Ăn & Uống',
+  'einkaufen': 'Mua sắm',
+  'koerper-gesundheit': 'Cơ thể & Sức khỏe',
+  'arbeit-beruf': 'Công việc & Nghề nghiệp',
+  'schule-ausbildung': 'Trường học & Đào tạo',
+  'freizeit-hobbys': 'Giải trí & Sở thích',
+  'reisen-verkehr': 'Du lịch & Giao thông',
+  'natur-wetter': 'Thiên nhiên & Thời tiết',
+  'medien-kommunikation': 'Truyền thông & Liên lạc',
 };
 
 // ─── Gender pill config ───

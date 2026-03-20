@@ -1,10 +1,13 @@
-import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Difficulty, CATEGORIES } from '@/types';
+import { spacing, radius, typography, featureGradient } from '@/theme';
+import type { FeatureKey } from '@/theme';
+import { useThemeStore } from '@/stores/themeStore';
 
 type GameKey =
   | 'flashcards'
@@ -18,54 +21,54 @@ type GameKey =
 
 const GAME_META: Record<
   GameKey,
-  { name: string; icon: keyof typeof Ionicons.glyphMap; colors: [string, string]; route: string }
+  { name: string; icon: keyof typeof Ionicons.glyphMap; featureKey: FeatureKey; route: string }
 > = {
   flashcards: {
     name: 'Flashcards',
     icon: 'albums-outline',
-    colors: ['#3B82F6', '#2563EB'],
+    featureKey: 'flashcards',
     route: '/(tabs)/games/flashcards',
   },
   'quick-quiz': {
     name: 'Quick Quiz',
     icon: 'help-circle-outline',
-    colors: ['#8B5CF6', '#7C3AED'],
+    featureKey: 'quick-quiz',
     route: '/(tabs)/games/quick-quiz',
   },
   matching: {
     name: 'Word Match',
     icon: 'git-compare-outline',
-    colors: ['#10B981', '#059669'],
+    featureKey: 'matching',
     route: '/(tabs)/games/matching',
   },
   'timed-challenge': {
     name: 'Time Challenge',
     icon: 'timer-outline',
-    colors: ['#EF4444', '#DC2626'],
+    featureKey: 'timed-challenge',
     route: '/(tabs)/games/timed-challenge',
   },
   'fill-blank': {
     name: 'Fill in Blank',
     icon: 'text-outline',
-    colors: ['#F59E0B', '#D97706'],
+    featureKey: 'fill-blank',
     route: '/(tabs)/games/fill-blank',
   },
   spelling: {
     name: 'Spelling',
     icon: 'pencil-outline',
-    colors: ['#EC4899', '#DB2777'],
+    featureKey: 'spelling',
     route: '/(tabs)/games/spelling',
   },
   'gender-quiz': {
     name: 'Gender Quiz',
     icon: 'male-female-outline',
-    colors: ['#6366F1', '#4F46E5'],
+    featureKey: 'gender-quiz',
     route: '/(tabs)/games/gender-quiz',
   },
   listening: {
     name: 'Listening',
     icon: 'ear-outline',
-    colors: ['#14B8A6', '#0D9488'],
+    featureKey: 'listening-game',
     route: '/(tabs)/games/listening',
   },
 };
@@ -102,6 +105,8 @@ const CATEGORY_LABELS: Record<string, string> = {
 };
 
 export default function GameSetupScreen() {
+  const colors = useThemeStore((s) => s.colors);
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const router = useRouter();
   const { game } = useLocalSearchParams<{ game: GameKey }>();
   const meta = game ? GAME_META[game] : null;
@@ -113,8 +118,8 @@ export default function GameSetupScreen() {
 
   if (!meta) {
     return (
-      <SafeAreaView className="flex-1 items-center justify-center bg-dark-bg">
-        <Text className="text-white">Game không tồn tại</Text>
+      <SafeAreaView style={styles.loadingContainer}>
+        <Text style={styles.textPrimary}>Game không tồn tại</Text>
       </SafeAreaView>
     );
   }
@@ -133,137 +138,146 @@ export default function GameSetupScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-dark-bg">
-      <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
+    <SafeAreaView style={styles.safeArea}>
+      <ScrollView style={styles.flex1} showsVerticalScrollIndicator={false}>
         {/* Header */}
-        <View className="flex-row items-center px-4 pt-4 pb-2">
+        <View style={styles.header}>
           <TouchableOpacity
             onPress={() => router.back()}
-            className="mr-3 h-10 w-10 items-center justify-center rounded-full bg-dark-card"
+            style={styles.backButton}
           >
-            <Ionicons name="arrow-back" size={20} color="#FFFFFF" />
+            <Ionicons name="arrow-back" size={20} color={colors.text.primary} />
           </TouchableOpacity>
-          <Text className="flex-1 text-xl font-bold text-white">Thiết lập game</Text>
+          <Text style={styles.headerTitle}>Thiết lập game</Text>
         </View>
 
         {/* Game Info Card */}
-        <View className="mx-4 mt-4">
+        <View style={styles.sectionMx}>
           <LinearGradient
-            colors={meta.colors}
+            colors={featureGradient(colors, meta.featureKey)}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
-            style={{ borderRadius: 16, padding: 20, alignItems: 'center' }}
+            style={styles.gameInfoGradient}
           >
-            <View className="mb-3 h-14 w-14 items-center justify-center rounded-2xl bg-white/20">
-              <Ionicons name={meta.icon} size={28} color="#FFFFFF" />
+            <View style={styles.gameIconContainer}>
+              <Ionicons name={meta.icon} size={28} color={colors.text.primary} />
             </View>
-            <Text className="text-xl font-bold text-white">{meta.name}</Text>
+            <Text style={styles.gameInfoName}>{meta.name}</Text>
           </LinearGradient>
         </View>
 
         {/* Difficulty Selection */}
-        <View className="mx-4 mt-6">
-          <Text className="mb-3 text-base font-bold text-white">Độ khó</Text>
+        <View style={styles.sectionMxMt}>
+          <Text style={styles.sectionLabel}>Độ khó</Text>
           {DIFFICULTIES.map((d) => (
             <TouchableOpacity
               key={d.value}
               activeOpacity={0.7}
               onPress={() => setDifficulty(d.value)}
-              className={`mb-2 flex-row items-center rounded-xl p-4 ${
+              style={[
+                styles.difficultyItem,
                 difficulty === d.value
-                  ? 'border border-primary-500 bg-primary-500/10'
-                  : 'bg-dark-card'
-              }`}
+                  ? styles.difficultyItemActive
+                  : styles.difficultyItemInactive,
+              ]}
             >
               <View
-                className={`mr-3 h-10 w-10 items-center justify-center rounded-lg ${
-                  difficulty === d.value ? 'bg-primary-500/20' : 'bg-dark-secondary'
-                }`}
+                style={[
+                  styles.difficultyIcon,
+                  difficulty === d.value
+                    ? styles.difficultyIconActive
+                    : styles.difficultyIconInactive,
+                ]}
               >
                 <Ionicons
                   name={d.icon}
                   size={20}
-                  color={difficulty === d.value ? '#6366F1' : '#9CA3AF'}
+                  color={difficulty === d.value ? colors.pastel.lavender.base : colors.text.secondary}
                 />
               </View>
-              <View className="flex-1">
+              <View style={styles.flex1}>
                 <Text
-                  className={`text-sm font-semibold ${
-                    difficulty === d.value ? 'text-primary-400' : 'text-white'
-                  }`}
+                  style={[
+                    styles.difficultyLabel,
+                    { color: difficulty === d.value ? colors.pastel.lavender.base : colors.text.primary },
+                  ]}
                 >
                   {d.label}
                 </Text>
-                <Text className="text-xs text-gray-400">{d.description}</Text>
+                <Text style={styles.difficultyDesc}>{d.description}</Text>
               </View>
               {difficulty === d.value && (
-                <Ionicons name="checkmark-circle" size={22} color="#6366F1" />
+                <Ionicons name="checkmark-circle" size={22} color={colors.pastel.lavender.base} />
               )}
             </TouchableOpacity>
           ))}
         </View>
 
         {/* Question Count */}
-        <View className="mx-4 mt-5">
-          <Text className="mb-3 text-base font-bold text-white">Số câu hỏi</Text>
-          <View className="flex-row" style={{ gap: 10 }}>
+        <View style={styles.sectionMxMt5}>
+          <Text style={styles.sectionLabel}>Số câu hỏi</Text>
+          <View style={styles.countRow}>
             {QUESTION_COUNTS.map((count) => (
               <TouchableOpacity
                 key={count}
                 activeOpacity={0.7}
                 onPress={() => setQuestionCount(count)}
-                className={`flex-1 items-center rounded-xl py-3 ${
+                style={[
+                  styles.countItem,
                   questionCount === count
-                    ? 'border border-primary-500 bg-primary-500/10'
-                    : 'bg-dark-card'
-                }`}
+                    ? styles.countItemActive
+                    : styles.countItemInactive,
+                ]}
               >
                 <Text
-                  className={`text-lg font-bold ${
-                    questionCount === count ? 'text-primary-400' : 'text-white'
-                  }`}
+                  style={[
+                    styles.countNumber,
+                    { color: questionCount === count ? colors.pastel.lavender.base : colors.text.primary },
+                  ]}
                 >
                   {count}
                 </Text>
-                <Text className="text-xs text-gray-400">câu</Text>
+                <Text style={styles.countLabel}>câu</Text>
               </TouchableOpacity>
             ))}
           </View>
         </View>
 
         {/* Category Filter (Optional) */}
-        <View className="mx-4 mt-5">
+        <View style={styles.sectionMxMt5}>
           <TouchableOpacity
             activeOpacity={0.7}
             onPress={() => setShowCategories(!showCategories)}
-            className="flex-row items-center justify-between"
+            style={styles.categoryToggle}
           >
-            <Text className="text-base font-bold text-white">
+            <Text style={styles.sectionLabelNoMargin}>
               Chủ đề {category ? `(${CATEGORY_LABELS[category] || category})` : '(Tất cả)'}
             </Text>
             <Ionicons
               name={showCategories ? 'chevron-up' : 'chevron-down'}
               size={20}
-              color="#9CA3AF"
+              color={colors.text.secondary}
             />
           </TouchableOpacity>
 
           {showCategories && (
-            <View className="mt-3 flex-row flex-wrap" style={{ gap: 8 }}>
+            <View style={styles.categoryWrap}>
               <TouchableOpacity
                 activeOpacity={0.7}
                 onPress={() => {
                   setCategory(undefined);
                   setShowCategories(false);
                 }}
-                className={`rounded-lg px-3 py-2 ${
-                  !category ? 'border border-primary-500 bg-primary-500/10' : 'bg-dark-card'
-                }`}
+                style={[
+                  styles.categoryChip,
+                  !category ? styles.categoryChipActive : styles.categoryChipInactive,
+                ]}
               >
                 <Text
-                  className={`text-xs font-medium ${
-                    !category ? 'text-primary-400' : 'text-gray-300'
-                  }`}
+                  style={[
+                    styles.categoryChipText,
+                    { color: !category ? colors.pastel.lavender.base : colors.text.secondary },
+                  ]}
                 >
                   Tất cả
                 </Text>
@@ -276,16 +290,16 @@ export default function GameSetupScreen() {
                     setCategory(cat);
                     setShowCategories(false);
                   }}
-                  className={`rounded-lg px-3 py-2 ${
-                    category === cat
-                      ? 'border border-primary-500 bg-primary-500/10'
-                      : 'bg-dark-card'
-                  }`}
+                  style={[
+                    styles.categoryChip,
+                    category === cat ? styles.categoryChipActive : styles.categoryChipInactive,
+                  ]}
                 >
                   <Text
-                    className={`text-xs font-medium ${
-                      category === cat ? 'text-primary-400' : 'text-gray-300'
-                    }`}
+                    style={[
+                      styles.categoryChipText,
+                      { color: category === cat ? colors.pastel.lavender.base : colors.text.secondary },
+                    ]}
                   >
                     {CATEGORY_LABELS[cat] || cat}
                   </Text>
@@ -296,22 +310,16 @@ export default function GameSetupScreen() {
         </View>
 
         {/* Start Button */}
-        <View className="mx-4 mt-8 mb-8">
+        <View style={styles.startSection}>
           <TouchableOpacity activeOpacity={0.8} onPress={handleStart}>
             <LinearGradient
-              colors={meta.colors}
+              colors={featureGradient(colors, meta.featureKey)}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
-              style={{
-                borderRadius: 16,
-                paddingVertical: 16,
-                alignItems: 'center',
-                flexDirection: 'row',
-                justifyContent: 'center',
-              }}
+              style={styles.startGradient}
             >
-              <Ionicons name="play" size={22} color="#FFFFFF" />
-              <Text className="ml-2 text-lg font-bold text-white">Bắt đầu chơi</Text>
+              <Ionicons name="play" size={22} color={colors.text.primary} />
+              <Text style={styles.startText}>Bắt đầu chơi</Text>
             </LinearGradient>
           </TouchableOpacity>
         </View>
@@ -319,3 +327,213 @@ export default function GameSetupScreen() {
     </SafeAreaView>
   );
 }
+
+const createStyles = (colors: any) => StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: colors.bg.b0,
+  },
+  flex1: {
+    flex: 1,
+  },
+  loadingContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.bg.b0,
+  },
+  textPrimary: {
+    color: colors.text.primary,
+    fontSize: typography.fontSize.base,
+    fontFamily: typography.fontFamily.body,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.lg,
+    paddingBottom: spacing.sm,
+  },
+  backButton: {
+    marginRight: spacing.md,
+    height: 40,
+    width: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 20,
+    backgroundColor: colors.bg.b2,
+  },
+  headerTitle: {
+    flex: 1,
+    fontSize: typography.fontSize.xl,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.heading,
+    color: colors.text.primary,
+  },
+  sectionMx: {
+    marginHorizontal: spacing.lg,
+    marginTop: spacing.lg,
+  },
+  gameInfoGradient: {
+    borderRadius: radius.stone,
+    padding: spacing.xl,
+    alignItems: 'center',
+  },
+  gameIconContainer: {
+    marginBottom: spacing.md,
+    height: 56,
+    width: 56,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: radius.stone,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+  },
+  gameInfoName: {
+    fontSize: typography.fontSize.xl,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.heading,
+    color: colors.text.primary,
+  },
+  sectionMxMt: {
+    marginHorizontal: spacing.lg,
+    marginTop: spacing['2xl'],
+  },
+  sectionLabel: {
+    marginBottom: spacing.md,
+    fontSize: typography.fontSize.md,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.heading,
+    color: colors.text.primary,
+  },
+  sectionLabelNoMargin: {
+    fontSize: typography.fontSize.md,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.heading,
+    color: colors.text.primary,
+  },
+  difficultyItem: {
+    marginBottom: spacing.sm,
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: radius.lg,
+    padding: spacing.lg,
+  },
+  difficultyItemActive: {
+    borderWidth: 1,
+    borderColor: colors.pastel.lavender.base,
+    backgroundColor: colors.pastel.lavender.dim,
+  },
+  difficultyItemInactive: {
+    backgroundColor: colors.bg.b2,
+    borderWidth: 1,
+    borderColor: colors.border.subtle,
+  },
+  difficultyIcon: {
+    marginRight: spacing.md,
+    height: 40,
+    width: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: radius.sm,
+  },
+  difficultyIconActive: {
+    backgroundColor: colors.pastel.lavender.dim,
+  },
+  difficultyIconInactive: {
+    backgroundColor: colors.bg.b3,
+  },
+  difficultyLabel: {
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.semibold,
+    fontFamily: typography.fontFamily.bodySemibold,
+  },
+  difficultyDesc: {
+    fontSize: typography.fontSize.xs,
+    fontFamily: typography.fontFamily.body,
+    color: colors.text.secondary,
+  },
+  sectionMxMt5: {
+    marginHorizontal: spacing.lg,
+    marginTop: spacing.xl,
+  },
+  countRow: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  countItem: {
+    flex: 1,
+    alignItems: 'center',
+    borderRadius: radius.lg,
+    paddingVertical: spacing.md,
+  },
+  countItemActive: {
+    borderWidth: 1,
+    borderColor: colors.pastel.lavender.base,
+    backgroundColor: colors.pastel.lavender.dim,
+  },
+  countItemInactive: {
+    backgroundColor: colors.bg.b2,
+    borderWidth: 1,
+    borderColor: colors.border.subtle,
+  },
+  countNumber: {
+    fontSize: typography.fontSize.lg,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.bodyBold,
+  },
+  countLabel: {
+    fontSize: typography.fontSize.xs,
+    fontFamily: typography.fontFamily.body,
+    color: colors.text.secondary,
+  },
+  categoryToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  categoryWrap: {
+    marginTop: spacing.md,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  categoryChip: {
+    borderRadius: radius.sm,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+  },
+  categoryChipActive: {
+    borderWidth: 1,
+    borderColor: colors.pastel.lavender.base,
+    backgroundColor: colors.pastel.lavender.dim,
+  },
+  categoryChipInactive: {
+    backgroundColor: colors.bg.b2,
+    borderWidth: 1,
+    borderColor: colors.border.subtle,
+  },
+  categoryChipText: {
+    fontSize: typography.fontSize.xs,
+    fontWeight: typography.fontWeight.medium,
+    fontFamily: typography.fontFamily.bodyMedium,
+  },
+  startSection: {
+    marginHorizontal: spacing.lg,
+    marginTop: spacing['3xl'],
+    marginBottom: spacing['3xl'],
+  },
+  startGradient: {
+    borderRadius: radius.stone,
+    paddingVertical: spacing.lg,
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  startText: {
+    marginLeft: spacing.sm,
+    fontSize: typography.fontSize.lg,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.bodyBold,
+    color: colors.text.primary,
+  },
+});

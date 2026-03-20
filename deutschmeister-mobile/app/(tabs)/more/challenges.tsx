@@ -6,6 +6,7 @@ import {
   RefreshControl,
   ActivityIndicator,
   Pressable,
+  StyleSheet,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -13,8 +14,8 @@ import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useWeeklyChallenges, useChallengeHistory } from '@/hooks/useChallenges';
 import type { ChallengeProgress } from '@/lib/api/challenges';
-
-const ACCENT = '#6366F1';
+import { spacing, radius, typography } from '@/theme';
+import { useThemeStore } from '@/stores/themeStore';
 
 const CHALLENGE_ICONS: Record<string, React.ComponentProps<typeof Ionicons>['name']> = {
   words_learned: 'book',
@@ -36,77 +37,77 @@ function getChallengeIcon(challengeKey: string): React.ComponentProps<typeof Ion
 }
 
 function ChallengeCard({ challenge }: { challenge: ChallengeProgress }) {
+  const colors = useThemeStore((s) => s.colors);
+  const cs = useMemo(() => createCs(colors), [colors]);
+  const s = useMemo(() => createS(colors), [colors]);
   const iconName = getChallengeIcon(challenge.challengeKey);
   const progress = challenge.target > 0 ? Math.min(challenge.current / challenge.target, 1) : 0;
   const percent = Math.round(progress * 100);
   const isCompleted = challenge.completed;
 
   return (
-    <View className="mb-3 rounded-2xl bg-dark-card p-4">
-      <View className="flex-row items-start">
+    <View style={cs.card}>
+      <View style={cs.cardRow}>
         {/* Icon */}
         <View
-          className="h-12 w-12 items-center justify-center rounded-xl"
-          style={{ backgroundColor: isCompleted ? '#22C55E20' : `${ACCENT}20` }}
+          style={[
+            cs.iconWrap,
+            {
+              backgroundColor: isCompleted
+                ? colors.pastel.mint.dim
+                : colors.pastel.lime.dim,
+            },
+          ]}
         >
           {isCompleted ? (
-            <Ionicons name="checkmark-circle" size={24} color="#22C55E" />
+            <Ionicons name="checkmark-circle" size={24} color={colors.pastel.mint.base} />
           ) : (
-            <Ionicons name={iconName} size={22} color={ACCENT} />
+            <Ionicons name={iconName} size={22} color={colors.pastel.lime.base} />
           )}
         </View>
 
         {/* Info */}
-        <View className="ml-3 flex-1">
-          <View className="flex-row items-center justify-between">
-            <Text
-              className="flex-1 text-base font-semibold text-white"
-              numberOfLines={1}
-            >
+        <View style={cs.infoWrap}>
+          <View style={cs.titleRow}>
+            <Text style={cs.title} numberOfLines={1}>
               {challenge.titleVi || challenge.title}
             </Text>
-            <View className="ml-2 flex-row items-center rounded-lg bg-dark-secondary px-2 py-0.5">
-              <Ionicons name="star" size={12} color="#F59E0B" />
-              <Text className="ml-1 text-xs font-medium text-yellow-500">
-                +{challenge.xpReward} XP
-              </Text>
+            <View style={cs.xpBadge}>
+              <Ionicons name="star" size={12} color={colors.pastel.peach.base} />
+              <Text style={cs.xpText}>+{challenge.xpReward} XP</Text>
             </View>
           </View>
 
           {/* Progress Text */}
-          <Text className="mt-1 text-sm text-gray-400">
+          <Text style={cs.progressLabel}>
             {challenge.current}/{challenge.target}
-            {isCompleted ? ' - Hoan thanh!' : ''}
+            {isCompleted ? ' - Hoàn thành!' : ''}
           </Text>
 
           {/* Progress Bar */}
-          <View className="mt-2.5 h-2 overflow-hidden rounded-full bg-dark-border">
+          <View style={cs.progressTrack}>
             {isCompleted ? (
               <LinearGradient
-                colors={['#22C55E', '#14B8A6']}
+                colors={colors.gradient.correct}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  borderRadius: 999,
-                }}
+                style={cs.progressFillFull}
               />
             ) : (
               <View
-                className="h-full rounded-full"
-                style={{
-                  width: `${percent}%`,
-                  backgroundColor: ACCENT,
-                }}
+                style={[
+                  cs.progressFill,
+                  {
+                    width: `${percent}%`,
+                    backgroundColor: colors.pastel.lime.base,
+                  },
+                ]}
               />
             )}
           </View>
 
           {/* Percentage */}
-          <Text className="mt-1 text-right text-xs text-gray-500">
-            {percent}%
-          </Text>
+          <Text style={cs.percentText}>{percent}%</Text>
         </View>
       </View>
     </View>
@@ -114,6 +115,9 @@ function ChallengeCard({ challenge }: { challenge: ChallengeProgress }) {
 }
 
 export default function ChallengesScreen() {
+  const colors = useThemeStore((s) => s.colors);
+  const cs = useMemo(() => createCs(colors), [colors]);
+  const s = useMemo(() => createS(colors), [colors]);
   const router = useRouter();
   const {
     data: weeklyChallenges,
@@ -151,69 +155,59 @@ export default function ChallengesScreen() {
   }, [refetchWeekly, refetchHistory]);
 
   return (
-    <SafeAreaView className="flex-1 bg-dark-bg" edges={['top']}>
+    <SafeAreaView style={s.container} edges={['top']}>
       {/* Header */}
-      <View className="flex-row items-center px-4 pb-3 pt-2">
-        <Pressable onPress={() => router.back()} className="mr-3 p-1">
-          <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
+      <View style={s.header}>
+        <Pressable onPress={() => router.back()} style={s.backBtn}>
+          <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
         </Pressable>
-        <Text className="flex-1 text-xl font-bold text-white">Thach thuc</Text>
+        <Text style={s.headerTitle}>Thách thức</Text>
       </View>
 
       <ScrollView
-        className="flex-1 px-4"
+        style={s.scroll}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
             refreshing={isRefetching}
             onRefresh={onRefresh}
-            tintColor={ACCENT}
-            colors={[ACCENT]}
+            tintColor={colors.pastel.lime.base}
+            colors={[colors.pastel.lime.base]}
           />
         }
       >
         {/* Weekly Summary */}
-        <View className="mb-4 rounded-2xl bg-dark-card p-4">
-          <View className="flex-row items-center justify-between">
-            <View className="flex-row items-center">
+        <View style={s.summaryCard}>
+          <View style={s.summaryTopRow}>
+            <View style={s.summaryLeft}>
               <LinearGradient
-                colors={['#6366F1', '#8B5CF6']}
+                colors={colors.gradient.quiz}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
-                style={{
-                  width: 44,
-                  height: 44,
-                  borderRadius: 12,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
+                style={s.summaryIcon}
               >
                 <Ionicons name="flag" size={22} color="#FFFFFF" />
               </LinearGradient>
-              <View className="ml-3">
-                <Text className="text-lg font-bold text-white">
-                  Thach thuc hang tuan
-                </Text>
-                <Text className="text-sm text-gray-400">
-                  {stats.done}/{stats.total} hoan thanh
+              <View style={{ marginLeft: spacing.md }}>
+                <Text style={s.summaryTitle}>Thách thức hàng tuần</Text>
+                <Text style={s.summarySub}>
+                  {stats.done}/{stats.total} hoàn thành
                 </Text>
               </View>
             </View>
 
             {stats.totalXp > 0 && (
-              <View className="items-center">
-                <Text className="text-lg font-bold" style={{ color: '#F59E0B' }}>
-                  +{stats.totalXp}
-                </Text>
-                <Text className="text-xs text-gray-500">XP</Text>
+              <View style={s.summaryRight}>
+                <Text style={s.summaryXp}>+{stats.totalXp}</Text>
+                <Text style={s.summaryXpLabel}>XP</Text>
               </View>
             )}
           </View>
 
           {/* Progress Bar */}
-          <View className="mt-3 h-2 overflow-hidden rounded-full bg-dark-border">
+          <View style={s.summaryTrack}>
             <LinearGradient
-              colors={['#6366F1', '#8B5CF6']}
+              colors={colors.gradient.quiz}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
               style={{
@@ -226,17 +220,15 @@ export default function ChallengesScreen() {
         </View>
 
         {isLoading ? (
-          <View className="items-center py-20">
-            <ActivityIndicator size="large" color={ACCENT} />
+          <View style={s.emptyWrap}>
+            <ActivityIndicator size="large" color={colors.pastel.lime.base} />
           </View>
         ) : (
           <>
             {/* Active Challenges */}
             {active.length > 0 && (
-              <View className="mb-2">
-                <Text className="mb-2 text-sm font-semibold uppercase tracking-wider text-gray-500">
-                  Dang thuc hien
-                </Text>
+              <View style={{ marginBottom: spacing.sm }}>
+                <Text style={s.sectionLabel}>Đang thực hiện</Text>
                 {active.map((challenge) => (
                   <ChallengeCard key={challenge.id} challenge={challenge} />
                 ))}
@@ -245,10 +237,8 @@ export default function ChallengesScreen() {
 
             {/* Completed This Week */}
             {completedThisWeek.length > 0 && (
-              <View className="mb-2">
-                <Text className="mb-2 text-sm font-semibold uppercase tracking-wider text-gray-500">
-                  Da hoan thanh tuan nay
-                </Text>
+              <View style={{ marginBottom: spacing.sm }}>
+                <Text style={s.sectionLabel}>Đã hoàn thành tuần này</Text>
                 {completedThisWeek.map((challenge) => (
                   <ChallengeCard key={challenge.id} challenge={challenge} />
                 ))}
@@ -257,10 +247,8 @@ export default function ChallengesScreen() {
 
             {/* Past Completed (from history) */}
             {historyChallenges && historyChallenges.length > 0 && (
-              <View className="mb-2">
-                <Text className="mb-2 text-sm font-semibold uppercase tracking-wider text-gray-500">
-                  Lich su thach thuc
-                </Text>
+              <View style={{ marginBottom: spacing.sm }}>
+                <Text style={s.sectionLabel}>Lịch sử thách thức</Text>
                 {historyChallenges.slice(0, 10).map((challenge) => (
                   <ChallengeCard key={challenge.id} challenge={challenge} />
                 ))}
@@ -271,18 +259,202 @@ export default function ChallengesScreen() {
             {active.length === 0 &&
               completedThisWeek.length === 0 &&
               (!historyChallenges || historyChallenges.length === 0) && (
-                <View className="items-center py-20">
-                  <Ionicons name="flag-outline" size={48} color="#4B5563" />
-                  <Text className="mt-3 text-base text-gray-500">
-                    Chua co thach thuc nao
-                  </Text>
+                <View style={s.emptyWrap}>
+                  <Ionicons name="flag-outline" size={48} color={colors.text.tertiary} />
+                  <Text style={s.emptyText}>Chưa có thách thức nào</Text>
                 </View>
               )}
           </>
         )}
 
-        <View className="h-6" />
+        <View style={{ height: 24 }} />
       </ScrollView>
     </SafeAreaView>
   );
 }
+
+const createCs = (colors: any) => StyleSheet.create({
+  card: {
+    marginBottom: spacing.md,
+    borderRadius: radius.stone,
+    backgroundColor: colors.bg.b2,
+    padding: spacing.lg,
+    borderWidth: 1,
+    borderColor: colors.border.subtle,
+  },
+  cardRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+  },
+  iconWrap: {
+    height: 48,
+    width: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: radius.stone,
+  },
+  infoWrap: {
+    marginLeft: spacing.md,
+    flex: 1,
+  },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  title: {
+    flex: 1,
+    fontSize: typography.fontSize.md,
+    fontWeight: typography.fontWeight.semibold,
+    fontFamily: typography.fontFamily.heading,
+    color: colors.text.primary,
+  },
+  xpBadge: {
+    marginLeft: spacing.sm,
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: radius.sm,
+    backgroundColor: colors.bg.b3,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 2,
+  },
+  xpText: {
+    marginLeft: 4,
+    fontSize: typography.fontSize.xs,
+    fontWeight: typography.fontWeight.medium,
+    fontFamily: typography.fontFamily.bodyMedium,
+    color: colors.pastel.peach.base,
+  },
+  progressLabel: {
+    marginTop: spacing.xs,
+    fontSize: typography.fontSize.sm,
+    color: colors.text.secondary,
+  },
+  progressTrack: {
+    marginTop: 10,
+    height: 8,
+    overflow: 'hidden',
+    borderRadius: radius.pill,
+    backgroundColor: colors.bg.b3,
+  },
+  progressFill: {
+    height: '100%',
+    borderRadius: radius.pill,
+  },
+  progressFillFull: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 999,
+  },
+  percentText: {
+    marginTop: spacing.xs,
+    textAlign: 'right',
+    fontSize: typography.fontSize.xs,
+    fontFamily: typography.fontFamily.body,
+    color: colors.text.tertiary,
+  },
+});
+
+const createS = (colors: any) => StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.bg.b0,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.md,
+    paddingTop: spacing.sm,
+  },
+  backBtn: {
+    marginRight: spacing.md,
+    padding: spacing.xs,
+  },
+  headerTitle: {
+    flex: 1,
+    fontSize: typography.fontSize.xl,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.heading,
+    color: colors.text.primary,
+  },
+  scroll: {
+    flex: 1,
+    paddingHorizontal: spacing.lg,
+  },
+  summaryCard: {
+    marginBottom: spacing.lg,
+    borderRadius: radius.stone,
+    backgroundColor: colors.bg.b2,
+    padding: spacing.lg,
+    borderWidth: 1,
+    borderColor: colors.border.subtle,
+  },
+  summaryTopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  summaryLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  summaryIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: radius.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  summaryTitle: {
+    fontSize: typography.fontSize.lg,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.heading,
+    color: colors.text.primary,
+  },
+  summarySub: {
+    fontSize: typography.fontSize.sm,
+    fontFamily: typography.fontFamily.body,
+    color: colors.text.secondary,
+  },
+  summaryRight: {
+    alignItems: 'center',
+  },
+  summaryXp: {
+    fontSize: typography.fontSize.lg,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.bodyBold,
+    color: colors.pastel.peach.base,
+  },
+  summaryXpLabel: {
+    fontSize: typography.fontSize.xs,
+    fontFamily: typography.fontFamily.body,
+    color: colors.text.tertiary,
+  },
+  summaryTrack: {
+    marginTop: spacing.md,
+    height: 8,
+    overflow: 'hidden',
+    borderRadius: radius.pill,
+    backgroundColor: colors.bg.b3,
+  },
+  sectionLabel: {
+    marginBottom: spacing.sm,
+    fontSize: typography.fontSize.xs,
+    fontWeight: typography.fontWeight.semibold,
+    fontFamily: typography.fontFamily.heading,
+    textTransform: 'uppercase',
+    letterSpacing: typography.letterSpacing.widest,
+    color: colors.text.tertiary,
+  },
+  emptyWrap: {
+    alignItems: 'center',
+    paddingVertical: 80,
+  },
+  emptyText: {
+    marginTop: spacing.md,
+    fontSize: typography.fontSize.md,
+    fontFamily: typography.fontFamily.body,
+    color: colors.text.tertiary,
+  },
+});

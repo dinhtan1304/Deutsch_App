@@ -6,6 +6,7 @@ import {
   ActivityIndicator,
   Dimensions,
   PanResponder,
+  StyleSheet,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -16,6 +17,10 @@ import { useRandomWords } from '@/hooks/useWords';
 import { useGameSession } from '@/hooks/useGameSession';
 import { Difficulty, Word, GenderInfo } from '@/types';
 import * as Haptics from 'expo-haptics';
+import { spacing, radius, typography } from '@/theme';
+import { useXPStore, calculateGameXP } from '@/stores/xpStore';
+import { XPSummary } from '@/components/ui/XPSummary';
+import { useThemeStore } from '@/stores/themeStore';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.25;
@@ -23,6 +28,8 @@ const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.25;
 type Phase = 'playing' | 'result';
 
 export default function FlashcardsScreen() {
+  const colors = useThemeStore((s) => s.colors);
+  const s = useMemo(() => createS(colors), [colors]);
   const router = useRouter();
   const { difficulty = 'beginner', count = '10', category } = useLocalSearchParams<{
     difficulty: Difficulty;
@@ -50,6 +57,17 @@ export default function FlashcardsScreen() {
   const [knownCount, setKnownCount] = useState(0);
   const [unknownCount, setUnknownCount] = useState(0);
   const [sessionStarted, setSessionStarted] = useState(false);
+
+  // XP state
+  const [sessionXP, setSessionXP] = useState(0);
+  const [isNewBest, setIsNewBest] = useState(false);
+  const [leveledUp, setLeveledUp] = useState(false);
+
+  const addXP = useXPStore((s) => s.addXP);
+  const updateBestScore = useXPStore((s) => s.updateBestScore);
+  const xpLevel = useXPStore((s) => s.level);
+  const xpInCurrentLevel = useXPStore((s) => s.xpInCurrentLevel);
+  const xpNeededForLevel = useXPStore((s) => s.xpNeededForLevel);
 
   // Animations
   const flipAnim = useRef(new Animated.Value(0)).current;
@@ -162,6 +180,16 @@ export default function FlashcardsScreen() {
       sessionEndedRef.current = true;
       const score = knownCount * 10;
       session.end(score, knownCount, knownCount, unknownCount);
+
+      // XP + Best Score
+      const total = knownCount + unknownCount;
+      const finalAccuracy = total > 0 ? Math.round((knownCount / total) * 100) : 0;
+      const totalXP = calculateGameXP(knownCount, 0, finalAccuracy);
+      setSessionXP(totalXP);
+      const { leveledUp: didLevelUp } = addXP(totalXP);
+      setLeveledUp(didLevelUp);
+      const newBest = updateBestScore('flashcard', score);
+      setIsNewBest(newBest);
     }
   }, [phase]);
 
@@ -173,6 +201,9 @@ export default function FlashcardsScreen() {
     setUnknownCount(0);
     setSessionStarted(false);
     sessionEndedRef.current = false;
+    setSessionXP(0);
+    setIsNewBest(false);
+    setLeveledUp(false);
     flipAnim.setValue(0);
     panX.setValue(0);
     panY.setValue(0);
@@ -210,9 +241,11 @@ export default function FlashcardsScreen() {
 
   if (isLoading || cards.length === 0) {
     return (
-      <SafeAreaView className="flex-1 items-center justify-center bg-dark-bg">
-        <ActivityIndicator size="large" color="#3B82F6" />
-        <Text className="mt-4 text-gray-400">Đang tải thẻ...</Text>
+      <SafeAreaView style={s.safeArea}>
+        <View style={s.loadingContainer}>
+          <ActivityIndicator size="large" color={colors.pastel.lavender.base} />
+          <Text style={s.loadingText}>Đang tải thẻ...</Text>
+        </View>
       </SafeAreaView>
     );
   }
@@ -223,67 +256,63 @@ export default function FlashcardsScreen() {
     const accuracy = total > 0 ? Math.round((knownCount / total) * 100) : 0;
 
     return (
-      <SafeAreaView className="flex-1 bg-dark-bg">
-        <View className="flex-1 items-center justify-center px-6">
+      <SafeAreaView style={s.safeArea}>
+        <View style={s.resultContainer}>
           <LinearGradient
-            colors={['#3B82F6', '#2563EB']}
+            colors={[colors.bg.b3, colors.bg.b2]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
-            style={{ borderRadius: 24, padding: 32, width: '100%', alignItems: 'center' }}
+            style={s.resultGradient}
           >
-            <View className="mb-4 h-16 w-16 items-center justify-center rounded-full bg-white/20">
+            <View style={s.resultIconCircle}>
               <Ionicons
                 name={accuracy >= 70 ? 'trophy' : accuracy >= 40 ? 'thumbs-up' : 'refresh'}
                 size={32}
-                color="#FFFFFF"
+                color={colors.pastel.lime.base}
               />
             </View>
-            <Text className="text-2xl font-bold text-white">
+            <Text style={s.resultTitle}>
               {accuracy >= 70 ? 'Tuyệt vời!' : accuracy >= 40 ? 'Khá tốt!' : 'Cần ôn lại!'}
             </Text>
-            <Text className="mt-1 text-white/70">Flashcards hoàn thành</Text>
+            <Text style={s.resultSubtitle}>Flashcards hoàn thành</Text>
           </LinearGradient>
 
-          <View className="mt-6 w-full flex-row" style={{ gap: 12 }}>
-            <View className="flex-1 items-center rounded-2xl bg-dark-card p-4">
-              <Text className="text-2xl font-bold text-emerald-400">{knownCount}</Text>
-              <Text className="text-xs text-gray-400">Đã biết</Text>
+          <View style={s.statsRow}>
+            <View style={s.statCard}>
+              <Text style={[s.statValue, { color: colors.pastel.mint.base }]}>{knownCount}</Text>
+              <Text style={s.statLabel}>Đã biết</Text>
             </View>
-            <View className="flex-1 items-center rounded-2xl bg-dark-card p-4">
-              <Text className="text-2xl font-bold text-red-400">{unknownCount}</Text>
-              <Text className="text-xs text-gray-400">Chưa biết</Text>
+            <View style={s.statCard}>
+              <Text style={[s.statValue, { color: colors.pastel.rose.base }]}>{unknownCount}</Text>
+              <Text style={s.statLabel}>Chưa biết</Text>
             </View>
-            <View className="flex-1 items-center rounded-2xl bg-dark-card p-4">
-              <Text className="text-2xl font-bold text-blue-400">{accuracy}%</Text>
-              <Text className="text-xs text-gray-400">Tỷ lệ</Text>
+            <View style={s.statCard}>
+              <Text style={[s.statValue, { color: colors.pastel.sky.base }]}>{accuracy}%</Text>
+              <Text style={s.statLabel}>Tỷ lệ</Text>
             </View>
           </View>
 
-          <View className="mt-8 w-full" style={{ gap: 12 }}>
-            <TouchableOpacity activeOpacity={0.8} onPress={handlePlayAgain}>
-              <LinearGradient
-                colors={['#3B82F6', '#2563EB']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={{
-                  borderRadius: 16,
-                  paddingVertical: 14,
-                  alignItems: 'center',
-                  flexDirection: 'row',
-                  justifyContent: 'center',
-                }}
-              >
-                <Ionicons name="refresh" size={20} color="#FFFFFF" />
-                <Text className="ml-2 text-base font-bold text-white">Chơi lại</Text>
-              </LinearGradient>
+          <XPSummary
+            xpEarned={sessionXP}
+            isNewBest={isNewBest}
+            level={xpLevel}
+            leveledUp={leveledUp}
+            xpInCurrentLevel={xpInCurrentLevel}
+            xpNeededForLevel={xpNeededForLevel}
+          />
+
+          <View style={s.resultButtons}>
+            <TouchableOpacity activeOpacity={0.8} onPress={handlePlayAgain} style={s.primaryButton}>
+              <Ionicons name="refresh" size={20} color={colors.pastel.lime.on} />
+              <Text style={s.primaryButtonText}>Chơi lại</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               activeOpacity={0.7}
               onPress={() => router.back()}
-              className="items-center rounded-2xl bg-dark-card py-4"
+              style={s.ghostButton}
             >
-              <Text className="text-base font-semibold text-gray-300">Quay về</Text>
+              <Text style={s.ghostButtonText}>Quay về</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -297,56 +326,56 @@ export default function FlashcardsScreen() {
     : null;
 
   return (
-    <SafeAreaView className="flex-1 bg-dark-bg">
+    <SafeAreaView style={s.safeArea}>
       {/* Top Bar */}
-      <View className="flex-row items-center justify-between px-4 pt-3 pb-2">
+      <View style={s.topBar}>
         <TouchableOpacity
           onPress={() => router.back()}
-          className="h-10 w-10 items-center justify-center rounded-full bg-dark-card"
+          style={s.closeButton}
         >
-          <Ionicons name="close" size={20} color="#9CA3AF" />
+          <Ionicons name="close" size={20} color={colors.text.secondary} />
         </TouchableOpacity>
 
-        <Text className="text-sm font-semibold text-white">
+        <Text style={s.counterText}>
           {currentIndex + 1} / {cards.length}
         </Text>
 
-        <View className="flex-row items-center" style={{ gap: 12 }}>
-          <View className="flex-row items-center">
-            <Ionicons name="checkmark-circle" size={16} color="#10B981" />
-            <Text className="ml-1 text-sm font-bold text-emerald-400">{knownCount}</Text>
+        <View style={s.scoreRow}>
+          <View style={s.scoreItem}>
+            <Ionicons name="checkmark-circle" size={16} color={colors.pastel.mint.base} />
+            <Text style={[s.scoreText, { color: colors.pastel.mint.base }]}>{knownCount}</Text>
           </View>
-          <View className="flex-row items-center">
-            <Ionicons name="close-circle" size={16} color="#EF4444" />
-            <Text className="ml-1 text-sm font-bold text-red-400">{unknownCount}</Text>
+          <View style={s.scoreItem}>
+            <Ionicons name="close-circle" size={16} color={colors.pastel.rose.base} />
+            <Text style={[s.scoreText, { color: colors.pastel.rose.base }]}>{unknownCount}</Text>
           </View>
         </View>
       </View>
 
       {/* Progress Bar */}
-      <View className="mx-4 mt-1 h-2 overflow-hidden rounded-full bg-dark-secondary">
+      <View style={s.progressBarTrack}>
         <View
-          className="h-full rounded-full bg-blue-500"
-          style={{ width: `${((currentIndex) / cards.length) * 100}%` }}
+          style={[
+            s.progressBarFill,
+            { width: `${((currentIndex) / cards.length) * 100}%` },
+          ]}
         />
       </View>
 
       {/* Swipe Indicators */}
-      <View className="relative mt-4 flex-1 items-center justify-center px-6">
+      <View style={s.cardArea}>
         {/* Know indicator (right) */}
         <Animated.View
-          className="absolute right-8 top-4 z-10 rounded-lg border-2 border-emerald-500 px-3 py-1"
-          style={{ opacity: knowOpacity }}
+          style={[s.knowIndicator, { opacity: knowOpacity }]}
         >
-          <Text className="text-sm font-bold text-emerald-400">BIẾT</Text>
+          <Text style={s.knowIndicatorText}>BIẾT</Text>
         </Animated.View>
 
         {/* Don't know indicator (left) */}
         <Animated.View
-          className="absolute left-8 top-4 z-10 rounded-lg border-2 border-red-500 px-3 py-1"
-          style={{ opacity: dontKnowOpacity }}
+          style={[s.dontKnowIndicator, { opacity: dontKnowOpacity }]}
         >
-          <Text className="text-sm font-bold text-red-400">CHƯA BIẾT</Text>
+          <Text style={s.dontKnowIndicatorText}>CHƯA BIẾT</Text>
         </Animated.View>
 
         {/* Flashcard */}
@@ -370,42 +399,30 @@ export default function FlashcardsScreen() {
                 transform: [{ rotateY: frontInterpolate }],
               }}
             >
-              <LinearGradient
-                colors={['#1F2937', '#111827']}
-                style={{
-                  flex: 1,
-                  borderRadius: 24,
-                  padding: 24,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  borderWidth: 1,
-                  borderColor: '#374151',
-                }}
-              >
+              <View style={s.cardFront}>
                 {genderInfo && (
                   <View
-                    className="mb-3 rounded-full px-4 py-1"
-                    style={{ backgroundColor: genderInfo.bgColor }}
+                    style={[s.genderBadge, { backgroundColor: genderInfo.bgColor }]}
                   >
-                    <Text style={{ color: genderInfo.color }} className="text-sm font-bold">
+                    <Text style={[s.genderBadgeText, { color: genderInfo.color }]}>
                       {genderInfo.article} · {genderInfo.label}
                     </Text>
                   </View>
                 )}
-                <Text className="text-4xl font-bold text-white">{currentCard?.word}</Text>
+                <Text style={s.cardWord}>{currentCard?.word}</Text>
                 {currentCard?.pronunciation && (
-                  <Text className="mt-3 text-base text-gray-500">
+                  <Text style={s.cardPronunciation}>
                     [{currentCard.pronunciation}]
                   </Text>
                 )}
                 {currentCard?.plural && (
-                  <Text className="mt-2 text-sm text-gray-400">Plural: {currentCard.plural}</Text>
+                  <Text style={s.cardPlural}>Plural: {currentCard.plural}</Text>
                 )}
-                <View className="mt-4 flex-row items-center">
-                  <Ionicons name="sync-outline" size={14} color="#6B7280" />
-                  <Text className="ml-1 text-xs text-gray-500">Nhấn để lật thẻ</Text>
+                <View style={s.flipHintRow}>
+                  <Ionicons name="sync-outline" size={14} color={colors.text.tertiary} />
+                  <Text style={s.flipHintText}>Nhấn để lật thẻ</Text>
                 </View>
-              </LinearGradient>
+              </View>
             </Animated.View>
 
             {/* Back Side */}
@@ -418,69 +435,417 @@ export default function FlashcardsScreen() {
                 transform: [{ rotateY: backInterpolate }],
               }}
             >
-              <LinearGradient
-                colors={['#3B82F6', '#2563EB']}
-                style={{
-                  flex: 1,
-                  borderRadius: 24,
-                  padding: 24,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                <Text className="mb-2 text-sm text-white/60">Nghĩa</Text>
-                <Text className="text-center text-2xl font-bold text-white">
+              <View style={s.cardBack}>
+                <Text style={s.backLabel}>Nghĩa</Text>
+                <Text style={s.backTranslation}>
                   {currentCard?.translationVi || currentCard?.translationEn}
                 </Text>
                 {currentCard?.translationVi && currentCard?.translationEn && (
-                  <Text className="mt-2 text-center text-base text-white/70">
+                  <Text style={s.backSecondary}>
                     {currentCard.translationEn}
                   </Text>
                 )}
                 {currentCard?.examples && currentCard.examples.length > 0 && (
-                  <View className="mt-4 w-full rounded-xl bg-white/10 p-3">
-                    <Text className="text-xs text-white/50">Ví dụ:</Text>
-                    <Text className="mt-1 text-sm text-white/80" numberOfLines={3}>
+                  <View style={s.exampleBox}>
+                    <Text style={s.exampleLabel}>Ví dụ:</Text>
+                    <Text style={s.exampleText} numberOfLines={3}>
                       {currentCard.examples[0]}
                     </Text>
                   </View>
                 )}
-                <View className="mt-4 flex-row items-center">
-                  <Ionicons name="sync-outline" size={14} color="rgba(255,255,255,0.5)" />
-                  <Text className="ml-1 text-xs text-white/50">Nhấn để lật thẻ</Text>
+                <View style={s.flipHintRow}>
+                  <Ionicons name="sync-outline" size={14} color={colors.text.tertiary} />
+                  <Text style={s.flipHintText}>Nhấn để lật thẻ</Text>
                 </View>
-              </LinearGradient>
+              </View>
             </Animated.View>
           </TouchableOpacity>
         </Animated.View>
       </View>
 
       {/* Bottom Buttons */}
-      <View className="flex-row items-center justify-center px-6 pb-6" style={{ gap: 24 }}>
+      <View style={s.bottomButtons}>
         <TouchableOpacity
           activeOpacity={0.7}
           onPress={() => handleSwipe('left')}
-          className="h-16 w-16 items-center justify-center rounded-full bg-red-500/10 border-2 border-red-500/30"
+          style={s.swipeButtonWrong}
         >
-          <Ionicons name="close" size={28} color="#EF4444" />
+          <Ionicons name="close" size={28} color={colors.pastel.rose.base} />
         </TouchableOpacity>
 
         <TouchableOpacity
           activeOpacity={0.7}
           onPress={flipCard}
-          className="h-12 w-12 items-center justify-center rounded-full bg-dark-card"
+          style={s.flipButton}
         >
-          <Ionicons name="sync-outline" size={22} color="#9CA3AF" />
+          <Ionicons name="sync-outline" size={22} color={colors.text.secondary} />
         </TouchableOpacity>
 
         <TouchableOpacity
           activeOpacity={0.7}
           onPress={() => handleSwipe('right')}
-          className="h-16 w-16 items-center justify-center rounded-full bg-emerald-500/10 border-2 border-emerald-500/30"
+          style={s.swipeButtonCorrect}
         >
-          <Ionicons name="checkmark" size={28} color="#10B981" />
+          <Ionicons name="checkmark" size={28} color={colors.pastel.mint.base} />
         </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
 }
+
+const createS = (colors: any) => StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: colors.bg.b0,
+  },
+
+  /* ── Loading ─────────────────────────────────────── */
+  loadingContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  loadingText: {
+    marginTop: spacing.lg,
+    color: colors.text.secondary,
+    fontSize: typography.fontSize.base,
+    fontFamily: typography.fontFamily.body,
+  },
+
+  /* ── Result Screen ───────────────────────────────── */
+  resultContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: spacing.xl + spacing.xs, // ~24
+  },
+  resultGradient: {
+    borderRadius: radius.stone,
+    padding: spacing['3xl'],
+    width: '100%',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: colors.border.default,
+  },
+  resultIconCircle: {
+    marginBottom: spacing.lg,
+    height: 64,
+    width: 64,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 32,
+    backgroundColor: colors.pastel.lime.dim,
+  },
+  resultTitle: {
+    fontSize: typography.fontSize.xl,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.heading,
+    color: colors.text.primary,
+  },
+  resultSubtitle: {
+    marginTop: spacing.xs,
+    color: colors.text.secondary,
+    fontSize: typography.fontSize.base,
+  },
+  statsRow: {
+    marginTop: spacing.xl + spacing.xs, // ~24
+    width: '100%',
+    flexDirection: 'row',
+    gap: spacing.md,
+  },
+  statCard: {
+    flex: 1,
+    alignItems: 'center',
+    borderRadius: radius.stone,
+    backgroundColor: colors.bg.b2,
+    borderWidth: 1,
+    borderColor: colors.border.default,
+    paddingVertical: spacing.lg,
+    paddingHorizontal: spacing.sm,
+  },
+  statValue: {
+    fontSize: typography.fontSize.xl,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.bodyBold,
+  },
+  statLabel: {
+    fontSize: typography.fontSize.xs,
+    fontFamily: typography.fontFamily.body,
+    color: colors.text.secondary,
+    marginTop: spacing.xs,
+  },
+  resultButtons: {
+    marginTop: spacing['2xl'] + spacing.xs, // ~32
+    width: '100%',
+    gap: spacing.md,
+  },
+  primaryButton: {
+    backgroundColor: colors.pastel.lime.base,
+    borderRadius: radius.stone,
+    paddingVertical: 14,
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: spacing.sm,
+  },
+  primaryButtonText: {
+    fontSize: typography.fontSize.md,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.bodyBold,
+    color: colors.pastel.lime.on,
+  },
+  ghostButton: {
+    alignItems: 'center',
+    borderRadius: radius.stone,
+    backgroundColor: colors.bg.b2,
+    borderWidth: 1,
+    borderColor: colors.border.default,
+    paddingVertical: spacing.lg,
+  },
+  ghostButtonText: {
+    fontSize: typography.fontSize.md,
+    fontWeight: typography.fontWeight.semibold,
+    fontFamily: typography.fontFamily.bodySemibold,
+    color: colors.text.primary,
+  },
+
+  /* ── Playing – Top Bar ───────────────────────────── */
+  topBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.sm,
+  },
+  closeButton: {
+    height: 40,
+    width: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 20,
+    backgroundColor: colors.bg.b2,
+  },
+  counterText: {
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.semibold,
+    fontFamily: typography.fontFamily.bodySemibold,
+    color: colors.text.primary,
+  },
+  scoreRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+  },
+  scoreItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  scoreText: {
+    marginLeft: spacing.xs,
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.bodyBold,
+  },
+
+  /* ── Progress Bar ────────────────────────────────── */
+  progressBarTrack: {
+    marginHorizontal: spacing.lg,
+    marginTop: spacing.xs,
+    height: 8,
+    overflow: 'hidden',
+    borderRadius: radius.pill,
+    backgroundColor: colors.bg.b3,
+  },
+  progressBarFill: {
+    height: '100%',
+    borderRadius: radius.pill,
+    backgroundColor: colors.pastel.lime.base,
+  },
+
+  /* ── Card Area ───────────────────────────────────── */
+  cardArea: {
+    position: 'relative',
+    marginTop: spacing.lg,
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: spacing.xl + spacing.xs, // ~24
+  },
+
+  /* ── Swipe Indicators ────────────────────────────── */
+  knowIndicator: {
+    position: 'absolute',
+    right: 32,
+    top: spacing.lg,
+    zIndex: 10,
+    borderRadius: radius.sm,
+    borderWidth: 2,
+    borderColor: colors.pastel.mint.base,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+  },
+  knowIndicatorText: {
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.bodyBold,
+    color: colors.pastel.mint.base,
+  },
+  dontKnowIndicator: {
+    position: 'absolute',
+    left: 32,
+    top: spacing.lg,
+    zIndex: 10,
+    borderRadius: radius.sm,
+    borderWidth: 2,
+    borderColor: colors.pastel.rose.base,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+  },
+  dontKnowIndicatorText: {
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.bodyBold,
+    color: colors.pastel.rose.base,
+  },
+
+  /* ── Card Faces ──────────────────────────────────── */
+  cardFront: {
+    flex: 1,
+    borderRadius: radius['2xl'],
+    padding: spacing.xl + spacing.xs, // ~24
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: colors.border.default,
+    backgroundColor: colors.bg.b2,
+  },
+  genderBadge: {
+    marginBottom: spacing.md,
+    borderRadius: radius.pill,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.xs,
+  },
+  genderBadgeText: {
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.bodyBold,
+  },
+  cardWord: {
+    fontSize: 36,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.bodyBold,
+    color: colors.text.primary,
+  },
+  cardPronunciation: {
+    marginTop: spacing.md,
+    fontSize: typography.fontSize.md,
+    fontFamily: typography.fontFamily.body,
+    color: colors.text.tertiary,
+  },
+  cardPlural: {
+    marginTop: spacing.sm,
+    fontSize: typography.fontSize.sm,
+    fontFamily: typography.fontFamily.body,
+    color: colors.text.secondary,
+  },
+  flipHintRow: {
+    marginTop: spacing.lg,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  flipHintText: {
+    marginLeft: spacing.xs,
+    fontSize: typography.fontSize.xs,
+    fontFamily: typography.fontFamily.body,
+    color: colors.text.tertiary,
+  },
+
+  cardBack: {
+    flex: 1,
+    borderRadius: radius['2xl'],
+    padding: spacing.xl + spacing.xs, // ~24
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: colors.pastel.lavender.base + '33',
+    backgroundColor: colors.bg.b3,
+  },
+  backLabel: {
+    marginBottom: spacing.sm,
+    fontSize: typography.fontSize.sm,
+    fontFamily: typography.fontFamily.body,
+    color: colors.text.tertiary,
+  },
+  backTranslation: {
+    textAlign: 'center',
+    fontSize: typography.fontSize.xl,
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.bodyBold,
+    color: colors.text.primary,
+  },
+  backSecondary: {
+    marginTop: spacing.sm,
+    textAlign: 'center',
+    fontSize: typography.fontSize.md,
+    color: colors.text.secondary,
+  },
+  exampleBox: {
+    marginTop: spacing.lg,
+    width: '100%',
+    borderRadius: radius.lg,
+    backgroundColor: colors.bg.b4,
+    padding: spacing.md,
+  },
+  exampleLabel: {
+    fontSize: typography.fontSize.xs,
+    fontFamily: typography.fontFamily.body,
+    color: colors.text.tertiary,
+  },
+  exampleText: {
+    marginTop: spacing.xs,
+    fontSize: typography.fontSize.sm,
+    fontFamily: typography.fontFamily.body,
+    color: colors.text.secondary,
+  },
+
+  /* ── Bottom Buttons ──────────────────────────────── */
+  bottomButtons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: spacing.xl + spacing.xs, // ~24
+    paddingBottom: spacing.xl + spacing.xs,
+    gap: spacing.xl + spacing.xs, // ~24
+  },
+  swipeButtonWrong: {
+    height: 64,
+    width: 64,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 32,
+    backgroundColor: colors.pastel.rose.dim,
+    borderWidth: 2,
+    borderColor: colors.pastel.rose.base + '4D', // ~30%
+  },
+  flipButton: {
+    height: 48,
+    width: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 24,
+    backgroundColor: colors.bg.b2,
+    borderWidth: 1,
+    borderColor: colors.border.default,
+  },
+  swipeButtonCorrect: {
+    height: 64,
+    width: 64,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 32,
+    backgroundColor: colors.pastel.mint.dim,
+    borderWidth: 2,
+    borderColor: colors.pastel.mint.base + '4D', // ~30%
+  },
+});
