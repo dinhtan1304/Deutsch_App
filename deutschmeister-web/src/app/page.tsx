@@ -25,11 +25,11 @@ const IconX = () => <svg width={22} height={22} viewBox="0 0 24 24" fill="none" 
 // ─── Data ─────────────────────────────────────────────────────────────────────
 const CORE_FEATURES = [
   {
-    icon: IconBook, title: 'Từ điển & Chủ đề', badge: '12 chủ đề A1',
-    desc: '1000+ từ vựng A1 theo chuẩn Goethe. Học theo chủ đề: gia đình, công việc, du lịch, nhà ở...',
+    icon: IconBook, title: 'Từ điển & Chủ đề', badge: '12+ chủ đề',
+    desc: '5000+ từ vựng theo chuẩn Goethe. Học theo chủ đề: gia đình, công việc, du lịch, nhà ở...',
     gradient: 'linear-gradient(135deg, #22C55E, #14B8A6)',
     bg: 'rgba(34,197,94,.07)',
-    points: ['1000+ từ vựng A1 chuẩn Goethe', '12 chủ đề có hình ảnh minh họa', 'Ngữ pháp giải thích song ngữ'],
+    points: ['5000+ từ vựng chuẩn Goethe', '12+ chủ đề ', 'Ngữ pháp giải thích song ngữ'],
   },
   {
     icon: IconGamepad, title: '8 Trò chơi học từ', badge: 'Gamification',
@@ -55,10 +55,10 @@ const CORE_FEATURES = [
 ];
 
 const AI_FEATURES = [
-  { skill: 'Nghe', icon: IconHeadphones, color: '#EC4899', title: 'AI tạo bài nghe tiếng Đức', desc: 'Gemini tạo ra audio tiếng Đức tự nhiên theo cấp độ của bạn. Nghe và trả lời câu hỏi hiểu bài.', badge: 'Luyện tự do + Đề chuẩn' },
-  { skill: 'Viết', icon: IconPen, color: '#6366F1', title: 'AI chấm bài viết chi tiết', desc: 'Nộp bài viết tiếng Đức — Gemini phân tích ngữ pháp, từ vựng, cấu trúc câu và cho điểm theo tiêu chí chính thức.', badge: 'Nhận xét song ngữ Đức-Việt' },
-  { skill: 'Nói', icon: IconMic, color: '#F59E0B', title: 'AI chấm phát âm & ngữ pháp', desc: 'Ghi âm câu trả lời bằng tiếng Đức — Gemini phân tích multimodal từ audio + transcript, chấm 4 tiêu chí.', badge: 'Phát âm · Ngữ pháp · Từ vựng · Nội dung' },
-  { skill: 'Đọc', icon: IconBook, color: '#22C55E', title: 'AI tạo đề đọc & hỏi bài', desc: 'Bài đọc tiếng Đức được tạo tự động theo chủ đề và cấp độ. Trả lời câu hỏi, AI chấm và giải thích.', badge: 'Tự do + Đề chuẩn Goethe/TELC' },
+  { skill: 'Nghe', icon: IconHeadphones, color: '#EC4899', title: 'AI tạo bài nghe tiếng Đức', desc: 'Gemini tạo ra audio tiếng Đức tự nhiên theo cấp độ của bạn. Nghe và trả lời câu hỏi hiểu bài.', badge: 'Tự do + Đề chuẩn Goethe/TELC + Audio chất lượng cao' },
+  { skill: 'Viết', icon: IconPen, color: '#6366F1', title: 'AI chấm bài viết chi tiết', desc: 'Nộp bài viết tiếng Đức — Gemini phân tích ngữ pháp, từ vựng, cấu trúc câu và cho điểm theo tiêu chí chính thức.', badge: 'Tự do + Đề chuẩn Goethe/TELC + Nhận xét song ngữ Đức-Việt' },
+  { skill: 'Nói', icon: IconMic, color: '#F59E0B', title: 'AI chấm phát âm & ngữ pháp', desc: 'Ghi âm câu trả lời bằng tiếng Đức — Gemini phân tích multimodal từ audio + transcript, chấm 4 tiêu chí.', badge: 'Tự do + Đề chuẩn Goethe/TELC + Phát âm · Ngữ pháp · Từ vựng · Nội dung' },
+  { skill: 'Đọc', icon: IconBook, color: '#22C55E', title: 'AI tạo đề đọc & hỏi bài', desc: 'Bài đọc tiếng Đức được tạo tự động theo chủ đề và cấp độ. Trả lời câu hỏi, AI chấm và giải thích.', badge: 'Tự do + Đề chuẩn Goethe/TELC + Bài đọc chất lượng' },
 ];
 
 const EXAM_LEVELS = [
@@ -79,8 +79,8 @@ const GAMES = [
 ];
 
 const STATS = [
-  { num: '1000+', label: 'Từ vựng A1',  sub: 'chuẩn Goethe' },
-  { num: '12',   label: 'Chủ đề',      sub: 'bài học theo chủ đề' },
+  { num: '5000+', label: 'Từ vựng',  sub: 'chuẩn Goethe' },
+  { num: '12+',   label: 'Chủ đề',      sub: 'bài học theo chủ đề' },
   { num: '8',    label: 'Trò chơi',    sub: 'gamification học từ' },
   { num: '4',    label: 'Kỹ năng',     sub: 'Nghe · Nói · Đọc · Viết' },
 ];
@@ -115,6 +115,22 @@ export default function HomePage() {
 
   return (
     <div style={{ fontFamily: 'system-ui, -apple-system, sans-serif', background: '#0a0f1e', color: '#f9fafb', overflowX: 'hidden' }}>
+      {/* JSON-LD Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify({
+          '@context': 'https://schema.org',
+          '@type': 'WebApplication',
+          name: 'Deutschmeister',
+          url: 'https://deutschmeister.app',
+          description: 'Nền tảng học tiếng Đức toàn diện dành cho người Việt. 5000+ từ vựng, 8 trò chơi, AI chấm 4 kỹ năng, đề thi chuẩn Goethe/TELC A1-B1.',
+          applicationCategory: 'EducationalApplication',
+          operatingSystem: 'Web',
+          inLanguage: ['vi', 'de'],
+          offers: { '@type': 'Offer', price: '0', priceCurrency: 'VND' },
+          author: { '@type': 'Organization', name: 'Deutschmeister' },
+        }) }}
+      />
       <style>{`
         @keyframes fadeUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
@@ -139,14 +155,18 @@ export default function HomePage() {
         .glow-border-amber { border: 1px solid rgba(245,158,11,.3); box-shadow: 0 0 20px rgba(245,158,11,.1); }
         @media (max-width: 768px) {
           .hero-title { font-size: 2.5rem !important; }
+          .hero-sub { font-size: 14px !important; }
+          .section-title { font-size: 1.75rem !important; }
           .hide-mobile { display: none !important; }
           .mobile-menu { display: flex !important; }
           .grid-4 { grid-template-columns: repeat(2, 1fr) !important; }
+          .stats-grid { grid-template-columns: repeat(2, 1fr) !important; }
         }
       `}</style>
 
       {/* ─── Navbar ─────────────────────────────────────────────────────────── */}
-      <nav style={{
+      <header>
+      <nav role="navigation" aria-label="Main navigation" style={{
         position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
         background: scrolled ? 'rgba(10,15,30,.9)' : 'transparent',
         backdropFilter: scrolled ? 'blur(20px)' : 'none',
@@ -188,7 +208,9 @@ export default function HomePage() {
           </div>
         )}
       </nav>
+      </header>
 
+      <main>
       {/* ─── Hero ───────────────────────────────────────────────────────────── */}
       <section style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '120px 24px 80px', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', top: '15%', left: '10%', width: 500, height: 500, borderRadius: '50%', background: 'radial-gradient(circle, rgba(99,102,241,.18) 0%, transparent 70%)', pointerEvents: 'none' }} />
@@ -203,9 +225,8 @@ export default function HomePage() {
           Học tiếng Đức <span className="gradient-text">thông minh</span><br />cùng AI
         </h1>
 
-        <p className="fade-up-2" style={{ fontSize: 18, color: 'rgba(255,255,255,.6)', textAlign: 'center', maxWidth: 560, lineHeight: 1.7, marginBottom: 40 }}>
-          Nền tảng luyện thi tiếng Đức toàn diện — từ từ vựng cơ bản đến đề thi Goethe/TELC A1/A2/B1.
-          Tạo đề theo yêu cầu dựa vào hơn 100 bộ đề, chấm điểm và nhận xét chi tiết bằng tiếng Việt.
+        <p className="fade-up-2 hero-sub" style={{ fontSize: 16, color: 'rgba(255,255,255,.55)', textAlign: 'center', maxWidth: 640, lineHeight: 1.75, marginBottom: 40 }}>
+          Nền tảng luyện thi tiếng Đức toàn diện — từ từ vựng cơ bản đến đề thi Goethe/TELC A1·A2·B1. Tạo đề theo yêu cầu, AI chấm điểm và nhận xét chi tiết bằng tiếng Việt.
         </p>
 
         <div className="fade-up-3" style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center', marginBottom: 64 }}>
@@ -217,12 +238,12 @@ export default function HomePage() {
           </Link>
         </div>
 
-        <div className="fade-up-4" style={{ display: 'flex', gap: 10, flexWrap: 'wrap', justifyContent: 'center', maxWidth: 640 }}>
+        <div className="fade-up-4" style={{ display: 'flex', gap: 10, flexWrap: 'wrap', justifyContent: 'center', maxWidth: 840 }}>
           {[
-            { label: '140+ từ vựng', color: '#22C55E', bg: 'rgba(34,197,94,.1)' },
+            { label: '5000+ từ vựng', color: '#22C55E', bg: 'rgba(34,197,94,.1)' },
             { label: '8 trò chơi', color: '#8B5CF6', bg: 'rgba(139,92,246,.1)' },
             { label: 'AI chấm phát âm', color: '#F59E0B', bg: 'rgba(245,158,11,.1)' },
-            { label: 'Đề chuẩn Goethe', color: '#EC4899', bg: 'rgba(236,72,153,.1)' },
+            { label: 'Đề chuẩn Goethe/TELC', color: '#EC4899', bg: 'rgba(236,72,153,.1)' },
             { label: 'SRS thông minh', color: '#3B82F6', bg: 'rgba(59,130,246,.1)' },
           ].map(chip => (
             <span key={chip.label} style={{ padding: '6px 14px', borderRadius: 100, fontSize: 12.5, fontWeight: 600, background: chip.bg, color: chip.color, border: `1px solid ${chip.color}33` }}>{chip.label}</span>
@@ -238,7 +259,7 @@ export default function HomePage() {
 
       {/* ─── Stats bar ──────────────────────────────────────────────────────── */}
       <section style={{ background: 'rgba(255,255,255,.03)', borderTop: '1px solid rgba(255,255,255,.06)', borderBottom: '1px solid rgba(255,255,255,.06)', padding: '40px 24px' }}>
-        <div style={{ maxWidth: 900, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 24, textAlign: 'center' }}>
+        <div className="stats-grid" style={{ maxWidth: 900, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 24, textAlign: 'center' }}>
           {STATS.map(s => (
             <div key={s.num}>
               <div style={{ fontSize: '2.5rem', fontWeight: 900, background: 'linear-gradient(135deg, #60a5fa, #a78bfa)', backgroundClip: 'text', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>{s.num}</div>
@@ -255,8 +276,8 @@ export default function HomePage() {
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 14px', borderRadius: 100, background: 'rgba(99,102,241,.12)', border: '1px solid rgba(99,102,241,.3)', fontSize: 12.5, fontWeight: 700, color: '#a78bfa', marginBottom: 16 }}>
             <IconZap /> TÍNH NĂNG CỐT LÕI
           </div>
-          <h2 style={{ fontSize: '2.5rem', fontWeight: 900, letterSpacing: '-1px', marginBottom: 12 }}>Mọi thứ bạn cần để <span className="gradient-text">học tiếng Đức</span></h2>
-          <p style={{ color: 'rgba(255,255,255,.5)', fontSize: 16, maxWidth: 500, margin: '0 auto' }}>Từ nền tảng từ vựng đến luyện thi chính thức — một nền tảng hoàn chỉnh.</p>
+          <h2 className="section-title" style={{ fontSize: '2.25rem', fontWeight: 900, letterSpacing: '-1px', marginBottom: 12 }}>Mọi thứ bạn cần để <span className="gradient-text">học tiếng Đức</span></h2>
+          <p style={{ color: 'rgba(255,255,255,.5)', fontSize: 15, maxWidth: 550, margin: '0 auto', lineHeight: 1.7 }}>Từ nền tảng từ vựng đến luyện thi chính thức — một nền tảng hoàn chỉnh.</p>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 20 }}>
           {CORE_FEATURES.map((f, i) => {
@@ -287,8 +308,8 @@ export default function HomePage() {
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 14px', borderRadius: 100, background: 'rgba(245,158,11,.12)', border: '1px solid rgba(245,158,11,.3)', fontSize: 12.5, fontWeight: 700, color: '#fbbf24', marginBottom: 16 }}>
               <IconSparkles /> POWERED BY GEMINI AI
             </div>
-            <h2 style={{ fontSize: '2.5rem', fontWeight: 900, letterSpacing: '-1px', marginBottom: 12 }}>AI làm thầy giáo <span className="gradient-text-amber">24/7 của bạn</span></h2>
-            <p style={{ color: 'rgba(255,255,255,.5)', fontSize: 16, maxWidth: 560, margin: '0 auto' }}>Không chỉ tạo đề — phân tích, chấm điểm và nhận xét chi tiết bằng tiếng Việt giúp bạn cải thiện từng ngày.</p>
+            <h2 className="section-title" style={{ fontSize: '2.25rem', fontWeight: 900, letterSpacing: '-1px', marginBottom: 12 }}>AI làm thầy giáo <span className="gradient-text-amber">24/7 của bạn</span></h2>
+            <p style={{ color: 'rgba(255,255,255,.5)', fontSize: 15, maxWidth: 560, margin: '0 auto', lineHeight: 1.7 }}>Không chỉ tạo đề — phân tích, chấm điểm và nhận xét chi tiết bằng tiếng Việt giúp bạn cải thiện từng ngày.</p>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 20 }}>
             {AI_FEATURES.map((f, i) => {
@@ -312,7 +333,7 @@ export default function HomePage() {
               <div style={{ width: 32, height: 32, borderRadius: 8, background: 'linear-gradient(135deg, #4285F4, #34A853, #FBBC04, #EA4335)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, fontWeight: 900, color: 'white' }}>G</div>
               <div style={{ textAlign: 'left' }}>
                 <div style={{ fontSize: 13, fontWeight: 700, color: 'white' }}>Gemini AI</div>
-                <div style={{ fontSize: 11, color: 'rgba(255,255,255,.4)' }}>Multimodal AI — phân tích audio, text & hình ảnh</div>
+                <div style={{ fontSize: 11, color: 'rgba(255,255,255,.4)' }}>Multimodal AI Engine</div>
               </div>
             </div>
           </div>
@@ -325,14 +346,14 @@ export default function HomePage() {
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 14px', borderRadius: 100, background: 'rgba(245,158,11,.12)', border: '1px solid rgba(245,158,11,.3)', fontSize: 12.5, fontWeight: 700, color: '#fbbf24', marginBottom: 16 }}>
             <IconGraduate /> LUYỆN THI CHUẨN
           </div>
-          <h2 style={{ fontSize: '2.5rem', fontWeight: 900, letterSpacing: '-1px', marginBottom: 12 }}>Đề thi <span className="gradient-text-amber">Goethe & TELC</span> chính thức</h2>
-          <p style={{ color: 'rgba(255,255,255,.5)', fontSize: 16, maxWidth: 560, margin: '0 auto' }}>Mô phỏng đúng format, đúng số lượng Teile và thời gian như kỳ thi thật. Cả 4 kỹ năng: Nghe · Đọc · Viết · Nói.</p>
+          <h2 className="section-title" style={{ fontSize: '2.25rem', fontWeight: 900, letterSpacing: '-1px', marginBottom: 12 }}>Đề thi <span className="gradient-text-amber">Goethe & TELC</span> chính thức</h2>
+          <p style={{ color: 'rgba(255,255,255,.5)', fontSize: 15, maxWidth: 560, margin: '0 auto', lineHeight: 1.7 }}>Mô phỏng đúng format, đúng số lượng Teile và thời gian như kỳ thi thật. Cả 4 kỹ năng: Nghe · Đọc · Viết · Nói.</p>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 20, marginBottom: 40 }}>
           {['Goethe-Zertifikat', 'TELC Deutsch'].map((name, idx) => (
             <div key={name} className="glow-border-amber card-hover" style={{ borderRadius: 20, padding: '28px', background: 'rgba(245,158,11,.04)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
-                <div style={{ fontSize: 24 }}>{idx === 0 ? '🇩🇪' : '🏆'}</div>
+                <div style={{ fontSize: 24 }}>{idx === 0 ? '🏆' : '🏆'}</div>
                 <div>
                   <div style={{ fontWeight: 800, fontSize: 16, color: 'white' }}>{name}</div>
                   <div style={{ fontSize: 12, color: 'rgba(255,255,255,.4)' }}>A1 · A2 · B1</div>
@@ -376,8 +397,8 @@ export default function HomePage() {
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 14px', borderRadius: 100, background: 'rgba(139,92,246,.12)', border: '1px solid rgba(139,92,246,.3)', fontSize: 12.5, fontWeight: 700, color: '#c4b5fd', marginBottom: 16 }}>
               <IconGamepad /> 8 TRÒ CHƠI HỌC TỪ
             </div>
-            <h2 style={{ fontSize: '2.5rem', fontWeight: 900, letterSpacing: '-1px', marginBottom: 12 }}>Học mà như <span className="gradient-text">đang chơi</span></h2>
-            <p style={{ color: 'rgba(255,255,255,.5)', fontSize: 16, maxWidth: 480, margin: '0 auto' }}>8 mini-game đa dạng giúp ôn từ vựng một cách tự nhiên và không nhàm chán.</p>
+            <h2 className="section-title" style={{ fontSize: '2.25rem', fontWeight: 900, letterSpacing: '-1px', marginBottom: 12 }}>Học mà như <span className="gradient-text">đang chơi</span></h2>
+            <p style={{ color: 'rgba(255,255,255,.5)', fontSize: 15, maxWidth: 480, margin: '0 auto', lineHeight: 1.7 }}>8 mini-game đa dạng giúp ôn từ vựng một cách tự nhiên và không nhàm chán.</p>
           </div>
           <div className="grid-4" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14 }}>
             {GAMES.map(g => {
@@ -397,14 +418,14 @@ export default function HomePage() {
       </section>
 
       {/* ─── Final CTA ──────────────────────────────────────────────────────── */}
-      <section style={{ padding: '100px 24px', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
+      <section style={{ padding: '96px 24px', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 600, height: 600, borderRadius: '50%', background: 'radial-gradient(circle, rgba(99,102,241,.15) 0%, transparent 70%)', pointerEvents: 'none' }} />
-        <div style={{ position: 'relative', maxWidth: 600, margin: '0 auto' }}>
+        <div style={{ position: 'relative', maxWidth: 700, margin: '0 auto' }}>
           <div style={{ fontSize: 52, marginBottom: 20 }} className="float-2">🇩🇪</div>
-          <h2 style={{ fontSize: '2.8rem', fontWeight: 900, letterSpacing: '-1px', marginBottom: 16, lineHeight: 1.1 }}>
+          <h2 className="section-title" style={{ fontSize: '2.25rem', fontWeight: 900, letterSpacing: '-1px', marginBottom: 16, lineHeight: 1.15 }}>
             Sẵn sàng bắt đầu <span className="gradient-text">hành trình</span> của bạn?
           </h2>
-          <p style={{ color: 'rgba(255,255,255,.5)', fontSize: 16, lineHeight: 1.7, marginBottom: 40 }}>
+          <p style={{ color: 'rgba(255,255,255,.5)', fontSize: 14, lineHeight: 1.7, marginBottom: 40 }}>
             Bắt đầu học tiếng Đức ngay hôm nay với sự hỗ trợ của AI.
           </p>
           <Link href="/auth/register" className="btn-glow" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '16px 36px', borderRadius: 16, background: 'linear-gradient(135deg, #6366F1, #8B5CF6)', color: 'white', fontWeight: 800, fontSize: 16, textDecoration: 'none', boxShadow: '0 12px 40px rgba(99,102,241,.5)' }}>
@@ -420,6 +441,8 @@ export default function HomePage() {
         </div>
       </section>
 
+      </main>
+
       {/* ─── Footer ─────────────────────────────────────────────────────────── */}
       <footer style={{ borderTop: '1px solid rgba(255,255,255,.06)', background: 'rgba(255,255,255,.015)' }}>
         {/* Main grid */}
@@ -433,7 +456,7 @@ export default function HomePage() {
               <span style={{ fontWeight: 800, fontSize: 16, color: 'white' }}>Deutschmeister</span>
             </div>
             <p style={{ fontSize: 13, color: 'rgba(255,255,255,.45)', lineHeight: 1.7, marginBottom: 20, maxWidth: 240 }}>
-              Nền tảng học tiếng Đức toàn diện dành cho người Việt — từ từ vựng cơ bản đến luyện thi Goethe/TELC.
+              Nền tảng học tiếng Đức toàn diện — từ cơ bản đến luyện thi Goethe/TELC.
             </p>
             {/* Gemini badge */}
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '8px 12px', borderRadius: 10, background: 'rgba(255,255,255,.04)', border: '1px solid rgba(255,255,255,.08)' }}>
@@ -515,7 +538,7 @@ export default function HomePage() {
         {/* Bottom bar */}
         <div style={{ borderTop: '1px solid rgba(255,255,255,.05)', padding: '20px 24px' }}>
           <div style={{ maxWidth: 1200, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
-            <div style={{ fontSize: 12.5, color: 'rgba(255,255,255,.25)' }}>© 2025 Deutschmeister · Made with Yuii in Vietnam</div>
+            <div style={{ fontSize: 12.5, color: 'rgba(255,255,255,.25)' }}>© 2025 – 2026 Deutschmeister · Made with Yuii in Vietnam</div>
             <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
               {[
                 { label: 'A1', color: '#22C55E' },

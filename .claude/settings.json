@@ -50,7 +50,8 @@
       "Read(//e/assets/**)",
       "Bash(grep \"\\\\.ts$\")",
       "Bash(grep -l \"export const.*Api\\\\|export \\\\*\" /e/Deutsch_App/deutschmeister-mobile/src/lib/api/*.ts)",
-      "Bash(node -e \"const fs = require\\(''''expo-file-system''''\\); console.log\\(Object.keys\\(fs\\)\\)\")"
+      "Bash(node -e \"const fs = require\\(''''expo-file-system''''\\); console.log\\(Object.keys\\(fs\\)\\)\")",
+      "Bash(npx next:*)"
     ],
     "additionalDirectories": [
       "e:\\Deutsch_App\\.claude"
