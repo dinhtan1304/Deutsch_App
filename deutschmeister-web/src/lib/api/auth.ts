@@ -21,12 +21,14 @@ export interface MessageResponse {
 export interface LoginDto {
   email: string;
   password: string;
+  captchaToken?: string;
 }
 
 export interface RegisterDto {
   email: string;
   password: string;
   name?: string;
+  captchaToken?: string;
 }
 
 export interface User {
@@ -58,8 +60,8 @@ export const authApi = {
     return api<MessageResponse>(`/auth/verify-email?token=${encodeURIComponent(token)}`, { method: 'GET' });
   },
 
-  forgotPassword: async (email: string): Promise<MessageResponse> => {
-    return apiPost<MessageResponse>('/auth/forgot-password', { email });
+  forgotPassword: async (email: string, captchaToken?: string): Promise<MessageResponse> => {
+    return apiPost<MessageResponse>('/auth/forgot-password', { email, captchaToken });
   },
 
   resetPassword: async (token: string, password: string): Promise<MessageResponse> => {

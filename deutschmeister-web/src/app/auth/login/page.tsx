@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 import { useAuthStore } from '@/stores/authStore';
 import {
   IconArrowLeft, IconMail, IconLock, IconLogIn, IconLoader, IconEye, IconEyeOff,
@@ -20,6 +21,7 @@ const HIGHLIGHTS = [
 export default function LoginPage() {
   const router = useRouter();
   const { login, isLoading, isAuthenticated, user, _hasHydrated } = useAuthStore();
+  const { executeRecaptcha } = useGoogleReCaptcha();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPw, setShowPw] = useState(false);
@@ -32,11 +34,12 @@ export default function LoginPage() {
     }
   }, [_hasHydrated, isAuthenticated, user, router]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     try {
-      await login({ email: email.trim(), password });
+      const captchaToken = executeRecaptcha ? await executeRecaptcha('login') : undefined;
+      await login({ email: email.trim(), password, captchaToken });
       const { user: loggedInUser } = useAuthStore.getState();
       router.push(loggedInUser?.role === 'admin' ? '/admin' : '/dashboard');
     } catch (err: any) {
@@ -46,7 +49,7 @@ export default function LoginPage() {
         setError(err.message || 'Đăng nhập thất bại. Vui lòng thử lại.');
       }
     }
-  };
+  }, [executeRecaptcha, email, password, login, router]);
 
   if (!_hasHydrated || isAuthenticated) {
     return <div style={{ minHeight: '100vh', background: '#0a0f1e' }} />;

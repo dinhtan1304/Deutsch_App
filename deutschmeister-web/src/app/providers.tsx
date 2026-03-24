@@ -1,6 +1,7 @@
 'use client';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3';
 import { useState, useEffect, useRef } from 'react';
 import { ErrorBoundary } from '@/components/ui';
 import { ApiError, clearTokens, initAuth } from '@/lib/api/client';
@@ -130,7 +131,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
       })
   );
 
-  return (
+  const recaptchaKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
+
+  const inner = (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <AppInitializer>
@@ -145,5 +148,14 @@ export function Providers({ children }: { children: React.ReactNode }) {
         </AppInitializer>
       </QueryClientProvider>
     </ErrorBoundary>
+  );
+
+  // Only wrap with reCAPTCHA if site key is configured
+  if (!recaptchaKey) return inner;
+
+  return (
+    <GoogleReCaptchaProvider reCaptchaKey={recaptchaKey}>
+      {inner}
+    </GoogleReCaptchaProvider>
   );
 }

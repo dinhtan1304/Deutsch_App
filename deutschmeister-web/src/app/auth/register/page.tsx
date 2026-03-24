@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 import { useAuthStore } from '@/stores/authStore';
 import {
   IconArrowLeft, IconUser, IconMail, IconLock, IconLoader,
@@ -55,6 +56,7 @@ function PasswordStrength({ password }: { password: string }) {
 export default function RegisterPage() {
   const router = useRouter();
   const { register, isLoading, isAuthenticated, _hasHydrated } = useAuthStore();
+  const { executeRecaptcha } = useGoogleReCaptcha();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -73,19 +75,20 @@ export default function RegisterPage() {
     [isPasswordValid, password, confirmPassword, name]
   );
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     if (name.trim().length < 2) { setError('Tên phải có ít nhất 2 ký tự'); return; }
     if (!isPasswordValid) { setError('Mật khẩu chưa đủ mạnh.'); return; }
     if (password !== confirmPassword) { setError('Mật khẩu xác nhận không khớp'); return; }
     try {
-      await register({ name: name.trim(), email, password });
+      const captchaToken = executeRecaptcha ? await executeRecaptcha('register') : undefined;
+      await register({ name: name.trim(), email, password, captchaToken });
       router.push(`/auth/verify-email?email=${encodeURIComponent(email)}`);
     } catch (err: any) {
       setError(err.message || 'Đăng ký thất bại. Vui lòng thử lại.');
     }
-  };
+  }, [executeRecaptcha, name, email, password, confirmPassword, isPasswordValid, register, router]);
 
   if (!_hasHydrated || isAuthenticated) {
     return <div style={{ minHeight: '100vh', background: '#0a0f1e' }} />;

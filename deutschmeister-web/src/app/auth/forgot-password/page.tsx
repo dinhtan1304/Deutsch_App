@@ -1,29 +1,32 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import Link from 'next/link';
+import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 import { authApi } from '@/lib/api/auth';
 
 export default function ForgotPasswordPage() {
+  const { executeRecaptcha } = useGoogleReCaptcha();
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState('');
   const [focused, setFocused] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
     try {
-      await authApi.forgotPassword(email.trim());
+      const captchaToken = executeRecaptcha ? await executeRecaptcha('forgot_password') : undefined;
+      await authApi.forgotPassword(email.trim(), captchaToken);
       setSent(true);
     } catch (err: any) {
       setError(err.message || 'Có lỗi xảy ra. Vui lòng thử lại.');
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [executeRecaptcha, email]);
 
   return (
     <>
