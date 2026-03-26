@@ -205,7 +205,7 @@ export default function SRSReviewPage() {
         refetchDue();
         setPhase('setup');
       }
-    } catch (e) { console.warn('Failed to add random words:', e); }
+    } catch { /* silently ignore – non-critical */ }
   };
 
   // Mode accent colors

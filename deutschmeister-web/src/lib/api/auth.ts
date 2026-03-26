@@ -38,6 +38,7 @@ export interface User {
   avatar: string | null;
   role: string;
   createdAt: string;
+  onboardingCompleted?: boolean;
   subscription?: {
     plan: 'free' | 'premium';
     status: string;

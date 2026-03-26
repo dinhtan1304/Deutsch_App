@@ -103,7 +103,7 @@ export default function ReadingListPage() {
     try {
       await deleteMutation.mutateAsync(id);
     } catch (e) {
-      console.warn('Failed to delete reading:', e);
+      /* delete error handled by React Query's onError */
     }
   };
 

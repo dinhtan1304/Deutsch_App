@@ -15,6 +15,42 @@ import { TopicFlashcard } from '@/components/topics/TopicFlashcard';
 import { TopicQuiz } from '@/components/topics/TopicQuiz';
 import { TopicMatching } from '@/components/topics/TopicMatching';
 
+// ─── Level-based Learning Tips ───
+const LEVEL_TIPS: Record<string, { title: string; tips: string[] }> = {
+  A1: {
+    title: 'M\u1eb9o h\u1ecdc A1',
+    tips: [
+      'T\u1ea5t c\u1ea3 danh t\u1eeb ti\u1ebfng \u0110\u1ee9c \u0111\u1ec1u vi\u1ebft hoa v\u00e0 c\u00f3 gi\u1ed1ng: der (nam), die (n\u1eef), das (trung). H\u00e3y h\u1ecdc gi\u1ed1ng c\u00f9ng v\u1edbi t\u1eeb!',
+      'C\u1ea5u tr\u00fac c\u00e2u c\u01a1 b\u1ea3n: Subjekt + Verb + Objekt. V\u00ed d\u1ee5: Ich trinke Wasser.',
+      'S\u1ed1 nhi\u1ec1u th\u01b0\u1eddng thay \u0111\u1ed5i: -e, -en, -er, -s ho\u1eb7c \u00dcmlaut (\u00e4/\u00f6/\u00fc). V\u00ed d\u1ee5: das Haus \u2192 die H\u00e4user.',
+    ],
+  },
+  A2: {
+    title: 'M\u1eb9o h\u1ecdc A2',
+    tips: [
+      'T\u1eeb gh\u00e9p (Komposita) r\u1ea5t ph\u1ed5 bi\u1ebfn: K\u00fchl + Schrank = K\u00fchlschrank. Gi\u1ed1ng c\u1ee7a t\u1eeb gh\u00e9p theo t\u1eeb cu\u1ed1i.',
+      'Tr\u1ea1ng t\u1eeb ch\u1ec9 th\u1eddi gian: gestern (h\u00f4m qua), heute (h\u00f4m nay), morgen (ng\u00e0y mai) \u0111\u1eb7t \u1edf \u0111\u1ea7u ho\u1eb7c sau \u0111\u1ed9ng t\u1eeb.',
+      'Ch\u00fa \u00fd Dativ sau c\u00e1c gi\u1edbi t\u1eeb: mit, nach, bei, seit, von, zu, aus \u2192 lu\u00f4n \u0111i v\u1edbi Dativ.',
+    ],
+  },
+  B1: {
+    title: 'M\u1eb9o h\u1ecdc B1',
+    tips: [
+      'Ti\u1ec1n t\u1ed1 \u0111\u1ed9ng t\u1eeb thay \u0111\u1ed5i ngh\u0129a: ver- (bi\u1ebfn \u0111\u1ed5i), be- (t\u00e1c \u0111\u1ed9ng), ent- (t\u00e1ch r\u1eddi), er- (\u0111\u1ea1t \u0111\u01b0\u1ee3c).',
+      'Nebens\u00e4tze (m\u1ec7nh \u0111\u1ec1 ph\u1ee5): \u0111\u1ed9ng t\u1eeb lu\u00f4n \u1edf cu\u1ed1i c\u00e2u. V\u00ed d\u1ee5: Ich wei\u00df, dass er krank ist.',
+      'H\u1ecdc th\u00eam Redewendungen (th\u00e0nh ng\u1eef) \u0111\u1ec3 ngh\u1ec7 t\u1ef1 nhi\u00ean h\u01a1n: "Hals- und Beinbruch!" = Ch\u00fac may m\u1eafn!',
+    ],
+  },
+  B2: {
+    title: 'M\u1eb9o h\u1ecdc B2',
+    tips: [
+      'Genitiv ng\u00e0y c\u00e0ng quan tr\u1ecdng: w\u00e4hrend des Sommers, trotz des Regens, wegen des Wetters.',
+      '\u0110\u1ecdc b\u00e1o ti\u1ebfng \u0110\u1ee9c (Spiegel, Zeit) \u0111\u1ec3 m\u1edf r\u1ed9ng v\u1ed1n t\u1eeb chuy\u00ean ng\u00e0nh.',
+      'Konjunktiv II cho l\u1ecbch s\u1ef1: K\u00f6nnten Sie mir bitte helfen? thay v\u00ec K\u00f6nnen Sie mir helfen?',
+    ],
+  },
+};
+
 // ─── Article Colors ───
 const ArticleColor: Record<string, { color: string; gradient: string; bg: string }> = {
   der: { color: '#3B82F6', gradient: 'linear-gradient(135deg, #3B82F6, #1D4ED8)', bg: 'rgba(59,130,246,.08)' },
@@ -225,6 +261,7 @@ export default function TopicDetailPage() {
   const [filterMode, setFilterMode] = useState<FilterMode>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState<TabKey>('words');
+  const [showTips, setShowTips] = useState(false);
 
   // localStorage key scoped per user so different accounts on the same browser
   // don't share or overwrite each other's progress.
@@ -244,7 +281,7 @@ export default function TopicDetailPage() {
       const stored = key ? localStorage.getItem(key) : null;
       if (stored) {
         try { setLearnedWords(new Set(JSON.parse(stored))); }
-        catch (e) { console.error('Error loading learned words:', e); }
+        catch { /* corrupted localStorage entry – ignore */ }
       } else {
         // Clear stale state when switching users or no key available
         setLearnedWords(new Set());
@@ -451,6 +488,52 @@ export default function TopicDetailPage() {
             </div>
           )}
         </div>
+
+        {/* ═══════════════════════════════════════════ */}
+        {/* MINI LESSON TIPS                             */}
+        {/* ═══════════════════════════════════════════ */}
+        {LEVEL_TIPS[topic.level] && (
+          <div className="mb-6 rounded-2xl border overflow-hidden"
+            style={{ borderColor: `${topicColor}20`, backgroundColor: 'var(--theme-bg-card)' }}>
+            <button
+              onClick={() => setShowTips(!showTips)}
+              className="w-full flex items-center justify-between px-5 py-3.5 transition-colors"
+              style={{ backgroundColor: `${topicColor}08` }}
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+                  style={{ background: `${topicColor}15` }}>
+                  <IconLightbulb size={16} style={{ color: topicColor }} />
+                </div>
+                <span className="text-[14px] font-semibold" style={{ color: 'var(--theme-text-primary)' }}>
+                  {LEVEL_TIPS[topic.level].title}
+                </span>
+              </div>
+              <svg
+                width="16" height="16" viewBox="0 0 24 24" fill="none"
+                stroke="var(--theme-text-muted)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                style={{ transform: showTips ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform 0.2s' }}
+              >
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </button>
+            {showTips && (
+              <div className="px-5 py-4 space-y-3">
+                {LEVEL_TIPS[topic.level].tips.map((tip, i) => (
+                  <div key={i} className="flex gap-3">
+                    <div className="w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5 text-[11px] font-bold"
+                      style={{ background: `${topicColor}15`, color: topicColor }}>
+                      {i + 1}
+                    </div>
+                    <p className="text-[13px] leading-relaxed" style={{ color: 'var(--theme-text-secondary)' }}>
+                      {tip}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* ═══════════════════════════════════════════ */}
         {/* TAB NAVIGATION                              */}

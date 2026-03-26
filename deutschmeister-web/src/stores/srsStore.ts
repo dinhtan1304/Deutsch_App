@@ -58,7 +58,7 @@ export const useSRSStore = create<SRSState>((set, get) => ({
         set({ cards: {}, isLoaded: false, isLoading: false });
         return;
       }
-      console.error('Failed to load SRS cards:', e);
+      if (process.env.NODE_ENV === 'development') console.error('Failed to load SRS cards:', e);
       set({ cards: {}, isLoaded: true, isLoading: false });
     }
   },
@@ -71,7 +71,7 @@ export const useSRSStore = create<SRSState>((set, get) => ({
       set({ cards: { ...cards, [wordId]: updated } });
     } catch (e: any) {
       if (e?.status === 401) return;
-      console.error('Failed to review card:', e);
+      if (process.env.NODE_ENV === 'development') console.error('Failed to review card:', e);
     }
   },
 
@@ -84,7 +84,7 @@ export const useSRSStore = create<SRSState>((set, get) => ({
     } catch (e: any) {
       // Silently handle auth errors (redirect handled by API client)
       if (e?.status === 401) return;
-      console.error('Failed to add words:', e);
+      if (process.env.NODE_ENV === 'development') console.error('Failed to add words:', e);
     }
   },
 

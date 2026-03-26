@@ -25,7 +25,8 @@ function AuthCallbackInner() {
     loginWithOAuth(token)
       .then(() => {
         const { user } = useAuthStore.getState();
-        router.replace(user?.role === 'admin' ? '/admin' : '/dashboard');
+        const dest = user?.role === 'admin' ? '/admin' : user?.onboardingCompleted === false ? '/onboarding' : '/dashboard';
+        router.replace(dest);
       })
       .catch(() => {
         router.replace('/auth/login?error=oauth_failed');

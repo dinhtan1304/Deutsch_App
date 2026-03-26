@@ -106,7 +106,7 @@ export default function WritingListPage() {
     try {
       await deleteMutation.mutateAsync(id);
     } catch (e) {
-      console.warn('Failed to delete writing:', e);
+      /* delete error handled by React Query's onError */
     }
   };
 

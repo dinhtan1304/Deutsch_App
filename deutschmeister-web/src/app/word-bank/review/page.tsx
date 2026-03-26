@@ -382,7 +382,7 @@ export default function WordBankReviewPage() {
       });
       setIsFlipped(false);
     } catch (error) {
-      console.error('Review failed:', error);
+      if (process.env.NODE_ENV === 'development') console.error('Review failed:', error);
     }
   }, [playCorrect, playWrong]);
 

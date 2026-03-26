@@ -51,7 +51,7 @@ export function shuffleArray<T>(array: T[]): T[] {
 
 export function speakGerman(text: string, slow = false): void {
   if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
-    console.warn('Speech Synthesis not supported');
+    /* Speech Synthesis not supported — silent no-op */
     return;
   }
 
@@ -71,6 +71,6 @@ export function speakGerman(text: string, slow = false): void {
     
     window.speechSynthesis.speak(utterance);
   } catch (error) {
-    console.warn('Speech synthesis failed:', error);
+    /* speech synthesis failed — silent no-op */
   }
 }

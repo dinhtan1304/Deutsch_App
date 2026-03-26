@@ -26,7 +26,7 @@ export function useGameSession(gameType: GameType, difficulty: Difficulty = 'beg
       const session = await gamesApi.start({ gameType, difficulty, totalQuestions });
       sessionIdRef.current = session.id;
     } catch (e) {
-      console.warn('[GameSession] Failed to start:', e);
+      if (process.env.NODE_ENV === 'development') console.warn('[GameSession] Failed to start:', e);
       sessionIdRef.current = null;
     }
   }, [gameType, difficulty]);
@@ -45,7 +45,7 @@ export function useGameSession(gameType: GameType, difficulty: Difficulty = 'beg
       queryClient.invalidateQueries({ queryKey: dashboardKeys.all });
       queryClient.invalidateQueries({ queryKey: ['games', 'history'] });
     } catch (e) {
-      console.warn('[GameSession] Failed to end:', e);
+      if (process.env.NODE_ENV === 'development') console.warn('[GameSession] Failed to end:', e);
     } finally {
       sessionIdRef.current = null;
     }

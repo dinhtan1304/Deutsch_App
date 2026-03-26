@@ -371,7 +371,7 @@ export const ExerciseList = ({ exercises, onSubmit }: ExerciseListProps) => {
             const res = await onSubmit(final);
             setResult(res);
         } catch (err: any) {
-            console.error('Submit error:', err);
+            if (process.env.NODE_ENV === 'development') console.error('Submit error:', err);
             const msg = err?.message || err?.response?.message || 'Có lỗi khi nộp bài. Vui lòng thử lại.';
             setSubmitError(typeof msg === 'string' ? msg : JSON.stringify(msg));
         } finally {

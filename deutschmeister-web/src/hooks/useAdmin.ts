@@ -2,8 +2,9 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
-  adminApi, adminWordApi,
+  adminApi, adminWordApi, adminFeedbackApi,
   AdminStats, AdminUserListResponse, AdminUserDetail, AdminWordItem, CreateWordPayload,
+  AdminFeedbackListResponse,
 } from '@/lib/api/admin';
 
 // ─── Query keys ───────────────────────────────────────────────────────────────
@@ -62,6 +63,31 @@ export function useDeleteAdminUser() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: adminKeys.users() });
       queryClient.invalidateQueries({ queryKey: adminKeys.stats() });
+    },
+  });
+}
+
+// ─── Feedback ────────────────────────────────────────────────────────────────
+
+export const adminFeedbackKeys = {
+  all: ['admin-feedback'] as const,
+  list: (params?: Record<string, any>) => [...adminFeedbackKeys.all, 'list', params] as const,
+};
+
+export function useAdminFeedback(params?: { status?: string; type?: string; page?: number }) {
+  return useQuery<AdminFeedbackListResponse>({
+    queryKey: adminFeedbackKeys.list(params),
+    queryFn: () => adminFeedbackApi.getAll(params),
+  });
+}
+
+export function useUpdateFeedbackStatus() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, status }: { id: string; status: 'new' | 'reviewed' | 'resolved' }) =>
+      adminFeedbackApi.updateStatus(id, status),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: adminFeedbackKeys.all });
     },
   });
 }

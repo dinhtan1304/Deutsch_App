@@ -24,6 +24,12 @@ function IconPenTool({ size = 18 }: { size?: number }) {
 function IconCreditCard({ size = 18 }: { size?: number }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}><rect x="1" y="4" width="22" height="16" rx="2" ry="2" /><line x1="1" y1="10" x2="23" y2="10" /></svg>;
 }
+function IconMessageSquare({ size = 18 }: { size?: number }) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>;
+}
+function IconDatabase({ size = 18 }: { size?: number }) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}><ellipse cx="12" cy="5" rx="9" ry="3" /><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" /><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" /></svg>;
+}
 function IconArrowLeft({ size = 16 }: { size?: number }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}><line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" /></svg>;
 }
@@ -38,6 +44,8 @@ const NAV_ITEMS = [
   { href: '/admin/topics', label: 'Topics', icon: IconLayers, exact: false },
   { href: '/admin/grammar', label: 'Ngữ pháp', icon: IconPenTool, exact: false },
   { href: '/admin/subscriptions', label: 'Đăng ký', icon: IconCreditCard, exact: false },
+  { href: '/admin/feedback', label: 'Phản hồi', icon: IconMessageSquare, exact: false },
+  { href: '/admin/exam-rag', label: 'Đề mẫu RAG', icon: IconDatabase, exact: false },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {

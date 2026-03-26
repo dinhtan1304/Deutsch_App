@@ -59,3 +59,22 @@ export async function getRecentActivity(): Promise<RecentActivity[]> {
 export async function getPublicStats(): Promise<PublicStats> {
   return apiGet<PublicStats>(`${BASE_URL}/public-stats`);
 }
+
+/**
+ * Lấy lộ trình học hàng ngày
+ */
+export const getDailyPath = () => apiGet<DailyPath>('/dashboard/daily-path');
+
+export interface DailyTask {
+  type: string;
+  title: string;
+  description: string;
+  href: string;
+  completed: boolean;
+}
+
+export interface DailyPath {
+  tasks: DailyTask[];
+  completedCount: number;
+  totalCount: number;
+}

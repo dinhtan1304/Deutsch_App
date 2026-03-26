@@ -30,7 +30,8 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (_hasHydrated && isAuthenticated) {
-      router.replace(user?.role === 'admin' ? '/admin' : '/dashboard');
+      const dest = user?.role === 'admin' ? '/admin' : user?.onboardingCompleted === false ? '/onboarding' : '/dashboard';
+      router.replace(dest);
     }
   }, [_hasHydrated, isAuthenticated, user, router]);
 
@@ -41,7 +42,8 @@ export default function LoginPage() {
       const captchaToken = executeRecaptcha ? await executeRecaptcha('login') : undefined;
       await login({ email: email.trim(), password, captchaToken });
       const { user: loggedInUser } = useAuthStore.getState();
-      router.push(loggedInUser?.role === 'admin' ? '/admin' : '/dashboard');
+      const dest = loggedInUser?.role === 'admin' ? '/admin' : loggedInUser?.onboardingCompleted === false ? '/onboarding' : '/dashboard';
+      router.push(dest);
     } catch (err: any) {
       if (err.message === 'EMAIL_NOT_VERIFIED') {
         setError('Email chưa được xác nhận. Vui lòng kiểm tra hộp thư và nhấn link xác nhận.');

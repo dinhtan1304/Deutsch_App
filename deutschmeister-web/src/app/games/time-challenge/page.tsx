@@ -78,7 +78,7 @@ export default function TimedChallengePage() {
       setWords(prev => [...prev, ...batch]);
     } catch {
       // Silently ignore prefetch failures — user still has remaining words to answer
-      console.warn('[TimedChallenge] Prefetch failed');
+      /* prefetch failure is non-critical — user still has remaining words */
     } finally {
       isFetchingRef.current = false;
     }

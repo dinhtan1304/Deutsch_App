@@ -109,13 +109,22 @@ function IconAlertTriangle({ size = 16, style }: { size?: number; style?: React.
     </svg>
   );
 }
+function IconBell({ size = 16, style }: { size?: number; style?: React.CSSProperties }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}>
+      <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" /><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+    </svg>
+  );
+}
 
 // ─── Tab config ───
 const TABS = [
   { id: 'display' as const, label: 'Hiển thị', icon: IconPalette, color: '#8B5CF6' },
   { id: 'sound' as const, label: 'Âm thanh', icon: IconVolume2, color: '#3B82F6' },
   { id: 'learning' as const, label: 'Học tập', icon: IconGraduationCap, color: '#22C55E' },
-  { id: 'account' as const, label: 'Tài khoản', icon: IconUser, color: '#F59E0B' },
+  { id: 'notification' as const, label: 'Thông báo', icon: IconBell, color: '#F59E0B' },
+  { id: 'account' as const, label: 'Tài khoản', icon: IconUser, color: '#6B7280' },
 ];
 
 // ─── Theme options ───
@@ -214,7 +223,7 @@ export default function SettingsPage() {
   const updateSettingsMutation = useUpdateSettings();
 
   const [toast, setToast] = useState('');
-  const [activeTab, setActiveTab] = useState<'display' | 'sound' | 'learning' | 'account'>('display');
+  const [activeTab, setActiveTab] = useState<'display' | 'sound' | 'learning' | 'notification' | 'account'>('display');
 
   // Track toast timer to cancel before setting a new one (prevents rapid-change race)
   // and to clean up if the component unmounts before the timer fires.
@@ -267,7 +276,7 @@ export default function SettingsPage() {
     try {
       await logout();
     } catch (e) {
-      console.warn('Logout error:', e);
+      /* logout errors are non-critical — redirect proceeds anyway */
     } finally {
       router.push('/');
     }
@@ -506,6 +515,18 @@ export default function SettingsPage() {
               label="Thời gian Timed Challenge"
               value={settings.timedChallengeSeconds} min={30} max={180} step={15} unit="giây"
               onChange={v => handleChange('timedChallengeSeconds', v)} color="#F59E0B"
+            />
+          </SectionCard>
+        )}
+
+        {/* ─── Notification Tab ─── */}
+        {activeTab === 'notification' && (
+          <SectionCard title="Thông báo" icon={IconBell} color="#F59E0B">
+            <SettingToggle
+              label="Nhắc nhở học tập hàng ngày"
+              desc="Nhận email nhắc nhở lúc 7h tối nếu bạn chưa học hôm nay"
+              checked={settings.dailyReminder}
+              onChange={v => handleChange('dailyReminder', v)}
             />
           </SectionCard>
         )}

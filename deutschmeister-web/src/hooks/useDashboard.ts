@@ -7,6 +7,7 @@ import {
   getTopicProgress,
   getRecentActivity,
   getPublicStats,
+  getDailyPath,
 } from '@/lib/api/dashboard';
 
 // ============================================
@@ -21,6 +22,7 @@ export const dashboardKeys = {
   topics: () => [...dashboardKeys.all, 'topics'] as const,
   activity: () => [...dashboardKeys.all, 'activity'] as const,
   public: () => [...dashboardKeys.all, 'public'] as const,
+  dailyPath: () => [...dashboardKeys.all, 'daily-path'] as const,
 };
 
 // ============================================
@@ -102,5 +104,17 @@ export function usePublicStats() {
     queryKey: dashboardKeys.public(),
     queryFn: getPublicStats,
     staleTime: 10 * 60 * 1000, // 10 minutes
+  });
+}
+
+/**
+ * Hook lấy daily learning path
+ */
+export function useDailyPath() {
+  return useQuery({
+    queryKey: dashboardKeys.dailyPath(),
+    queryFn: getDailyPath,
+    staleTime: 2 * 60 * 1000,
+    refetchOnWindowFocus: true,
   });
 }

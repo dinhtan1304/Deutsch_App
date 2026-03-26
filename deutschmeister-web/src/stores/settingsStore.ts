@@ -14,11 +14,12 @@ export interface AppSettings {
   preferredLevel: 'A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C2' | 'all';
   questionsPerGame: number;
   timedChallengeSeconds: number;
+  dailyReminder: boolean;
 }
 
 // Fields that are persisted to the backend DB (subset of AppSettings)
 export const BACKEND_SETTINGS_KEYS: (keyof AppSettings)[] = [
-  'theme', 'soundEnabled', 'dailyGoal', 'preferredLevel', 'showVietnamese',
+  'theme', 'soundEnabled', 'dailyGoal', 'preferredLevel', 'showVietnamese', 'dailyReminder',
 ];
 
 interface SettingsState {
@@ -43,6 +44,7 @@ const defaultSettings: AppSettings = {
   preferredLevel: 'A1',   // matches DB default
   questionsPerGame: 20,
   timedChallengeSeconds: 60,
+  dailyReminder: true,
 };
 
 const STORAGE_KEY = 'deutschmeister-settings';

@@ -167,7 +167,7 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
         setPreviewErrors(allErrors);
         setStep('preview');
       } catch (err) {
-        console.error(err);
+        if (process.env.NODE_ENV === 'development') console.error(err);
         setImportError('Không thể đọc file. Vui lòng kiểm tra định dạng Excel.');
       }
     };

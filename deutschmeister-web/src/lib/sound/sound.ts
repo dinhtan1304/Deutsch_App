@@ -16,7 +16,7 @@ function getAudioContext(): AudioContext | null {
     try {
       audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
     } catch (e) {
-      console.warn('Web Audio API not supported');
+      /* Web Audio API not supported — graceful fallback */
       return null;
     }
   }

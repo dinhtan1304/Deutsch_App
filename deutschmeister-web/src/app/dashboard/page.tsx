@@ -9,13 +9,15 @@ import {
   TopicProgressList,
   RecentActivityFeed,
   QuickActions,
+  DailyPath,
 } from '@/components/dashboard';
 import { WeeklyChallengesWidget } from '@/components/dashboard/WeeklyChallengesWidget';
 import { LeaderboardWidget } from '@/components/dashboard/LeaderboardWidget';
+import { FirstDayJourney } from '@/components/dashboard/FirstDayJourney';
+import { CelebrationModal } from '@/components/ui/CelebrationModal';
 import { useFullDashboard } from '@/hooks/useDashboard';
+import { useMilestoneCheck } from '@/hooks/useMilestones';
 import { useAuthStore } from '@/stores/authStore';
-import Link from 'next/link';
-import { IconZap, IconBookOpen, IconGamepad, IconLightbulb } from '@/components/ui/Icons';
 import type {
   FullDashboard,
   DashboardStats,
@@ -67,48 +69,26 @@ function DashboardSkeleton() {
   );
 }
 
-function WelcomeBanner() {
-  return (
-    <div className="relative overflow-hidden p-6 rounded-2xl mb-6"
-      style={{ background: 'linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%)' }}>
-      {/* Decorative orbs */}
-      <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full bg-white opacity-[0.06]" />
-      <div className="absolute -bottom-6 -left-6 w-24 h-24 rounded-full bg-white opacity-[0.04]" />
-      <div className="relative flex items-center gap-4">
-        <div className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0"
-          style={{ backgroundColor: 'rgba(255,255,255,0.15)' }}>
-          <IconZap size={28} className="text-white" />
-        </div>
-        <div className="text-white flex-1">
-          <h2 className="text-xl font-bold mb-1">Chào mừng bạn đến với Deutschmeister!</h2>
-          <p className="text-white/80 text-[13px]">Bắt đầu hành trình học tiếng Đức của bạn ngay hôm nay</p>
-        </div>
-        <Link href="/topics"
-          className="px-5 py-2 rounded-xl font-bold text-[13px] shrink-0 transition-all hover:-translate-y-0.5 hover:shadow-lg"
-          style={{ backgroundColor: 'white', color: '#2563EB' }}>
-          Bắt đầu học
-        </Link>
-      </div>
-    </div>
-  );
-}
-
 export default function DashboardPage() {
   const { isAuthenticated, isLoading: authLoading, user, _hasHydrated } = useAuthStore();
   const router = useRouter();
   const { data, isLoading } = useFullDashboard();
+  useMilestoneCheck();
 
   // Must be before any early returns (Rules of Hooks)
   const todayLabel = useMemo(() => new Date().toLocaleDateString('vi-VN', {
     weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
   }), []);
 
-  // Redirect unauthenticated users to landing page
+  // Redirect unauthenticated users to landing page, or to onboarding if not completed
   useEffect(() => {
-    if (_hasHydrated && !isAuthenticated) {
+    if (!_hasHydrated) return;
+    if (!isAuthenticated) {
       router.replace('/');
+    } else if (user?.onboardingCompleted === false) {
+      router.replace('/onboarding');
     }
-  }, [_hasHydrated, isAuthenticated, router]);
+  }, [_hasHydrated, isAuthenticated, user, router]);
 
   if (authLoading || isLoading || !_hasHydrated) return (
     <div className="max-w-7xl mx-auto px-4 py-6">
@@ -127,7 +107,6 @@ export default function DashboardPage() {
   };
 
   const { stats } = dashboardData;
-  const isNewUser = stats.gamesPlayed === 0 && stats.totalWordsLearned === 0;
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-5 space-y-4">
@@ -143,7 +122,7 @@ export default function DashboardPage() {
               <>Bạn đã học <span className="text-orange-500 font-bold">{stats.streak} ngày</span> liên tiếp 🔥</>
             ) : stats.totalWordsLearned > 0 ? (
               <>Đã học <span className="text-blue-500 font-bold">{stats.totalWordsLearned} từ</span>. Tiếp tục nhé!</>
-            ) : isNewUser ? (
+            ) : stats.gamesPlayed === 0 ? (
               'Hôm nay là ngày tuyệt vời để bắt đầu học tiếng Đức!'
             ) : (
               'Hãy tiếp tục học để duy trì streak nhé!'
@@ -153,7 +132,11 @@ export default function DashboardPage() {
         <div className="text-right text-[12px] hidden sm:block" style={{ color: 'var(--theme-text-muted)' }}>{todayLabel}</div>
       </div>
 
-      {isNewUser && <WelcomeBanner />}
+      {/* ── First Day Journey (new users) ── */}
+      <FirstDayJourney />
+
+      {/* ── Daily Learning Path ── */}
+      <DailyPath />
 
       {/* ── Stats ── */}
       <StatsCards stats={dashboardData.stats} />
@@ -177,41 +160,8 @@ export default function DashboardPage() {
         <TopicProgressList data={dashboardData.topicProgress} limit={3} />
       </div>
 
-      {/* ── Getting started (new users only) ── */}
-      {isNewUser && (
-        <div className="p-5 rounded-2xl border" style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
-          <h3 className="text-[14px] font-bold mb-3 flex items-center gap-2" style={{ color: 'var(--theme-text-primary)' }}>
-            <span className="w-6 h-6 rounded-lg flex items-center justify-center"
-              style={{ background: 'linear-gradient(135deg, rgba(245,158,11,.15), rgba(245,158,11,.08))' }}>
-              <IconLightbulb size={13} style={{ color: '#F59E0B' }} />
-            </span>
-            Gợi ý để bắt đầu
-          </h3>
-          <div className="grid md:grid-cols-3 gap-3">
-            {[
-              { href: '/topics', icon: IconBookOpen, color: '#3B82F6', label: 'Học theo chủ đề', sub: '12 chủ đề A1 cơ bản', gradient: 'linear-gradient(135deg, #3B82F6, #6366F1)' },
-              { href: '/games/quick-quiz', icon: IconGamepad, color: '#10B981', label: 'Chơi Quick Quiz', sub: 'Luyện tập Der/Die/Das', gradient: 'linear-gradient(135deg, #10B981, #059669)' },
-              { href: '/words', icon: IconBookOpen, color: '#8B5CF6', label: 'Khám phá từ điển', sub: 'Tra cứu từ vựng', gradient: 'linear-gradient(135deg, #8B5CF6, #7C3AED)' },
-            ].map(item => {
-              const Ic = item.icon;
-              return (
-                <Link key={item.href} href={item.href}
-                  className="group flex items-center gap-3 p-3.5 rounded-xl transition-all hover:-translate-y-0.5 hover:shadow-md"
-                  style={{ backgroundColor: `${item.color}12`, border: `1px solid ${item.color}20` }}>
-                  <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-110"
-                    style={{ background: item.gradient }}>
-                    <Ic size={18} className="text-white" />
-                  </div>
-                  <div>
-                    <div className="font-semibold text-[13px]" style={{ color: item.color }}>{item.label}</div>
-                    <div className="text-[11px]" style={{ color: 'var(--theme-text-muted)' }}>{item.sub}</div>
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
-        </div>
-      )}
+      {/* Milestone celebration modal */}
+      <CelebrationModal />
     </div>
   );
 }

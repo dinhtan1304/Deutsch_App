@@ -134,8 +134,8 @@ export async function api<T>(
     credentials: 'include',
   });
 
-  // If unauthorized, try to refresh token
-  if (response.status === 401 && token) {
+  // If unauthorized, try to refresh token (even if token was null — e.g. after page refresh)
+  if (response.status === 401) {
     const newToken = await refreshAccessToken();
     if (newToken) {
       (headers as Record<string, string>)['Authorization'] = `Bearer ${newToken}`;
@@ -184,6 +184,12 @@ export const apiPost = <T>(endpoint: string, data?: any) =>
 export const apiPut = <T>(endpoint: string, data?: any) =>
   api<T>(endpoint, {
     method: 'PUT',
+    body: data ? JSON.stringify(data) : undefined,
+  });
+
+export const apiPatch = <T>(endpoint: string, data?: any) =>
+  api<T>(endpoint, {
+    method: 'PATCH',
     body: data ? JSON.stringify(data) : undefined,
   });
 

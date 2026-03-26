@@ -154,6 +154,36 @@ export const adminWordApi = {
     api<{ success: boolean }>(`/words/${id}`, { method: 'DELETE' }),
 };
 
+// ─── Admin Feedback API ──────────────────────────────────────────────────────
+
+export interface AdminFeedbackItem {
+  id: string;
+  type: 'bug' | 'suggestion' | 'other';
+  content: string;
+  pageUrl: string | null;
+  status: 'new' | 'reviewed' | 'resolved';
+  createdAt: string;
+  user: { id: string; email: string; name: string | null } | null;
+}
+
+export interface AdminFeedbackListResponse {
+  items: AdminFeedbackItem[];
+  total: number;
+  page: number;
+  totalPages: number;
+}
+
+export const adminFeedbackApi = {
+  getAll: (params?: { status?: string; type?: string; page?: number }) =>
+    apiGet<AdminFeedbackListResponse>(`/feedback/admin${toQS(params)}`),
+
+  updateStatus: (id: string, status: 'new' | 'reviewed' | 'resolved') =>
+    api<{ success: boolean }>(`/feedback/admin/${id}/status`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status }),
+    }),
+};
+
 // ─── Admin Grammar API ────────────────────────────────────────────────────────
 
 export interface CreateGrammarLessonPayload {

@@ -20,7 +20,7 @@ function getLocalProgress(topicId: string, totalWords: number): { wordsLearned: 
       const percent = totalWords > 0 ? Math.round((wordsLearned / totalWords) * 100) : 0;
       return { wordsLearned, percent };
     }
-  } catch (e) { console.error('Error reading localStorage:', e); }
+  } catch { /* corrupted localStorage – ignore */ }
   return { wordsLearned: 0, percent: 0 };
 }
 

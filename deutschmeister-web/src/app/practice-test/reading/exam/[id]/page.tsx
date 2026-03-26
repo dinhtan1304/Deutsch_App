@@ -320,6 +320,12 @@ export default function ExamReadingPage() {
     }));
   }, []);
 
+  useEffect(() => {
+    if (session?.status === 'GRADED') {
+      router.replace(`/practice-test/reading/exam/${id}/result`);
+    }
+  }, [session?.status, id, router]);
+
   if (isLoading) {
     return (
       <div className="py-6 flex items-center justify-center min-h-[60vh]">
@@ -339,12 +345,6 @@ export default function ExamReadingPage() {
       </div>
     );
   }
-
-  useEffect(() => {
-    if (session?.status === 'GRADED') {
-      router.replace(`/practice-test/reading/exam/${id}/result`);
-    }
-  }, [session?.status, id, router]);
 
   if (session.status === 'GRADED') return null;
 
