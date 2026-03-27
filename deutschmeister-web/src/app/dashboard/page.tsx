@@ -133,13 +133,13 @@ export default function DashboardPage() {
         <div className="text-right text-[12px] hidden sm:block" style={{ color: 'var(--theme-text-muted)' }}>{todayLabel}</div>
       </div>
 
-      {/* ── First Day Journey (new users) ── */}
-      <FirstDayJourney />
-
-      {/* ── Study Plan Widget ── */}
+      {/* ── Study Plan Widget (top priority) ── */}
       <StudyPlanWidget />
 
-      {/* ── Daily Learning Path ── */}
+      {/* ── First Day Journey (collapsible) ── */}
+      <FirstDayJourney />
+
+      {/* ── Daily Learning Path (collapsible) ── */}
       <DailyPath />
 
       {/* ── Stats ── */}

@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { useFullDashboard } from '@/hooks/useDashboard';
 import { useAuthStore } from '@/stores/authStore';
@@ -44,6 +45,7 @@ export function FirstDayJourney() {
   const { user } = useAuthStore();
   const { data } = useFullDashboard();
   const stats = data?.stats;
+  const [collapsed, setCollapsed] = useState(false);
 
   if (!stats) return null;
 
@@ -63,8 +65,11 @@ export function FirstDayJourney() {
         background: 'linear-gradient(135deg, rgba(59,130,246,0.06), rgba(139,92,246,0.04))',
       }}
     >
-      {/* Header */}
-      <div className="px-5 pt-5 pb-3">
+      {/* Header — clickable to toggle */}
+      <button
+        onClick={() => setCollapsed(!collapsed)}
+        className="w-full text-left px-5 pt-5 pb-3"
+      >
         <div className="flex items-center justify-between mb-1">
           <div className="flex items-center gap-3">
             <div
@@ -84,15 +89,28 @@ export function FirstDayJourney() {
               </p>
             </div>
           </div>
-          <span
-            className="text-[13px] font-bold px-3 py-1 rounded-lg"
-            style={{
-              background: completedCount > 0 ? 'rgba(34,197,94,0.12)' : 'rgba(59,130,246,0.12)',
-              color: completedCount > 0 ? '#22C55E' : '#3B82F6',
-            }}
-          >
-            {completedCount}/{STEPS.length}
-          </span>
+          <div className="flex items-center gap-2">
+            <span
+              className="text-[13px] font-bold px-3 py-1 rounded-lg"
+              style={{
+                background: completedCount > 0 ? 'rgba(34,197,94,0.12)' : 'rgba(59,130,246,0.12)',
+                color: completedCount > 0 ? '#22C55E' : '#3B82F6',
+              }}
+            >
+              {completedCount}/{STEPS.length}
+            </span>
+            <svg
+              width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+              className="shrink-0 transition-transform duration-300"
+              style={{
+                color: 'var(--theme-text-muted)',
+                transform: collapsed ? 'rotate(0deg)' : 'rotate(180deg)',
+              }}
+            >
+              <path d="m6 9 6 6 6-6" />
+            </svg>
+          </div>
         </div>
 
         {/* Progress bar */}
@@ -105,68 +123,76 @@ export function FirstDayJourney() {
             }}
           />
         </div>
-      </div>
+      </button>
 
-      {/* Steps */}
-      <div className="px-5 pb-5 space-y-2.5 mt-1">
-        {STEPS.map((step, i) => {
-          const done = step.checkFn(stats);
-          return (
-            <Link
-              key={i}
-              href={step.href}
-              className="flex items-center gap-4 p-3.5 rounded-xl transition-all duration-200 group"
-              style={{
-                backgroundColor: done ? 'rgba(34,197,94,0.06)' : 'var(--theme-bg-card)',
-                border: `1px solid ${done ? 'rgba(34,197,94,0.2)' : 'var(--theme-border)'}`,
-              }}
-            >
-              {/* Step number / check */}
-              <div
-                className="w-9 h-9 rounded-full flex items-center justify-center shrink-0 transition-transform group-hover:scale-110"
+      {/* Steps — collapsible */}
+      <div
+        className="overflow-hidden transition-all duration-300 ease-in-out"
+        style={{
+          maxHeight: collapsed ? 0 : 500,
+          opacity: collapsed ? 0 : 1,
+        }}
+      >
+        <div className="px-5 pb-5 space-y-2.5 mt-1">
+          {STEPS.map((step, i) => {
+            const done = step.checkFn(stats);
+            return (
+              <Link
+                key={i}
+                href={step.href}
+                className="flex items-center gap-4 p-3.5 rounded-xl transition-all duration-200 group"
                 style={{
-                  background: done
-                    ? 'linear-gradient(135deg, #22C55E, #16A34A)'
-                    : `${step.color}15`,
+                  backgroundColor: done ? 'rgba(34,197,94,0.06)' : 'var(--theme-bg-card)',
+                  border: `1px solid ${done ? 'rgba(34,197,94,0.2)' : 'var(--theme-border)'}`,
                 }}
               >
-                {done ? (
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
-                ) : (
-                  <span className="text-[13px] font-bold" style={{ color: step.color }}>
-                    {i + 1}
-                  </span>
-                )}
-              </div>
-
-              {/* Text */}
-              <div className="flex-1 min-w-0">
+                {/* Step number / check */}
                 <div
-                  className={`text-[14px] font-semibold ${done ? 'line-through' : ''}`}
-                  style={{ color: done ? 'var(--theme-text-muted)' : 'var(--theme-text-primary)' }}
+                  className="w-9 h-9 rounded-full flex items-center justify-center shrink-0 transition-transform group-hover:scale-110"
+                  style={{
+                    background: done
+                      ? 'linear-gradient(135deg, #22C55E, #16A34A)'
+                      : `${step.color}15`,
+                  }}
                 >
-                  {step.title}
+                  {done ? (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                  ) : (
+                    <span className="text-[13px] font-bold" style={{ color: step.color }}>
+                      {i + 1}
+                    </span>
+                  )}
                 </div>
-                <div className="text-[12px]" style={{ color: 'var(--theme-text-muted)' }}>
-                  {step.description}
-                </div>
-              </div>
 
-              {/* Arrow */}
-              {!done && (
-                <svg
-                  width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={step.color}
-                  strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-                  className="shrink-0 opacity-50 group-hover:opacity-100 transition-opacity"
-                >
-                  <path d="M9 18l6-6-6-6" />
-                </svg>
-              )}
-            </Link>
-          );
-        })}
+                {/* Text */}
+                <div className="flex-1 min-w-0">
+                  <div
+                    className={`text-[14px] font-semibold ${done ? 'line-through' : ''}`}
+                    style={{ color: done ? 'var(--theme-text-muted)' : 'var(--theme-text-primary)' }}
+                  >
+                    {step.title}
+                  </div>
+                  <div className="text-[12px]" style={{ color: 'var(--theme-text-muted)' }}>
+                    {step.description}
+                  </div>
+                </div>
+
+                {/* Arrow */}
+                {!done && (
+                  <svg
+                    width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={step.color}
+                    strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                    className="shrink-0 opacity-50 group-hover:opacity-100 transition-opacity"
+                  >
+                    <path d="M9 18l6-6-6-6" />
+                  </svg>
+                )}
+              </Link>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
