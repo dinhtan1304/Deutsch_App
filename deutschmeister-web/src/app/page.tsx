@@ -180,7 +180,7 @@ export default function HomePage() {
             <span style={{ fontWeight: 800, fontSize: 17, color: 'white', letterSpacing: '-0.3px' }}>Deutschmeister</span>
           </div>
           <div className="hide-mobile" style={{ display: 'flex', alignItems: 'center', gap: 32, marginRight: 32 }}>
-            {[['Tính năng', '#features'], ['AI', '#ai'], ['Luyện thi', '#exam'], ['Trò chơi', '#games']].map(([label, href]) => (
+            {[['Tính năng', '#features'], ['AI', '#ai'], ['Luyện thi', '#exam'], ['Câu chuyện', '#story']].map(([label, href]) => (
               <a key={href} href={href} style={{ color: 'rgba(255,255,255,.65)', fontSize: 14, fontWeight: 500, textDecoration: 'none', transition: 'color .2s' }}
                 onMouseEnter={e => (e.currentTarget.style.color = 'white')}
                 onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,.65)')}>
@@ -198,7 +198,7 @@ export default function HomePage() {
         </div>
         {menuOpen && (
           <div style={{ background: 'rgba(10,15,30,.98)', padding: '16px 24px 24px', borderTop: '1px solid rgba(255,255,255,.06)' }}>
-            {[['Tính năng', '#features'], ['AI', '#ai'], ['Luyện thi', '#exam'], ['Trò chơi', '#games']].map(([label, href]) => (
+            {[['Tính năng', '#features'], ['AI', '#ai'], ['Luyện thi', '#exam'], ['Câu chuyện', '#story']].map(([label, href]) => (
               <a key={href} href={href} onClick={() => setMenuOpen(false)} style={{ display: 'block', padding: '12px 0', color: 'rgba(255,255,255,.8)', fontSize: 15, fontWeight: 500, textDecoration: 'none', borderBottom: '1px solid rgba(255,255,255,.06)' }}>{label}</a>
             ))}
             <div style={{ display: 'flex', gap: 10, marginTop: 16 }}>
@@ -417,6 +417,108 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ─── Story ──────────────────────────────────────────────────────────── */}
+      <section id="story" style={{ padding: '96px 24px', maxWidth: 860, margin: '0 auto' }}>
+        <div style={{ textAlign: 'center', marginBottom: 56 }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 14px', borderRadius: 100, background: 'rgba(34,197,94,.12)', border: '1px solid rgba(34,197,94,.3)', fontSize: 12.5, fontWeight: 700, color: '#4ade80', marginBottom: 16 }}>
+            CÂU CHUYỆN CỦA CHÚNG TÔI
+          </div>
+          <h2 className="section-title" style={{ fontSize: '2.25rem', fontWeight: 900, letterSpacing: '-1px', marginBottom: 12 }}>
+            Từ nỗi đau <span className="gradient-text">đến Deutschmeister</span>
+          </h2>
+        </div>
+
+        <div style={{ position: 'relative' }}>
+          {/* Timeline line */}
+          <div style={{ position: 'absolute', left: 23, top: 0, bottom: 0, width: 2, background: 'linear-gradient(180deg, rgba(99,102,241,.3), rgba(34,197,94,.3), rgba(245,158,11,.3))', borderRadius: 2 }} className="hide-mobile" />
+
+          {/* Story items */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 36 }}>
+
+            {/* 1 — Nỗi đau */}
+            <div style={{ display: 'flex', gap: 20 }}>
+              <div className="hide-mobile" style={{ width: 48, display: 'flex', justifyContent: 'center', flexShrink: 0 }}>
+                <div style={{ width: 48, height: 48, borderRadius: 14, background: 'linear-gradient(135deg, #EF4444, #F97316)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, zIndex: 1, boxShadow: '0 4px 20px rgba(239,68,68,.3)' }}>
+                  {'\uD83D\uDE2B'}
+                </div>
+              </div>
+              <div className="glow-border" style={{ flex: 1, borderRadius: 20, padding: '24px 28px', background: 'rgba(239,68,68,.04)' }}>
+                <div style={{ fontSize: 12, fontWeight: 700, color: '#F87171', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Khởi đầu — Nỗi đau thật sự</div>
+                <p style={{ fontSize: 14.5, color: 'rgba(255,255,255,.7)', lineHeight: 1.85, margin: 0 }}>
+                  Mình bắt đầu học tiếng Đức từ con số 0 — không biết gì ngoài &quot;Hallo&quot; và &quot;Danke&quot;. Mở sách ra, đập vào mặt là <strong style={{ color: '#F87171' }}>der, die, das</strong> — ba cái giống mà tiếng Việt không hề có. Mình nhớ cái bàn là &quot;der Tisch&quot; nhưng cái ghế lại là &quot;der Stuhl&quot;, còn cái cửa thì &quot;die Tür&quot;. Chẳng có quy luật nào cả.
+                </p>
+                <p style={{ fontSize: 14.5, color: 'rgba(255,255,255,.7)', lineHeight: 1.85, margin: '14px 0 0' }}>
+                  Mình dùng Duolingo, Anki, Google Translate — mỗi cái một ít nhưng không cái nào đủ. Duolingo thì không giải thích ngữ pháp cho người Việt. Anki thì quá khô khan. Tìm tài liệu tiếng Việt thì ít ỏi, rời rạc, không có hệ thống.
+                </p>
+              </div>
+            </div>
+
+            {/* 2 — Thực tế */}
+            <div style={{ display: 'flex', gap: 20 }}>
+              <div className="hide-mobile" style={{ width: 48, display: 'flex', justifyContent: 'center', flexShrink: 0 }}>
+                <div style={{ width: 48, height: 48, borderRadius: 14, background: 'linear-gradient(135deg, #F59E0B, #EF4444)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, zIndex: 1, boxShadow: '0 4px 20px rgba(245,158,11,.3)' }}>
+                  {'\uD83D\uDCA1'}
+                </div>
+              </div>
+              <div className="glow-border" style={{ flex: 1, borderRadius: 20, padding: '24px 28px', background: 'rgba(245,158,11,.04)' }}>
+                <div style={{ fontSize: 12, fontWeight: 700, color: '#FBBF24', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Thực tế phũ phàng</div>
+                <p style={{ fontSize: 14.5, color: 'rgba(255,255,255,.7)', lineHeight: 1.85, margin: 0 }}>
+                  Khi mình chuẩn bị thi Goethe A1, mình mới nhận ra: <strong style={{ color: '#FBBF24' }}>không có công cụ nào tạo đề thi chuẩn format Goethe bằng tiếng Việt</strong>. Muốn luyện Lesen Teil 1? Phải tự tìm đề cũ trên mạng, photocopy, tự chấm. Muốn luyện Schreiben? Viết xong không ai sửa, không biết sai ở đâu.
+                </p>
+                <p style={{ fontSize: 14.5, color: 'rgba(255,255,255,.7)', lineHeight: 1.85, margin: '14px 0 0' }}>
+                  Luyện nói thì càng khó hơn — không có bạn học, không dám nói sai, mở miệng ra chỉ nhớ mỗi &quot;Ich heiße...&quot; rồi đứng hình. Mình học một mình, đôi khi nản đến mức muốn bỏ cuộc.
+                </p>
+              </div>
+            </div>
+
+            {/* 3 — Ý tưởng */}
+            <div style={{ display: 'flex', gap: 20 }}>
+              <div className="hide-mobile" style={{ width: 48, display: 'flex', justifyContent: 'center', flexShrink: 0 }}>
+                <div style={{ width: 48, height: 48, borderRadius: 14, background: 'linear-gradient(135deg, #6366F1, #8B5CF6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, zIndex: 1, boxShadow: '0 4px 20px rgba(99,102,241,.3)' }}>
+                  {'\u2728'}
+                </div>
+              </div>
+              <div className="glow-border" style={{ flex: 1, borderRadius: 20, padding: '24px 28px', background: 'rgba(99,102,241,.04)' }}>
+                <div style={{ fontSize: 12, fontWeight: 700, color: '#A78BFA', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Ý tưởng ra đời</div>
+                <p style={{ fontSize: 14.5, color: 'rgba(255,255,255,.7)', lineHeight: 1.85, margin: 0 }}>
+                  Mình tự hỏi: <em style={{ color: '#C4B5FD' }}>&quot;Nếu có một app mà vừa học từ, vừa chơi game ôn tập, vừa tạo đề thi chuẩn Goethe, lại còn có AI chấm bài viết và nói — tất cả bằng tiếng Việt thì sao?&quot;</em>
+                </p>
+                <p style={{ fontSize: 14.5, color: 'rgba(255,255,255,.7)', lineHeight: 1.85, margin: '14px 0 0' }}>
+                  Mình là developer, và mình quyết định tự xây cái mà mình cần. Không phải vì muốn kinh doanh, mà vì thật sự không có công cụ nào phù hợp. Mỗi tính năng trong Deutschmeister đều sinh ra từ một nỗi đau thật: không nhớ nổi giống của danh từ → có Gender Quiz. Viết xong không ai sửa → có AI chấm bài. Học từ xong quên ngay → có SRS nhắc nhở.
+                </p>
+              </div>
+            </div>
+
+            {/* 4 — Deutschmeister */}
+            <div style={{ display: 'flex', gap: 20 }}>
+              <div className="hide-mobile" style={{ width: 48, display: 'flex', justifyContent: 'center', flexShrink: 0 }}>
+                <div style={{ width: 48, height: 48, borderRadius: 14, background: 'linear-gradient(135deg, #22C55E, #14B8A6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, zIndex: 1, boxShadow: '0 4px 20px rgba(34,197,94,.3)' }}>
+                  {'\uD83D\uDE80'}
+                </div>
+              </div>
+              <div style={{ flex: 1, borderRadius: 20, padding: '24px 28px', background: 'rgba(34,197,94,.06)', border: '1px solid rgba(34,197,94,.2)', boxShadow: '0 0 20px rgba(34,197,94,.08)' }}>
+                <div style={{ fontSize: 12, fontWeight: 700, color: '#4ADE80', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Deutschmeister ra đời</div>
+                <p style={{ fontSize: 14.5, color: 'rgba(255,255,255,.7)', lineHeight: 1.85, margin: 0 }}>
+                  Deutschmeister không phải sản phẩm của một công ty lớn. Nó là sản phẩm của <strong style={{ color: '#4ADE80' }}>một người học tiếng Đức, xây cho những người học tiếng Đức</strong>. Mỗi dòng code, mỗi tính năng đều xuất phát từ câu hỏi: &quot;Cái này có giúp mình học tốt hơn không?&quot;
+                </p>
+                <p style={{ fontSize: 14.5, color: 'rgba(255,255,255,.7)', lineHeight: 1.85, margin: '14px 0 0' }}>
+                  Mình biết con đường học tiếng Đức rất dài và đôi khi cô đơn. Nhưng mình hy vọng với Deutschmeister, bạn sẽ có một người bạn đồng hành — không hoàn hảo, nhưng luôn ở đó, 24/7, sẵn sàng tạo đề cho bạn luyện, sửa bài cho bạn học, và nhắc bạn ôn từ mỗi ngày.
+                </p>
+                <div style={{ marginTop: 20, padding: '16px 20px', borderRadius: 14, background: 'rgba(34,197,94,.08)', border: '1px solid rgba(34,197,94,.15)' }}>
+                  <p style={{ fontSize: 14, color: 'rgba(255,255,255,.6)', lineHeight: 1.8, margin: 0, fontStyle: 'italic' }}>
+                    &quot;Tiếng Đức khó, nhưng không phải không học được. Chỉ là cần đúng công cụ và đủ kiên nhẫn.&quot;
+                  </p>
+                  <p style={{ fontSize: 13, color: '#4ADE80', fontWeight: 700, margin: '10px 0 0' }}>
+                    — Yuii, Developer &amp; German Learner
+                  </p>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
       {/* ─── Final CTA ──────────────────────────────────────────────────────── */}
       <section style={{ padding: '96px 24px', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 600, height: 600, borderRadius: '50%', background: 'radial-gradient(circle, rgba(99,102,241,.15) 0%, transparent 70%)', pointerEvents: 'none' }} />
@@ -532,13 +634,34 @@ export default function HomePage() {
             <Link href="/auth/register" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '10px 18px', borderRadius: 10, background: 'linear-gradient(135deg, #6366F1, #8B5CF6)', color: 'white', fontWeight: 700, fontSize: 13, textDecoration: 'none', boxShadow: '0 4px 16px rgba(99,102,241,.35)' }}>
               Bắt đầu ngay <IconArrow />
             </Link>
+
+            <h4 style={{ fontSize: 12, fontWeight: 800, color: 'rgba(255,255,255,.35)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 12, marginTop: 28 }}>Chính sách</h4>
+            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 11 }}>
+              {[
+                ['Chính sách bảo mật', '/privacy'],
+                ['Điều khoản sử dụng', '/terms'],
+              ].map(([label, href]) => (
+                <li key={label}>
+                  <Link href={href} style={{ fontSize: 13.5, color: 'rgba(255,255,255,.5)', textDecoration: 'none', transition: 'color .2s' }}
+                    onMouseEnter={e => (e.currentTarget.style.color = 'rgba(255,255,255,.85)')}
+                    onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,.5)')}>
+                    {label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
 
         {/* Bottom bar */}
         <div style={{ borderTop: '1px solid rgba(255,255,255,.05)', padding: '20px 24px' }}>
           <div style={{ maxWidth: 1200, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
-            <div style={{ fontSize: 12.5, color: 'rgba(255,255,255,.25)' }}>© 2025 – 2026 Deutschmeister · Made with Yuii in Vietnam</div>
+            <div style={{ fontSize: 12.5, color: 'rgba(255,255,255,.25)', display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+              <span>© 2025 – 2026 Deutschmeister · Made with Yuii in Vietnam</span>
+              <span style={{ color: 'rgba(255,255,255,.12)' }}>|</span>
+              <Link href="/privacy" style={{ color: 'rgba(255,255,255,.3)', textDecoration: 'none', fontSize: 12 }}>Bảo mật</Link>
+              <Link href="/terms" style={{ color: 'rgba(255,255,255,.3)', textDecoration: 'none', fontSize: 12 }}>Điều khoản</Link>
+            </div>
             <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
               {[
                 { label: 'A1', color: '#22C55E' },

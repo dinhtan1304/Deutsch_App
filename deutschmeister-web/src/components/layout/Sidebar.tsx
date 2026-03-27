@@ -69,6 +69,7 @@ const navSections: NavSection[] = [
   {
     label: 'Luyện thi',
     items: [
+      { label: 'Study Plan', labelVi: 'Lịch học', icon: IconTarget, href: '/study-plan' },
       { label: 'Grammar', labelVi: 'Ngữ pháp', icon: IconBookOpen, href: '/grammar' },
       {
         label: 'Test', labelVi: 'Luyện thi', icon: IconGraduationCap, href: '/practice-test',

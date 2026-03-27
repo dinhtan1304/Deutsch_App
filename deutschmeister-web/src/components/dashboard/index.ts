@@ -6,3 +6,4 @@ export { RecentActivityFeed } from './RecentActivityFeed';
 export { QuickActions } from './QuickActions';
 export { DailyPath } from './DailyPath';
 export { FirstDayJourney } from './FirstDayJourney';
+export { StudyPlanWidget } from './StudyPlanWidget';

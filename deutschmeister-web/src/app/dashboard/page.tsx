@@ -14,6 +14,7 @@ import {
 import { WeeklyChallengesWidget } from '@/components/dashboard/WeeklyChallengesWidget';
 import { LeaderboardWidget } from '@/components/dashboard/LeaderboardWidget';
 import { FirstDayJourney } from '@/components/dashboard/FirstDayJourney';
+import { StudyPlanWidget } from '@/components/dashboard/StudyPlanWidget';
 import { CelebrationModal } from '@/components/ui/CelebrationModal';
 import { useFullDashboard } from '@/hooks/useDashboard';
 import { useMilestoneCheck } from '@/hooks/useMilestones';
@@ -134,6 +135,9 @@ export default function DashboardPage() {
 
       {/* ── First Day Journey (new users) ── */}
       <FirstDayJourney />
+
+      {/* ── Study Plan Widget ── */}
+      <StudyPlanWidget />
 
       {/* ── Daily Learning Path ── */}
       <DailyPath />
