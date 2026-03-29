@@ -106,7 +106,10 @@
       "Bash(ls -la /e/Deutsch_App/deutschmeister-api/src/modules/exam-reading/*.ts)",
       "Bash(grep -r \"export class.*Service\" /e/Deutsch_App/deutschmeister-api/src/modules/*/*.service.ts)",
       "Bash(ls -la /e/Deutsch_App/deutschmeister-api/src/modules/grammar/*.ts)",
-      "Bash(ls -la /e/Deutsch_App/deutschmeister-web/src/hooks/use*.ts)"
+      "Bash(ls -la /e/Deutsch_App/deutschmeister-web/src/hooks/use*.ts)",
+      "Bash(npx ts-node -e \":*)",
+      "Bash(grep -c \"level: ''A2''\" \"e:/Deutsch_App/deutschmeister-api/prisma/seeds/words-part19.seed.ts\")",
+      "Bash(grep -c \"level: ''B1''\" \"e:/Deutsch_App/deutschmeister-api/prisma/seeds/words-part19.seed.ts\")"
     ],
     "additionalDirectories": [
       "e:\\Deutsch_App\\.claude"
