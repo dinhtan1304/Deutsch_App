@@ -4,7 +4,14 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useWritingSession, useSaveDraft, useSubmitWriting } from '@/hooks/useWriting';
-import { IconBookOpen, IconChevronLeft, IconEye, IconEyeOff, IconLoader, IconPenLine, IconSave, IconSend } from '../icons';
+import { IconBookOpen, IconChevronDown, IconChevronLeft, IconEye, IconEyeOff, IconLoader, IconPenLine, IconSave, IconSend } from '../icons';
+
+function IconChevronUp({ size = 14 }: { size?: number }) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}><polyline points="18 15 12 9 6 15" /></svg>;
+}
+function IconPin({ size = 13 }: { size?: number }) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}><path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 1 1 0 0 0 1-1V4a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1 1 1 0 0 1 1 1z"/></svg>;
+}
 
 // ─── Helpers ───
 function countWords(text: string): number {
@@ -35,9 +42,24 @@ export default function WritingEditorPage() {
   const [showHints, setShowHints] = useState(true);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [stickyPromptOpen, setStickyPromptOpen] = useState(false);
+  const [showStickyPrompt, setShowStickyPrompt] = useState(false);
+  const promptRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => { if (session?.userText) setText(session.userText); }, [session?.userText]);
   useEffect(() => { if (session?.status === 'GRADED') router.replace(`/practice-test/writing/${id}/result`); }, [session?.status, id, router]);
+
+  // Show sticky prompt bar on mobile when prompt scrolls out of view
+  useEffect(() => {
+    const el = promptRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setShowStickyPrompt(!entry.isIntersecting),
+      { threshold: 0, rootMargin: '-80px 0px 0px 0px' }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [session]);
 
   // Auto-save every 30s sau lần cuối user gõ phím
   useEffect(() => {
@@ -141,12 +163,44 @@ export default function WritingEditorPage() {
           </div>
         </div>
 
+        {/* ── Sticky prompt bar on mobile (appears when prompt scrolls away) ── */}
+        {showStickyPrompt && (
+          <div className="sticky z-20 -mx-6 lg:hidden px-6 pb-3" style={{ top: '64px', paddingTop: '8px' }}>
+            <div className="rounded-2xl border overflow-hidden transition-all"
+              style={{
+                borderColor: 'rgba(59,130,246,.35)',
+                backgroundColor: 'var(--theme-bg-card)',
+                boxShadow: '0 4px 20px rgba(0,0,0,.1)',
+              }}>
+              <button
+                onClick={() => setStickyPromptOpen(o => !o)}
+                className="w-full flex items-center gap-2 px-3 py-2.5 text-left transition-all"
+              >
+                <IconPin size={12} />
+                <IconBookOpen size={12} />
+                <span className="text-[12px] font-bold truncate flex-1" style={{ color: 'var(--theme-text-primary)' }}>
+                  Aufgabe / Đề bài
+                </span>
+                {stickyPromptOpen ? <IconChevronUp size={14} /> : <IconChevronDown size={14} />}
+              </button>
+              {stickyPromptOpen && (
+                <div className="border-t px-3 pb-3 pt-2" style={{ borderColor: 'var(--theme-border)', maxHeight: '40vh', overflowY: 'auto' }}>
+                  <p className="text-[12px] leading-relaxed whitespace-pre-line"
+                    style={{ color: 'var(--theme-text-primary)' }}>
+                    {session.prompt}
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
 
           {/* Left: Prompt + Hints */}
           <div className="lg:col-span-2 space-y-3 lg:sticky lg:top-20 lg:self-start">
             {/* Prompt */}
-            <div className="rounded-xl border-2 p-4" style={{ borderColor: 'rgba(59,130,246,.3)', backgroundColor: 'rgba(59,130,246,.04)' }}>
+            <div ref={promptRef} className="rounded-xl border-2 p-4" style={{ borderColor: 'rgba(59,130,246,.3)', backgroundColor: 'rgba(59,130,246,.04)' }}>
               <h3 className="text-[12px] font-bold uppercase tracking-wider mb-2 flex items-center gap-1.5" style={{ color: '#3B82F6' }}>
                 <IconBookOpen size={13} /> Aufgabe / Đề bài
               </h3>

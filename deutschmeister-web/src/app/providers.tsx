@@ -15,11 +15,10 @@ import { AchievementToastProvider } from '@/components/ui/AchievementToast';
 
 function handleGlobalError(error: unknown) {
   if (error instanceof ApiError && error.status === 401) {
+    // Don't hard-redirect here — let the onAuthExpired callback in authStore
+    // handle the state change, and let each page's own auth guard redirect.
+    // Hard redirect was causing flash-to-login on page refresh before initAuth could complete.
     clearTokens();
-    if (typeof window !== 'undefined') {
-      const isAuthPage = window.location.pathname.startsWith('/auth');
-      if (!isAuthPage) window.location.href = '/auth/login';
-    }
   }
 }
 
@@ -43,10 +42,9 @@ function handleGlobalError(error: unknown) {
 function AppInitializer({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuthStore();
   const { loadSettings, syncFromBackend, settings, isLoaded } = useSettingsStore();
-  // Prevents the double GET /users/settings that would otherwise fire on mount for
-  // authenticated users: Step 3 (mount effect) and Step 4 (isAuthenticated effect)
-  // both run on the same render when the user is already logged in.
   const hasSyncedRef = useRef(false);
+  // Block rendering until auth verification completes (prevents flash-to-login on refresh)
+  const [authReady, setAuthReady] = useState(false);
 
   // Step 1: Load settings from localStorage (synchronous, instant)
   useEffect(() => {
@@ -59,21 +57,26 @@ function AppInitializer({ children }: { children: React.ReactNode }) {
   }, [isLoaded, settings.theme]);
 
   // Step 3: Verify token + sync backend settings on every page load/refresh
+  // BLOCKS children rendering until complete to prevent race conditions
   useEffect(() => {
     const run = async () => {
       const zustandIsAuth = useAuthStore.getState().isAuthenticated;
-      if (!zustandIsAuth) return;
-      // Mark synced BEFORE the first await so Step 4's synchronous check sees it
-      // and skips its own fetch — prevents two simultaneous GET /users/settings
-      // when the user is already authenticated on mount.
+      if (!zustandIsAuth) {
+        setAuthReady(true);
+        return;
+      }
+
       hasSyncedRef.current = true;
 
       // Verify token is still valid (refresh via httpOnly cookie)
       const tokenValid = await initAuth();
-      if (!tokenValid) { hasSyncedRef.current = false; return; } // token expired → let Step 4 retry after re-login
+      if (!tokenValid) {
+        hasSyncedRef.current = false;
+        setAuthReady(true);
+        return;
+      }
 
       // Token is valid — fetch backend settings and merge
-      // This syncs theme/soundEnabled/dailyGoal from server so device-switching works
       try {
         const backendSettings = await usersApi.getSettings();
         const picked = BACKEND_SETTINGS_KEYS.reduce((acc, key) => {
@@ -85,14 +88,15 @@ function AppInitializer({ children }: { children: React.ReactNode }) {
       } catch {
         // Backend unavailable — continue with localStorage values
       }
+
+      setAuthReady(true);
     };
 
     run();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Only on mount — intentionally not re-running on isAuthenticated change
+  }, []); // Only on mount
 
   // Step 4: When user logs in during the session, also sync backend settings.
-  // Skipped on initial mount if Step 3 already claimed the sync (hasSyncedRef).
   useEffect(() => {
     if (!isAuthenticated || hasSyncedRef.current) return;
     hasSyncedRef.current = true;
@@ -105,8 +109,12 @@ function AppInitializer({ children }: { children: React.ReactNode }) {
         }, {} as Partial<AppSettings>);
         syncFromBackend(picked);
       })
-      .catch(() => {}); // Silently ignore
+      .catch(() => {});
   }, [isAuthenticated, syncFromBackend]);
+
+  // Don't render children until auth verification is done
+  // This prevents pages from firing API calls before the access token is refreshed
+  if (!authReady) return null;
 
   return <>{children}</>;
 }

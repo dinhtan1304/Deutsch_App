@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useExamReadingSession, useSubmitExamReading } from '@/hooks/useExamReading';
@@ -21,6 +21,15 @@ function IconVolume2({ size = 14 }: { size?: number }) {
 }
 function IconCheck({ size = 10 }: { size?: number }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}><polyline points="20 6 9 17 4 12" /></svg>;
+}
+function IconChevronDown({ size = 14 }: { size?: number }) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}><polyline points="6 9 12 15 18 9" /></svg>;
+}
+function IconChevronUp({ size = 14 }: { size?: number }) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}><polyline points="18 15 12 9 6 15" /></svg>;
+}
+function IconPin({ size = 13 }: { size?: number }) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}><path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 1 1 0 0 0 1-1V4a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1 1 1 0 0 1 1 1z"/></svg>;
 }
 
 const ACCENT = '#22C55E';
@@ -312,6 +321,9 @@ export default function ExamReadingPage() {
   const [currentTeil, setCurrentTeil] = useState(0);
   const [error, setError] = useState('');
   const [confirmSubmit, setConfirmSubmit] = useState(false);
+  const [stickyPromptOpen, setStickyPromptOpen] = useState(false);
+  const teilHeaderRef = useRef<HTMLDivElement>(null);
+  const [showStickyPrompt, setShowStickyPrompt] = useState(false);
 
   const handleAnswer = useCallback((teilNumber: number, qid: string, val: string) => {
     setUserAnswers(prev => ({
@@ -325,6 +337,21 @@ export default function ExamReadingPage() {
       router.replace(`/practice-test/reading/exam/${id}/result`);
     }
   }, [session?.status, id, router]);
+
+  // Show sticky prompt bar when the original teil header scrolls out of view
+  useEffect(() => {
+    const el = teilHeaderRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setShowStickyPrompt(!entry.isIntersecting),
+      { threshold: 0, rootMargin: '-80px 0px 0px 0px' }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [currentTeil]);
+
+  // Close sticky prompt when switching Teil
+  useEffect(() => { setStickyPromptOpen(false); }, [currentTeil]);
 
   if (isLoading) {
     return (
@@ -429,7 +456,7 @@ export default function ExamReadingPage() {
       </div>
 
       {/* ── Teil header box ── */}
-      <div className="rounded-2xl border mb-5"
+      <div ref={teilHeaderRef} className="rounded-2xl border mb-5"
         style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)', overflow: 'hidden' }}>
         {/* Title row */}
         <div className="flex items-center gap-2 px-4 pt-3 pb-2 border-b" style={{ borderColor: 'var(--theme-border)' }}>
@@ -458,6 +485,57 @@ export default function ExamReadingPage() {
           </p>
         </div>
       </div>
+
+      {/* ── Sticky prompt bar (appears when header scrolls away) ── */}
+      {showStickyPrompt && (
+        <div className="sticky z-20 -mx-6 lg:-mx-8 xl:-mx-10 px-6 lg:px-8 xl:px-10 pb-3" style={{ top: '64px', paddingTop: '8px' }}>
+          <div className="rounded-2xl border overflow-hidden transition-all"
+            style={{
+              borderColor: 'rgba(34,197,94,.35)',
+              backgroundColor: 'var(--theme-bg-card)',
+              boxShadow: '0 4px 20px rgba(0,0,0,.1)',
+            }}>
+            {/* Collapsed bar */}
+            <button
+              onClick={() => setStickyPromptOpen(o => !o)}
+              className="w-full flex items-center gap-2 px-3 py-2.5 text-left transition-all"
+            >
+              <span className="w-6 h-6 rounded-md flex items-center justify-center text-[10px] font-extrabold text-white shrink-0"
+                style={{ background: GRADIENT }}>{teil.number}</span>
+              <IconPin size={12} />
+              <span className="text-[12px] font-bold truncate flex-1" style={{ color: 'var(--theme-text-primary)' }}>
+                {TASK_TYPE_LABELS[teil.taskType] || teil.taskType}
+                <span className="font-normal ml-1.5" style={{ color: 'var(--theme-text-muted)' }}>— Đề bài</span>
+              </span>
+              <span className="text-[11px] font-semibold shrink-0 mr-1" style={{ color: teilDone ? '#22C55E' : 'var(--theme-text-muted)' }}>
+                {teilAnsweredCount}/{teilTotalQ}
+              </span>
+              {stickyPromptOpen ? <IconChevronUp size={14} /> : <IconChevronDown size={14} />}
+            </button>
+            {/* Expanded content */}
+            {stickyPromptOpen && (
+              <div className="border-t px-3 pb-3 pt-2 space-y-2" style={{ borderColor: 'var(--theme-border)', maxHeight: '45vh', overflowY: 'auto' }}>
+                <p className="text-[12px] italic leading-relaxed" style={{ color: 'var(--theme-text-secondary)', fontFamily: 'Georgia, serif' }}>
+                  {teil.instruction}
+                </p>
+                {/* Show texts/passages for the current teil */}
+                {teil.texts.map(t => (
+                  <div key={t.id} className="rounded-xl border p-3" style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-secondary)' }}>
+                    {t.label && (
+                      <span className="inline-block text-[10px] font-bold px-2 py-0.5 rounded-md text-white mb-1.5"
+                        style={{ background: GRADIENT }}>{t.label}</span>
+                    )}
+                    {t.title && <p className="text-[12px] font-bold mb-1" style={{ color: 'var(--theme-text-primary)' }}>{t.title}</p>}
+                    <p className="text-[12px] leading-relaxed whitespace-pre-wrap" style={{ color: 'var(--theme-text-primary)', fontFamily: 'Georgia, serif' }}>
+                      {t.content}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* ── Teil content ── */}
       <TeilRenderer

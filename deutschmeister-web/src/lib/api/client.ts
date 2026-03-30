@@ -87,15 +87,18 @@ async function refreshAccessToken(): Promise<string | null> {
       });
 
       if (!response.ok) {
+        console.warn('[Auth] Refresh failed:', response.status, await response.text().catch(() => ''));
         clearTokens();
         onAuthExpiredCallback?.();
         return null;
       }
 
       const data = await response.json();
+      console.log('[Auth] Refresh success, got new access token');
       setAccessToken(data.accessToken);
       return data.accessToken;
-    } catch {
+    } catch (err) {
+      console.warn('[Auth] Refresh error:', err);
       clearTokens();
       onAuthExpiredCallback?.();
       return null;

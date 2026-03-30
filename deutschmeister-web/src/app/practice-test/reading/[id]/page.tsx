@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useReadingSession, useSubmitReading } from '@/hooks/useReading';
@@ -11,6 +11,16 @@ import {
 
 const ACCENT = '#22C55E';
 const GRADIENT = 'linear-gradient(135deg, #22C55E, #14B8A6)';
+
+function IconChevronDown({ size = 14 }: { size?: number }) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}><polyline points="6 9 12 15 18 9" /></svg>;
+}
+function IconChevronUp({ size = 14 }: { size?: number }) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}><polyline points="18 15 12 9 6 15" /></svg>;
+}
+function IconPin({ size = 13 }: { size?: number }) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}><path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 1 1 0 0 0 1-1V4a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1 1 1 0 0 1 1 1z"/></svg>;
+}
 
 function speakText(text: string) {
   if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
@@ -192,6 +202,9 @@ export default function ReadingSessionPage() {
   const submitMutation = useSubmitReading();
   const [userAnswers, setUserAnswers] = useState<Record<string, string>>({});
   const [isVocabOpen, setIsVocabOpen] = useState(false);
+  const [stickyPromptOpen, setStickyPromptOpen] = useState(false);
+  const [showStickyPrompt, setShowStickyPrompt] = useState(false);
+  const passageRef = useRef<HTMLDivElement>(null);
 
   // If already graded, redirect to result page
   useEffect(() => {
@@ -199,6 +212,18 @@ export default function ReadingSessionPage() {
       router.replace(`/practice-test/reading/${id}/result`);
     }
   }, [session?.status, id, router]);
+
+  // Show sticky prompt bar when passage scrolls out of view
+  useEffect(() => {
+    const el = passageRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setShowStickyPrompt(!entry.isIntersecting),
+      { threshold: 0, rootMargin: '-80px 0px 0px 0px' }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [session]);
 
   const handleSelect = (questionId: string, optionId: string) => {
     setUserAnswers(prev => ({ ...prev, [questionId]: optionId }));
@@ -260,7 +285,50 @@ export default function ReadingSessionPage() {
       </div>
 
       {/* Passage */}
-      <PassageCard title={session.title} passage={session.passage} />
+      <div ref={passageRef}>
+        <PassageCard title={session.title} passage={session.passage} />
+      </div>
+
+      {/* ── Sticky prompt bar (appears when passage scrolls away) ── */}
+      {showStickyPrompt && (
+        <div className="sticky z-20 -mx-6 lg:-mx-8 xl:-mx-10 px-6 lg:px-8 xl:px-10 pb-3" style={{ top: '64px', paddingTop: '8px' }}>
+          <div className="rounded-2xl border overflow-hidden transition-all"
+            style={{
+              borderColor: 'rgba(34,197,94,.35)',
+              backgroundColor: 'var(--theme-bg-card)',
+              boxShadow: '0 4px 20px rgba(0,0,0,.1)',
+            }}>
+            <button
+              onClick={() => setStickyPromptOpen(o => !o)}
+              className="w-full flex items-center gap-2 px-3 py-2.5 text-left transition-all"
+            >
+              <IconPin size={12} />
+              <span className="text-[12px] font-bold truncate flex-1" style={{ color: 'var(--theme-text-primary)' }}>
+                {session.title}
+                <span className="font-normal ml-1.5" style={{ color: 'var(--theme-text-muted)' }}>— Bài đọc</span>
+              </span>
+              <span className="px-2 py-0.5 rounded-lg text-[10px] font-bold shrink-0"
+                style={{ backgroundColor: 'rgba(34,197,94,.1)', color: ACCENT }}>
+                {session.cefrLevel}
+              </span>
+              {stickyPromptOpen ? <IconChevronUp size={14} /> : <IconChevronDown size={14} />}
+            </button>
+            {stickyPromptOpen && (
+              <div className="border-t px-3 pb-3 pt-2" style={{ borderColor: 'var(--theme-border)', maxHeight: '45vh', overflowY: 'auto' }}>
+                <p className="text-[12px] leading-relaxed whitespace-pre-wrap"
+                  style={{ color: 'var(--theme-text-primary)', fontFamily: 'Georgia, serif' }}>
+                  {session.passage}
+                </p>
+                <button onClick={() => speakText(session.passage)}
+                  className="mt-2 p-1.5 rounded-lg transition-all hover:scale-110 flex items-center gap-1 text-[11px]"
+                  style={{ color: ACCENT }}>
+                  <IconVolume2 size={13} /> Nghe
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Vocab Panel */}
       <VocabPanel

@@ -22,6 +22,15 @@ function IconChevronRight({ size = 15 }: { size?: number }) {
 function IconSend({ size = 15 }: { size?: number }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}><line x1="22" y1="2" x2="11" y2="13" /><polygon points="22 2 15 22 11 13 2 9 22 2" /></svg>;
 }
+function IconChevronDown({ size = 14 }: { size?: number }) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}><polyline points="6 9 12 15 18 9" /></svg>;
+}
+function IconChevronUp({ size = 14 }: { size?: number }) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}><polyline points="18 15 12 9 6 15" /></svg>;
+}
+function IconPin({ size = 13 }: { size?: number }) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}><path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 1 1 0 0 0 1-1V4a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1 1 1 0 0 1 1 1z"/></svg>;
+}
 
 const ACCENT = '#A855F7';
 const GRADIENT = 'linear-gradient(135deg, #A855F7, #6366F1)';
@@ -69,13 +78,14 @@ function WordCountBar({ count, min, max }: { count: number; min: number; max: nu
 }
 
 // ─── Teil Writer ──────────────────────────────────────────────────────────────
-function TeilWriter({ teil, value, onChange }: { teil: ExamWritingTeil; value: string; onChange: (v: string) => void }) {
+function TeilWriter({ teil, value, onChange, promptRef }: { teil: ExamWritingTeil; value: string; onChange: (v: string) => void; promptRef?: React.RefObject<HTMLDivElement | null> }) {
   const wc = countWords(value);
 
   return (
     <div className="space-y-3">
+      <div ref={promptRef}>
       {/* Situation */}
-      <div className="rounded-2xl p-4" style={{ background: 'linear-gradient(135deg, rgba(168,85,247,.1), rgba(99,102,241,.08))', border: '1px solid rgba(168,85,247,.25)' }}>
+      <div className="rounded-2xl p-4 mb-3" style={{ background: 'linear-gradient(135deg, rgba(168,85,247,.1), rgba(99,102,241,.08))', border: '1px solid rgba(168,85,247,.25)' }}>
         <p className="text-[10px] font-extrabold uppercase tracking-widest mb-2" style={{ color: ACCENT }}>Situation</p>
         <p className="text-[13px] leading-relaxed" style={{ color: 'var(--theme-text-primary)', fontFamily: 'Georgia, serif' }}>
           {teil.scenario}
@@ -102,6 +112,7 @@ function TeilWriter({ teil, value, onChange }: { teil: ExamWritingTeil; value: s
         <p className="text-[11px] mt-3 font-medium" style={{ color: 'var(--theme-text-muted)' }}>
           Schreiben Sie ca. {teil.minWords}–{teil.maxWords} Wörter · max. {teil.maxPoints} Punkte
         </p>
+      </div>
       </div>
 
       {/* Textarea */}
@@ -140,6 +151,9 @@ export default function ExamWritingPage() {
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved'>('idle');
   const [confirmSubmit, setConfirmSubmit] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const [stickyPromptOpen, setStickyPromptOpen] = useState(false);
+  const [showStickyPrompt, setShowStickyPrompt] = useState(false);
+  const promptRef = useRef<HTMLDivElement>(null);
   const autoSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   // Ref mirrors userTexts — lets the debounced callback read latest value
   // without adding userTexts to useCallback deps (would recreate on every keystroke)
@@ -165,6 +179,21 @@ export default function ExamWritingPage() {
 
   // Keep ref in sync with latest state value
   useEffect(() => { userTextsRef.current = userTexts; }, [userTexts]);
+
+  // Show sticky prompt bar when original prompt scrolls out of view
+  useEffect(() => {
+    const el = promptRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setShowStickyPrompt(!entry.isIntersecting),
+      { threshold: 0, rootMargin: '-160px 0px 0px 0px' }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [activeTeil]);
+
+  // Close sticky prompt when switching Teil
+  useEffect(() => { setStickyPromptOpen(false); }, [activeTeil]);
 
   const handleTextChange = useCallback((teilNum: number, value: string) => {
     const key = `teil_${teilNum}`;
@@ -224,7 +253,7 @@ export default function ExamWritingPage() {
     <div className="min-h-screen pb-10" style={{ backgroundColor: 'var(--theme-bg-primary)' }}>
 
       {/* ── Sticky header ── */}
-      <div className="sticky top-0 z-10 border-b" style={{ backgroundColor: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}>
+      <div className="sticky z-10 border-b" style={{ top: '64px', backgroundColor: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}>
         <div className="max-w-2xl mx-auto px-4">
           {/* Top row */}
           <div className="h-13 flex items-center gap-3" style={{ height: '52px' }}>
@@ -298,10 +327,64 @@ export default function ExamWritingPage() {
           </div>
         </div>
 
+        {/* ── Sticky prompt bar (appears when prompt scrolls away) ── */}
+        {showStickyPrompt && (
+          <div className="sticky z-10 -mx-4 px-4 pb-3" style={{ top: '156px' }}>
+            <div className="rounded-2xl border overflow-hidden transition-all"
+              style={{
+                borderColor: 'rgba(168,85,247,.35)',
+                backgroundColor: 'var(--theme-bg-card)',
+                boxShadow: '0 4px 20px rgba(0,0,0,.1)',
+              }}>
+              <button
+                onClick={() => setStickyPromptOpen(o => !o)}
+                className="w-full flex items-center gap-2 px-3 py-2.5 text-left transition-all"
+              >
+                <span className="w-6 h-6 rounded-md flex items-center justify-center text-[10px] font-extrabold text-white shrink-0"
+                  style={{ background: GRADIENT }}>{currentTeil.number}</span>
+                <IconPin size={12} />
+                <span className="text-[12px] font-bold truncate flex-1" style={{ color: 'var(--theme-text-primary)' }}>
+                  {taskTypeLabel(currentTeil.taskType)}
+                  <span className="font-normal ml-1.5" style={{ color: 'var(--theme-text-muted)' }}>— Đề bài</span>
+                </span>
+                {stickyPromptOpen ? <IconChevronUp size={14} /> : <IconChevronDown size={14} />}
+              </button>
+              {stickyPromptOpen && (
+                <div className="border-t px-3 pb-3 pt-2 space-y-2" style={{ borderColor: 'var(--theme-border)', maxHeight: '40vh', overflowY: 'auto' }}>
+                  <div className="rounded-xl p-3" style={{ background: 'linear-gradient(135deg, rgba(168,85,247,.1), rgba(99,102,241,.08))' }}>
+                    <p className="text-[10px] font-extrabold uppercase tracking-widest mb-1" style={{ color: ACCENT }}>Situation</p>
+                    <p className="text-[12px] leading-relaxed" style={{ color: 'var(--theme-text-primary)', fontFamily: 'Georgia, serif' }}>
+                      {currentTeil.scenario}
+                    </p>
+                  </div>
+                  <div className="rounded-xl p-3" style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
+                    <p className="text-[10px] font-extrabold uppercase tracking-widest mb-1" style={{ color: 'var(--theme-text-muted)' }}>Aufgabe</p>
+                    <p className="text-[12px] leading-relaxed" style={{ color: 'var(--theme-text-primary)' }}>
+                      {currentTeil.taskDescription}
+                    </p>
+                    {currentTeil.requiredPoints.length > 0 && (
+                      <div className="mt-2 space-y-1">
+                        {currentTeil.requiredPoints.map((pt, i) => (
+                          <div key={i} className="flex items-start gap-2">
+                            <span className="w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-extrabold text-white shrink-0 mt-0.5"
+                              style={{ background: GRADIENT }}>{i + 1}</span>
+                            <span className="text-[11px] leading-snug" style={{ color: 'var(--theme-text-secondary)' }}>{pt}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         <TeilWriter
           teil={currentTeil}
           value={userTexts[`teil_${currentTeil.number}`] ?? ''}
           onChange={v => handleTextChange(currentTeil.number, v)}
+          promptRef={promptRef}
         />
 
         {/* ── Navigation ── */}

@@ -47,10 +47,10 @@ const CORE_FEATURES = [
   },
   {
     icon: IconGraduate, title: 'Luyện thi chuẩn', badge: 'Goethe & TELC',
-    desc: 'Bộ đề thi mô phỏng Goethe-Zertifikat và TELC với đầy đủ Teile, thời gian và format chính thức.',
+    desc: 'AI sinh đề từ kho đề thi thật (RAG) — đúng format, đúng độ khó, đúng Teile như kỳ thi Goethe & TELC chính thức.',
     gradient: 'linear-gradient(135deg, #F59E0B, #EF4444)',
     bg: 'rgba(245,158,11,.07)',
-    points: ['A1 · A2 · B1 đầy đủ 4 kỹ năng', 'Đúng format Goethe & TELC', 'AI chấm điểm theo tiêu chí thật'],
+    points: ['RAG từ đề thi Goethe/TELC thật', 'A1 · A2 · B1 đầy đủ 4 kỹ năng', 'AI chấm điểm theo tiêu chí chính thức'],
   },
 ];
 
@@ -58,7 +58,7 @@ const AI_FEATURES = [
   { skill: 'Nghe', icon: IconHeadphones, color: '#EC4899', title: 'AI tạo bài nghe tiếng Đức', desc: 'Gemini tạo ra audio tiếng Đức tự nhiên theo cấp độ của bạn. Nghe và trả lời câu hỏi hiểu bài.', badge: 'Tự do + Đề chuẩn Goethe/TELC + Audio chất lượng cao' },
   { skill: 'Viết', icon: IconPen, color: '#6366F1', title: 'AI chấm bài viết chi tiết', desc: 'Nộp bài viết tiếng Đức — Gemini phân tích ngữ pháp, từ vựng, cấu trúc câu và cho điểm theo tiêu chí chính thức.', badge: 'Tự do + Đề chuẩn Goethe/TELC + Nhận xét song ngữ Đức-Việt' },
   { skill: 'Nói', icon: IconMic, color: '#F59E0B', title: 'AI chấm phát âm & ngữ pháp', desc: 'Ghi âm câu trả lời bằng tiếng Đức — Gemini phân tích multimodal từ audio + transcript, chấm 4 tiêu chí.', badge: 'Tự do + Đề chuẩn Goethe/TELC + Phát âm · Ngữ pháp · Từ vựng · Nội dung' },
-  { skill: 'Đọc', icon: IconBook, color: '#22C55E', title: 'AI tạo đề đọc & hỏi bài', desc: 'Bài đọc tiếng Đức được tạo tự động theo chủ đề và cấp độ. Trả lời câu hỏi, AI chấm và giải thích.', badge: 'Tự do + Đề chuẩn Goethe/TELC + Bài đọc chất lượng' },
+  { skill: 'Đọc', icon: IconBook, color: '#22C55E', title: 'AI sinh đề từ đề thi thật (RAG)', desc: 'AI học từ kho đề thi Goethe/TELC thật, sinh ra đề mới giống hệt format — cùng độ khó, cùng dạng câu hỏi.', badge: 'RAG từ đề thi thật + Tự do + Đề chuẩn Goethe/TELC' },
 ];
 
 const EXAM_LEVELS = [
@@ -122,7 +122,7 @@ export default function HomePage() {
           '@context': 'https://schema.org',
           '@type': 'WebApplication',
           name: 'Deutschmeister',
-          url: 'https://deutschmeister.app',
+          url: 'https://deutschmeister.vn',
           description: 'Nền tảng học tiếng Đức toàn diện dành cho người Việt. 5000+ từ vựng, 8 trò chơi, AI chấm 4 kỹ năng, đề thi chuẩn Goethe/TELC A1-B1.',
           applicationCategory: 'EducationalApplication',
           operatingSystem: 'Web',
@@ -226,7 +226,7 @@ export default function HomePage() {
         </h1>
 
         <p className="fade-up-2 hero-sub" style={{ fontSize: 16, color: 'rgba(255,255,255,.55)', textAlign: 'center', maxWidth: 640, lineHeight: 1.75, marginBottom: 40 }}>
-          Nền tảng luyện thi tiếng Đức toàn diện — từ từ vựng cơ bản đến đề thi Goethe/TELC A1·A2·B1. Tạo đề theo yêu cầu, AI chấm điểm và nhận xét chi tiết bằng tiếng Việt.
+          Nền tảng luyện thi tiếng Đức toàn diện — từ từ vựng cơ bản đến đề thi Goethe/TELC A1·A2·B1. AI sinh đề từ kho đề thi thật (RAG), chấm điểm và nhận xét chi tiết bằng tiếng Việt.
         </p>
 
         <div className="fade-up-3" style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center', marginBottom: 64 }}>
@@ -243,7 +243,7 @@ export default function HomePage() {
             { label: '5000+ từ vựng', color: '#22C55E', bg: 'rgba(34,197,94,.1)' },
             { label: '8 trò chơi', color: '#8B5CF6', bg: 'rgba(139,92,246,.1)' },
             { label: 'AI chấm phát âm', color: '#F59E0B', bg: 'rgba(245,158,11,.1)' },
-            { label: 'Đề chuẩn Goethe/TELC', color: '#EC4899', bg: 'rgba(236,72,153,.1)' },
+            { label: 'RAG từ đề thi thật', color: '#EC4899', bg: 'rgba(236,72,153,.1)' },
             { label: 'SRS thông minh', color: '#3B82F6', bg: 'rgba(59,130,246,.1)' },
           ].map(chip => (
             <span key={chip.label} style={{ padding: '6px 14px', borderRadius: 100, fontSize: 12.5, fontWeight: 600, background: chip.bg, color: chip.color, border: `1px solid ${chip.color}33` }}>{chip.label}</span>
@@ -309,7 +309,7 @@ export default function HomePage() {
               <IconSparkles /> POWERED BY GEMINI AI
             </div>
             <h2 className="section-title" style={{ fontSize: '2.25rem', fontWeight: 900, letterSpacing: '-1px', marginBottom: 12 }}>AI làm thầy giáo <span className="gradient-text-amber">24/7 của bạn</span></h2>
-            <p style={{ color: 'rgba(255,255,255,.5)', fontSize: 15, maxWidth: 560, margin: '0 auto', lineHeight: 1.7 }}>Không chỉ tạo đề — phân tích, chấm điểm và nhận xét chi tiết bằng tiếng Việt giúp bạn cải thiện từng ngày.</p>
+            <p style={{ color: 'rgba(255,255,255,.5)', fontSize: 15, maxWidth: 600, margin: '0 auto', lineHeight: 1.7 }}>Sinh đề từ kho đề thi thật bằng RAG — phân tích, chấm điểm và nhận xét chi tiết bằng tiếng Việt giúp bạn cải thiện từng ngày.</p>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 20 }}>
             {AI_FEATURES.map((f, i) => {
@@ -346,8 +346,8 @@ export default function HomePage() {
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 14px', borderRadius: 100, background: 'rgba(245,158,11,.12)', border: '1px solid rgba(245,158,11,.3)', fontSize: 12.5, fontWeight: 700, color: '#fbbf24', marginBottom: 16 }}>
             <IconGraduate /> LUYỆN THI CHUẨN
           </div>
-          <h2 className="section-title" style={{ fontSize: '2.25rem', fontWeight: 900, letterSpacing: '-1px', marginBottom: 12 }}>Đề thi <span className="gradient-text-amber">Goethe & TELC</span> chính thức</h2>
-          <p style={{ color: 'rgba(255,255,255,.5)', fontSize: 15, maxWidth: 560, margin: '0 auto', lineHeight: 1.7 }}>Mô phỏng đúng format, đúng số lượng Teile và thời gian như kỳ thi thật. Cả 4 kỹ năng: Nghe · Đọc · Viết · Nói.</p>
+          <h2 className="section-title" style={{ fontSize: '2.25rem', fontWeight: 900, letterSpacing: '-1px', marginBottom: 12 }}>Đề thi <span className="gradient-text-amber">Goethe & TELC</span> sinh từ đề thật</h2>
+          <p style={{ color: 'rgba(255,255,255,.5)', fontSize: 15, maxWidth: 600, margin: '0 auto', lineHeight: 1.7 }}>AI học từ kho đề thi Goethe/TELC thật (RAG), sinh đề mới đúng format, đúng độ khó, đúng Teile. Cả 4 kỹ năng: Nghe · Đọc · Viết · Nói.</p>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 20, marginBottom: 40 }}>
           {['Goethe-Zertifikat', 'TELC Deutsch'].map((name, idx) => (
