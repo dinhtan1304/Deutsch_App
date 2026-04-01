@@ -10,7 +10,7 @@
  * This prevents XSS attacks from stealing refresh tokens
  */
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://deutschmeister-api-production.up.railway.app/api';
 
 // Access token stored in memory only (more secure than localStorage)
 let accessToken: string | null = null;

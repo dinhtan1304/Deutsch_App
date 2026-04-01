@@ -54,7 +54,7 @@ function toQS(params?: Record<string, any>): string {
 
 // ─── API ──────────────────────────────────────────────────────────────────────
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://deutschmeister-api-production.up.railway.app/api';
 
 export const examRagApi = {
   upload: async (file: File, meta: { examType: string; cefrLevel: string; skill: string }): Promise<ExamDocumentDetail> => {

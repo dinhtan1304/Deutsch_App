@@ -110,7 +110,11 @@
       "Bash(npx ts-node -e \":*)",
       "Bash(grep -c \"level: ''A2''\" \"e:/Deutsch_App/deutschmeister-api/prisma/seeds/words-part19.seed.ts\")",
       "Bash(grep -c \"level: ''B1''\" \"e:/Deutsch_App/deutschmeister-api/prisma/seeds/words-part19.seed.ts\")",
-      "Bash(ls e:/Deutsch_App/deutschmeister-web/.env*)"
+      "Bash(ls e:/Deutsch_App/deutschmeister-web/.env*)",
+      "Bash(grep -E \"\\\\.\\(ts|tsx\\)$\")",
+      "Bash(xargs head:*)",
+      "Bash(git -C /e/Deutsch_App/deutschmeister-api log --oneline --all -- .env)",
+      "Bash(git -C /e/Deutsch_App/deutschmeister-api ls-files)"
     ],
     "additionalDirectories": [
       "e:\\Deutsch_App\\.claude"
