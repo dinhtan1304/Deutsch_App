@@ -94,14 +94,13 @@ export const dictionaryLookupApi = {
   /**
    * Kiểm tra từ đã có trong Personal Word Bank chưa
    */
-  checkInWordBank: async (word: string): Promise<boolean> => {
+  checkInWordBank: async (word: string): Promise<{ exists: boolean; personalWordId: string | null }> => {
     try {
-      const result = await apiGet<{ exists: boolean; personalWordId: string | null }>(
+      return await apiGet<{ exists: boolean; personalWordId: string | null }>(
         `/personal-words/check-word?word=${encodeURIComponent(word)}`
       );
-      return result.exists;
     } catch {
-      return false;
+      return { exists: false, personalWordId: null };
     }
   },
 
@@ -111,13 +110,13 @@ export const dictionaryLookupApi = {
   quickAdd: async (data: {
     word: string;
     translationVi?: string | null;
-    translationEn?: string | null; 
+    translationEn?: string | null;
     wordType?: string | null;
     gender?: string | null;
     plural?: string | null;
     example?: string | null;
     level?: string | null;
-  }): Promise<void> => {
-    await apiPost('/personal-words/quick-add', data);
+  }): Promise<{ id: string }> => {
+    return apiPost<{ id: string }>('/personal-words/quick-add', data);
   },
 };

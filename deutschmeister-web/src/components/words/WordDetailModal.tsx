@@ -5,7 +5,8 @@ import { Word, GenderInfo } from '@/types';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { GenderTip } from './GenderTip';
 import { IconStar, IconX, IconVolume, IconCheck, IconPlus, IconLoader, IconBookOpen, IconLightbulb } from '@/components/ui/Icons';
-import { dictionaryLookupApi } from '@/lib/api/dictionary-lookup';
+import { useQuickAddWithCollection } from '@/hooks/useQuickAddWithCollection';
+import { AddToCollectionPicker } from '@/components/word-bank/AddToCollectionPicker';
 
 interface WordDetailModalProps {
   word: Word | null;
@@ -46,8 +47,7 @@ export function WordDetailModal({
   const { settings } = useSettingsStore();
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [imageError, setImageError] = useState(false);
-  const [addedToBank, setAddedToBank] = useState(false);
-  const [addingToBank, setAddingToBank] = useState(false);
+  const { isAdding, isAdded, pendingWordId, quickAdd, closePicker, reset } = useQuickAddWithCollection();
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
@@ -61,7 +61,7 @@ export function WordDetailModal({
     };
   }, [isOpen, onClose]);
 
-  useEffect(() => { setImageError(false); setAddedToBank(false); }, [word?.id]);
+  useEffect(() => { setImageError(false); reset(); }, [word?.id, reset]);
 
   const speak = useCallback((text: string) => {
     if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
@@ -83,26 +83,18 @@ export function WordDetailModal({
   }, [isOpen, word, settings.autoPlaySound, settings.soundEnabled, speak]);
 
   const handleAddToWordBank = useCallback(async () => {
-    if (!word || addingToBank || addedToBank) return;
-    setAddingToBank(true);
-    try {
-      await dictionaryLookupApi.quickAdd({
-        word: word.word,
-        translationVi: word.translationVi,
-        translationEn: word.translationEn,
-        wordType: 'Nomen',
-        gender: word.gender,
-        plural: word.plural,
-        example: word.examples?.[0],
-        level: word.level,
-      });
-      setAddedToBank(true);
-    } catch {
-      setAddedToBank(true);
-    } finally {
-      setAddingToBank(false);
-    }
-  }, [word, addingToBank, addedToBank]);
+    if (!word) return;
+    await quickAdd({
+      word: word.word,
+      translationVi: word.translationVi,
+      translationEn: word.translationEn,
+      wordType: 'Nomen',
+      gender: word.gender,
+      plural: word.plural,
+      example: word.examples?.[0],
+      level: word.level,
+    });
+  }, [word, quickAdd]);
 
   if (!isOpen || !word) return null;
 
@@ -280,21 +272,24 @@ export function WordDetailModal({
         {/* ─── Footer ─── */}
         <div className="p-5 pt-0 flex flex-col gap-2">
           <button
-            onClick={addedToBank ? undefined : handleAddToWordBank}
-            disabled={addedToBank || addingToBank}
+            onClick={(isAdded && !pendingWordId) ? undefined : handleAddToWordBank}
+            disabled={(isAdded && !pendingWordId) || isAdding}
             className="w-full py-2.5 rounded-xl font-semibold text-[14px] border-2 transition-all duration-200 flex items-center justify-center gap-2"
-            style={addedToBank
+            style={(isAdded && !pendingWordId)
               ? { borderColor: 'var(--theme-border)', color: 'var(--theme-text-muted)', cursor: 'default', backgroundColor: 'var(--theme-bg-secondary)' }
               : { borderColor: gs.text, color: gs.text, backgroundColor: 'transparent' }
             }
           >
-            {addingToBank
+            {isAdding
               ? <><IconLoader size={15} /> Đang thêm...</>
-              : addedToBank
+              : (isAdded && !pendingWordId)
               ? <><IconCheck size={15} /> Đã có trong Word Bank</>
               : <><IconPlus size={15} /> Thêm vào Word Bank</>
             }
           </button>
+          {pendingWordId && (
+            <AddToCollectionPicker personalWordId={pendingWordId} onClose={closePicker} />
+          )}
           <button
             onClick={onClose}
             className="w-full py-3 rounded-xl font-semibold text-white text-[14px] transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0"

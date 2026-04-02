@@ -38,6 +38,7 @@ export default function WordBankPage() {
   const [selectedView, setSelectedView] = useState<string>('all'); // 'all' | 'favorites' | collectionId
   const [showNewCollection, setShowNewCollection] = useState(false);
   const [newCollectionName, setNewCollectionName] = useState('');
+  const [collectionError, setCollectionError] = useState<string | null>(null);
 
   const { data: collections = [] } = useCollections();
   const createCollection = useCreateCollection();
@@ -102,9 +103,17 @@ export default function WordBankPage() {
   const handleCreateCollection = async () => {
     const name = newCollectionName.trim();
     if (!name) return;
-    await createCollection.mutateAsync({ name });
-    setNewCollectionName('');
-    setShowNewCollection(false);
+    try {
+      setCollectionError(null);
+      await createCollection.mutateAsync({ name });
+      setNewCollectionName('');
+      setShowNewCollection(false);
+    } catch (err: any) {
+      const msg = err?.response?.data?.message || err?.message || '';
+      setCollectionError(msg.includes('Conflict') || msg.includes('duplicate') || msg.includes('exists')
+        ? 'Tên thư mục đã tồn tại'
+        : 'Tạo thư mục thất bại. Vui lòng thử lại.');
+    }
   };
 
   const handleDeleteCollection = async (id: string, e: React.MouseEvent) => {
@@ -329,10 +338,13 @@ export default function WordBankPage() {
 
             {/* Collection items */}
             {collections.map(col => (
-              <button
+              <div
                 key={col.id}
                 onClick={() => handleSelectCollection(col.id)}
-                className="group flex items-center gap-2.5 px-3.5 py-2.5 text-[13px] font-medium transition-all text-left"
+                role="button"
+                tabIndex={0}
+                onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') handleSelectCollection(col.id); }}
+                className="group flex items-center gap-2.5 px-3.5 py-2.5 text-[13px] font-medium transition-all text-left cursor-pointer"
                 style={{
                   backgroundColor: selectedView === col.id ? `${col.color}18` : 'transparent',
                   color: selectedView === col.id ? col.color : 'var(--theme-text-secondary)',
@@ -352,7 +364,7 @@ export default function WordBankPage() {
                   title="Xoá thư mục">
                   <IconX size={12} />
                 </button>
-              </button>
+              </div>
             ))}
 
             {/* Divider before create */}
@@ -364,7 +376,7 @@ export default function WordBankPage() {
                 <input
                   autoFocus
                   value={newCollectionName}
-                  onChange={e => setNewCollectionName(e.target.value)}
+                  onChange={e => { setNewCollectionName(e.target.value); setCollectionError(null); }}
                   onKeyDown={e => {
                     if (e.key === 'Enter') handleCreateCollection();
                     if (e.key === 'Escape') { setShowNewCollection(false); setNewCollectionName(''); }
@@ -378,6 +390,9 @@ export default function WordBankPage() {
                     color: 'var(--theme-text-primary)',
                   }}
                 />
+                {collectionError && (
+                  <p className="text-[11px] mt-1 px-0.5" style={{ color: '#EF4444' }}>{collectionError}</p>
+                )}
                 <div className="flex gap-1.5 mt-1.5">
                   <button
                     onClick={handleCreateCollection}
@@ -387,7 +402,7 @@ export default function WordBankPage() {
                     Tạo
                   </button>
                   <button
-                    onClick={() => { setShowNewCollection(false); setNewCollectionName(''); }}
+                    onClick={() => { setShowNewCollection(false); setNewCollectionName(''); setCollectionError(null); }}
                     className="px-2 py-1 rounded-lg text-[11px] transition-all"
                     style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }}>
                     Huỷ

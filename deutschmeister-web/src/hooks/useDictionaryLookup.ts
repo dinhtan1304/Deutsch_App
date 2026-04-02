@@ -22,10 +22,10 @@ export function useDictionaryLookup(word: string | null) {
  * Hook kiểm tra từ đã có trong Word Bank chưa
  */
 export function useCheckWordBank(word: string | null) {
-  return useQuery<boolean>({
+  return useQuery<{ exists: boolean; personalWordId: string | null }>({
     queryKey: ['word-bank-check', word],
     queryFn: () => {
-      if (!word) return false;
+      if (!word) return { exists: false, personalWordId: null };
       return dictionaryLookupApi.checkInWordBank(word);
     },
     enabled: !!word,

@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useCallback } from 'react';
 import { useDictionaryLookup, useCheckWordBank } from '@/hooks/useDictionaryLookup';
-import { dictionaryLookupApi } from '@/lib/api/dictionary-lookup';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQuickAddWithCollection } from '@/hooks/useQuickAddWithCollection';
+import { AddToCollectionPicker } from '@/components/word-bank/AddToCollectionPicker';
 
 interface PopupContentProps {
   word: string;
@@ -27,10 +27,8 @@ const ARTICLE_STYLES: Record<string, { bg: string; label: string }> = {
 
 export function PopupContent({ word }: PopupContentProps) {
   const { data: result, isLoading, isError } = useDictionaryLookup(word);
-  const { data: isInWordBank } = useCheckWordBank(result?.word || null);
-  const [addingToBank, setAddingToBank] = useState(false);
-  const [addedToBank, setAddedToBank] = useState(false);
-  const queryClient = useQueryClient();
+  const { data: wordBankCheck } = useCheckWordBank(result?.word || null);
+  const { isAdding, isAdded, pendingWordId, quickAdd, closePicker } = useQuickAddWithCollection();
 
   const handleSpeak = useCallback((text: string) => {
     if ('speechSynthesis' in window) {
@@ -43,27 +41,18 @@ export function PopupContent({ word }: PopupContentProps) {
   }, []);
 
   const handleAddToWordBank = useCallback(async () => {
-    if (!result || addingToBank) return;
-    setAddingToBank(true);
-    try {
-      await dictionaryLookupApi.quickAdd({
-        word: result.word,
-        translationVi: result.translationVi,
-        translationEn: result.translationEn,
-        wordType: result.wordType,
-        gender: result.gender,
-        plural: result.plural,
-        example: result.example,
-        level: result.level,
-      });
-      setAddedToBank(true);
-      queryClient.invalidateQueries({ queryKey: ['word-bank-check', result.word] });
-    } catch {
-      setAddedToBank(true);
-    } finally {
-      setAddingToBank(false);
-    }
-  }, [result, addingToBank, queryClient]);
+    if (!result) return;
+    await quickAdd({
+      word: result.word,
+      translationVi: result.translationVi,
+      translationEn: result.translationEn,
+      wordType: result.wordType,
+      gender: result.gender,
+      plural: result.plural,
+      example: result.example,
+      level: result.level,
+    });
+  }, [result, quickAdd]);
 
   // ── Loading ──
   if (isLoading) {
@@ -96,7 +85,7 @@ export function PopupContent({ word }: PopupContentProps) {
   }
 
   const articleStyle = result.article ? ARTICLE_STYLES[result.article] : null;
-  const alreadyInBank = isInWordBank || addedToBank;
+  const alreadyInBank = wordBankCheck?.exists || isAdded;
 
   return (
     <div className="dict-popup-body">
@@ -179,17 +168,24 @@ export function PopupContent({ word }: PopupContentProps) {
       )}
 
       {/* ═══ NÚT THÊM VÀO WORD BANK ═══ */}
-      <button
-        onClick={alreadyInBank ? undefined : handleAddToWordBank}
-        disabled={alreadyInBank || addingToBank}
-        className={alreadyInBank ? 'dict-btn-added' : 'dict-btn-add'}
-      >
-        {addingToBank
-          ? '⏳ Đang thêm...'
-          : alreadyInBank
-            ? '✅ Đã có trong Word Bank'
-            : '➕ Thêm vào Word Bank'}
-      </button>
+      <div style={{ position: 'relative' }}>
+        <button
+          onClick={alreadyInBank && !pendingWordId ? undefined : handleAddToWordBank}
+          disabled={(alreadyInBank && !pendingWordId) || isAdding}
+          className={alreadyInBank && !pendingWordId ? 'dict-btn-added' : 'dict-btn-add'}
+        >
+          {isAdding
+            ? '⏳ Đang thêm...'
+            : alreadyInBank && !pendingWordId
+              ? '✅ Đã có trong Word Bank'
+              : '➕ Thêm vào Word Bank'}
+        </button>
+        {pendingWordId && (
+          <div style={{ position: 'absolute', left: 0, right: 0, bottom: '100%', marginBottom: '4px', zIndex: 60 }}>
+            <AddToCollectionPicker personalWordId={pendingWordId} onClose={closePicker} />
+          </div>
+        )}
+      </div>
 
       <Style />
     </div>
