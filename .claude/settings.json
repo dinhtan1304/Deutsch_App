@@ -114,7 +114,8 @@
       "Bash(grep -E \"\\\\.\\(ts|tsx\\)$\")",
       "Bash(xargs head:*)",
       "Bash(git -C /e/Deutsch_App/deutschmeister-api log --oneline --all -- .env)",
-      "Bash(git -C /e/Deutsch_App/deutschmeister-api ls-files)"
+      "Bash(git -C /e/Deutsch_App/deutschmeister-api ls-files)",
+      "Bash(node -e ':*)"
     ],
     "additionalDirectories": [
       "e:\\Deutsch_App\\.claude"
