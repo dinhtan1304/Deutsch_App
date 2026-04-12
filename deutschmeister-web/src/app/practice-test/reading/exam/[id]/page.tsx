@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useExamReadingSession, useSubmitExamReading } from '@/hooks/useExamReading';
 import { ExamReadingTeil, ExamTeilQuestion } from '@/lib/api/examReading';
+import { HighlightedText } from '@/components/word-highlight/HighlightedText';
 
 // ─── Inline icons ─────────────────────────────────────────────────────────────
 function IconChevronLeft({ size = 16 }: { size?: number }) {
@@ -75,7 +76,7 @@ function TextCard({ text }: { text: ExamReadingTeil['texts'][0] }) {
       )}
       {text.author && <p className="text-[11px] mb-1.5" style={{ color: 'var(--theme-text-muted)' }}>von {text.author}</p>}
       <p className="text-[13px] leading-relaxed whitespace-pre-wrap" style={{ color: 'var(--theme-text-primary)', fontFamily: 'Georgia, serif' }}>
-        {text.content}
+        <HighlightedText text={text.content} />
       </p>
       <button onClick={() => speakText(text.content)}
         className="mt-2 p-1.5 rounded-lg transition-all hover:scale-110 flex items-center gap-1 text-[11px]"
@@ -98,7 +99,7 @@ function RichtigFalschTeil({ teil, answers, onAnswer }: { teil: ExamReadingTeil;
         {(teil.questions as ExamTeilQuestion[]).map((q, i) => (
           <div key={q.id} className="rounded-xl border p-3" style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
             <p className="text-[13px] font-semibold mb-2.5" style={{ color: 'var(--theme-text-primary)' }}>
-              {i + 1}. {q.questionText}
+              {i + 1}. <HighlightedText text={q.questionText} />
             </p>
             <div className="flex gap-2">
               {[{ id: 'richtig', label: 'Richtig ✓' }, { id: 'falsch', label: 'Falsch ✗' }].map(opt => {
@@ -130,7 +131,7 @@ function JaNeinTeil({ teil, answers, onAnswer }: { teil: ExamReadingTeil; answer
       {thema && (
         <div className="rounded-xl p-3 text-center" style={{ backgroundColor: 'rgba(34,197,94,.06)' }}>
           <p className="text-[12px] font-bold mb-1" style={{ color: 'var(--theme-text-muted)' }}>THEMA</p>
-          <p className="text-[14px] font-bold" style={{ color: 'var(--theme-text-primary)' }}>{thema.content}</p>
+          <p className="text-[14px] font-bold" style={{ color: 'var(--theme-text-primary)' }}><HighlightedText text={thema.content} /></p>
         </div>
       )}
       <div className="space-y-3">
@@ -141,11 +142,11 @@ function JaNeinTeil({ teil, answers, onAnswer }: { teil: ExamReadingTeil; answer
               {person && (
                 <div className="p-3 border-b" style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-secondary)' }}>
                   {person.label && <p className="text-[11px] font-bold mb-1" style={{ color: ACCENT }}>{person.label}</p>}
-                  <p className="text-[13px] leading-relaxed" style={{ color: 'var(--theme-text-primary)', fontFamily: 'Georgia, serif' }}>{person.content}</p>
+                  <p className="text-[13px] leading-relaxed" style={{ color: 'var(--theme-text-primary)', fontFamily: 'Georgia, serif' }}><HighlightedText text={person.content} /></p>
                 </div>
               )}
               <div className="p-3" style={{ backgroundColor: 'var(--theme-bg-card)' }}>
-                <p className="text-[12px] font-semibold mb-2" style={{ color: 'var(--theme-text-secondary)' }}>{q.questionText}</p>
+                <p className="text-[12px] font-semibold mb-2" style={{ color: 'var(--theme-text-secondary)' }}><HighlightedText text={q.questionText} /></p>
                 <div className="flex gap-2">
                   {[{ id: 'ja', label: 'Ja — Dafür ✓' }, { id: 'nein', label: 'Nein — Dagegen ✗' }].map(opt => {
                     const sel = answers[q.id] === opt.id;
@@ -179,7 +180,7 @@ function MCQTeil({ teil, answers, onAnswer }: { teil: ExamReadingTeil; answers: 
         {(teil.questions as ExamTeilQuestion[]).map((q, i) => (
           <div key={q.id}>
             <p className="text-[13px] font-semibold mb-2.5" style={{ color: 'var(--theme-text-primary)' }}>
-              {i + 1}. {q.questionText}
+              {i + 1}. <HighlightedText text={q.questionText} />
             </p>
             <div className="space-y-2">
               {(q.options || []).map(opt => {
@@ -191,7 +192,7 @@ function MCQTeil({ teil, answers, onAnswer }: { teil: ExamReadingTeil; answers: 
                       ? { borderColor: ACCENT, backgroundColor: 'rgba(34,197,94,.08)', color: ACCENT }
                       : { borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)', color: 'var(--theme-text-secondary)' }}>
                     <span className="font-bold shrink-0 w-5 text-center">{opt.id.toUpperCase()}.</span>
-                    <span className="flex-1">{opt.text}</span>
+                    <span className="flex-1"><HighlightedText text={opt.text} /></span>
                   </button>
                 );
               })}
@@ -218,7 +219,7 @@ function ZuordnungTeil({ teil, answers, onAnswer }: { teil: ExamReadingTeil; ans
           <div key={q.id} className="rounded-xl border p-3"
             style={{ borderColor: answers[q.id] ? 'rgba(34,197,94,.3)' : 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
             <p className="text-[13px] font-semibold mb-2" style={{ color: 'var(--theme-text-primary)' }}>
-              {i + 1}. {q.questionText}
+              {i + 1}. <HighlightedText text={q.questionText} />
             </p>
             <select
               value={answers[q.id] || ''}
@@ -252,7 +253,7 @@ function SprachbausteineTeil({ teil, answers, onAnswer }: { teil: ExamReadingTei
       <div className="rounded-xl border p-4 leading-loose text-[14px]"
         style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-secondary)', fontFamily: 'Georgia, serif', color: 'var(--theme-text-primary)' }}>
         {parts.map((part, idx) => {
-          if (idx % 2 === 0) return <span key={idx}>{part}</span>;
+          if (idx % 2 === 0) return <span key={idx}><HighlightedText text={part} /></span>;
           const gapNum = parseInt(part);
           const q = questions.find(qq => qq.id === `q${gapNum}`);
           if (!q) return <span key={idx}>[{gapNum}]</span>;
@@ -527,7 +528,7 @@ export default function ExamReadingPage() {
                     )}
                     {t.title && <p className="text-[12px] font-bold mb-1" style={{ color: 'var(--theme-text-primary)' }}>{t.title}</p>}
                     <p className="text-[12px] leading-relaxed whitespace-pre-wrap" style={{ color: 'var(--theme-text-primary)', fontFamily: 'Georgia, serif' }}>
-                      {t.content}
+                      <HighlightedText text={t.content} />
                     </p>
                   </div>
                 ))}

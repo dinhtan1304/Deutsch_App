@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useReadingSession, useSubmitReading } from '@/hooks/useReading';
 import { ReadingQuestion, VocabHighlight } from '@/lib/api/reading';
+import { HighlightedText } from '@/components/word-highlight/HighlightedText';
 import {
   IconChevronLeft, IconVolume2, IconList, IconLoader, IconSend, IconCheck,
 } from '../icons';
@@ -48,7 +49,7 @@ function PassageCard({ title, passage }: { title: string; passage: string }) {
       </div>
       <div className="text-[15px] leading-relaxed whitespace-pre-wrap"
         style={{ color: 'var(--theme-text-primary)', fontFamily: 'Georgia, serif' }}>
-        {passage}
+        <HighlightedText text={passage} />
       </div>
     </div>
   );
@@ -116,7 +117,7 @@ function QuestionItem({
           {selectedAnswer ? <IconCheck size={13} /> : index + 1}
         </div>
         <p className="text-[14px] font-semibold" style={{ color: 'var(--theme-text-primary)' }}>
-          {question.questionText}
+          <HighlightedText text={question.questionText} />
         </p>
       </div>
 
@@ -134,7 +135,7 @@ function QuestionItem({
                 fontWeight: isSelected ? 700 : 500,
               }}>
               <span className="mr-2 opacity-60">{opt.id.toUpperCase()}.</span>
-              {opt.text}
+              <HighlightedText text={opt.text} />
             </button>
           );
         })}
@@ -317,7 +318,7 @@ export default function ReadingSessionPage() {
               <div className="border-t px-3 pb-3 pt-2" style={{ borderColor: 'var(--theme-border)', maxHeight: '45vh', overflowY: 'auto' }}>
                 <p className="text-[12px] leading-relaxed whitespace-pre-wrap"
                   style={{ color: 'var(--theme-text-primary)', fontFamily: 'Georgia, serif' }}>
-                  {session.passage}
+                  <HighlightedText text={session.passage} />
                 </p>
                 <button onClick={() => speakText(session.passage)}
                   className="mt-2 p-1.5 rounded-lg transition-all hover:scale-110 flex items-center gap-1 text-[11px]"

@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useExamWritingSession, useSaveExamWritingDraft, useSubmitExamWriting } from '@/hooks/useExamWriting';
 import { ExamWritingTeil } from '@/lib/api/examWriting';
+import { HighlightedText } from '@/components/word-highlight/HighlightedText';
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
 function IconLoader({ size = 24, style }: { size?: number; style?: React.CSSProperties }) {
@@ -88,7 +89,7 @@ function TeilWriter({ teil, value, onChange, promptRef }: { teil: ExamWritingTei
       <div className="rounded-2xl p-4 mb-3" style={{ background: 'linear-gradient(135deg, rgba(168,85,247,.1), rgba(99,102,241,.08))', border: '1px solid rgba(168,85,247,.25)' }}>
         <p className="text-[10px] font-extrabold uppercase tracking-widest mb-2" style={{ color: ACCENT }}>Situation</p>
         <p className="text-[13px] leading-relaxed" style={{ color: 'var(--theme-text-primary)', fontFamily: 'Georgia, serif' }}>
-          {teil.scenario}
+          <HighlightedText text={teil.scenario} />
         </p>
       </div>
 
@@ -96,7 +97,7 @@ function TeilWriter({ teil, value, onChange, promptRef }: { teil: ExamWritingTei
       <div className="rounded-2xl p-4" style={{ backgroundColor: 'var(--theme-bg-secondary)', border: '1px solid var(--theme-border)' }}>
         <p className="text-[10px] font-extrabold uppercase tracking-widest mb-2" style={{ color: 'var(--theme-text-muted)' }}>Aufgabe</p>
         <p className="text-[13px] leading-relaxed" style={{ color: 'var(--theme-text-primary)' }}>
-          {teil.taskDescription}
+          <HighlightedText text={teil.taskDescription} />
         </p>
         {teil.requiredPoints.length > 0 && (
           <div className="mt-3 space-y-1.5">
@@ -104,7 +105,7 @@ function TeilWriter({ teil, value, onChange, promptRef }: { teil: ExamWritingTei
               <div key={i} className="flex items-start gap-2.5">
                 <span className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-extrabold text-white shrink-0 mt-0.5"
                   style={{ background: GRADIENT }}>{i + 1}</span>
-                <span className="text-[12px] leading-snug pt-0.5" style={{ color: 'var(--theme-text-secondary)' }}>{pt}</span>
+                <span className="text-[12px] leading-snug pt-0.5" style={{ color: 'var(--theme-text-secondary)' }}><HighlightedText text={pt} /></span>
               </div>
             ))}
           </div>
@@ -354,13 +355,13 @@ export default function ExamWritingPage() {
                   <div className="rounded-xl p-3" style={{ background: 'linear-gradient(135deg, rgba(168,85,247,.1), rgba(99,102,241,.08))' }}>
                     <p className="text-[10px] font-extrabold uppercase tracking-widest mb-1" style={{ color: ACCENT }}>Situation</p>
                     <p className="text-[12px] leading-relaxed" style={{ color: 'var(--theme-text-primary)', fontFamily: 'Georgia, serif' }}>
-                      {currentTeil.scenario}
+                      <HighlightedText text={currentTeil.scenario} />
                     </p>
                   </div>
                   <div className="rounded-xl p-3" style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
                     <p className="text-[10px] font-extrabold uppercase tracking-widest mb-1" style={{ color: 'var(--theme-text-muted)' }}>Aufgabe</p>
                     <p className="text-[12px] leading-relaxed" style={{ color: 'var(--theme-text-primary)' }}>
-                      {currentTeil.taskDescription}
+                      <HighlightedText text={currentTeil.taskDescription} />
                     </p>
                     {currentTeil.requiredPoints.length > 0 && (
                       <div className="mt-2 space-y-1">
@@ -368,7 +369,7 @@ export default function ExamWritingPage() {
                           <div key={i} className="flex items-start gap-2">
                             <span className="w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-extrabold text-white shrink-0 mt-0.5"
                               style={{ background: GRADIENT }}>{i + 1}</span>
-                            <span className="text-[11px] leading-snug" style={{ color: 'var(--theme-text-secondary)' }}>{pt}</span>
+                            <span className="text-[11px] leading-snug" style={{ color: 'var(--theme-text-secondary)' }}><HighlightedText text={pt} /></span>
                           </div>
                         ))}
                       </div>

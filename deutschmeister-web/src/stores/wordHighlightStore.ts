@@ -58,9 +58,7 @@ export const useWordHighlightStore = create<WordHighlightState>((set, get) => ({
       const index = await wordHighlightApi.getLevelIndex();
       set({ levelIndex: index, hasFetched: true });
     } catch (err) {
-      if (process.env.NODE_ENV === 'development') {
-        console.warn('[WordHighlight] Failed to fetch level index:', err);
-      }
+      console.error('[WordHighlight] Failed to fetch level index:', err);
       set({ hasFetched: true }); // Đánh dấu đã fetch (dù fail) để không retry liên tục
     } finally {
       set({ isLoading: false });
