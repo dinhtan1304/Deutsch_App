@@ -15,6 +15,7 @@ import {
   WritingHistoryResponse,
   WritingStats,
   TopicSuggestions,
+  ExplainErrorResponse,
 } from '@/lib/api/writing';
 
 // ── Query Keys ──
@@ -121,5 +122,12 @@ export function useDeleteWriting() {
       queryClient.invalidateQueries({ queryKey: writingKeys.history() });
       queryClient.invalidateQueries({ queryKey: writingKeys.stats() });
     },
+  });
+}
+
+/** AI giải thích lỗi chi tiết (Premium) */
+export function useExplainError() {
+  return useMutation<ExplainErrorResponse, Error, { sessionId: string; errorId: string }>({
+    mutationFn: ({ sessionId, errorId }) => writingApi.explainError(sessionId, errorId),
   });
 }

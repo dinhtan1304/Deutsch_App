@@ -3,8 +3,9 @@
 import { useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { useWritingSession } from '@/hooks/useWriting';
-import type { WritingError } from '@/lib/api/writing';
+import { useWritingSession, useExplainError } from '@/hooks/useWriting';
+import { useAuthStore } from '@/stores/authStore';
+import type { WritingError, GrammarAnalysis } from '@/lib/api/writing';
 import { IconChevronDown, IconChevronLeft, IconDice, IconList } from '../../icons';
 
 // ─── Helpers ───
@@ -62,11 +63,83 @@ function ScoreRing({ score }: { score: number }) {
   );
 }
 
+// ─── Deep Analysis Section ───
+function AnalysisPanel({ analysis }: { analysis: GrammarAnalysis }) {
+  return (
+    <div className="mt-3 space-y-3 border-t pt-3" style={{ borderColor: 'rgba(139,92,246,0.2)' }}>
+      {/* Components */}
+      <div>
+        <span className="text-[11px] font-bold uppercase" style={{ color: '#8B5CF6' }}>Phân tích ngữ pháp</span>
+        <div className="mt-1.5 flex flex-wrap gap-1.5">
+          {analysis.components.map((c, i) => (
+            <span key={i} className="px-2 py-1 rounded-lg text-[11px]" style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
+              <span className="font-bold" style={{ color: 'var(--theme-text-primary)' }}>{c.text}</span>
+              <span className="ml-1" style={{ color: 'var(--theme-text-muted)' }}>({c.roleVi})</span>
+            </span>
+          ))}
+        </div>
+      </div>
+
+      {/* Tense + Sentence Type */}
+      <div className="flex gap-4 text-[12px]">
+        <div><span style={{ color: 'var(--theme-text-muted)' }}>Thì: </span><span className="font-medium" style={{ color: 'var(--theme-text-primary)' }}>{analysis.tenseVi}</span></div>
+        <div><span style={{ color: 'var(--theme-text-muted)' }}>Loại câu: </span><span className="font-medium" style={{ color: 'var(--theme-text-primary)' }}>{analysis.sentenceTypeVi}</span></div>
+      </div>
+
+      {/* Corrected */}
+      {analysis.hasErrors && (
+        <div>
+          <span className="text-[11px] font-bold uppercase" style={{ color: 'var(--theme-text-muted)' }}>Câu đúng</span>
+          <p className="text-[13px] mt-0.5 font-medium" style={{ color: '#22C55E' }}>{analysis.correctedSentence}</p>
+        </div>
+      )}
+
+      {/* Grammar Rules */}
+      {analysis.grammarRules.length > 0 && (
+        <div>
+          <span className="text-[11px] font-bold uppercase" style={{ color: 'var(--theme-text-muted)' }}>Quy tắc ngữ pháp</span>
+          <ul className="mt-1 space-y-1">
+            {analysis.grammarRules.map((r, i) => (
+              <li key={i} className="text-[12px]" style={{ color: 'var(--theme-text-secondary)' }}>
+                <span className="font-medium">{r.rule}</span> — {r.ruleVi}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* Explanation */}
+      <div>
+        <span className="text-[11px] font-bold uppercase" style={{ color: 'var(--theme-text-muted)' }}>Giải thích</span>
+        <p className="text-[12px] mt-0.5 leading-relaxed" style={{ color: 'var(--theme-text-secondary)' }}>{analysis.explanationVi}</p>
+      </div>
+
+      {/* Tip */}
+      <div className="rounded-lg p-2.5" style={{ backgroundColor: 'rgba(139,92,246,0.06)' }}>
+        <p className="text-[12px]" style={{ color: '#8B5CF6' }}>
+          <span className="font-bold">Mẹo: </span>{analysis.tipVi}
+        </p>
+      </div>
+    </div>
+  );
+}
+
 // ─── Error Card ───
-function ErrorCard({ error }: { error: WritingError }) {
+function ErrorCard({ error, sessionId }: { error: WritingError; sessionId: string }) {
   const [expanded, setExpanded] = useState(false);
+  const [analysis, setAnalysis] = useState<GrammarAnalysis | null>(null);
+  const explainMut = useExplainError();
+  const { user } = useAuthStore();
+  const isPremium = user?.subscription?.plan === 'premium' && user?.subscription?.status === 'active';
   const typeInfo = ERROR_TYPE_INFO[error.errorType] || { labelVi: error.errorType, color: '#6B7280' };
   const severity = SEVERITY_CONFIG[error.severity] || SEVERITY_CONFIG.error;
+
+  const handleExplain = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (analysis) return; // already loaded
+    const res = await explainMut.mutateAsync({ sessionId, errorId: error.id });
+    setAnalysis(res.analysis);
+  };
 
   return (
     <button onClick={() => setExpanded(!expanded)}
@@ -97,6 +170,27 @@ function ErrorCard({ error }: { error: WritingError }) {
                 <span className="text-[11px] font-bold uppercase" style={{ color: 'var(--theme-text-muted)' }}>Tiếng Việt</span>
                 <p className="text-[12px] mt-0.5" style={{ color: 'var(--theme-text-secondary)' }}>{error.explanationVi}</p>
               </div>
+
+              {/* Deep analysis (Premium) */}
+              {!analysis && (
+                <button
+                  onClick={handleExplain}
+                  disabled={explainMut.isPending}
+                  className="mt-2 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold transition-colors"
+                  style={{
+                    color: isPremium ? '#8B5CF6' : 'var(--theme-text-muted)',
+                    backgroundColor: isPremium ? 'rgba(139,92,246,0.08)' : 'var(--theme-bg-secondary)',
+                  }}
+                >
+                  {explainMut.isPending ? (
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="animate-spin"><path d="M21 12a9 9 0 1 1-6.219-8.56" /></svg>
+                  ) : (
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg>
+                  )}
+                  {isPremium ? 'Giải thích chi tiết bằng AI' : 'Giải thích chi tiết (Premium)'}
+                </button>
+              )}
+              {analysis && <AnalysisPanel analysis={analysis} />}
             </div>
           )}
         </div>
@@ -293,7 +387,7 @@ export default function WritingResultPage() {
               </div>
             ) : (
               <div className="space-y-2 max-h-128 overflow-y-auto pr-1">
-                {filteredErrors.map(error => <ErrorCard key={error.id} error={error} />)}
+                {filteredErrors.map(error => <ErrorCard key={error.id} error={error} sessionId={id} />)}
               </div>
             )}
           </div>

@@ -87,6 +87,42 @@ export interface WritingError {
   position: number | null;
 }
 
+export interface GrammarComponent {
+  text: string;
+  role: string;
+  roleVi: string;
+  case?: string;
+  caseVi?: string;
+  noteVi: string;
+}
+
+export interface GrammarRule {
+  rule: string;
+  ruleVi: string;
+}
+
+export interface GrammarAnalysis {
+  sentence: string;
+  correctedSentence: string;
+  hasErrors: boolean;
+  tense: string;
+  tenseVi: string;
+  sentenceType: string;
+  sentenceTypeVi: string;
+  components: GrammarComponent[];
+  explanationVi: string;
+  grammarRules: GrammarRule[];
+  tipVi: string;
+}
+
+export interface ExplainErrorResponse {
+  errorId: string;
+  originalText: string;
+  correctedText: string;
+  errorType: string;
+  analysis: GrammarAnalysis;
+}
+
 export interface WritingHistoryItem {
   id: string;
   topic: string;
@@ -179,5 +215,10 @@ export const writingApi = {
   /** Xóa session */
   deleteSession: async (id: string): Promise<void> => {
     await apiDelete(`/writing/${id}`);
+  },
+
+  /** AI giải thích lỗi chi tiết (Premium) */
+  explainError: async (sessionId: string, errorId: string): Promise<ExplainErrorResponse> => {
+    return apiPost<ExplainErrorResponse>(`/writing/${sessionId}/explain-error`, { errorId });
   },
 };
