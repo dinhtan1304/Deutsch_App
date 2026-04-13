@@ -1,0 +1,98 @@
+'use client';
+
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import {
+  subscriptionsApi,
+  Plan,
+  MySubscription,
+  UpgradeResponse,
+  QuotaInfo,
+  PracticeFeat,
+  BillingPeriod,
+  PromoValidation,
+  LifetimeRemaining,
+} from '@/lib/api/subscriptions';
+
+// ── Query Keys ──
+
+export const subscriptionKeys = {
+  all: ['subscription'] as const,
+  plans: () => [...subscriptionKeys.all, 'plans'] as const,
+  me: () => [...subscriptionKeys.all, 'me'] as const,
+  quota: (feature: PracticeFeat) => [...subscriptionKeys.all, 'quota', feature] as const,
+  lifetimeRemaining: () => [...subscriptionKeys.all, 'lifetime-remaining'] as const,
+};
+
+// ── Queries ──
+
+export function usePlans() {
+  return useQuery<Plan[]>({
+    queryKey: subscriptionKeys.plans(),
+    queryFn: () => subscriptionsApi.getPlans(),
+    staleTime: 60 * 60 * 1000, // 1h — plans rarely change
+  });
+}
+
+export function useMySubscription() {
+  return useQuery<MySubscription>({
+    queryKey: subscriptionKeys.me(),
+    queryFn: () => subscriptionsApi.getMySubscription(),
+    staleTime: 60 * 1000,
+  });
+}
+
+export function useCheckQuota(feature: PracticeFeat, enabled = true) {
+  return useQuery<QuotaInfo>({
+    queryKey: subscriptionKeys.quota(feature),
+    queryFn: () => subscriptionsApi.checkQuota(feature),
+    enabled,
+    staleTime: 30 * 1000,
+  });
+}
+
+export function useLifetimeRemaining() {
+  return useQuery<LifetimeRemaining>({
+    queryKey: subscriptionKeys.lifetimeRemaining(),
+    queryFn: () => subscriptionsApi.getLifetimeRemaining(),
+    staleTime: 5 * 60 * 1000, // 5min — count doesn't change often
+  });
+}
+
+// ── Mutations ──
+
+export function useRequestUpgrade() {
+  const qc = useQueryClient();
+  return useMutation<
+    UpgradeResponse,
+    Error,
+    { period: BillingPeriod; promoCode?: string }
+  >({
+    mutationFn: ({ period, promoCode }) =>
+      subscriptionsApi.requestUpgrade(period, promoCode),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: subscriptionKeys.me() });
+      qc.invalidateQueries({ queryKey: subscriptionKeys.lifetimeRemaining() });
+    },
+  });
+}
+
+export function useValidatePromo() {
+  return useMutation<
+    PromoValidation,
+    Error,
+    { code: string; period: BillingPeriod }
+  >({
+    mutationFn: ({ code, period }) =>
+      subscriptionsApi.validatePromo(code, period),
+  });
+}
+
+// ── Helpers ──
+
+export function useIsPremium(): boolean {
+  const { data } = useMySubscription();
+  return (
+    (data?.plan === 'premium' || data?.plan === 'lifetime') &&
+    data?.status === 'active'
+  );
+}

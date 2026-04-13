@@ -1,0 +1,458 @@
+'use client';
+
+import { useState, useCallback, useEffect } from 'react';
+import {
+  useRequestUpgrade,
+  useValidatePromo,
+  useLifetimeRemaining,
+} from '@/hooks/useSubscription';
+import { useAuthStore } from '@/stores/authStore';
+import type { UpgradeResponse, BillingPeriod } from '@/lib/api/subscriptions';
+
+interface Props {
+  open: boolean;
+  onClose: () => void;
+  defaultPeriod?: BillingPeriod;
+}
+
+function formatVND(n: number) {
+  return n.toLocaleString('vi-VN') + 'đ';
+}
+
+function CopyButton({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false);
+  const copy = async () => {
+    await navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+  return (
+    <button
+      onClick={copy}
+      className="ml-2 px-1.5 py-0.5 rounded text-[11px] font-medium transition-colors"
+      style={{
+        color: copied ? '#22C55E' : 'var(--theme-text-muted)',
+        backgroundColor: copied ? 'rgba(34,197,94,0.1)' : 'var(--theme-bg-secondary)',
+      }}
+    >
+      {copied ? 'Copied!' : 'Copy'}
+    </button>
+  );
+}
+
+function VietQRImage({ bankBin, account, amount, note, accountName }: {
+  bankBin: string;
+  account: string;
+  amount: number;
+  note: string;
+  accountName: string;
+}) {
+  const url = `https://img.vietqr.io/image/${bankBin}-${account}-compact2.png?amount=${amount}&addInfo=${encodeURIComponent(note)}&accountName=${encodeURIComponent(accountName)}`;
+  return (
+    <div className="flex justify-center my-3">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={url}
+        alt="VietQR"
+        className="rounded-xl border"
+        style={{ borderColor: 'var(--theme-border)', maxWidth: 240 }}
+        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+      />
+    </div>
+  );
+}
+
+const BANK_BIN_MAP: Record<string, string> = {
+  'MB Bank': '970422',
+  'MBBank': '970422',
+  'Vietcombank': '970436',
+  'VCB': '970436',
+  'Techcombank': '970407',
+  'TCB': '970407',
+  'ACB': '970416',
+  'BIDV': '970418',
+  'Agribank': '970405',
+  'VPBank': '970432',
+  'TPBank': '970423',
+  'Sacombank': '970403',
+  'VietinBank': '970415',
+  'HDBank': '970437',
+  'OCB': '970448',
+  'MSB': '970426',
+  'SHB': '970443',
+};
+
+function getBankBin(bankName: string): string {
+  for (const [key, bin] of Object.entries(BANK_BIN_MAP)) {
+    if (bankName.toLowerCase().includes(key.toLowerCase())) return bin;
+  }
+  return bankName;
+}
+
+const MONTHLY_PRICE = 99000;
+const YEARLY_PRICE = 990000;
+const LIFETIME_PRICE = 1490000;
+
+function priceForPeriod(p: BillingPeriod): number {
+  if (p === 'lifetime') return LIFETIME_PRICE;
+  if (p === 'yearly') return YEARLY_PRICE;
+  return MONTHLY_PRICE;
+}
+
+export function UpgradeModal({ open, onClose, defaultPeriod = 'yearly' }: Props) {
+  const { isAuthenticated } = useAuthStore();
+  const [period, setPeriod] = useState<BillingPeriod>(defaultPeriod);
+  const [step, setStep] = useState<'select' | 'payment'>('select');
+  const [upgradeData, setUpgradeData] = useState<UpgradeResponse | null>(null);
+
+  // Promo code state
+  const [promoCode, setPromoCode] = useState('');
+  const [promoApplied, setPromoApplied] = useState<{ discount: number; label: string } | null>(null);
+  const [promoError, setPromoError] = useState<string | null>(null);
+
+  const upgradeMut = useRequestUpgrade();
+  const validatePromoMut = useValidatePromo();
+  const { data: lifetimeInfo } = useLifetimeRemaining();
+
+  // Reset promo when period changes
+  useEffect(() => {
+    setPromoApplied(null);
+    setPromoError(null);
+  }, [period]);
+
+  const handleClose = useCallback(() => {
+    setStep('select');
+    setUpgradeData(null);
+    setPromoCode('');
+    setPromoApplied(null);
+    setPromoError(null);
+    onClose();
+  }, [onClose]);
+
+  const handleApplyPromo = async () => {
+    if (!promoCode.trim()) return;
+    setPromoError(null);
+    try {
+      const res = await validatePromoMut.mutateAsync({
+        code: promoCode.trim(),
+        period,
+      });
+      setPromoApplied({ discount: res.discount, label: res.discountLabel });
+    } catch (e: any) {
+      setPromoApplied(null);
+      setPromoError(e?.response?.data?.message || e?.message || 'Mã không hợp lệ');
+    }
+  };
+
+  const handleRemovePromo = () => {
+    setPromoCode('');
+    setPromoApplied(null);
+    setPromoError(null);
+  };
+
+  const handleUpgrade = async () => {
+    if (!isAuthenticated) return;
+    const res = await upgradeMut.mutateAsync({
+      period,
+      promoCode: promoApplied ? promoCode.trim() : undefined,
+    });
+    setUpgradeData(res);
+    setStep('payment');
+  };
+
+  if (!open) return null;
+
+  const basePrice = priceForPeriod(period);
+  const finalPrice = Math.max(0, basePrice - (promoApplied?.discount ?? 0));
+  const lifetimeSoldOut = lifetimeInfo ? lifetimeInfo.remaining <= 0 : false;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={handleClose}>
+      {/* Backdrop */}
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+
+      {/* Modal */}
+      <div
+        className="relative w-full max-w-md rounded-2xl border p-6 shadow-xl max-h-[90vh] overflow-y-auto"
+        style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Close button */}
+        <button
+          onClick={handleClose}
+          className="absolute top-4 right-4 p-1 rounded-lg transition-colors"
+          style={{ color: 'var(--theme-text-muted)' }}
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+        </button>
+
+        {step === 'select' ? (
+          <>
+            <h2 className="text-lg font-bold mb-1" style={{ color: 'var(--theme-text-primary)' }}>
+              Nâng cấp Premium
+            </h2>
+            <p className="text-[13px] mb-5" style={{ color: 'var(--theme-text-muted)' }}>
+              Luyện tập không giới hạn, đề thi chuẩn Goethe/TELC, AI chấm bài
+            </p>
+
+            {/* Period toggle */}
+            <div className="grid grid-cols-3 gap-2 mb-5">
+              {(['monthly', 'yearly', 'lifetime'] as const).map((p) => {
+                const disabled = p === 'lifetime' && lifetimeSoldOut;
+                const isActive = period === p;
+                return (
+                  <button
+                    key={p}
+                    onClick={() => !disabled && setPeriod(p)}
+                    disabled={disabled}
+                    className="relative py-3 px-2 rounded-xl text-[12px] font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    style={{
+                      color: isActive ? '#fff' : 'var(--theme-text-primary)',
+                      background: isActive
+                        ? 'linear-gradient(135deg, #6366F1, #8B5CF6)'
+                        : 'var(--theme-bg-secondary)',
+                      border: isActive ? 'none' : '1px solid var(--theme-border)',
+                    }}
+                  >
+                    <div className="text-[11px] opacity-90">
+                      {p === 'monthly' ? 'Tháng' : p === 'yearly' ? 'Năm' : 'Trọn đời'}
+                    </div>
+                    <div className="text-[13px] font-bold mt-0.5">
+                      {formatVND(priceForPeriod(p))}
+                    </div>
+                    {p === 'yearly' && (
+                      <div
+                        className="absolute -top-2 left-1/2 -translate-x-1/2 px-1.5 py-0.5 rounded-full text-[9px] font-bold whitespace-nowrap"
+                        style={{ backgroundColor: '#F59E0B', color: '#fff' }}
+                      >
+                        -17%
+                      </div>
+                    )}
+                    {p === 'lifetime' && lifetimeInfo && lifetimeInfo.remaining > 0 && (
+                      <div
+                        className="absolute -top-2 left-1/2 -translate-x-1/2 px-1.5 py-0.5 rounded-full text-[9px] font-bold whitespace-nowrap"
+                        style={{ backgroundColor: '#EC4899', color: '#fff' }}
+                      >
+                        HOT
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Lifetime remaining */}
+            {period === 'lifetime' && lifetimeInfo && (
+              <div
+                className="rounded-lg px-3 py-2 mb-4 text-[12px]"
+                style={{
+                  backgroundColor: 'rgba(236,72,153,0.08)',
+                  color: '#EC4899',
+                  border: '1px solid rgba(236,72,153,0.2)',
+                }}
+              >
+                🔥 Còn <b>{lifetimeInfo.remaining}/{lifetimeInfo.max}</b> suất Lifetime
+              </div>
+            )}
+
+            {/* Promo code */}
+            <div className="mb-4">
+              <label
+                className="text-[11px] uppercase tracking-wide block mb-1.5"
+                style={{ color: 'var(--theme-text-muted)' }}
+              >
+                Mã giảm giá (tùy chọn)
+              </label>
+              {promoApplied ? (
+                <div
+                  className="flex items-center justify-between rounded-lg px-3 py-2"
+                  style={{
+                    backgroundColor: 'rgba(34,197,94,0.1)',
+                    border: '1px solid rgba(34,197,94,0.3)',
+                  }}
+                >
+                  <div className="text-[13px]">
+                    <span className="font-mono font-bold" style={{ color: '#22C55E' }}>
+                      {promoCode.toUpperCase()}
+                    </span>
+                    <span className="ml-2 text-[12px]" style={{ color: 'var(--theme-text-secondary)' }}>
+                      ({promoApplied.label})
+                    </span>
+                  </div>
+                  <button
+                    onClick={handleRemovePromo}
+                    className="text-[11px] px-2 py-0.5 rounded font-medium"
+                    style={{ color: 'var(--theme-text-muted)' }}
+                  >
+                    Bỏ
+                  </button>
+                </div>
+              ) : (
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={promoCode}
+                    onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
+                    placeholder="VD: EARLY50"
+                    className="flex-1 px-3 py-2 rounded-lg text-[13px] font-mono uppercase outline-none"
+                    style={{
+                      backgroundColor: 'var(--theme-bg-secondary)',
+                      border: '1px solid var(--theme-border)',
+                      color: 'var(--theme-text-primary)',
+                    }}
+                  />
+                  <button
+                    onClick={handleApplyPromo}
+                    disabled={!promoCode.trim() || validatePromoMut.isPending}
+                    className="px-4 py-2 rounded-lg text-[12px] font-bold disabled:opacity-50"
+                    style={{
+                      backgroundColor: 'var(--theme-bg-secondary)',
+                      color: 'var(--theme-text-primary)',
+                      border: '1px solid var(--theme-border)',
+                    }}
+                  >
+                    {validatePromoMut.isPending ? '...' : 'Áp dụng'}
+                  </button>
+                </div>
+              )}
+              {promoError && (
+                <div className="text-[11px] mt-1" style={{ color: '#EF4444' }}>
+                  {promoError}
+                </div>
+              )}
+            </div>
+
+            {/* Summary */}
+            <div className="rounded-xl p-4 mb-5" style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
+              <div className="flex justify-between items-center mb-1">
+                <span className="text-[13px]" style={{ color: 'var(--theme-text-secondary)' }}>
+                  {period === 'lifetime' ? 'Gói Lifetime' : 'Gói Premium'}
+                </span>
+                <span
+                  className="text-[14px] font-bold"
+                  style={{
+                    color: 'var(--theme-text-primary)',
+                    textDecoration: promoApplied ? 'line-through' : 'none',
+                    opacity: promoApplied ? 0.5 : 1,
+                  }}
+                >
+                  {formatVND(basePrice)}
+                </span>
+              </div>
+              {promoApplied && (
+                <>
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-[12px]" style={{ color: '#22C55E' }}>
+                      Giảm giá ({promoApplied.label})
+                    </span>
+                    <span className="text-[12px] font-semibold" style={{ color: '#22C55E' }}>
+                      -{formatVND(promoApplied.discount)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center pt-2 mt-2 border-t" style={{ borderColor: 'var(--theme-border)' }}>
+                    <span className="text-[13px] font-semibold" style={{ color: 'var(--theme-text-primary)' }}>
+                      Tổng thanh toán
+                    </span>
+                    <span className="text-[16px] font-bold" style={{ color: '#8B5CF6' }}>
+                      {formatVND(finalPrice)}
+                    </span>
+                  </div>
+                </>
+              )}
+              <div className="text-[12px] mt-1" style={{ color: 'var(--theme-text-muted)' }}>
+                {period === 'yearly' ? '12 tháng sử dụng' :
+                 period === 'lifetime' ? 'Truy cập trọn đời — không cần gia hạn' :
+                 '1 tháng sử dụng'}
+              </div>
+            </div>
+
+            <button
+              onClick={handleUpgrade}
+              disabled={upgradeMut.isPending}
+              className="w-full py-3 rounded-xl text-[14px] font-bold text-white transition-transform hover:scale-[1.01] disabled:opacity-60"
+              style={{ background: 'linear-gradient(135deg, #6366F1, #8B5CF6)' }}
+            >
+              {upgradeMut.isPending ? 'Đang tạo...' : 'Tiếp tục thanh toán'}
+            </button>
+          </>
+        ) : upgradeData ? (
+          <>
+            <h2 className="text-lg font-bold mb-1" style={{ color: 'var(--theme-text-primary)' }}>
+              Thông tin chuyển khoản
+            </h2>
+            <p className="text-[13px] mb-4" style={{ color: 'var(--theme-text-muted)' }}>
+              Chuyển khoản theo thông tin bên dưới hoặc quét mã QR
+            </p>
+
+            {/* VietQR */}
+            <VietQRImage
+              bankBin={getBankBin(upgradeData.bankInfo.bankName)}
+              account={upgradeData.bankInfo.accountNumber}
+              amount={upgradeData.bankInfo.amount}
+              note={upgradeData.bankInfo.content}
+              accountName={upgradeData.bankInfo.accountName}
+            />
+
+            {/* Bank details */}
+            <div className="rounded-xl border p-4 space-y-3 mb-4" style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-secondary)' }}>
+              <div>
+                <div className="text-[11px] uppercase tracking-wide mb-0.5" style={{ color: 'var(--theme-text-muted)' }}>Ngân hàng</div>
+                <div className="text-[14px] font-semibold" style={{ color: 'var(--theme-text-primary)' }}>
+                  {upgradeData.bankInfo.bankName}
+                </div>
+              </div>
+              <div>
+                <div className="text-[11px] uppercase tracking-wide mb-0.5" style={{ color: 'var(--theme-text-muted)' }}>Số tài khoản</div>
+                <div className="flex items-center">
+                  <span className="text-[14px] font-mono font-semibold" style={{ color: 'var(--theme-text-primary)' }}>
+                    {upgradeData.bankInfo.accountNumber}
+                  </span>
+                  <CopyButton text={upgradeData.bankInfo.accountNumber} />
+                </div>
+              </div>
+              <div>
+                <div className="text-[11px] uppercase tracking-wide mb-0.5" style={{ color: 'var(--theme-text-muted)' }}>Chủ tài khoản</div>
+                <div className="text-[14px] font-semibold" style={{ color: 'var(--theme-text-primary)' }}>
+                  {upgradeData.bankInfo.accountName}
+                </div>
+              </div>
+              <div>
+                <div className="text-[11px] uppercase tracking-wide mb-0.5" style={{ color: 'var(--theme-text-muted)' }}>Số tiền</div>
+                <div className="flex items-center">
+                  <span className="text-[16px] font-bold" style={{ color: '#8B5CF6' }}>
+                    {formatVND(upgradeData.bankInfo.amount)}
+                  </span>
+                  <CopyButton text={String(upgradeData.bankInfo.amount)} />
+                </div>
+              </div>
+              <div>
+                <div className="text-[11px] uppercase tracking-wide mb-0.5" style={{ color: 'var(--theme-text-muted)' }}>
+                  Nội dung chuyển khoản
+                </div>
+                <div className="flex items-center">
+                  <span className="text-[14px] font-mono font-bold" style={{ color: '#F59E0B' }}>
+                    {upgradeData.bankInfo.content}
+                  </span>
+                  <CopyButton text={upgradeData.bankInfo.content} />
+                </div>
+              </div>
+            </div>
+
+            <div className="rounded-lg p-3 mb-4 text-[12px] leading-relaxed" style={{ backgroundColor: 'rgba(59,130,246,0.08)', color: 'var(--theme-text-secondary)' }}>
+              Sau khi chuyển khoản, admin sẽ xác nhận trong vòng 24 giờ.
+              Premium sẽ được kích hoạt tự động sau khi xác nhận.
+            </div>
+
+            <button
+              onClick={handleClose}
+              className="w-full py-3 rounded-xl text-[14px] font-bold transition-colors"
+              style={{ color: 'var(--theme-text-primary)', backgroundColor: 'var(--theme-bg-secondary)' }}
+            >
+              Tôi đã chuyển khoản
+            </button>
+          </>
+        ) : null}
+      </div>
+    </div>
+  );
+}

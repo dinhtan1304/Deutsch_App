@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useGenerateFreeSpeaking } from '@/hooks/useFreeSpeaking';
+import { QuotaPaywall } from '@/components/subscription/QuotaPaywall';
 
 function IconLoader({ size = 18 }: { size?: number }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="animate-spin" style={{ display: 'block' }}><path d="M21 12a9 9 0 1 1-6.219-8.56" /></svg>;
@@ -47,6 +48,7 @@ export default function FreeSpeakingNewPage() {
   };
 
   return (
+    <QuotaPaywall feature="freeSpeaking">
     <div className="py-6">
       <div className="flex items-center gap-2 mb-6">
         <Link href="/practice-test/speaking" className="flex items-center gap-1 text-[13px] font-medium transition-opacity hover:opacity-70"
@@ -124,5 +126,6 @@ export default function FreeSpeakingNewPage() {
         )}
       </button>
     </div>
+    </QuotaPaywall>
   );
 }

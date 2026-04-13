@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useReadingTopics, useGenerateReading } from '@/hooks/useReading';
+import { QuotaPaywall } from '@/components/subscription/QuotaPaywall';
 import { IconChevronLeft, IconDice, IconLoader, IconRobot } from '../icons';
 
 const LEVEL_COLORS: Record<string, string> = {
@@ -53,6 +54,7 @@ export default function NewReadingPage() {
   };
 
   return (
+    <QuotaPaywall feature="reading">
     <div className="py-6">
 
       {/* Header */}
@@ -253,5 +255,6 @@ export default function NewReadingPage() {
 
       </div>
     </div>
+    </QuotaPaywall>
   );
 }

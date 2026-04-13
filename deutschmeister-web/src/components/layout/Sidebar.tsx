@@ -11,6 +11,7 @@ import {
   IconHeadphones, IconSpellCheck, IconLink, IconMic,
 } from '@/components/ui/Icons';
 import { useXp } from '@/hooks/useXp';
+import { useAuthStore } from '@/stores/authStore';
 
 // ============================================
 // Navigation Data
@@ -120,6 +121,7 @@ interface SidebarProps {
 export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
   const pathname = usePathname();
   const { data: xpInfo } = useXp();
+  const { user } = useAuthStore();
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
   const [tooltip, setTooltip] = useState<{ href: string; top: number } | null>(null);
 
@@ -411,6 +413,35 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
           </div>
         ))}
       </nav>
+
+      {/* ─── Premium CTA ─── */}
+      {user && (
+        <div className="px-3 pb-1 shrink-0">
+          {user.subscription?.plan === 'premium' && user.subscription?.status === 'active' ? (
+            <Link
+              href="/profile/subscription"
+              className="flex items-center justify-center gap-2 py-2 rounded-xl text-[12px] font-bold transition-colors"
+              style={{ color: '#8B5CF6', backgroundColor: 'rgba(139,92,246,0.08)' }}
+            >
+              {!isCollapsed && <span>Premium</span>}
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8B5CF6" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+              </svg>
+            </Link>
+          ) : (
+            <Link
+              href="/pricing"
+              className="flex items-center justify-center gap-2 py-2 rounded-xl text-[12px] font-bold text-white transition-transform hover:scale-[1.02]"
+              style={{ background: 'linear-gradient(135deg, #6366F1, #8B5CF6)' }}
+            >
+              {!isCollapsed && <span>Nâng cấp Premium</span>}
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+              </svg>
+            </Link>
+          )}
+        </div>
+      )}
 
       {/* ─── XP Bar + Footer ─── */}
       <div className="px-3 py-3 shrink-0" style={{ borderTop: '1px solid var(--theme-border)' }}>
