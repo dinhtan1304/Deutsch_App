@@ -44,6 +44,12 @@ const freeCards: CardDef[] = [
     icon: IconZap, href: '/practice-test/roleplay',
     gradient: 'linear-gradient(135deg, #6366F1, #A855F7)', color: '#A855F7',
   },
+  {
+    title: 'Phát Âm AI', titleDe: 'Aussprachetraining',
+    description: 'Ghi âm và nhận đánh giá phát âm từng từ bằng AI · Premium',
+    icon: IconMic, href: '/practice-test/pronunciation',
+    gradient: 'linear-gradient(135deg, #EC4899, #A855F7)', color: '#EC4899',
+  },
 ];
 
 const examCards: CardDef[] = [
