@@ -116,31 +116,29 @@ export default function DashboardPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-bold" style={{ color: 'var(--theme-text-primary)' }}>
-            Chào {user?.name || 'bạn'}! 👋
+            Hallo, {user?.name || 'Freund'}!
           </h1>
           <p className="text-[13px] mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>
             {stats.streak > 0 ? (
-              <>Bạn đã học <span className="text-orange-500 font-bold">{stats.streak} ngày</span> liên tiếp 🔥</>
+              <>Du lernst seit <span className="text-orange-500 font-bold">{stats.streak} Tagen</span> in Folge 🔥</>
             ) : stats.totalWordsLearned > 0 ? (
-              <>Đã học <span className="text-blue-500 font-bold">{stats.totalWordsLearned} từ</span>. Tiếp tục nhé!</>
+              <>Du hast <span className="text-blue-500 font-bold">{stats.totalWordsLearned} Wörter</span> gelernt. Weiter so!</>
             ) : stats.gamesPlayed === 0 ? (
-              'Hôm nay là ngày tuyệt vời để bắt đầu học tiếng Đức!'
+              'Heute ist ein toller Tag, um Deutsch zu lernen!'
             ) : (
-              'Hãy tiếp tục học để duy trì streak nhé!'
+              'Lerne weiter, um deinen Streak zu halten!'
             )}
           </p>
         </div>
         <div className="text-right text-[12px] hidden sm:block" style={{ color: 'var(--theme-text-muted)' }}>{todayLabel}</div>
       </div>
 
-      {/* ── Study Plan Widget (top priority) ── */}
-      <StudyPlanWidget />
-
-      {/* ── First Day Journey (collapsible) ── */}
-      <FirstDayJourney />
-
-      {/* ── Daily Learning Path (collapsible) ── */}
-      <DailyPath />
+      {/* ── Quick Cards Row ── */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <StudyPlanWidget />
+        <FirstDayJourney />
+        <DailyPath />
+      </div>
 
       {/* ── Stats ── */}
       <StatsCards stats={dashboardData.stats} />
