@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: 'Deutschmeister' }],
   creator: 'Deutschmeister',
-  metadataBase: new URL('https://deutschmeister.vn'),
+  metadataBase: new URL('https://www.deutschmeister.vn'),
   openGraph: {
     type: 'website',
     locale: 'vi_VN',

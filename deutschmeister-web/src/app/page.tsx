@@ -122,7 +122,7 @@ export default function HomePage() {
           '@context': 'https://schema.org',
           '@type': 'WebApplication',
           name: 'Deutschmeister',
-          url: 'https://deutschmeister.vn',
+          url: 'https://www.deutschmeister.vn',
           description: 'Nền tảng học tiếng Đức toàn diện dành cho người Việt. 5000+ từ vựng, 8 trò chơi, AI chấm 4 kỹ năng, đề thi chuẩn Goethe/TELC A1-B1.',
           applicationCategory: 'EducationalApplication',
           operatingSystem: 'Web',
