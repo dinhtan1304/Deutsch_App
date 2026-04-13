@@ -4,17 +4,46 @@ export interface Plan {
   code: string;
   name: string;
   nameVi: string;
-  monthlyPrice: number;
-  yearlyPrice: number;
+  monthlyPrice?: number;
+  yearlyPrice?: number;
+  price?: number;          // for lifetime
   features: string[];
   limits: { practicePerDay: number };
 }
 
+export type BillingPeriod = 'monthly' | 'yearly' | 'lifetime';
+
 export interface MySubscription {
-  plan: 'free' | 'premium';
+  plan: 'free' | 'premium' | 'lifetime';
   status: string;
   expiresAt: string | null;
   payments: Payment[];
+}
+
+export interface PromoValidation {
+  valid: boolean;
+  discount: number;
+  discountLabel: string;
+}
+
+export interface LifetimeRemaining {
+  sold: number;
+  max: number;
+  remaining: number;
+}
+
+export interface PromoCode {
+  id: string;
+  code: string;
+  discountPct: number | null;
+  discountVnd: number | null;
+  maxUses: number | null;
+  usedCount: number;
+  validFrom: string;
+  validUntil: string | null;
+  appliesTo: string;
+  active: boolean;
+  createdAt: string;
 }
 
 export interface Payment {
@@ -40,6 +69,11 @@ export interface BankInfo {
 export interface UpgradeResponse {
   payment: Payment;
   bankInfo: BankInfo;
+  promo?: {
+    code: string;
+    discount: number;
+    originalAmount: number;
+  };
 }
 
 export interface AdminPayment extends Payment {
@@ -68,10 +102,14 @@ export interface QuotaInfo {
 export const subscriptionsApi = {
   getPlans: () => apiGet<Plan[]>('/subscriptions/plans'),
   getMySubscription: () => apiGet<MySubscription>('/subscriptions/me'),
-  requestUpgrade: (period: 'monthly' | 'yearly') =>
-    apiPost<UpgradeResponse>('/subscriptions/upgrade', { period }),
+  requestUpgrade: (period: BillingPeriod, promoCode?: string) =>
+    apiPost<UpgradeResponse>('/subscriptions/upgrade', { period, promoCode }),
   checkQuota: (feature: PracticeFeat) =>
     apiGet<QuotaInfo>(`/subscriptions/quota/${feature}`),
+  validatePromo: (code: string, period: BillingPeriod) =>
+    apiPost<PromoValidation>('/subscriptions/validate-promo', { code, period }),
+  getLifetimeRemaining: () =>
+    apiGet<LifetimeRemaining>('/subscriptions/lifetime-remaining'),
 };
 
 export const adminSubscriptionsApi = {
@@ -96,4 +134,17 @@ export const adminSubscriptionsApi = {
     apiPost(`/subscriptions/admin/grant/${userId}`, { period, note }),
   revokePremium: (userId: string) =>
     apiPost(`/subscriptions/admin/revoke/${userId}`, {}),
+
+  // Promo code admin
+  createPromoCode: (dto: {
+    code: string;
+    discountPct?: number;
+    discountVnd?: number;
+    maxUses?: number;
+    appliesTo?: string;
+    validUntil?: string;
+  }) => apiPost<PromoCode>('/subscriptions/admin/promo-codes', dto),
+  listPromoCodes: () => apiGet<PromoCode[]>('/subscriptions/admin/promo-codes'),
+  disablePromoCode: (id: string) =>
+    apiPost<PromoCode>(`/subscriptions/admin/promo-codes/${id}/disable`, {}),
 };

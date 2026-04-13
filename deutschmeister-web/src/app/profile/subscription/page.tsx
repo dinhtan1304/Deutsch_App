@@ -50,7 +50,8 @@ export default function SubscriptionPage() {
     );
   }
 
-  const isPremium = data.plan === 'premium' && data.status === 'active';
+  const isLifetime = data.plan === 'lifetime' && data.status === 'active';
+  const isPremium = (data.plan === 'premium' || data.plan === 'lifetime') && data.status === 'active';
   const isExpired = data.status === 'expired';
 
   return (
@@ -93,15 +94,17 @@ export default function SubscriptionPage() {
             </div>
             <div>
               <div className="text-[15px] font-bold" style={{ color: 'var(--theme-text-primary)' }}>
-                {isPremium ? 'Premium' : 'Free'}
+                {isLifetime ? 'Lifetime' : isPremium ? 'Premium' : 'Free'}
               </div>
-              {isPremium && data.expiresAt && (
+              {isPremium && !isLifetime && data.expiresAt && (
                 <div className="text-[12px]" style={{ color: 'var(--theme-text-muted)' }}>
                   Còn {daysUntil(data.expiresAt)} ngày &middot; Hết hạn {formatDate(data.expiresAt)}
                 </div>
               )}
-              {isPremium && !data.expiresAt && (
-                <div className="text-[12px]" style={{ color: '#22C55E' }}>Trọn đời</div>
+              {isLifetime && (
+                <div className="text-[12px] font-semibold" style={{ color: '#EC4899' }}>
+                  ⭐ Trọn đời — Early Backer
+                </div>
               )}
               {isExpired && (
                 <div className="text-[12px]" style={{ color: '#EF4444' }}>
@@ -129,7 +132,7 @@ export default function SubscriptionPage() {
             {isExpired ? 'Gia hạn Premium' : 'Nâng cấp lên Premium'}
           </button>
         )}
-        {isPremium && data.expiresAt && daysUntil(data.expiresAt) <= 30 && (
+        {isPremium && !isLifetime && data.expiresAt && daysUntil(data.expiresAt) <= 30 && (
           <button
             onClick={() => setUpgradeOpen(true)}
             className="w-full py-2.5 rounded-xl text-[14px] font-bold transition-colors"

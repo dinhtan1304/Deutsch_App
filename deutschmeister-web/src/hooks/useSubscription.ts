@@ -8,6 +8,9 @@ import {
   UpgradeResponse,
   QuotaInfo,
   PracticeFeat,
+  BillingPeriod,
+  PromoValidation,
+  LifetimeRemaining,
 } from '@/lib/api/subscriptions';
 
 // ── Query Keys ──
@@ -17,6 +20,7 @@ export const subscriptionKeys = {
   plans: () => [...subscriptionKeys.all, 'plans'] as const,
   me: () => [...subscriptionKeys.all, 'me'] as const,
   quota: (feature: PracticeFeat) => [...subscriptionKeys.all, 'quota', feature] as const,
+  lifetimeRemaining: () => [...subscriptionKeys.all, 'lifetime-remaining'] as const,
 };
 
 // ── Queries ──
@@ -46,15 +50,40 @@ export function useCheckQuota(feature: PracticeFeat, enabled = true) {
   });
 }
 
+export function useLifetimeRemaining() {
+  return useQuery<LifetimeRemaining>({
+    queryKey: subscriptionKeys.lifetimeRemaining(),
+    queryFn: () => subscriptionsApi.getLifetimeRemaining(),
+    staleTime: 5 * 60 * 1000, // 5min — count doesn't change often
+  });
+}
+
 // ── Mutations ──
 
 export function useRequestUpgrade() {
   const qc = useQueryClient();
-  return useMutation<UpgradeResponse, Error, 'monthly' | 'yearly'>({
-    mutationFn: (period) => subscriptionsApi.requestUpgrade(period),
+  return useMutation<
+    UpgradeResponse,
+    Error,
+    { period: BillingPeriod; promoCode?: string }
+  >({
+    mutationFn: ({ period, promoCode }) =>
+      subscriptionsApi.requestUpgrade(period, promoCode),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: subscriptionKeys.me() });
+      qc.invalidateQueries({ queryKey: subscriptionKeys.lifetimeRemaining() });
     },
+  });
+}
+
+export function useValidatePromo() {
+  return useMutation<
+    PromoValidation,
+    Error,
+    { code: string; period: BillingPeriod }
+  >({
+    mutationFn: ({ code, period }) =>
+      subscriptionsApi.validatePromo(code, period),
   });
 }
 
@@ -62,5 +91,8 @@ export function useRequestUpgrade() {
 
 export function useIsPremium(): boolean {
   const { data } = useMySubscription();
-  return data?.plan === 'premium' && data?.status === 'active';
+  return (
+    (data?.plan === 'premium' || data?.plan === 'lifetime') &&
+    data?.status === 'active'
+  );
 }
