@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useExamListeningHistory, useExamListeningStats, useDeleteExamListening } from '@/hooks/useExamListening';
 import { ExamListeningHistoryItem, TeilScore } from '@/lib/api/examListening';
+import { PremiumPaywall } from '@/components/subscription/PremiumPaywall';
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
 function IconHeadphones({ size = 16, style }: { size?: number; style?: React.CSSProperties }) {
@@ -98,6 +99,17 @@ function HistoryCard({ item, onDelete }: { item: ExamListeningHistoryItem; onDel
 }
 
 export default function ExamListeningListPage() {
+  return (
+    <PremiumPaywall
+      title="Đề chuẩn Listening"
+      description="Luyện nghe theo đề thi Goethe & TELC A1–B1 với Premium"
+    >
+      <ExamListeningListContent />
+    </PremiumPaywall>
+  );
+}
+
+function ExamListeningListContent() {
   const [filter, setFilter] = useState<string>('all');
   const [page, setPage] = useState(1);
 

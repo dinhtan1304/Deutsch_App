@@ -1,10 +1,13 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import {
   IconPenLine, IconHeadphones, IconBookOpen, IconMic,
   IconArrowRight, IconStar, IconZap, IconGraduationCap,
 } from '@/components/ui/Icons';
+import { useIsExamUnlocked } from '@/hooks/useSubscription';
+import { UpgradeModal } from '@/components/subscription/UpgradeModal';
 
 // ─── Data ──────────────────────────────────────────────────────────────────────
 type CardDef = {
@@ -80,7 +83,15 @@ const examCards: CardDef[] = [
 ];
 
 // ─── Card ──────────────────────────────────────────────────────────────────────
-function Card({ card }: { card: CardDef }) {
+function Card({
+  card,
+  premiumLocked,
+  onPremiumClick,
+}: {
+  card: CardDef;
+  premiumLocked?: boolean;
+  onPremiumClick?: () => void;
+}) {
   const Ic = card.icon;
   if (card.locked) {
     return (
@@ -96,6 +107,45 @@ function Card({ card }: { card: CardDef }) {
         <h3 className="text-[16px] font-bold mb-2" style={{ color: 'var(--theme-text-primary)' }}>{card.title}</h3>
         <p className="text-[12.5px] leading-relaxed" style={{ color: 'var(--theme-text-secondary)' }}>{card.description}</p>
       </div>
+    );
+  }
+  if (premiumLocked) {
+    return (
+      <button
+        type="button"
+        onClick={onPremiumClick}
+        className="group text-left w-full rounded-2xl border p-5 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg relative"
+        style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}
+      >
+        {/* Icon with lock overlay */}
+        <div className="relative w-12 h-12 rounded-xl flex items-center justify-center mb-4 transition-transform duration-200 group-hover:scale-110"
+          style={{ background: card.gradient }}>
+          <Ic size={22} className="text-white" />
+          <span className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full flex items-center justify-center"
+            style={{ background: 'linear-gradient(135deg, #F59E0B, #EF4444)' }}>
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+            </svg>
+          </span>
+        </div>
+        {/* PREMIUM badge */}
+        <span
+          className="absolute top-4 right-4 text-[9px] font-extrabold px-1.5 py-0.5 rounded-full text-white"
+          style={{ background: 'linear-gradient(135deg, #F59E0B, #EF4444)' }}
+        >
+          PREMIUM
+        </span>
+        {/* Text */}
+        <p className="text-[11px] font-semibold mb-0.5" style={{ color: 'var(--theme-text-muted)' }}>{card.titleDe}</p>
+        <h3 className="text-[16px] font-bold mb-2" style={{ color: 'var(--theme-text-primary)' }}>{card.title}</h3>
+        <p className="text-[12.5px] leading-relaxed mb-4" style={{ color: 'var(--theme-text-secondary)' }}>{card.description}</p>
+        {/* CTA */}
+        <div className="flex items-center gap-1.5 text-[12.5px] font-semibold"
+          style={{ color: card.color }}>
+          Nâng cấp để mở khoá <IconArrowRight size={13} />
+        </div>
+      </button>
     );
   }
   return (
@@ -151,6 +201,9 @@ function SectionHeader({
 
 // ─── Page ──────────────────────────────────────────────────────────────────────
 export default function PracticeTestPage() {
+  const examUnlocked = useIsExamUnlocked();
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
+
   return (
     <div className="py-6 max-w-7xl mx-auto px-4">
 
@@ -194,12 +247,27 @@ export default function PracticeTestPage() {
         icon={IconGraduationCap}
         iconGradient="linear-gradient(135deg, #F59E0B, #EF4444)"
         label="Theo đề chuẩn"
-        sub="Goethe & TELC · A1/A2/B1 · Đầy đủ tất cả Teile như đề thi thật"
+        sub={examUnlocked
+          ? 'Goethe & TELC · A1/A2/B1 · Đầy đủ tất cả Teile như đề thi thật'
+          : 'Goethe & TELC · A1/A2/B1 · Yêu cầu gói Premium'}
         badge="Đề chuẩn"
       />
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {examCards.map(card => <Card key={card.href} card={card} />)}
+        {examCards.map(card => (
+          <Card
+            key={card.href}
+            card={card}
+            premiumLocked={!examUnlocked}
+            onPremiumClick={() => setUpgradeOpen(true)}
+          />
+        ))}
       </div>
+
+      <UpgradeModal
+        open={upgradeOpen}
+        onClose={() => setUpgradeOpen(false)}
+        defaultPeriod="yearly"
+      />
     </div>
   );
 }

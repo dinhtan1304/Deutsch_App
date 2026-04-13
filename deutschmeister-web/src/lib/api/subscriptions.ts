@@ -99,6 +99,10 @@ export interface QuotaInfo {
   limit: number;
 }
 
+export interface BetaStatus {
+  betaOpen: boolean;
+}
+
 export const subscriptionsApi = {
   getPlans: () => apiGet<Plan[]>('/subscriptions/plans'),
   getMySubscription: () => apiGet<MySubscription>('/subscriptions/me'),
@@ -110,6 +114,8 @@ export const subscriptionsApi = {
     apiPost<PromoValidation>('/subscriptions/validate-promo', { code, period }),
   getLifetimeRemaining: () =>
     apiGet<LifetimeRemaining>('/subscriptions/lifetime-remaining'),
+  getBetaStatus: () =>
+    apiGet<BetaStatus>('/subscriptions/beta-status'),
 };
 
 export const adminSubscriptionsApi = {

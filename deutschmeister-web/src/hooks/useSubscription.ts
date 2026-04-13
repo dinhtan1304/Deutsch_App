@@ -11,6 +11,7 @@ import {
   BillingPeriod,
   PromoValidation,
   LifetimeRemaining,
+  BetaStatus,
 } from '@/lib/api/subscriptions';
 
 // ── Query Keys ──
@@ -21,6 +22,7 @@ export const subscriptionKeys = {
   me: () => [...subscriptionKeys.all, 'me'] as const,
   quota: (feature: PracticeFeat) => [...subscriptionKeys.all, 'quota', feature] as const,
   lifetimeRemaining: () => [...subscriptionKeys.all, 'lifetime-remaining'] as const,
+  betaStatus: () => [...subscriptionKeys.all, 'beta-status'] as const,
 };
 
 // ── Queries ──
@@ -87,6 +89,14 @@ export function useValidatePromo() {
   });
 }
 
+export function useBetaStatus() {
+  return useQuery<BetaStatus>({
+    queryKey: subscriptionKeys.betaStatus(),
+    queryFn: () => subscriptionsApi.getBetaStatus(),
+    staleTime: 5 * 60 * 1000, // 5min
+  });
+}
+
 // ── Helpers ──
 
 export function useIsPremium(): boolean {
@@ -95,4 +105,19 @@ export function useIsPremium(): boolean {
     (data?.plan === 'premium' || data?.plan === 'lifetime') &&
     data?.status === 'active'
   );
+}
+
+export function useBetaOpen(): boolean {
+  const { data } = useBetaStatus();
+  return data?.betaOpen ?? false;
+}
+
+/**
+ * Exam "đề chuẩn" features are unlocked either when the user is Premium
+ * or when the backend has BETA_OPEN=true. Use this hook to gate exam UI.
+ */
+export function useIsExamUnlocked(): boolean {
+  const isPremium = useIsPremium();
+  const betaOpen = useBetaOpen();
+  return isPremium || betaOpen;
 }

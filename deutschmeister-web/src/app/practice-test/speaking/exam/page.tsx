@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useExamSpeakingHistory, useExamSpeakingStats, useDeleteExamSpeaking } from '@/hooks/useExamSpeaking';
 import { ExamSpeakingHistoryItem } from '@/lib/api/examSpeaking';
+import { PremiumPaywall } from '@/components/subscription/PremiumPaywall';
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
 function IconMic({ size = 16, style }: { size?: number; style?: React.CSSProperties }) {
@@ -88,6 +89,17 @@ function HistoryCard({ item, onDelete }: { item: ExamSpeakingHistoryItem; onDele
 }
 
 export default function ExamSpeakingListPage() {
+  return (
+    <PremiumPaywall
+      title="Đề chuẩn Speaking"
+      description="Luyện nói theo đề thi Goethe & TELC A1–B1 với Premium"
+    >
+      <ExamSpeakingListContent />
+    </PremiumPaywall>
+  );
+}
+
+function ExamSpeakingListContent() {
   const [filter, setFilter] = useState<string>('all');
   const [page, setPage] = useState(1);
 
