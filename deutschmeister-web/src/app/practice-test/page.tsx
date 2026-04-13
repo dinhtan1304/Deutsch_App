@@ -38,6 +38,12 @@ const freeCards: CardDef[] = [
     icon: IconMic, href: '/practice-test/speaking',
     gradient: 'linear-gradient(135deg, #F59E0B, #EF4444)', color: '#F59E0B',
   },
+  {
+    title: 'Roleplay AI', titleDe: 'Rollenspiel',
+    description: 'Luyện hội thoại thực tế với AI (bác sĩ, phỏng vấn, thuê nhà...) · Premium',
+    icon: IconZap, href: '/practice-test/roleplay',
+    gradient: 'linear-gradient(135deg, #6366F1, #A855F7)', color: '#A855F7',
+  },
 ];
 
 const examCards: CardDef[] = [
