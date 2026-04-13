@@ -40,13 +40,13 @@ const freeCards: CardDef[] = [
   },
   {
     title: 'Roleplay AI', titleDe: 'Rollenspiel',
-    description: 'Luyện hội thoại thực tế với AI (bác sĩ, phỏng vấn, thuê nhà...) · Premium',
+    description: 'Luyện hội thoại thực tế với AI (bác sĩ, phỏng vấn, thuê nhà...)',
     icon: IconZap, href: '/practice-test/roleplay',
     gradient: 'linear-gradient(135deg, #6366F1, #A855F7)', color: '#A855F7',
   },
   {
     title: 'Phát Âm AI', titleDe: 'Aussprachetraining',
-    description: 'Ghi âm và nhận đánh giá phát âm từng từ bằng AI · Premium',
+    description: 'Ghi âm và nhận đánh giá phát âm từng từ bằng AI',
     icon: IconMic, href: '/practice-test/pronunciation',
     gradient: 'linear-gradient(135deg, #EC4899, #A855F7)', color: '#EC4899',
   },
@@ -173,7 +173,7 @@ export default function PracticeTestPage() {
         icon={IconZap}
         iconGradient="linear-gradient(135deg, #6366F1, #8B5CF6)"
         label="Luyện tự do"
-        sub="AI tạo đề ngẫu nhiên · Tối đa 3 lượt/ngày"
+        sub="AI tạo đề ngẫu nhiên · Tối đa 3 lượt/tuần"
       />
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-10">
         {freeCards.map(card => <Card key={card.href} card={card} />)}

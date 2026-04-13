@@ -8,7 +8,7 @@ export interface Plan {
   yearlyPrice?: number;
   price?: number;          // for lifetime
   features: string[];
-  limits: { practicePerDay: number };
+  limits: { practicePerWeek: number };
 }
 
 export type BillingPeriod = 'monthly' | 'yearly' | 'lifetime';
@@ -91,7 +91,7 @@ export interface AdminSubscription {
   user: { id: string; email: string; name: string | null };
 }
 
-export type PracticeFeat = 'writing' | 'reading' | 'listening' | 'speaking' | 'freeSpeaking';
+export type PracticeFeat = 'writing' | 'reading' | 'listening' | 'speaking' | 'freeSpeaking' | 'roleplay' | 'pronunciation';
 
 export interface QuotaInfo {
   allowed: boolean;

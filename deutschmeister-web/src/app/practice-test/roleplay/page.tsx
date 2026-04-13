@@ -9,7 +9,7 @@ import {
   useRoleplayHistory,
   useDeleteRoleplay,
 } from '@/hooks/useRoleplay';
-import { useIsPremium } from '@/hooks/useSubscription';
+import { useCheckQuota } from '@/hooks/useSubscription';
 import { ScenarioCard } from '@/components/roleplay/ScenarioCard';
 import { UpgradeModal } from '@/components/subscription/UpgradeModal';
 import type { RoleplayLevel, RoleplayScenario } from '@/lib/api/roleplay';
@@ -28,7 +28,8 @@ function formatDate(dateStr: string) {
 
 export default function RoleplayPage() {
   const router = useRouter();
-  const isPremium = useIsPremium();
+  const { data: quota } = useCheckQuota('roleplay');
+  const quotaExhausted = quota && !quota.allowed;
   const [levelFilter, setLevelFilter] = useState<RoleplayLevel | 'all'>('all');
   const [upgradeOpen, setUpgradeOpen] = useState(false);
 
@@ -44,7 +45,7 @@ export default function RoleplayPage() {
   }, [scenarios, levelFilter]);
 
   const handleStart = async (scenario: RoleplayScenario) => {
-    if (!isPremium) {
+    if (quotaExhausted) {
       setUpgradeOpen(true);
       return;
     }
@@ -90,14 +91,15 @@ export default function RoleplayPage() {
                 style={{ color: 'var(--theme-text-primary)' }}
               >
                 <span>💬</span> Roleplay AI
-                {!isPremium && (
+                {quota && (
                   <span
-                    className="px-2 py-0.5 rounded-md text-[10px] font-bold text-white"
+                    className="px-2 py-0.5 rounded-md text-[10px] font-bold"
                     style={{
-                      background: 'linear-gradient(135deg, #F59E0B, #EF4444)',
+                      backgroundColor: quotaExhausted ? 'rgba(239,68,68,0.1)' : 'rgba(34,197,94,0.1)',
+                      color: quotaExhausted ? '#EF4444' : '#22C55E',
                     }}
                   >
-                    PREMIUM
+                    {quota.used}/{quota.limit} lượt/tuần
                   </span>
                 )}
               </h1>
@@ -152,7 +154,7 @@ export default function RoleplayPage() {
               <ScenarioCard
                 key={sc.code}
                 scenario={sc}
-                locked={!isPremium}
+                locked={!!quotaExhausted}
                 onClick={() => handleStart(sc)}
               />
             ))}

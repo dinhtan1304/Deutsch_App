@@ -41,10 +41,10 @@ export function QuotaPaywall({ feature, children }: Props) {
         </div>
 
         <h3 className="text-[16px] font-bold mb-1" style={{ color: 'var(--theme-text-primary)' }}>
-          Hết lượt luyện tập hôm nay
+          Hết lượt luyện tập tuần này
         </h3>
         <p className="text-[13px] mb-4" style={{ color: 'var(--theme-text-muted)' }}>
-          Bạn đã sử dụng {quota.used}/{quota.limit} lượt miễn phí hôm nay
+          Bạn đã sử dụng {quota.used}/{quota.limit} lượt miễn phí tuần này
         </p>
 
         {/* Progress bar */}
@@ -64,7 +64,7 @@ export function QuotaPaywall({ feature, children }: Props) {
         </button>
 
         <p className="text-[12px]" style={{ color: 'var(--theme-text-muted)' }}>
-          Lượt miễn phí sẽ reset lúc 00:00 (UTC+7)
+          Lượt miễn phí reset vào thứ Hai hàng tuần (00:00 UTC+7)
         </p>
       </div>
 

@@ -45,7 +45,9 @@ const COMPARISON: { feature: string; free: Val; premium: Val; lifetime: Val }[] 
   { feature: 'Ngữ pháp & chủ đề', free: true, premium: true, lifetime: true },
   { feature: 'Dictionary click-to-lookup', free: true, premium: true, lifetime: true },
   { feature: 'Streak & Leaderboard', free: true, premium: true, lifetime: true },
-  { feature: 'Luyện viết / đọc / nghe / nói', free: '3 lần/ngày', premium: 'Không giới hạn', lifetime: 'Không giới hạn' },
+  { feature: 'Luyện viết / đọc / nghe / nói', free: '3 lần/tuần', premium: 'Không giới hạn', lifetime: 'Không giới hạn' },
+  { feature: 'Roleplay AI (hội thoại)', free: '3 lần/tuần', premium: 'Không giới hạn', lifetime: 'Không giới hạn' },
+  { feature: 'Phát âm AI', free: '3 lần/tuần', premium: 'Không giới hạn', lifetime: 'Không giới hạn' },
   { feature: 'Đề thi Goethe/TELC (Reading)', free: false, premium: true, lifetime: true },
   { feature: 'Đề thi Goethe/TELC (Writing)', free: false, premium: true, lifetime: true },
   { feature: 'Đề thi Goethe/TELC (Listening)', free: false, premium: true, lifetime: true },
@@ -124,7 +126,7 @@ export default function PricingPage() {
               ))}
               <li className="flex items-start gap-2 text-[13px]" style={{ color: 'var(--theme-text-muted)' }}>
                 {CHECK}
-                <span>Luyện viết/đọc/nghe/nói — 3 lần/ngày</span>
+                <span>Luyện viết/đọc/nghe/nói/roleplay/phát âm — 3 lần/tuần</span>
               </li>
             </ul>
             {isAuthenticated ? (
@@ -347,7 +349,7 @@ export default function PricingPage() {
               { q: 'Làm sao để thanh toán?', a: 'Chuyển khoản ngân hàng hoặc quét mã VietQR. Sau khi chuyển, admin sẽ xác nhận trong 24 giờ.' },
               { q: 'Bao lâu thì Premium được kích hoạt?', a: 'Sau khi admin xác nhận thanh toán — thường trong vòng vài giờ, tối đa 24 giờ.' },
               { q: 'Có được hoàn tiền không?', a: 'Trong 7 ngày đầu, nếu chưa hài lòng hãy liên hệ email support để được hoàn tiền.' },
-              { q: 'Free hết lượt thì sao?', a: 'Bạn vẫn dùng được từ vựng, games, ngữ pháp, dictionary. Lượt luyện tập AI reset mỗi ngày (00:00 UTC+7).' },
+              { q: 'Free hết lượt thì sao?', a: 'Bạn vẫn dùng được từ vựng, games, ngữ pháp, dictionary. Lượt luyện tập AI reset vào thứ Hai hàng tuần (00:00 UTC+7).' },
               { q: 'Gói Lifetime là gì?', a: 'Trả 1 lần, dùng mãi mãi. Early bird deal giới hạn 500 slot đầu tiên — khi hết là không mở lại. Bạn sẽ nhận Early Backer badge và được ưu tiên tính năng AI mới.' },
               { q: 'Tôi có mã giảm giá, dùng ở đâu?', a: 'Khi bấm nút đăng ký, modal thanh toán sẽ có ô "Mã giảm giá". Nhập mã và bấm "Áp dụng" để thấy giá sau giảm trước khi chuyển khoản.' },
             ].map(({ q, a }) => (
