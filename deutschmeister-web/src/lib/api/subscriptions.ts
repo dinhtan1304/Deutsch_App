@@ -57,11 +57,21 @@ export interface AdminSubscription {
   user: { id: string; email: string; name: string | null };
 }
 
+export type PracticeFeat = 'writing' | 'reading' | 'listening' | 'speaking' | 'freeSpeaking';
+
+export interface QuotaInfo {
+  allowed: boolean;
+  used: number;
+  limit: number;
+}
+
 export const subscriptionsApi = {
   getPlans: () => apiGet<Plan[]>('/subscriptions/plans'),
   getMySubscription: () => apiGet<MySubscription>('/subscriptions/me'),
   requestUpgrade: (period: 'monthly' | 'yearly') =>
     apiPost<UpgradeResponse>('/subscriptions/upgrade', { period }),
+  checkQuota: (feature: PracticeFeat) =>
+    apiGet<QuotaInfo>(`/subscriptions/quota/${feature}`),
 };
 
 export const adminSubscriptionsApi = {

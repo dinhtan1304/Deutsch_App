@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useWritingTopics, useGeneratePrompt } from '@/hooks/useWriting';
+import { QuotaPaywall } from '@/components/subscription/QuotaPaywall';
 import { IconChevronLeft, IconDice, IconLoader, IconRobot } from '../icons';
 
 // ─── Level colors ───
@@ -41,6 +42,7 @@ export default function NewWritingPage() {
   const activeColor = LEVEL_COLORS[level] || '#3B82F6';
 
   return (
+    <QuotaPaywall feature="writing">
       <div className="py-6">
 
         {/* Header */}
@@ -234,5 +236,6 @@ export default function NewWritingPage() {
 
         </div>
       </div>
+    </QuotaPaywall>
   );
 }

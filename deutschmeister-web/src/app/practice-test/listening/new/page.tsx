@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useGenerateListening } from '@/hooks/useListening';
+import { QuotaPaywall } from '@/components/subscription/QuotaPaywall';
 
 function IconHeadphones({ size = 20, style }: { size?: number; style?: React.CSSProperties }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}><path d="M3 18v-6a9 9 0 0 1 18 0v6" /><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z" /></svg>;
@@ -51,6 +52,7 @@ export default function NewListeningPage() {
   };
 
   return (
+    <QuotaPaywall feature="listening">
     <div className="py-6 max-w-lg mx-auto">
       <div className="flex items-center gap-3 mb-6">
         <Link href="/practice-test/listening" className="p-2 rounded-xl transition-all hover:scale-110"
@@ -117,5 +119,6 @@ export default function NewListeningPage() {
         {loading ? <><IconLoader size={18} /> Đang tạo bài nghe...</> : '🎧 Tạo Bài Nghe'}
       </button>
     </div>
+    </QuotaPaywall>
   );
 }
