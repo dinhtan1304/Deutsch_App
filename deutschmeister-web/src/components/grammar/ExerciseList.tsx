@@ -302,8 +302,8 @@ function ResultScreen({ result, exercises, onRetry }: {
                                             {ex.questionVi}
                                         </span>
                                     </div>
-                                    {!fb.correct && fb.explanation && (
-                                        <p className="text-[12px] mt-1" style={{ color: '#EF4444' }}>
+                                    {fb.explanation && (
+                                        <p className="text-[12px] mt-1" style={{ color: fb.correct ? '#22C55E' : '#EF4444' }}>
                                             💡 {(fb.explanation as any)?.vi || (fb.explanation as any)?.en || ''}
                                         </p>
                                     )}

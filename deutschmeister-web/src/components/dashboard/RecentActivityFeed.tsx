@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import type { RecentActivity } from '@/types/dashboard';
-import { IconGamepad, IconPencil, IconLayers, IconBrain, IconClock, IconGraduationCap } from '@/components/ui/Icons';
+import { IconGamepad, IconPencil, IconLayers, IconBrain, IconClock, IconGraduationCap, IconPenLine, IconBookOpen, IconHeadphones, IconMic, IconMessageCircle } from '@/components/ui/Icons';
 
 interface RecentActivityFeedProps {
   data: RecentActivity[];
@@ -16,11 +16,20 @@ const TYPE_CONFIG: Record<string, {
   accent: string;
   label: string;
 }> = {
-  game:    { icon: IconGamepad,       gradient: 'linear-gradient(135deg, #3B82F6, #6366F1)', accent: '#3B82F6', label: 'Game' },
-  word:    { icon: IconPencil,        gradient: 'linear-gradient(135deg, #10B981, #34D399)', accent: '#10B981', label: 'Từ vựng' },
-  topic:   { icon: IconLayers,        gradient: 'linear-gradient(135deg, #8B5CF6, #A855F7)', accent: '#8B5CF6', label: 'Chủ đề' },
-  review:  { icon: IconBrain,         gradient: 'linear-gradient(135deg, #F59E0B, #FBBF24)', accent: '#F59E0B', label: 'Ôn tập' },
-  grammar: { icon: IconGraduationCap, gradient: 'linear-gradient(135deg, #F59E0B, #EF4444)', accent: '#F59E0B', label: 'Ngữ pháp' },
+  game:           { icon: IconGamepad,       gradient: 'linear-gradient(135deg, #3B82F6, #6366F1)', accent: '#3B82F6', label: 'Game' },
+  word:           { icon: IconPencil,        gradient: 'linear-gradient(135deg, #10B981, #34D399)', accent: '#10B981', label: 'Từ vựng' },
+  topic:          { icon: IconLayers,        gradient: 'linear-gradient(135deg, #8B5CF6, #A855F7)', accent: '#8B5CF6', label: 'Chủ đề' },
+  review:         { icon: IconBrain,         gradient: 'linear-gradient(135deg, #F59E0B, #FBBF24)', accent: '#F59E0B', label: 'Ôn tập' },
+  grammar:        { icon: IconGraduationCap, gradient: 'linear-gradient(135deg, #F59E0B, #EF4444)', accent: '#F59E0B', label: 'Ngữ pháp' },
+  writing:        { icon: IconPenLine,       gradient: 'linear-gradient(135deg, #6366F1, #8B5CF6)', accent: '#6366F1', label: 'Luyện viết' },
+  reading:        { icon: IconBookOpen,      gradient: 'linear-gradient(135deg, #22C55E, #14B8A6)', accent: '#22C55E', label: 'Luyện đọc' },
+  listening:      { icon: IconHeadphones,    gradient: 'linear-gradient(135deg, #06B6D4, #0EA5E9)', accent: '#06B6D4', label: 'Luyện nghe' },
+  exam_reading:   { icon: IconBookOpen,      gradient: 'linear-gradient(135deg, #22C55E, #10B981)', accent: '#22C55E', label: 'Thi đọc' },
+  exam_writing:   { icon: IconPenLine,       gradient: 'linear-gradient(135deg, #A855F7, #6366F1)', accent: '#A855F7', label: 'Thi viết' },
+  exam_listening: { icon: IconHeadphones,    gradient: 'linear-gradient(135deg, #06B6D4, #0EA5E9)', accent: '#06B6D4', label: 'Thi nghe' },
+  exam_speaking:  { icon: IconMic,           gradient: 'linear-gradient(135deg, #F59E0B, #EF4444)', accent: '#F59E0B', label: 'Thi nói' },
+  free_speaking:  { icon: IconMic,           gradient: 'linear-gradient(135deg, #F59E0B, #D97706)', accent: '#F59E0B', label: 'Luyện nói' },
+  roleplay:       { icon: IconMessageCircle, gradient: 'linear-gradient(135deg, #EC4899, #F43F5E)', accent: '#EC4899', label: 'Roleplay' },
 };
 
 // ─── Inline chevron icon ───
@@ -80,7 +89,9 @@ export function RecentActivityFeed({ data, initialCount = 2 }: RecentActivityFee
 
       {data.length === 0 ? (
         <div className="text-center py-8">
-          <div className="text-4xl mb-3">🌱</div>
+          <div className="w-14 h-14 mx-auto mb-3 rounded-2xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, rgba(34,197,94,.12), rgba(20,184,166,.08))' }}>
+            <svg width={28} height={28} viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round"><path d="M7 20h10" /><path d="M10 20c5.5-2.5 .8-6.4 3-10" /><path d="M9.5 9.4c1.1.8 1.8 2.2 2.3 3.7-2 .4-3.5.4-4.8-.3-1.2-.6-2.3-1.9-3-4.2 2.8-.5 4.4 0 5.5.8z" /><path d="M14.1 6a7 7 0 0 0-1.1 4c1.9-.1 3.3-.6 4.3-1.4 1-1 1.6-2.3 1.7-4.6-2.7.1-4 1-4.9 2z" /></svg>
+          </div>
           <p className="text-[13px] font-medium" style={{ color: 'var(--theme-text-secondary)' }}>
             Chưa có hoạt động nào
           </p>

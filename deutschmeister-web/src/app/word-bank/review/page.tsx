@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import Link from 'next/link';
-import { useSRSDue, useSRSStats, useReviewWord, SRSRating } from '@/hooks/usePersonalWords';
+import { useSearchParams } from 'next/navigation';
+import { useSRSDue, useSRSStats, useReviewWord, useWeakWords, SRSRating } from '@/hooks/usePersonalWords';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
 import { PersonalWord, getSRSStatus, getIntervalText, SRSStatusInfo, WordTypeInfo, GenderInfo } from '@/types/personalWord';
 import { IconRefresh, IconChevronLeft, IconBrain, IconTarget, IconFlame, IconBookOpen, IconTrophy, IconKeyboard } from '@/components/ui/Icons';
@@ -250,7 +251,7 @@ function SessionComplete({ session, onRestart }: { session: ReviewSession; onRes
         <IconTrophy size={36} style={{ color: '#22C55E' }} />
       </div>
       <h2 className="text-2xl font-bold mb-2" style={{ color: 'var(--theme-text-primary)' }}>
-        Hoàn thành! 🎉
+        Hoàn thành!
       </h2>
       <p className="text-[14px] mb-6" style={{ color: 'var(--theme-text-muted)' }}>
         Tuyệt vời, bạn đã hoàn thành phiên ôn tập
@@ -286,8 +287,18 @@ function SessionComplete({ session, onRestart }: { session: ReviewSession; onRes
 // ============================================
 // Empty State Component
 // ============================================
-function EmptyState() {
+function EmptyState({ mode = 'srs' }: { mode?: 'srs' | 'weak' }) {
   const { data: stats } = useSRSStats();
+
+  const title = mode === 'weak'
+    ? 'Chưa có từ yếu nào'
+    : stats?.total === 0 ? 'Chưa có từ nào' : 'Không có từ cần ôn!';
+
+  const description = mode === 'weak'
+    ? 'Cần ít nhất 3 lần ôn cho mỗi từ trước khi xuất hiện ở đây. Hãy ôn tập SRS thêm để có dữ liệu.'
+    : stats?.total === 0
+      ? 'Thêm từ vào Word Bank để bắt đầu học.'
+      : 'Tuyệt vời! Bạn đã ôn hết tất cả các từ cho hôm nay.';
 
   return (
     <div className="text-center py-16">
@@ -296,12 +307,10 @@ function EmptyState() {
         <IconBrain size={36} style={{ color: '#8B5CF6' }} />
       </div>
       <h2 className="text-2xl font-bold mb-2" style={{ color: 'var(--theme-text-primary)' }}>
-        {stats?.total === 0 ? 'Chưa có từ nào' : 'Không có từ cần ôn!'}
+        {title}
       </h2>
       <p className="text-[14px] mb-6" style={{ color: 'var(--theme-text-muted)' }}>
-        {stats?.total === 0
-          ? 'Thêm từ vào Word Bank để bắt đầu học.'
-          : 'Tuyệt vời! Bạn đã ôn hết tất cả các từ cho hôm nay. ✨'}
+        {description}
       </p>
 
       <div className="flex gap-3 justify-center">
@@ -326,10 +335,29 @@ function EmptyState() {
 // Main Review Page
 // ============================================
 export default function WordBankReviewPage() {
+  const searchParams = useSearchParams();
+  const mode = searchParams.get('mode') === 'weak' ? 'weak' : 'srs';
+
   const [session, setSession] = useState<ReviewSession | null>(null);
   const [isFlipped, setIsFlipped] = useState(false);
 
-  const { data: dueData, isLoading, refetch } = useSRSDue({ limit: 20, includeNew: true, newLimit: 5 });
+  const srsQuery = useSRSDue({ limit: 20, includeNew: true, newLimit: 5 });
+  const weakQuery = useWeakWords(20);
+
+  const isLoading = mode === 'weak' ? weakQuery.isLoading : srsQuery.isLoading;
+  const refetch = mode === 'weak' ? weakQuery.refetch : srsQuery.refetch;
+
+  // Normalize both modes to a flat words array
+  const sessionData = useMemo(() => {
+    if (mode === 'weak') {
+      const words = weakQuery.data?.words ?? [];
+      return { words, total: words.length };
+    }
+    const due = srsQuery.data?.due ?? [];
+    const newW = srsQuery.data?.new ?? [];
+    return { words: [...due, ...newW], total: due.length + newW.length };
+  }, [mode, weakQuery.data, srsQuery.data]);
+
   const reviewMutation = useReviewWord();
   const { playCorrect, playWrong } = useSoundEffects();
 
@@ -346,13 +374,10 @@ export default function WordBankReviewPage() {
   useEffect(() => { isFlippedRef.current = isFlipped; }, [isFlipped]);
 
   useEffect(() => {
-    if (dueData && !session) {
-      const allWords = [...dueData.due, ...dueData.new];
-      if (allWords.length > 0) {
-        setSession({ words: allWords, currentIndex: 0, reviewed: 0, correct: 0 });
-      }
+    if (sessionData.words.length > 0 && !session) {
+      setSession({ words: sessionData.words, currentIndex: 0, reviewed: 0, correct: 0 });
     }
-  }, [dueData, session]);
+  }, [sessionData, session]);
 
   const currentWord = session?.words[session.currentIndex];
   const isComplete = session && session.currentIndex >= session.words.length;
@@ -415,15 +440,19 @@ export default function WordBankReviewPage() {
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <div className="w-11 h-11 rounded-2xl flex items-center justify-center"
-              style={{ background: 'linear-gradient(135deg, #8B5CF6, #6366F1)' }}>
+              style={{ background: mode === 'weak'
+                ? 'linear-gradient(135deg, #EF4444, #F59E0B)'
+                : 'linear-gradient(135deg, #8B5CF6, #6366F1)' }}>
               <IconBrain size={22} className="text-white" />
             </div>
             <div>
               <h1 className="text-2xl font-bold" style={{ color: 'var(--theme-text-primary)' }}>
-                Ôn tập Word Bank
+                {mode === 'weak' ? 'Ôn từ yếu' : 'Ôn tập Word Bank'}
               </h1>
               <p className="text-[13px]" style={{ color: 'var(--theme-text-muted)' }}>
-                Spaced Repetition System (SM-2)
+                {mode === 'weak'
+                  ? 'Tập trung vào những từ bạn hay sai nhất'
+                  : 'Spaced Repetition System (SM-2)'}
               </p>
             </div>
           </div>
@@ -434,8 +463,8 @@ export default function WordBankReviewPage() {
           </Link>
         </div>
 
-        {/* Stats */}
-        <SRSStatsCard />
+        {/* Stats — only on SRS mode */}
+        {mode === 'srs' && <SRSStatsCard />}
 
         {/* Loading */}
         {isLoading && (
@@ -448,7 +477,7 @@ export default function WordBankReviewPage() {
         )}
 
         {/* Empty State */}
-        {!isLoading && (!dueData || dueData.total === 0) && <EmptyState />}
+        {!isLoading && sessionData.total === 0 && <EmptyState mode={mode} />}
 
         {/* Review Session */}
         {session && !isComplete && currentWord && (

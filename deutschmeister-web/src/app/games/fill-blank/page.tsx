@@ -9,7 +9,7 @@ import { useGameSession } from '@/hooks/useGameSession';
 import { GenderInfo, Word } from '@/types';
 import {
   GameSetupCard, GameResultCard, GameButton, GameProgressBar,
-  ComboBadge, StatCard, AnswerReview, GameInfoBox, KBD,
+  ComboBadge, StatCard, AnswerReview, AddWrongWordsToBank, GameResultUpsell, GameInfoBox, KBD,
   IconPenTool, IconTarget, IconCheck, IconX, IconRocket, IconKeyboard, IconVolume,
   IconRefresh, IconChevronLeft, IconLightbulb,
 } from '@/components/games/GameUI';
@@ -180,6 +180,8 @@ export default function FillBlankPage() {
             getSelectedLabel={a => !a.isCorrect ? (a.userInput || '(trống)') : null}
           />
         </div>
+        <AddWrongWordsToBank wrongWords={answers.filter(a => !a.isCorrect).map(a => a.word)} />
+        <GameResultUpsell />
       </>
     );
   }

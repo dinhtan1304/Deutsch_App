@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useGrammarLessons, useGrammarProgress } from '@/hooks/useGrammar';
 import { GrammarLessonCard } from '@/components/grammar/GrammarLessonCard';
-import { IconBook, IconGraduationCap, IconCheck, IconTarget } from '@/components/ui/Icons';
+import { IconBook, IconGraduationCap, IconCheck, IconTarget, IconList } from '@/components/ui/Icons';
 
 const LEVELS = ['ALL', 'A1', 'A2', 'B1'] as const;
 
@@ -24,6 +24,48 @@ export default function GrammarDashboardPage() {
   ).sort((a, b) => a.lessonNumber - b.lessonNumber);
 
   const getLessonProgress = (lessonId: string) => progress.find(p => p.lessonId === lessonId);
+
+  // Group by level for path view when showing ALL
+  const lessonsByLevel = useMemo(() => {
+    const map: Record<string, typeof lessons> = { A1: [], A2: [], B1: [] };
+    for (const l of filteredLessons) {
+      if (!map[l.level]) map[l.level] = [];
+      map[l.level].push(l);
+    }
+    return map;
+  }, [filteredLessons]);
+
+  const levelDescriptions: Record<string, string> = {
+    A1: 'Nền tảng — Alphabet, động từ sein/haben, mạo từ, câu đơn',
+    A2: 'Sơ cấp trên — Perfekt, Präteritum, câu phụ với weil/dass',
+    B1: 'Trung cấp — Konjunktiv, Passiv, Nebensätze phức tạp',
+  };
+
+  // Compute prerequisite lock status
+  const lockInfo = useMemo(() => {
+    const passedSet = new Set(
+      progress.filter(p => p.status === 'completed' && (p.score ?? 0) >= 80).map(p => p.lessonId)
+    );
+    const map: Record<string, { locked: boolean; reason: string }> = {};
+    for (const lesson of lessons) {
+      const prereqs = lesson.prerequisiteIds ?? [];
+      if (prereqs.length === 0) {
+        map[lesson.id] = { locked: false, reason: '' };
+        continue;
+      }
+      const unmet = prereqs.filter(id => !passedSet.has(id));
+      if (unmet.length === 0) {
+        map[lesson.id] = { locked: false, reason: '' };
+      } else {
+        const names = lessons.filter(l => unmet.includes(l.id)).map(l => l.titleVi);
+        map[lesson.id] = {
+          locked: true,
+          reason: names.length > 0 ? `Hoàn thành "${names.join(', ')}" trước (≥80%)` : 'Hoàn thành bài tiên quyết trước (≥80%)',
+        };
+      }
+    }
+    return map;
+  }, [lessons, progress]);
 
   const completedCount = progress.filter(p => p.status === 'completed').length;
   const totalCount = lessons.length;
@@ -65,8 +107,20 @@ export default function GrammarDashboardPage() {
           </div>
         </div>
 
-        {/* Level filter */}
-        <div className="flex gap-1 p-1 rounded-xl" style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
+        <div className="flex items-center gap-2">
+          {/* Cheatsheet link */}
+          <a href="/grammar/cheatsheet"
+            className="flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-[13px] font-semibold transition-all hover:-translate-y-0.5"
+            style={{
+              background: 'linear-gradient(135deg,rgba(139,92,246,.12),rgba(139,92,246,.06))',
+              color: '#8B5CF6',
+              border: '1px solid rgba(139,92,246,.2)',
+            }}>
+            <IconList size={14} /> Cheatsheet
+          </a>
+
+          {/* Level filter */}
+          <div className="flex gap-1 p-1 rounded-xl" style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
           {LEVELS.map(level => {
             const isActive = filterLevel === level;
             const lc = level !== 'ALL' ? LEVEL_COLORS[level] : null;
@@ -85,6 +139,7 @@ export default function GrammarDashboardPage() {
               </button>
             );
           })}
+        </div>
         </div>
       </div>
 
@@ -133,15 +188,77 @@ export default function GrammarDashboardPage() {
         </div>
       )}
 
-      {/* ─── Grid ─── */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        {filteredLessons.map(lesson => (
-          <GrammarLessonCard
-            key={lesson.id}
-            lesson={lesson}
-            progress={getLessonProgress(lesson.id)}
-          />
-        ))}
+      {/* ─── Learning Path — grouped by level ─── */}
+      <div className="space-y-8">
+        {(['A1', 'A2', 'B1'] as const).map((lvl, lvlIdx) => {
+          const levelLessons = lessonsByLevel[lvl] ?? [];
+          if (levelLessons.length === 0) return null;
+
+          const lc = LEVEL_COLORS[lvl];
+          const lvlCompleted = levelLessons.filter(l => getLessonProgress(l.id)?.status === 'completed').length;
+          const lvlPct = levelLessons.length > 0 ? Math.round((lvlCompleted / levelLessons.length) * 100) : 0;
+
+          return (
+            <section key={lvl} className="relative">
+              {/* Connector arrow between sections */}
+              {lvlIdx > 0 && (
+                <div className="flex justify-center -mt-4 mb-4" aria-hidden>
+                  <div className="flex flex-col items-center">
+                    <div className="w-0.5 h-6" style={{ backgroundColor: 'var(--theme-border)' }} />
+                    <div style={{ color: 'var(--theme-text-muted)' }}>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="6 9 12 15 18 9" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Level header */}
+              <div className="mb-4 flex items-center gap-3">
+                <div
+                  className="shrink-0 w-12 h-12 rounded-2xl flex items-center justify-center text-white font-extrabold text-[15px]"
+                  style={{ background: lc.gradient, boxShadow: `0 4px 14px ${lc.color}40` }}
+                >
+                  {lvl}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-baseline gap-2 flex-wrap">
+                    <h2 className="text-[17px] font-bold" style={{ color: 'var(--theme-text-primary)' }}>
+                      Chặng {lvl}
+                    </h2>
+                    <span className="text-[12px]" style={{ color: 'var(--theme-text-muted)' }}>
+                      {lvlCompleted}/{levelLessons.length} bài
+                    </span>
+                  </div>
+                  <p className="text-[12px] leading-snug mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>
+                    {levelDescriptions[lvl]}
+                  </p>
+                  {/* Mini progress bar */}
+                  <div className="mt-2 h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
+                    <div
+                      className="h-full rounded-full transition-all duration-700"
+                      style={{ width: `${lvlPct}%`, background: lc.gradient }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Level lesson grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                {levelLessons.map(lesson => (
+                  <GrammarLessonCard
+                    key={lesson.id}
+                    lesson={lesson}
+                    progress={getLessonProgress(lesson.id)}
+                    locked={lockInfo[lesson.id]?.locked}
+                    lockedReason={lockInfo[lesson.id]?.reason}
+                  />
+                ))}
+              </div>
+            </section>
+          );
+        })}
       </div>
 
       {/* Empty state */}

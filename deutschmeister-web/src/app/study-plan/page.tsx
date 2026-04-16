@@ -251,8 +251,18 @@ export default function StudyPlanPage() {
               className="p-4 rounded-2xl border"
               style={{ borderColor: 'rgba(59,130,246,.2)', background: 'rgba(59,130,246,.04)' }}
             >
-              <div className="text-[12px] font-bold uppercase tracking-wider mb-3" style={{ color: '#3B82F6' }}>
-                Hôm nay — {DAY_NAMES[today]}
+              <div className="flex items-center justify-between mb-3">
+                <div className="text-[12px] font-bold uppercase tracking-wider" style={{ color: '#3B82F6' }}>
+                  Hôm nay — {DAY_NAMES[today]}
+                </div>
+                {todayTasks.length > 0 && (
+                  <span className="text-[12px] font-semibold px-2 py-0.5 rounded-full" style={{
+                    backgroundColor: todayTasks.filter((t: WeeklyTask) => t.completed).length === todayTasks.length ? 'rgba(34,197,94,.1)' : 'var(--theme-bg-secondary)',
+                    color: todayTasks.filter((t: WeeklyTask) => t.completed).length === todayTasks.length ? '#22C55E' : 'var(--theme-text-muted)',
+                  }}>
+                    {todayTasks.filter((t: WeeklyTask) => t.completed).length}/{todayTasks.length} nhiệm vụ
+                  </span>
+                )}
               </div>
               <div className="space-y-2">
                 {todayTasks.map((task: WeeklyTask, i: number) => (
@@ -260,20 +270,33 @@ export default function StudyPlanPage() {
                     key={i}
                     href={task.href}
                     className="flex items-center gap-3 p-3 rounded-xl transition-all group"
-                    style={{ backgroundColor: 'var(--theme-bg-card)', border: '1px solid var(--theme-border)' }}
+                    style={{
+                      backgroundColor: task.completed ? 'rgba(34,197,94,.04)' : 'var(--theme-bg-card)',
+                      border: `1px solid ${task.completed ? 'rgba(34,197,94,.2)' : 'var(--theme-border)'}`,
+                    }}
                   >
-                    <span className="text-lg">{TASK_ICONS[task.type] || '\uD83D\uDCCC'}</span>
+                    {task.completed ? (
+                      <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0" style={{ background: 'linear-gradient(135deg, #22C55E, #10B981)' }}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                      </div>
+                    ) : (
+                      <span className="text-lg">{TASK_ICONS[task.type] || '\uD83D\uDCCC'}</span>
+                    )}
                     <div className="flex-1 min-w-0">
-                      <div className="text-[14px] font-semibold" style={{ color: 'var(--theme-text-primary)' }}>
+                      <div className="text-[14px] font-semibold" style={{ color: task.completed ? '#22C55E' : 'var(--theme-text-primary)', textDecoration: task.completed ? 'line-through' : 'none' }}>
                         {task.title}
                       </div>
                       <div className="text-[12px]" style={{ color: 'var(--theme-text-muted)' }}>
                         {task.description}
                       </div>
                     </div>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="shrink-0 opacity-30 group-hover:opacity-70 transition-opacity" style={{ color: 'var(--theme-text-muted)' }}>
-                      <path d="M9 18l6-6-6-6" />
-                    </svg>
+                    {!task.completed && (
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="shrink-0 opacity-30 group-hover:opacity-70 transition-opacity" style={{ color: 'var(--theme-text-muted)' }}>
+                        <path d="M9 18l6-6-6-6" />
+                      </svg>
+                    )}
                   </Link>
                 ))}
               </div>

@@ -86,11 +86,11 @@ export function TopicProgressList({ data, limit }: TopicProgressListProps) {
             >
               {/* Icon */}
               <div
-                className="w-9 h-9 rounded-lg flex items-center justify-center text-lg shrink-0
+                className="w-9 h-9 rounded-lg flex items-center justify-center text-[13px] font-extrabold shrink-0
                   transition-transform duration-200 group-hover:scale-110 group-hover:rotate-3"
-                style={{ backgroundColor: `${topic.color}18` }}
+                style={{ backgroundColor: `${topic.color}18`, color: topic.color }}
               >
-                {topic.icon}
+                {topic.nameDe?.[0]?.toUpperCase() || 'T'}
               </div>
 
               {/* Content */}
@@ -139,7 +139,9 @@ export function TopicProgressList({ data, limit }: TopicProgressListProps) {
       {/* Empty state */}
       {data.length === 0 && (
         <div className="text-center py-8">
-          <div className="text-4xl mb-3">📭</div>
+          <div className="w-14 h-14 mx-auto mb-3 rounded-2xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, rgba(236,72,153,.12), rgba(244,114,182,.08))' }}>
+            <IconLayers size={28} style={{ color: '#EC4899' }} />
+          </div>
           <p className="text-[13px] font-medium" style={{ color: 'var(--theme-text-secondary)' }}>
             Chưa có chủ đề nào
           </p>

@@ -9,7 +9,7 @@ import { useGameSession } from '@/hooks/useGameSession';
 import { Gender, GenderInfo, Word } from '@/types';
 import {
   GameSetupCard, GameResultCard, GameButton, GameProgressBar,
-  ComboBadge, StatCard, GenderButtons, AnswerReview, GameInfoBox, KBD,
+  ComboBadge, StatCard, GenderButtons, AnswerReview, AddWrongWordsToBank, GameResultUpsell, GameInfoBox, KBD,
   IconTarget, IconCheck, IconX, IconFlame, IconRocket, IconKeyboard, IconVolume, IconRefresh, IconChevronLeft,
 } from '@/components/games/GameUI';
 
@@ -177,6 +177,8 @@ export default function GenderQuizPage() {
             getSelectedLabel={a => !a.isCorrect ? GenderInfo[a.selectedAnswer].article : null}
           />
         </div>
+        <AddWrongWordsToBank wrongWords={answers.filter(a => !a.isCorrect).map(a => a.word)} />
+        <GameResultUpsell />
       </>
     );
   }

@@ -5,7 +5,8 @@ import { Word, GenderInfo } from '@/types';
 import { WordDetailModal } from './WordDetailModal';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useAddToHistory } from '@/hooks/useHistory';
-import { IconVolume, IconStar } from '@/components/ui/Icons';
+import { IconVolume, IconStar, IconPlus, IconCheck } from '@/components/ui/Icons';
+import { useCreatePersonalWord } from '@/hooks/usePersonalWords';
 
 interface WordCardProps {
   word: Word;
@@ -24,10 +25,12 @@ export function WordCard({
 }: WordCardProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const [addedToBank, setAddedToBank] = useState(false);
   const { settings } = useSettingsStore();
   const addToHistory = useAddToHistory();
+  const createPersonalWord = useCreatePersonalWord();
 
-  const genderInfo = GenderInfo[word.gender];
+  const genderInfo = GenderInfo[word.gender] ?? { label: word.gender || 'n', article: 'das', color: '#22c55e' };
 
   const genderStyles = {
     masculine: {
@@ -49,7 +52,7 @@ export function WordCard({
       gradient: 'linear-gradient(135deg,#22c55e,#15803d)',
     },
   };
-  const styles = genderStyles[word.gender];
+  const styles = genderStyles[word.gender] ?? genderStyles.neuter;
 
   const handleCardClick = () => {
     setIsModalOpen(true);
@@ -59,6 +62,24 @@ export function WordCard({
   const handleFavoriteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     onFavoriteToggle?.(word.id);
+  };
+
+  const handleAddToBank = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (addedToBank || createPersonalWord.isPending) return;
+    try {
+      await createPersonalWord.mutateAsync({
+        word: word.word,
+        wordType: 'nomen',
+        translationEn: word.translationEn,
+        translationVi: word.translationVi || '',
+        nomenData: { article: word.article, gender: word.gender, plural: word.plural || '' },
+        level: word.level as any,
+        category: word.category,
+        examples: word.examples,
+      });
+      setAddedToBank(true);
+    } catch { /* duplicate or error */ }
   };
 
   const speakWord = (e: React.MouseEvent) => {
@@ -197,14 +218,25 @@ export function WordCard({
 
             {/* Right: Favorite + Image */}
             <div className="flex flex-col items-end gap-2 shrink-0">
-              {showFavoriteButton && onFavoriteToggle && (
-                <button onClick={handleFavoriteClick}
+              <div className="flex items-center gap-1.5">
+                {showFavoriteButton && onFavoriteToggle && (
+                  <button onClick={handleFavoriteClick}
+                    className="w-8 h-8 flex items-center justify-center rounded-xl transition-all hover:scale-110"
+                    style={{ backgroundColor: isFavorite ? 'rgba(234,179,8,.15)' : 'var(--theme-bg-secondary)', color: isFavorite ? '#FBBF24' : 'var(--theme-text-muted)' }}
+                    title={isFavorite ? 'Bỏ yêu thích' : 'Thêm vào yêu thích'}>
+                    <IconStar size={16} style={isFavorite ? { fill: '#FBBF24' } : {}} />
+                  </button>
+                )}
+                <button onClick={handleAddToBank}
                   className="w-8 h-8 flex items-center justify-center rounded-xl transition-all hover:scale-110"
-                  style={{ backgroundColor: isFavorite ? 'rgba(234,179,8,.15)' : 'var(--theme-bg-secondary)', color: isFavorite ? '#FBBF24' : 'var(--theme-text-muted)' }}
-                  title={isFavorite ? 'Bỏ yêu thích' : 'Thêm vào yêu thích'}>
-                  <IconStar size={16} style={isFavorite ? { fill: '#FBBF24' } : {}} />
+                  style={{
+                    backgroundColor: addedToBank ? 'rgba(34,197,94,.15)' : 'var(--theme-bg-secondary)',
+                    color: addedToBank ? '#22C55E' : 'var(--theme-text-muted)',
+                  }}
+                  title={addedToBank ? 'Đã thêm vào Word Bank' : 'Thêm vào Word Bank'}>
+                  {addedToBank ? <IconCheck size={14} /> : <IconPlus size={14} />}
                 </button>
-              )}
+              </div>
 
               {hasImage && (
                 <div className="w-16 h-16 rounded-xl overflow-hidden shadow-sm"

@@ -17,12 +17,12 @@ export function WordHighlightProvider({ children }: { children: ReactNode }) {
   const isAuthenticated = useAuthStore(state => state.isAuthenticated);
   const prevAuthRef = useRef(false);
 
-  // Fetch lần đầu khi mount
+  // Fetch khi user đã đăng nhập (không cần fetch trên landing page)
   useEffect(() => {
-    if (!hasFetched && !isLoading) {
+    if (isAuthenticated && !hasFetched && !isLoading) {
       fetchLevelIndex();
     }
-  }, [hasFetched, isLoading, fetchLevelIndex]);
+  }, [isAuthenticated, hasFetched, isLoading, fetchLevelIndex]);
 
   // Retry sau khi login nếu fetch trước đó fail (hasFetched=true nhưng levelIndex=null)
   useEffect(() => {

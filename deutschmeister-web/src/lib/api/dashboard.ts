@@ -77,4 +77,18 @@ export interface DailyPath {
   tasks: DailyTask[];
   completedCount: number;
   totalCount: number;
+  srsDueCount: number;
 }
+
+export interface NextAction {
+  priority: 'srs_urgent' | 'srs_normal' | 'study_plan' | 'streak_risk' | 'weak_skill' | 'explore';
+  title: string;
+  subtitle: string;
+  ctaText: string;
+  href: string;
+  icon: string;
+  gradient: string;
+  badge?: string;
+}
+
+export const getNextAction = () => apiGet<NextAction>('/dashboard/next-action');

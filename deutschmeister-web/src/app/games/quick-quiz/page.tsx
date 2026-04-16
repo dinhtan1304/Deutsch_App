@@ -11,7 +11,7 @@ import { Word, Gender, GenderInfo } from '@/types';
 import { speakGerman } from '@/lib/utils';
 import {
   GameSetupCard, GameResultCard, GameButton, GameProgressBar,
-  StatCard, AnswerReview, GameInfoBox, KBD,
+  StatCard, AnswerReview, AddWrongWordsToBank, GameResultUpsell, GameInfoBox, KBD,
   IconZap, IconTarget, IconCheck, IconX, IconRocket, IconKeyboard, IconVolume,
   IconRefresh, IconChevronLeft,
 } from '@/components/games/GameUI';
@@ -154,6 +154,8 @@ export default function QuickQuizPage() {
             getSelectedLabel={a => !a.isCorrect ? GenderInfo[a.selected].article : null}
           />
         </div>
+        <AddWrongWordsToBank wrongWords={answers.filter(a => !a.isCorrect).map(a => a.word)} />
+        <GameResultUpsell />
       </>
     );
   }

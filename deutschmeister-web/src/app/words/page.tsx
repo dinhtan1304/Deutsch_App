@@ -1,14 +1,13 @@
 'use client';
 
-import { useState, useMemo, useRef, useEffect } from 'react';
+import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { WordCard } from '@/components/words/WordCard';
-import { useWords } from '@/hooks/useWords';
+import { useInfiniteWords } from '@/hooks/useWords';
 import { useFavorites, useToggleFavorite } from '@/hooks/useFavorites';
 import { Gender, CEFRLevel, CATEGORIES, LEVELS } from '@/types';
 import {
-  IconBook, IconSearch, IconChevronLeft, IconChevronRight,
-  IconLightbulb, IconStar, IconHistory, IconX,
+  IconBook, IconSearch, IconLightbulb, IconStar, IconHistory, IconX,
 } from '@/components/ui/Icons';
 
 // ─── Category display names (Vietnamese) ───
@@ -43,16 +42,24 @@ export default function WordsPage() {
   const [gender, setGender] = useState<Gender | ''>('');
   const [category, setCategory] = useState('');
   const [level, setLevel] = useState<CEFRLevel | ''>('');
-  const [page, setPage] = useState(1);
 
-  const { data, isLoading, error } = useWords({
+  const {
+    data,
+    isLoading,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteWords({
     search: search || undefined,
     gender: gender || undefined,
     category: category || undefined,
     level: level || undefined,
-    page,
     limit: 21,
   });
+
+  const allWords = useMemo(() => data?.pages.flatMap(p => p.data) ?? [], [data]);
+  const totalCount = data?.pages[0]?.total ?? 0;
 
   const { data: favorites } = useFavorites();
   const { toggle: toggleFavorite } = useToggleFavorite();
@@ -65,10 +72,27 @@ export default function WordsPage() {
 
   const clearFilters = () => {
     if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
-    setSearchInput(''); setSearch(''); setGender(''); setCategory(''); setLevel(''); setPage(1);
+    setSearchInput(''); setSearch(''); setGender(''); setCategory(''); setLevel('');
   };
 
-  const toggleGender = (g: Gender) => { setGender(prev => prev === g ? '' : g); setPage(1); };
+  const toggleGender = (g: Gender) => { setGender(prev => prev === g ? '' : g); };
+
+  // ─── Infinite scroll sentinel ───
+  const sentinelRef = useRef<HTMLDivElement>(null);
+
+  const handleIntersect = useCallback(([entry]: IntersectionObserverEntry[]) => {
+    if (entry.isIntersecting && hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(handleIntersect, { threshold: 0.1 });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [handleIntersect]);
 
   return (
     <div className="py-6">
@@ -108,11 +132,11 @@ export default function WordsPage() {
             <IconHistory size={14} /> Lịch sử
           </Link>
 
-          {data && (
+          {totalCount > 0 && (
             <div className="text-right hidden sm:block pl-2 border-l"
               style={{ borderColor: 'var(--theme-border)' }}>
               <div className="text-xl font-extrabold" style={{ color: 'var(--theme-text-primary)' }}>
-                {data.total}
+                {totalCount}
               </div>
               <div className="text-[11px]" style={{ color: 'var(--theme-text-muted)' }}>
                 {hasFilters ? 'kết quả' : 'từ vựng'}
@@ -138,7 +162,6 @@ export default function WordsPage() {
             onChange={e => {
               const val = e.target.value;
               setSearchInput(val);
-              setPage(1);
               if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
               searchDebounceRef.current = setTimeout(() => { searchDebounceRef.current = null; setSearch(val); }, 300);
             }}
@@ -152,7 +175,7 @@ export default function WordsPage() {
           />
           {searchInput && (
             <button
-              onClick={() => { setSearchInput(''); setSearch(''); setPage(1); }}
+              onClick={() => { setSearchInput(''); setSearch(''); }}
               className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full flex items-center justify-center hover:opacity-70 transition-opacity"
               style={{ backgroundColor: 'var(--theme-text-muted)', color: 'var(--theme-bg-card)' }}>
               <IconX size={11} />
@@ -186,7 +209,7 @@ export default function WordsPage() {
           <div className="w-px h-5 hidden sm:block" style={{ backgroundColor: 'var(--theme-border)' }} />
 
           {/* Category */}
-          <select value={category} onChange={e => { setCategory(e.target.value); setPage(1); }}
+          <select value={category} onChange={e => { setCategory(e.target.value); }}
             className="px-3 py-1.5 rounded-lg text-[13px] border focus:outline-none transition-all"
             style={{
               backgroundColor: 'var(--theme-bg-secondary)',
@@ -198,7 +221,7 @@ export default function WordsPage() {
           </select>
 
           {/* Level */}
-          <select value={level} onChange={e => { setLevel(e.target.value as CEFRLevel | ''); setPage(1); }}
+          <select value={level} onChange={e => { setLevel(e.target.value as CEFRLevel | ''); }}
             className="px-3 py-1.5 rounded-lg text-[13px] border focus:outline-none transition-all"
             style={{
               backgroundColor: 'var(--theme-bg-secondary)',
@@ -220,7 +243,7 @@ export default function WordsPage() {
         </div>
       </div>
 
-      {/* ─── Loading skeleton ─── */}
+      {/* ─── Loading skeleton (initial) ─── */}
       {isLoading && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {[...Array(6)].map((_, i) => (
@@ -247,10 +270,10 @@ export default function WordsPage() {
       )}
 
       {/* ─── Word grid ─── */}
-      {data && data.data.length > 0 && (
+      {allWords.length > 0 && (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-            {data.data.map(word => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {allWords.map(word => (
               <WordCard
                 key={word.id}
                 word={word}
@@ -260,45 +283,28 @@ export default function WordsPage() {
             ))}
           </div>
 
-          {/* Pagination */}
-          {data.totalPages > 1 && (
-            <div className="flex items-center justify-center gap-1.5">
-              <button
-                onClick={() => setPage(p => Math.max(1, p - 1))}
-                disabled={page === 1}
-                className="w-9 h-9 rounded-xl flex items-center justify-center border transition-all duration-200 disabled:opacity-30 hover:bg-blue-500/10"
-                style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)', backgroundColor: 'var(--theme-bg-card)' }}>
-                <IconChevronLeft size={16} />
-              </button>
+          {/* Sentinel for infinite scroll */}
+          <div ref={sentinelRef} className="h-10" />
 
-              {Array.from({ length: Math.min(5, data.totalPages) }, (_, i) => {
-                let pageNum: number;
-                if (data.totalPages <= 5) pageNum = i + 1;
-                else if (page <= 3) pageNum = i + 1;
-                else if (page >= data.totalPages - 2) pageNum = data.totalPages - 4 + i;
-                else pageNum = page - 2 + i;
-                const isActive = pageNum === page;
-                return (
-                  <button key={pageNum} onClick={() => setPage(pageNum)}
-                    className="w-9 h-9 rounded-xl flex items-center justify-center text-[13px] font-semibold transition-all duration-200"
-                    style={isActive
-                      ? { background: 'linear-gradient(135deg, #3B82F6, #6366F1)', color: 'white', boxShadow: '0 4px 12px rgba(59,130,246,.3)' }
-                      : { color: 'var(--theme-text-secondary)' }}>
-                    {pageNum}
-                  </button>
-                );
-              })}
+          {/* Loading more indicator */}
+          {isFetchingNextPage && (
+            <div className="flex justify-center py-6">
+              <div className="flex items-center gap-2 px-4 py-2 rounded-xl"
+                style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
+                <div className="w-4 h-4 border-2 rounded-full animate-spin"
+                  style={{ borderColor: 'var(--theme-border)', borderTopColor: '#3B82F6' }} />
+                <span className="text-[13px] font-medium" style={{ color: 'var(--theme-text-muted)' }}>
+                  Đang tải thêm...
+                </span>
+              </div>
+            </div>
+          )}
 
-              <button
-                onClick={() => setPage(p => Math.min(data.totalPages, p + 1))}
-                disabled={page === data.totalPages}
-                className="w-9 h-9 rounded-xl flex items-center justify-center border transition-all duration-200 disabled:opacity-30 hover:bg-blue-500/10"
-                style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)', backgroundColor: 'var(--theme-bg-card)' }}>
-                <IconChevronRight size={16} />
-              </button>
-
-              <span className="ml-2 text-[12px]" style={{ color: 'var(--theme-text-muted)' }}>
-                {page} / {data.totalPages}
+          {/* End of list */}
+          {!hasNextPage && allWords.length > 21 && (
+            <div className="text-center py-6">
+              <span className="text-[13px]" style={{ color: 'var(--theme-text-muted)' }}>
+                Đã hiển thị tất cả {totalCount} từ
               </span>
             </div>
           )}
@@ -306,7 +312,7 @@ export default function WordsPage() {
       )}
 
       {/* ─── No results ─── */}
-      {data && data.data.length === 0 && (
+      {!isLoading && allWords.length === 0 && !error && (
         <div className="text-center py-16">
           <div className="w-14 h-14 rounded-2xl mx-auto flex items-center justify-center mb-4"
             style={{ background: 'linear-gradient(135deg,rgba(107,114,128,.12),rgba(107,114,128,.06))' }}>

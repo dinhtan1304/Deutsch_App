@@ -13,10 +13,18 @@ export interface ExamWritingTeil {
   maxPoints: number;
 }
 
+export interface CriterionScores {
+  aufgabenerfuellung: number;
+  grammatik: number;
+  wortschatz: number;
+  kohaerenz: number;
+}
+
 export interface TeilGrading {
   teilNumber: number;
   score: number;
   maxPoints: number;
+  criterionScores?: CriterionScores;
   feedback: string;
   corrections: {
     original: string;

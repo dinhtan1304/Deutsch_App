@@ -212,6 +212,18 @@ export default function OnboardingPage() {
     }, 900);
   }, [selected, qIdx]);
 
+  // ─── Skip onboarding (use partial results if any) ────────────────────
+  const handleSkip = useCallback(async () => {
+    const level = answers.length >= 5 ? determineLevel(scores.a1, scores.a2, scores.b1) : 'A1';
+    try {
+      await completeMutation.mutateAsync({ preferredLevel: level, dailyGoal: dailyGoal ?? 20 });
+      useAuthStore.setState((s) => ({
+        user: s.user ? { ...s.user, onboardingCompleted: true } : s.user,
+      }));
+      router.push('/dashboard');
+    } catch { /* retry */ }
+  }, [completeMutation, answers, scores, dailyGoal, router]);
+
   // ─── Final submit ──────────────────────────────────────────────────────
   const handleComplete = useCallback(async () => {
     try {
@@ -278,6 +290,11 @@ export default function OnboardingPage() {
             </div>
             <button onClick={goNext} style={gradientBtn} className="ob-btn">
               {'B\u1eaft \u0111\u1ea7u l\u00e0m b\u00e0i'}
+            </button>
+            <button onClick={handleSkip} disabled={completeMutation.isPending}
+              style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.35)', fontSize: '13px', cursor: 'pointer', marginTop: '16px', padding: '8px 16px' }}
+              className="ob-btn">
+              {'B\u1ecf qua, v\u00e0o Dashboard \u2192'}
             </button>
           </div>
         );
@@ -362,6 +379,14 @@ export default function OnboardingPage() {
                   </button>
                 );
               })}
+            </div>
+
+            {/* Skip link */}
+            <div style={{ textAlign: 'center', marginTop: '20px' }}>
+              <button onClick={handleSkip} disabled={completeMutation.isPending}
+                style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', fontSize: '12px', cursor: 'pointer', padding: '6px 12px' }}>
+                {'B\u1ecf qua \u2192'}
+              </button>
             </div>
           </div>
         );
@@ -474,6 +499,12 @@ export default function OnboardingPage() {
             <button onClick={goNext} disabled={!dailyGoal} style={dailyGoal ? gradientBtn : disabledBtn} className="ob-btn">
               {'Ti\u1ebfp t\u1ee5c'}
             </button>
+            <div style={{ textAlign: 'center', marginTop: '12px' }}>
+              <button onClick={handleSkip} disabled={completeMutation.isPending}
+                style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', fontSize: '12px', cursor: 'pointer', padding: '6px 12px' }}>
+                {'B\u1ecf qua \u2192'}
+              </button>
+            </div>
           </div>
         );
 

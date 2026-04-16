@@ -182,6 +182,11 @@ export const personalWordsApi = {
     return apiGet<SRSStats>('/personal-words/srs/stats');
   },
 
+  // GET /api/personal-words/srs/weak — Get weakest words for focused review
+  getWeakWords: async (limit = 20): Promise<WeakWordsResponse> => {
+    return apiGet<WeakWordsResponse>(`/personal-words/srs/weak?limit=${limit}`);
+  },
+
   // POST /api/personal-words/srs/review — Review a word
   reviewWord: async (data: ReviewWordDto): Promise<PersonalWord> => {
     return apiPost<PersonalWord>('/personal-words/srs/review', data);
@@ -224,6 +229,15 @@ export interface SRSQueryParams {
 export interface SRSDueResponse {
   due: PersonalWord[];
   new: PersonalWord[];
+  total: number;
+}
+
+export interface WeakWord extends PersonalWord {
+  accuracy: number;
+}
+
+export interface WeakWordsResponse {
+  words: WeakWord[];
   total: number;
 }
 

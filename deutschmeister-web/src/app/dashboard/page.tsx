@@ -9,15 +9,22 @@ import {
   TopicProgressList,
   RecentActivityFeed,
   QuickActions,
-  DailyPath,
 } from '@/components/dashboard';
+import { TodayFocusCard } from '@/components/dashboard/TodayFocusCard';
 import { WeeklyChallengesWidget } from '@/components/dashboard/WeeklyChallengesWidget';
 import { LeaderboardWidget } from '@/components/dashboard/LeaderboardWidget';
 import { FirstDayJourney } from '@/components/dashboard/FirstDayJourney';
 import { StudyPlanWidget } from '@/components/dashboard/StudyPlanWidget';
 import { CelebrationModal } from '@/components/ui/CelebrationModal';
+import { DailyBonusToast } from '@/components/dashboard/DailyBonusToast';
+import { StreakWarningBanner } from '@/components/dashboard/StreakWarningBanner';
+import { UpsellTrigger } from '@/components/subscription/UpsellTrigger';
+import { ErrorPatternsWidget } from '@/components/dashboard/ErrorPatternsWidget';
+import { QuickReviewWidget } from '@/components/dashboard/QuickReviewWidget';
+import { HeroActionCard } from '@/components/dashboard/HeroActionCard';
 import { useFullDashboard } from '@/hooks/useDashboard';
 import { useMilestoneCheck } from '@/hooks/useMilestones';
+import { useAutoDailyBonus } from '@/hooks/useDailyBonus';
 import { useAuthStore } from '@/stores/authStore';
 import type {
   FullDashboard,
@@ -29,7 +36,7 @@ import type {
 const toLocalDateStr = (date: Date): string => date.toISOString().slice(0, 10);
 
 const getEmptyStats = (): DashboardStats => ({
-  streak: 0, totalWordsLearned: 0, totalWords: 0, accuracy: 0,
+  streak: 0, streakFreezesAvailable: 0, totalWordsLearned: 0, totalWords: 0, accuracy: 0,
   totalMinutes: 0, topicsCompleted: 0, totalTopics: 12, wordsToReview: 0,
   gamesPlayed: 0, startedAt: toLocalDateStr(new Date()), grammarCompleted: 0, grammarTotal: 0,
 });
@@ -75,6 +82,9 @@ export default function DashboardPage() {
   const router = useRouter();
   const { data, isLoading } = useFullDashboard();
   useMilestoneCheck();
+  const { bonus, dismiss } = useAutoDailyBonus(
+    _hasHydrated && isAuthenticated && user?.onboardingCompleted !== false,
+  );
 
   // Must be before any early returns (Rules of Hooks)
   const todayLabel = useMemo(() => new Date().toLocaleDateString('vi-VN', {
@@ -120,7 +130,9 @@ export default function DashboardPage() {
           </h1>
           <p className="text-[13px] mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>
             {stats.streak > 0 ? (
-              <>Du lernst seit <span className="text-orange-500 font-bold">{stats.streak} Tagen</span> in Folge 🔥</>
+              <>Du lernst seit <span className="text-orange-500 font-bold">{stats.streak} Tagen</span> in Folge
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#F97316" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="inline ml-1 -mt-0.5"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" /></svg>
+              </>
             ) : stats.totalWordsLearned > 0 ? (
               <>Du hast <span className="text-blue-500 font-bold">{stats.totalWordsLearned} Wörter</span> gelernt. Weiter so!</>
             ) : stats.gamesPlayed === 0 ? (
@@ -133,11 +145,22 @@ export default function DashboardPage() {
         <div className="text-right text-[12px] hidden sm:block" style={{ color: 'var(--theme-text-muted)' }}>{todayLabel}</div>
       </div>
 
+      {/* ── Streak Warning (only shows if streak ≥3 and no activity today) ── */}
+      <StreakWarningBanner />
+
+      {/* ── Hero: Smart "Do This Next" ── */}
+      <HeroActionCard />
+
+      {/* ── Today's Focus ── */}
+      <TodayFocusCard />
+
+      {/* ── Quick Review (inline SRS, only renders when cards are due) ── */}
+      <QuickReviewWidget />
+
       {/* ── Quick Cards Row ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <StudyPlanWidget />
         <FirstDayJourney />
-        <DailyPath />
       </div>
 
       {/* ── Stats ── */}
@@ -155,15 +178,22 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* ── Row 2: Leaderboard + Activity + Topics (3 equal cols) ── */}
-      <div className="grid gap-4 grid-cols-1 md:grid-cols-3">
+      {/* ── Premium upsell (hidden for Premium/beta users) ── */}
+      <UpsellTrigger source="dashboard" />
+
+      {/* ── Row 2: Leaderboard + Activity + Topics + Error Patterns ── */}
+      <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
         <LeaderboardWidget />
         <RecentActivityFeed data={dashboardData.recentActivity} initialCount={3} />
         <TopicProgressList data={dashboardData.topicProgress} limit={3} />
+        <ErrorPatternsWidget />
       </div>
 
       {/* Milestone celebration modal */}
       <CelebrationModal />
+
+      {/* Daily login bonus toast (auto-claimed on mount) */}
+      <DailyBonusToast bonus={bonus} onDismiss={dismiss} />
     </div>
   );
 }

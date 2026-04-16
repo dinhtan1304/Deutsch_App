@@ -29,6 +29,18 @@ export const wordsApi = {
     return apiGet<Word[]>(`/words/random?${searchParams.toString()}`);
   },
 
+  // Authenticated: returns words prioritized by user's personal study path
+  // (70% from their Progress table, 30% fresh at their preferred level).
+  // Falls back server-side to random if the user has no progress yet.
+  getGameWords: async (count = 10, params?: { gender?: string; category?: string }): Promise<Word[]> => {
+    const searchParams = new URLSearchParams();
+    searchParams.set('count', count.toString());
+    if (params?.gender) searchParams.set('gender', params.gender);
+    if (params?.category) searchParams.set('category', params.category);
+
+    return apiGet<Word[]>(`/words/game?${searchParams.toString()}`);
+  },
+
   getStats: async (): Promise<{
     total: number;
     byGender: { gender: string; count: number }[];

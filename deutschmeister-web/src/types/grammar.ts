@@ -13,6 +13,7 @@ export interface GrammarLesson {
   objectives: { de: string[]; en: string[]; vi: string[] };
   estimatedMinutes: number;
   exerciseCount?: number;
+  prerequisiteIds?: string[];
   isActive?: boolean;
 }
 

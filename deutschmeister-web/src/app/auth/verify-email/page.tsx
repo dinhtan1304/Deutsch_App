@@ -1,8 +1,60 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Suspense } from 'react';
+import { authApi } from '@/lib/api/auth';
+
+function ResendButton({ email }: { email: string }) {
+  const [resending, setResending] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
+  const [sent, setSent] = useState(false);
+
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const timer = setInterval(() => setCooldown((c) => c - 1), 1000);
+    return () => clearInterval(timer);
+  }, [cooldown]);
+
+  const handleResend = async () => {
+    if (!email || cooldown > 0 || resending) return;
+    setResending(true);
+    try {
+      await authApi.resendVerification(email);
+      setCooldown(60);
+      setSent(true);
+    } catch { /* ignore */ }
+    setResending(false);
+  };
+
+  const disabled = cooldown > 0 || resending || !email;
+
+  return (
+    <div style={{ marginBottom: '12px' }}>
+      {sent && cooldown > 0 && (
+        <p style={{ color: '#4ADE80', fontSize: '13px', marginBottom: '8px' }}>
+          Email đã được gửi lại!
+        </p>
+      )}
+      <button
+        onClick={handleResend}
+        disabled={disabled}
+        style={{
+          display: 'inline-block', padding: '13px 32px', borderRadius: '12px',
+          background: disabled ? 'rgba(34,197,94,0.3)' : 'linear-gradient(135deg, #22C55E, #14B8A6)',
+          color: 'white', fontWeight: 700, fontSize: '14px', border: 'none',
+          cursor: disabled ? 'not-allowed' : 'pointer',
+          boxShadow: disabled ? 'none' : '0 8px 24px rgba(34,197,94,0.3)',
+          opacity: disabled ? 0.6 : 1,
+          transition: 'all 0.2s',
+        }}
+      >
+        {resending ? 'Đang gửi...' : cooldown > 0 ? `Gửi lại sau ${cooldown}s` : 'Gửi lại email xác nhận'}
+      </button>
+    </div>
+  );
+}
 
 function VerifyEmailContent() {
   const params = useSearchParams();
@@ -52,9 +104,11 @@ function VerifyEmailContent() {
             </p>
           </div>
 
+          <ResendButton email={email} />
+
           <Link
             href="/auth/login"
-            style={{ display: 'inline-block', padding: '13px 32px', borderRadius: '12px', background: 'linear-gradient(135deg, #22C55E, #14B8A6)', color: 'white', fontWeight: 700, fontSize: '14px', textDecoration: 'none', boxShadow: '0 8px 24px rgba(34,197,94,0.3)' }}
+            style={{ display: 'inline-block', padding: '13px 32px', borderRadius: '12px', background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.7)', fontWeight: 600, fontSize: '14px', textDecoration: 'none', marginTop: '12px' }}
           >
             Quay lại đăng nhập
           </Link>

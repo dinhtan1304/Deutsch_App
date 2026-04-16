@@ -9,6 +9,9 @@ import {
   PronunciationHistoryResponse,
   PronunciationStats,
   PronunciationCategory,
+  PhonemeDrillSummary,
+  PhonemeDrill,
+  PhonemeDrillStat,
 } from '@/lib/api/pronunciation';
 
 export const pronunciationKeys = {
@@ -69,12 +72,41 @@ export function useScorePronunciation() {
       audioBase64: string;
       mimeType?: string;
       targetId?: string;
+      phonemeTag?: string;
     }
   >({
     mutationFn: (data) => pronunciationApi.score(data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: [...pronunciationKeys.all, 'history'] });
       qc.invalidateQueries({ queryKey: pronunciationKeys.stats() });
+      qc.invalidateQueries({ queryKey: [...pronunciationKeys.all, 'phoneme-stats'] });
     },
+  });
+}
+
+// ── Phoneme Drills ──
+
+export function usePhonemeDrills() {
+  return useQuery<PhonemeDrillSummary[]>({
+    queryKey: [...pronunciationKeys.all, 'phoneme-drills'],
+    queryFn: () => pronunciationApi.getPhonemeDrills(),
+    staleTime: 60 * 60 * 1000,
+  });
+}
+
+export function usePhonemeDrill(slug: string) {
+  return useQuery<PhonemeDrill>({
+    queryKey: [...pronunciationKeys.all, 'phoneme-drill', slug],
+    queryFn: () => pronunciationApi.getPhonemeDrill(slug),
+    staleTime: 60 * 60 * 1000,
+    enabled: !!slug,
+  });
+}
+
+export function usePhonemeDrillStats() {
+  return useQuery<PhonemeDrillStat[]>({
+    queryKey: [...pronunciationKeys.all, 'phoneme-stats'],
+    queryFn: () => pronunciationApi.getPhonemeDrillStats(),
+    staleTime: 60 * 1000,
   });
 }

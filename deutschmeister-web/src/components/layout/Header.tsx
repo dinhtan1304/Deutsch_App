@@ -7,6 +7,8 @@ import { useAuthStore } from '@/stores/authStore';
 import { IconSearch, IconGamepad, IconBrain, IconUser, IconSettings, IconLogOut, IconMessageCircle } from '@/components/ui/Icons';
 import { SIDEBAR_WIDTH, SIDEBAR_COLLAPSED_WIDTH } from './Sidebar';
 import { FeedbackModal } from './FeedbackModal';
+import { NotificationDrawer } from './NotificationDrawer';
+import { useUnreadCount } from '@/hooks/useNotifications';
 
 interface HeaderProps {
   sidebarCollapsed: boolean;
@@ -18,6 +20,9 @@ export function Header({ sidebarCollapsed }: HeaderProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
+  const [showNotifs, setShowNotifs] = useState(false);
+  const { data: unreadData } = useUnreadCount();
+  const unreadCount = unreadData?.count ?? 0;
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -83,6 +88,37 @@ export function Header({ sidebarCollapsed }: HeaderProps) {
           <IconMessageCircle size={16} />
           <span className="hidden md:inline">Phản hồi</span>
         </button>
+
+        {/* Notification bell */}
+        {isAuthenticated && (
+          <button
+            onClick={() => setShowNotifs(prev => !prev)}
+            className="relative flex items-center justify-center w-9 h-9 rounded-xl transition-all duration-200"
+            style={{ color: 'var(--theme-text-muted)' }}
+            onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'var(--theme-bg-secondary)'; e.currentTarget.style.color = '#3B82F6'; }}
+            onMouseLeave={e => { e.currentTarget.style.backgroundColor = ''; e.currentTarget.style.color = 'var(--theme-text-muted)'; }}
+            title="Thông báo"
+          >
+            <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+              <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+            </svg>
+            {unreadCount > 0 && (
+              <span
+                className="absolute -top-0.5 -right-0.5 flex items-center justify-center rounded-full text-[9px] font-bold text-white"
+                style={{
+                  background: '#EF4444',
+                  minWidth: 16,
+                  height: 16,
+                  padding: '0 4px',
+                  boxShadow: '0 2px 6px rgba(239,68,68,.4)',
+                }}
+              >
+                {unreadCount > 99 ? '99+' : unreadCount}
+              </span>
+            )}
+          </button>
+        )}
 
         {/* Quick actions */}
         <div className="hidden md:flex items-center gap-1.5">
@@ -206,6 +242,7 @@ export function Header({ sidebarCollapsed }: HeaderProps) {
     </header>
 
     {showFeedback && <FeedbackModal onClose={() => setShowFeedback(false)} />}
+    <NotificationDrawer open={showNotifs} onClose={() => setShowNotifs(false)} />
     </>
   );
 }

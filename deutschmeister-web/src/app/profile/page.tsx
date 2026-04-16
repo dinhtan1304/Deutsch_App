@@ -4,13 +4,15 @@ import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import { useAuthStore } from '@/stores/authStore';
 import { useUserStats } from '@/hooks/useUser';
+import { useXp } from '@/hooks/useXp';
 import { useGrammarLessons, useGrammarProgress } from '@/hooks/useGrammar';
 import type { GrammarProgress } from '@/types/grammar';
 import {
-  IconUser, IconSettings, IconGamepad, IconBook, IconLogIn, IconArrowRight,
-  IconGraduationCap, IconBookOpen, IconCheck, IconLock, IconChevronRight,
-  IconTarget, IconStar, IconBrain, IconX, IconCheckAll,
+  IconUser, IconGamepad, IconBook, IconLogIn, IconArrowRight,
+  IconGraduationCap, IconBookOpen, IconCheck, IconCheckCircle, IconLock, IconChevronRight,
+  IconTarget, IconStar, IconBrain, IconX, IconCheckAll, IconMail, IconZap, IconPencil,
 } from '@/components/ui/Icons';
+import { SkillRadar } from '@/components/profile/SkillRadar';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -324,6 +326,7 @@ function LearningRoadmap() {
 export default function ProfilePage() {
   const { user, isAuthenticated, _hasHydrated } = useAuthStore();
   const { data: stats, isLoading } = useUserStats(isAuthenticated);
+  const { data: xpInfo } = useXp();
 
   if (!_hasHydrated) {
     return (
@@ -362,6 +365,12 @@ export default function ProfilePage() {
   const wrong = stats?.wrongAnswers || 0;
   const accuracyPct = total > 0 ? Math.round((correct / total) * 100) : 0;
 
+  const isPremium = user?.subscription?.plan === 'premium';
+  const joinedDate = user?.createdAt
+    ? new Date(user.createdAt).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })
+    : '—';
+  const points = correct;
+
   const statCards = [
     { label: 'Trò chơi', value: stats?.gamesPlayed ?? 0, color: '#3B82F6', icon: IconGamepad },
     { label: 'Chính xác', value: `${stats?.accuracy ?? 0}%`, color: '#22C55E', icon: IconTarget },
@@ -383,47 +392,163 @@ export default function ProfilePage() {
       <div className="rounded-2xl border mb-6 overflow-hidden"
         style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
         {/* Banner */}
-        <div className="h-24 relative"
-          style={{ background: 'linear-gradient(135deg, rgba(59,130,246,.18) 0%, rgba(139,92,246,.14) 50%, rgba(34,197,94,.1) 100%)' }}>
-          {/* Decorative circles */}
-          <div className="absolute top-2 left-8 w-16 h-16 rounded-full opacity-15"
-            style={{ background: '#3B82F6' }} />
-          <div className="absolute bottom-1 right-12 w-10 h-10 rounded-full opacity-10"
-            style={{ background: '#8B5CF6' }} />
-          {/* Settings */}
-          <Link href="/settings"
-            className="absolute top-3 right-3 flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[12px] font-medium transition-all hover:-translate-y-0.5"
-            style={{ backgroundColor: 'rgba(255,255,255,.12)', color: 'rgba(255,255,255,.85)', backdropFilter: 'blur(8px)' }}>
-            <IconSettings size={13} />
-            Cài đặt
-          </Link>
+        <div className="h-20 relative"
+          style={{ background: 'linear-gradient(135deg, rgba(59,130,246,.22) 0%, rgba(139,92,246,.18) 50%, rgba(34,197,94,.14) 100%)' }}>
+          <div className="absolute top-2 left-10 w-16 h-16 rounded-full opacity-15" style={{ background: '#3B82F6' }} />
+          <div className="absolute bottom-1 right-20 w-10 h-10 rounded-full opacity-10" style={{ background: '#8B5CF6' }} />
+          <div className="absolute top-6 right-6 w-8 h-8 rounded-full opacity-10" style={{ background: '#22C55E' }} />
         </div>
 
         {/* Avatar + info */}
         <div className="px-6 pb-5">
-          <div className="-mt-9 mb-3 flex items-end justify-between">
-            {/* Avatar */}
-            <div className="rounded-2xl flex items-center justify-center text-white text-2xl font-extrabold shrink-0 border-4"
-              style={{
-                width: 72, height: 72,
-                background: 'linear-gradient(135deg, #3B82F6, #8B5CF6)',
-                borderColor: 'var(--theme-bg-card)',
-                boxShadow: '0 4px 16px rgba(59,130,246,.35)',
-              }}>
-              {user?.name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || 'U'}
+          <div className="-mt-12 mb-4 flex items-end justify-between gap-3">
+            {/* Avatar with gradient frame */}
+            <div className="relative shrink-0">
+              <div className="rounded-full p-[3px]"
+                style={{ background: 'linear-gradient(135deg, #3B82F6, #8B5CF6, #22C55E)' }}>
+                <div className="rounded-full p-[3px]" style={{ backgroundColor: 'var(--theme-bg-card)' }}>
+                  <div className="rounded-full flex items-center justify-center text-white text-[28px] font-extrabold overflow-hidden"
+                    style={{
+                      width: 86, height: 86,
+                      background: user?.avatar ? undefined : 'linear-gradient(135deg, #3B82F6, #8B5CF6)',
+                      boxShadow: '0 6px 20px rgba(59,130,246,.35)',
+                    }}>
+                    {user?.avatar ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={user.avatar} alt={user.name ?? ''} className="w-full h-full object-cover" />
+                    ) : (
+                      user?.name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || 'U'
+                    )}
+                  </div>
+                </div>
+              </div>
+              {/* Verify sub-badge on avatar */}
+              <div className="absolute bottom-0 right-0 w-7 h-7 rounded-full flex items-center justify-center"
+                style={{
+                  background: 'linear-gradient(135deg, #3B82F6, #0EA5E9)',
+                  border: '3px solid var(--theme-bg-card)',
+                  boxShadow: '0 2px 8px rgba(59,130,246,.4)',
+                }}>
+                <IconCheck size={12} style={{ color: 'white' }} />
+              </div>
+            </div>
+
+            {/* Edit + Share buttons */}
+            <div className="flex items-center gap-2 mb-1">
+              <Link href="/profile/share"
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-[12.5px] font-semibold text-white transition-all hover:-translate-y-0.5"
+                style={{
+                  background: 'linear-gradient(135deg, #3B82F6, #8B5CF6)',
+                  boxShadow: '0 4px 12px rgba(99,102,241,.3)',
+                }}>
+                <IconZap size={13} />
+                Chia sẻ
+              </Link>
+              <Link href="/settings"
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-[12.5px] font-semibold transition-all hover:-translate-y-0.5"
+                style={{
+                  backgroundColor: 'var(--theme-bg-secondary)',
+                  color: 'var(--theme-text-primary)',
+                  border: '1px solid var(--theme-border)',
+                }}>
+                <IconPencil size={13} />
+                Sửa hồ sơ
+              </Link>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 flex-wrap mb-0.5">
-            <h1 className="text-xl font-bold" style={{ color: 'var(--theme-text-primary)' }}>
+          {/* Name + inline badges */}
+          <div className="flex items-center gap-2 flex-wrap mb-2">
+            <h1 className="text-[22px] font-extrabold leading-tight" style={{ color: 'var(--theme-text-primary)' }}>
               {user?.name || 'User'}
             </h1>
-            <span className="px-2 py-0.5 rounded-full text-[11px] font-extrabold text-white"
-              style={{ background: 'linear-gradient(135deg, #22C55E, #14B8A6)' }}>
-              A1
+            {/* Blue verify checkmark */}
+            <span className="w-5 h-5 rounded-full flex items-center justify-center shrink-0"
+              style={{
+                background: 'linear-gradient(135deg, #3B82F6, #0EA5E9)',
+                boxShadow: '0 2px 6px rgba(59,130,246,.35)',
+              }}>
+              <IconCheck size={11} style={{ color: 'white' }} />
+            </span>
+            {/* ACTIVE pill */}
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold tracking-wider text-white"
+              style={{
+                background: 'linear-gradient(135deg, #22C55E, #14B8A6)',
+                boxShadow: '0 2px 6px rgba(34,197,94,.3)',
+              }}>
+              ACTIVE
             </span>
           </div>
-          <p className="text-[13px]" style={{ color: 'var(--theme-text-muted)' }}>{user?.email}</p>
+
+          {/* Email + join date */}
+          <div className="flex items-center gap-2 flex-wrap text-[12.5px] mb-4"
+            style={{ color: 'var(--theme-text-muted)' }}>
+            <span className="flex items-center gap-1.5">
+              <IconMail size={13} />
+              {user?.email}
+            </span>
+            <span style={{ opacity: .5 }}>•</span>
+            <span>Tham gia: {joinedDate}</span>
+          </div>
+
+          {/* Bottom badges */}
+          <div className="flex items-center gap-2 flex-wrap">
+            {/* Level + CEFR */}
+            {xpInfo && (
+              <span
+                title="Mức ước tính dựa trên XP — làm placement test để xác định chính xác"
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[11.5px] font-bold"
+                style={{
+                  background: 'linear-gradient(135deg, rgba(99,102,241,.14), rgba(139,92,246,.1))',
+                  color: '#6366F1',
+                  border: '1px solid rgba(99,102,241,.28)',
+                }}>
+                <IconGraduationCap size={12} />
+                Lv.{xpInfo.level} · ≈ {xpInfo.cefr}
+              </span>
+            )}
+            {/* Points */}
+            <span className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[11.5px] font-bold"
+              style={{
+                background: 'linear-gradient(135deg, rgba(245,158,11,.15), rgba(234,88,12,.1))',
+                color: '#F59E0B',
+                border: '1px solid rgba(245,158,11,.28)',
+              }}>
+              <IconZap size={12} />
+              {isLoading ? '—' : points} Points
+            </span>
+            {/* Email verified */}
+            <span className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[11px] font-bold tracking-wide uppercase"
+              style={{
+                background: 'rgba(34,197,94,.12)',
+                color: '#22C55E',
+                border: '1px solid rgba(34,197,94,.25)',
+              }}>
+              <IconCheckCircle size={12} />
+              Email Verified
+            </span>
+            {/* Plan */}
+            <span className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[11px] font-bold tracking-wide uppercase"
+              style={{
+                background: isPremium ? 'rgba(139,92,246,.14)' : 'rgba(107,114,128,.12)',
+                color: isPremium ? '#A855F7' : 'var(--theme-text-muted)',
+                border: isPremium ? '1px solid rgba(139,92,246,.28)' : '1px solid var(--theme-border)',
+              }}>
+              <IconStar size={12} />
+              {isPremium ? 'Premium' : 'Free Plan'}
+            </span>
+            {/* Placement retake */}
+            <Link href="/placement"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[11px] font-bold transition-all hover:opacity-80"
+              style={{
+                background: 'linear-gradient(135deg, rgba(59,130,246,.12), rgba(139,92,246,.08))',
+                color: '#3B82F6',
+                border: '1px solid rgba(59,130,246,.25)',
+              }}>
+              <IconTarget size={12} />
+              Kiểm tra lại trình độ
+            </Link>
+          </div>
         </div>
       </div>
 
@@ -438,6 +563,11 @@ export default function ProfilePage() {
             icon={card.icon}
           />
         ))}
+      </div>
+
+      {/* ─── Skill Proficiency Radar ─── */}
+      <div className="mb-6">
+        <SkillRadar />
       </div>
 
       {/* ─── Learning Roadmap ─── */}

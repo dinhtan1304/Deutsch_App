@@ -9,7 +9,7 @@ import { useGameSession } from '@/hooks/useGameSession';
 import { GenderInfo, Word } from '@/types';
 import {
   GameSetupCard, GameResultCard, GameButton, GameProgressBar, StatCard,
-  GameInfoBox, KBD,
+  AddWrongWordsToBank, GameResultUpsell, GameInfoBox, KBD,
   IconLayers, IconCheck, IconX, IconFlame, IconRocket, IconKeyboard, IconVolume,
   IconRefresh, IconChevronLeft, IconChevronRight,
 } from '@/components/games/GameUI';
@@ -192,6 +192,8 @@ export default function FlashcardsPage() {
             </div>
           </div>
         )}
+        <AddWrongWordsToBank wrongWords={needReview.map(r => r.word)} />
+        <GameResultUpsell />
       </>
     );
   }

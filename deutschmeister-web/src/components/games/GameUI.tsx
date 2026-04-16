@@ -3,7 +3,10 @@
  * Reusable styled elements for all game pages
  */
 
-import React from 'react';
+import React, { useState } from 'react';
+import { useCreatePersonalWord } from '@/hooks/usePersonalWords';
+import { UpsellTrigger } from '@/components/subscription/UpsellTrigger';
+import type { Word } from '@/types';
 import {
   IconTrophy, IconFlame, IconZap, IconTarget, IconClock,
   IconPenTool, IconLayers, IconBookOpen, IconLink,
@@ -255,5 +258,80 @@ export function KBD({ children }: { children: React.ReactNode }) {
       style={{ backgroundColor: 'var(--theme-bg-card)', border: '1px solid var(--theme-border)', color: 'var(--theme-text-muted)' }}>
       {children}
     </kbd>
+  );
+}
+
+/** CTA to batch-add wrong words to Word Bank after a game */
+export function AddWrongWordsToBank({ wrongWords }: { wrongWords: Word[] }) {
+  const createWord = useCreatePersonalWord();
+  const [adding, setAdding] = useState(false);
+  const [added, setAdded] = useState(false);
+  const count = wrongWords.length;
+
+  if (count === 0) return null;
+
+  if (added) {
+    return (
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 mt-4">
+        <div className="text-center py-3 rounded-xl text-[13px] font-semibold"
+          style={{ background: 'rgba(34,197,94,.08)', color: '#4ADE80', border: '1px solid rgba(34,197,94,.15)' }}>
+          ✓ Đã thêm {count} từ vào Word Bank
+        </div>
+      </div>
+    );
+  }
+
+  const handleAdd = async () => {
+    setAdding(true);
+    for (const w of wrongWords) {
+      try {
+        await createWord.mutateAsync({
+          word: w.word,
+          wordType: 'nomen',
+          translationEn: w.translationEn,
+          translationVi: w.translationVi || '',
+          nomenData: { article: w.article, gender: w.gender, plural: w.plural || '' },
+          level: w.level as any,
+          category: w.category,
+        });
+      } catch { /* duplicate — skip */ }
+    }
+    setAdded(true);
+    setAdding(false);
+  };
+
+  return (
+    <div className="max-w-2xl mx-auto px-4 sm:px-6 mt-4">
+      <button onClick={handleAdd} disabled={adding}
+        className="w-full py-3 rounded-xl font-semibold text-[14px] transition-all hover:-translate-y-0.5"
+        style={{
+          background: 'linear-gradient(135deg, #8B5CF6, #6366F1)',
+          color: 'white', border: 'none',
+          boxShadow: '0 4px 12px rgba(99,102,241,.3)',
+          opacity: adding ? 0.7 : 1,
+          cursor: adding ? 'wait' : 'pointer',
+        }}>
+        {adding ? 'Đang thêm...' : `+ Thêm ${count} từ sai vào Word Bank`}
+      </button>
+    </div>
+  );
+}
+
+/**
+ * Compact upsell card for game result screens. Renders nothing for Premium
+ * users (the inner UpsellTrigger handles gating). Wrapped in the standard
+ * game-result container so it aligns with AnswerReview / AddWrongWordsToBank.
+ */
+export function GameResultUpsell() {
+  return (
+    <div className="max-w-2xl mx-auto px-4 sm:px-6 mt-4">
+      <UpsellTrigger
+        variant="compact"
+        title="Muốn thi thật Goethe/TELC?"
+        description="Mở khóa đề chuẩn + AI chấm không giới hạn"
+        ctaLabel="Xem Premium"
+        source="game_result"
+      />
+    </div>
   );
 }

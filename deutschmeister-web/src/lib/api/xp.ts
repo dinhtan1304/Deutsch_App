@@ -5,7 +5,12 @@ export interface XpInfo {
   level: number;
   name: string;
   nameVi: string;
+  cefr: string;
+  cefrLabel: string;
+  currentLevelXp: number;
   nextLevelXp: number;
+  xpInLevel: number;
+  xpNeeded: number;
   progress: number;
 }
 

@@ -51,6 +51,13 @@ export interface CreateWritingDto {
   wordCountMax: number;
 }
 
+export interface CriterionScores {
+  aufgabenerfuellung: number;
+  grammatik: number;
+  wortschatz: number;
+  kohaerenz: number;
+}
+
 export interface WritingSession {
   id: string;
   topic: string;
@@ -64,6 +71,7 @@ export interface WritingSession {
   userText: string | null;
   wordCount: number | null;
   overallScore: number | null;
+  criterionScores: CriterionScores | null;
   correctedText: string | null;
   feedbackDe: string | null;
   feedbackVi: string | null;

@@ -34,7 +34,7 @@ export function WeeklyChart({ data }: WeeklyChartProps) {
           style={{ color: 'var(--theme-text-primary)' }}>
           <span className="w-7 h-7 rounded-lg flex items-center justify-center text-xs"
             style={{ background: 'linear-gradient(135deg, rgba(59,130,246,.15), rgba(99,102,241,.1))' }}>
-            📊
+            <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="#3B82F6" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10" /><line x1="12" y1="20" x2="12" y2="4" /><line x1="6" y1="20" x2="6" y2="14" /></svg>
           </span>
           Tiến độ 7 ngày qua
         </h3>

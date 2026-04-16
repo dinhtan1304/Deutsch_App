@@ -65,7 +65,7 @@ function CollectionPopover({ wordId, collections, onClose }: CollectionPopoverPr
                 }}>
                 {checked && <IconCheck size={10} className="text-white" />}
               </div>
-              <span className="text-[14px] shrink-0">{col.icon}</span>
+              <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke={col.color || 'currentColor'} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="shrink-0"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" /></svg>
               <span className="flex-1 truncate">{col.name}</span>
               <span className="text-[11px] shrink-0" style={{ color: 'var(--theme-text-muted)' }}>
                 {col.wordCount}
@@ -188,7 +188,7 @@ export function WordBankCard({ word, onToggleFavorite, onSpeak, collections = []
             className="w-8 h-8 flex items-center justify-center rounded-lg transition-all text-[16px]"
             title="Thêm vào thư mục"
             style={{ opacity: showCollPopover ? 1 : 0.45 }}>
-            🗂
+            <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" /></svg>
           </button>
           {showCollPopover && (
             <CollectionPopover

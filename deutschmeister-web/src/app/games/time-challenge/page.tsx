@@ -74,7 +74,7 @@ export default function TimedChallengePage() {
     if (isFetchingRef.current) return;
     isFetchingRef.current = true;
     try {
-      const batch = await wordsApi.getRandom(BATCH_SIZE, {});
+      const batch = await wordsApi.getGameWords(BATCH_SIZE, {});
       setWords(prev => [...prev, ...batch]);
     } catch {
       // Silently ignore prefetch failures — user still has remaining words to answer
@@ -104,7 +104,7 @@ export default function TimedChallengePage() {
 
       // Fetch initial batch — much faster than ORDER BY RANDOM() LIMIT 200
       isFetchingRef.current = true;
-      const firstBatch = await wordsApi.getRandom(BATCH_SIZE, {});
+      const firstBatch = await wordsApi.getGameWords(BATCH_SIZE, {});
       isFetchingRef.current = false;
 
       if (!firstBatch.length) { alert('Không có từ vựng!'); setStarting(false); return; }

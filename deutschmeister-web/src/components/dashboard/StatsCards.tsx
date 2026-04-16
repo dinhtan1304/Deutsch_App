@@ -25,7 +25,7 @@ const cardConfigs: StatCardConfig[] = [
     icon: IconFlame,
     label: 'Streak liên tiếp',
     getValue: s => s.streak,
-    getSubValue: s => s.streak > 0 ? 'ngày liên tiếp 🔥' : 'Bắt đầu hôm nay!',
+    getSubValue: s => s.streak > 0 ? 'ngày liên tiếp' : 'Bắt đầu hôm nay!',
     gradient: 'linear-gradient(135deg, rgba(249,115,22,.12), rgba(251,191,36,.08))',
     iconBg: 'linear-gradient(135deg, #F97316, #FBBF24)',
     accent: '#F97316',
@@ -88,7 +88,7 @@ const cardConfigs: StatCardConfig[] = [
     icon: IconBrain,
     label: 'Cần ôn tập',
     getValue: s => s.wordsToReview,
-    getSubValue: s => s.wordsToReview > 0 ? 'từ hôm nay' : 'Tuyệt vời! 🎉',
+    getSubValue: s => s.wordsToReview > 0 ? 'từ hôm nay' : 'Tuyệt vời!',
     gradient: 'linear-gradient(135deg, rgba(6,182,212,.12), rgba(34,211,238,.08))',
     iconBg: 'linear-gradient(135deg, #06B6D4, #22D3EE)',
     accent: '#06B6D4',
@@ -102,6 +102,7 @@ export function StatsCards({ stats }: StatsCardsProps) {
         const Icon = card.icon;
         const value = card.getValue(stats);
         const sub = card.getSubValue(stats);
+        const isStreakCard = card.label === 'Streak liên tiếp';
 
         return (
           <div
@@ -110,6 +111,21 @@ export function StatsCards({ stats }: StatsCardsProps) {
               hover:-translate-y-0.5 hover:shadow-lg cursor-default group"
             style={{ background: card.gradient }}
           >
+            {/* Streak freeze badge — only on streak card */}
+            {isStreakCard && stats.streakFreezesAvailable > 0 && (
+              <div
+                className="absolute top-2 right-2 flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-bold z-10"
+                style={{
+                  background: 'rgba(59,130,246,.15)',
+                  color: '#3B82F6',
+                  border: '1px solid rgba(59,130,246,.3)',
+                }}
+                title={`${stats.streakFreezesAvailable} streak freeze — bảo vệ streak nếu bạn lỡ 1 ngày`}
+              >
+                ❄️ {stats.streakFreezesAvailable}
+              </div>
+            )}
+
             {/* Decorative orb */}
             <div
               className="absolute -right-6 -top-6 w-20 h-20 rounded-full opacity-[0.07] transition-transform duration-500 group-hover:scale-125"

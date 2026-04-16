@@ -63,3 +63,12 @@ export function useUserStats(enabled = true) {
     enabled,
   });
 }
+
+export function useSkills(enabled = true) {
+  return useQuery({
+    queryKey: ['users', 'skills'],
+    queryFn: () => usersApi.getSkills(),
+    staleTime: 10 * 60 * 1000,
+    enabled,
+  });
+}

@@ -12,6 +12,18 @@ import {
 } from '@/components/ui/Icons';
 import { useXp } from '@/hooks/useXp';
 import { useAuthStore } from '@/stores/authStore';
+import { useSRSStats } from '@/hooks/usePersonalWords';
+import { useProgressStats } from '@/hooks/useProgress';
+import { PremiumLockIcon } from '@/components/subscription/UpsellTrigger';
+
+// Routes that require Premium (or BETA_OPEN). Crown icon is shown in sidebar
+// next to these for free users to signal the upsell.
+const PREMIUM_ROUTES = new Set<string>([
+  '/practice-test/reading/exam',
+  '/practice-test/listening/exam',
+  '/practice-test/writing/exam',
+  '/practice-test/speaking/exam',
+]);
 
 // ============================================
 // Navigation Data
@@ -94,6 +106,7 @@ const navSections: NavSection[] = [
       { label: 'Achievements', labelVi: 'Thành tích', icon: IconTarget, href: '/achievements' },
       { label: 'Leaderboard', labelVi: 'Bảng xếp hạng', icon: IconZap, href: '/leaderboard' },
       { label: 'Challenges', labelVi: 'Thử thách', icon: IconBrain, href: '/challenges' },
+      { label: 'Resources', labelVi: 'Tài nguyên Đức', icon: IconLink, href: '/resources' },
     ],
   },
   {
@@ -122,6 +135,10 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
   const pathname = usePathname();
   const { data: xpInfo } = useXp();
   const { user } = useAuthStore();
+  const { data: srsStats } = useSRSStats();
+  const { data: progressStats } = useProgressStats();
+  const srsDue = srsStats?.due ?? 0;
+  const builtInDue = progressStats?.due ?? 0;
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
   const [tooltip, setTooltip] = useState<{ href: string; top: number } | null>(null);
 
@@ -194,6 +211,9 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
               >
                 {active && <ActiveBar />}
                 <IconWrap active={active}><Icon size={20} /></IconWrap>
+                {item.href === '/word-bank' && srsDue > 0 && (
+                  <span className="absolute top-1.5 right-2 w-2 h-2 rounded-full" style={{ background: '#EF4444' }} />
+                )}
               </Link>
             ) : (
               <button
@@ -271,7 +291,14 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                         onMouseLeave={e => !childActive && (e.currentTarget.style.backgroundColor = '')}
                       >
                         <span className="shrink-0 w-4 h-4 flex items-center justify-center"><ChildIcon size={16} /></span>
-                        <span className="min-w-0 truncate">{child.labelVi}</span>
+                        <span className="min-w-0 truncate flex-1">{child.labelVi}</span>
+                        {PREMIUM_ROUTES.has(child.href) && <PremiumLockIcon size={12} />}
+                        {child.href === '/word-bank/review' && srsDue > 0 && (
+                          <span className="shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded-full leading-none"
+                            style={{ background: '#EF4444', color: 'white', minWidth: 18, textAlign: 'center' }}>
+                            {srsDue > 99 ? '99+' : srsDue}
+                          </span>
+                        )}
                       </Link>
                     </li>
                   );
@@ -295,7 +322,17 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
               {active && <ActiveBar />}
               <IconWrap active={active}><Icon size={20} /></IconWrap>
               {!isCollapsed && (
-                <span className="text-[13.5px] font-medium whitespace-nowrap">{item.labelVi}</span>
+                <span className="flex-1 text-[13.5px] font-medium whitespace-nowrap">{item.labelVi}</span>
+              )}
+              {item.href === '/review' && builtInDue > 0 && (
+                isCollapsed ? (
+                  <span className="absolute top-1.5 right-2 w-2 h-2 rounded-full" style={{ background: '#EF4444' }} />
+                ) : (
+                  <span className="shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded-full leading-none"
+                    style={{ background: '#EF4444', color: 'white', minWidth: 18, textAlign: 'center' }}>
+                    {builtInDue > 99 ? '99+' : builtInDue}
+                  </span>
+                )
               )}
             </Link>
 
@@ -451,6 +488,14 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
               <span style={{ fontSize: 11, fontWeight: 700, color: '#F59E0B' }}>Lv.{xpInfo.level} {xpInfo.nameVi}</span>
               <span style={{ fontSize: 10, color: 'var(--theme-text-muted)' }}>{xpInfo.xp} / {xpInfo.nextLevelXp} XP</span>
             </div>
+            {xpInfo.cefr && (
+              <div
+                title="Mức ước tính dựa trên XP — thi placement test để xác định chính xác"
+                style={{ fontSize: 10, color: 'var(--theme-text-muted)', marginBottom: 4, fontWeight: 600 }}
+              >
+                ≈ {xpInfo.cefrLabel}
+              </div>
+            )}
             <div style={{ height: 4, borderRadius: 999, background: 'var(--theme-border)', overflow: 'hidden' }}>
               <div style={{ height: '100%', borderRadius: 999, background: 'linear-gradient(90deg, #F59E0B, #EF4444)', width: `${xpInfo.progress}%`, transition: 'width 0.5s' }} />
             </div>

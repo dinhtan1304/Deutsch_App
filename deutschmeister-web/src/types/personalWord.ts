@@ -10,15 +10,15 @@ export type Gender = 'masculine' | 'feminine' | 'neuter';
 export type Level = 'A1' | 'A2' | 'B1' | 'B2' | 'C1';
 
 export const WordTypeInfo: Record<WordType, { label: string; labelDe: string; icon: string; color: string }> = {
-  nomen:       { label: 'Danh từ',    labelDe: 'Nomen',        icon: '📦', color: '#3b82f6' },
-  verb:        { label: 'Động từ',    labelDe: 'Verb',         icon: '⚡', color: '#ef4444' },
-  adjektiv:    { label: 'Tính từ',    labelDe: 'Adjektiv',     icon: '🎨', color: '#f59e0b' },
-  adverb:      { label: 'Trạng từ',   labelDe: 'Adverb',       icon: '💨', color: '#8b5cf6' },
-  praposition: { label: 'Giới từ',    labelDe: 'Präposition',  icon: '📍', color: '#ec4899' },
-  konjunktion: { label: 'Liên từ',    labelDe: 'Konjunktion',  icon: '🔗', color: '#14b8a6' },
-  pronomen:    { label: 'Đại từ',     labelDe: 'Pronomen',     icon: '👤', color: '#6366f1' },
-  partikel:    { label: 'Tiểu từ',    labelDe: 'Partikel',     icon: '✨', color: '#78716c' },
-  andere:      { label: 'Khác',       labelDe: 'Andere',       icon: '📝', color: '#64748b' },
+  nomen:       { label: 'Danh từ',    labelDe: 'Nomen',        icon: 'N',  color: '#3b82f6' },
+  verb:        { label: 'Động từ',    labelDe: 'Verb',         icon: 'V',  color: '#ef4444' },
+  adjektiv:    { label: 'Tính từ',    labelDe: 'Adjektiv',     icon: 'Adj', color: '#f59e0b' },
+  adverb:      { label: 'Trạng từ',   labelDe: 'Adverb',       icon: 'Adv', color: '#8b5cf6' },
+  praposition: { label: 'Giới từ',    labelDe: 'Präposition',  icon: 'Pr', color: '#ec4899' },
+  konjunktion: { label: 'Liên từ',    labelDe: 'Konjunktion',  icon: 'Kj', color: '#14b8a6' },
+  pronomen:    { label: 'Đại từ',     labelDe: 'Pronomen',     icon: 'Pn', color: '#6366f1' },
+  partikel:    { label: 'Tiểu từ',    labelDe: 'Partikel',     icon: 'Pt', color: '#78716c' },
+  andere:      { label: 'Khác',       labelDe: 'Andere',       icon: 'An', color: '#64748b' },
 };
 
 export const GenderInfo: Record<Gender, { article: string; label: string; color: string }> = {

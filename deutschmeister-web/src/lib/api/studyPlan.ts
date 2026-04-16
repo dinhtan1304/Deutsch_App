@@ -23,6 +23,7 @@ export interface WeeklyTask {
   description: string;
   href: string;
   targetCount?: number;
+  completed?: boolean;
 }
 
 export interface PhaseInfo {

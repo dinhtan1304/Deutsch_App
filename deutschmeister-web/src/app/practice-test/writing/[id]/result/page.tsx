@@ -6,6 +6,8 @@ import Link from 'next/link';
 import { useWritingSession, useExplainError } from '@/hooks/useWriting';
 import { useAuthStore } from '@/stores/authStore';
 import type { WritingError, GrammarAnalysis } from '@/lib/api/writing';
+import { CriterionRadar } from '@/components/writing/CriterionRadar';
+import { getErrorTip } from '@/data/error-tips';
 import { IconChevronDown, IconChevronLeft, IconDice, IconList } from '../../icons';
 
 // ─── Helpers ───
@@ -171,6 +173,40 @@ function ErrorCard({ error, sessionId }: { error: WritingError; sessionId: strin
                 <p className="text-[12px] mt-0.5" style={{ color: 'var(--theme-text-secondary)' }}>{error.explanationVi}</p>
               </div>
 
+              {/* Contextual mini-lesson — static tip + link to grammar lesson */}
+              {(() => {
+                const tip = getErrorTip(error.errorType);
+                if (!tip) return null;
+                return (
+                  <div className="mt-1 rounded-lg p-3" style={{ backgroundColor: `${typeInfo.color}0C`, border: `1px solid ${typeInfo.color}26` }}>
+                    <div className="flex items-start gap-2">
+                      <span className="text-[14px] leading-none mt-0.5">💡</span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[12px] leading-relaxed" style={{ color: 'var(--theme-text-secondary)' }}>
+                          <span className="font-bold" style={{ color: typeInfo.color }}>Mẹo: </span>
+                          {tip.tipVi}
+                        </p>
+                        {tip.example && (
+                          <p className="mt-1.5 text-[11.5px] italic" style={{ color: 'var(--theme-text-muted)' }}>
+                            {tip.example}
+                          </p>
+                        )}
+                        {tip.lessonSlug && tip.lessonTitleVi && (
+                          <Link
+                            href={`/grammar/${tip.lessonSlug}`}
+                            onClick={(e) => e.stopPropagation()}
+                            className="mt-2 inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-semibold transition-colors"
+                            style={{ color: typeInfo.color, backgroundColor: `${typeInfo.color}14` }}
+                          >
+                            Học bài: {tip.lessonTitleVi} →
+                          </Link>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
+
               {/* Deep analysis (Premium) */}
               {!analysis && (
                 <button
@@ -265,16 +301,32 @@ export default function WritingResultPage() {
           </p>
         </div>
 
+        {/* Score + Radar row (only when criterionScores exist) */}
+        {session.criterionScores && (
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-5 mb-5">
+            <div className="md:col-span-2 flex justify-center items-center p-6 rounded-2xl border"
+              style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
+              <ScoreRing score={session.overallScore || 0} />
+            </div>
+            <div className="md:col-span-3 flex justify-center items-center p-4 rounded-2xl border"
+              style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
+              <CriterionRadar scores={session.criterionScores} />
+            </div>
+          </div>
+        )}
+
         {/* Score + Feedback — side by side */}
         <div className="grid grid-cols-1 md:grid-cols-5 gap-5 mb-6">
-          {/* Score ring */}
-          <div className="md:col-span-2 flex justify-center items-center p-6 rounded-2xl border"
-            style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
-            <ScoreRing score={session.overallScore || 0} />
-          </div>
+          {/* Score ring — hidden when radar above shows it */}
+          {!session.criterionScores && (
+            <div className="md:col-span-2 flex justify-center items-center p-6 rounded-2xl border"
+              style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
+              <ScoreRing score={session.overallScore || 0} />
+            </div>
+          )}
 
           {/* Strengths & Improvements */}
-          <div className="md:col-span-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className={`${session.criterionScores ? 'md:col-span-5' : 'md:col-span-3'} grid grid-cols-1 sm:grid-cols-2 gap-3`}>
             <div className="rounded-xl border p-4" style={{ borderColor: 'rgba(34,197,94,.2)', backgroundColor: 'rgba(34,197,94,.04)' }}>
               <h3 className="text-[12px] font-bold uppercase tracking-wider mb-2 flex items-center gap-1" style={{ color: '#22C55E' }}>
                 Stärken / Điểm mạnh

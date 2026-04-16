@@ -9,7 +9,7 @@ import { useGameSession } from '@/hooks/useGameSession';
 import { GenderInfo, Word } from '@/types';
 import {
   GameSetupCard, GameResultCard, GameButton, GameProgressBar,
-  ComboBadge, StatCard, AnswerReview, GameInfoBox,
+  ComboBadge, StatCard, AnswerReview, AddWrongWordsToBank, GameResultUpsell, GameInfoBox,
   IconHeadphones, IconRocket, IconChevronLeft, IconRefresh, IconX,
 } from '@/components/games/GameUI';
 
@@ -262,6 +262,8 @@ export default function ListeningQuizPage() {
             getSelectedLabel={a => !a.isCorrect ? a.selectedAnswer : null}
           />
         </div>
+        <AddWrongWordsToBank wrongWords={answers.filter(a => !a.isCorrect).map(a => a.word)} />
+        <GameResultUpsell />
       </>
     );
   }

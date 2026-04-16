@@ -8,6 +8,7 @@ import {
   getRecentActivity,
   getPublicStats,
   getDailyPath,
+  getNextAction,
 } from '@/lib/api/dashboard';
 
 // ============================================
@@ -23,6 +24,7 @@ export const dashboardKeys = {
   activity: () => [...dashboardKeys.all, 'activity'] as const,
   public: () => [...dashboardKeys.all, 'public'] as const,
   dailyPath: () => [...dashboardKeys.all, 'daily-path'] as const,
+  nextAction: () => [...dashboardKeys.all, 'next-action'] as const,
 };
 
 // ============================================
@@ -114,6 +116,18 @@ export function useDailyPath() {
   return useQuery({
     queryKey: dashboardKeys.dailyPath(),
     queryFn: getDailyPath,
+    staleTime: 2 * 60 * 1000,
+    refetchOnWindowFocus: true,
+  });
+}
+
+/**
+ * Hook lấy smart next-action recommendation for hero card
+ */
+export function useNextAction() {
+  return useQuery({
+    queryKey: dashboardKeys.nextAction(),
+    queryFn: getNextAction,
     staleTime: 2 * 60 * 1000,
     refetchOnWindowFocus: true,
   });

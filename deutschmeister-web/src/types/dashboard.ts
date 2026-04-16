@@ -4,6 +4,7 @@
 
 export interface DashboardStats {
   streak: number;
+  streakFreezesAvailable: number;
   totalWordsLearned: number;
   totalWords: number;
   accuracy: number;
@@ -51,7 +52,10 @@ export interface TopicProgress {
 }
 
 export interface RecentActivity {
-  type: 'game' | 'word' | 'topic' | 'review' | 'grammar';
+  type: 'game' | 'word' | 'topic' | 'review' | 'grammar'
+    | 'writing' | 'reading' | 'listening'
+    | 'exam_reading' | 'exam_writing' | 'exam_listening' | 'exam_speaking'
+    | 'free_speaking' | 'roleplay';
   description: string;
   timestamp: string;
   metadata?: string;

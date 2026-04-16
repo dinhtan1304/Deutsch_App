@@ -15,11 +15,12 @@ export interface AppSettings {
   questionsPerGame: number;
   timedChallengeSeconds: number;
   dailyReminder: boolean;
+  weeklyEmailEnabled: boolean;
 }
 
 // Fields that are persisted to the backend DB (subset of AppSettings)
 export const BACKEND_SETTINGS_KEYS: (keyof AppSettings)[] = [
-  'theme', 'soundEnabled', 'dailyGoal', 'preferredLevel', 'showVietnamese', 'dailyReminder',
+  'theme', 'soundEnabled', 'dailyGoal', 'preferredLevel', 'showVietnamese', 'dailyReminder', 'weeklyEmailEnabled',
 ];
 
 interface SettingsState {
@@ -45,6 +46,7 @@ const defaultSettings: AppSettings = {
   questionsPerGame: 20,
   timedChallengeSeconds: 60,
   dailyReminder: true,
+  weeklyEmailEnabled: true,
 };
 
 const STORAGE_KEY = 'deutschmeister-settings';

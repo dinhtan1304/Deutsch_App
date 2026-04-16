@@ -10,6 +10,8 @@ interface GrammarLessonCardProps {
     status: 'not_started' | 'in_progress' | 'completed';
     score?: number;
   };
+  locked?: boolean;
+  lockedReason?: string;
 }
 
 const LEVEL_STYLE: Record<string, { bg: string; color: string; gradient: string }> = {
@@ -19,8 +21,8 @@ const LEVEL_STYLE: Record<string, { bg: string; color: string; gradient: string 
   B2: { bg: 'rgba(139,92,246,.12)', color: '#7C3AED', gradient: 'linear-gradient(135deg, #8B5CF6, #7C3AED)' },
 };
 
-export const GrammarLessonCard = ({ lesson, progress }: GrammarLessonCardProps) => {
-  const isLocked = lesson.isActive === false;
+export const GrammarLessonCard = ({ lesson, progress, locked, lockedReason }: GrammarLessonCardProps) => {
+  const isLocked = locked || lesson.isActive === false;
   const isCompleted = progress?.status === 'completed';
   const isInProgress = progress?.status === 'in_progress';
   const levelStyle = LEVEL_STYLE[lesson.level] || LEVEL_STYLE.A1;
@@ -102,9 +104,16 @@ export const GrammarLessonCard = ({ lesson, progress }: GrammarLessonCardProps) 
       {/* Footer */}
       <div className="px-5 py-4 border-t" style={{ borderColor: 'var(--theme-border)' }}>
         {isLocked ? (
-          <div className="w-full px-4 py-2.5 rounded-xl text-[13px] font-semibold flex items-center justify-center gap-2 cursor-not-allowed"
+          <div className="w-full px-4 py-2.5 rounded-xl text-[13px] font-semibold flex flex-col items-center gap-1 cursor-not-allowed"
             style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }}>
-            <IconLock size={14} /> Đang khóa
+            <span className="flex items-center gap-2">
+              <IconLock size={14} /> Đang khóa
+            </span>
+            {lockedReason && (
+              <span className="text-[11px] font-normal text-center" style={{ color: 'var(--theme-text-muted)' }}>
+                {lockedReason}
+              </span>
+            )}
           </div>
         ) : (
           <Link href={`/grammar/${lesson.slug}`}

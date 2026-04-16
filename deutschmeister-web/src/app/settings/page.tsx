@@ -528,6 +528,12 @@ export default function SettingsPage() {
               checked={settings.dailyReminder}
               onChange={v => handleChange('dailyReminder', v)}
             />
+            <SettingToggle
+              label="Email tổng kết tuần"
+              desc="Nhận email tổng kết tiến độ vào tối Chủ Nhật hàng tuần"
+              checked={settings.weeklyEmailEnabled}
+              onChange={v => handleChange('weeklyEmailEnabled', v)}
+            />
           </SectionCard>
         )}
 

@@ -9,7 +9,7 @@ import { useGameSession } from '@/hooks/useGameSession';
 import { GenderInfo, Word } from '@/types';
 import {
   GameSetupCard, GameResultCard, GameButton, GameProgressBar,
-  ComboBadge, StatCard, AnswerReview, GameInfoBox, KBD,
+  ComboBadge, StatCard, AnswerReview, AddWrongWordsToBank, GameResultUpsell, GameInfoBox, KBD,
   IconSpellCheck, IconRocket, IconChevronLeft, IconRefresh, IconX, IconCheck,
 } from '@/components/games/GameUI';
 
@@ -210,6 +210,8 @@ export default function SpellingBeePage() {
             getSelectedLabel={a => !a.isCorrect ? a.selectedAnswer : null}
           />
         </div>
+        <AddWrongWordsToBank wrongWords={answers.filter(a => !a.isCorrect).map(a => a.word)} />
+        <GameResultUpsell />
       </>
     );
   }

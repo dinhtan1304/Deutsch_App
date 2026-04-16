@@ -45,7 +45,9 @@ export function StudyPlanWidget() {
     );
   }
 
-  const { plan, currentWeek, currentPhase, overallProgress, daysUntilExam } = data;
+  const { plan, currentWeek, currentPhase, overallProgress, daysUntilExam, todayTasks } = data;
+  const completedToday = todayTasks?.filter((t) => t.completed).length ?? 0;
+  const totalToday = todayTasks?.length ?? 0;
 
   if (plan.status === 'paused') {
     return (
@@ -87,6 +89,11 @@ export function StudyPlanWidget() {
           </div>
           <div className="text-[11px] truncate" style={{ color: 'var(--theme-text-muted)' }}>
             Tuần {currentWeek}/{plan.totalWeeks} · Còn {daysUntilExam} ngày
+            {totalToday > 0 && (
+              <span style={{ color: completedToday === totalToday ? '#22C55E' : 'var(--theme-text-muted)' }}>
+                {' '}· {completedToday}/{totalToday} nhiệm vụ
+              </span>
+            )}
           </div>
         </div>
       </div>

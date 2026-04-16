@@ -196,6 +196,7 @@ export const srsKeys = {
   all: ['personal-words-srs'] as const,
   due: (params?: SRSQueryParams) => [...srsKeys.all, 'due', params] as const,
   stats: () => [...srsKeys.all, 'stats'] as const,
+  weak: (limit?: number) => [...srsKeys.all, 'weak', limit] as const,
   preview: (id: string) => [...srsKeys.all, 'preview', id] as const,
 };
 
@@ -214,6 +215,15 @@ export function useSRSStats() {
     queryKey: srsKeys.stats(),
     queryFn: () => personalWordsApi.getSRSStats(),
     staleTime: 60 * 1000, // 1 minute
+  });
+}
+
+/** Lấy từ yếu nhất (accuracy thấp) */
+export function useWeakWords(limit = 20) {
+  return useQuery({
+    queryKey: srsKeys.weak(limit),
+    queryFn: () => personalWordsApi.getWeakWords(limit),
+    staleTime: 60 * 1000,
   });
 }
 

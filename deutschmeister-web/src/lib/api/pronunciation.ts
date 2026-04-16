@@ -69,6 +69,7 @@ export const pronunciationApi = {
     audioBase64: string;
     mimeType?: string;
     targetId?: string;
+    phonemeTag?: string;
   }) => apiPost<PronunciationResult>('/pronunciation/score', data),
 
   getHistory: (params?: { page?: number; limit?: number; level?: PronunciationLevel }) => {
@@ -83,4 +84,32 @@ export const pronunciationApi = {
   getStats: () => apiGet<PronunciationStats>('/pronunciation/stats'),
 
   getAttempt: (id: string) => apiGet<any>(`/pronunciation/${id}`),
+
+  getPhonemeDrills: () => apiGet<PhonemeDrillSummary[]>('/pronunciation/phoneme-drills'),
+
+  getPhonemeDrill: (slug: string) => apiGet<PhonemeDrill>(`/pronunciation/phoneme-drills/${slug}`),
+
+  getPhonemeDrillStats: () => apiGet<PhonemeDrillStat[]>('/pronunciation/phoneme-drills/stats'),
 };
+
+export interface PhonemeDrillSummary {
+  phoneme: string;
+  label: string;
+  labelVi: string;
+  description: string;
+  ipa: string;
+  difficultyForVi: 'high' | 'medium' | 'low';
+}
+
+export interface PhonemeDrill extends PhonemeDrillSummary {
+  minimalPairs: { wordA: string; wordB: string; noteVi: string }[];
+  practiceWords: string[];
+  practiceSentences: string[];
+}
+
+export interface PhonemeDrillStat {
+  phoneme: string;
+  count: number;
+  avgScore: number;
+  bestScore: number;
+}

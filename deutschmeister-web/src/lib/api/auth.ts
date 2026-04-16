@@ -61,6 +61,10 @@ export const authApi = {
     return api<MessageResponse>(`/auth/verify-email?token=${encodeURIComponent(token)}`, { method: 'GET' });
   },
 
+  resendVerification: async (email: string): Promise<MessageResponse> => {
+    return apiPost<MessageResponse>('/auth/resend-verification', { email });
+  },
+
   forgotPassword: async (email: string, captchaToken?: string): Promise<MessageResponse> => {
     return apiPost<MessageResponse>('/auth/forgot-password', { email, captchaToken });
   },

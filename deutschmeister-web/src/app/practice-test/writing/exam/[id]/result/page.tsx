@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { useExamWritingSession } from '@/hooks/useExamWriting';
 import { ExamWritingTeil, TeilGrading } from '@/lib/api/examWriting';
+import { CriterionRadar } from '@/components/writing/CriterionRadar';
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
 function IconLoader({ size = 24 }: { size?: number }) {
@@ -109,6 +110,13 @@ function TeilGradingCard({
 
       {expanded && (
         <div className="border-t px-4 pb-4 space-y-4" style={{ borderColor: 'var(--theme-border)' }}>
+          {/* Criterion radar */}
+          {grading.criterionScores && (
+            <div className="pt-3 flex justify-center">
+              <CriterionRadar scores={grading.criterionScores} size={240} />
+            </div>
+          )}
+
           {/* Overall feedback */}
           {grading.feedback && (
             <div className="pt-3">
