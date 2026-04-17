@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   adminApi, adminWordApi, adminFeedbackApi,
   AdminStats, AdminUserListResponse, AdminUserDetail, AdminWordItem, CreateWordPayload,
-  AdminFeedbackListResponse,
+  AdminFeedbackListResponse, AdminTokenStats,
 } from '@/lib/api/admin';
 
 // ─── Query keys ───────────────────────────────────────────────────────────────
@@ -12,6 +12,7 @@ import {
 export const adminKeys = {
   all: ['admin'] as const,
   stats: () => [...adminKeys.all, 'stats'] as const,
+  tokenStats: () => [...adminKeys.all, 'token-stats'] as const,
   users: (params?: Record<string, any>) => [...adminKeys.all, 'users', params] as const,
   user: (id: string) => [...adminKeys.all, 'users', id] as const,
 };
@@ -22,6 +23,14 @@ export function useAdminStats() {
   return useQuery<AdminStats>({
     queryKey: adminKeys.stats(),
     queryFn: () => adminApi.getStats(),
+    staleTime: 30_000,
+  });
+}
+
+export function useAdminTokenStats() {
+  return useQuery<AdminTokenStats>({
+    queryKey: adminKeys.tokenStats(),
+    queryFn: () => adminApi.getTokenStats(),
     staleTime: 30_000,
   });
 }

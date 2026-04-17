@@ -45,6 +45,44 @@ export interface AdminStats {
   };
 }
 
+// ─── Token Usage Types ───────────────────────────────────────────────────────
+
+export interface TokenTotals {
+  allTime: { calls: number; promptTokens: number; candidatesTokens: number; totalTokens: number };
+  today: { calls: number; totalTokens: number };
+  week: { calls: number; totalTokens: number };
+  month: { calls: number; totalTokens: number };
+}
+
+export interface TokenByFeature {
+  feature: string;
+  calls: number;
+  promptTokens: number;
+  candidatesTokens: number;
+  totalTokens: number;
+}
+
+export interface TokenDaily {
+  day: string;
+  tokens: number;
+  calls: number;
+}
+
+export interface TokenTopUser {
+  userId: string;
+  email: string | null;
+  name: string | null;
+  calls: number;
+  totalTokens: number;
+}
+
+export interface AdminTokenStats {
+  totals: TokenTotals;
+  byFeature: TokenByFeature[];
+  daily: TokenDaily[];
+  topUsers: TokenTopUser[];
+}
+
 export interface AdminUserItem {
   id: string;
   email: string;
@@ -139,6 +177,9 @@ export const adminApi = {
 
   deleteUser: (id: string) =>
     apiDelete<{ success: boolean }>(`/admin/users/${id}`),
+
+  getTokenStats: () =>
+    apiGet<AdminTokenStats>('/admin/token-stats'),
 };
 
 // ─── Admin Word API ───────────────────────────────────────────────────────────
@@ -161,6 +202,7 @@ export interface AdminFeedbackItem {
   type: 'bug' | 'suggestion' | 'other';
   content: string;
   pageUrl: string | null;
+  imageUrls: string[];
   status: 'new' | 'reviewed' | 'resolved';
   createdAt: string;
   user: { id: string; email: string; name: string | null } | null;

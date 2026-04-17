@@ -1,6 +1,6 @@
 'use client';
 
-import { apiGet, apiDelete, api } from './client';
+import { apiGet, apiDelete, api, apiUpload } from './client';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -54,8 +54,6 @@ function toQS(params?: Record<string, any>): string {
 
 // ─── API ──────────────────────────────────────────────────────────────────────
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://deutschmeister-api-production.up.railway.app/api';
-
 export const examRagApi = {
   upload: async (file: File, meta: { examType: string; cefrLevel: string; skill: string }): Promise<ExamDocumentDetail> => {
     const formData = new FormData();
@@ -64,20 +62,7 @@ export const examRagApi = {
     formData.append('cefrLevel', meta.cefrLevel);
     formData.append('skill', meta.skill);
 
-    // Use raw fetch for multipart — api() sets Content-Type: application/json
-    const { getAccessToken } = await import('./client');
-    const token = getAccessToken();
-    const res = await fetch(`${API_URL}/exam-rag/upload`, {
-      method: 'POST',
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
-      body: formData,
-      credentials: 'include',
-    });
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err.message || 'Upload failed');
-    }
-    return res.json();
+    return apiUpload<ExamDocumentDetail>('/exam-rag/upload', formData);
   },
 
   list: (params?: { examType?: string; cefrLevel?: string; skill?: string }) =>

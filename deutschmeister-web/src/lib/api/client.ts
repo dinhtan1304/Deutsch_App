@@ -200,6 +200,53 @@ export const apiDelete = <T>(endpoint: string) =>
   api<T>(endpoint, { method: 'DELETE' });
 
 /**
+ * Upload file via multipart/form-data with automatic token refresh.
+ * Does NOT set Content-Type — lets the browser add the multipart boundary.
+ *
+ * Unlike api(), we pre-ensure a valid token BEFORE sending the upload
+ * to avoid re-sending large payloads on 401 retry (FormData may not
+ * be reliably re-consumable across all environments).
+ */
+export async function apiUpload<T>(endpoint: string, formData: FormData): Promise<T> {
+  const url = `${API_URL}${endpoint}`;
+
+  // Pre-ensure valid token so we don't upload twice on 401
+  let token = getAccessToken();
+  if (!token) {
+    token = await refreshAccessToken();
+  }
+  if (!token) {
+    onAuthExpiredCallback?.();
+    throw new ApiError(401, 'Vui lòng đăng nhập lại');
+  }
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+    body: formData,
+    credentials: 'include',
+  });
+
+  if (response.status === 401) {
+    clearTokens();
+    onAuthExpiredCallback?.();
+    throw new ApiError(401, 'Phiên đăng nhập hết hạn');
+  }
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new ApiError(
+      response.status,
+      errorData.message || `HTTP Error ${response.status}`,
+      errorData,
+    );
+  }
+
+  if (response.status === 204) return {} as T;
+  return response.json();
+}
+
+/**
  * Initialize authentication on app startup
  * Attempts to refresh token if we have a stored access token
  */

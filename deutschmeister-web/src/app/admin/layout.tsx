@@ -33,6 +33,9 @@ function IconDatabase({ size = 18 }: { size?: number }) {
 function IconArrowLeft({ size = 16 }: { size?: number }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}><line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" /></svg>;
 }
+function IconZap({ size = 18 }: { size?: number }) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" /></svg>;
+}
 function IconShield({ size = 20 }: { size?: number }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>;
 }
@@ -44,6 +47,7 @@ const NAV_ITEMS = [
   { href: '/admin/topics', label: 'Topics', icon: IconLayers, exact: false },
   { href: '/admin/grammar', label: 'Ngữ pháp', icon: IconPenTool, exact: false },
   { href: '/admin/subscriptions', label: 'Đăng ký', icon: IconCreditCard, exact: false },
+  { href: '/admin/token-usage', label: 'Token AI', icon: IconZap, exact: false },
   { href: '/admin/feedback', label: 'Phản hồi', icon: IconMessageSquare, exact: false },
   { href: '/admin/exam-rag', label: 'Đề mẫu RAG', icon: IconDatabase, exact: false },
 ];

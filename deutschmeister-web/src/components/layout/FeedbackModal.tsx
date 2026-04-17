@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { feedbackApi, FeedbackType } from '@/lib/api/feedback';
 import { IconX, IconBug, IconLightbulb, IconMessageCircle, IconCheck, IconLoader } from '@/components/ui/Icons';
@@ -9,25 +9,100 @@ interface FeedbackModalProps {
   onClose: () => void;
 }
 
+const MAX_IMAGES = 3;
+const MAX_SIZE_MB = 2;
+
 const TYPES: { value: FeedbackType; label: string; icon: React.ComponentType<{ size?: number; className?: string }>; color: string; bg: string }[] = [
   { value: 'bug',        label: 'Báo cáo lỗi',  icon: IconBug,           color: '#EF4444', bg: 'rgba(239,68,68,.12)'  },
   { value: 'suggestion', label: 'Góp ý / Đề xuất', icon: IconLightbulb,  color: '#F59E0B', bg: 'rgba(245,158,11,.12)' },
   { value: 'other',      label: 'Khác',          icon: IconMessageCircle, color: '#6366F1', bg: 'rgba(99,102,241,.12)' },
 ];
 
+/** Compress image to JPEG, max 1200px wide, quality 0.7 → base64 data URI */
+function compressImage(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        const maxW = 1200;
+        let w = img.width;
+        let h = img.height;
+        if (w > maxW) {
+          h = Math.round(h * (maxW / w));
+          w = maxW;
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d')!;
+        ctx.drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', 0.7));
+      };
+      img.onerror = () => reject(new Error('Failed to load image'));
+      img.src = reader.result as string;
+    };
+    reader.onerror = () => reject(new Error('Failed to read file'));
+    reader.readAsDataURL(file);
+  });
+}
+
+// ─── Inline Icons ────────────────────────────────────────────────────────────
+function IconCamera({ size = 16 }: { size?: number }) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" /><circle cx="12" cy="13" r="4" /></svg>;
+}
+
 export function FeedbackModal({ onClose }: FeedbackModalProps) {
   const [type, setType] = useState<FeedbackType>('bug');
   const [content, setContent] = useState('');
+  const [images, setImages] = useState<string[]>([]);
+  const [imgError, setImgError] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   const { mutate, isPending } = useMutation({
     mutationFn: () => feedbackApi.submit({
       type,
       content: content.trim(),
       pageUrl: typeof window !== 'undefined' ? window.location.pathname : undefined,
+      imageUrls: images.length > 0 ? images : undefined,
     }),
     onSuccess: () => setSubmitted(true),
   });
+
+  const handleFiles = useCallback(async (files: FileList | null) => {
+    if (!files) return;
+    setImgError('');
+
+    const remaining = MAX_IMAGES - images.length;
+    if (remaining <= 0) {
+      setImgError(`Tối đa ${MAX_IMAGES} ảnh`);
+      return;
+    }
+
+    const toProcess = Array.from(files).slice(0, remaining);
+    for (const file of toProcess) {
+      if (!file.type.startsWith('image/')) {
+        setImgError('Chỉ chấp nhận file ảnh');
+        continue;
+      }
+      if (file.size > MAX_SIZE_MB * 1024 * 1024) {
+        setImgError(`Ảnh tối đa ${MAX_SIZE_MB}MB`);
+        continue;
+      }
+      try {
+        const dataUri = await compressImage(file);
+        setImages(prev => [...prev, dataUri]);
+      } catch {
+        setImgError('Không thể xử lý ảnh');
+      }
+    }
+  }, [images.length]);
+
+  const removeImage = (index: number) => {
+    setImages(prev => prev.filter((_, i) => i !== index));
+    setImgError('');
+  };
 
   const canSubmit = content.trim().length >= 10 && !isPending;
   const selected = TYPES.find(t => t.value === type)!;
@@ -40,10 +115,10 @@ export function FeedbackModal({ onClose }: FeedbackModalProps) {
       {/* Modal */}
       <div
         className="fixed z-50 bottom-6 right-6 w-[360px] rounded-2xl shadow-2xl border overflow-hidden"
-        style={{ backgroundColor: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}
+        style={{ backgroundColor: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)', maxHeight: 'calc(100vh - 48px)', display: 'flex', flexDirection: 'column' }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b" style={{ borderColor: 'var(--theme-border)' }}>
+        <div className="flex items-center justify-between px-5 py-4 border-b shrink-0" style={{ borderColor: 'var(--theme-border)' }}>
           <div>
             <p className="font-bold text-[15px]" style={{ color: 'var(--theme-text-primary)' }}>Phản hồi</p>
             <p className="text-[11px] mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>Giúp chúng tôi cải thiện DeutschMeister</p>
@@ -79,7 +154,7 @@ export function FeedbackModal({ onClose }: FeedbackModalProps) {
             </button>
           </div>
         ) : (
-          <div className="p-5">
+          <div className="p-5 overflow-y-auto">
             {/* Type selector */}
             <div className="grid grid-cols-3 gap-2 mb-4">
               {TYPES.map(t => {
@@ -128,6 +203,64 @@ export function FeedbackModal({ onClose }: FeedbackModalProps) {
             <p className="text-[11px] mt-1 text-right" style={{ color: content.trim().length < 10 ? '#EF4444' : 'var(--theme-text-muted)' }}>
               {content.trim().length}/10 ký tự tối thiểu
             </p>
+
+            {/* Image upload */}
+            <div className="mt-3">
+              <input
+                ref={fileRef}
+                type="file"
+                accept="image/*"
+                multiple
+                className="hidden"
+                onChange={e => { handleFiles(e.target.files); e.target.value = ''; }}
+              />
+
+              {/* Image previews */}
+              {images.length > 0 && (
+                <div className="flex gap-2 mb-2 flex-wrap">
+                  {images.map((src, i) => (
+                    <div key={i} className="relative group" style={{ width: 72, height: 72 }}>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={src}
+                        alt={`Ảnh ${i + 1}`}
+                        className="w-full h-full object-cover rounded-lg border"
+                        style={{ borderColor: 'var(--theme-border)' }}
+                      />
+                      <button
+                        onClick={() => removeImage(i)}
+                        className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full flex items-center justify-center text-white text-[10px] font-bold opacity-0 group-hover:opacity-100 transition-opacity"
+                        style={{ backgroundColor: '#EF4444' }}
+                      >
+                        <IconX size={10} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Add image button */}
+              {images.length < MAX_IMAGES && (
+                <button
+                  onClick={() => fileRef.current?.click()}
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg border text-[12px] transition-colors"
+                  style={{
+                    borderColor: 'var(--theme-border)',
+                    color: 'var(--theme-text-secondary)',
+                    borderStyle: 'dashed',
+                  }}
+                  onMouseEnter={e => (e.currentTarget.style.borderColor = selected.color)}
+                  onMouseLeave={e => (e.currentTarget.style.borderColor = 'var(--theme-border)')}
+                >
+                  <IconCamera size={14} />
+                  Thêm ảnh chụp màn hình ({images.length}/{MAX_IMAGES})
+                </button>
+              )}
+
+              {imgError && (
+                <p className="text-[11px] mt-1" style={{ color: '#EF4444' }}>{imgError}</p>
+              )}
+            </div>
 
             {/* Submit */}
             <button

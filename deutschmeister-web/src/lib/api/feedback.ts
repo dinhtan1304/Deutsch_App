@@ -6,6 +6,7 @@ export interface SubmitFeedbackPayload {
   type: FeedbackType;
   content: string;
   pageUrl?: string;
+  imageUrls?: string[];
 }
 
 export const feedbackApi = {

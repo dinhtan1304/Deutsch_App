@@ -35,6 +35,46 @@ const TYPE_COLORS: Record<string, { bg: string; color: string; border: string }>
 const TYPE_LABELS: Record<string, string> = { bug: 'Bug', suggestion: 'Gợi ý', other: 'Khác' };
 const STATUS_LABELS: Record<string, string> = { new: 'Mới', reviewed: 'Đã xem', resolved: 'Đã xử lý' };
 
+// ─── Lightbox ──────────────────────────────────────────────────────────────
+
+function ImageLightbox({ src, onClose }: { src: string; onClose: () => void }) {
+  return (
+    <div
+      onClick={onClose}
+      style={{
+        position: 'fixed', inset: 0, zIndex: 100,
+        backgroundColor: 'rgba(0,0,0,.85)', backdropFilter: 'blur(4px)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        cursor: 'zoom-out', padding: 24,
+      }}
+    >
+      <button
+        onClick={onClose}
+        style={{
+          position: 'absolute', top: 16, right: 16,
+          width: 36, height: 36, borderRadius: '50%',
+          backgroundColor: 'rgba(255,255,255,.15)', border: 'none',
+          color: '#fff', fontSize: 20, cursor: 'pointer',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}
+      >
+        &times;
+      </button>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={src}
+        alt="Feedback screenshot"
+        onClick={e => e.stopPropagation()}
+        style={{
+          maxWidth: '90vw', maxHeight: '90vh',
+          borderRadius: 8, objectFit: 'contain', cursor: 'default',
+          boxShadow: '0 8px 32px rgba(0,0,0,.5)',
+        }}
+      />
+    </div>
+  );
+}
+
 // ─── Page ───────────────────────────────────────────────────────────────────
 
 export default function AdminFeedbackPage() {
@@ -42,6 +82,7 @@ export default function AdminFeedbackPage() {
   const [typeFilter, setTypeFilter] = useState('');
   const [page, setPage] = useState(1);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
 
   const { data, isLoading } = useAdminFeedback({
     status: statusFilter || undefined,
@@ -61,6 +102,9 @@ export default function AdminFeedbackPage() {
 
   return (
     <div style={{ maxWidth: 1100 }}>
+      {/* Lightbox */}
+      {lightboxSrc && <ImageLightbox src={lightboxSrc} onClose={() => setLightboxSrc(null)} />}
+
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
         <div>
@@ -105,6 +149,7 @@ export default function AdminFeedbackPage() {
                 expanded={expandedId === item.id}
                 onToggle={() => setExpandedId(expandedId === item.id ? null : item.id)}
                 onStatusChange={handleStatusChange}
+                onImageClick={setLightboxSrc}
               />
             ))}
           </tbody>
@@ -140,16 +185,18 @@ export default function AdminFeedbackPage() {
 // ─── Row component ──────────────────────────────────────────────────────────
 
 function FeedbackRow({
-  item, expanded, onToggle, onStatusChange,
+  item, expanded, onToggle, onStatusChange, onImageClick,
 }: {
   item: AdminFeedbackItem;
   expanded: boolean;
   onToggle: () => void;
   onStatusChange: (id: string, status: 'new' | 'reviewed' | 'resolved') => void;
+  onImageClick: (src: string) => void;
 }) {
   const typeStyle = TYPE_COLORS[item.type] ?? TYPE_COLORS.other;
   const statusStyle = STATUS_COLORS[item.status] ?? STATUS_COLORS.new;
   const date = new Date(item.createdAt);
+  const hasImages = item.imageUrls && item.imageUrls.length > 0;
 
   return (
     <>
@@ -166,8 +213,19 @@ function FeedbackRow({
 
         {/* Content preview */}
         <td style={{ padding: '10px 14px', borderBottom: '1px solid #1E293B', color: '#F1F5F9', maxWidth: 400 }}>
-          <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-            {item.content}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>
+              {item.content}
+            </div>
+            {hasImages && (
+              <span style={{
+                flexShrink: 0, fontSize: 9, fontWeight: 700,
+                padding: '2px 6px', borderRadius: 4,
+                backgroundColor: 'rgba(99,102,241,.15)', color: '#818CF8',
+              }}>
+                {item.imageUrls.length} ảnh
+              </span>
+            )}
           </div>
         </td>
 
@@ -198,6 +256,33 @@ function FeedbackRow({
               <p style={{ color: '#F1F5F9', fontSize: 13, lineHeight: 1.7, margin: '0 0 12px', whiteSpace: 'pre-wrap' }}>
                 {item.content}
               </p>
+
+              {/* Images */}
+              {hasImages && (
+                <div style={{ marginBottom: 14 }}>
+                  <p style={{ fontSize: 11, fontWeight: 600, color: '#64748B', marginBottom: 8 }}>
+                    Ảnh đính kèm ({item.imageUrls.length})
+                  </p>
+                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                    {item.imageUrls.map((src, i) => (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        key={i}
+                        src={src}
+                        alt={`Screenshot ${i + 1}`}
+                        onClick={(e) => { e.stopPropagation(); onImageClick(src); }}
+                        style={{
+                          width: 140, height: 100, objectFit: 'cover',
+                          borderRadius: 8, border: '1px solid #334155',
+                          cursor: 'zoom-in', transition: 'border-color 0.15s',
+                        }}
+                        onMouseEnter={e => (e.currentTarget.style.borderColor = '#6366F1')}
+                        onMouseLeave={e => (e.currentTarget.style.borderColor = '#334155')}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Meta */}
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, fontSize: 12, color: '#64748B', marginBottom: 16 }}>
