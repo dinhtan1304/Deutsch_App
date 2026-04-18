@@ -6,6 +6,8 @@ import { WordCard } from '@/components/words/WordCard';
 import { useInfiniteWords } from '@/hooks/useWords';
 import { useFavorites, useToggleFavorite } from '@/hooks/useFavorites';
 import { Gender, CEFRLevel, CATEGORIES, LEVELS } from '@/types';
+import { useAutoTranslate } from '@/hooks/useAutoTranslate';
+import { type TranslateLang } from '@/lib/api/translation';
 import {
   IconBook, IconSearch, IconLightbulb, IconStar, IconHistory, IconX,
 } from '@/components/ui/Icons';
@@ -33,6 +35,39 @@ const GENDERS: { value: Gender; article: string; color: string; bg: string; grad
   { value: 'neuter',    article: 'das', color: '#22C55E', bg: 'rgba(34,197,94,.1)',  gradient: 'linear-gradient(135deg,#22C55E,#15803D)' },
 ];
 
+function CopyBtn({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false);
+  const copy = () => {
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+  return (
+    <button onClick={copy}
+      className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[12px] font-semibold transition-all"
+      style={{ backgroundColor: copied ? 'rgba(34,197,94,.15)' : 'var(--theme-bg-secondary)', color: copied ? '#22C55E' : 'var(--theme-text-secondary)', border: '1px solid var(--theme-border)' }}>
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+      {copied ? 'Đã copy' : 'Copy'}
+    </button>
+  );
+}
+
+function SpeakBtn({ text, lang }: { text: string; lang: string }) {
+  const speak = () => {
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = lang;
+    speechSynthesis.speak(utter);
+  };
+  return (
+    <button onClick={speak}
+      className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[12px] font-semibold transition-all"
+      style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-secondary)', border: '1px solid var(--theme-border)' }}>
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+      Phát âm
+    </button>
+  );
+}
+
 export default function WordsPage() {
   const [searchInput, setSearchInput] = useState('');
   const [search, setSearch] = useState('');
@@ -42,6 +77,10 @@ export default function WordsPage() {
   const [gender, setGender] = useState<Gender | ''>('');
   const [category, setCategory] = useState('');
   const [level, setLevel] = useState<CEFRLevel | ''>('');
+  const [langOverride, setLangOverride] = useState<TranslateLang | undefined>(undefined);
+
+  const { data: translated, isLoading: isTranslating, isPhrase, from: tlFrom, to: tlTo } =
+    useAutoTranslate(searchInput, langOverride);
 
   const {
     data,
@@ -73,6 +112,14 @@ export default function WordsPage() {
   const clearFilters = () => {
     if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
     setSearchInput(''); setSearch(''); setGender(''); setCategory(''); setLevel('');
+    setLangOverride(undefined);
+  };
+
+  const swapLang = () => {
+    setLangOverride(prev => {
+      const current = prev ?? tlFrom;
+      return current === 'vi' ? 'de' : 'vi';
+    });
   };
 
   const toggleGender = (g: Gender) => { setGender(prev => prev === g ? '' : g); };
@@ -242,6 +289,66 @@ export default function WordsPage() {
           )}
         </div>
       </div>
+
+      {/* ─── Translation card ─── */}
+      {isPhrase && (
+        <div
+          className="rounded-2xl p-4 mb-5"
+          style={{
+            backgroundColor: 'var(--theme-bg-card)',
+            border: '1px solid var(--theme-border)',
+            borderLeft: '3px solid #3B82F6',
+          }}
+        >
+          {/* Header row */}
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2 text-[13px] font-semibold" style={{ color: 'var(--theme-text-secondary)' }}>
+              <span>{tlFrom === 'vi' ? '🇻🇳 Tiếng Việt' : '🇩🇪 Tiếng Đức'}</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{ color: '#3B82F6' }}><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+              <span>{tlTo === 'de' ? '🇩🇪 Tiếng Đức' : '🇻🇳 Tiếng Việt'}</span>
+            </div>
+            <button
+              onClick={swapLang}
+              className="px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all hover:scale-105"
+              style={{ backgroundColor: 'rgba(59,130,246,.1)', color: '#3B82F6' }}
+              title="Đổi chiều dịch"
+            >
+              ⇄ Đổi chiều
+            </button>
+          </div>
+
+          {/* Source text */}
+          <p className="text-[13px] mb-2 italic" style={{ color: 'var(--theme-text-muted)' }}>
+            &ldquo;{searchInput.trim()}&rdquo;
+          </p>
+
+          {/* Result */}
+          {isTranslating ? (
+            <div className="flex items-center gap-2 py-2">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" strokeWidth="2" strokeLinecap="round" className="animate-spin"><path d="M21 12a9 9 0 1 1-6.219-8.56" /></svg>
+              <span className="text-[13px]" style={{ color: 'var(--theme-text-muted)' }}>Đang dịch...</span>
+            </div>
+          ) : translated ? (
+            <div className="flex items-start justify-between gap-3 py-1">
+              <p className="text-[15px] font-semibold flex-1 leading-snug" style={{ color: 'var(--theme-text-primary)' }}>
+                {translated}
+              </p>
+              <div className="flex items-center gap-1.5 shrink-0">
+                <CopyBtn text={translated} />
+                <SpeakBtn text={translated} lang={tlTo === 'de' ? 'de-DE' : 'vi-VN'} />
+              </div>
+            </div>
+          ) : (
+            <div className="py-1 text-[12px]" style={{ color: '#EF4444' }}>
+              Không dịch được. Thử lại hoặc kiểm tra kết nối.
+            </div>
+          )}
+
+          <p className="text-[10px] mt-3" style={{ color: 'var(--theme-text-muted)' }}>
+            Powered by MyMemory · {tlFrom} → {tlTo}
+          </p>
+        </div>
+      )}
 
       {/* ─── Loading skeleton (initial) ─── */}
       {isLoading && (

@@ -4,7 +4,6 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useExamWritingHistory, useExamWritingStats, useDeleteExamWriting } from '@/hooks/useExamWriting';
 import { ExamWritingHistoryItem } from '@/lib/api/examWriting';
-import { PremiumPaywall } from '@/components/subscription/PremiumPaywall';
 
 // ─── Inline icons ─────────────────────────────────────────────────────────────
 function IconPencil({ size = 16, style }: { size?: number; style?: React.CSSProperties }) {
@@ -100,14 +99,7 @@ function HistoryCard({ item, onDelete }: { item: ExamWritingHistoryItem; onDelet
 }
 
 export default function ExamWritingListPage() {
-  return (
-    <PremiumPaywall
-      title="Đề chuẩn Writing"
-      description="Luyện viết theo đề thi Goethe & TELC A1–B1 với Premium"
-    >
-      <ExamWritingListContent />
-    </PremiumPaywall>
-  );
+  return <ExamWritingListContent />;
 }
 
 function ExamWritingListContent() {

@@ -8,13 +8,14 @@ import type { PracticeFeat } from '@/lib/api/subscriptions';
 interface Props {
   feature: PracticeFeat;
   children: React.ReactNode;
+  featureContext?: string;
 }
 
 /**
  * Wraps practice content. If quota is exhausted, shows paywall instead of children.
  * If user is premium or still has quota, renders children normally.
  */
-export function QuotaPaywall({ feature, children }: Props) {
+export function QuotaPaywall({ feature, children, featureContext }: Props) {
   const { data: quota, isLoading } = useCheckQuota(feature);
   const [upgradeOpen, setUpgradeOpen] = useState(false);
 
@@ -48,7 +49,7 @@ export function QuotaPaywall({ feature, children }: Props) {
         </p>
 
         {/* Progress bar */}
-        <div className="h-2 rounded-full overflow-hidden mb-5 mx-auto max-w-[200px]" style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
+        <div className="h-2 rounded-full overflow-hidden mb-5 mx-auto max-w-50" style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
           <div
             className="h-full rounded-full"
             style={{ width: '100%', background: 'linear-gradient(90deg, #F59E0B, #EF4444)' }}
@@ -72,6 +73,7 @@ export function QuotaPaywall({ feature, children }: Props) {
         open={upgradeOpen}
         onClose={() => setUpgradeOpen(false)}
         defaultPeriod="yearly"
+        featureContext={featureContext}
       />
     </>
   );

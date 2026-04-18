@@ -86,6 +86,11 @@ export function HeroActionCard() {
 
         {/* Content */}
         <div className="flex-1 min-w-0">
+          {data.priority === 'weak_skill' && (
+            <p className="text-[10px] font-bold uppercase tracking-wider text-white/60 mb-0.5">
+              Kỹ năng cần cải thiện
+            </p>
+          )}
           <div className="flex items-center gap-2 mb-0.5">
             <h2
               className="text-[18px] font-extrabold text-white leading-tight truncate"
@@ -105,7 +110,7 @@ export function HeroActionCard() {
               </span>
             )}
           </div>
-          <p className="text-[13px] text-white/80 leading-snug line-clamp-1">
+          <p className="text-[13px] text-white/80 leading-snug">
             {data.subtitle}
           </p>
         </div>

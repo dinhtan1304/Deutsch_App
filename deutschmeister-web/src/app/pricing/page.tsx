@@ -37,6 +37,7 @@ const LIFETIME_EXTRA = [
   'Trọn đời — không cần gia hạn',
   'Early Backer badge',
   'Ưu tiên tính năng AI mới',
+  'Ưu tiên hỗ trợ & custom tính năng',
 ];
 
 type Val = boolean | string;
@@ -63,12 +64,15 @@ function formatVND(n: number) {
   return n.toLocaleString('vi-VN') + 'đ';
 }
 
+type PremiumPeriod = 'monthly' | 'quarterly' | 'yearly';
+
 export default function PricingPage() {
   const { isAuthenticated, user } = useAuthStore();
   const { data: plans } = usePlans();
   const { data: lifetimeInfo } = useLifetimeRemaining();
   const [upgradeOpen, setUpgradeOpen] = useState(false);
   const [defaultPeriod, setDefaultPeriod] = useState<BillingPeriod>('yearly');
+  const [activePeriod, setActivePeriod] = useState<PremiumPeriod>('yearly');
 
   const isPremium =
     (user?.subscription?.plan === 'premium' ||
@@ -79,23 +83,50 @@ export default function PricingPage() {
   const premiumPlan = plans?.find((p) => p.code === 'premium');
   const lifetimePlan = plans?.find((p) => p.code === 'lifetime');
   const monthlyPrice = premiumPlan?.monthlyPrice ?? 99000;
+  const quarterlyPrice = premiumPlan?.quarterlyPrice ?? 249000;
   const yearlyPrice = premiumPlan?.yearlyPrice ?? 990000;
   const lifetimePrice = lifetimePlan?.price ?? 1490000;
-  const yearlyMonthly = Math.round(yearlyPrice / 12);
-  const savePct = Math.round((1 - yearlyPrice / (monthlyPrice * 12)) * 100);
+  const savePctYearly = Math.round((1 - yearlyPrice / (monthlyPrice * 12)) * 100);
+  const savePctQuarterly = Math.round((1 - quarterlyPrice / (monthlyPrice * 3)) * 100);
   const lifetimeSoldOut = lifetimeInfo ? lifetimeInfo.remaining <= 0 : false;
+
+  const currentPrice =
+    activePeriod === 'monthly' ? monthlyPrice :
+    activePeriod === 'quarterly' ? quarterlyPrice :
+    yearlyPrice;
+
+  const perMonthPrice =
+    activePeriod === 'monthly' ? null :
+    activePeriod === 'quarterly' ? Math.round(quarterlyPrice / 3) :
+    Math.round(yearlyPrice / 12);
+
+  const periodLabel =
+    activePeriod === 'monthly' ? '/tháng' :
+    activePeriod === 'quarterly' ? '/3 tháng' :
+    '/năm';
+
+  const ctaLabel =
+    activePeriod === 'monthly' ? 'Đăng ký tháng' :
+    activePeriod === 'quarterly' ? 'Đăng ký 3 tháng' :
+    `Đăng ký năm — Tiết kiệm ${savePctYearly}%`;
 
   const openUpgrade = (period: BillingPeriod) => {
     setDefaultPeriod(period);
     setUpgradeOpen(true);
   };
 
+  const PERIOD_OPTIONS: { key: PremiumPeriod; label: string; savePct?: number }[] = [
+    { key: 'monthly', label: '1 Tháng' },
+    { key: 'quarterly', label: '3 Tháng', savePct: savePctQuarterly },
+    { key: 'yearly', label: '1 Năm', savePct: savePctYearly },
+  ];
+
   return (
     <div className="min-h-screen py-12 px-4" style={{ backgroundColor: 'var(--theme-bg-primary)' }}>
-      <div className="max-w-5xl mx-auto">
+      <div className="max-w-4xl mx-auto">
 
         {/* Header */}
-        <div className="text-center mb-10">
+        <div className="text-center mb-8">
           <h1 className="text-3xl font-extrabold mb-3" style={{ color: 'var(--theme-text-primary)' }}>
             Nâng cấp lên Premium
           </h1>
@@ -104,8 +135,49 @@ export default function PricingPage() {
           </p>
         </div>
 
-        {/* Plan Cards */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5 mb-14">
+        {/* Period Toggle */}
+        <div className="flex justify-center mb-10">
+          <div
+            className="inline-flex items-center gap-1 p-1 rounded-2xl"
+            style={{ backgroundColor: 'var(--theme-bg-secondary)', border: '1px solid var(--theme-border)' }}
+          >
+            {PERIOD_OPTIONS.map(({ key, label, savePct }) => {
+              const isActive = activePeriod === key;
+              return (
+                <button
+                  key={key}
+                  onClick={() => setActivePeriod(key)}
+                  className="relative flex items-center gap-2 px-4 py-2 rounded-xl text-[13px] font-semibold transition-all"
+                  style={isActive ? {
+                    backgroundColor: 'var(--theme-bg-card)',
+                    color: 'var(--theme-text-primary)',
+                    boxShadow: '0 1px 4px rgba(0,0,0,0.12)',
+                    border: '1.5px solid var(--theme-border)',
+                  } : {
+                    color: 'var(--theme-text-muted)',
+                    border: '1.5px solid transparent',
+                  }}
+                >
+                  {label}
+                  {savePct != null && savePct > 0 && (
+                    <span
+                      className="px-1.5 py-0.5 rounded-md text-[10px] font-bold"
+                      style={{
+                        backgroundColor: isActive ? 'rgba(34,197,94,0.12)' : 'rgba(34,197,94,0.08)',
+                        color: '#22C55E',
+                      }}
+                    >
+                      Tiết kiệm {savePct}%
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Plan Cards — always 3 */}
+        <div className="grid md:grid-cols-3 gap-5 mb-14">
 
           {/* Free */}
           <div
@@ -120,13 +192,11 @@ export default function PricingPage() {
             <ul className="space-y-2.5 flex-1 mb-6">
               {FREE_FEATURES.map((f) => (
                 <li key={f} className="flex items-start gap-2 text-[13px]" style={{ color: 'var(--theme-text-secondary)' }}>
-                  {CHECK}
-                  <span>{f}</span>
+                  {CHECK}<span>{f}</span>
                 </li>
               ))}
               <li className="flex items-start gap-2 text-[13px]" style={{ color: 'var(--theme-text-muted)' }}>
-                {CHECK}
-                <span>Luyện viết/đọc/nghe/nói/roleplay/phát âm — 3 lần/tuần</span>
+                {CHECK}<span>Luyện viết/đọc/nghe/nói/roleplay/phát âm — 3 lần/tuần</span>
               </li>
             </ul>
             {isAuthenticated ? (
@@ -142,7 +212,7 @@ export default function PricingPage() {
             ) : (
               <Link
                 href="/login"
-                className="text-center text-[13px] font-bold py-2.5 rounded-lg transition-colors"
+                className="text-center text-[13px] font-bold py-2.5 rounded-lg transition-colors block"
                 style={{ color: 'var(--theme-text-primary)', backgroundColor: 'var(--theme-bg-secondary)' }}
               >
                 Đăng ký miễn phí
@@ -150,80 +220,42 @@ export default function PricingPage() {
             )}
           </div>
 
-          {/* Premium Monthly */}
-          <div
-            className="rounded-2xl border p-6 flex flex-col"
-            style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}
-          >
-            <div className="mb-5">
-              <div className="text-[13px] font-semibold uppercase tracking-wide mb-1" style={{ color: '#8B5CF6' }}>Premium</div>
-              <div className="flex items-baseline gap-1">
-                <span className="text-3xl font-extrabold" style={{ color: 'var(--theme-text-primary)' }}>{formatVND(monthlyPrice)}</span>
-                <span className="text-[13px]" style={{ color: 'var(--theme-text-muted)' }}>/tháng</span>
-              </div>
-              <div className="text-[13px] mt-1" style={{ color: 'var(--theme-text-muted)' }}>Huỷ bất kỳ lúc nào</div>
-            </div>
-            <ul className="space-y-2.5 flex-1 mb-6">
-              {FREE_FEATURES.slice(0, 2).map((f) => (
-                <li key={f} className="flex items-start gap-2 text-[13px]" style={{ color: 'var(--theme-text-secondary)' }}>
-                  {CHECK}
-                  <span>{f}</span>
-                </li>
-              ))}
-              {PREMIUM_EXTRA.map((f) => (
-                <li key={f} className="flex items-start gap-2 text-[13px]" style={{ color: 'var(--theme-text-secondary)' }}>
-                  {CHECK}
-                  <span className="font-medium">{f}</span>
-                </li>
-              ))}
-            </ul>
-            {isPremium ? (
-              <div className="text-center text-[13px] font-medium py-2.5 rounded-lg" style={{ color: '#22C55E', backgroundColor: 'rgba(34,197,94,0.1)' }}>
-                Đang sử dụng
-              </div>
-            ) : (
-              <button
-                onClick={() => openUpgrade('monthly')}
-                className="w-full py-2.5 rounded-lg text-[14px] font-bold text-white transition-transform hover:scale-[1.02]"
-                style={{ background: 'linear-gradient(135deg, #6366F1, #8B5CF6)' }}
-              >
-                Đăng ký tháng
-              </button>
-            )}
-          </div>
-
-          {/* Premium Yearly — Recommended */}
+          {/* Premium — dynamic by period */}
           <div
             className="rounded-2xl border-2 p-6 flex flex-col relative"
             style={{ borderColor: '#8B5CF6', backgroundColor: 'var(--theme-bg-card)' }}
           >
-            <div
-              className="absolute -top-3 left-1/2 -translate-x-1/2 text-[11px] font-bold px-3 py-0.5 rounded-full text-white"
-              style={{ background: 'linear-gradient(135deg, #8B5CF6, #6366F1)' }}
-            >
-              Tiết kiệm {savePct}%
-            </div>
+            {activePeriod !== 'monthly' && (
+              <div
+                className="absolute -top-3 left-1/2 -translate-x-1/2 text-[11px] font-bold px-3 py-0.5 rounded-full text-white whitespace-nowrap"
+                style={{ background: 'linear-gradient(135deg, #6366F1, #8B5CF6)' }}
+              >
+                Tiết kiệm {activePeriod === 'quarterly' ? savePctQuarterly : savePctYearly}%
+              </div>
+            )}
             <div className="mb-5">
-              <div className="text-[13px] font-semibold uppercase tracking-wide mb-1" style={{ color: '#8B5CF6' }}>Premium Năm</div>
+              <div className="text-[13px] font-semibold uppercase tracking-wide mb-1" style={{ color: '#8B5CF6' }}>Premium</div>
               <div className="flex items-baseline gap-1">
-                <span className="text-3xl font-extrabold" style={{ color: 'var(--theme-text-primary)' }}>{formatVND(yearlyPrice)}</span>
-                <span className="text-[13px]" style={{ color: 'var(--theme-text-muted)' }}>/năm</span>
+                <span className="text-3xl font-extrabold" style={{ color: 'var(--theme-text-primary)' }}>
+                  {formatVND(currentPrice)}
+                </span>
+                <span className="text-[13px]" style={{ color: 'var(--theme-text-muted)' }}>{periodLabel}</span>
               </div>
               <div className="text-[13px] mt-1" style={{ color: 'var(--theme-text-muted)' }}>
-                Chỉ {formatVND(yearlyMonthly)}/tháng
+                {perMonthPrice != null
+                  ? `Chỉ ${formatVND(perMonthPrice)}/tháng`
+                  : 'Huỷ bất kỳ lúc nào'}
               </div>
             </div>
             <ul className="space-y-2.5 flex-1 mb-6">
               {FREE_FEATURES.slice(0, 2).map((f) => (
                 <li key={f} className="flex items-start gap-2 text-[13px]" style={{ color: 'var(--theme-text-secondary)' }}>
-                  {CHECK}
-                  <span>{f}</span>
+                  {CHECK}<span>{f}</span>
                 </li>
               ))}
               {PREMIUM_EXTRA.map((f) => (
                 <li key={f} className="flex items-start gap-2 text-[13px]" style={{ color: 'var(--theme-text-secondary)' }}>
-                  {CHECK}
-                  <span className="font-medium">{f}</span>
+                  {CHECK}<span className="font-medium">{f}</span>
                 </li>
               ))}
             </ul>
@@ -233,11 +265,11 @@ export default function PricingPage() {
               </div>
             ) : (
               <button
-                onClick={() => openUpgrade('yearly')}
+                onClick={() => openUpgrade(activePeriod)}
                 className="w-full py-2.5 rounded-lg text-[14px] font-bold text-white transition-transform hover:scale-[1.02]"
-                style={{ background: 'linear-gradient(135deg, #8B5CF6, #6366F1)' }}
+                style={{ background: 'linear-gradient(135deg, #6366F1, #8B5CF6)' }}
               >
-                Đăng ký năm — Tiết kiệm {savePct}%
+                {ctaLabel}
               </button>
             )}
           </div>
@@ -273,8 +305,7 @@ export default function PricingPage() {
             <ul className="space-y-2.5 flex-1 mb-6">
               {LIFETIME_EXTRA.map((f) => (
                 <li key={f} className="flex items-start gap-2 text-[13px]" style={{ color: 'var(--theme-text-secondary)' }}>
-                  {CHECK}
-                  <span className="font-medium">{f}</span>
+                  {CHECK}<span className="font-medium">{f}</span>
                 </li>
               ))}
             </ul>
@@ -379,7 +410,7 @@ export default function PricingPage() {
               Bắt đầu với Premium
             </button>
             <p className="text-[12px] mt-2" style={{ color: 'var(--theme-text-muted)' }}>
-              Chỉ từ {formatVND(yearlyMonthly)}/tháng khi đăng ký năm
+              Chỉ từ {formatVND(Math.round(yearlyPrice / 12))}/tháng khi đăng ký năm
             </p>
           </div>
         )}

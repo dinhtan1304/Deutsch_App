@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useExamListeningSession, useSubmitExamListening } from '@/hooks/useExamListening';
 import { ExamListeningTeil, ExamListeningQuestion } from '@/lib/api/examListening';
+import { EXAM_LISTENING_DISPLAY } from '@/lib/examConfig';
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
 function IconChevronLeft({ size = 16 }: { size?: number }) {
@@ -28,6 +29,12 @@ function IconCheck({ size = 10 }: { size?: number }) {
 
 const ACCENT = '#EC4899';
 const GRADIENT = 'linear-gradient(135deg, #EC4899, #8B5CF6)';
+
+function formatTime(secs: number) {
+  const m = Math.floor(secs / 60);
+  const s = secs % 60;
+  return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+}
 
 const TASK_TYPE_LABELS: Record<string, string> = {
   richtig_falsch: 'Richtig / Falsch',
@@ -217,6 +224,35 @@ export default function ExamListeningPage() {
   const [ttsSpeed, setTtsSpeed] = useState(1.0);
   // Track play count per Teil
   const [playCounts, setPlayCounts] = useState<Record<number, number>>({});
+  const [timeRemaining, setTimeRemaining] = useState(0);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const userAnswersRef = useRef(userAnswers);
+
+  useEffect(() => { userAnswersRef.current = userAnswers; }, [userAnswers]);
+
+  useEffect(() => {
+    if (!session || session.status === 'GRADED') return;
+    const cfg = EXAM_LISTENING_DISPLAY[session.examType]?.[session.cefrLevel];
+    if (!cfg) return;
+    const totalSecs = cfg.timeMin * 60;
+    setTimeRemaining(totalSecs);
+    timerRef.current = setInterval(() => {
+      setTimeRemaining(prev => {
+        if (prev <= 1) { clearInterval(timerRef.current!); return 0; }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => { if (timerRef.current) clearInterval(timerRef.current!); };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session?.id]);
+
+  useEffect(() => {
+    if (timeRemaining !== 0 || !session || session.status === 'GRADED') return;
+    submitMut.mutateAsync({ id, userAnswers: userAnswersRef.current })
+      .then(() => router.push(`/practice-test/listening/exam/${id}/result`))
+      .catch(() => {});
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [timeRemaining]);
 
   const handleAnswer = useCallback((teilNumber: number, qid: string, val: string) => {
     setUserAnswers(prev => ({
@@ -291,6 +327,15 @@ export default function ExamListeningPage() {
           <IconChevronLeft size={14} /> Thoát
         </Link>
         <div className="flex-1" />
+        {timeRemaining > 0 && (
+          <span className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[12px] font-bold tabular-nums"
+            style={{
+              backgroundColor: timeRemaining < 300 ? 'rgba(239,68,68,.12)' : 'rgba(236,72,153,.08)',
+              color: timeRemaining < 300 ? '#EF4444' : ACCENT,
+            }}>
+            ⏱ {formatTime(timeRemaining)}
+          </span>
+        )}
         <span className="text-[12px] font-semibold" style={{ color: 'var(--theme-text-muted)' }}>
           {totalAnswered}/{totalQ} câu
         </span>

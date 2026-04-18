@@ -13,6 +13,7 @@ interface Props {
   open: boolean;
   onClose: () => void;
   defaultPeriod?: BillingPeriod;
+  featureContext?: string;
 }
 
 function formatVND(n: number) {
@@ -49,13 +50,13 @@ function VietQRImage({ bankBin, account, amount, note, accountName }: {
 }) {
   const url = `https://img.vietqr.io/image/${bankBin}-${account}-compact2.png?amount=${amount}&addInfo=${encodeURIComponent(note)}&accountName=${encodeURIComponent(accountName)}`;
   return (
-    <div className="flex justify-center my-3">
+    <div className="flex justify-center">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={url}
         alt="VietQR"
         className="rounded-xl border"
-        style={{ borderColor: 'var(--theme-border)', maxWidth: 240 }}
+        style={{ borderColor: 'var(--theme-border)', width: 320, height: 'auto' }}
         onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
       />
     </div>
@@ -90,16 +91,18 @@ function getBankBin(bankName: string): string {
 }
 
 const MONTHLY_PRICE = 99000;
+const QUARTERLY_PRICE = 249000;
 const YEARLY_PRICE = 990000;
 const LIFETIME_PRICE = 1490000;
 
 function priceForPeriod(p: BillingPeriod): number {
   if (p === 'lifetime') return LIFETIME_PRICE;
   if (p === 'yearly') return YEARLY_PRICE;
+  if (p === 'quarterly') return QUARTERLY_PRICE;
   return MONTHLY_PRICE;
 }
 
-export function UpgradeModal({ open, onClose, defaultPeriod = 'yearly' }: Props) {
+export function UpgradeModal({ open, onClose, defaultPeriod = 'yearly', featureContext }: Props) {
   const { isAuthenticated } = useAuthStore();
   const [period, setPeriod] = useState<BillingPeriod>(defaultPeriod);
   const [step, setStep] = useState<'select' | 'payment'>('select');
@@ -173,8 +176,8 @@ export function UpgradeModal({ open, onClose, defaultPeriod = 'yearly' }: Props)
 
       {/* Modal */}
       <div
-        className="relative w-full max-w-md rounded-2xl border p-6 shadow-xl max-h-[90vh] overflow-y-auto"
-        style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}
+        className="relative w-full rounded-2xl border p-6 shadow-xl max-h-[90vh] overflow-y-auto"
+        style={{ maxWidth: step === 'payment' ? 680 : 448, borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close button */}
@@ -191,13 +194,20 @@ export function UpgradeModal({ open, onClose, defaultPeriod = 'yearly' }: Props)
             <h2 className="text-lg font-bold mb-1" style={{ color: 'var(--theme-text-primary)' }}>
               Nâng cấp Premium
             </h2>
-            <p className="text-[13px] mb-5" style={{ color: 'var(--theme-text-muted)' }}>
-              Luyện tập không giới hạn, đề thi chuẩn Goethe/TELC, AI chấm bài
-            </p>
+            {featureContext ? (
+              <div className="rounded-xl px-3 py-2.5 mb-4 text-[13px] leading-relaxed"
+                style={{ backgroundColor: 'rgba(99,102,241,.08)', borderLeft: '3px solid #6366F1', color: 'var(--theme-text-secondary)' }}>
+                {featureContext}
+              </div>
+            ) : (
+              <p className="text-[13px] mb-5" style={{ color: 'var(--theme-text-muted)' }}>
+                Luyện tập không giới hạn, đề thi chuẩn Goethe/TELC, AI chấm bài
+              </p>
+            )}
 
             {/* Period toggle */}
-            <div className="grid grid-cols-3 gap-2 mb-5">
-              {(['monthly', 'yearly', 'lifetime'] as const).map((p) => {
+            <div className="grid grid-cols-4 gap-2 mb-5">
+              {(['monthly', 'quarterly', 'yearly', 'lifetime'] as const).map((p) => {
                 const disabled = p === 'lifetime' && lifetimeSoldOut;
                 const isActive = period === p;
                 return (
@@ -215,11 +225,19 @@ export function UpgradeModal({ open, onClose, defaultPeriod = 'yearly' }: Props)
                     }}
                   >
                     <div className="text-[11px] opacity-90">
-                      {p === 'monthly' ? 'Tháng' : p === 'yearly' ? 'Năm' : 'Trọn đời'}
+                      {p === 'monthly' ? 'Tháng' : p === 'quarterly' ? '3 Tháng' : p === 'yearly' ? 'Năm' : 'Trọn đời'}
                     </div>
                     <div className="text-[13px] font-bold mt-0.5">
                       {formatVND(priceForPeriod(p))}
                     </div>
+                    {p === 'quarterly' && (
+                      <div
+                        className="absolute -top-2 left-1/2 -translate-x-1/2 px-1.5 py-0.5 rounded-full text-[9px] font-bold whitespace-nowrap"
+                        style={{ backgroundColor: '#6366F1', color: '#fff' }}
+                      >
+                        -16%
+                      </div>
+                    )}
                     {p === 'yearly' && (
                       <div
                         className="absolute -top-2 left-1/2 -translate-x-1/2 px-1.5 py-0.5 rounded-full text-[9px] font-bold whitespace-nowrap"
@@ -361,6 +379,7 @@ export function UpgradeModal({ open, onClose, defaultPeriod = 'yearly' }: Props)
               )}
               <div className="text-[12px] mt-1" style={{ color: 'var(--theme-text-muted)' }}>
                 {period === 'yearly' ? '12 tháng sử dụng' :
+                 period === 'quarterly' ? '3 tháng sử dụng' :
                  period === 'lifetime' ? 'Truy cập trọn đời — không cần gia hạn' :
                  '1 tháng sử dụng'}
               </div>
@@ -384,56 +403,61 @@ export function UpgradeModal({ open, onClose, defaultPeriod = 'yearly' }: Props)
               Chuyển khoản theo thông tin bên dưới hoặc quét mã QR
             </p>
 
-            {/* VietQR */}
-            <VietQRImage
-              bankBin={getBankBin(upgradeData.bankInfo.bankName)}
-              account={upgradeData.bankInfo.accountNumber}
-              amount={upgradeData.bankInfo.amount}
-              note={upgradeData.bankInfo.content}
-              accountName={upgradeData.bankInfo.accountName}
-            />
+            {/* QR + Bank details side by side */}
+            <div className="flex gap-4 mb-4">
+              {/* Left: QR code */}
+              <div className="shrink-0">
+                <VietQRImage
+                  bankBin={getBankBin(upgradeData.bankInfo.bankName)}
+                  account={upgradeData.bankInfo.accountNumber}
+                  amount={upgradeData.bankInfo.amount}
+                  note={upgradeData.bankInfo.content}
+                  accountName={upgradeData.bankInfo.accountName}
+                />
+              </div>
 
-            {/* Bank details */}
-            <div className="rounded-xl border p-4 space-y-3 mb-4" style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-secondary)' }}>
-              <div>
-                <div className="text-[11px] uppercase tracking-wide mb-0.5" style={{ color: 'var(--theme-text-muted)' }}>Ngân hàng</div>
-                <div className="text-[14px] font-semibold" style={{ color: 'var(--theme-text-primary)' }}>
-                  {upgradeData.bankInfo.bankName}
+              {/* Right: Bank details */}
+              <div className="flex-1 rounded-xl border p-4 space-y-3" style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-secondary)' }}>
+                <div>
+                  <div className="text-[10px] uppercase tracking-wide mb-0.5" style={{ color: 'var(--theme-text-muted)' }}>Ngân hàng</div>
+                  <div className="text-[13px] font-semibold" style={{ color: 'var(--theme-text-primary)' }}>
+                    {upgradeData.bankInfo.bankName}
+                  </div>
                 </div>
-              </div>
-              <div>
-                <div className="text-[11px] uppercase tracking-wide mb-0.5" style={{ color: 'var(--theme-text-muted)' }}>Số tài khoản</div>
-                <div className="flex items-center">
-                  <span className="text-[14px] font-mono font-semibold" style={{ color: 'var(--theme-text-primary)' }}>
-                    {upgradeData.bankInfo.accountNumber}
-                  </span>
-                  <CopyButton text={upgradeData.bankInfo.accountNumber} />
+                <div>
+                  <div className="text-[10px] uppercase tracking-wide mb-0.5" style={{ color: 'var(--theme-text-muted)' }}>Số tài khoản</div>
+                  <div className="flex items-center gap-1">
+                    <span className="text-[13px] font-mono font-semibold" style={{ color: 'var(--theme-text-primary)' }}>
+                      {upgradeData.bankInfo.accountNumber}
+                    </span>
+                    <CopyButton text={upgradeData.bankInfo.accountNumber} />
+                  </div>
                 </div>
-              </div>
-              <div>
-                <div className="text-[11px] uppercase tracking-wide mb-0.5" style={{ color: 'var(--theme-text-muted)' }}>Chủ tài khoản</div>
-                <div className="text-[14px] font-semibold" style={{ color: 'var(--theme-text-primary)' }}>
-                  {upgradeData.bankInfo.accountName}
+                <div>
+                  <div className="text-[10px] uppercase tracking-wide mb-0.5" style={{ color: 'var(--theme-text-muted)' }}>Chủ tài khoản</div>
+                  <div className="text-[13px] font-semibold" style={{ color: 'var(--theme-text-primary)' }}>
+                    {upgradeData.bankInfo.accountName}
+                  </div>
                 </div>
-              </div>
-              <div>
-                <div className="text-[11px] uppercase tracking-wide mb-0.5" style={{ color: 'var(--theme-text-muted)' }}>Số tiền</div>
-                <div className="flex items-center">
-                  <span className="text-[16px] font-bold" style={{ color: '#8B5CF6' }}>
-                    {formatVND(upgradeData.bankInfo.amount)}
-                  </span>
-                  <CopyButton text={String(upgradeData.bankInfo.amount)} />
+                <div>
+                  <div className="text-[10px] uppercase tracking-wide mb-0.5" style={{ color: 'var(--theme-text-muted)' }}>Số tiền</div>
+                  <div className="flex items-center gap-1">
+                    <span className="text-[15px] font-bold" style={{ color: '#8B5CF6' }}>
+                      {formatVND(upgradeData.bankInfo.amount)}
+                    </span>
+                    <CopyButton text={String(upgradeData.bankInfo.amount)} />
+                  </div>
                 </div>
-              </div>
-              <div>
-                <div className="text-[11px] uppercase tracking-wide mb-0.5" style={{ color: 'var(--theme-text-muted)' }}>
-                  Nội dung chuyển khoản
-                </div>
-                <div className="flex items-center">
-                  <span className="text-[14px] font-mono font-bold" style={{ color: '#F59E0B' }}>
-                    {upgradeData.bankInfo.content}
-                  </span>
-                  <CopyButton text={upgradeData.bankInfo.content} />
+                <div>
+                  <div className="text-[10px] uppercase tracking-wide mb-0.5" style={{ color: 'var(--theme-text-muted)' }}>
+                    Nội dung chuyển khoản
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <span className="text-[13px] font-mono font-bold" style={{ color: '#F59E0B' }}>
+                      {upgradeData.bankInfo.content}
+                    </span>
+                    <CopyButton text={upgradeData.bankInfo.content} />
+                  </div>
                 </div>
               </div>
             </div>

@@ -4,7 +4,6 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useExamReadingHistory, useExamReadingStats, useDeleteExamReading } from '@/hooks/useExamReading';
 import { ExamReadingHistoryItem, TeilScore } from '@/lib/api/examReading';
-import { PremiumPaywall } from '@/components/subscription/PremiumPaywall';
 
 // ─── Inline icons ─────────────────────────────────────────────────────────────
 function IconBookOpen({ size = 16, style }: { size?: number; style?: React.CSSProperties }) {
@@ -125,14 +124,7 @@ function HistoryCard({ item, onDelete }: { item: ExamReadingHistoryItem; onDelet
 }
 
 export default function ExamReadingListPage() {
-  return (
-    <PremiumPaywall
-      title="Đề chuẩn Reading"
-      description="Luyện theo đề thi Goethe & TELC A1–B1 với Premium"
-    >
-      <ExamReadingListContent />
-    </PremiumPaywall>
-  );
+  return <ExamReadingListContent />;
 }
 
 function ExamReadingListContent() {

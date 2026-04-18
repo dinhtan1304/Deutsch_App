@@ -5,13 +5,14 @@ export interface Plan {
   name: string;
   nameVi: string;
   monthlyPrice?: number;
+  quarterlyPrice?: number;
   yearlyPrice?: number;
   price?: number;          // for lifetime
   features: string[];
   limits: { practicePerWeek: number };
 }
 
-export type BillingPeriod = 'monthly' | 'yearly' | 'lifetime';
+export type BillingPeriod = 'monthly' | 'quarterly' | 'yearly' | 'lifetime';
 
 export interface MySubscription {
   plan: 'free' | 'premium' | 'lifetime';

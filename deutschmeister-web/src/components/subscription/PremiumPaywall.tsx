@@ -8,6 +8,7 @@ interface Props {
   title?: string;
   description?: string;
   children: React.ReactNode;
+  featureContext?: string;
 }
 
 /**
@@ -19,6 +20,7 @@ export function PremiumPaywall({
   title = 'Tính năng Premium',
   description = 'Nâng cấp để truy cập đề thi chuẩn Goethe & TELC',
   children,
+  featureContext,
 }: Props) {
   const unlocked = useIsExamUnlocked();
   const [upgradeOpen, setUpgradeOpen] = useState(false);
@@ -97,6 +99,7 @@ export function PremiumPaywall({
         open={upgradeOpen}
         onClose={() => setUpgradeOpen(false)}
         defaultPeriod="yearly"
+        featureContext={featureContext}
       />
     </div>
   );

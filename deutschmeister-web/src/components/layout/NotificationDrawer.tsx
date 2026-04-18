@@ -33,7 +33,7 @@ function timeAgo(dateStr: string): string {
 
 export function NotificationDrawer({ open, onClose }: Props) {
   const [page] = useState(1);
-  const { data, isLoading } = useNotifications(page);
+  const { data, isLoading, isError, refetch } = useNotifications(page);
   const markRead = useMarkRead();
   const markAllRead = useMarkAllRead();
 
@@ -111,13 +111,31 @@ export function NotificationDrawer({ open, onClose }: Props) {
                 style={{ borderColor: 'var(--theme-border)', borderTopColor: '#3B82F6' }}
               />
             </div>
-          ) : !data?.items.length ? (
-            <div className="p-10 text-center">
-              <div className="text-4xl mb-3">🔔</div>
-              <div
-                className="text-[13px] font-medium"
-                style={{ color: 'var(--theme-text-muted)' }}
+          ) : isError ? (
+            <div className="p-10 text-center flex flex-col items-center gap-3">
+              <svg width={32} height={32} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--theme-text-muted)', opacity: 0.5 }}>
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
+              <div className="text-[13px] font-medium" style={{ color: 'var(--theme-text-muted)' }}>
+                Không tải được thông báo
+              </div>
+              <button
+                onClick={() => refetch()}
+                className="text-[12px] font-medium px-3 py-1.5 rounded-lg border transition-colors"
+                style={{ color: '#3B82F6', borderColor: 'rgba(59,130,246,.3)' }}
               >
+                Thử lại
+              </button>
+            </div>
+          ) : !data?.items.length ? (
+            <div className="p-10 text-center flex flex-col items-center gap-3">
+              <svg width={32} height={32} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--theme-text-muted)', opacity: 0.5 }}>
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+              </svg>
+              <div className="text-[13px] font-medium" style={{ color: 'var(--theme-text-muted)' }}>
                 Chưa có thông báo nào
               </div>
             </div>
