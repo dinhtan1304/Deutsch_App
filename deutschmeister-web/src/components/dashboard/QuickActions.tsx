@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import {
   IconGamepad, IconCards, IconLayers, IconBook,
-  IconBrain, IconArrowRight, IconZap,
+  IconBrain, IconArrowRight, IconZap, IconGraduationCap, IconRotateCcw,
 } from '@/components/ui/Icons';
 
 interface QuickActionsProps {
@@ -47,6 +47,24 @@ const actions = [
     iconBg: 'linear-gradient(135deg, #F59E0B, #FBBF24)',
     accent: '#F59E0B',
   },
+  {
+    icon: IconGraduationCap,
+    label: 'Luyện đề',
+    description: 'Goethe & TELC',
+    href: '/practice-test',
+    gradient: 'linear-gradient(135deg, rgba(236,72,153,.1), rgba(168,85,247,.06))',
+    iconBg: 'linear-gradient(135deg, #EC4899, #A855F7)',
+    accent: '#EC4899',
+  },
+  {
+    icon: IconRotateCcw,
+    label: 'SRS',
+    description: 'Ôn tập thẻ nhớ',
+    href: '/srs',
+    gradient: 'linear-gradient(135deg, rgba(6,182,212,.1), rgba(14,165,233,.06))',
+    iconBg: 'linear-gradient(135deg, #06B6D4, #0EA5E9)',
+    accent: '#06B6D4',
+  },
 ];
 
 export function QuickActions({ wordsToReview }: QuickActionsProps) {
@@ -56,6 +74,8 @@ export function QuickActions({ wordsToReview }: QuickActionsProps) {
       style={{
         borderColor: 'var(--theme-border)',
         backgroundColor: 'var(--theme-bg-card)',
+        height: '317.5px',
+        boxSizing: 'border-box',
       }}
     >
       {/* Header */}

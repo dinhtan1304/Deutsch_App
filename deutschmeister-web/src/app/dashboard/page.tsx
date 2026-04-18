@@ -167,19 +167,27 @@ export default function DashboardPage() {
       <StatsCards stats={dashboardData.stats} />
 
       {/* ── Row 1: Chart (2/3) + Actions+Challenges (1/3) ── */}
-      <div className="grid gap-4" style={{ gridTemplateColumns: 'minmax(0,2fr) minmax(0,1fr)' }}>
-        <div className="space-y-4 min-w-0">
+      <div className="grid gap-4 items-stretch" style={{ gridTemplateColumns: 'minmax(0,2fr) minmax(0,1fr)' }}>
+        <div className="flex flex-col gap-4 min-w-0">
           <WeeklyChart data={dashboardData.weeklyProgress} />
           <ActivityHeatmap data={dashboardData.heatmap} />
         </div>
-        <div className="space-y-4 min-w-0">
+        <div className="flex flex-col gap-4 min-w-0">
           <QuickActions wordsToReview={dashboardData.stats.wordsToReview} />
-          <WeeklyChallengesWidget />
+          <div className="flex-1 min-h-0">
+            <WeeklyChallengesWidget />
+          </div>
         </div>
       </div>
 
-      {/* ── Premium upsell (hidden for Premium/beta users) ── */}
-      <UpsellTrigger source="dashboard" />
+      {/* ── Premium upsell — full-width highlight (hidden for Premium/beta users) ── */}
+      <UpsellTrigger
+        variant="card"
+        source="dashboard"
+        title="Đề chuẩn Goethe & TELC đang chờ bạn"
+        description="Thi thử 4 kỹ năng có tính giờ · AI chấm bài Writing & Speaking · Không giới hạn lượt luyện"
+        ctaLabel="Nâng cấp Premium"
+      />
 
       {/* ── Row 2: Leaderboard + Activity + Topics + Error Patterns ── */}
       <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">

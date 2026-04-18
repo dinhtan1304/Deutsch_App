@@ -329,6 +329,34 @@ export default function PricingPage() {
           </div>
         </div>
 
+        {/* Payment Guide */}
+        <div className="rounded-2xl border p-6 mb-14" style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
+          <h2 className="text-[15px] font-bold mb-5" style={{ color: 'var(--theme-text-primary)' }}>
+            Cách thanh toán — 3 bước đơn giản
+          </h2>
+          <div className="grid sm:grid-cols-3 gap-4">
+            {[
+              { step: '1', title: 'Chọn gói & nhấn đăng ký', desc: 'Chọn Premium (tháng/quý/năm) hoặc Lifetime. Nhập mã giảm giá nếu có, xem số tiền cuối cùng.' },
+              { step: '2', title: 'Chuyển khoản ngân hàng', desc: 'Chuyển đúng số tiền và nội dung chuyển khoản hiển thị trong modal (dạng "NANGCAP XXXXXXXX"). Quét mã VietQR cho nhanh.' },
+              { step: '3', title: 'Kích hoạt trong vài giờ', desc: 'Admin xác nhận giao dịch — thường trong 1-4 giờ, tối đa 24 giờ. Bạn nhận email thông báo khi Premium đã active.' },
+            ].map(({ step, title, desc }) => (
+              <div key={step} className="flex gap-3">
+                <div className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-[13px] font-black text-white" style={{ background: 'linear-gradient(135deg, #6366F1, #8B5CF6)' }}>
+                  {step}
+                </div>
+                <div>
+                  <div className="text-[13px] font-semibold mb-1" style={{ color: 'var(--theme-text-primary)' }}>{title}</div>
+                  <div className="text-[12px] leading-relaxed" style={{ color: 'var(--theme-text-muted)' }}>{desc}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-4 pt-4 flex items-center gap-2 text-[12px]" style={{ borderTop: '1px solid var(--theme-border)', color: 'var(--theme-text-muted)' }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4m0-4h.01"/></svg>
+            Hỗ trợ qua email nếu có vấn đề thanh toán · Hoàn tiền trong 7 ngày nếu chưa hài lòng
+          </div>
+        </div>
+
         {/* Comparison Table */}
         <div className="mb-14">
           <h2 className="text-xl font-bold text-center mb-6" style={{ color: 'var(--theme-text-primary)' }}>

@@ -9,7 +9,7 @@ export function WeeklyChallengesWidget() {
   const completedCount = data?.filter((c) => c.completed).length ?? 0;
 
   return (
-    <div style={{ background: 'var(--theme-card)', borderRadius: 16, padding: '1.25rem', border: '1px solid var(--theme-border)' }}>
+    <div style={{ background: 'var(--theme-card)', borderRadius: 16, padding: '1.25rem', border: '1px solid var(--theme-border)', height: '100%', boxSizing: 'border-box' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <div style={{ width: 28, height: 28, borderRadius: 8, background: 'linear-gradient(135deg, #3B82F6, #6366F1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

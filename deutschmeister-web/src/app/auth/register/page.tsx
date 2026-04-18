@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 import { useAuthStore } from '@/stores/authStore';
+import { trackEvent } from '@/lib/analytics';
 import {
   IconArrowLeft, IconUser, IconMail, IconLock, IconLoader,
   IconEye, IconEyeOff, IconUserPlus, IconCheckCircle,
@@ -84,6 +85,7 @@ export default function RegisterPage() {
     try {
       const captchaToken = executeRecaptcha ? await executeRecaptcha('register') : undefined;
       await register({ name: name.trim(), email, password, captchaToken });
+      trackEvent('sign_up', { method: 'email' });
       router.push(`/auth/verify-email?email=${encodeURIComponent(email)}`);
     } catch (err: any) {
       setError(err.message || 'Đăng ký thất bại. Vui lòng thử lại.');

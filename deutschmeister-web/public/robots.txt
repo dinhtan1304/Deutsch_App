@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+Disallow: /auth/callback
+Sitemap: https://www.deutschmeister.vn/sitemap.xml

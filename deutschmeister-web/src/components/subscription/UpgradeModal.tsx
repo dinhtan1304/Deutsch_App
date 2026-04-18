@@ -7,6 +7,7 @@ import {
   useLifetimeRemaining,
 } from '@/hooks/useSubscription';
 import { useAuthStore } from '@/stores/authStore';
+import { trackEvent } from '@/lib/analytics';
 import type { UpgradeResponse, BillingPeriod } from '@/lib/api/subscriptions';
 
 interface Props {
@@ -155,10 +156,12 @@ export function UpgradeModal({ open, onClose, defaultPeriod = 'yearly', featureC
 
   const handleUpgrade = async () => {
     if (!isAuthenticated) return;
+    trackEvent('begin_checkout', { period, feature_context: featureContext ?? 'direct' });
     const res = await upgradeMut.mutateAsync({
       period,
       promoCode: promoApplied ? promoCode.trim() : undefined,
     });
+    trackEvent('purchase', { period, value: Math.max(0, priceForPeriod(period) - (promoApplied?.discount ?? 0)), currency: 'VND' });
     setUpgradeData(res);
     setStep('payment');
   };

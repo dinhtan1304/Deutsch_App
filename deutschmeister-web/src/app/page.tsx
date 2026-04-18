@@ -78,11 +78,9 @@ const GAMES = [
   { name: 'Spelling Bee',    vi: 'Chính tả',      icon: IconSpellCheck, color: '#F97316' },
 ];
 
-const STATS = [
-  { num: '5000+', label: 'Từ vựng',  sub: 'chuẩn Goethe' },
-  { num: '12+',   label: 'Chủ đề',      sub: 'bài học theo chủ đề' },
-  { num: '8',    label: 'Trò chơi',    sub: 'gamification học từ' },
-  { num: '4',    label: 'Kỹ năng',     sub: 'Nghe · Nói · Đọc · Viết' },
+const STATIC_STATS = [
+  { num: '8',  label: 'Trò chơi', sub: 'gamification học từ' },
+  { num: '4',  label: 'Kỹ năng',  sub: 'Nghe · Nói · Đọc · Viết' },
 ];
 
 function hexToRgb(hex: string): string {
@@ -320,11 +318,21 @@ function LandingDemoQuiz() {
   );
 }
 
+const DEMO_STATS = { totalUsers: 500, totalWords: 5000, totalTopics: 12 };
+
 export default function HomePage() {
   const router = useRouter();
   const { isAuthenticated, _hasHydrated } = useAuthStore();
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [publicStats, setPublicStats] = useState(DEMO_STATS);
+
+  useEffect(() => {
+    fetch(`${DEMO_API_URL}/dashboard/public-stats`)
+      .then(r => r.json())
+      .then(d => { if (d?.totalUsers) setPublicStats(d); })
+      .catch(() => {});
+  }, []);
 
   // Redirect authenticated users to dashboard
   useEffect(() => {
@@ -412,7 +420,7 @@ export default function HomePage() {
             <span style={{ fontWeight: 800, fontSize: 17, color: 'white', letterSpacing: '-0.3px' }}>Deutschmeister</span>
           </div>
           <div className="hide-mobile" style={{ display: 'flex', alignItems: 'center', gap: 32, marginRight: 32 }}>
-            {[['Tính năng', '#features'], ['AI', '#ai'], ['Luyện thi', '#exam'], ['Câu chuyện', '#story']].map(([label, href]) => (
+            {[['Tính năng', '#features'], ['AI', '#ai'], ['Luyện thi', '#exam'], ['Câu chuyện', '#story'], ['Bảng giá', '/pricing']].map(([label, href]) => (
               <a key={href} href={href} style={{ color: 'rgba(255,255,255,.65)', fontSize: 14, fontWeight: 500, textDecoration: 'none', transition: 'color .2s' }}
                 onMouseEnter={e => (e.currentTarget.style.color = 'white')}
                 onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,.65)')}>
@@ -430,7 +438,7 @@ export default function HomePage() {
         </div>
         {menuOpen && (
           <div style={{ background: 'rgba(10,15,30,.98)', padding: '16px 24px 24px', borderTop: '1px solid rgba(255,255,255,.06)' }}>
-            {[['Tính năng', '#features'], ['AI', '#ai'], ['Luyện thi', '#exam'], ['Câu chuyện', '#story']].map(([label, href]) => (
+            {[['Tính năng', '#features'], ['AI', '#ai'], ['Luyện thi', '#exam'], ['Câu chuyện', '#story'], ['Bảng giá', '/pricing']].map(([label, href]) => (
               <a key={href} href={href} onClick={() => setMenuOpen(false)} style={{ display: 'block', padding: '12px 0', color: 'rgba(255,255,255,.8)', fontSize: 15, fontWeight: 500, textDecoration: 'none', borderBottom: '1px solid rgba(255,255,255,.06)' }}>{label}</a>
             ))}
             <div style={{ display: 'flex', gap: 10, marginTop: 16 }}>
@@ -461,13 +469,18 @@ export default function HomePage() {
           Nền tảng luyện thi tiếng Đức toàn diện — từ từ vựng cơ bản đến đề thi Goethe/TELC A1·A2·B1. AI sinh đề từ kho đề thi thật (RAG), chấm điểm và nhận xét chi tiết bằng tiếng Việt.
         </p>
 
-        <div className="fade-up-3" style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center', marginBottom: 64 }}>
-          <Link href="/auth/register" className="btn-glow" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '14px 28px', borderRadius: 14, background: 'linear-gradient(135deg, #6366F1, #8B5CF6)', color: 'white', fontWeight: 700, fontSize: 15, textDecoration: 'none', boxShadow: '0 8px 32px rgba(99,102,241,.45)' }}>
-            Bắt đầu ngay<IconArrow />
-          </Link>
-          <Link href="/auth/login" className="btn-outline-hover" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '14px 28px', borderRadius: 14, border: '1px solid rgba(255,255,255,.15)', color: 'white', fontWeight: 600, fontSize: 15, textDecoration: 'none' }}>
-            Đăng nhập
-          </Link>
+        <div className="fade-up-3" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, marginBottom: 64 }}>
+          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
+            <Link href="/auth/register" className="btn-glow" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '14px 28px', borderRadius: 14, background: 'linear-gradient(135deg, #6366F1, #8B5CF6)', color: 'white', fontWeight: 700, fontSize: 15, textDecoration: 'none', boxShadow: '0 8px 32px rgba(99,102,241,.45)' }}>
+              Học miễn phí ngay<IconArrow />
+            </Link>
+            <Link href="/pricing" className="btn-outline-hover" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '14px 28px', borderRadius: 14, border: '1px solid rgba(255,255,255,.15)', color: 'white', fontWeight: 600, fontSize: 15, textDecoration: 'none' }}>
+              Xem gói Premium
+            </Link>
+          </div>
+          <p style={{ fontSize: 12.5, color: 'rgba(255,255,255,.3)', margin: 0 }}>
+            Không cần thẻ tín dụng · Miễn phí mãi mãi · 3 tính năng AI/tuần
+          </p>
         </div>
 
         <div className="fade-up-4" style={{ display: 'flex', gap: 10, flexWrap: 'wrap', justifyContent: 'center', maxWidth: 840 }}>
@@ -490,13 +503,16 @@ export default function HomePage() {
       </section>
 
       {/* ─── Stats bar ──────────────────────────────────────────────────────── */}
-      <section style={{ background: 'rgba(255,255,255,.03)', borderTop: '1px solid rgba(255,255,255,.06)', borderBottom: '1px solid rgba(255,255,255,.06)', padding: '40px 24px' }}>
-        <div className="stats-grid" style={{ maxWidth: 900, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 24, textAlign: 'center' }}>
-          {STATS.map(s => (
-            <div key={s.num}>
-              <div style={{ fontSize: '2.5rem', fontWeight: 900, background: 'linear-gradient(135deg, #60a5fa, #a78bfa)', backgroundClip: 'text', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>{s.num}</div>
-              <div style={{ fontSize: 14, fontWeight: 700, color: 'white', marginTop: 4 }}>{s.label}</div>
-              <div style={{ fontSize: 12, color: 'rgba(255,255,255,.4)', marginTop: 2 }}>{s.sub}</div>
+      <section style={{ background: 'rgba(255,255,255,.03)', borderTop: '1px solid rgba(255,255,255,.06)', borderBottom: '1px solid rgba(255,255,255,.06)', padding: '24px 24px' }}>
+        <div className="stats-grid" style={{ maxWidth: 560, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, textAlign: 'center' }}>
+          {[
+            { num: `${publicStats.totalWords}+`, label: 'Từ vựng', sub: 'chuẩn Goethe' },
+            ...STATIC_STATS,
+          ].map(s => (
+            <div key={s.label}>
+              <div style={{ fontSize: '1.75rem', fontWeight: 900, background: 'linear-gradient(135deg, #60a5fa, #a78bfa)', backgroundClip: 'text', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>{s.num}</div>
+              <div style={{ fontSize: 12.5, fontWeight: 700, color: 'white', marginTop: 3 }}>{s.label}</div>
+              <div style={{ fontSize: 11, color: 'rgba(255,255,255,.4)', marginTop: 1 }}>{s.sub}</div>
             </div>
           ))}
         </div>
@@ -764,6 +780,42 @@ export default function HomePage() {
             </div>
 
           </div>
+        </div>
+      </section>
+
+      {/* ─── FAQ ────────────────────────────────────────────────────────────── */}
+      <section id="faq" style={{ padding: '96px 24px', maxWidth: 760, margin: '0 auto' }}>
+        <div style={{ textAlign: 'center', marginBottom: 48 }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 14px', borderRadius: 100, background: 'rgba(59,130,246,.12)', border: '1px solid rgba(59,130,246,.3)', fontSize: 12.5, fontWeight: 700, color: '#60A5FA', marginBottom: 16 }}>
+            CÂU HỎI THƯỜNG GẶP
+          </div>
+          <h2 className="section-title" style={{ fontSize: '2.25rem', fontWeight: 900, letterSpacing: '-1px', marginBottom: 12 }}>
+            Bạn đang <span className="gradient-text">thắc mắc</span> gì?
+          </h2>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {[
+            { q: 'App có thực sự miễn phí không?', a: 'Có. Tất cả từ vựng, mini-games, ngữ pháp, chủ đề hoàn toàn miễn phí mãi mãi. Chỉ các tính năng AI nâng cao (luyện thi Goethe/TELC, chấm writing/speaking) mới cần Premium — với giới hạn 3 lần/tuần cho Free.' },
+            { q: 'Tôi cần trả phí để luyện thi Goethe/TELC không?', a: 'Free users có 3 lần/tuần để dùng tất cả tính năng AI bao gồm luyện thi. Premium sẽ mở không giới hạn tất cả đề thi A1/A2/B1, AI chấm bài, và AI giải thích lỗi bằng tiếng Việt.' },
+            { q: 'AI chấm bài tiếng Đức có chính xác không?', a: 'Deutschmeister dùng Gemini AI của Google — được train trên dữ liệu ngôn ngữ khổng lồ. AI chấm theo đúng tiêu chí của Goethe/TELC: ngữ pháp, từ vựng, cấu trúc câu, nội dung. Mỗi lỗi đều có giải thích chi tiết bằng tiếng Việt.' },
+            { q: 'Thanh toán Premium như thế nào?', a: 'Chuyển khoản ngân hàng hoặc quét mã VietQR. Sau khi chuyển khoản với đúng nội dung, admin xác nhận trong vòng vài giờ (tối đa 24h) và Premium tự động kích hoạt. Xem chi tiết tại trang Pricing.' },
+            { q: 'App hỗ trợ những trình độ nào?', a: 'A1 (sơ cấp), A2 (cơ bản), B1 (trung cấp) — đầy đủ 4 kỹ năng Nghe/Nói/Đọc/Viết theo format Goethe-Zertifikat và TELC Deutsch. Phù hợp cho người mới bắt đầu đến người chuẩn bị thi.' },
+            { q: 'Cần cài đặt gì không? Có app di động không?', a: 'Không cần cài đặt — chạy hoàn toàn trên trình duyệt web. App di động (Android/iOS) đang phát triển, sẽ ra mắt sớm. Tài khoản dùng chung trên cả web và mobile.' },
+            { q: 'Lifetime deal là gì?', a: 'Trả 1 lần, dùng mãi mãi — không cần gia hạn hàng tháng/năm. Đây là Early Bird deal giới hạn chỉ 500 suất đầu tiên. Bạn sẽ nhận Early Backer badge và ưu tiên tính năng mới. Khi hết 500 suất là không mở lại.' },
+          ].map(({ q, a }) => (
+            <details key={q} style={{ borderRadius: 16, background: 'rgba(255,255,255,.03)', border: '1px solid rgba(255,255,255,.08)', padding: '0' }}>
+              <summary style={{ padding: '18px 22px', fontSize: 15, fontWeight: 600, color: 'white', cursor: 'pointer', listStyle: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
+                {q}
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="2" strokeLinecap="round" style={{ flexShrink: 0 }}><path d="M6 9l6 6 6-6"/></svg>
+              </summary>
+              <p style={{ padding: '0 22px 18px', margin: 0, fontSize: 14, color: 'rgba(255,255,255,.55)', lineHeight: 1.8 }}>{a}</p>
+            </details>
+          ))}
+        </div>
+        <div style={{ textAlign: 'center', marginTop: 36 }}>
+          <Link href="/pricing" style={{ fontSize: 14, color: '#60A5FA', textDecoration: 'none', fontWeight: 600 }}>
+            Xem bảng giá chi tiết →
+          </Link>
         </div>
       </section>
 

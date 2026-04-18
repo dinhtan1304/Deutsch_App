@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 import { useAuthStore } from '@/stores/authStore';
+import { trackEvent } from '@/lib/analytics';
 import {
   IconArrowLeft, IconMail, IconLock, IconLogIn, IconLoader, IconEye, IconEyeOff,
   IconBook, IconGamepad, IconBrain, IconFlame,
@@ -41,6 +42,7 @@ export default function LoginPage() {
     try {
       const captchaToken = executeRecaptcha ? await executeRecaptcha('login') : undefined;
       await login({ email: email.trim(), password, captchaToken });
+      trackEvent('login', { method: 'email' });
       const { user: loggedInUser } = useAuthStore.getState();
       const dest = loggedInUser?.role === 'admin' ? '/admin' : loggedInUser?.onboardingCompleted === false ? '/onboarding' : '/dashboard';
       router.push(dest);

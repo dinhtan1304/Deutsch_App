@@ -12,7 +12,7 @@ interface MainLayoutProps {
 const SIDEBAR_COLLAPSED_KEY = 'deutschmeister-sidebar-collapsed';
 
 // Routes that should render WITHOUT sidebar/header (full-screen)
-const BARE_ROUTES = ['/auth/login', '/auth/register', '/auth', '/', '/landing', '/admin', '/onboarding', '/privacy', '/terms'];
+const BARE_ROUTES = ['/auth/login', '/auth/register', '/auth', '/', '/landing', '/admin', '/onboarding', '/privacy', '/terms', '/pricing'];
 
 export function MainLayout({ children }: MainLayoutProps) {
   const pathname = usePathname();
@@ -33,7 +33,7 @@ export function MainLayout({ children }: MainLayoutProps) {
     }
   }, [isBareRoute]);
 
-  // ─── Auth pages: full-screen, no chrome ───
+  // ─── Auth/landing pages: full-screen, no chrome ───
   if (isBareRoute) {
     return (
       <div className="min-h-screen" style={{ backgroundColor: 'var(--theme-bg-body)' }}>
