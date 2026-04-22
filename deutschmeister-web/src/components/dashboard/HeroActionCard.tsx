@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import Link from 'next/link';
 import { useNextAction } from '@/hooks/useDashboard';
@@ -87,19 +87,19 @@ export function HeroActionCard() {
         {/* Content */}
         <div className="flex-1 min-w-0">
           {data.priority === 'weak_skill' && (
-            <p className="text-[10px] font-bold uppercase tracking-wider text-white/60 mb-0.5">
+            <p className="text-caption font-bold uppercase tracking-wider text-white/60 mb-0.5">
               Kỹ năng cần cải thiện
             </p>
           )}
           <div className="flex items-center gap-2 mb-0.5">
             <h2
-              className="text-[18px] font-extrabold text-white leading-tight truncate"
+              className="text-title font-extrabold text-white leading-tight truncate"
             >
               {data.title}
             </h2>
             {data.badge && (
               <span
-                className="shrink-0 px-2 py-0.5 rounded-full text-[10px] font-bold"
+                className="shrink-0 px-2 py-0.5 rounded-full text-caption font-bold"
                 style={{
                   backgroundColor: 'rgba(255,255,255,.25)',
                   color: 'white',
@@ -110,14 +110,14 @@ export function HeroActionCard() {
               </span>
             )}
           </div>
-          <p className="text-[13px] text-white/80 leading-snug">
+          <p className="text-body text-white/80 leading-snug">
             {data.subtitle}
           </p>
         </div>
 
         {/* CTA button */}
         <div
-          className="shrink-0 px-5 py-2.5 rounded-xl text-[13px] font-bold transition-all group-hover:scale-105"
+          className="shrink-0 px-5 py-2.5 rounded-xl text-body font-bold transition-all group-hover:scale-105"
           style={{
             backgroundColor: 'rgba(255,255,255,.25)',
             color: 'white',

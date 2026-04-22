@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
@@ -8,10 +8,12 @@ import { useSoundEffects } from '@/hooks/useSoundEffects';
 import { useGameSession } from '@/hooks/useGameSession';
 import { GenderInfo, Word } from '@/types';
 import {
-  GameSetupCard, GameResultCard, GameButton, GameProgressBar,
-  ComboBadge, StatCard, AnswerReview, AddWrongWordsToBank, GameResultUpsell, GameInfoBox, KBD,
+  GameSetupCard, GameResultCard, GameProgressBar,
+  StatCard, AnswerReview, AddWrongWordsToBank, GameResultUpsell, GameInfoBox, KBD,
+  GamePlayHeader, GameStatsBar, useGameTimer,
   IconSpellCheck, IconRocket, IconChevronLeft, IconRefresh, IconX, IconCheck,
 } from '@/components/games/GameUI';
+import { Button } from '@/components/ui';
 
 type Phase = 'setup' | 'playing' | 'result';
 type Feedback = 'correct' | 'wrong' | null;
@@ -142,14 +144,16 @@ export default function SpellingBeePage() {
     ? currentWord.word.split('').map(() => '_').join(' ')
     : '';
 
+  const timer = useGameTimer(phase === 'playing');
+
   // ─── Setup Screen ───
   if (phase === 'setup') {
     return (
       <GameSetupCard icon={({ size }) => <span style={{ color: 'white' }}><IconSpellCheck size={size} /></span>} iconColor="#EC4899" title="Spelling Bee">
-        <p className="text-[14px] mb-1" style={{ color: 'var(--theme-text-secondary)' }}>
+        <p className="text-sm mb-1" style={{ color: 'var(--theme-text-secondary)' }}>
           Gõ đúng chính tả <span className="font-bold" style={{ color: '#EC4899' }}>{questionsCount} từ</span> tiếng Đức
         </p>
-        <p className="text-[12px] mb-6" style={{ color: 'var(--theme-text-muted)' }}>
+        <p className="text-xs mb-6" style={{ color: 'var(--theme-text-muted)' }}>
           (Thay đổi số câu trong Settings → Học tập)
         </p>
 
@@ -163,18 +167,18 @@ export default function SpellingBeePage() {
             <span>để xác nhận đáp án</span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="font-mono text-[13px]" style={{ color: '#EC4899' }}>ä ö ü ß</span>
+            <span className="font-mono text-body" style={{ color: '#EC4899' }}>ä ö ü ß</span>
             <span>Nút ký tự đặc biệt có sẵn</span>
           </div>
         </GameInfoBox>
 
         <div className="flex gap-3 justify-center mt-6">
-          <GameButton onClick={startGame} loading={isLoading} color="#EC4899">
+          <Button variant="game" accent="listening" onClick={startGame} isLoading={isLoading}>
             <IconRocket size={16} /> Bắt đầu
-          </GameButton>
-          <GameButton variant="outline" onClick={() => router.push('/games')}>
+          </Button>
+          <Button variant="outline" onClick={() => router.push('/games')}>
             <IconChevronLeft size={16} /> Quay lại
-          </GameButton>
+          </Button>
         </div>
       </GameSetupCard>
     );
@@ -189,17 +193,17 @@ export default function SpellingBeePage() {
         <GameResultCard accuracy={accuracy} title="Kết quả">
           <div className="my-5">
             <div className="text-5xl font-extrabold" style={{ color: '#EC4899' }}>{score}</div>
-            <p className="text-[13px] mt-1" style={{ color: 'var(--theme-text-muted)' }}>điểm</p>
+            <p className="text-body mt-1" style={{ color: 'var(--theme-text-muted)' }}>điểm</p>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-6">
             <StatCard label="Đúng" value={correctCount} color="#22C55E" />
             <StatCard label="Sai" value={questionsCount - correctCount} color="#EF4444" />
-            <StatCard label="Chính xác" value={`${accuracy}%`} color="#EC4899" />
+            <StatCard label="Chính xác" value={`${accuracy}%`} />
             <StatCard label="Best Combo" value={`x${bestCombo}`} color="#F59E0B" />
           </div>
           <div className="flex gap-3 justify-center">
-            <GameButton onClick={startGame} color="#EC4899"><IconRefresh size={16} /> Chơi lại</GameButton>
-            <GameButton variant="outline" onClick={() => router.push('/games')}><IconChevronLeft size={16} /> Menu</GameButton>
+            <Button variant="game" accent="listening" onClick={startGame}><IconRefresh size={16} /> Chơi lại</Button>
+            <Button variant="outline" onClick={() => router.push('/games')}><IconChevronLeft size={16} /> Menu</Button>
           </div>
         </GameResultCard>
 
@@ -217,132 +221,109 @@ export default function SpellingBeePage() {
   }
 
   // ─── Playing Screen ───
+  const correctCount = answers.filter(a => a.isCorrect).length;
+
   return (
     <div className="max-w-2xl mx-auto px-4 sm:px-6 py-5">
-      {/* Header */}
-      <div className="flex justify-between items-center mb-3">
-        <div className="text-xl font-extrabold" style={{ color: '#EC4899' }}>
-          {score} <span className="text-[13px] font-medium" style={{ color: 'var(--theme-text-muted)' }}>điểm</span>
-        </div>
-        <div className="text-[13px] font-semibold" style={{ color: 'var(--theme-text-muted)' }}>
-          {index + 1} / {questionsCount}
-        </div>
-      </div>
-
+      <GamePlayHeader title="Spelling Bee" streak={combo} timer={timer}
+        onExit={() => { playClick(); router.push('/games'); }} />
+      <GameStatsBar stats={[
+        { label: 'Điểm',  value: score,                          color: '#EC4899' },
+        { label: 'Đúng',  value: correctCount,                   color: '#22C55E', dot: true },
+        { label: 'Sai',   value: index - correctCount,           color: '#EF4444', dot: true },
+        { label: 'Câu',   value: `${index + 1}/${questionsCount}`, color: 'var(--theme-text-primary)' },
+      ]} />
       <GameProgressBar current={index + 1} total={questionsCount} />
 
-      <div className="mt-3 mb-4">
-        <ComboBadge combo={combo} />
-      </div>
-
-      {/* Question Card */}
       {currentWord && (
-        <div className="rounded-2xl border p-7 text-center mb-5 transition-all duration-300"
+        <div className="rounded-3xl overflow-hidden mb-5 mt-4 transition-all duration-300"
           style={{
-            borderColor: feedback === 'correct' ? '#22C55E'
-              : feedback === 'wrong' ? '#EF4444'
-              : 'var(--theme-border)',
-            backgroundColor: 'var(--theme-bg-card)',
-            borderWidth: feedback ? '2px' : '1px',
-            boxShadow: feedback === 'correct' ? '0 0 24px rgba(34,197,94,.12)'
-              : feedback === 'wrong' ? '0 0 24px rgba(239,68,68,.12)'
-              : 'none',
+            background: feedback === 'correct'
+              ? 'linear-gradient(135deg, #052e16 0%, #166534 100%)'
+              : feedback === 'wrong'
+              ? 'linear-gradient(135deg, #450a0a 0%, #991b1b 100%)'
+              : 'linear-gradient(135deg, #2a0a1e 0%, #9d174d 100%)',
           }}>
-
-          {/* Article hint */}
-          <div className="text-[13px] font-semibold mb-2" style={{ color: 'var(--theme-text-muted)' }}>
-            Mạo từ:{' '}
-            <span className="font-bold" style={{ color: AC[currentWord.gender] }}>
-              {GenderInfo[currentWord.gender].article}
-            </span>
-          </div>
-
-          {/* Translation */}
-          <h2 className="text-2xl md:text-3xl font-bold mb-1" style={{ color: 'var(--theme-text-primary)' }}>
-            {currentWord.translationEn}
-          </h2>
-          {settings.showVietnamese && currentWord.translationVi && (
-            <p className="text-[15px] mb-2" style={{ color: 'var(--theme-text-secondary)' }}>
-              {currentWord.translationVi}
-            </p>
-          )}
-
-          {/* Length hint */}
-          <p className="text-[12px] font-mono tracking-widest mb-5" style={{ color: 'var(--theme-text-muted)' }}>
-            {lengthHint}
-          </p>
-
-          {/* Feedback overlay */}
-          {feedback === 'correct' && (
-            <div className="flex items-center justify-center gap-2 mb-3">
-              <IconCheck size={18} style={{ color: '#22C55E' }} />
-              <span className="font-bold text-[16px]" style={{ color: '#22C55E' }}>
-                {currentWord.word}
+          <div className="flex flex-col items-center justify-center px-6 py-8 text-center" style={{ minHeight: 200 }}>
+            <div className="text-body font-semibold mb-2" style={{ color: 'rgba(255,255,255,0.6)' }}>
+              Mạo từ:{' '}
+              <span className="font-bold" style={{ color: AC[currentWord.gender] }}>
+                {GenderInfo[currentWord.gender].article}
               </span>
             </div>
-          )}
-          {feedback === 'wrong' && (
-            <div className="mb-3">
-              <div className="flex items-center justify-center gap-2 mb-1">
-                <IconX size={16} style={{ color: '#EF4444' }} />
-                <span className="text-[14px] line-through" style={{ color: '#EF4444' }}>{input}</span>
-              </div>
-              <p className="text-[14px]" style={{ color: 'var(--theme-text-secondary)' }}>
-                Đáp án: <span className="font-bold" style={{ color: AC[currentWord.gender] }}>
-                  {GenderInfo[currentWord.gender].article} {currentWord.word}
-                </span>
+
+            <h2 className="text-2xl md:text-3xl font-bold mb-1 text-white">
+              {currentWord.translationEn}
+            </h2>
+            {settings.showVietnamese && currentWord.translationVi && (
+              <p className="text-[15px] mb-2" style={{ color: 'rgba(255,255,255,0.65)' }}>
+                {currentWord.translationVi}
               </p>
-            </div>
-          )}
+            )}
 
-          {/* Input */}
-          {!feedback && (
-            <>
-              <input
-                ref={inputRef}
-                type="text"
-                value={input}
-                onChange={e => setInput(e.target.value)}
-                placeholder="Gõ từ tiếng Đức..."
-                className="w-full rounded-xl border px-4 py-3 text-center text-[16px] font-semibold outline-none transition-all"
-                style={{
-                  borderColor: 'var(--theme-border)',
-                  backgroundColor: 'var(--theme-bg-secondary)',
-                  color: 'var(--theme-text-primary)',
-                }}
-              />
+            <p className="text-xs font-mono tracking-widest mb-4" style={{ color: 'rgba(255,255,255,0.45)' }}>
+              {lengthHint}
+            </p>
 
-              {/* Special chars */}
-              <div className="flex justify-center gap-2 mt-3 flex-wrap">
-                {SPECIAL_CHARS.map(ch => (
-                  <button key={ch}
-                    onClick={() => insertSpecial(ch)}
-                    className="w-9 h-9 rounded-lg text-[14px] font-bold border transition-all hover:scale-105"
-                    style={{
-                      borderColor: '#EC4899',
-                      color: '#EC4899',
-                      backgroundColor: 'rgba(236,72,153,.06)',
-                    }}>
-                    {ch}
-                  </button>
-                ))}
+            {feedback === 'correct' && (
+              <div className="flex items-center justify-center gap-2 mb-3">
+                <IconCheck size={18} style={{ color: '#4ade80' }} />
+                <span className="font-bold text-base" style={{ color: '#4ade80' }}>{currentWord.word}</span>
               </div>
-
-              <div className="mt-4">
-                <GameButton onClick={submitAnswer} color="#EC4899" disabled={!input.trim()}>
-                  <IconCheck size={16} /> Xác nhận
-                </GameButton>
+            )}
+            {feedback === 'wrong' && (
+              <div className="mb-3">
+                <div className="flex items-center justify-center gap-2 mb-1">
+                  <IconX size={16} style={{ color: '#f87171' }} />
+                  <span className="text-sm line-through" style={{ color: '#f87171' }}>{input}</span>
+                </div>
+                <p className="text-sm" style={{ color: 'rgba(255,255,255,0.7)' }}>
+                  Đáp án: <span className="font-bold text-white">
+                    {GenderInfo[currentWord.gender].article} {currentWord.word}
+                  </span>
+                </p>
               </div>
-            </>
-          )}
+            )}
+
+            {!feedback && (
+              <>
+                <input
+                  ref={inputRef}
+                  type="text"
+                  value={input}
+                  onChange={e => setInput(e.target.value)}
+                  placeholder="Gõ từ tiếng Đức..."
+                  className="w-full rounded-xl px-4 py-3 text-center text-base font-semibold outline-none transition-all border-2"
+                  style={{
+                    borderColor: '#EC4899',
+                    backgroundColor: 'rgba(0,0,0,0.3)',
+                    color: 'white',
+                  }}
+                />
+                <div className="flex justify-center gap-2 mt-3 flex-wrap">
+                  {SPECIAL_CHARS.map(ch => (
+                    <button key={ch}
+                      onClick={() => insertSpecial(ch)}
+                      className="w-9 h-9 rounded-lg text-sm font-bold transition-all hover:scale-105"
+                      style={{
+                        border: '1px solid rgba(236,72,153,.5)',
+                        color: '#F9A8D4',
+                        backgroundColor: 'rgba(236,72,153,.15)',
+                      }}>
+                      {ch}
+                    </button>
+                  ))}
+                </div>
+                <div className="mt-4">
+                  <Button variant="game" accent="listening" onClick={submitAnswer} disabled={!input.trim()}>
+                    <IconCheck size={16} /> Xác nhận
+                  </Button>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       )}
-
-      <div className="text-center">
-        <GameButton variant="ghost" onClick={() => { playClick(); router.push('/games'); }}>
-          <IconX size={14} /> Thoát
-        </GameButton>
-      </div>
     </div>
   );
 }

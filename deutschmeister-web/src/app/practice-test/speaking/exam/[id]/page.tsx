@@ -127,7 +127,7 @@ export default function ExamSpeakingSessionPage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-64 gap-3">
         <IconLoader size={28} style={{ color: ACCENT }} />
-        <p className="text-[14px]" style={{ color: 'var(--theme-text-muted)' }}>Đang tải đề...</p>
+        <p className="text-sm" style={{ color: 'var(--theme-text-muted)' }}>Đang tải đề...</p>
       </div>
     );
   }
@@ -292,8 +292,8 @@ export default function ExamSpeakingSessionPage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-64 gap-4 py-12">
         <IconLoader size={36} style={{ color: ACCENT }} />
-        <p className="text-[16px] font-bold" style={{ color: 'var(--theme-text-primary)' }}>AI đang chấm điểm...</p>
-        <p className="text-[13px] text-center" style={{ color: 'var(--theme-text-muted)' }}>
+        <p className="text-base font-bold" style={{ color: 'var(--theme-text-primary)' }}>AI đang chấm điểm...</p>
+        <p className="text-body text-center" style={{ color: 'var(--theme-text-muted)' }}>
           Gemini đang phân tích audio và transcript của bạn. Có thể mất 20–40 giây.
         </p>
       </div>
@@ -306,12 +306,12 @@ export default function ExamSpeakingSessionPage() {
       {/* Header */}
       <div className="flex items-center gap-3 mb-5">
         <Link href="/practice-test/speaking/exam"
-          className="flex items-center gap-1 text-[13px] font-medium transition-opacity hover:opacity-70"
+          className="flex items-center gap-1 text-body font-medium transition-opacity hover:opacity-70"
           style={{ color: 'var(--theme-text-muted)' }}>
           <IconChevronLeft size={14} style={{}} /> Danh sách
         </Link>
         <div className="flex-1" />
-        <span className="text-[12px] font-semibold px-2 py-1 rounded-lg"
+        <span className="text-xs font-semibold px-2 py-1 rounded-lg"
           style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }}>
           {session.examType} · {session.cefrLevel} · Sprechen
         </span>
@@ -338,7 +338,7 @@ export default function ExamSpeakingSessionPage() {
           {currentTeil.number}
         </div>
         <div>
-          <p className="text-[11px] font-bold uppercase tracking-wider" style={{ color: 'var(--theme-text-muted)' }}>
+          <p className="text-caption font-bold uppercase tracking-wider" style={{ color: 'var(--theme-text-muted)' }}>
             Teil {currentTeil.number} / {teile.length}
           </p>
           <p className="text-[15px] font-bold" style={{ color: 'var(--theme-text-primary)' }}>
@@ -349,7 +349,7 @@ export default function ExamSpeakingSessionPage() {
 
       {/* Vietnamese instruction */}
       {currentTeil.instructionVi && (
-        <p className="text-[13px] mb-4 px-3 py-2 rounded-xl"
+        <p className="text-body mb-4 px-3 py-2 rounded-xl"
           style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-secondary)' }}>
           {currentTeil.instructionVi}
         </p>
@@ -358,12 +358,12 @@ export default function ExamSpeakingSessionPage() {
       {/* Word cards */}
       {currentTeil.wordCards && currentTeil.wordCards.length > 0 && (
         <div className="mb-4">
-          <p className="text-[11px] font-bold uppercase tracking-wider mb-2" style={{ color: 'var(--theme-text-muted)' }}>
+          <p className="text-caption font-bold uppercase tracking-wider mb-2" style={{ color: 'var(--theme-text-muted)' }}>
             Thẻ từ
           </p>
           <div className="flex flex-wrap gap-2">
             {currentTeil.wordCards.map((card, i) => (
-              <span key={i} className="px-3 py-1.5 rounded-xl text-[13px] font-semibold border"
+              <span key={i} className="px-3 py-1.5 rounded-xl text-body font-semibold border"
                 style={{ borderColor: 'rgba(245,158,11,.4)', backgroundColor: 'rgba(245,158,11,.06)', color: 'var(--theme-text-primary)' }}>
                 {card}
               </span>
@@ -376,14 +376,14 @@ export default function ExamSpeakingSessionPage() {
       {currentTeil.partnerLines && currentTeil.partnerLines.length > 0 && (
         <div className="mb-4 rounded-xl border p-3 space-y-2"
           style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-secondary)' }}>
-          <p className="text-[11px] font-bold uppercase tracking-wider" style={{ color: 'var(--theme-text-muted)' }}>
+          <p className="text-caption font-bold uppercase tracking-wider" style={{ color: 'var(--theme-text-muted)' }}>
             Partner / Prüfer
           </p>
           {currentTeil.partnerLines.map((line, i) => (
             <div key={i} className="flex items-start gap-2">
-              <span className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold text-white shrink-0 mt-0.5"
+              <span className="w-5 h-5 rounded-full flex items-center justify-center text-caption font-bold text-white shrink-0 mt-0.5"
                 style={{ backgroundColor: '#8B5CF6' }}>P</span>
-              <p className="text-[13px] italic" style={{ color: 'var(--theme-text-primary)', fontFamily: 'Georgia, serif' }}>
+              <p className="text-body italic" style={{ color: 'var(--theme-text-primary)', fontFamily: 'Georgia, serif' }}>
                 {line}
               </p>
             </div>
@@ -394,12 +394,12 @@ export default function ExamSpeakingSessionPage() {
       {/* Key points */}
       {currentTeil.keyPoints && currentTeil.keyPoints.length > 0 && (
         <div className="mb-5">
-          <p className="text-[11px] font-bold uppercase tracking-wider mb-2" style={{ color: 'var(--theme-text-muted)' }}>
+          <p className="text-caption font-bold uppercase tracking-wider mb-2" style={{ color: 'var(--theme-text-muted)' }}>
             Gợi ý nội dung
           </p>
           <div className="space-y-1">
             {currentTeil.keyPoints.map((kp, i) => (
-              <div key={i} className="flex items-center gap-2 text-[12px]" style={{ color: 'var(--theme-text-secondary)' }}>
+              <div key={i} className="flex items-center gap-2 text-xs" style={{ color: 'var(--theme-text-secondary)' }}>
                 <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: ACCENT }} />
                 {kp}
               </div>
@@ -419,13 +419,13 @@ export default function ExamSpeakingSessionPage() {
               style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
               <IconMic size={28} style={{ color: 'var(--theme-text-muted)' }} />
             </div>
-            <p className="text-[13px] mb-4" style={{ color: 'var(--theme-text-muted)' }}>
+            <p className="text-body mb-4" style={{ color: 'var(--theme-text-muted)' }}>
               {currentTeil.prepTimeSeconds > 0
                 ? `Sẽ có ${currentTeil.prepTimeSeconds}s chuẩn bị trước khi ghi âm`
                 : 'Nhấn để bắt đầu ghi âm ngay'}
             </p>
             <button onClick={startPrep}
-              className="px-6 py-3 rounded-2xl font-bold text-[14px] text-white transition-all hover:-translate-y-0.5"
+              className="px-6 py-3 rounded-2xl font-bold text-sm text-white transition-all hover:-translate-y-0.5"
               style={{ background: GRADIENT, boxShadow: '0 4px 12px rgba(245,158,11,.3)' }}>
               {currentTeil.prepTimeSeconds > 0 ? 'Bắt đầu chuẩn bị' : 'Bắt đầu ghi âm'}
             </button>
@@ -435,17 +435,17 @@ export default function ExamSpeakingSessionPage() {
         {/* PREP */}
         {teilState === 'prep' && (
           <>
-            <p className="text-[12px] font-bold uppercase tracking-wider mb-3" style={{ color: 'var(--theme-text-muted)' }}>
+            <p className="text-xs font-bold uppercase tracking-wider mb-3" style={{ color: 'var(--theme-text-muted)' }}>
               Thời gian chuẩn bị
             </p>
             <div className="flex justify-center mb-3">
               <CountdownRing seconds={prepCountdown} total={currentTeil.prepTimeSeconds} size={80} color="#6366F1" />
             </div>
-            <p className="text-[13px]" style={{ color: 'var(--theme-text-muted)' }}>Chuẩn bị nội dung nói...</p>
+            <p className="text-body" style={{ color: 'var(--theme-text-muted)' }}>Chuẩn bị nội dung nói...</p>
             <button onClick={() => {
               clearInterval(prepTimerRef.current!);
               startRecording();
-            }} className="mt-3 px-4 py-2 rounded-xl text-[12px] font-semibold"
+            }} className="mt-3 px-4 py-2 rounded-xl text-xs font-semibold"
               style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }}>
               Bỏ qua →
             </button>
@@ -458,25 +458,25 @@ export default function ExamSpeakingSessionPage() {
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full animate-pulse bg-red-500" />
-                <span className="text-[12px] font-bold text-red-500">REC</span>
+                <span className="text-xs font-bold text-red-500">REC</span>
               </div>
               <CountdownRing seconds={recCountdown} total={currentTeil.speakTimeSeconds} size={52} color={ACCENT} />
             </div>
             <Waveform active={true} />
             {liveTranscript && (
-              <div className="mt-3 p-2.5 rounded-xl text-left text-[12px] leading-relaxed"
+              <div className="mt-3 p-2.5 rounded-xl text-left text-xs leading-relaxed"
                 style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-secondary)', fontFamily: 'Georgia, serif', minHeight: 40 }}>
                 {liveTranscript}
                 <span className="inline-block w-0.5 h-3 ml-0.5 animate-pulse" style={{ backgroundColor: ACCENT }} />
               </div>
             )}
             {!liveTranscript && (
-              <p className="text-[11px] mt-2" style={{ color: 'var(--theme-text-muted)' }}>
+              <p className="text-caption mt-2" style={{ color: 'var(--theme-text-muted)' }}>
                 Bắt đầu nói...
               </p>
             )}
             <button onClick={stopRecording}
-              className="mt-4 flex items-center gap-2 px-5 py-2.5 rounded-2xl font-bold text-[13px] text-white mx-auto transition-all hover:opacity-90"
+              className="mt-4 flex items-center gap-2 px-5 py-2.5 rounded-2xl font-bold text-body text-white mx-auto transition-all hover:opacity-90"
               style={{ backgroundColor: '#EF4444' }}>
               <IconStop size={14} style={{}} /> Dừng lại
             </button>
@@ -490,29 +490,29 @@ export default function ExamSpeakingSessionPage() {
               style={{ backgroundColor: 'rgba(34,197,94,.12)' }}>
               <svg width={28} height={28} viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
             </div>
-            <p className="text-[14px] font-bold mb-1" style={{ color: '#22C55E' }}>Đã ghi xong!</p>
+            <p className="text-sm font-bold mb-1" style={{ color: '#22C55E' }}>Đã ghi xong!</p>
             {transcriptMap[currentTeil.number] && (
-              <div className="mt-2 p-2.5 rounded-xl text-left text-[12px] leading-relaxed"
+              <div className="mt-2 p-2.5 rounded-xl text-left text-xs leading-relaxed"
                 style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-secondary)', fontFamily: 'Georgia, serif' }}>
                 {transcriptMap[currentTeil.number]}
               </div>
             )}
             {!transcriptMap[currentTeil.number] && (
-              <p className="text-[12px] mt-1" style={{ color: 'var(--theme-text-muted)' }}>
+              <p className="text-xs mt-1" style={{ color: 'var(--theme-text-muted)' }}>
                 (Transcript trống — Gemini vẫn chấm từ audio)
               </p>
             )}
             <div className="flex gap-2 mt-4 justify-center">
               {!retakeUsed[currentTeil.number] && (
                 <button onClick={retake}
-                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-[12px] font-semibold border transition-all hover:opacity-80"
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold border transition-all hover:opacity-80"
                   style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-muted)', backgroundColor: 'var(--theme-bg-secondary)' }}>
                   <IconRefresh size={13} style={{}} /> Ghi lại
                 </button>
               )}
               {!isLastTeil ? (
                 <button onClick={nextTeil}
-                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[13px] font-bold text-white transition-all hover:-translate-y-0.5"
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-body font-bold text-white transition-all hover:-translate-y-0.5"
                   style={{ background: GRADIENT }}>
                   Teil {currentTeil.number + 1} <IconChevronRight size={14} style={{}} />
                 </button>
@@ -526,10 +526,10 @@ export default function ExamSpeakingSessionPage() {
       {allDone && (
         <div className="rounded-2xl border p-4 mb-4"
           style={{ borderColor: 'rgba(34,197,94,.3)', backgroundColor: 'rgba(34,197,94,.04)' }}>
-          <p className="text-[14px] font-bold mb-1" style={{ color: '#22C55E' }}>
+          <p className="text-sm font-bold mb-1" style={{ color: '#22C55E' }}>
             Đã ghi xong tất cả {teile.length} Teil!
           </p>
-          <p className="text-[12px] mb-3" style={{ color: 'var(--theme-text-muted)' }}>
+          <p className="text-xs mb-3" style={{ color: 'var(--theme-text-muted)' }}>
             Nhấn nộp bài để AI chấm điểm. Quá trình mất khoảng 20–40 giây.
           </p>
           <button onClick={handleSubmit}

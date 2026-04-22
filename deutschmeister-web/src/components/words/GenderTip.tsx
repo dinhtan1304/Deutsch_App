@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { Gender } from '@/types';
 import { getBestRule, getTipForWord } from '@/lib/genderRules';
@@ -43,7 +43,7 @@ export function GenderTip({ word, gender, showDetailed = false }: GenderTipProps
   // ─── Inline tip ───
   if (!showDetailed) {
     return (
-      <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-[13px]"
+      <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-body"
         style={{ backgroundColor: c.bg }}>
         <IconLightbulb size={14} />
         <span style={{ color: c.text }}>
@@ -63,19 +63,19 @@ export function GenderTip({ word, gender, showDetailed = false }: GenderTipProps
           style={{ backgroundColor: c.bg, color: c.text }}>
           <IconLightbulb size={16} />
         </span>
-        <span className="font-semibold text-[14px]" style={{ color: c.text }}>Mẹo nhớ</span>
-        <span className="ml-auto px-2.5 py-0.5 rounded-full text-[11px] font-semibold text-white"
+        <span className="font-semibold text-sm" style={{ color: c.text }}>Mẹo nhớ</span>
+        <span className="ml-auto px-2.5 py-0.5 rounded-full text-caption font-semibold text-white"
           style={{ backgroundColor: c.border }}>
           {rule.reliability}% chính xác
         </span>
       </div>
 
-      <p className="text-[13px] mb-3" style={{ color: c.text }}>{rule.description}</p>
+      <p className="text-body mb-3" style={{ color: c.text }}>{rule.description}</p>
 
       {/* Examples */}
       <div className="flex flex-wrap gap-1.5">
         {rule.examples.slice(0, 4).map((ex, i) => (
-          <span key={i} className="px-2 py-0.5 rounded-md text-[12px] font-medium"
+          <span key={i} className="px-2 py-0.5 rounded-md text-xs font-medium"
             style={{ backgroundColor: c.bg, color: c.text }}>
             {ex}
           </span>
@@ -84,7 +84,7 @@ export function GenderTip({ word, gender, showDetailed = false }: GenderTipProps
 
       {/* Exceptions */}
       {rule.exceptions && rule.exceptions.length > 0 && (
-        <p className="text-[11px] mt-2.5" style={{ color: 'var(--theme-text-muted)' }}>
+        <p className="text-caption mt-2.5" style={{ color: 'var(--theme-text-muted)' }}>
           ⚠️ Ngoại lệ: {rule.exceptions.slice(0, 3).join(', ')}
         </p>
       )}

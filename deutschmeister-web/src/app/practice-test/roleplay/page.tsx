@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
@@ -93,7 +93,7 @@ export default function RoleplayPage() {
                 <span>💬</span> Roleplay AI
                 {quota && (
                   <span
-                    className="px-2 py-0.5 rounded-md text-[10px] font-bold"
+                    className="px-2 py-0.5 rounded-md text-caption font-bold"
                     style={{
                       backgroundColor: quotaExhausted ? 'rgba(239,68,68,0.1)' : 'rgba(34,197,94,0.1)',
                       color: quotaExhausted ? '#EF4444' : '#22C55E',
@@ -195,7 +195,7 @@ export default function RoleplayPage() {
                       {h.scenarioInfo?.titleDe ?? h.scenario}
                     </div>
                     <div
-                      className="text-[11px] flex items-center gap-2"
+                      className="text-caption flex items-center gap-2"
                       style={{ color: 'var(--theme-text-muted)' }}
                     >
                       <span>{h.level}</span>

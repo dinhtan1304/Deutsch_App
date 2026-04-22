@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
@@ -10,11 +10,13 @@ import { useSoundEffects } from '@/hooks/useSoundEffects';
 import { Word, Gender, GenderInfo } from '@/types';
 import { speakGerman } from '@/lib/utils';
 import {
-  GameSetupCard, GameResultCard, GameButton, GameProgressBar,
+  GameSetupCard, GameResultCard, GameProgressBar,
   StatCard, AnswerReview, AddWrongWordsToBank, GameResultUpsell, GameInfoBox, KBD,
+  GamePlayHeader, GameStatsBar, GameWordCard, GenderButtons, useGameTimer,
   IconZap, IconTarget, IconCheck, IconX, IconRocket, IconKeyboard, IconVolume,
   IconRefresh, IconChevronLeft,
 } from '@/components/games/GameUI';
+import { Button } from '@/components/ui';
 
 const AC: Record<string, string> = { masculine: '#3B82F6', feminine: '#EC4899', neuter: '#22C55E' };
 // BUG FIX 2: Removed hardcoded TOTAL_QUESTIONS = 20, now reads from settings
@@ -104,14 +106,16 @@ export default function QuickQuizPage() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [phase, showFeedback, handleAnswer]);
 
+  const timer = useGameTimer(phase === 'playing');
+
   // ─── Setup ───
   if (phase === 'setup') {
     return (
         <GameSetupCard icon={({ size }) => <IconZap size={size} style={{ color: 'white' }} />} iconColor="#F59E0B" title="Quick Quiz">
-          <p className="text-[14px] mb-6" style={{ color: 'var(--theme-text-secondary)' }}>
+          <p className="text-sm mb-6" style={{ color: 'var(--theme-text-secondary)' }}>
             Chọn mạo từ đúng cho <span className="font-bold" style={{ color: '#F59E0B' }}>{TOTAL_QUESTIONS} từ</span> tiếng Đức
           </p>
-          <p className="text-[12px] mb-6" style={{ color: 'var(--theme-text-muted)' }}>(Thay đổi số câu trong Settings → Học tập)
+          <p className="text-xs mb-6" style={{ color: 'var(--theme-text-muted)' }}>(Thay đổi số câu trong Settings → Học tập)
           </p>
           <GameInfoBox>
             <div className="flex items-center gap-2"><IconTarget size={14} style={{ color: '#F59E0B' }} /><span>Click hoặc dùng phím tắt để trả lời</span></div>
@@ -119,8 +123,8 @@ export default function QuickQuizPage() {
             <div className="flex items-center gap-2"><IconVolume size={14} style={{ color: '#3B82F6' }} /><span>Phản hồi tức thì sau mỗi câu</span></div>
           </GameInfoBox>
           <div className="flex gap-3 justify-center mt-6">
-            <GameButton onClick={handleStartGame} loading={isLoading} color="#F59E0B"><IconRocket size={16} /> Bắt đầu</GameButton>
-            <GameButton variant="outline" onClick={() => router.push('/games')}><IconChevronLeft size={16} /> Quay lại</GameButton>
+            <Button variant="game" accent="xp" onClick={handleStartGame} isLoading={isLoading}><IconRocket size={16} /> Bắt đầu</Button>
+            <Button variant="outline" onClick={() => router.push('/games')}><IconChevronLeft size={16} /> Quay lại</Button>
           </div>
         </GameSetupCard>
     );
@@ -142,8 +146,8 @@ export default function QuickQuizPage() {
             <StatCard label="Chính xác" value={`${percentage}%`} color="#3B82F6" />
           </div>
           <div className="flex gap-3 justify-center">
-            <GameButton onClick={handleStartGame} color="#F59E0B"><IconRefresh size={16} /> Chơi lại</GameButton>
-            <GameButton variant="outline" onClick={() => router.push('/games')}><IconChevronLeft size={16} /> Menu</GameButton>
+            <Button variant="game" accent="xp" onClick={handleStartGame}><IconRefresh size={16} /> Chơi lại</Button>
+            <Button variant="outline" onClick={() => router.push('/games')}><IconChevronLeft size={16} /> Menu</Button>
           </div>
         </GameResultCard>
 
@@ -161,101 +165,50 @@ export default function QuickQuizPage() {
   }
 
   // ─── Playing ───
-  const genderButtons = [
-    { gender: 'masculine' as Gender, article: 'der', label: 'Maskulin', color: '#3B82F6' },
-    { gender: 'feminine' as Gender, article: 'die', label: 'Feminin', color: '#EC4899' },
-    { gender: 'neuter' as Gender, article: 'das', label: 'Neutrum', color: '#22C55E' },
-  ];
+  const correctCount = answers.filter(a => a.isCorrect).length;
 
   return (
-      <div className="max-w-2xl mx-auto px-4 sm:px-6 py-5">
-        {/* Header */}
-        <div className="flex justify-between text-[13px] font-semibold mb-3" style={{ color: 'var(--theme-text-muted)' }}>
-          <span>Câu {currentIndex + 1} / {TOTAL_QUESTIONS}</span>
-          <span>Điểm: <span style={{ color: '#F59E0B' }}>{score}</span></span>
-        </div>
+    <div className="max-w-2xl mx-auto px-4 sm:px-6 py-5">
+      <GamePlayHeader
+        title="Quick Quiz" streak={score > 0 ? Math.floor(score / 10) : undefined} timer={timer}
+        onExit={() => router.push('/games')}
+      />
+      <GameStatsBar stats={[
+        { label: 'Điểm',  value: score,        color: '#F59E0B' },
+        { label: 'Đúng',  value: correctCount, color: '#22C55E', dot: true },
+        { label: 'Sai',   value: currentIndex - correctCount, color: '#EF4444', dot: true },
+        { label: 'Câu',   value: `${currentIndex + 1}/${TOTAL_QUESTIONS}`, color: 'var(--theme-text-primary)' },
+      ]} />
+      <GameProgressBar current={currentIndex + 1} total={TOTAL_QUESTIONS} />
 
-        <GameProgressBar current={currentIndex + 1} total={TOTAL_QUESTIONS} color="#F59E0B" />
-
-        {/* Word Card */}
-        {currentWord && (
-          <div className="rounded-2xl border p-8 text-center my-6"
-            style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
-            {/* Audio button */}
-            <button onClick={() => speakGerman(currentWord.word)}
-              className="w-10 h-10 rounded-xl flex items-center justify-center mx-auto mb-3 transition-all duration-200
-                hover:scale-110"
-              style={{ background: 'linear-gradient(135deg, rgba(59,130,246,.12), rgba(59,130,246,.06))' }}>
-              <IconVolume size={18} style={{ color: '#3B82F6' }} />
-            </button>
-
-            <h2 className="text-4xl font-bold mb-2" style={{ color: 'var(--theme-text-primary)' }}>
-              {currentWord.word}
-            </h2>
-            <p className="text-[16px]" style={{ color: 'var(--theme-text-secondary)' }}>
-              {currentWord.translationVi || currentWord.translationEn}
+      {currentWord && (
+        <GameWordCard
+          gradient="linear-gradient(135deg, #1a0f00 0%, #92400e 100%)"
+          feedback={showFeedback ? (selectedAnswer === currentWord.gender ? 'correct' : 'wrong') : null}
+        >
+          <button onClick={() => speakGerman(currentWord.word)}
+            className="w-11 h-11 rounded-full flex items-center justify-center mb-4 transition-all hover:scale-110 active:scale-95"
+            style={{ backgroundColor: 'rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.9)' }}>
+            <IconVolume size={20} />
+          </button>
+          <h2 className="text-4xl font-extrabold text-white mb-2">{currentWord.word}</h2>
+          <p className="text-[15px]" style={{ color: 'rgba(255,255,255,0.65)' }}>
+            {currentWord.translationVi || currentWord.translationEn}
+          </p>
+          {showFeedback && (
+            <p className="text-body mt-4 font-bold" style={{ color: 'rgba(255,255,255,0.8)' }}>
+              {selectedAnswer === currentWord.gender
+                ? '✓ Chính xác!'
+                : `✗ Đáp án: ${GenderInfo[currentWord.gender].article}`}
             </p>
-            {currentWord.translationVi && currentWord.translationEn && (
-              <p className="text-[13px] mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>
-                {currentWord.translationEn}
-              </p>
-            )}
+          )}
+        </GameWordCard>
+      )}
 
-            {/* Feedback */}
-            {showFeedback && (
-              <div className="mt-5 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-[14px] font-semibold"
-                style={{
-                  background: selectedAnswer === currentWord.gender ? 'rgba(34,197,94,.08)' : 'rgba(239,68,68,.08)',
-                  color: selectedAnswer === currentWord.gender ? '#22C55E' : '#EF4444',
-                }}>
-                {selectedAnswer === currentWord.gender
-                  ? <><IconCheck size={15} /> Chính xác!</>
-                  : <><IconX size={15} /> Sai! Đáp án: &quot;{GenderInfo[currentWord.gender].article}&quot;</>}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Answer Buttons */}
-        <div className="grid grid-cols-3 gap-3">
-          {genderButtons.map((btn, i) => {
-            const isSelected = selectedAnswer === btn.gender;
-            const isCorrect = currentWord?.gender === btn.gender;
-
-            let bg: string;
-            let opacity = 1;
-            if (showFeedback) {
-              if (isCorrect) bg = 'linear-gradient(135deg, #22C55E, #16A34A)';
-              else if (isSelected) bg = 'linear-gradient(135deg, #EF4444, #DC2626)';
-              else { bg = `linear-gradient(135deg, ${btn.color}30, ${btn.color}15)`; opacity = 0.5; }
-            } else {
-              bg = `linear-gradient(135deg, ${btn.color}15, ${btn.color}08)`;
-            }
-
-            return (
-              <button key={btn.gender} onClick={() => handleAnswer(btn.gender)}
-                disabled={showFeedback}
-                className="py-5 rounded-2xl font-bold text-2xl transition-all duration-200
-                  hover:-translate-y-0.5 hover:shadow-md active:scale-95 disabled:cursor-not-allowed"
-                style={{
-                  background: bg, opacity,
-                  color: showFeedback && (isCorrect || isSelected) ? 'white' : btn.color,
-                  border: !showFeedback ? `2px solid ${btn.color}20` : '2px solid transparent',
-                }}>
-                {btn.article}
-                <div className="text-[11px] font-medium mt-1 opacity-70">
-                  ({i + 1}) {btn.label}
-                </div>
-              </button>
-            );
-          })}
-        </div>
-
-        <div className="text-center mt-6">
-          <GameButton variant="ghost" onClick={() => router.push('/games')}>
-            <IconX size={14} /> Thoát
-          </GameButton>
-        </div>
-      </div>
+      <GenderButtons onAnswer={handleAnswer} answered={showFeedback} selectedAnswer={selectedAnswer} correctGender={currentWord?.gender} />
+      <p className="text-center text-caption mt-4" style={{ color: 'var(--theme-text-muted)' }}>
+        Phím tắt: <KBD>1</KBD> der · <KBD>2</KBD> die · <KBD>3</KBD> das
+      </p>
+    </div>
   );
 }

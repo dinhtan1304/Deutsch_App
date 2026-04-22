@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import Link from 'next/link';
 import { useSkills } from '@/hooks/useUser';
@@ -187,14 +187,14 @@ function SkillRow({
       />
       {/* Label */}
       <span
-        className="flex-1 text-[13px] font-medium"
+        className="flex-1 text-body font-medium"
         style={{ color: 'var(--theme-text-primary)' }}
       >
         {skill.label}
       </span>
       {/* Score */}
       <span
-        className="text-[14px] font-bold min-w-10 text-right"
+        className="text-sm font-bold min-w-10 text-right"
         style={{ color: data.score !== null ? skill.color : 'var(--theme-text-muted)' }}
       >
         {data.score !== null ? data.score : '—'}
@@ -268,17 +268,17 @@ export function SkillRadar() {
             </svg>
           </div>
           <p
-            className="text-[14px] font-semibold mb-1"
+            className="text-sm font-semibold mb-1"
             style={{ color: 'var(--theme-text-primary)' }}
           >
             Chưa đủ dữ liệu
           </p>
-          <p className="text-[12px] mb-4" style={{ color: 'var(--theme-text-muted)' }}>
+          <p className="text-xs mb-4" style={{ color: 'var(--theme-text-muted)' }}>
             Hoàn thành thêm bài tập để xem phân tích kỹ năng
           </p>
           <Link
             href="/practice-test"
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-[13px] font-semibold text-white transition-all hover:-translate-y-0.5"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-body font-semibold text-white transition-all hover:-translate-y-0.5"
             style={{
               background: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
               boxShadow: '0 4px 12px rgba(99,102,241,.3)',
@@ -316,7 +316,7 @@ export function SkillRadar() {
             <h2 className="text-[15px] font-bold" style={{ color: 'var(--theme-text-primary)' }}>
               Phân tích kỹ năng
             </h2>
-            <p className="text-[11px]" style={{ color: 'var(--theme-text-muted)' }}>
+            <p className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>
               Tổng quan 5 kỹ năng
             </p>
           </div>
@@ -327,7 +327,7 @@ export function SkillRadar() {
             style={{ color: '#6366F1' }}
           >
             {data.overall}
-            <span className="text-[11px] font-medium" style={{ color: 'var(--theme-text-muted)' }}>
+            <span className="text-caption font-medium" style={{ color: 'var(--theme-text-muted)' }}>
               /100
             </span>
           </span>
@@ -353,7 +353,7 @@ export function SkillRadar() {
       {weakLabel && (
         <Link
           href={weakLabel.href}
-          className="mt-3 flex items-center justify-center gap-2 py-2.5 rounded-xl text-[13px] font-semibold text-white transition-all hover:-translate-y-0.5"
+          className="mt-3 flex items-center justify-center gap-2 py-2.5 rounded-xl text-body font-semibold text-white transition-all hover:-translate-y-0.5"
           style={{
             background: `linear-gradient(135deg, ${weakLabel.color}, ${weakLabel.color}cc)`,
             boxShadow: `0 4px 12px ${weakLabel.color}30`,

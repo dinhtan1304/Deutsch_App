@@ -2,8 +2,10 @@
 
 import { ReactNode, useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
-import { Sidebar } from './Sidebar';
+import { Sidebar, SIDEBAR_WIDTH, SIDEBAR_COLLAPSED_WIDTH } from './Sidebar';
 import { Header } from './Header';
+import { BottomTabBar } from './BottomTabBar';
+import { Breadcrumb } from '@/components/ui';
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -62,27 +64,38 @@ export function MainLayout({ children }: MainLayoutProps) {
     localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(newState));
   };
 
-  // ─── Normal pages: sidebar + header ───
+  const sidebarMl = `${sidebarCollapsed ? SIDEBAR_COLLAPSED_WIDTH : SIDEBAR_WIDTH}px`;
+
+  // ─── Normal pages: sidebar + header + bottom tab bar ───
   return (
     <div className="min-h-screen" style={{ backgroundColor: 'var(--theme-bg-body)' }}>
-      <Sidebar isCollapsed={sidebarCollapsed} onToggle={toggleSidebar} />
+      {/* Sidebar — desktop only */}
+      <div className="hidden md:block">
+        <Sidebar isCollapsed={sidebarCollapsed} onToggle={toggleSidebar} />
+      </div>
+
       <Header sidebarCollapsed={sidebarCollapsed} />
 
       <main
-        className="transition-all duration-300 ease-in-out pt-16"
-        style={{ marginLeft: sidebarCollapsed ? '72px' : '260px' }}
+        className="main-ml pt-16"
+        style={{ '--sidebar-ml': sidebarMl } as React.CSSProperties}
       >
-        <div className="min-h-[calc(100vh-4rem)] px-6 lg:px-8 xl:px-10">
+        <div className="min-h-[calc(100vh-4rem)] px-4 md:px-6 lg:px-8 xl:px-10 py-4">
+          <Breadcrumb className="mb-3" />
           {children}
         </div>
       </main>
 
+      {/* Mobile overlay for sidebar (when sidebar is open via toggle) */}
       {!sidebarCollapsed && (
         <div
           className="fixed inset-0 bg-black/50 z-30 md:hidden backdrop-blur-sm"
           onClick={toggleSidebar}
         />
       )}
+
+      {/* Bottom tab bar — mobile only */}
+      <BottomTabBar />
     </div>
   );
 }

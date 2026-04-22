@@ -57,7 +57,7 @@ export function DailyBonusToast({ bonus, onDismiss }: Props) {
           <div className="text-white font-extrabold text-[15px] leading-tight">
             +{bonus.xp} XP Daily Bonus!
           </div>
-          <div className="text-white/90 text-[12px] leading-tight mt-0.5">
+          <div className="text-white/90 text-xs leading-tight mt-0.5">
             {bonus.streak > 0
               ? `Streak ${bonus.streak} ngày — tiếp tục nhé!`
               : 'Chào mừng quay lại!'}

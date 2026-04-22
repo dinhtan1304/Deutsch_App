@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { ChatMessage } from '@/lib/api/roleplay';
@@ -39,7 +39,7 @@ export function ChatBubble({ message, aiIcon = '🤖' }: Props) {
             <button
               type="button"
               onClick={() => setShowTranslation((s) => !s)}
-              className="mt-1.5 text-[11px] underline opacity-70 hover:opacity-100"
+              className="mt-1.5 text-caption underline opacity-70 hover:opacity-100"
               style={{ color: 'var(--theme-text-muted)' }}
             >
               {showTranslation ? 'Ẩn dịch' : '🇻🇳 Xem dịch'}

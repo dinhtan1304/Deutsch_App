@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import Link from 'next/link';
@@ -61,7 +61,7 @@ function SRSStatsCard() {
               <Ic size={16} className="text-white" />
             </div>
             <div className="text-2xl font-extrabold" style={{ color: item.color }}>{item.value}</div>
-            <div className="text-[12px] font-medium" style={{ color: 'var(--theme-text-muted)' }}>{item.label}</div>
+            <div className="text-xs font-medium" style={{ color: 'var(--theme-text-muted)' }}>{item.label}</div>
           </div>
         );
       })}
@@ -105,13 +105,13 @@ function ReviewCard({ word, isFlipped, onFlip }: ReviewCardProps) {
             boxShadow: '0 8px 32px rgba(0,0,0,.08)',
           }}>
           {/* Type badge */}
-          <div className="absolute top-4 left-4 px-3 py-1 rounded-lg text-[11px] font-semibold"
+          <div className="absolute top-4 left-4 px-3 py-1 rounded-lg text-caption font-semibold"
             style={{ background: `linear-gradient(135deg, ${typeInfo.color}, ${typeInfo.color}cc)`, color: 'white' }}>
             {typeInfo.labelDe}
           </div>
 
           {/* Status badge */}
-          <div className="absolute top-4 right-4 px-3 py-1 rounded-lg text-[11px] font-semibold"
+          <div className="absolute top-4 right-4 px-3 py-1 rounded-lg text-caption font-semibold"
             style={{ backgroundColor: statusInfo.bgColor, color: statusInfo.color }}>
             {statusInfo.label}
           </div>
@@ -129,19 +129,19 @@ function ReviewCard({ word, isFlipped, onFlip }: ReviewCardProps) {
           </div>
 
           {word.wordType === 'nomen' && word.nomenData?.plural && (
-            <div className="mt-2 text-[13px]" style={{ color: 'var(--theme-text-muted)' }}>
+            <div className="mt-2 text-body" style={{ color: 'var(--theme-text-muted)' }}>
               Plural: <span className="font-medium">{word.nomenData.plural}</span>
             </div>
           )}
 
           {word.wordType === 'verb' && word.verbData && (
-            <div className="mt-2 text-[13px]" style={{ color: 'var(--theme-text-muted)' }}>
+            <div className="mt-2 text-body" style={{ color: 'var(--theme-text-muted)' }}>
               {word.verbData.partizipII && <span>Part. II: {word.verbData.partizipII}</span>}
               {word.verbData.hilfsverb && <span className="ml-3">+ {word.verbData.hilfsverb}</span>}
             </div>
           )}
 
-          <div className="absolute bottom-4 text-[13px]" style={{ color: 'var(--theme-text-muted)' }}>
+          <div className="absolute bottom-4 text-body" style={{ color: 'var(--theme-text-muted)' }}>
             Nhấn để xem nghĩa
           </div>
         </div>
@@ -164,12 +164,12 @@ function ReviewCard({ word, isFlipped, onFlip }: ReviewCardProps) {
 
           {word.examples && word.examples.length > 0 && (
             <div className="relative mt-6 p-4 bg-white/10 rounded-xl max-w-full backdrop-blur-sm">
-              <div className="text-[12px] text-white/60 mb-1">Ví dụ:</div>
-              <div className="text-white/90 italic text-[14px]">„{word.examples[0]}"</div>
+              <div className="text-xs text-white/60 mb-1">Ví dụ:</div>
+              <div className="text-white/90 italic text-sm">„{word.examples[0]}"</div>
             </div>
           )}
 
-          <div className="absolute bottom-4 text-[12px] text-white/50">
+          <div className="absolute bottom-4 text-xs text-white/50">
             Lần ôn tiếp: {getIntervalText(word.interval)}
           </div>
         </div>
@@ -214,11 +214,11 @@ function RatingButtons({ word, onRate, isLoading }: RatingButtonsProps) {
           className="flex flex-col items-center p-3 sm:p-4 rounded-2xl transition-all duration-200
             hover:-translate-y-1 hover:shadow-lg active:translate-y-0 disabled:opacity-40"
           style={{ background: `${color}12`, border: `2px solid ${color}30` }}>
-          <span className="font-bold text-[14px]" style={{ color }}>{label}</span>
-          <span className="text-[11px] mt-1" style={{ color: 'var(--theme-text-muted)' }}>
+          <span className="font-bold text-sm" style={{ color }}>{label}</span>
+          <span className="text-caption mt-1" style={{ color: 'var(--theme-text-muted)' }}>
             {getIntervalText(calculatePreviewInterval(rating))}
           </span>
-          <kbd className="mt-1.5 px-2 py-0.5 rounded-md text-[10px] font-semibold"
+          <kbd className="mt-1.5 px-2 py-0.5 rounded-md text-caption font-semibold"
             style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }}>
             {hotkey}
           </kbd>
@@ -253,7 +253,7 @@ function SessionComplete({ session, onRestart }: { session: ReviewSession; onRes
       <h2 className="text-2xl font-bold mb-2" style={{ color: 'var(--theme-text-primary)' }}>
         Hoàn thành!
       </h2>
-      <p className="text-[14px] mb-6" style={{ color: 'var(--theme-text-muted)' }}>
+      <p className="text-sm mb-6" style={{ color: 'var(--theme-text-muted)' }}>
         Tuyệt vời, bạn đã hoàn thành phiên ôn tập
       </p>
 
@@ -261,20 +261,20 @@ function SessionComplete({ session, onRestart }: { session: ReviewSession; onRes
         {resultItems.map((item, i) => (
           <div key={i} className="p-4 rounded-2xl" style={{ background: item.gradient }}>
             <div className="text-2xl font-extrabold" style={{ color: item.color }}>{item.value}</div>
-            <div className="text-[11px] font-medium" style={{ color: 'var(--theme-text-muted)' }}>{item.label}</div>
+            <div className="text-caption font-medium" style={{ color: 'var(--theme-text-muted)' }}>{item.label}</div>
           </div>
         ))}
       </div>
 
       <div className="flex gap-3 justify-center">
         <button onClick={onRestart}
-          className="flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-[14px] text-white
+          className="flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm text-white
             transition-all hover:shadow-md hover:-translate-y-0.5"
           style={{ background: 'linear-gradient(135deg, #3B82F6, #6366F1)' }}>
           <IconRefresh size={16} /> Ôn tiếp
         </button>
         <Link href="/word-bank"
-          className="flex items-center gap-2 px-6 py-3 rounded-xl font-medium text-[14px] border
+          className="flex items-center gap-2 px-6 py-3 rounded-xl font-medium text-sm border
             transition-all hover:-translate-y-0.5"
           style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)' }}>
           <IconChevronLeft size={16} /> Về Word Bank
@@ -309,19 +309,19 @@ function EmptyState({ mode = 'srs' }: { mode?: 'srs' | 'weak' }) {
       <h2 className="text-2xl font-bold mb-2" style={{ color: 'var(--theme-text-primary)' }}>
         {title}
       </h2>
-      <p className="text-[14px] mb-6" style={{ color: 'var(--theme-text-muted)' }}>
+      <p className="text-sm mb-6" style={{ color: 'var(--theme-text-muted)' }}>
         {description}
       </p>
 
       <div className="flex gap-3 justify-center">
         <Link href="/word-bank"
-          className="flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-[14px] text-white
+          className="flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm text-white
             transition-all hover:shadow-md hover:-translate-y-0.5"
           style={{ background: 'linear-gradient(135deg, #3B82F6, #6366F1)' }}>
           Đi đến Word Bank
         </Link>
         <Link href="/words"
-          className="flex items-center gap-2 px-6 py-3 rounded-xl font-medium text-[14px] border
+          className="flex items-center gap-2 px-6 py-3 rounded-xl font-medium text-sm border
             transition-all hover:-translate-y-0.5"
           style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)' }}>
           Khám phá từ điển
@@ -449,7 +449,7 @@ export default function WordBankReviewPage() {
               <h1 className="text-2xl font-bold" style={{ color: 'var(--theme-text-primary)' }}>
                 {mode === 'weak' ? 'Ôn từ yếu' : 'Ôn tập Word Bank'}
               </h1>
-              <p className="text-[13px]" style={{ color: 'var(--theme-text-muted)' }}>
+              <p className="text-body" style={{ color: 'var(--theme-text-muted)' }}>
                 {mode === 'weak'
                   ? 'Tập trung vào những từ bạn hay sai nhất'
                   : 'Spaced Repetition System (SM-2)'}
@@ -457,7 +457,7 @@ export default function WordBankReviewPage() {
             </div>
           </div>
           <Link href="/word-bank"
-            className="flex items-center gap-1.5 text-[13px] font-medium transition-all hover:opacity-70"
+            className="flex items-center gap-1.5 text-body font-medium transition-all hover:opacity-70"
             style={{ color: '#3B82F6' }}>
             <IconChevronLeft size={16} /> Word Bank
           </Link>
@@ -484,7 +484,7 @@ export default function WordBankReviewPage() {
           <>
             {/* Progress bar */}
             <div className="mb-6">
-              <div className="flex justify-between text-[12px] mb-2"
+              <div className="flex justify-between text-xs mb-2"
                 style={{ color: 'var(--theme-text-muted)' }}>
                 <span className="font-semibold">{session.currentIndex + 1} / {session.words.length}</span>
                 <span className="font-semibold">{Math.round(progress)}%</span>
@@ -509,9 +509,9 @@ export default function WordBankReviewPage() {
 
             {/* Flip hint */}
             {!isFlipped && (
-              <div className="text-center mt-6 text-[13px]" style={{ color: 'var(--theme-text-muted)' }}>
+              <div className="text-center mt-6 text-body" style={{ color: 'var(--theme-text-muted)' }}>
                 Nhấn{' '}
-                <kbd className="px-2 py-0.5 rounded-md text-[11px] font-semibold"
+                <kbd className="px-2 py-0.5 rounded-md text-caption font-semibold"
                   style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>Space</kbd>
                 {' '}hoặc click để lật thẻ
               </div>
@@ -528,7 +528,7 @@ export default function WordBankReviewPage() {
             backgroundColor: 'rgba(139,92,246,.04)',
             borderColor: 'rgba(139,92,246,.15)',
           }}>
-          <h3 className="font-bold text-[14px] mb-3 flex items-center gap-2"
+          <h3 className="font-bold text-sm mb-3 flex items-center gap-2"
             style={{ color: '#8B5CF6' }}>
             <span className="w-7 h-7 rounded-lg flex items-center justify-center"
               style={{ background: 'linear-gradient(135deg, rgba(139,92,246,.15), rgba(139,92,246,.08))' }}>
@@ -536,7 +536,7 @@ export default function WordBankReviewPage() {
             </span>
             Phím tắt
           </h3>
-          <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 text-[12px]">
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 text-xs">
             {[
               { key: 'Space', action: 'Lật thẻ' },
               { key: '1', action: 'Quên' },
@@ -545,7 +545,7 @@ export default function WordBankReviewPage() {
               { key: '4', action: 'Dễ' },
             ].map(item => (
               <div key={item.key} className="flex items-center gap-2">
-                <kbd className="px-2 py-0.5 rounded-md font-semibold text-[11px]"
+                <kbd className="px-2 py-0.5 rounded-md font-semibold text-caption"
                   style={{ backgroundColor: 'rgba(139,92,246,.1)', color: '#8B5CF6' }}>
                   {item.key}
                 </kbd>

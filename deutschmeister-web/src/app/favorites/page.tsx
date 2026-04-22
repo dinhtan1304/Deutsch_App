@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useMemo } from 'react';
 import Link from 'next/link';
@@ -69,9 +69,9 @@ export default function FavoritesPage() {
             <IconStar size={28} style={{ color: 'white' }} />
           </div>
           <h1 className="text-xl font-bold mb-2" style={{ color: 'var(--theme-text-primary)' }}>Đăng nhập để xem yêu thích</h1>
-          <p className="text-[13px] mb-6" style={{ color: 'var(--theme-text-muted)' }}>Tạo tài khoản để lưu từ vựng yêu thích</p>
+          <p className="text-body mb-6" style={{ color: 'var(--theme-text-muted)' }}>Tạo tài khoản để lưu từ vựng yêu thích</p>
           <Link href="/auth/login"
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-[14px] font-semibold text-white"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white"
             style={{ background: 'linear-gradient(135deg, #3B82F6, #6366F1)' }}>
             <IconLogIn size={16} /> Đăng nhập
           </Link>
@@ -92,13 +92,13 @@ export default function FavoritesPage() {
               <h1 className="text-2xl font-bold" style={{ color: 'var(--theme-text-primary)' }}>
                 Từ vựng yêu thích
               </h1>
-              <p className="text-[13px] mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>
+              <p className="text-body mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>
                 Các từ đã lưu để ôn tập nhanh ({favorites?.length || 0} từ)
               </p>
             </div>
           </div>
           <Link href="/words"
-            className="flex items-center gap-1 px-3 py-2 rounded-xl text-[13px] font-semibold transition-all duration-200 hover:-translate-y-0.5"
+            className="flex items-center gap-1 px-3 py-2 rounded-xl text-body font-semibold transition-all duration-200 hover:-translate-y-0.5"
             style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }}>
             <IconChevronLeft size={14} /> Từ điển
           </Link>
@@ -120,11 +120,11 @@ export default function FavoritesPage() {
               style={{ background: 'rgba(239,68,68,.08)' }}>
               <IconLogIn size={24} style={{ color: '#EF4444' }} />
             </div>
-            <h2 className="text-[16px] font-bold mb-2" style={{ color: 'var(--theme-text-primary)' }}>Phiên đăng nhập hết hạn</h2>
-            <p className="text-[13px] mb-5" style={{ color: 'var(--theme-text-muted)' }}>Vui lòng đăng nhập lại để xem từ vựng yêu thích</p>
+            <h2 className="text-base font-bold mb-2" style={{ color: 'var(--theme-text-primary)' }}>Phiên đăng nhập hết hạn</h2>
+            <p className="text-body mb-5" style={{ color: 'var(--theme-text-muted)' }}>Vui lòng đăng nhập lại để xem từ vựng yêu thích</p>
             <div className="flex items-center justify-center gap-3">
               <Link href="/auth/login"
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-[14px] font-semibold text-white"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white"
                 style={{ background: 'linear-gradient(135deg, #3B82F6, #6366F1)' }}
                 onClick={() => logout()}>
                 <IconLogIn size={16} /> Đăng nhập lại
@@ -140,12 +140,12 @@ export default function FavoritesPage() {
               style={{ background: 'rgba(239,68,68,.08)' }}>
               <IconRefresh size={24} style={{ color: '#EF4444' }} />
             </div>
-            <h2 className="text-[16px] font-bold mb-2" style={{ color: 'var(--theme-text-primary)' }}>Lỗi tải dữ liệu</h2>
-            <p className="text-[13px] mb-5" style={{ color: 'var(--theme-text-muted)' }}>
+            <h2 className="text-base font-bold mb-2" style={{ color: 'var(--theme-text-primary)' }}>Lỗi tải dữ liệu</h2>
+            <p className="text-body mb-5" style={{ color: 'var(--theme-text-muted)' }}>
               {error instanceof ApiError ? error.message : 'Không thể kết nối đến máy chủ'}
             </p>
             <button onClick={() => refetch()}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-[14px] font-semibold transition-all hover:-translate-y-0.5"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all hover:-translate-y-0.5"
               style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-primary)', border: '1px solid var(--theme-border)' }}>
               <IconRefresh size={16} /> Thử lại
             </button>
@@ -166,10 +166,10 @@ export default function FavoritesPage() {
               style={{ background: 'linear-gradient(135deg, #F59E0B, #F97316)' }}>
               <IconStar size={28} style={{ color: 'white' }} />
             </div>
-            <h2 className="text-[16px] font-bold mb-2" style={{ color: 'var(--theme-text-primary)' }}>Chưa có từ yêu thích</h2>
-            <p className="text-[13px] mb-5" style={{ color: 'var(--theme-text-muted)' }}>Nhấn vào biểu tượng ⭐ trên thẻ từ để lưu lại</p>
+            <h2 className="text-base font-bold mb-2" style={{ color: 'var(--theme-text-primary)' }}>Chưa có từ yêu thích</h2>
+            <p className="text-body mb-5" style={{ color: 'var(--theme-text-muted)' }}>Nhấn vào biểu tượng ⭐ trên thẻ từ để lưu lại</p>
             <Link href="/words"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-[14px] font-semibold text-white"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white"
               style={{ background: 'linear-gradient(135deg, #3B82F6, #6366F1)' }}>
               <IconBook size={16} /> Xem từ điển
             </Link>

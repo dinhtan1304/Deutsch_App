@@ -83,10 +83,10 @@ export function TodayFocusCard() {
 
         {/* Title + subtitle */}
         <div className="flex-1 min-w-0">
-          <div className="text-[14px] font-bold" style={{ color: 'var(--theme-text-primary)' }}>
+          <div className="text-sm font-bold" style={{ color: 'var(--theme-text-primary)' }}>
             Mục tiêu hôm nay
           </div>
-          <div className="text-[12px] mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>
+          <div className="text-xs mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>
             {allDone
               ? 'Hoàn thành tất cả! Hẹn ngày mai'
               : `${completedCount}/${totalCount} nhiệm vụ${srsDueCount > 0 ? ` · ${srsDueCount} thẻ cần ôn` : ''}`
@@ -94,32 +94,13 @@ export function TodayFocusCard() {
           </div>
         </div>
 
-        {/* CTA button */}
-        {nextTask ? (
-          <Link
-            href={nextTask.href}
-            className="shrink-0 text-[12px] font-bold px-3.5 py-1.5 rounded-lg transition-all hover:scale-105"
-            style={{
-              background: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
-              color: 'white',
-              boxShadow: '0 4px 12px rgba(99,102,241,0.3)',
-            }}
-          >
-            Tiếp tục →
-          </Link>
-        ) : srsDueCount > 0 ? (
-          <Link
-            href="/review"
-            className="shrink-0 text-[12px] font-bold px-3.5 py-1.5 rounded-lg transition-all hover:scale-105"
-            style={{
-              background: 'linear-gradient(135deg, #8B5CF6, #A855F7)',
-              color: 'white',
-              boxShadow: '0 4px 12px rgba(139,92,246,0.3)',
-            }}
-          >
-            Ôn {srsDueCount} thẻ →
-          </Link>
-        ) : null}
+        {/* Progress percentage — replaces CTA button (HeroActionCard handles the primary action) */}
+        <div
+          className="shrink-0 text-xs font-bold tabular-nums"
+          style={{ color: allDone ? '#22C55E' : 'var(--theme-text-muted)' }}
+        >
+          {progressPct}%
+        </div>
       </div>
 
       {/* Progress bar */}
@@ -139,10 +120,10 @@ export function TodayFocusCard() {
           <Link
             key={i}
             href={t.href}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-[12px] transition-all hover:scale-[1.02]"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs transition-all hover:scale-[1.02]"
             style={{
-              background: t.completed ? 'rgba(34,197,94,0.08)' : 'rgba(255,255,255,0.04)',
-              border: `1px solid ${t.completed ? 'rgba(34,197,94,0.15)' : 'rgba(255,255,255,0.06)'}`,
+              background: t.completed ? 'rgba(34,197,94,0.08)' : 'var(--theme-overlay-soft)',
+              border: `1px solid ${t.completed ? 'rgba(34,197,94,0.15)' : 'var(--theme-border)'}`,
               color: t.completed ? '#4ADE80' : 'var(--theme-text-secondary)',
               textDecoration: t.completed ? 'line-through' : 'none',
               opacity: t.completed ? 0.7 : 1,

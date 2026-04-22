@@ -1,10 +1,11 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useGenerateFreeSpeaking } from '@/hooks/useFreeSpeaking';
 import { QuotaPaywall } from '@/components/subscription/QuotaPaywall';
+import { PageHeader } from '@/components/ui';
 
 function IconLoader({ size = 18 }: { size?: number }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="animate-spin" style={{ display: 'block' }}><path d="M21 12a9 9 0 1 1-6.219-8.56" /></svg>;
@@ -50,23 +51,16 @@ export default function FreeSpeakingNewPage() {
   return (
     <QuotaPaywall feature="freeSpeaking">
     <div className="py-6">
-      <div className="flex items-center gap-2 mb-6">
-        <Link href="/practice-test/speaking" className="flex items-center gap-1 text-[13px] font-medium transition-opacity hover:opacity-70"
-          style={{ color: 'var(--theme-text-muted)' }}>
-          <IconChevronLeft size={14} /> Danh sách
-        </Link>
-      </div>
-
-      <h1 className="text-xl font-bold mb-1" style={{ color: 'var(--theme-text-primary)' }}>
-        Tạo bài Luyện Nói
-      </h1>
-      <p className="text-[13px] mb-6" style={{ color: 'var(--theme-text-muted)' }}>
-        AI tạo prompt tiếng Đức → bạn ghi âm → AI chấm điểm chi tiết
-      </p>
+      <PageHeader
+        backHref="/practice-test/speaking"
+        title="Tạo bài Luyện Nói"
+        subtitle="AI tạo prompt tiếng Đức → bạn ghi âm → AI chấm điểm chi tiết"
+        accent="xp"
+      />
 
       {/* Step 1: Level */}
       <div className="mb-6">
-        <p className="text-[12px] font-bold uppercase tracking-wider mb-3" style={{ color: 'var(--theme-text-muted)' }}>
+        <p className="text-xs font-bold uppercase tracking-wider mb-3" style={{ color: 'var(--theme-text-muted)' }}>
           Bước 1 — Trình độ (CEFR)
         </p>
         <div className="flex gap-2">
@@ -84,7 +78,7 @@ export default function FreeSpeakingNewPage() {
 
       {/* Step 2: Topic */}
       <div className="mb-6">
-        <p className="text-[12px] font-bold uppercase tracking-wider mb-3" style={{ color: 'var(--theme-text-muted)' }}>
+        <p className="text-xs font-bold uppercase tracking-wider mb-3" style={{ color: 'var(--theme-text-muted)' }}>
           Bước 2 — Chủ đề
         </p>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
@@ -94,23 +88,23 @@ export default function FreeSpeakingNewPage() {
               style={topicType === t.key
                 ? { borderColor: ACCENT, backgroundColor: 'rgba(245,158,11,.08)' }
                 : { borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
-              <p className="text-[13px] font-bold" style={{ color: topicType === t.key ? ACCENT : 'var(--theme-text-primary)' }}>
+              <p className="text-body font-bold" style={{ color: topicType === t.key ? ACCENT : 'var(--theme-text-primary)' }}>
                 {t.de}
               </p>
-              <p className="text-[11px] mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>{t.vi}</p>
+              <p className="text-caption mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>{t.vi}</p>
             </button>
           ))}
         </div>
       </div>
 
       {/* Info note */}
-      <div className="rounded-xl p-3 mb-5 text-[12px]"
+      <div className="rounded-xl p-3 mb-5 text-xs"
         style={{ backgroundColor: 'rgba(245,158,11,.06)', borderLeft: '3px solid rgba(245,158,11,.4)', color: 'var(--theme-text-muted)' }}>
         Yêu cầu: microphone + Chrome/Edge. AI sẽ tạo ngẫu nhiên một câu hỏi/prompt, bạn ghi âm trả lời, Gemini chấm điểm từ audio + transcript.
       </div>
 
       {errorMsg && (
-        <div className="p-3 rounded-xl text-[13px] mb-4" style={{ backgroundColor: 'rgba(239,68,68,.08)', color: '#EF4444' }}>
+        <div className="p-3 rounded-xl text-body mb-4" style={{ backgroundColor: 'rgba(239,68,68,.08)', color: '#EF4444' }}>
           {errorMsg}
         </div>
       )}

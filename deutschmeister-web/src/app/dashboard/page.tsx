@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useMemo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -128,7 +128,7 @@ export default function DashboardPage() {
           <h1 className="text-xl font-bold" style={{ color: 'var(--theme-text-primary)' }}>
             Hallo, {user?.name || 'Freund'}!
           </h1>
-          <p className="text-[13px] mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>
+          <p className="text-body mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>
             {stats.streak > 0 ? (
               <>Du lernst seit <span className="text-orange-500 font-bold">{stats.streak} Tagen</span> in Folge
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#F97316" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="inline ml-1 -mt-0.5"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" /></svg>
@@ -142,7 +142,7 @@ export default function DashboardPage() {
             )}
           </p>
         </div>
-        <div className="text-right text-[12px] hidden sm:block" style={{ color: 'var(--theme-text-muted)' }}>{todayLabel}</div>
+        <div className="text-right text-xs hidden sm:block" style={{ color: 'var(--theme-text-muted)' }}>{todayLabel}</div>
       </div>
 
       {/* ── Streak Warning (only shows if streak ≥3 and no activity today) ── */}

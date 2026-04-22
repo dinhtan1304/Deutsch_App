@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { useIsExamUnlocked } from '@/hooks/useSubscription';
@@ -61,7 +61,7 @@ export function PremiumPaywall({
           </div>
 
           <div
-            className="inline-block px-2.5 py-1 rounded-full text-[10px] font-extrabold text-white mb-3"
+            className="inline-block px-2.5 py-1 rounded-full text-caption font-extrabold text-white mb-3"
             style={{ background: 'linear-gradient(135deg, #F59E0B, #EF4444)' }}
           >
             PREMIUM
@@ -74,7 +74,7 @@ export function PremiumPaywall({
             {title}
           </h3>
           <p
-            className="text-[13px] mb-6 leading-relaxed"
+            className="text-body mb-6 leading-relaxed"
             style={{ color: 'var(--theme-text-muted)' }}
           >
             {description}
@@ -83,13 +83,13 @@ export function PremiumPaywall({
           <button
             type="button"
             onClick={() => setUpgradeOpen(true)}
-            className="w-full py-3 rounded-xl text-[14px] font-bold text-white mb-3 transition-transform hover:scale-[1.01]"
+            className="w-full py-3 rounded-xl text-sm font-bold text-white mb-3 transition-transform hover:scale-[1.01]"
             style={{ background: 'linear-gradient(135deg, #6366F1, #8B5CF6)' }}
           >
             Nâng cấp Premium
           </button>
 
-          <p className="text-[12px]" style={{ color: 'var(--theme-text-muted)' }}>
+          <p className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>
             Mở khoá đề Goethe/TELC A1–B1, AI chấm điểm, giải thích lỗi
           </p>
         </div>

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -107,14 +107,14 @@ export default function StudyPlanSetup() {
                       <div className="font-bold text-[15px]" style={{ color: 'var(--theme-text-primary)' }}>
                         {exam.name}
                       </div>
-                      <div className="text-[13px] mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>
+                      <div className="text-body mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>
                         {exam.description}
                       </div>
                       <div className="flex gap-1.5 mt-2">
                         {exam.levels.map((l) => (
                           <span
                             key={l}
-                            className="px-2 py-0.5 rounded text-[11px] font-semibold"
+                            className="px-2 py-0.5 rounded text-caption font-semibold"
                             style={{ background: `${exam.color}15`, color: exam.color }}
                           >
                             {l}
@@ -157,7 +157,7 @@ export default function StudyPlanSetup() {
                     <div className="font-bold text-[15px]" style={{ color: 'var(--theme-text-primary)' }}>
                       {info.label}
                     </div>
-                    <div className="text-[13px] mt-1" style={{ color: 'var(--theme-text-muted)' }}>
+                    <div className="text-body mt-1" style={{ color: 'var(--theme-text-muted)' }}>
                       {info.desc}
                     </div>
                   </button>
@@ -218,7 +218,7 @@ export default function StudyPlanSetup() {
                   >
                     {weeksUntilExam} tuần
                   </div>
-                  <span className="text-[13px]" style={{ color: 'var(--theme-text-muted)' }}>
+                  <span className="text-body" style={{ color: 'var(--theme-text-muted)' }}>
                     {weeksUntilExam < 8
                       ? 'Thời gian hơi gấp — hãy học chăm chỉ!'
                       : weeksUntilExam > 24

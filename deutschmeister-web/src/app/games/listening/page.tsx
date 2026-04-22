@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
@@ -8,10 +8,12 @@ import { useSoundEffects } from '@/hooks/useSoundEffects';
 import { useGameSession } from '@/hooks/useGameSession';
 import { GenderInfo, Word } from '@/types';
 import {
-  GameSetupCard, GameResultCard, GameButton, GameProgressBar,
-  ComboBadge, StatCard, AnswerReview, AddWrongWordsToBank, GameResultUpsell, GameInfoBox,
+  GameSetupCard, GameResultCard,
+  StatCard, AnswerReview, AddWrongWordsToBank, GameResultUpsell, GameInfoBox,
+  GamePlayHeader, GameStatsBar, useGameTimer,
   IconHeadphones, IconRocket, IconChevronLeft, IconRefresh, IconX,
 } from '@/components/games/GameUI';
+import { Button } from '@/components/ui';
 
 type Phase = 'setup' | 'playing' | 'result';
 
@@ -191,14 +193,16 @@ export default function ListeningQuizPage() {
     }, 1200);
   }, [answered, questions, index, answers, questionsCount, playCorrect, playWrong, playCombo, playLevelUp, playGameOver, playCurrentWord, session]);
 
+  const timer = useGameTimer(phase === 'playing');
+
   // ─── Setup Screen ───
   if (phase === 'setup') {
     return (
       <GameSetupCard icon={({ size }) => <span style={{ color: 'white' }}><IconHeadphones size={size} /></span>} iconColor="#F97316" title="Listening Quiz">
-        <p className="text-[14px] mb-1" style={{ color: 'var(--theme-text-secondary)' }}>
+        <p className="text-sm mb-1" style={{ color: 'var(--theme-text-secondary)' }}>
           Nghe và chọn đúng <span className="font-bold" style={{ color: '#F97316' }}>{questionsCount} từ</span> tiếng Đức
         </p>
-        <p className="text-[12px] mb-6" style={{ color: 'var(--theme-text-muted)' }}>
+        <p className="text-xs mb-6" style={{ color: 'var(--theme-text-muted)' }}>
           (Thay đổi số câu trong Settings → Học tập)
         </p>
 
@@ -218,12 +222,12 @@ export default function ListeningQuizPage() {
         </GameInfoBox>
 
         <div className="flex gap-3 justify-center mt-6">
-          <GameButton onClick={startGame} loading={isLoading} color="#F97316">
+          <Button variant="game" accent="games" onClick={startGame} isLoading={isLoading}>
             <IconRocket size={16} /> Bắt đầu
-          </GameButton>
-          <GameButton variant="outline" onClick={() => router.push('/games')}>
+          </Button>
+          <Button variant="outline" onClick={() => router.push('/games')}>
             <IconChevronLeft size={16} /> Quay lại
-          </GameButton>
+          </Button>
         </div>
       </GameSetupCard>
     );
@@ -238,17 +242,17 @@ export default function ListeningQuizPage() {
         <GameResultCard accuracy={accuracy} title="Kết quả">
           <div className="my-5">
             <div className="text-5xl font-extrabold" style={{ color: '#F97316' }}>{score}</div>
-            <p className="text-[13px] mt-1" style={{ color: 'var(--theme-text-muted)' }}>điểm</p>
+            <p className="text-body mt-1" style={{ color: 'var(--theme-text-muted)' }}>điểm</p>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-6">
             <StatCard label="Đúng" value={correctCount} color="#22C55E" />
             <StatCard label="Sai" value={questionsCount - correctCount} color="#EF4444" />
-            <StatCard label="Chính xác" value={`${accuracy}%`} color="#F97316" />
+            <StatCard label="Chính xác" value={`${accuracy}%`} />
             <StatCard label="Best Combo" value={`x${bestCombo}`} color="#F59E0B" />
           </div>
           <div className="flex gap-3 justify-center">
-            <GameButton onClick={startGame} color="#F97316"><IconRefresh size={16} /> Chơi lại</GameButton>
-            <GameButton variant="outline" onClick={() => router.push('/games')}><IconChevronLeft size={16} /> Menu</GameButton>
+            <Button variant="game" accent="games" onClick={startGame}><IconRefresh size={16} /> Chơi lại</Button>
+            <Button variant="outline" onClick={() => router.push('/games')}><IconChevronLeft size={16} /> Menu</Button>
           </div>
         </GameResultCard>
 
@@ -271,88 +275,78 @@ export default function ListeningQuizPage() {
   // ─── Playing Screen ───
   const currentQ = questions[index];
   if (!currentQ) return null;
+  const correctCount = answers.filter(a => a.isCorrect).length;
 
   return (
     <div className="max-w-2xl mx-auto px-4 sm:px-6 py-5">
-      {/* Header */}
-      <div className="flex justify-between items-center mb-3">
-        <div className="text-xl font-extrabold" style={{ color: '#F97316' }}>
-          {score} <span className="text-[13px] font-medium" style={{ color: 'var(--theme-text-muted)' }}>điểm</span>
-        </div>
-        <div className="text-[13px] font-semibold" style={{ color: 'var(--theme-text-muted)' }}>
-          {index + 1} / {questionsCount}
-        </div>
-      </div>
-
-      <GameProgressBar current={index + 1} total={questionsCount} />
-
-      <div className="mt-3 mb-4">
-        <ComboBadge combo={combo} />
-      </div>
+      <GamePlayHeader title="Listening Quiz" streak={combo} timer={timer}
+        onExit={() => { window.speechSynthesis?.cancel(); playClick(); router.push('/games'); }} />
+      <GameStatsBar stats={[
+        { label: 'Điểm',  value: score,                          color: '#F97316' },
+        { label: 'Đúng',  value: correctCount,                   color: '#22C55E', dot: true },
+        { label: 'Sai',   value: index - correctCount,           color: '#EF4444', dot: true },
+        { label: 'Câu',   value: `${index + 1}/${questionsCount}`, color: 'var(--theme-text-primary)' },
+      ]} />
 
       {/* Audio Card */}
-      <div className="rounded-2xl border p-8 text-center mb-5"
-        style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
-
-        {/* Play Button */}
-        <button
-          onClick={answered ? undefined : handleReplay}
-          disabled={answered || replayCount >= MAX_REPLAYS || isSpeaking}
-          className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 transition-all duration-300
-            disabled:opacity-40 disabled:cursor-not-allowed hover:scale-105 active:scale-95"
-          style={{
-            background: isSpeaking
-              ? 'linear-gradient(135deg, #F97316aa, #EF4444aa)'
-              : 'linear-gradient(135deg, #F97316, #EF4444)',
-            boxShadow: isSpeaking ? '0 0 0 8px rgba(249,115,22,.15)' : '0 4px 20px rgba(249,115,22,.3)',
-          }}>
-          <span style={{ color: 'white' }}><IconHeadphones size={32} /></span>
-        </button>
-
-        {!answered && (
-          <p className="text-[13px] mb-1" style={{ color: 'var(--theme-text-muted)' }}>
-            {isSpeaking ? 'Đang phát...' : replayCount === 0 ? 'Nhấn để nghe từ' : `Nghe lại (${replayCount}/${MAX_REPLAYS})`}
-          </p>
-        )}
-
-        {/* Replay count indicator */}
-        {!answered && replayCount > 0 && (
-          <div className="flex justify-center gap-1.5 mt-1">
-            {Array.from({ length: MAX_REPLAYS }, (_, i) => (
-              <div key={i} className="w-2 h-2 rounded-full"
-                style={{ backgroundColor: i < replayCount ? '#F97316' : 'var(--theme-border)' }} />
-            ))}
-          </div>
-        )}
-
-        {/* Score hint */}
-        {!answered && (
-          <p className="text-[11px] mt-2" style={{ color: 'var(--theme-text-muted)' }}>
-            {replayCount === 0 ? '+15 điểm nếu đúng lần đầu'
-              : replayCount === 1 ? '+10 điểm nếu đúng'
-              : '+5 điểm nếu đúng'}
-          </p>
-        )}
-
-        {/* Answered feedback */}
-        {answered && currentQ && (
-          <div className="mt-2">
-            <p className="text-[15px] font-bold" style={{
-              color: selectedAnswer === `${GenderInfo[currentQ.correct.gender].article} ${currentQ.correct.word}` ? '#22C55E' : '#EF4444'
+      <div className="rounded-3xl overflow-hidden mb-5 mt-3 transition-all duration-300"
+        style={{ background: 'linear-gradient(135deg, #1a0a00 0%, #7c2d12 100%)' }}>
+        <div className="flex flex-col items-center justify-center px-6 py-8 text-center">
+          <button
+            onClick={answered ? undefined : handleReplay}
+            disabled={answered || replayCount >= MAX_REPLAYS || isSpeaking}
+            className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 transition-all duration-300
+              disabled:opacity-40 disabled:cursor-not-allowed hover:scale-105 active:scale-95"
+            style={{
+              background: isSpeaking
+                ? 'linear-gradient(135deg, #F97316aa, #EF4444aa)'
+                : 'linear-gradient(135deg, #F97316, #EF4444)',
+              boxShadow: isSpeaking ? '0 0 0 8px rgba(249,115,22,.15)' : '0 4px 20px rgba(249,115,22,.3)',
             }}>
-              {selectedAnswer === `${GenderInfo[currentQ.correct.gender].article} ${currentQ.correct.word}` ? '✓ Đúng!' : '✗ Sai'}
+            <span style={{ color: 'white' }}><IconHeadphones size={32} /></span>
+          </button>
+
+          {!answered && (
+            <p className="text-body mb-1" style={{ color: 'rgba(255,255,255,0.6)' }}>
+              {isSpeaking ? 'Đang phát...' : replayCount === 0 ? 'Nhấn để nghe từ' : `Nghe lại (${replayCount}/${MAX_REPLAYS})`}
             </p>
-            <p className="text-[14px] mt-1" style={{ color: 'var(--theme-text-secondary)' }}>
-              Đáp án: <span className="font-bold" style={{ color: AC[currentQ.correct.gender] }}>
-                {GenderInfo[currentQ.correct.gender].article} {currentQ.correct.word}
-              </span>
+          )}
+
+          {!answered && replayCount > 0 && (
+            <div className="flex justify-center gap-1.5 mt-1">
+              {Array.from({ length: MAX_REPLAYS }, (_, i) => (
+                <div key={i} className="w-2 h-2 rounded-full"
+                  style={{ backgroundColor: i < replayCount ? '#F97316' : 'rgba(255,255,255,0.2)' }} />
+              ))}
+            </div>
+          )}
+
+          {!answered && (
+            <p className="text-caption mt-2" style={{ color: 'rgba(255,255,255,0.45)' }}>
+              {replayCount === 0 ? '+15 điểm nếu đúng lần đầu'
+                : replayCount === 1 ? '+10 điểm nếu đúng'
+                : '+5 điểm nếu đúng'}
             </p>
-          </div>
-        )}
+          )}
+
+          {answered && currentQ && (
+            <div className="mt-2">
+              <p className="text-[15px] font-bold" style={{
+                color: selectedAnswer === `${GenderInfo[currentQ.correct.gender].article} ${currentQ.correct.word}` ? '#4ade80' : '#f87171'
+              }}>
+                {selectedAnswer === `${GenderInfo[currentQ.correct.gender].article} ${currentQ.correct.word}` ? '✓ Đúng!' : '✗ Sai'}
+              </p>
+              <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.7)' }}>
+                Đáp án: <span className="font-bold text-white">
+                  {GenderInfo[currentQ.correct.gender].article} {currentQ.correct.word}
+                </span>
+              </p>
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Options */}
-      <p className="text-[13px] font-semibold mb-3 text-center" style={{ color: 'var(--theme-text-muted)' }}>
+      <p className="text-body font-semibold mb-3 text-center" style={{ color: 'var(--theme-text-muted)' }}>
         Chọn từ bạn vừa nghe:
       </p>
       <div className="grid grid-cols-2 gap-3">
@@ -382,23 +376,13 @@ export default function ListeningQuizPage() {
               </span>{' '}
               {option.word}
               {settings.showVietnamese && option.translationVi && (
-                <span className="block text-[11px] font-normal mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>
+                <span className="block text-caption font-normal mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>
                   {option.translationVi}
                 </span>
               )}
             </button>
           );
         })}
-      </div>
-
-      <div className="text-center mt-6">
-        <GameButton variant="ghost" onClick={() => {
-          window.speechSynthesis?.cancel();
-          playClick();
-          router.push('/games');
-        }}>
-          <IconX size={14} /> Thoát
-        </GameButton>
       </div>
     </div>
   );

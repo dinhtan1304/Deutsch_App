@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import Link from 'next/link';
@@ -95,7 +95,7 @@ function Card({
   const Ic = card.icon;
   if (card.locked) {
     return (
-      <div className="rounded-2xl border p-5 opacity-55 cursor-not-allowed select-none"
+      <div className="rounded-card border p-5 opacity-55 cursor-not-allowed select-none"
         style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
         <div className="relative w-12 h-12 rounded-xl flex items-center justify-center mb-4"
           style={{ background: card.gradient }}>
@@ -103,9 +103,9 @@ function Card({
           <span className="absolute -top-1.5 -right-1.5 text-[9px] font-extrabold px-1.5 py-0.5 rounded-full text-white"
             style={{ backgroundColor: '#6B7280' }}>Soon</span>
         </div>
-        <p className="text-[11px] font-semibold mb-0.5" style={{ color: 'var(--theme-text-muted)' }}>{card.titleDe}</p>
-        <h3 className="text-[16px] font-bold mb-2" style={{ color: 'var(--theme-text-primary)' }}>{card.title}</h3>
-        <p className="text-[12.5px] leading-relaxed" style={{ color: 'var(--theme-text-secondary)' }}>{card.description}</p>
+        <p className="text-caption font-semibold mb-0.5" style={{ color: 'var(--theme-text-muted)' }}>{card.titleDe}</p>
+        <h3 className="text-base font-bold mb-2" style={{ color: 'var(--theme-text-primary)' }}>{card.title}</h3>
+        <p className="text-body leading-relaxed" style={{ color: 'var(--theme-text-secondary)' }}>{card.description}</p>
       </div>
     );
   }
@@ -114,7 +114,7 @@ function Card({
       <button
         type="button"
         onClick={onPremiumClick}
-        className="group text-left w-full rounded-2xl border p-5 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg relative"
+        className="group text-left w-full rounded-card border shadow-card p-5 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg relative"
         style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}
       >
         {/* Icon with lock overlay */}
@@ -137,11 +137,11 @@ function Card({
           PREMIUM
         </span>
         {/* Text */}
-        <p className="text-[11px] font-semibold mb-0.5" style={{ color: 'var(--theme-text-muted)' }}>{card.titleDe}</p>
-        <h3 className="text-[16px] font-bold mb-2" style={{ color: 'var(--theme-text-primary)' }}>{card.title}</h3>
-        <p className="text-[12.5px] leading-relaxed mb-4" style={{ color: 'var(--theme-text-secondary)' }}>{card.description}</p>
+        <p className="text-caption font-semibold mb-0.5" style={{ color: 'var(--theme-text-muted)' }}>{card.titleDe}</p>
+        <h3 className="text-base font-bold mb-2" style={{ color: 'var(--theme-text-primary)' }}>{card.title}</h3>
+        <p className="text-body leading-relaxed mb-4" style={{ color: 'var(--theme-text-secondary)' }}>{card.description}</p>
         {/* CTA */}
-        <div className="flex items-center gap-1.5 text-[12.5px] font-semibold"
+        <div className="flex items-center gap-1.5 text-body font-semibold"
           style={{ color: card.color }}>
           Nâng cấp để mở khoá <IconArrowRight size={13} />
         </div>
@@ -150,7 +150,7 @@ function Card({
   }
   return (
     <Link href={card.href}
-      className="group block rounded-2xl border p-5 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg"
+      className="group block rounded-card border shadow-card p-5 transition-all duration-200 hover:-translate-y-1 hover:shadow-hero"
       style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
       {/* Icon */}
       <div className="relative w-12 h-12 rounded-xl flex items-center justify-center mb-4 transition-transform duration-200 group-hover:scale-110"
@@ -158,11 +158,11 @@ function Card({
         <Ic size={22} className="text-white" />
       </div>
       {/* Text */}
-      <p className="text-[11px] font-semibold mb-0.5" style={{ color: 'var(--theme-text-muted)' }}>{card.titleDe}</p>
-      <h3 className="text-[16px] font-bold mb-2" style={{ color: 'var(--theme-text-primary)' }}>{card.title}</h3>
-      <p className="text-[12.5px] leading-relaxed mb-4" style={{ color: 'var(--theme-text-secondary)' }}>{card.description}</p>
+      <p className="text-caption font-semibold mb-0.5" style={{ color: 'var(--theme-text-muted)' }}>{card.titleDe}</p>
+      <h3 className="text-base font-bold mb-2" style={{ color: 'var(--theme-text-primary)' }}>{card.title}</h3>
+      <p className="text-body leading-relaxed mb-4" style={{ color: 'var(--theme-text-secondary)' }}>{card.description}</p>
       {/* CTA */}
-      <div className="flex items-center gap-1.5 text-[12.5px] font-semibold opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+      <div className="flex items-center gap-1.5 text-body font-semibold opacity-0 group-hover:opacity-100 transition-opacity duration-200"
         style={{ color: card.color }}>
         Bắt đầu <IconArrowRight size={13} />
       </div>
@@ -187,13 +187,13 @@ function SectionHeader({
         <div className="flex items-center gap-2 flex-wrap">
           <span className="text-[15px] font-bold" style={{ color: 'var(--theme-text-primary)' }}>{label}</span>
           {badge && (
-            <span className="inline-flex items-center gap-1 text-[10px] font-extrabold px-2 py-0.5 rounded-full text-white"
+            <span className="inline-flex items-center gap-1 text-caption font-extrabold px-2 py-0.5 rounded-full text-white"
               style={{ background: 'linear-gradient(135deg, #F59E0B, #EF4444)' }}>
               <IconStar size={8} /> {badge}
             </span>
           )}
         </div>
-        <p className="text-[12px] mt-0.5 truncate" style={{ color: 'var(--theme-text-muted)' }}>{sub}</p>
+        <p className="text-xs mt-0.5 truncate" style={{ color: 'var(--theme-text-muted)' }}>{sub}</p>
       </div>
     </div>
   );
@@ -215,7 +215,7 @@ export default function PracticeTestPage() {
         </div>
         <div>
           <h1 className="text-2xl font-bold" style={{ color: 'var(--theme-text-primary)' }}>Luyện Test</h1>
-          <p className="text-[13px] mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>
+          <p className="text-body mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>
             Chọn dạng bài luyện tập phù hợp — từ luyện tự do đến đề thi chuẩn Goethe & TELC
           </p>
         </div>
@@ -235,7 +235,7 @@ export default function PracticeTestPage() {
       {/* Divider */}
       <div className="flex items-center gap-3 mb-8">
         <div className="flex-1 h-px" style={{ backgroundColor: 'var(--theme-border)' }} />
-        <span className="text-[10px] font-bold uppercase tracking-[0.15em] px-3 py-1 rounded-full"
+        <span className="text-caption font-bold uppercase tracking-[0.15em] px-3 py-1 rounded-full"
           style={{ color: 'var(--theme-text-muted)', backgroundColor: 'var(--theme-bg-secondary)' }}>
           Đề chuẩn
         </span>

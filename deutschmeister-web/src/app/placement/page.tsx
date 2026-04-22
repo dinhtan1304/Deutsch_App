@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useMemo, useRef, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -126,25 +126,25 @@ export default function PlacementRetakePage() {
             <h1 className="text-2xl font-bold mb-2" style={{ color: 'var(--theme-text-primary)' }}>
               Kiểm tra trình độ
             </h1>
-            <p className="text-[14px] mb-1" style={{ color: 'var(--theme-text-secondary)' }}>
+            <p className="text-sm mb-1" style={{ color: 'var(--theme-text-secondary)' }}>
               15 câu hỏi ngữ pháp — mỗi 5 câu cho A1, A2, B1
             </p>
-            <p className="text-[12px] mb-6" style={{ color: 'var(--theme-text-muted)' }}>
+            <p className="text-xs mb-6" style={{ color: 'var(--theme-text-muted)' }}>
               Kết quả sẽ cập nhật level gợi ý của bạn. Mất khoảng 3-5 phút.
             </p>
             {settings?.preferredLevel && (
-              <p className="text-[12px] mb-4 px-3 py-1.5 rounded-lg inline-block"
+              <p className="text-xs mb-4 px-3 py-1.5 rounded-lg inline-block"
                 style={{ backgroundColor: 'rgba(99,102,241,.08)', color: '#6366F1' }}>
                 Level hiện tại: {settings.preferredLevel}
               </p>
             )}
             <div className="flex gap-3 justify-center">
-              <Link href="/profile" className="px-5 py-2.5 rounded-xl border font-semibold text-[13px]"
+              <Link href="/profile" className="px-5 py-2.5 rounded-xl border font-semibold text-body"
                 style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-muted)' }}>
                 Quay lại
               </Link>
               <button onClick={() => setPhase('quiz')}
-                className="px-6 py-2.5 rounded-xl text-white font-bold text-[14px]"
+                className="px-6 py-2.5 rounded-xl text-white font-bold text-sm"
                 style={{ background: 'linear-gradient(135deg, #3B82F6, #8B5CF6)', boxShadow: '0 4px 12px rgba(99,102,241,.3)' }}>
                 Bắt đầu
               </button>
@@ -157,8 +157,8 @@ export default function PlacementRetakePage() {
           <div className="rounded-2xl border p-6" style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
             {/* Progress bar */}
             <div className="flex items-center justify-between mb-4">
-              <span className="text-[12px] font-medium" style={{ color: LEVEL_COLORS[q.level] }}>{q.level}</span>
-              <span className="text-[12px]" style={{ color: 'var(--theme-text-muted)' }}>{qIdx + 1}/{QUESTIONS.length}</span>
+              <span className="text-xs font-medium" style={{ color: LEVEL_COLORS[q.level] }}>{q.level}</span>
+              <span className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>{qIdx + 1}/{QUESTIONS.length}</span>
             </div>
             <div className="h-1.5 rounded-full mb-5 overflow-hidden" style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
               <div className="h-full rounded-full transition-all duration-500"
@@ -166,7 +166,7 @@ export default function PlacementRetakePage() {
             </div>
 
             {/* Question */}
-            <p className="text-[11px] mb-1" style={{ color: 'var(--theme-text-muted)' }}>{q.hint}</p>
+            <p className="text-caption mb-1" style={{ color: 'var(--theme-text-muted)' }}>{q.hint}</p>
             <p className="text-lg font-bold mb-5" style={{ color: 'var(--theme-text-primary)' }}>{q.sentence}</p>
 
             {/* Options */}
@@ -189,7 +189,7 @@ export default function PlacementRetakePage() {
                 return (
                   <button key={i} onClick={() => handleAnswer(i)}
                     disabled={selected !== null}
-                    className="w-full text-left px-4 py-3 rounded-xl border text-[14px] font-medium transition-all"
+                    className="w-full text-left px-4 py-3 rounded-xl border text-sm font-medium transition-all"
                     style={{ backgroundColor: bg, borderColor: border, color: textColor }}>
                     {opt}
                   </button>
@@ -207,7 +207,7 @@ export default function PlacementRetakePage() {
             <h2 className="text-2xl font-bold mb-1" style={{ color: 'var(--theme-text-primary)' }}>
               Kết quả
             </h2>
-            <p className="text-[13px] mb-5" style={{ color: 'var(--theme-text-muted)' }}>
+            <p className="text-body mb-5" style={{ color: 'var(--theme-text-muted)' }}>
               {scores.total}/15 câu đúng
             </p>
 
@@ -218,7 +218,7 @@ export default function PlacementRetakePage() {
                 return (
                   <div key={lv} className="rounded-xl p-3"
                     style={{ backgroundColor: `${LEVEL_COLORS[lv]}10` }}>
-                    <div className="text-[11px] font-bold" style={{ color: LEVEL_COLORS[lv] }}>{lv}</div>
+                    <div className="text-caption font-bold" style={{ color: LEVEL_COLORS[lv] }}>{lv}</div>
                     <div className="text-xl font-extrabold" style={{ color: LEVEL_COLORS[lv] }}>{s}/5</div>
                   </div>
                 );
@@ -228,24 +228,24 @@ export default function PlacementRetakePage() {
             {/* Suggested level */}
             <div className="rounded-xl p-4 mb-5"
               style={{ background: `linear-gradient(135deg, ${LEVEL_COLORS[level]}12, ${LEVEL_COLORS[level]}06)`, border: `1px solid ${LEVEL_COLORS[level]}30` }}>
-              <div className="text-[12px] mb-1" style={{ color: 'var(--theme-text-muted)' }}>
+              <div className="text-xs mb-1" style={{ color: 'var(--theme-text-muted)' }}>
                 Trình độ ước tính
               </div>
               <div className="text-2xl font-extrabold" style={{ color: LEVEL_COLORS[level] }}>
                 {sublabel}
               </div>
-              <div className="text-[11px] mt-1" style={{ color: 'var(--theme-text-muted)' }}>
+              <div className="text-caption mt-1" style={{ color: 'var(--theme-text-muted)' }}>
                 Ước tính dựa trên 15 câu ngữ pháp — không thay thế bài thi chính thức.
               </div>
             </div>
 
             <div className="flex gap-3 justify-center">
-              <Link href="/profile" className="px-5 py-2.5 rounded-xl border font-semibold text-[13px]"
+              <Link href="/profile" className="px-5 py-2.5 rounded-xl border font-semibold text-body"
                 style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-muted)' }}>
                 Giữ nguyên
               </Link>
               <button onClick={handleSave} disabled={saving}
-                className="px-6 py-2.5 rounded-xl text-white font-bold text-[14px] transition-all"
+                className="px-6 py-2.5 rounded-xl text-white font-bold text-sm transition-all"
                 style={{ background: 'linear-gradient(135deg, #3B82F6, #8B5CF6)', opacity: saving ? 0.6 : 1 }}>
                 {saving ? 'Đang lưu...' : `Cập nhật → ${level}`}
               </button>

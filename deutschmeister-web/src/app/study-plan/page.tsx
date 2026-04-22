@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -88,7 +88,7 @@ export default function StudyPlanPage() {
           <h1 className="text-xl font-bold" style={{ color: 'var(--theme-text-primary)' }}>
             {plan.examFormat} {plan.targetLevel}
           </h1>
-          <p className="text-[13px] mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>
+          <p className="text-body mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>
             Tuần {currentWeek}/{plan.totalWeeks} — Còn {daysUntilExam} ngày đến ngày thi
           </p>
         </div>
@@ -157,7 +157,7 @@ export default function StudyPlanPage() {
             return (
               <div key={i} className="relative" style={{ width: `${widthPct}%` }}>
                 <div
-                  className="h-8 rounded-lg flex items-center justify-center text-[11px] font-bold text-white transition-all"
+                  className="h-8 rounded-lg flex items-center justify-center text-caption font-bold text-white transition-all"
                   style={{
                     background: phase.color,
                     opacity: isCurrent ? 1 : 0.4,
@@ -167,7 +167,7 @@ export default function StudyPlanPage() {
                 >
                   {phase.icon} {phase.name}
                 </div>
-                <div className="text-[10px] text-center mt-1" style={{ color: 'var(--theme-text-muted)' }}>
+                <div className="text-caption text-center mt-1" style={{ color: 'var(--theme-text-muted)' }}>
                   T{phase.weekStart}-{phase.weekEnd}
                 </div>
               </div>
@@ -188,7 +188,7 @@ export default function StudyPlanPage() {
             maxHeight: 480,
           }}
         >
-          <div className="text-[11px] font-semibold uppercase tracking-wider mb-2 px-2" style={{ color: 'var(--theme-text-muted)' }}>
+          <div className="text-caption font-semibold uppercase tracking-wider mb-2 px-2" style={{ color: 'var(--theme-text-muted)' }}>
             Các tuần
           </div>
           <div className="space-y-0.5">
@@ -201,7 +201,7 @@ export default function StudyPlanPage() {
                 <button
                   key={w}
                   onClick={() => setSelectedWeek(w)}
-                  className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-left transition-all text-[13px]"
+                  className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-left transition-all text-body"
                   style={{
                     backgroundColor: isSelected ? `${phase?.color || '#3B82F6'}12` : undefined,
                     color: isSelected ? phase?.color || '#3B82F6' : isPast ? 'var(--theme-text-muted)' : 'var(--theme-text-secondary)',
@@ -239,7 +239,7 @@ export default function StudyPlanPage() {
               <div className="text-sm font-bold" style={{ color: displayPhase.color }}>
                 Phase: {displayPhase.name}
               </div>
-              <div className="text-[12px]" style={{ color: 'var(--theme-text-muted)' }}>
+              <div className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>
                 Tuần {activeWeek} — {displayPhase.nameEn}
               </div>
             </div>
@@ -252,11 +252,11 @@ export default function StudyPlanPage() {
               style={{ borderColor: 'rgba(59,130,246,.2)', background: 'rgba(59,130,246,.04)' }}
             >
               <div className="flex items-center justify-between mb-3">
-                <div className="text-[12px] font-bold uppercase tracking-wider" style={{ color: '#3B82F6' }}>
+                <div className="text-xs font-bold uppercase tracking-wider" style={{ color: '#3B82F6' }}>
                   Hôm nay — {DAY_NAMES[today]}
                 </div>
                 {todayTasks.length > 0 && (
-                  <span className="text-[12px] font-semibold px-2 py-0.5 rounded-full" style={{
+                  <span className="text-xs font-semibold px-2 py-0.5 rounded-full" style={{
                     backgroundColor: todayTasks.filter((t: WeeklyTask) => t.completed).length === todayTasks.length ? 'rgba(34,197,94,.1)' : 'var(--theme-bg-secondary)',
                     color: todayTasks.filter((t: WeeklyTask) => t.completed).length === todayTasks.length ? '#22C55E' : 'var(--theme-text-muted)',
                   }}>
@@ -285,10 +285,10 @@ export default function StudyPlanPage() {
                       <span className="text-lg">{TASK_ICONS[task.type] || '\uD83D\uDCCC'}</span>
                     )}
                     <div className="flex-1 min-w-0">
-                      <div className="text-[14px] font-semibold" style={{ color: task.completed ? '#22C55E' : 'var(--theme-text-primary)', textDecoration: task.completed ? 'line-through' : 'none' }}>
+                      <div className="text-sm font-semibold" style={{ color: task.completed ? '#22C55E' : 'var(--theme-text-primary)', textDecoration: task.completed ? 'line-through' : 'none' }}>
                         {task.title}
                       </div>
-                      <div className="text-[12px]" style={{ color: 'var(--theme-text-muted)' }}>
+                      <div className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>
                         {task.description}
                       </div>
                     </div>
@@ -326,17 +326,17 @@ export default function StudyPlanPage() {
                     }}
                   >
                     <span
-                      className="text-[12px] font-bold w-8 text-center shrink-0"
+                      className="text-xs font-bold w-8 text-center shrink-0"
                       style={{ color: isToday ? '#3B82F6' : 'var(--theme-text-muted)' }}
                     >
                       {DAY_NAMES[task.day] || 'ALL'}
                     </span>
                     <span className="text-base shrink-0">{TASK_ICONS[task.type] || '\uD83D\uDCCC'}</span>
                     <div className="flex-1 min-w-0">
-                      <div className="text-[13px] font-medium" style={{ color: 'var(--theme-text-primary)' }}>
+                      <div className="text-body font-medium" style={{ color: 'var(--theme-text-primary)' }}>
                         {task.title}
                       </div>
-                      <div className="text-[11px]" style={{ color: 'var(--theme-text-muted)' }}>
+                      <div className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>
                         {task.description}
                       </div>
                     </div>

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useCallback } from 'react';
 import Link from 'next/link';
@@ -149,21 +149,21 @@ export default function WordBankPage() {
               <h1 className="text-2xl font-bold" style={{ color: 'var(--theme-text-primary)' }}>
                 Sổ từ vựng cá nhân
               </h1>
-              <p className="text-[13px] mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>
+              <p className="text-body mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>
                 {statTotal} từ • {statFavorites} yêu thích
-                {isFetching && <span className="ml-2 text-blue-500 text-[11px]">đang tải...</span>}
+                {isFetching && <span className="ml-2 text-blue-500 text-caption">đang tải...</span>}
               </p>
             </div>
           </div>
           <div className="flex gap-2">
             <button onClick={() => setShowImportModal(true)}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl text-[13px] font-semibold text-white
+              className="flex items-center gap-2 px-4 py-2 rounded-xl text-body font-semibold text-white
                 transition-all hover:shadow-md hover:-translate-y-0.5"
               style={{ background: 'linear-gradient(135deg, #10B981, #059669)' }}>
               <IconDownload size={15} /> Import
             </button>
             <button onClick={handleExport} disabled={statTotal === 0 || exportMutation.isPending}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl text-[13px] font-medium border
+              className="flex items-center gap-2 px-4 py-2 rounded-xl text-body font-medium border
                 transition-all hover:-translate-y-0.5 disabled:opacity-40"
               style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)' }}>
               <IconUpload size={15} /> Export
@@ -189,10 +189,10 @@ export default function WordBankPage() {
                   <IconBrain size={24} style={{ color: srsStats.due > 0 ? '#EF4444' : '#22C55E' }} />
                 </div>
                 <div>
-                  <h3 className="font-bold text-[16px]" style={{ color: 'var(--theme-text-primary)' }}>
+                  <h3 className="font-bold text-base" style={{ color: 'var(--theme-text-primary)' }}>
                     Ôn tập SRS
                   </h3>
-                  <p className="text-[13px]" style={{ color: 'var(--theme-text-muted)' }}>
+                  <p className="text-body" style={{ color: 'var(--theme-text-muted)' }}>
                     {srsStats.due > 0 ? (
                       <>
                         <span className="font-bold" style={{ color: '#EF4444' }}>{srsStats.due}</span> từ cần ôn
@@ -208,7 +208,7 @@ export default function WordBankPage() {
               </div>
 
               <div className="flex items-center gap-3">
-                <div className="hidden sm:flex gap-2 text-[12px]">
+                <div className="hidden sm:flex gap-2 text-xs">
                   {[
                     { label: srsStats.learning, color: '#F59E0B', bg: 'rgba(245,158,11,.1)', icon: IconFlame, title: 'Đang học' },
                     { label: srsStats.mature,   color: '#22C55E', bg: 'rgba(34,197,94,.1)',  icon: IconTarget, title: 'Thuộc lòng' },
@@ -227,7 +227,7 @@ export default function WordBankPage() {
                 </div>
 
                 <Link href="/word-bank/review?mode=weak"
-                  className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl font-semibold text-[13px]
+                  className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl font-semibold text-body
                     transition-all hover:shadow-md hover:-translate-y-0.5"
                   style={{
                     background: 'linear-gradient(135deg, rgba(239,68,68,.12), rgba(245,158,11,.08))',
@@ -240,7 +240,7 @@ export default function WordBankPage() {
                 </Link>
 
                 <Link href="/word-bank/review"
-                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-[13px] text-white
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-body text-white
                     transition-all hover:shadow-md hover:-translate-y-0.5"
                   style={{
                     background: srsStats.due > 0
@@ -256,7 +256,7 @@ export default function WordBankPage() {
             {/* Progress bar */}
             {statTotal > 0 && (
               <div className="mt-4">
-                <div className="flex justify-between text-[11px] mb-1.5"
+                <div className="flex justify-between text-caption mb-1.5"
                   style={{ color: 'var(--theme-text-muted)' }}>
                   <span>Đã ôn hôm nay: {srsStats.reviewedToday} từ</span>
                   <span>{srsStats.mature} / {statTotal} đã thuộc ({Math.round((srsStats.mature / statTotal) * 100)}%)</span>
@@ -291,9 +291,9 @@ export default function WordBankPage() {
                     borderColor: active ? info.color : 'var(--theme-border)',
                     opacity: count === 0 && !active ? 0.4 : 1,
                   }}>
-                  <div className="text-[14px] font-bold">{info.icon}</div>
-                  <div className="text-[11px] font-medium mt-0.5">{info.label}</div>
-                  <div className="text-[11px] font-bold">{count}</div>
+                  <div className="text-sm font-bold">{info.icon}</div>
+                  <div className="text-caption font-medium mt-0.5">{info.label}</div>
+                  <div className="text-caption font-bold">{count}</div>
                 </button>
               );
             })}
@@ -310,14 +310,14 @@ export default function WordBankPage() {
             {/* Static nav items */}
             <button
               onClick={handleSelectAll}
-              className="flex items-center gap-2.5 px-3.5 py-2.5 text-[13px] font-medium transition-all text-left"
+              className="flex items-center gap-2.5 px-3.5 py-2.5 text-body font-medium transition-all text-left"
               style={{
                 backgroundColor: selectedView === 'all' ? 'rgba(99,102,241,.1)' : 'transparent',
                 color: selectedView === 'all' ? '#6366F1' : 'var(--theme-text-secondary)',
               }}>
               <svg width={15} height={15} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" /><rect x="8" y="2" width="8" height="4" rx="1" ry="1" /></svg>
               <span className="flex-1">Tất cả</span>
-              <span className="text-[11px] font-semibold px-1.5 py-0.5 rounded-full"
+              <span className="text-caption font-semibold px-1.5 py-0.5 rounded-full"
                 style={{
                   backgroundColor: selectedView === 'all' ? 'rgba(99,102,241,.15)' : 'var(--theme-bg-secondary)',
                   color: selectedView === 'all' ? '#6366F1' : 'var(--theme-text-muted)',
@@ -328,14 +328,14 @@ export default function WordBankPage() {
 
             <button
               onClick={handleSelectFavorites}
-              className="flex items-center gap-2.5 px-3.5 py-2.5 text-[13px] font-medium transition-all text-left"
+              className="flex items-center gap-2.5 px-3.5 py-2.5 text-body font-medium transition-all text-left"
               style={{
                 backgroundColor: selectedView === 'favorites' ? 'rgba(234,179,8,.1)' : 'transparent',
                 color: selectedView === 'favorites' ? '#EAB308' : 'var(--theme-text-secondary)',
               }}>
               <svg width={15} height={15} viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
               <span className="flex-1">Yêu thích</span>
-              <span className="text-[11px] font-semibold px-1.5 py-0.5 rounded-full"
+              <span className="text-caption font-semibold px-1.5 py-0.5 rounded-full"
                 style={{
                   backgroundColor: selectedView === 'favorites' ? 'rgba(234,179,8,.15)' : 'var(--theme-bg-secondary)',
                   color: selectedView === 'favorites' ? '#EAB308' : 'var(--theme-text-muted)',
@@ -357,14 +357,14 @@ export default function WordBankPage() {
                 role="button"
                 tabIndex={0}
                 onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') handleSelectCollection(col.id); }}
-                className="group flex items-center gap-2.5 px-3.5 py-2.5 text-[13px] font-medium transition-all text-left cursor-pointer"
+                className="group flex items-center gap-2.5 px-3.5 py-2.5 text-body font-medium transition-all text-left cursor-pointer"
                 style={{
                   backgroundColor: selectedView === col.id ? `${col.color}18` : 'transparent',
                   color: selectedView === col.id ? col.color : 'var(--theme-text-secondary)',
                 }}>
                 <svg width={15} height={15} viewBox="0 0 24 24" fill="none" stroke={col.color || 'currentColor'} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="shrink-0"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" /></svg>
                 <span className="flex-1 truncate">{col.name}</span>
-                <span className="text-[11px] font-semibold px-1.5 py-0.5 rounded-full shrink-0"
+                <span className="text-caption font-semibold px-1.5 py-0.5 rounded-full shrink-0"
                   style={{
                     backgroundColor: selectedView === col.id ? `${col.color}22` : 'var(--theme-bg-secondary)',
                     color: selectedView === col.id ? col.color : 'var(--theme-text-muted)',
@@ -396,7 +396,7 @@ export default function WordBankPage() {
                   }}
                   placeholder="Tên thư mục..."
                   maxLength={50}
-                  className="w-full px-2.5 py-1.5 rounded-lg border text-[12px] focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
+                  className="w-full px-2.5 py-1.5 rounded-lg border text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
                   style={{
                     borderColor: 'var(--theme-border)',
                     backgroundColor: 'var(--theme-bg-secondary)',
@@ -404,19 +404,19 @@ export default function WordBankPage() {
                   }}
                 />
                 {collectionError && (
-                  <p className="text-[11px] mt-1 px-0.5" style={{ color: '#EF4444' }}>{collectionError}</p>
+                  <p className="text-caption mt-1 px-0.5" style={{ color: '#EF4444' }}>{collectionError}</p>
                 )}
                 <div className="flex gap-1.5 mt-1.5">
                   <button
                     onClick={handleCreateCollection}
                     disabled={!newCollectionName.trim() || createCollection.isPending}
-                    className="flex-1 py-1 rounded-lg text-[11px] font-semibold text-white transition-all disabled:opacity-40"
+                    className="flex-1 py-1 rounded-lg text-caption font-semibold text-white transition-all disabled:opacity-40"
                     style={{ background: 'linear-gradient(135deg, #6366F1, #8B5CF6)' }}>
                     Tạo
                   </button>
                   <button
                     onClick={() => { setShowNewCollection(false); setNewCollectionName(''); setCollectionError(null); }}
-                    className="px-2 py-1 rounded-lg text-[11px] transition-all"
+                    className="px-2 py-1 rounded-lg text-caption transition-all"
                     style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }}>
                     Huỷ
                   </button>
@@ -425,7 +425,7 @@ export default function WordBankPage() {
             ) : (
               <button
                 onClick={() => setShowNewCollection(true)}
-                className="flex items-center gap-2 px-3.5 py-2.5 text-[12px] font-medium transition-all hover:opacity-80"
+                className="flex items-center gap-2 px-3.5 py-2.5 text-xs font-medium transition-all hover:opacity-80"
                 style={{ color: 'var(--theme-text-muted)' }}>
                 <IconPlus size={13} /> Tạo thư mục mới
               </button>
@@ -448,7 +448,7 @@ export default function WordBankPage() {
                       value={filters.search}
                       onChange={e => setFilters({ search: e.target.value })}
                       placeholder="Tìm từ, nghĩa, ghi chú..."
-                      className="w-full pl-10 pr-4 py-2.5 rounded-xl border text-[13px]
+                      className="w-full pl-10 pr-4 py-2.5 rounded-xl border text-body
                         focus:outline-none focus:ring-2 focus:ring-blue-500/40 transition-all"
                       style={{
                         borderColor: 'var(--theme-border)',
@@ -459,7 +459,7 @@ export default function WordBankPage() {
                   </div>
 
                   <button onClick={() => setShowFilters(!showFilters)}
-                    className="flex items-center gap-2 px-4 py-2.5 rounded-xl border text-[13px] font-medium transition-all"
+                    className="flex items-center gap-2 px-4 py-2.5 rounded-xl border text-body font-medium transition-all"
                     style={{
                       borderColor: showFilters ? '#3B82F6' : 'var(--theme-border)',
                       backgroundColor: showFilters ? 'rgba(59,130,246,.08)' : 'var(--theme-bg-card)',
@@ -470,7 +470,7 @@ export default function WordBankPage() {
 
                   {selectedView !== 'favorites' && (
                     <button onClick={() => setFilters({ favoritesOnly: !filters.favoritesOnly })}
-                      className="flex items-center gap-2 px-4 py-2.5 rounded-xl border text-[13px] font-medium transition-all"
+                      className="flex items-center gap-2 px-4 py-2.5 rounded-xl border text-body font-medium transition-all"
                       style={{
                         borderColor: filters.favoritesOnly ? '#EAB308' : 'var(--theme-border)',
                         backgroundColor: filters.favoritesOnly ? 'rgba(234,179,8,.08)' : 'var(--theme-bg-card)',
@@ -486,7 +486,7 @@ export default function WordBankPage() {
                       const [sortBy, sortOrder] = e.target.value.split('-') as [WordBankFilters['sortBy'], 'asc' | 'desc'];
                       setFilters({ sortBy, sortOrder });
                     }}
-                    className="px-3 py-2.5 rounded-xl border text-[13px]
+                    className="px-3 py-2.5 rounded-xl border text-body
                       focus:outline-none focus:ring-2 focus:ring-blue-500/40 transition-all"
                     style={{
                       borderColor: 'var(--theme-border)',
@@ -509,11 +509,11 @@ export default function WordBankPage() {
                     <div className="flex flex-wrap gap-5">
                       {/* Level */}
                       <div>
-                        <label className="block text-[11px] font-semibold mb-1.5"
+                        <label className="block text-caption font-semibold mb-1.5"
                           style={{ color: 'var(--theme-text-muted)' }}>Cấp độ</label>
                         <div className="flex gap-1">
                           <button onClick={() => setFilters({ level: 'all' })}
-                            className="px-2.5 py-1 rounded-lg text-[12px] font-medium transition-all"
+                            className="px-2.5 py-1 rounded-lg text-xs font-medium transition-all"
                             style={{
                               backgroundColor: filters.level === 'all' ? '#3B82F6' : 'var(--theme-bg-secondary)',
                               color: filters.level === 'all' ? 'white' : 'var(--theme-text-secondary)',
@@ -523,7 +523,7 @@ export default function WordBankPage() {
                           {levels.map(l => (
                             <button key={l}
                               onClick={() => setFilters({ level: filters.level === l ? 'all' : l })}
-                              className="px-2.5 py-1 rounded-lg text-[12px] font-medium transition-all"
+                              className="px-2.5 py-1 rounded-lg text-xs font-medium transition-all"
                               style={{
                                 backgroundColor: filters.level === l ? '#3B82F6' : 'var(--theme-bg-secondary)',
                                 color: filters.level === l ? 'white' : 'var(--theme-text-secondary)',
@@ -536,11 +536,11 @@ export default function WordBankPage() {
 
                       {/* Gender */}
                       <div>
-                        <label className="block text-[11px] font-semibold mb-1.5"
+                        <label className="block text-caption font-semibold mb-1.5"
                           style={{ color: 'var(--theme-text-muted)' }}>Giống (Nomen)</label>
                         <div className="flex gap-1">
                           <button onClick={() => setFilters({ gender: 'all' })}
-                            className="px-2.5 py-1 rounded-lg text-[12px] font-medium transition-all"
+                            className="px-2.5 py-1 rounded-lg text-xs font-medium transition-all"
                             style={{
                               backgroundColor: filters.gender === 'all' ? '#6B7280' : 'var(--theme-bg-secondary)',
                               color: filters.gender === 'all' ? 'white' : 'var(--theme-text-secondary)',
@@ -552,7 +552,7 @@ export default function WordBankPage() {
                             return (
                               <button key={g}
                                 onClick={() => setFilters({ gender: filters.gender === g ? 'all' : g })}
-                                className="px-2.5 py-1 rounded-lg text-[12px] font-medium transition-all"
+                                className="px-2.5 py-1 rounded-lg text-xs font-medium transition-all"
                                 style={{
                                   backgroundColor: filters.gender === g ? info.color : 'var(--theme-bg-secondary)',
                                   color: filters.gender === g ? 'white' : 'var(--theme-text-secondary)',
@@ -567,11 +567,11 @@ export default function WordBankPage() {
                       {/* Category */}
                       {categories.length > 0 && (
                         <div>
-                          <label className="block text-[11px] font-semibold mb-1.5"
+                          <label className="block text-caption font-semibold mb-1.5"
                             style={{ color: 'var(--theme-text-muted)' }}>Chủ đề</label>
                           <select value={filters.category}
                             onChange={e => setFilters({ category: e.target.value })}
-                            className="px-2.5 py-1 rounded-lg text-[12px] border transition-all
+                            className="px-2.5 py-1 rounded-lg text-xs border transition-all
                               focus:outline-none focus:ring-2 focus:ring-blue-500/40"
                             style={{
                               borderColor: 'var(--theme-border)',
@@ -585,14 +585,14 @@ export default function WordBankPage() {
                       )}
                     </div>
                     <button onClick={resetFilters}
-                      className="flex items-center gap-1.5 text-[12px] font-medium transition-all hover:opacity-70"
+                      className="flex items-center gap-1.5 text-xs font-medium transition-all hover:opacity-70"
                       style={{ color: '#3B82F6' }}>
                       <IconRefresh size={13} /> Reset bộ lọc
                     </button>
                   </div>
                 )}
 
-                <p className="text-[12px] mb-3" style={{ color: 'var(--theme-text-muted)' }}>
+                <p className="text-xs mb-3" style={{ color: 'var(--theme-text-muted)' }}>
                   Hiển thị {words.length} / {total} từ
                   {totalPages > 1 && ` • Trang ${page} / ${totalPages}`}
                 </p>
@@ -608,14 +608,14 @@ export default function WordBankPage() {
                       style={{ background: 'linear-gradient(135deg, rgba(139,92,246,.12), rgba(139,92,246,.06))' }}>
                       <IconNotebook size={30} style={{ color: '#8B5CF6' }} />
                     </div>
-                    <h3 className="text-[18px] font-bold mb-2" style={{ color: 'var(--theme-text-primary)' }}>
+                    <h3 className="text-title font-bold mb-2" style={{ color: 'var(--theme-text-primary)' }}>
                       Sổ từ vựng trống
                     </h3>
-                    <p className="text-[13px] mb-6 max-w-md mx-auto" style={{ color: 'var(--theme-text-muted)' }}>
+                    <p className="text-body mb-6 max-w-md mx-auto" style={{ color: 'var(--theme-text-muted)' }}>
                       Import danh sách từ vựng để bắt đầu. Từ đã có sẵn sẽ được tự động bỏ qua.
                     </p>
                     <button onClick={() => setShowImportModal(true)}
-                      className="flex items-center gap-2 mx-auto px-6 py-3 rounded-xl font-semibold text-[14px] text-white
+                      className="flex items-center gap-2 mx-auto px-6 py-3 rounded-xl font-semibold text-sm text-white
                         transition-all hover:shadow-md hover:-translate-y-0.5"
                       style={{ background: 'linear-gradient(135deg, #10B981, #059669)' }}>
                       <IconDownload size={17} /> Import từ vựng
@@ -627,10 +627,10 @@ export default function WordBankPage() {
                       style={{ background: 'linear-gradient(135deg, rgba(59,130,246,.12), rgba(59,130,246,.06))' }}>
                       <IconSearch size={26} style={{ color: '#3B82F6' }} />
                     </div>
-                    <h3 className="text-[16px] font-bold mb-2" style={{ color: 'var(--theme-text-primary)' }}>
+                    <h3 className="text-base font-bold mb-2" style={{ color: 'var(--theme-text-primary)' }}>
                       Không tìm thấy từ nào
                     </h3>
-                    <p className="text-[13px]" style={{ color: 'var(--theme-text-muted)' }}>Thử thay đổi bộ lọc</p>
+                    <p className="text-body" style={{ color: 'var(--theme-text-muted)' }}>Thử thay đổi bộ lọc</p>
                   </>
                 )}
               </div>
@@ -671,7 +671,7 @@ export default function WordBankPage() {
 
                       return (
                         <button key={pageNum} onClick={() => setPage(pageNum)}
-                          className="w-9 h-9 rounded-lg flex items-center justify-center text-[13px] font-semibold
+                          className="w-9 h-9 rounded-lg flex items-center justify-center text-body font-semibold
                             transition-all duration-200"
                           style={pageNum === page ? {
                             background: 'linear-gradient(135deg, #8B5CF6, #6366F1)',
@@ -694,7 +694,7 @@ export default function WordBankPage() {
                       }}>
                       <IconChevronRight size={16} />
                     </button>
-                    <span className="ml-2 text-[12px]" style={{ color: 'var(--theme-text-muted)' }}>
+                    <span className="ml-2 text-xs" style={{ color: 'var(--theme-text-muted)' }}>
                       / {totalPages} trang
                     </span>
                   </div>

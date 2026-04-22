@@ -1,9 +1,9 @@
-/**
+﻿/**
  * Shared Game UI Components
  * Reusable styled elements for all game pages
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useCreatePersonalWord } from '@/hooks/usePersonalWords';
 import { UpsellTrigger } from '@/components/subscription/UpsellTrigger';
 import type { Word } from '@/types';
@@ -42,7 +42,7 @@ export function ComboBadge({ combo }: { combo: number }) {
   if (combo <= 0) return <div className="h-9" />;
   return (
     <div className="h-9 flex justify-center items-center">
-      <div className="flex items-center gap-1.5 px-4 py-1.5 rounded-full text-white text-[13px] font-bold"
+      <div className="flex items-center gap-1.5 px-4 py-1.5 rounded-full text-white text-body font-bold"
         style={{ background: 'linear-gradient(135deg, #F97316, #EF4444)' }}>
         <IconFlame size={14} /> Combo x{Math.min(combo, 4)}!
       </div>
@@ -51,8 +51,8 @@ export function ComboBadge({ combo }: { combo: number }) {
 }
 
 /** Stats card used in result screens */
-export function StatCard({ label, value, color, icon: Icon }: {
-  label: string; value: string | number; color: string; icon?: React.FC<{ size?: number }>;
+export function StatCard({ label, value, color = '#3B82F6', icon: Icon }: {
+  label: string; value: string | number; color?: string; icon?: React.FC<{ size?: number }>;
 }) {
   return (
     <div className="relative overflow-hidden rounded-2xl p-3 text-center"
@@ -65,7 +65,7 @@ export function StatCard({ label, value, color, icon: Icon }: {
         </div>
       )}
       <div className="text-xl font-extrabold" style={{ color }}>{value}</div>
-      <div className="text-[11px] font-medium" style={{ color: 'var(--theme-text-muted)' }}>{label}</div>
+      <div className="text-caption font-medium" style={{ color: 'var(--theme-text-muted)' }}>{label}</div>
     </div>
   );
 }
@@ -114,74 +114,40 @@ export function GameResultCard({ accuracy, title, children }: {
   );
 }
 
-/** Primary action button */
-export function GameButton({ children, onClick, disabled, loading, variant = 'primary', color = '#3B82F6', className = '' }: {
-  children: React.ReactNode; onClick?: () => void; disabled?: boolean; loading?: boolean;
-  variant?: 'primary' | 'outline' | 'ghost'; color?: string; className?: string;
-}) {
-  const base = 'inline-flex items-center justify-center gap-2 font-semibold rounded-xl transition-all duration-200 text-[14px] disabled:opacity-50 disabled:cursor-not-allowed';
 
-  const styles: Record<string, React.CSSProperties> = {
-    primary: { background: `linear-gradient(135deg, ${color}, ${color}cc)`, color: 'white', boxShadow: `0 4px 12px ${color}30` },
-    outline: { border: '2px solid var(--theme-border)', color: 'var(--theme-text-secondary)', background: 'transparent' },
-    ghost: { color: 'var(--theme-text-muted)', background: 'transparent' },
-  };
-
-  return (
-    <button onClick={onClick} disabled={disabled || loading}
-      className={`${base} px-6 py-3 hover:-translate-y-0.5 ${className}`}
-      style={styles[variant]}>
-      {loading && (
-        <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-        </svg>
-      )}
-      {children}
-    </button>
-  );
-}
-
-/** Gender article answer buttons (der/die/das) */
+/** Gender article answer buttons (der/die/das) — SRS rating button style */
 type GenderType = 'masculine' | 'feminine' | 'neuter';
+
+const GENDER_BTN = [
+  { gender: 'masculine' as GenderType, article: 'der', label: 'Maskulin', textColor: '#93C5FD', bg: 'linear-gradient(160deg, #0a1628, #1e3a8a)', border: 'rgba(59,130,246,.45)',  hotkey: '1' },
+  { gender: 'feminine'  as GenderType, article: 'die', label: 'Feminin',  textColor: '#F9A8D4', bg: 'linear-gradient(160deg, #2a0a1e, #9d174d)', border: 'rgba(236,72,153,.45)', hotkey: '2' },
+  { gender: 'neuter'    as GenderType, article: 'das', label: 'Neutrum',  textColor: '#5EEAD4', bg: 'linear-gradient(160deg, #0a2218, #065f46)', border: 'rgba(20,184,166,.45)',  hotkey: '3' },
+];
 
 export function GenderButtons({ onAnswer, answered, selectedAnswer, correctGender, disabled }: {
   onAnswer: (g: GenderType) => void; answered: boolean; selectedAnswer: GenderType | null;
   correctGender?: GenderType; disabled?: boolean;
 }) {
-  const buttons: { gender: GenderType; article: string; color: string; key: string }[] = [
-    { gender: 'masculine', article: 'der', color: '#3B82F6', key: '1' },
-    { gender: 'feminine', article: 'die', color: '#EC4899', key: '2' },
-    { gender: 'neuter', article: 'das', color: '#22C55E', key: '3' },
-  ];
-
   return (
-    <div className="grid grid-cols-3 gap-3">
-      {buttons.map(btn => {
+    <div className="grid grid-cols-3 gap-2.5">
+      {GENDER_BTN.map(btn => {
         const isSelected = selectedAnswer === btn.gender;
-        const isCorrect = correctGender === btn.gender;
-
-        let bg = `linear-gradient(135deg, ${btn.color}, ${btn.color}cc)`;
-        let opacity = 1;
-
+        const isCorrect  = correctGender === btn.gender;
+        let bg = btn.bg, border = `1.5px solid ${btn.border}`, opacity = 1, textColor = btn.textColor;
         if (answered) {
-          if (isCorrect) bg = 'linear-gradient(135deg, #22C55E, #16A34A)';
-          else if (isSelected) bg = 'linear-gradient(135deg, #EF4444, #DC2626)';
-          else opacity = 0.35;
+          if (isCorrect)            { bg = 'linear-gradient(160deg, #052e16, #166534)'; border = '1.5px solid rgba(34,197,94,.5)';  textColor = '#86EFAC'; }
+          else if (isSelected)      { bg = 'linear-gradient(160deg, #450a0a, #991b1b)'; border = '1.5px solid rgba(239,68,68,.5)'; textColor = '#FCA5A5'; }
+          else                      { opacity = 0.28; }
         }
-
         return (
-          <button key={btn.gender} onClick={() => onAnswer(btn.gender)}
-            disabled={answered || disabled}
-            className="py-7 md:py-9 rounded-2xl font-bold text-3xl md:text-4xl text-white transition-all duration-200
-              hover:-translate-y-1 hover:shadow-lg active:scale-95 disabled:cursor-not-allowed"
-            style={{ background: bg, opacity, boxShadow: !answered ? `0 4px 16px ${btn.color}30` : 'none' }}>
-            {btn.article}
-            <div className="text-[11px] font-medium mt-1.5 opacity-80">
-              {answered && isCorrect && <IconCheck size={14} />}
-              {answered && isSelected && !isCorrect && <IconX size={14} />}
-              {!answered && `(${btn.key})`}
-            </div>
+          <button key={btn.gender} onClick={() => onAnswer(btn.gender)} disabled={answered || disabled}
+            className="relative py-6 rounded-2xl transition-all duration-200 hover:-translate-y-1.5 hover:shadow-xl active:scale-95 disabled:cursor-not-allowed"
+            style={{ background: bg, border, opacity }}>
+            {!answered && <span className="absolute top-2 right-2.5 text-caption font-bold" style={{ color: textColor, opacity: 0.5 }}>{btn.hotkey}</span>}
+            {answered && isCorrect  && <span className="absolute top-2 right-2.5 text-sm" style={{ color: textColor }}>✓</span>}
+            {answered && isSelected && !isCorrect && <span className="absolute top-2 right-2.5 text-sm" style={{ color: textColor }}>✗</span>}
+            <div className="text-3xl md:text-4xl font-extrabold" style={{ color: textColor }}>{btn.article}</div>
+            <div className="text-caption font-semibold mt-1" style={{ color: textColor, opacity: 0.65 }}>{btn.label}</div>
           </button>
         );
       })}
@@ -220,16 +186,16 @@ export function AnswerReview<T extends { word: any; isCorrect: boolean }>({ answ
                     : <IconX size={11} style={{ color: '#EF4444' }} />}
                 </span>
                 <div>
-                  <span className="text-[13px] font-semibold" style={{ color: correct.color }}>
+                  <span className="text-body font-semibold" style={{ color: correct.color }}>
                     {correct.article}
                   </span>
-                  <span className="text-[14px] font-bold ml-1.5" style={{ color: 'var(--theme-text-primary)' }}>
+                  <span className="text-sm font-bold ml-1.5" style={{ color: 'var(--theme-text-primary)' }}>
                     {record.word.word}
                   </span>
                 </div>
               </div>
               {!record.isCorrect && wrongLabel && (
-                <span className="text-[12px]" style={{ color: 'var(--theme-text-muted)' }}>
+                <span className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>
                   Bạn chọn: <span style={{ color: '#EF4444' }}>{wrongLabel}</span>
                 </span>
               )}
@@ -244,7 +210,7 @@ export function AnswerReview<T extends { word: any; isCorrect: boolean }>({ answ
 /** Info box for setup screens */
 export function GameInfoBox({ children }: { children: React.ReactNode }) {
   return (
-    <div className="rounded-xl p-4 text-left space-y-2 text-[13px]"
+    <div className="rounded-xl p-4 text-left space-y-2 text-body"
       style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-secondary)' }}>
       {children}
     </div>
@@ -254,7 +220,7 @@ export function GameInfoBox({ children }: { children: React.ReactNode }) {
 /** Keyboard hint badge */
 export function KBD({ children }: { children: React.ReactNode }) {
   return (
-    <kbd className="inline-flex items-center justify-center min-w-6 px-1.5 py-0.5 rounded-md text-[11px] font-bold"
+    <kbd className="inline-flex items-center justify-center min-w-6 px-1.5 py-0.5 rounded-md text-caption font-bold"
       style={{ backgroundColor: 'var(--theme-bg-card)', border: '1px solid var(--theme-border)', color: 'var(--theme-text-muted)' }}>
       {children}
     </kbd>
@@ -273,7 +239,7 @@ export function AddWrongWordsToBank({ wrongWords }: { wrongWords: Word[] }) {
   if (added) {
     return (
       <div className="max-w-2xl mx-auto px-4 sm:px-6 mt-4">
-        <div className="text-center py-3 rounded-xl text-[13px] font-semibold"
+        <div className="text-center py-3 rounded-xl text-body font-semibold"
           style={{ background: 'rgba(34,197,94,.08)', color: '#4ADE80', border: '1px solid rgba(34,197,94,.15)' }}>
           ✓ Đã thêm {count} từ vào Word Bank
         </div>
@@ -303,7 +269,7 @@ export function AddWrongWordsToBank({ wrongWords }: { wrongWords: Word[] }) {
   return (
     <div className="max-w-2xl mx-auto px-4 sm:px-6 mt-4">
       <button onClick={handleAdd} disabled={adding}
-        className="w-full py-3 rounded-xl font-semibold text-[14px] transition-all hover:-translate-y-0.5"
+        className="w-full py-3 rounded-xl font-semibold text-sm transition-all hover:-translate-y-0.5"
         style={{
           background: 'linear-gradient(135deg, #8B5CF6, #6366F1)',
           color: 'white', border: 'none',
@@ -332,6 +298,99 @@ export function GameResultUpsell() {
         ctaLabel="Xem Premium"
         source="game_result"
       />
+    </div>
+  );
+}
+
+// ─── SRS-style playing UI ────────────────────────────────────────────────────
+
+/** Self-contained session timer. Resets when active goes false→true. */
+export function useGameTimer(active: boolean): string {
+  const [seconds, setSeconds] = React.useState(0);
+  useEffect(() => {
+    if (!active) { setSeconds(0); return; }
+    const id = setInterval(() => setSeconds(s => s + 1), 1000);
+    return () => clearInterval(id);
+  }, [active]);
+  return `${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`;
+}
+
+/** SRS-style playing header with × close, game title, streak + timer pills */
+export function GamePlayHeader({ title, subtitle = 'Trò chơi', streak, timer, onExit }: {
+  title: string; subtitle?: string; streak?: number; timer?: string; onExit: () => void;
+}) {
+  return (
+    <div className="flex items-center justify-between mb-5">
+      <div className="flex items-center gap-3">
+        <button onClick={onExit}
+          className="w-9 h-9 rounded-xl flex items-center justify-center transition-all hover:opacity-70"
+          style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }}>
+          <IconX size={16} />
+        </button>
+        <div>
+          <p className="text-caption font-medium" style={{ color: 'var(--theme-text-muted)' }}>{subtitle}</p>
+          <p className="text-[15px] font-bold leading-tight" style={{ color: 'var(--theme-text-primary)' }}>{title}</p>
+        </div>
+      </div>
+      <div className="flex items-center gap-2">
+        {streak !== undefined && streak >= 2 && (
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-body font-bold"
+            style={{ background: 'rgba(249,115,22,.12)', color: '#F97316' }}>
+            🔥 {streak}
+          </div>
+        )}
+        {timer && (
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-body font-mono font-semibold"
+            style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+            </svg>
+            {timer}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/** Stats bar with colored number cells (like SRS session stats) */
+export function GameStatsBar({ stats }: {
+  stats: Array<{ label: string; value: number | string; color: string; dot?: boolean }>;
+}) {
+  return (
+    <div className="grid gap-1 mb-5 rounded-2xl p-3.5"
+      style={{
+        gridTemplateColumns: `repeat(${stats.length}, 1fr)`,
+        backgroundColor: 'var(--theme-bg-card)',
+        border: '1px solid var(--theme-border)',
+      }}>
+      {stats.map(s => (
+        <div key={s.label} className="text-center">
+          <div className="text-h2 font-extrabold leading-tight" style={{ color: s.color }}>{s.value}</div>
+          <div className="text-caption flex items-center justify-center gap-1 mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>
+            {s.dot && <span style={{ color: s.color, fontSize: 9 }}>■</span>}
+            {s.label}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/** Dark gradient hero card for word display — matches SRS card aesthetic */
+export function GameWordCard({ gradient = 'linear-gradient(135deg, #1e1b4b 0%, #4338ca 100%)', feedback, children, onClick }: {
+  gradient?: string; feedback?: 'correct' | 'wrong' | null; children: React.ReactNode; onClick?: () => void;
+}) {
+  const bg = feedback === 'correct' ? 'linear-gradient(135deg, #052e16 0%, #166534 100%)'
+    : feedback === 'wrong'   ? 'linear-gradient(135deg, #450a0a 0%, #991b1b 100%)'
+    : gradient;
+  return (
+    <div className="rounded-3xl overflow-hidden mb-5 transition-all duration-300"
+      style={{ background: bg, cursor: onClick ? 'pointer' : 'default', minHeight: 200 }}
+      onClick={onClick}>
+      <div className="flex flex-col items-center justify-center px-6 py-8 text-center" style={{ minHeight: 200 }}>
+        {children}
+      </div>
     </div>
   );
 }

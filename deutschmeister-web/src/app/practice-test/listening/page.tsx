@@ -1,9 +1,10 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import Link from 'next/link';
 import { useListeningHistory, useListeningStats, useDeleteListening } from '@/hooks/useListening';
 import { ListeningHistoryItem } from '@/lib/api/listening';
+import { PageHeader } from '@/components/ui';
 
 function IconHeadphones({ size = 16, style }: { size?: number; style?: React.CSSProperties }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}><path d="M3 18v-6a9 9 0 0 1 18 0v6" /><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z" /></svg>;
@@ -49,11 +50,11 @@ function HistoryCard({ item, onDelete }: { item: ListeningHistoryItem; onDelete:
       <Link href={href} className="block p-4">
         <div className="flex items-start justify-between gap-3 mb-2">
           <div className="flex items-center gap-2 flex-1 min-w-0">
-            <span className="text-[11px] font-extrabold px-2 py-0.5 rounded-full text-white shrink-0"
+            <span className="text-caption font-extrabold px-2 py-0.5 rounded-full text-white shrink-0"
               style={{ backgroundColor: CEFR_COLORS[item.cefrLevel] || '#6366F1' }}>
               {item.cefrLevel}
             </span>
-            <span className="text-[11px] font-medium px-2 py-0.5 rounded-full border"
+            <span className="text-caption font-medium px-2 py-0.5 rounded-full border"
               style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-muted)' }}>
               {SCRIPT_TYPE_LABELS[item.scriptType] || item.scriptType}
             </span>
@@ -63,19 +64,19 @@ function HistoryCard({ item, onDelete }: { item: ListeningHistoryItem; onDelete:
               {Math.round(item.score)}%
             </span>
           ) : (
-            <span className="text-[11px] font-bold px-2 py-0.5 rounded-full"
+            <span className="text-caption font-bold px-2 py-0.5 rounded-full"
               style={{ backgroundColor: 'rgba(249,115,22,.1)', color: '#F97316' }}>Chưa nộp</span>
           )}
         </div>
-        <p className="text-[13px] font-semibold mb-1 truncate" style={{ color: 'var(--theme-text-primary)' }}>
+        <p className="text-body font-semibold mb-1 truncate" style={{ color: 'var(--theme-text-primary)' }}>
           {item.title}
         </p>
         {item.status === 'GRADED' && (
-          <p className="text-[12px]" style={{ color: 'var(--theme-text-muted)' }}>
+          <p className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>
             {item.correctCount}/{item.totalQ} câu đúng
           </p>
         )}
-        <p className="text-[11px] mt-1" style={{ color: 'var(--theme-text-muted)' }}>
+        <p className="text-caption mt-1" style={{ color: 'var(--theme-text-muted)' }}>
           {new Date(item.createdAt).toLocaleDateString('vi-VN')}
         </p>
       </Link>
@@ -102,43 +103,26 @@ export default function ListeningPage() {
 
   return (
     <div className="py-6">
-      {/* ─── Back ─── */}
-      <div className="flex items-center gap-2 mb-5">
-        <Link href="/practice-test" className="flex items-center gap-1 text-[13px] font-medium transition-opacity hover:opacity-70"
-          style={{ color: 'var(--theme-text-muted)' }}>
-          <IconChevronLeft size={14} /> Luyện Test
-        </Link>
-      </div>
-
-      {/* ─── Header ─── */}
-      <div className="flex items-start justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-2xl flex items-center justify-center"
-            style={{ background: GRADIENT }}>
-            <IconHeadphones size={22} style={{ color: 'white' }} />
+      <PageHeader
+        backHref="/practice-test"
+        title="Luyện Nghe"
+        subtitle="AI tạo bài nghe tiếng Đức — Luyện kỹ năng nghe hiểu Goethe/TELC"
+        accent="listening"
+        right={
+          <div className="flex items-center gap-2">
+            <Link href="/practice-test/listening/exam"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-body font-semibold border transition-all hover:-translate-y-0.5"
+              style={{ borderColor: ACCENT, color: ACCENT, backgroundColor: `${ACCENT}0d` }}>
+              Theo đề chuẩn →
+            </Link>
+            <Link href="/practice-test/listening/new"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white transition-all duration-200 hover:-translate-y-0.5"
+              style={{ background: GRADIENT, boxShadow: '0 4px 12px rgba(236,72,153,.3)' }}>
+              <IconPlus size={16} /> Bài nghe mới
+            </Link>
           </div>
-          <div>
-            <h1 className="text-2xl font-bold" style={{ color: 'var(--theme-text-primary)' }}>
-              Luyện Nghe
-            </h1>
-            <p className="text-[13px] mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>
-              AI tạo bài nghe tiếng Đức — Luyện kỹ năng nghe hiểu Goethe/TELC
-            </p>
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <Link href="/practice-test/listening/exam"
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-[13px] font-semibold border transition-all hover:-translate-y-0.5"
-            style={{ borderColor: ACCENT, color: ACCENT, backgroundColor: `${ACCENT}0d` }}>
-            Theo đề chuẩn →
-          </Link>
-          <Link href="/practice-test/listening/new"
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-[14px] font-semibold text-white transition-all duration-200 hover:-translate-y-0.5"
-            style={{ background: GRADIENT, boxShadow: '0 4px 12px rgba(236,72,153,.3)' }}>
-            <IconPlus size={16} /> Bài nghe mới
-          </Link>
-        </div>
-      </div>
+        }
+      />
 
       {/* Stats */}
       {stats && (
@@ -150,8 +134,8 @@ export default function ListeningPage() {
           ].map(s => (
             <div key={s.label} className="rounded-2xl border p-3 text-center"
               style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
-              <p className="text-[20px] font-extrabold" style={{ color: ACCENT }}>{s.value}</p>
-              <p className="text-[11px] mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>{s.label}</p>
+              <p className="text-h2 font-extrabold" style={{ color: ACCENT }}>{s.value}</p>
+              <p className="text-caption mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>{s.label}</p>
             </div>
           ))}
         </div>
@@ -169,11 +153,11 @@ export default function ListeningPage() {
           <p className="text-[15px] font-semibold mb-1" style={{ color: 'var(--theme-text-primary)' }}>
             Chưa có bài nghe nào
           </p>
-          <p className="text-[13px] mb-4" style={{ color: 'var(--theme-text-muted)' }}>
+          <p className="text-body mb-4" style={{ color: 'var(--theme-text-muted)' }}>
             Tạo bài nghe đầu tiên để bắt đầu
           </p>
           <Link href="/practice-test/listening/new"
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-[14px] font-bold text-white"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white"
             style={{ background: GRADIENT }}>
             <IconPlus size={16} /> Tạo bài nghe
           </Link>

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -114,7 +114,7 @@ function GrammarTable({ headers, rows, genderCols = true }: {
 }) {
   return (
     <div className="overflow-x-auto -mx-1">
-      <table className="w-full text-[13px] sm:text-[14px]" style={{ borderCollapse: 'separate', borderSpacing: 0 }}>
+      <table className="w-full text-body sm:text-sm" style={{ borderCollapse: 'separate', borderSpacing: 0 }}>
         <thead>
           <tr>
             {headers.map((h, i) => (
@@ -170,13 +170,13 @@ export default function GrammarCheatsheetPage() {
             <h1 className="text-2xl font-bold" style={{ color: 'var(--theme-text-primary)' }}>
               Cheatsheet Ngữ pháp
             </h1>
-            <p className="text-[13px]" style={{ color: 'var(--theme-text-muted)' }}>
+            <p className="text-body" style={{ color: 'var(--theme-text-muted)' }}>
               Bảng tóm tắt nhanh các quy tắc ngữ pháp quan trọng
             </p>
           </div>
         </div>
         <button onClick={() => router.push('/grammar')}
-          className="flex items-center gap-1 px-4 py-2 rounded-xl text-[13px] font-semibold transition-all hover:-translate-y-0.5"
+          className="flex items-center gap-1 px-4 py-2 rounded-xl text-body font-semibold transition-all hover:-translate-y-0.5"
           style={{
             backgroundColor: 'var(--theme-bg-secondary)',
             color: 'var(--theme-text-secondary)',
@@ -192,7 +192,7 @@ export default function GrammarCheatsheetPage() {
         {/* 1. Bestimmter Artikel */}
         <Section title="Mạo từ xác định (der / die / das)" color="#3B82F6">
           <GrammarTable headers={BESTIMMT.headers} rows={BESTIMMT.rows} />
-          <p className="text-[12px] mt-3" style={{ color: 'var(--theme-text-muted)' }}>
+          <p className="text-xs mt-3" style={{ color: 'var(--theme-text-muted)' }}>
             Mẹo: Chỉ Maskulin Akkusativ thay đổi (der → den). Dativ luôn có -m (dem) trừ Feminin -r (der) và Plural -n (den).
           </p>
         </Section>
@@ -200,7 +200,7 @@ export default function GrammarCheatsheetPage() {
         {/* 2. Unbestimmter Artikel */}
         <Section title="Mạo từ bất định (ein / eine)" color="#EC4899">
           <GrammarTable headers={UNBESTIMMT.headers} rows={UNBESTIMMT.rows} />
-          <p className="text-[12px] mt-3" style={{ color: 'var(--theme-text-muted)' }}>
+          <p className="text-xs mt-3" style={{ color: 'var(--theme-text-muted)' }}>
             Lưu ý: Mạo từ bất định không có dạng Plural. Dùng &quot;keine&quot; cho phủ định Plural.
           </p>
         </Section>
@@ -215,12 +215,12 @@ export default function GrammarCheatsheetPage() {
           <div className="space-y-4">
             {PREPOSITIONS.map(group => (
               <div key={group.case}>
-                <h3 className="text-[14px] font-bold mb-2" style={{ color: group.color }}>
+                <h3 className="text-sm font-bold mb-2" style={{ color: group.color }}>
                   {group.case}
                 </h3>
                 <div className="flex flex-wrap gap-2 mb-2">
                   {group.preps.map(p => (
-                    <span key={p} className="px-3 py-1.5 rounded-lg text-[13px] font-semibold"
+                    <span key={p} className="px-3 py-1.5 rounded-lg text-body font-semibold"
                       style={{
                         backgroundColor: `${group.color}12`,
                         color: group.color,
@@ -230,7 +230,7 @@ export default function GrammarCheatsheetPage() {
                     </span>
                   ))}
                 </div>
-                <p className="text-[12px] italic" style={{ color: 'var(--theme-text-muted)' }}>
+                <p className="text-xs italic" style={{ color: 'var(--theme-text-muted)' }}>
                   {group.mnemonic}
                 </p>
               </div>
@@ -241,7 +241,7 @@ export default function GrammarCheatsheetPage() {
         {/* 5. Irregular Verbs */}
         <Section title="20 động từ bất quy tắc phổ biến" color="#8B5CF6" defaultOpen={false}>
           <div className="overflow-x-auto -mx-1">
-            <table className="w-full text-[13px] sm:text-[14px]" style={{ borderCollapse: 'separate', borderSpacing: 0 }}>
+            <table className="w-full text-body sm:text-sm" style={{ borderCollapse: 'separate', borderSpacing: 0 }}>
               <thead>
                 <tr>
                   {['Infinitiv', 'Präsens (er/sie/es)', 'Präteritum', 'Perfekt', 'Nghĩa'].map((h, i) => (
@@ -301,7 +301,7 @@ export default function GrammarCheatsheetPage() {
       {/* Footer nav */}
       <div className="mt-8 text-center">
         <button onClick={() => router.push('/grammar')}
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-[14px] font-semibold transition-all hover:-translate-y-0.5"
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all hover:-translate-y-0.5"
           style={{
             background: 'linear-gradient(135deg, #8B5CF6, #6366F1)',
             color: 'white',

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useCallback, useEffect } from 'react';
 import {
@@ -31,7 +31,7 @@ function CopyButton({ text }: { text: string }) {
   return (
     <button
       onClick={copy}
-      className="ml-2 px-1.5 py-0.5 rounded text-[11px] font-medium transition-colors"
+      className="ml-2 px-1.5 py-0.5 rounded text-caption font-medium transition-colors"
       style={{
         color: copied ? '#22C55E' : 'var(--theme-text-muted)',
         backgroundColor: copied ? 'rgba(34,197,94,0.1)' : 'var(--theme-bg-secondary)',
@@ -198,12 +198,12 @@ export function UpgradeModal({ open, onClose, defaultPeriod = 'yearly', featureC
               Nâng cấp Premium
             </h2>
             {featureContext ? (
-              <div className="rounded-xl px-3 py-2.5 mb-4 text-[13px] leading-relaxed"
+              <div className="rounded-xl px-3 py-2.5 mb-4 text-body leading-relaxed"
                 style={{ backgroundColor: 'rgba(99,102,241,.08)', borderLeft: '3px solid #6366F1', color: 'var(--theme-text-secondary)' }}>
                 {featureContext}
               </div>
             ) : (
-              <p className="text-[13px] mb-5" style={{ color: 'var(--theme-text-muted)' }}>
+              <p className="text-body mb-5" style={{ color: 'var(--theme-text-muted)' }}>
                 Luyện tập không giới hạn, đề thi chuẩn Goethe/TELC, AI chấm bài
               </p>
             )}
@@ -218,7 +218,7 @@ export function UpgradeModal({ open, onClose, defaultPeriod = 'yearly', featureC
                     key={p}
                     onClick={() => !disabled && setPeriod(p)}
                     disabled={disabled}
-                    className="relative py-3 px-2 rounded-xl text-[12px] font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="relative py-3 px-2 rounded-xl text-xs font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                     style={{
                       color: isActive ? '#fff' : 'var(--theme-text-primary)',
                       background: isActive
@@ -227,10 +227,10 @@ export function UpgradeModal({ open, onClose, defaultPeriod = 'yearly', featureC
                       border: isActive ? 'none' : '1px solid var(--theme-border)',
                     }}
                   >
-                    <div className="text-[11px] opacity-90">
+                    <div className="text-caption opacity-90">
                       {p === 'monthly' ? 'Tháng' : p === 'quarterly' ? '3 Tháng' : p === 'yearly' ? 'Năm' : 'Trọn đời'}
                     </div>
-                    <div className="text-[13px] font-bold mt-0.5">
+                    <div className="text-body font-bold mt-0.5">
                       {formatVND(priceForPeriod(p))}
                     </div>
                     {p === 'quarterly' && (
@@ -265,7 +265,7 @@ export function UpgradeModal({ open, onClose, defaultPeriod = 'yearly', featureC
             {/* Lifetime remaining */}
             {period === 'lifetime' && lifetimeInfo && (
               <div
-                className="rounded-lg px-3 py-2 mb-4 text-[12px]"
+                className="rounded-lg px-3 py-2 mb-4 text-xs"
                 style={{
                   backgroundColor: 'rgba(236,72,153,0.08)',
                   color: '#EC4899',
@@ -279,7 +279,7 @@ export function UpgradeModal({ open, onClose, defaultPeriod = 'yearly', featureC
             {/* Promo code */}
             <div className="mb-4">
               <label
-                className="text-[11px] uppercase tracking-wide block mb-1.5"
+                className="text-caption uppercase tracking-wide block mb-1.5"
                 style={{ color: 'var(--theme-text-muted)' }}
               >
                 Mã giảm giá (tùy chọn)
@@ -292,17 +292,17 @@ export function UpgradeModal({ open, onClose, defaultPeriod = 'yearly', featureC
                     border: '1px solid rgba(34,197,94,0.3)',
                   }}
                 >
-                  <div className="text-[13px]">
+                  <div className="text-body">
                     <span className="font-mono font-bold" style={{ color: '#22C55E' }}>
                       {promoCode.toUpperCase()}
                     </span>
-                    <span className="ml-2 text-[12px]" style={{ color: 'var(--theme-text-secondary)' }}>
+                    <span className="ml-2 text-xs" style={{ color: 'var(--theme-text-secondary)' }}>
                       ({promoApplied.label})
                     </span>
                   </div>
                   <button
                     onClick={handleRemovePromo}
-                    className="text-[11px] px-2 py-0.5 rounded font-medium"
+                    className="text-caption px-2 py-0.5 rounded font-medium"
                     style={{ color: 'var(--theme-text-muted)' }}
                   >
                     Bỏ
@@ -315,7 +315,7 @@ export function UpgradeModal({ open, onClose, defaultPeriod = 'yearly', featureC
                     value={promoCode}
                     onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
                     placeholder="VD: EARLY50"
-                    className="flex-1 px-3 py-2 rounded-lg text-[13px] font-mono uppercase outline-none"
+                    className="flex-1 px-3 py-2 rounded-lg text-body font-mono uppercase outline-none"
                     style={{
                       backgroundColor: 'var(--theme-bg-secondary)',
                       border: '1px solid var(--theme-border)',
@@ -325,7 +325,7 @@ export function UpgradeModal({ open, onClose, defaultPeriod = 'yearly', featureC
                   <button
                     onClick={handleApplyPromo}
                     disabled={!promoCode.trim() || validatePromoMut.isPending}
-                    className="px-4 py-2 rounded-lg text-[12px] font-bold disabled:opacity-50"
+                    className="px-4 py-2 rounded-lg text-xs font-bold disabled:opacity-50"
                     style={{
                       backgroundColor: 'var(--theme-bg-secondary)',
                       color: 'var(--theme-text-primary)',
@@ -337,7 +337,7 @@ export function UpgradeModal({ open, onClose, defaultPeriod = 'yearly', featureC
                 </div>
               )}
               {promoError && (
-                <div className="text-[11px] mt-1" style={{ color: '#EF4444' }}>
+                <div className="text-caption mt-1" style={{ color: '#EF4444' }}>
                   {promoError}
                 </div>
               )}
@@ -346,11 +346,11 @@ export function UpgradeModal({ open, onClose, defaultPeriod = 'yearly', featureC
             {/* Summary */}
             <div className="rounded-xl p-4 mb-5" style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
               <div className="flex justify-between items-center mb-1">
-                <span className="text-[13px]" style={{ color: 'var(--theme-text-secondary)' }}>
+                <span className="text-body" style={{ color: 'var(--theme-text-secondary)' }}>
                   {period === 'lifetime' ? 'Gói Lifetime' : 'Gói Premium'}
                 </span>
                 <span
-                  className="text-[14px] font-bold"
+                  className="text-sm font-bold"
                   style={{
                     color: 'var(--theme-text-primary)',
                     textDecoration: promoApplied ? 'line-through' : 'none',
@@ -363,24 +363,24 @@ export function UpgradeModal({ open, onClose, defaultPeriod = 'yearly', featureC
               {promoApplied && (
                 <>
                   <div className="flex justify-between items-center mb-1">
-                    <span className="text-[12px]" style={{ color: '#22C55E' }}>
+                    <span className="text-xs" style={{ color: '#22C55E' }}>
                       Giảm giá ({promoApplied.label})
                     </span>
-                    <span className="text-[12px] font-semibold" style={{ color: '#22C55E' }}>
+                    <span className="text-xs font-semibold" style={{ color: '#22C55E' }}>
                       -{formatVND(promoApplied.discount)}
                     </span>
                   </div>
                   <div className="flex justify-between items-center pt-2 mt-2 border-t" style={{ borderColor: 'var(--theme-border)' }}>
-                    <span className="text-[13px] font-semibold" style={{ color: 'var(--theme-text-primary)' }}>
+                    <span className="text-body font-semibold" style={{ color: 'var(--theme-text-primary)' }}>
                       Tổng thanh toán
                     </span>
-                    <span className="text-[16px] font-bold" style={{ color: '#8B5CF6' }}>
+                    <span className="text-base font-bold" style={{ color: '#8B5CF6' }}>
                       {formatVND(finalPrice)}
                     </span>
                   </div>
                 </>
               )}
-              <div className="text-[12px] mt-1" style={{ color: 'var(--theme-text-muted)' }}>
+              <div className="text-xs mt-1" style={{ color: 'var(--theme-text-muted)' }}>
                 {period === 'yearly' ? '12 tháng sử dụng' :
                  period === 'quarterly' ? '3 tháng sử dụng' :
                  period === 'lifetime' ? 'Truy cập trọn đời — không cần gia hạn' :
@@ -391,7 +391,7 @@ export function UpgradeModal({ open, onClose, defaultPeriod = 'yearly', featureC
             <button
               onClick={handleUpgrade}
               disabled={upgradeMut.isPending}
-              className="w-full py-3 rounded-xl text-[14px] font-bold text-white transition-transform hover:scale-[1.01] disabled:opacity-60"
+              className="w-full py-3 rounded-xl text-sm font-bold text-white transition-transform hover:scale-[1.01] disabled:opacity-60"
               style={{ background: 'linear-gradient(135deg, #6366F1, #8B5CF6)' }}
             >
               {upgradeMut.isPending ? 'Đang tạo...' : 'Tiếp tục thanh toán'}
@@ -402,7 +402,7 @@ export function UpgradeModal({ open, onClose, defaultPeriod = 'yearly', featureC
             <h2 className="text-lg font-bold mb-1" style={{ color: 'var(--theme-text-primary)' }}>
               Thông tin chuyển khoản
             </h2>
-            <p className="text-[13px] mb-4" style={{ color: 'var(--theme-text-muted)' }}>
+            <p className="text-body mb-4" style={{ color: 'var(--theme-text-muted)' }}>
               Chuyển khoản theo thông tin bên dưới hoặc quét mã QR
             </p>
 
@@ -422,28 +422,28 @@ export function UpgradeModal({ open, onClose, defaultPeriod = 'yearly', featureC
               {/* Right: Bank details */}
               <div className="flex-1 rounded-xl border p-4 space-y-3" style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-secondary)' }}>
                 <div>
-                  <div className="text-[10px] uppercase tracking-wide mb-0.5" style={{ color: 'var(--theme-text-muted)' }}>Ngân hàng</div>
-                  <div className="text-[13px] font-semibold" style={{ color: 'var(--theme-text-primary)' }}>
+                  <div className="text-caption uppercase tracking-wide mb-0.5" style={{ color: 'var(--theme-text-muted)' }}>Ngân hàng</div>
+                  <div className="text-body font-semibold" style={{ color: 'var(--theme-text-primary)' }}>
                     {upgradeData.bankInfo.bankName}
                   </div>
                 </div>
                 <div>
-                  <div className="text-[10px] uppercase tracking-wide mb-0.5" style={{ color: 'var(--theme-text-muted)' }}>Số tài khoản</div>
+                  <div className="text-caption uppercase tracking-wide mb-0.5" style={{ color: 'var(--theme-text-muted)' }}>Số tài khoản</div>
                   <div className="flex items-center gap-1">
-                    <span className="text-[13px] font-mono font-semibold" style={{ color: 'var(--theme-text-primary)' }}>
+                    <span className="text-body font-mono font-semibold" style={{ color: 'var(--theme-text-primary)' }}>
                       {upgradeData.bankInfo.accountNumber}
                     </span>
                     <CopyButton text={upgradeData.bankInfo.accountNumber} />
                   </div>
                 </div>
                 <div>
-                  <div className="text-[10px] uppercase tracking-wide mb-0.5" style={{ color: 'var(--theme-text-muted)' }}>Chủ tài khoản</div>
-                  <div className="text-[13px] font-semibold" style={{ color: 'var(--theme-text-primary)' }}>
+                  <div className="text-caption uppercase tracking-wide mb-0.5" style={{ color: 'var(--theme-text-muted)' }}>Chủ tài khoản</div>
+                  <div className="text-body font-semibold" style={{ color: 'var(--theme-text-primary)' }}>
                     {upgradeData.bankInfo.accountName}
                   </div>
                 </div>
                 <div>
-                  <div className="text-[10px] uppercase tracking-wide mb-0.5" style={{ color: 'var(--theme-text-muted)' }}>Số tiền</div>
+                  <div className="text-caption uppercase tracking-wide mb-0.5" style={{ color: 'var(--theme-text-muted)' }}>Số tiền</div>
                   <div className="flex items-center gap-1">
                     <span className="text-[15px] font-bold" style={{ color: '#8B5CF6' }}>
                       {formatVND(upgradeData.bankInfo.amount)}
@@ -452,11 +452,11 @@ export function UpgradeModal({ open, onClose, defaultPeriod = 'yearly', featureC
                   </div>
                 </div>
                 <div>
-                  <div className="text-[10px] uppercase tracking-wide mb-0.5" style={{ color: 'var(--theme-text-muted)' }}>
+                  <div className="text-caption uppercase tracking-wide mb-0.5" style={{ color: 'var(--theme-text-muted)' }}>
                     Nội dung chuyển khoản
                   </div>
                   <div className="flex items-center gap-1">
-                    <span className="text-[13px] font-mono font-bold" style={{ color: '#F59E0B' }}>
+                    <span className="text-body font-mono font-bold" style={{ color: '#F59E0B' }}>
                       {upgradeData.bankInfo.content}
                     </span>
                     <CopyButton text={upgradeData.bankInfo.content} />
@@ -465,14 +465,14 @@ export function UpgradeModal({ open, onClose, defaultPeriod = 'yearly', featureC
               </div>
             </div>
 
-            <div className="rounded-lg p-3 mb-4 text-[12px] leading-relaxed" style={{ backgroundColor: 'rgba(59,130,246,0.08)', color: 'var(--theme-text-secondary)' }}>
+            <div className="rounded-lg p-3 mb-4 text-xs leading-relaxed" style={{ backgroundColor: 'rgba(59,130,246,0.08)', color: 'var(--theme-text-secondary)' }}>
               Sau khi chuyển khoản, admin sẽ xác nhận trong vòng 24 giờ.
               Premium sẽ được kích hoạt tự động sau khi xác nhận.
             </div>
 
             <button
               onClick={handleClose}
-              className="w-full py-3 rounded-xl text-[14px] font-bold transition-colors"
+              className="w-full py-3 rounded-xl text-sm font-bold transition-colors"
               style={{ color: 'var(--theme-text-primary)', backgroundColor: 'var(--theme-bg-secondary)' }}
             >
               Tôi đã chuyển khoản

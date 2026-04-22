@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import Link from 'next/link';
 import type { Topic, TopicWithProgress } from '@/types/topic';
@@ -50,7 +50,7 @@ export function TopicCard({ topic, showProgress = false }: TopicCardProps) {
 
         {/* Completed badge */}
         {isCompleted && (
-          <div className="absolute top-3 right-3 flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-bold"
+          <div className="absolute top-3 right-3 flex items-center gap-1 px-2 py-0.5 rounded-lg text-caption font-bold"
             style={{ background: 'linear-gradient(135deg, #22C55E, #16A34A)', color: 'white' }}>
             <IconCheck size={10} /> Hoàn thành
           </div>
@@ -65,20 +65,20 @@ export function TopicCard({ topic, showProgress = false }: TopicCardProps) {
 
         {/* Content */}
         <div className="relative space-y-0.5">
-          <h3 className="font-bold text-[16px] leading-tight"
+          <h3 className="font-bold text-base leading-tight"
             style={{ color: 'var(--theme-text-primary)' }}>
             {topic.nameDe}
           </h3>
-          <p className="text-[13px]" style={{ color: 'var(--theme-text-muted)' }}>{topic.nameVi}</p>
+          <p className="text-body" style={{ color: 'var(--theme-text-muted)' }}>{topic.nameVi}</p>
         </div>
 
         {/* Stats row */}
         <div className="relative mt-3 flex items-center justify-between">
-          <span className="text-[11px] font-semibold px-2 py-0.5 rounded-md"
+          <span className="text-caption font-semibold px-2 py-0.5 rounded-md"
             style={{ background: `${topicColor}12`, color: topicColor }}>
             {topic.wordCount} từ
           </span>
-          <span className="text-[11px] font-medium px-2 py-0.5 rounded-md"
+          <span className="text-caption font-medium px-2 py-0.5 rounded-md"
             style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }}>
             {topic.level}
           </span>
@@ -87,7 +87,7 @@ export function TopicCard({ topic, showProgress = false }: TopicCardProps) {
         {/* Progress bar */}
         {showProgress && (
           <div className="relative mt-3">
-            <div className="flex items-center justify-between text-[11px] mb-1">
+            <div className="flex items-center justify-between text-caption mb-1">
               <span style={{ color: 'var(--theme-text-muted)' }}>
                 {wordsLearned}/{topic.wordCount} từ
               </span>

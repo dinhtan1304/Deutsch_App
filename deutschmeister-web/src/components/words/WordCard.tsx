@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { Word, GenderInfo } from '@/types';
@@ -161,11 +161,11 @@ export function WordCard({
             <div className="flex-1 min-w-0">
               {/* Article + Word + Speaker */}
               <div className="flex items-center gap-2 mb-2 flex-wrap">
-                <span className="text-[12px] font-bold px-2 py-0.5 rounded-md text-white"
+                <span className="text-xs font-bold px-2 py-0.5 rounded-md text-white"
                   style={{ background: styles.gradient }}>
                   {word.article}
                 </span>
-                <span className="text-[18px] font-bold" style={{ color: 'var(--theme-text-primary)' }}>
+                <span className="text-title font-bold" style={{ color: 'var(--theme-text-primary)' }}>
                   {word.word}
                 </span>
                 <button onClick={speakWord}
@@ -178,21 +178,21 @@ export function WordCard({
 
               {/* IPA */}
               {settings.showPronunciation && word.pronunciation && (
-                <p className="text-[12px] mb-1.5 font-mono" style={{ color: 'var(--theme-text-muted)' }}>
+                <p className="text-xs mb-1.5 font-mono" style={{ color: 'var(--theme-text-muted)' }}>
                   [{word.pronunciation}]
                 </p>
               )}
 
               {/* Translations */}
               <div className="space-y-0.5 mb-2.5">
-                <p className="text-[13px] flex items-center gap-1.5" style={{ color: 'var(--theme-text-primary)' }}>
-                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded"
+                <p className="text-body flex items-center gap-1.5" style={{ color: 'var(--theme-text-primary)' }}>
+                  <span className="text-caption font-bold px-1.5 py-0.5 rounded"
                     style={{ backgroundColor: styles.bg, color: styles.text }}>EN</span>
                   {word.translationEn}
                 </p>
                 {settings.showVietnamese && word.translationVi && (
-                  <p className="text-[13px] flex items-center gap-1.5" style={{ color: 'var(--theme-text-secondary)' }}>
-                    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded"
+                  <p className="text-body flex items-center gap-1.5" style={{ color: 'var(--theme-text-secondary)' }}>
+                    <span className="text-caption font-bold px-1.5 py-0.5 rounded"
                       style={{ backgroundColor: 'rgba(239,68,68,.08)', color: '#EF4444' }}>VN</span>
                     {word.translationVi}
                   </p>
@@ -201,15 +201,15 @@ export function WordCard({
 
               {/* Tags */}
               <div className="flex flex-wrap gap-1">
-                <span className="px-2 py-0.5 rounded-md text-[11px] font-medium"
+                <span className="px-2 py-0.5 rounded-md text-caption font-medium"
                   style={{ backgroundColor: styles.bg, color: styles.text }}>
                   {genderInfo.label}
                 </span>
-                <span className="px-2 py-0.5 rounded-md text-[11px]"
+                <span className="px-2 py-0.5 rounded-md text-caption"
                   style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }}>
                   {word.level}
                 </span>
-                <span className="px-2 py-0.5 rounded-md text-[11px]"
+                <span className="px-2 py-0.5 rounded-md text-caption"
                   style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }}>
                   {word.category}
                 </span>
@@ -252,14 +252,14 @@ export function WordCard({
           {/* Example preview */}
           {settings.showExamples && word.examples && word.examples.length > 0 && (
             <div className="mt-3 pt-3 border-t" style={{ borderColor: 'var(--theme-border)' }}>
-              <p className="text-[12px] italic line-clamp-1" style={{ color: 'var(--theme-text-muted)' }}>
+              <p className="text-xs italic line-clamp-1" style={{ color: 'var(--theme-text-muted)' }}>
                 „{word.examples[0]}"
               </p>
             </div>
           )}
 
           {/* Hover CTA */}
-          <p className="text-center text-[11px] mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 font-medium"
+          <p className="text-center text-caption mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 font-medium"
             style={{ color: styles.text }}>
             Nhấn để xem chi tiết →
           </p>

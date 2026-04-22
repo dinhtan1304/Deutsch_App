@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import Link from 'next/link';
 import { useStreakStatus } from '@/hooks/useDailyBonus';
@@ -27,13 +27,13 @@ export function StreakWarningBanner() {
       <div className="text-3xl animate-pulse">⚠️</div>
       <div className="flex-1 min-w-0">
         <div
-          className="font-bold text-[14px]"
+          className="font-bold text-sm"
           style={{ color: 'var(--theme-text-primary)' }}
         >
           Streak {data.streak} ngày của bạn đang gặp nguy hiểm!
         </div>
         <div
-          className="text-[12px] mt-0.5"
+          className="text-xs mt-0.5"
           style={{ color: 'var(--theme-text-muted)' }}
         >
           Hãy học ít nhất 1 bài hôm nay để giữ streak. Hết ngày (VN) là
@@ -42,7 +42,7 @@ export function StreakWarningBanner() {
       </div>
       <Link
         href="/games/quick-quiz"
-        className="shrink-0 px-4 py-2 rounded-xl font-semibold text-[13px] text-white shadow-lg transition-transform hover:scale-105"
+        className="shrink-0 px-4 py-2 rounded-xl font-semibold text-body text-white shadow-lg transition-transform hover:scale-105"
         style={{
           background: 'linear-gradient(135deg, #EF4444, #F97316)',
         }}

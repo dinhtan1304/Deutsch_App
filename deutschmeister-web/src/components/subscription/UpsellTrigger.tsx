@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import Link from 'next/link';
 import { useIsPremium, useBetaOpen } from '@/hooks/useSubscription';
@@ -55,20 +55,20 @@ export function UpsellTrigger({
         <CrownIcon />
         <div className="flex-1 min-w-0">
           <div
-            className="font-bold text-[13px] truncate"
+            className="font-bold text-body truncate"
             style={{ color: 'var(--theme-text-primary)' }}
           >
             {title}
           </div>
           <div
-            className="text-[11px] truncate"
+            className="text-caption truncate"
             style={{ color: 'var(--theme-text-muted)' }}
           >
             {description}
           </div>
         </div>
         <span
-          className="shrink-0 px-3 py-1.5 rounded-lg text-[12px] font-bold text-white"
+          className="shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold text-white"
           style={{
             background: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
           }}
@@ -120,7 +120,7 @@ export function UpsellTrigger({
           </div>
           <Link
             href={fullHref}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-[13px] font-bold text-white transition-transform hover:scale-105"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-body font-bold text-white transition-transform hover:scale-105"
             style={{
               background: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
               boxShadow: '0 4px 12px -2px rgba(139,92,246,0.4)',

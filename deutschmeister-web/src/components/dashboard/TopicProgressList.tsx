@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import Link from 'next/link';
 import type { TopicProgress } from '@/types/dashboard';
@@ -23,12 +23,12 @@ export function TopicProgressList({ data, limit }: TopicProgressListProps) {
 
   return (
     <div
-      className="p-5 rounded-2xl border"
+      className="p-5 rounded-card border shadow-card"
       style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}
     >
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-[15px] font-bold flex items-center gap-2"
+        <h3 className="text-title font-bold flex items-center gap-2"
           style={{ color: 'var(--theme-text-primary)' }}>
           <span className="w-7 h-7 rounded-lg flex items-center justify-center"
             style={{ background: 'linear-gradient(135deg, rgba(236,72,153,.15), rgba(244,114,182,.1))' }}>
@@ -38,7 +38,7 @@ export function TopicProgressList({ data, limit }: TopicProgressListProps) {
         </h3>
         <Link
           href="/topics"
-          className="flex items-center gap-1 text-[12px] font-medium transition-colors hover:opacity-80"
+          className="flex items-center gap-1 text-xs font-medium transition-colors hover:opacity-80"
           style={{ color: '#3B82F6' }}
         >
           Xem tất cả
@@ -49,7 +49,7 @@ export function TopicProgressList({ data, limit }: TopicProgressListProps) {
       {/* Summary bar */}
       <div className="flex items-center gap-4 mb-4 pb-4" style={{ borderBottom: '1px solid var(--theme-border)' }}>
         <div className="flex-1">
-          <div className="flex items-center justify-between text-[12px] mb-1.5">
+          <div className="flex items-center justify-between text-xs mb-1.5">
             <span style={{ color: 'var(--theme-text-muted)' }}>Tổng tiến độ</span>
             <span className="font-bold" style={{ color: 'var(--theme-text-primary)' }}>
               {overallProgress}%
@@ -68,7 +68,7 @@ export function TopicProgressList({ data, limit }: TopicProgressListProps) {
         </div>
         <div className="text-center px-3">
           <div className="text-xl font-extrabold" style={{ color: '#10B981' }}>{completedCount}</div>
-          <div className="text-[10px]" style={{ color: 'var(--theme-text-muted)' }}>Hoàn thành</div>
+          <div className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>Hoàn thành</div>
         </div>
       </div>
 
@@ -81,12 +81,11 @@ export function TopicProgressList({ data, limit }: TopicProgressListProps) {
             <Link
               key={topic.id}
               href={`/topics/${topic.slug}`}
-              className="flex items-center gap-3 p-3 rounded-xl transition-all duration-200
-                hover:bg-var(--theme-bg-secondary) group"
+              className="flex items-center gap-3 p-3 rounded-xl transition-all duration-200 hover:bg-(--theme-bg-secondary) group"
             >
               {/* Icon */}
               <div
-                className="w-9 h-9 rounded-lg flex items-center justify-center text-[13px] font-extrabold shrink-0
+                className="w-9 h-9 rounded-lg flex items-center justify-center text-body font-extrabold shrink-0
                   transition-transform duration-200 group-hover:scale-110 group-hover:rotate-3"
                 style={{ backgroundColor: `${topic.color}18`, color: topic.color }}
               >
@@ -96,18 +95,18 @@ export function TopicProgressList({ data, limit }: TopicProgressListProps) {
               {/* Content */}
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1.5">
-                  <span className="font-medium text-[13px] truncate"
+                  <span className="font-medium text-body truncate"
                     style={{ color: 'var(--theme-text-primary)' }}>
                     {topic.nameDe}
                   </span>
                   {isComplete && (
-                    <span className="text-[10px] px-1.5 py-0.5 rounded-full font-semibold"
+                    <span className="text-caption px-1.5 py-0.5 rounded-full font-semibold"
                       style={{ backgroundColor: 'rgba(16,185,129,.12)', color: '#10B981' }}>
                       ✓
                     </span>
                   )}
                 </div>
-                <div className="text-[11px]" style={{ color: 'var(--theme-text-muted)' }}>
+                <div className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>
                   {topic.wordsLearned}/{topic.totalWords} từ
                 </div>
               </div>
@@ -126,7 +125,7 @@ export function TopicProgressList({ data, limit }: TopicProgressListProps) {
                     }}
                   />
                 </div>
-                <span className="text-[12px] font-semibold w-10 text-right"
+                <span className="text-xs font-semibold w-10 text-right"
                   style={{ color: isComplete ? '#10B981' : topic.color }}>
                   {Math.round(topic.percent)}%
                 </span>
@@ -142,10 +141,10 @@ export function TopicProgressList({ data, limit }: TopicProgressListProps) {
           <div className="w-14 h-14 mx-auto mb-3 rounded-2xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, rgba(236,72,153,.12), rgba(244,114,182,.08))' }}>
             <IconLayers size={28} style={{ color: '#EC4899' }} />
           </div>
-          <p className="text-[13px] font-medium" style={{ color: 'var(--theme-text-secondary)' }}>
+          <p className="text-body font-medium" style={{ color: 'var(--theme-text-secondary)' }}>
             Chưa có chủ đề nào
           </p>
-          <Link href="/topics" className="text-[12px] font-medium mt-1 inline-block"
+          <Link href="/topics" className="text-xs font-medium mt-1 inline-block"
             style={{ color: '#3B82F6' }}>
             Bắt đầu học ngay →
           </Link>

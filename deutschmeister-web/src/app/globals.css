@@ -1,6 +1,70 @@
 @import "tailwindcss";
 
-/* 
+/* ============================================
+   TAILWIND v4 @theme — design tokens exposed as utilities
+   Generates: bg-accent-reading, text-status-success, rounded-card,
+   shadow-card, text-caption, text-body, text-title, etc.
+   Mirror of src/lib/tokens.ts — keep in sync.
+   ============================================ */
+
+@theme {
+  /* Feature accents */
+  --color-accent-reading: #22C55E;
+  --color-accent-reading-alt: #14B8A6;
+  --color-accent-listening: #EC4899;
+  --color-accent-listening-alt: #8B5CF6;
+  --color-accent-writing: #6366F1;
+  --color-accent-writing-alt: #8B5CF6;
+  --color-accent-writing-exam: #A855F7;
+  --color-accent-speaking: #EC4899;
+  --color-accent-speaking-alt: #F43F5E;
+  --color-accent-games: #F97316;
+  --color-accent-games-alt: #EF4444;
+  --color-accent-srs: #3B82F6;
+  --color-accent-srs-alt: #6366F1;
+  --color-accent-xp: #F59E0B;
+  --color-accent-xp-alt: #EF4444;
+  --color-accent-premium: #8B5CF6;
+  --color-accent-premium-alt: #A855F7;
+
+  /* Semantic status */
+  --color-status-success: #22C55E;
+  --color-status-warning: #F59E0B;
+  --color-status-danger: #EF4444;
+  --color-status-info: #3B82F6;
+
+  /* Theme aliases mapping to CSS vars (runtime-switchable) */
+  --color-theme-bg: var(--theme-bg-body);
+  --color-theme-card: var(--theme-bg-card);
+  --color-theme-secondary: var(--theme-bg-secondary);
+  --color-theme-tertiary: var(--theme-bg-tertiary);
+  --color-theme-text: var(--theme-text-primary);
+  --color-theme-sub: var(--theme-text-secondary);
+  --color-theme-muted: var(--theme-text-muted);
+  --color-theme-border: var(--theme-border);
+  --color-theme-border-dark: var(--theme-border-dark);
+
+  /* Radius */
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-card: 16px;
+  --radius-xl: 20px;
+  --radius-pill: 9999px;
+
+  /* Shadow */
+  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --shadow-hero: 0 12px 32px rgba(0, 0, 0, 0.12);
+
+  /* Typography (WCAG-safe floor = 11px) — text-xs/sm/base/lg from Tailwind cover 12/14/16/18 */
+  --text-caption: 11px;
+  --text-body: 13px;
+  --text-title: 18px;
+  --text-h2: 22px;
+  --text-h1: 28px;
+}
+
+/*
  * PURE CSS THEME SOLUTION
  * This works regardless of Tailwind version or configuration
  * Theme is controlled by 'data-theme' attribute on <html>
@@ -24,6 +88,8 @@ html.light {
   --theme-text-muted: #6b7280;      /* gray-500 */
   --theme-border: #e5e7eb;          /* gray-200 */
   --theme-border-dark: #d1d5db;     /* gray-300 */
+  --theme-overlay-soft: rgba(0, 0, 0, 0.04);
+  --theme-overlay-strong: rgba(0, 0, 0, 0.08);
 }
 
 /* Dark Theme Colors */
@@ -35,9 +101,23 @@ html.dark {
   --theme-bg-tertiary: #4b5563;     /* gray-600 */
   --theme-text-primary: #f9fafb;    /* gray-50 */
   --theme-text-secondary: #d1d5db;  /* gray-300 */
-  --theme-text-muted: #9ca3af;      /* gray-400 */
+  --theme-text-muted: #b0b8c4;      /* raised from #9ca3af for WCAG AA on #111827 */
   --theme-border: #374151;          /* gray-700 */
   --theme-border-dark: #4b5563;     /* gray-600 */
+  --theme-overlay-soft: rgba(255, 255, 255, 0.06);
+  --theme-overlay-strong: rgba(255, 255, 255, 0.10);
+}
+
+/* Accessibility: respect user's motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 /* ============================================
@@ -317,4 +397,29 @@ input[type="range"]::-webkit-slider-thumb {
   background: #3b82f6;
   margin-top: -6px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* ============================================
+   RESPONSIVE SIDEBAR LAYOUT HELPERS
+   Used by Header and MainLayout to offset based on sidebar width.
+   --sidebar-ml is set inline by the component (React style prop).
+   ============================================ */
+.header-left {
+  left: 0;
+  transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.main-ml {
+  margin-left: 0;
+  transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+@media (min-width: 768px) {
+  .header-left { left: var(--sidebar-ml, 260px); }
+  .main-ml { margin-left: var(--sidebar-ml, 260px); }
+}
+
+/* Hide reCAPTCHA badge — keeps UI clean; Google's terms still satisfied if reCAPTCHA is disclosed in privacy policy */
+.grecaptcha-badge {
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
 }

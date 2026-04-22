@@ -201,7 +201,7 @@ export default function PronunciationPracticePage() {
           }}
         >
           <span
-            className="px-2 py-0.5 rounded-md text-[10px] font-bold mb-3 inline-block"
+            className="px-2 py-0.5 rounded-md text-caption font-bold mb-3 inline-block"
             style={{
               backgroundColor: `${getWordColor(80)}1a`,
               color: getWordColor(80),
@@ -400,7 +400,7 @@ export default function PronunciationPracticePage() {
                 }}
               >
                 <div
-                  className="text-[11px] font-bold mb-1"
+                  className="text-caption font-bold mb-1"
                   style={{ color: 'var(--theme-text-muted)' }}
                 >
                   AI nghe được:
@@ -423,7 +423,7 @@ export default function PronunciationPracticePage() {
               }}
             >
               <div
-                className="text-[11px] font-bold mb-3"
+                className="text-caption font-bold mb-3"
                 style={{ color: 'var(--theme-text-muted)' }}
               >
                 Điểm từng từ (chạm/hover để xem chi tiết):
@@ -448,11 +448,11 @@ export default function PronunciationPracticePage() {
                       }}
                     >
                       {ws.word}
-                      <span className="text-[10px] opacity-70">{ws.score}</span>
+                      <span className="text-caption opacity-70">{ws.score}</span>
                     </span>
                     {hoveredWord === i && ws.issue && (
                       <div
-                        className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 rounded-lg text-[11px] whitespace-nowrap z-10 shadow-lg"
+                        className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 rounded-lg text-caption whitespace-nowrap z-10 shadow-lg"
                         style={{
                           backgroundColor: 'var(--theme-bg-primary)',
                           color: 'var(--theme-text-primary)',

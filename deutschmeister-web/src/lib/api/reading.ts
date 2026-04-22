@@ -28,6 +28,7 @@ export interface ReadingQuestion {
 export interface VocabHighlight {
   word: string;
   translation: string;
+  article?: string; // "der" | "die" | "das" | undefined for non-nouns
 }
 
 export interface GradingDetail {

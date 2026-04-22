@@ -1,9 +1,10 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useGenerateExamSpeaking } from '@/hooks/useExamSpeaking';
+import { PageHeader } from '@/components/ui';
 import { EXAM_SPEAKING_DISPLAY } from '@/lib/examConfig';
 
 function IconLoader({ size = 18 }: { size?: number }) {
@@ -47,23 +48,16 @@ export default function ExamSpeakingNewPage() {
 
   return (
     <div className="py-6">
-      <div className="flex items-center gap-2 mb-6">
-        <Link href="/practice-test/speaking/exam" className="flex items-center gap-1 text-[13px] font-medium transition-opacity hover:opacity-70"
-          style={{ color: 'var(--theme-text-muted)' }}>
-          <IconChevronLeft size={14} /> Danh sách
-        </Link>
-      </div>
-
-      <h1 className="text-xl font-bold mb-1" style={{ color: 'var(--theme-text-primary)' }}>
-        Tạo đề Luyện Nói
-      </h1>
-      <p className="text-[13px] mb-6" style={{ color: 'var(--theme-text-muted)' }}>
-        Chọn loại đề và trình độ để AI tạo bài nói đầy đủ các Teil Sprechen
-      </p>
+      <PageHeader
+        backHref="/practice-test/speaking/exam"
+        title="Tạo đề Luyện Nói"
+        subtitle="Chọn loại đề và trình độ để AI tạo bài nói đầy đủ các Teil Sprechen"
+        accent="xp"
+      />
 
       {/* Step 1: Exam type */}
       <div className="mb-6">
-        <p className="text-[12px] font-bold uppercase tracking-wider mb-3" style={{ color: 'var(--theme-text-muted)' }}>
+        <p className="text-xs font-bold uppercase tracking-wider mb-3" style={{ color: 'var(--theme-text-muted)' }}>
           Bước 1 — Loại đề thi
         </p>
         <div className="grid grid-cols-2 gap-3">
@@ -76,7 +70,7 @@ export default function ExamSpeakingNewPage() {
               <div className="text-[15px] font-bold" style={{ color: examType === et.id ? et.color : 'var(--theme-text-primary)' }}>
                 {et.label}
               </div>
-              <div className="text-[11px] mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>{et.desc}</div>
+              <div className="text-caption mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>{et.desc}</div>
             </button>
           ))}
         </div>
@@ -84,7 +78,7 @@ export default function ExamSpeakingNewPage() {
 
       {/* Step 2: Level */}
       <div className="mb-6">
-        <p className="text-[12px] font-bold uppercase tracking-wider mb-3" style={{ color: 'var(--theme-text-muted)' }}>
+        <p className="text-xs font-bold uppercase tracking-wider mb-3" style={{ color: 'var(--theme-text-muted)' }}>
           Bước 2 — Trình độ (CEFR)
         </p>
         <div className="flex gap-2">
@@ -111,33 +105,33 @@ export default function ExamSpeakingNewPage() {
       {examInfo && !isTelcA1 && (
         <div className="rounded-2xl border p-4 mb-6"
           style={{ borderColor: 'rgba(245,158,11,.3)', backgroundColor: 'rgba(245,158,11,.04)' }}>
-          <p className="text-[13px] font-bold mb-2" style={{ color: ACCENT }}>
+          <p className="text-body font-bold mb-2" style={{ color: ACCENT }}>
             {examType} {cefrLevel} — Sprechen
           </p>
           <div className="grid grid-cols-3 gap-2 text-center mb-3">
             <div>
-              <div className="text-[18px] font-extrabold" style={{ color: 'var(--theme-text-primary)' }}>{examInfo.teile}</div>
-              <div className="text-[11px]" style={{ color: 'var(--theme-text-muted)' }}>Teile</div>
+              <div className="text-title font-extrabold" style={{ color: 'var(--theme-text-primary)' }}>{examInfo.teile}</div>
+              <div className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>Teile</div>
             </div>
             <div>
-              <div className="text-[18px] font-extrabold" style={{ color: 'var(--theme-text-primary)' }}>{examInfo.totalPoints}</div>
-              <div className="text-[11px]" style={{ color: 'var(--theme-text-muted)' }}>Điểm tối đa</div>
+              <div className="text-title font-extrabold" style={{ color: 'var(--theme-text-primary)' }}>{examInfo.totalPoints}</div>
+              <div className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>Điểm tối đa</div>
             </div>
             <div>
-              <div className="text-[18px] font-extrabold" style={{ color: 'var(--theme-text-primary)' }}>{examInfo.timeMin} ph</div>
-              <div className="text-[11px]" style={{ color: 'var(--theme-text-muted)' }}>Thời gian</div>
+              <div className="text-title font-extrabold" style={{ color: 'var(--theme-text-primary)' }}>{examInfo.timeMin} ph</div>
+              <div className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>Thời gian</div>
             </div>
           </div>
           <div className="space-y-1">
             {examInfo.structure.map((s: string, i: number) => (
-              <div key={i} className="flex items-center gap-2 text-[12px]" style={{ color: 'var(--theme-text-secondary)' }}>
+              <div key={i} className="flex items-center gap-2 text-xs" style={{ color: 'var(--theme-text-secondary)' }}>
                 <span className="w-14 font-bold shrink-0" style={{ color: 'var(--theme-text-muted)' }}>Teil {i + 1}</span>
                 <span>{s}</span>
               </div>
             ))}
           </div>
           <div className="mt-3 pt-3 border-t" style={{ borderColor: 'rgba(245,158,11,.2)' }}>
-            <p className="text-[11px]" style={{ color: 'var(--theme-text-muted)' }}>
+            <p className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>
               Yêu cầu: microphone + Chrome/Edge (Web Speech API). Gemini sẽ chấm điểm từ audio và transcript.
             </p>
           </div>
@@ -145,7 +139,7 @@ export default function ExamSpeakingNewPage() {
       )}
 
       {errorMsg && (
-        <div className="p-3 rounded-xl text-[13px] mb-4" style={{ backgroundColor: 'rgba(239,68,68,.08)', color: '#EF4444' }}>
+        <div className="p-3 rounded-xl text-body mb-4" style={{ backgroundColor: 'rgba(239,68,68,.08)', color: '#EF4444' }}>
           {errorMsg}
         </div>
       )}
@@ -162,7 +156,7 @@ export default function ExamSpeakingNewPage() {
       </button>
 
       {generateMut.isPending && (
-        <p className="text-center text-[12px] mt-3" style={{ color: 'var(--theme-text-muted)' }}>
+        <p className="text-center text-xs mt-3" style={{ color: 'var(--theme-text-muted)' }}>
           AI đang tạo song song tất cả các Teil Sprechen...
         </p>
       )}

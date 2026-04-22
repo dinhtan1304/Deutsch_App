@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import Link from 'next/link';
@@ -147,7 +147,7 @@ export default function PricingPage() {
                 <button
                   key={key}
                   onClick={() => setActivePeriod(key)}
-                  className="relative flex items-center gap-2 px-4 py-2 rounded-xl text-[13px] font-semibold transition-all"
+                  className="relative flex items-center gap-2 px-4 py-2 rounded-xl text-body font-semibold transition-all"
                   style={isActive ? {
                     backgroundColor: 'var(--theme-bg-card)',
                     color: 'var(--theme-text-primary)',
@@ -161,7 +161,7 @@ export default function PricingPage() {
                   {label}
                   {savePct != null && savePct > 0 && (
                     <span
-                      className="px-1.5 py-0.5 rounded-md text-[10px] font-bold"
+                      className="px-1.5 py-0.5 rounded-md text-caption font-bold"
                       style={{
                         backgroundColor: isActive ? 'rgba(34,197,94,0.12)' : 'rgba(34,197,94,0.08)',
                         color: '#22C55E',
@@ -185,34 +185,34 @@ export default function PricingPage() {
             style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}
           >
             <div className="mb-5">
-              <div className="text-[13px] font-semibold uppercase tracking-wide mb-1" style={{ color: 'var(--theme-text-muted)' }}>Free</div>
+              <div className="text-body font-semibold uppercase tracking-wide mb-1" style={{ color: 'var(--theme-text-muted)' }}>Free</div>
               <div className="text-3xl font-extrabold" style={{ color: 'var(--theme-text-primary)' }}>0đ</div>
-              <div className="text-[13px] mt-1" style={{ color: 'var(--theme-text-muted)' }}>Mãi mãi miễn phí</div>
+              <div className="text-body mt-1" style={{ color: 'var(--theme-text-muted)' }}>Mãi mãi miễn phí</div>
             </div>
             <ul className="space-y-2.5 flex-1 mb-6">
               {FREE_FEATURES.map((f) => (
-                <li key={f} className="flex items-start gap-2 text-[13px]" style={{ color: 'var(--theme-text-secondary)' }}>
+                <li key={f} className="flex items-start gap-2 text-body" style={{ color: 'var(--theme-text-secondary)' }}>
                   {CHECK}<span>{f}</span>
                 </li>
               ))}
-              <li className="flex items-start gap-2 text-[13px]" style={{ color: 'var(--theme-text-muted)' }}>
+              <li className="flex items-start gap-2 text-body" style={{ color: 'var(--theme-text-muted)' }}>
                 {CHECK}<span>Luyện viết/đọc/nghe/nói/roleplay/phát âm — 3 lần/tuần</span>
               </li>
             </ul>
             {isAuthenticated ? (
               isPremium ? (
-                <div className="text-center text-[13px] font-medium py-2.5 rounded-lg" style={{ color: 'var(--theme-text-muted)', backgroundColor: 'var(--theme-bg-secondary)' }}>
+                <div className="text-center text-body font-medium py-2.5 rounded-lg" style={{ color: 'var(--theme-text-muted)', backgroundColor: 'var(--theme-bg-secondary)' }}>
                   Gói hiện tại: Premium
                 </div>
               ) : (
-                <div className="text-center text-[13px] font-medium py-2.5 rounded-lg" style={{ color: 'var(--theme-text-muted)', backgroundColor: 'var(--theme-bg-secondary)' }}>
+                <div className="text-center text-body font-medium py-2.5 rounded-lg" style={{ color: 'var(--theme-text-muted)', backgroundColor: 'var(--theme-bg-secondary)' }}>
                   Gói hiện tại
                 </div>
               )
             ) : (
               <Link
                 href="/login"
-                className="text-center text-[13px] font-bold py-2.5 rounded-lg transition-colors block"
+                className="text-center text-body font-bold py-2.5 rounded-lg transition-colors block"
                 style={{ color: 'var(--theme-text-primary)', backgroundColor: 'var(--theme-bg-secondary)' }}
               >
                 Đăng ký miễn phí
@@ -227,21 +227,21 @@ export default function PricingPage() {
           >
             {activePeriod !== 'monthly' && (
               <div
-                className="absolute -top-3 left-1/2 -translate-x-1/2 text-[11px] font-bold px-3 py-0.5 rounded-full text-white whitespace-nowrap"
+                className="absolute -top-3 left-1/2 -translate-x-1/2 text-caption font-bold px-3 py-0.5 rounded-full text-white whitespace-nowrap"
                 style={{ background: 'linear-gradient(135deg, #6366F1, #8B5CF6)' }}
               >
                 Tiết kiệm {activePeriod === 'quarterly' ? savePctQuarterly : savePctYearly}%
               </div>
             )}
             <div className="mb-5">
-              <div className="text-[13px] font-semibold uppercase tracking-wide mb-1" style={{ color: '#8B5CF6' }}>Premium</div>
+              <div className="text-body font-semibold uppercase tracking-wide mb-1" style={{ color: '#8B5CF6' }}>Premium</div>
               <div className="flex items-baseline gap-1">
                 <span className="text-3xl font-extrabold" style={{ color: 'var(--theme-text-primary)' }}>
                   {formatVND(currentPrice)}
                 </span>
-                <span className="text-[13px]" style={{ color: 'var(--theme-text-muted)' }}>{periodLabel}</span>
+                <span className="text-body" style={{ color: 'var(--theme-text-muted)' }}>{periodLabel}</span>
               </div>
-              <div className="text-[13px] mt-1" style={{ color: 'var(--theme-text-muted)' }}>
+              <div className="text-body mt-1" style={{ color: 'var(--theme-text-muted)' }}>
                 {perMonthPrice != null
                   ? `Chỉ ${formatVND(perMonthPrice)}/tháng`
                   : 'Huỷ bất kỳ lúc nào'}
@@ -249,24 +249,24 @@ export default function PricingPage() {
             </div>
             <ul className="space-y-2.5 flex-1 mb-6">
               {FREE_FEATURES.slice(0, 2).map((f) => (
-                <li key={f} className="flex items-start gap-2 text-[13px]" style={{ color: 'var(--theme-text-secondary)' }}>
+                <li key={f} className="flex items-start gap-2 text-body" style={{ color: 'var(--theme-text-secondary)' }}>
                   {CHECK}<span>{f}</span>
                 </li>
               ))}
               {PREMIUM_EXTRA.map((f) => (
-                <li key={f} className="flex items-start gap-2 text-[13px]" style={{ color: 'var(--theme-text-secondary)' }}>
+                <li key={f} className="flex items-start gap-2 text-body" style={{ color: 'var(--theme-text-secondary)' }}>
                   {CHECK}<span className="font-medium">{f}</span>
                 </li>
               ))}
             </ul>
             {isPremium ? (
-              <div className="text-center text-[13px] font-medium py-2.5 rounded-lg" style={{ color: '#22C55E', backgroundColor: 'rgba(34,197,94,0.1)' }}>
+              <div className="text-center text-body font-medium py-2.5 rounded-lg" style={{ color: '#22C55E', backgroundColor: 'rgba(34,197,94,0.1)' }}>
                 Đang sử dụng
               </div>
             ) : (
               <button
                 onClick={() => openUpgrade(activePeriod)}
-                className="w-full py-2.5 rounded-lg text-[14px] font-bold text-white transition-transform hover:scale-[1.02]"
+                className="w-full py-2.5 rounded-lg text-sm font-bold text-white transition-transform hover:scale-[1.02]"
                 style={{ background: 'linear-gradient(135deg, #6366F1, #8B5CF6)' }}
               >
                 {ctaLabel}
@@ -283,44 +283,44 @@ export default function PricingPage() {
             }}
           >
             <div
-              className="absolute -top-3 left-1/2 -translate-x-1/2 text-[11px] font-bold px-3 py-0.5 rounded-full text-white whitespace-nowrap"
+              className="absolute -top-3 left-1/2 -translate-x-1/2 text-caption font-bold px-3 py-0.5 rounded-full text-white whitespace-nowrap"
               style={{ background: 'linear-gradient(135deg, #EC4899, #F59E0B)' }}
             >
               🔥 Early Bird — Limited
             </div>
             <div className="mb-5">
-              <div className="text-[13px] font-semibold uppercase tracking-wide mb-1" style={{ color: '#EC4899' }}>Lifetime</div>
+              <div className="text-body font-semibold uppercase tracking-wide mb-1" style={{ color: '#EC4899' }}>Lifetime</div>
               <div className="flex items-baseline gap-1">
                 <span className="text-3xl font-extrabold" style={{ color: 'var(--theme-text-primary)' }}>{formatVND(lifetimePrice)}</span>
               </div>
-              <div className="text-[13px] mt-1" style={{ color: 'var(--theme-text-muted)' }}>
+              <div className="text-body mt-1" style={{ color: 'var(--theme-text-muted)' }}>
                 Trả 1 lần — dùng trọn đời
               </div>
               {lifetimeInfo && !lifetimeSoldOut && (
-                <div className="text-[12px] mt-2 font-semibold" style={{ color: '#EC4899' }}>
+                <div className="text-xs mt-2 font-semibold" style={{ color: '#EC4899' }}>
                   🔥 Còn {lifetimeInfo.remaining}/{lifetimeInfo.max} suất
                 </div>
               )}
             </div>
             <ul className="space-y-2.5 flex-1 mb-6">
               {LIFETIME_EXTRA.map((f) => (
-                <li key={f} className="flex items-start gap-2 text-[13px]" style={{ color: 'var(--theme-text-secondary)' }}>
+                <li key={f} className="flex items-start gap-2 text-body" style={{ color: 'var(--theme-text-secondary)' }}>
                   {CHECK}<span className="font-medium">{f}</span>
                 </li>
               ))}
             </ul>
             {isLifetime ? (
-              <div className="text-center text-[13px] font-medium py-2.5 rounded-lg" style={{ color: '#22C55E', backgroundColor: 'rgba(34,197,94,0.1)' }}>
+              <div className="text-center text-body font-medium py-2.5 rounded-lg" style={{ color: '#22C55E', backgroundColor: 'rgba(34,197,94,0.1)' }}>
                 Đang sử dụng
               </div>
             ) : lifetimeSoldOut ? (
-              <div className="text-center text-[13px] font-medium py-2.5 rounded-lg" style={{ color: 'var(--theme-text-muted)', backgroundColor: 'var(--theme-bg-secondary)' }}>
+              <div className="text-center text-body font-medium py-2.5 rounded-lg" style={{ color: 'var(--theme-text-muted)', backgroundColor: 'var(--theme-bg-secondary)' }}>
                 Hết suất
               </div>
             ) : (
               <button
                 onClick={() => openUpgrade('lifetime')}
-                className="w-full py-2.5 rounded-lg text-[14px] font-bold text-white transition-transform hover:scale-[1.02]"
+                className="w-full py-2.5 rounded-lg text-sm font-bold text-white transition-transform hover:scale-[1.02]"
                 style={{ background: 'linear-gradient(135deg, #EC4899, #F59E0B)' }}
               >
                 Mua trọn đời
@@ -341,17 +341,17 @@ export default function PricingPage() {
               { step: '3', title: 'Kích hoạt trong vài giờ', desc: 'Admin xác nhận giao dịch — thường trong 1-4 giờ, tối đa 24 giờ. Bạn nhận email thông báo khi Premium đã active.' },
             ].map(({ step, title, desc }) => (
               <div key={step} className="flex gap-3">
-                <div className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-[13px] font-black text-white" style={{ background: 'linear-gradient(135deg, #6366F1, #8B5CF6)' }}>
+                <div className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-body font-black text-white" style={{ background: 'linear-gradient(135deg, #6366F1, #8B5CF6)' }}>
                   {step}
                 </div>
                 <div>
-                  <div className="text-[13px] font-semibold mb-1" style={{ color: 'var(--theme-text-primary)' }}>{title}</div>
-                  <div className="text-[12px] leading-relaxed" style={{ color: 'var(--theme-text-muted)' }}>{desc}</div>
+                  <div className="text-body font-semibold mb-1" style={{ color: 'var(--theme-text-primary)' }}>{title}</div>
+                  <div className="text-xs leading-relaxed" style={{ color: 'var(--theme-text-muted)' }}>{desc}</div>
                 </div>
               </div>
             ))}
           </div>
-          <div className="mt-4 pt-4 flex items-center gap-2 text-[12px]" style={{ borderTop: '1px solid var(--theme-border)', color: 'var(--theme-text-muted)' }}>
+          <div className="mt-4 pt-4 flex items-center gap-2 text-xs" style={{ borderTop: '1px solid var(--theme-border)', color: 'var(--theme-text-muted)' }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4m0-4h.01"/></svg>
             Hỗ trợ qua email nếu có vấn đề thanh toán · Hoàn tiền trong 7 ngày nếu chưa hài lòng
           </div>
@@ -363,7 +363,7 @@ export default function PricingPage() {
             So sánh chi tiết
           </h2>
           <div className="rounded-2xl border overflow-hidden" style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
-            <table className="w-full text-[13px]">
+            <table className="w-full text-body">
               <thead>
                 <tr style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
                   <th className="text-left py-3 px-4 font-semibold" style={{ color: 'var(--theme-text-primary)' }}>Tính năng</th>
@@ -378,17 +378,17 @@ export default function PricingPage() {
                     <td className="py-2.5 px-4" style={{ color: 'var(--theme-text-secondary)' }}>{row.feature}</td>
                     <td className="text-center py-2.5 px-4">
                       {row.free === true ? CHECK : row.free === false ? CROSS : (
-                        <span className="text-[12px] font-medium" style={{ color: 'var(--theme-text-muted)' }}>{row.free}</span>
+                        <span className="text-xs font-medium" style={{ color: 'var(--theme-text-muted)' }}>{row.free}</span>
                       )}
                     </td>
                     <td className="text-center py-2.5 px-4">
                       {row.premium === true ? CHECK : row.premium === false ? CROSS : (
-                        <span className="text-[12px] font-medium" style={{ color: '#8B5CF6' }}>{row.premium}</span>
+                        <span className="text-xs font-medium" style={{ color: '#8B5CF6' }}>{row.premium}</span>
                       )}
                     </td>
                     <td className="text-center py-2.5 px-4">
                       {row.lifetime === true ? CHECK : row.lifetime === false ? CROSS : (
-                        <span className="text-[12px] font-medium" style={{ color: '#EC4899' }}>{row.lifetime}</span>
+                        <span className="text-xs font-medium" style={{ color: '#EC4899' }}>{row.lifetime}</span>
                       )}
                     </td>
                   </tr>
@@ -413,13 +413,13 @@ export default function PricingPage() {
               { q: 'Tôi có mã giảm giá, dùng ở đâu?', a: 'Khi bấm nút đăng ký, modal thanh toán sẽ có ô "Mã giảm giá". Nhập mã và bấm "Áp dụng" để thấy giá sau giảm trước khi chuyển khoản.' },
             ].map(({ q, a }) => (
               <details key={q} className="group rounded-xl border p-4" style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
-                <summary className="text-[14px] font-semibold cursor-pointer list-none flex items-center justify-between" style={{ color: 'var(--theme-text-primary)' }}>
+                <summary className="text-sm font-semibold cursor-pointer list-none flex items-center justify-between" style={{ color: 'var(--theme-text-primary)' }}>
                   {q}
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="shrink-0 transition-transform group-open:rotate-180" style={{ color: 'var(--theme-text-muted)' }}>
                     <path d="M6 9l6 6 6-6" />
                   </svg>
                 </summary>
-                <p className="mt-2 text-[13px] leading-relaxed" style={{ color: 'var(--theme-text-muted)' }}>
+                <p className="mt-2 text-body leading-relaxed" style={{ color: 'var(--theme-text-muted)' }}>
                   {a}
                 </p>
               </details>
@@ -437,7 +437,7 @@ export default function PricingPage() {
             >
               Bắt đầu với Premium
             </button>
-            <p className="text-[12px] mt-2" style={{ color: 'var(--theme-text-muted)' }}>
+            <p className="text-xs mt-2" style={{ color: 'var(--theme-text-muted)' }}>
               Chỉ từ {formatVND(Math.round(yearlyPrice / 12))}/tháng khi đăng ký năm
             </p>
           </div>

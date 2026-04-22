@@ -1,185 +1,128 @@
 'use client';
 
-import { useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useReadingSession } from '@/hooks/useReading';
-import { ReadingQuestion, GradingDetail, VocabHighlight } from '@/lib/api/reading';
+import { ReadingQuestion, GradingDetail } from '@/lib/api/reading';
+import { IconCheck, IconX, IconLoader } from '../../icons';
 import {
-  IconBookOpen, IconChevronLeft, IconCheck, IconX, IconVolume2, IconList, IconLoader,
-} from '../../icons';
+  PageHeader,
+  ScoreRing,
+  StatGrid,
+  FixedActionBar,
+  Button,
+  type StatItem,
+} from '@/components/ui';
+import { ACCENT } from '@/lib/tokens';
 
-const ACCENT = '#22C55E';
-const GRADIENT = 'linear-gradient(135deg, #22C55E, #14B8A6)';
-
-function speakText(text: string) {
-  if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
-  window.speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(text);
-  u.lang = 'de-DE';
-  u.rate = 0.85;
-  window.speechSynthesis.speak(u);
+function getGradeInfo(score: number): { emoji: string; label: string; color: string; bg: string } {
+  if (score >= 90) return { emoji: '🏆', label: 'Xuất sắc!', color: '#22C55E', bg: 'rgba(34,197,94,.15)' };
+  if (score >= 75) return { emoji: '🌟', label: 'Rất tốt! 👏', color: '#22C55E', bg: 'rgba(34,197,94,.12)' };
+  if (score >= 60) return { emoji: '👍', label: 'Khá tốt!', color: '#F59E0B', bg: 'rgba(245,158,11,.12)' };
+  if (score >= 40) return { emoji: '📖', label: 'Cần cố gắng thêm', color: '#F97316', bg: 'rgba(249,115,22,.12)' };
+  return { emoji: '💪', label: 'Hãy ôn luyện thêm', color: '#EF4444', bg: 'rgba(239,68,68,.12)' };
 }
 
-function getScoreColor(score: number) {
-  if (score >= 80) return '#22C55E';
-  if (score >= 60) return '#F59E0B';
-  if (score >= 40) return '#F97316';
-  return '#EF4444';
+function formatTime(ms: number): string {
+  const totalSec = Math.floor(ms / 1000);
+  const m = Math.floor(totalSec / 60);
+  const s = totalSec % 60;
+  if (m === 0) return `${s}s`;
+  return `${m}p${s.toString().padStart(2, '0')}s`;
 }
 
-function getScoreLabel(score: number) {
-  if (score >= 80) return 'Xuất sắc!';
-  if (score >= 60) return 'Khá tốt!';
-  if (score >= 40) return 'Cần cố gắng thêm';
-  return 'Hãy ôn luyện thêm';
-}
-
-// ─── Score Ring ───
-function ScoreRing({ score }: { score: number }) {
-  const r = 44;
-  const circ = 2 * Math.PI * r;
-  const offset = circ * (1 - score / 100);
-  const color = getScoreColor(score);
-
-  return (
-    <div className="flex flex-col items-center justify-center py-6">
-      <div className="relative w-32 h-32">
-        <svg width="128" height="128" viewBox="0 0 100 100" className="-rotate-90">
-          <circle cx="50" cy="50" r={r} fill="none" stroke="var(--theme-bg-secondary)" strokeWidth="10" />
-          <circle cx="50" cy="50" r={r} fill="none" stroke={color} strokeWidth="10"
-            strokeDasharray={circ} strokeDashoffset={offset}
-            strokeLinecap="round" style={{ transition: 'stroke-dashoffset 1s ease' }} />
-        </svg>
-        <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-[32px] font-extrabold leading-none" style={{ color }}>{Math.round(score)}%</span>
-        </div>
-      </div>
-      <p className="text-[16px] font-bold mt-3" style={{ color }}>{getScoreLabel(score)}</p>
-    </div>
-  );
-}
-
-// ─── Stats Cards ───
-function StatsRow({ correct, total }: { correct: number; total: number }) {
-  const wrong = total - correct;
-  const score = total > 0 ? (correct / total) * 100 : 0;
-
-  const cards = [
-    { label: 'Đúng', value: correct, color: '#22C55E', bg: 'rgba(34,197,94,.1)' },
-    { label: 'Sai', value: wrong, color: '#EF4444', bg: 'rgba(239,68,68,.1)' },
-    { label: 'Điểm', value: `${Math.round(score)}%`, color: getScoreColor(score), bg: `rgba(34,197,94,.05)` },
-  ];
-
-  return (
-    <div className="grid grid-cols-3 gap-3 mb-6">
-      {cards.map((c, i) => (
-        <div key={i} className="rounded-xl p-4 text-center"
-          style={{ backgroundColor: c.bg }}>
-          <div className="text-[24px] font-extrabold" style={{ color: c.color }}>{c.value}</div>
-          <div className="text-[11px] font-medium mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>{c.label}</div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-// ─── Question Review ───
-function QuestionReview({
-  question,
-  detail,
-  index,
-}: {
-  question: ReadingQuestion;
-  detail: GradingDetail | undefined;
-  index: number;
-}) {
-  const [isOpen, setIsOpen] = useState(false);
+function QuestionItem({
+  question, detail, index,
+}: { question: ReadingQuestion; detail: GradingDetail | undefined; index: number }) {
+  const [open, setOpen] = useState(false);
   const isCorrect = detail?.isCorrect ?? false;
-  const userOpt = question.options.find(o => o.id === detail?.userAnswer);
   const correctOpt = question.options.find(o => o.id === question.correctAnswer);
+  const LABELS = ['A', 'B', 'C', 'D'];
 
   return (
     <div className="rounded-2xl border overflow-hidden"
-      style={{ borderColor: isCorrect ? 'rgba(34,197,94,.3)' : 'rgba(239,68,68,.3)' }}>
-      {/* Header */}
-      <button onClick={() => setIsOpen(v => !v)}
-        className="w-full flex items-start gap-3 p-4 text-left"
+      style={{ borderColor: isCorrect ? 'rgba(34,197,94,.25)' : 'rgba(239,68,68,.25)' }}>
+      <button onClick={() => setOpen(v => !v)}
+        className="w-full flex items-center gap-3 px-4 py-3.5 text-left"
         style={{ backgroundColor: isCorrect ? 'rgba(34,197,94,.04)' : 'rgba(239,68,68,.04)' }}>
-        <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 text-white"
+        <div className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 text-white text-caption"
           style={{ background: isCorrect ? '#22C55E' : '#EF4444' }}>
-          {isCorrect ? <IconCheck size={13} /> : <IconX size={13} />}
+          {isCorrect ? <IconCheck size={11} /> : <IconX size={11} />}
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-[13px] font-semibold" style={{ color: 'var(--theme-text-primary)' }}>
+          <p className="text-body font-semibold leading-snug" style={{ color: 'var(--theme-text-primary)' }}>
             Câu {index + 1}: {question.questionText}
           </p>
-          <p className="text-[12px] mt-1" style={{ color: isCorrect ? '#22C55E' : '#EF4444' }}>
-            {isCorrect ? '✓ Đúng' : `✗ Sai — Đáp án: ${correctOpt?.text || question.correctAnswer}`}
-          </p>
+          {!isCorrect && (
+            <p className="text-xs mt-0.5" style={{ color: '#EF4444' }}>
+              Đáp án đúng: {correctOpt?.text || question.correctAnswer}
+            </p>
+          )}
         </div>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
+          className="shrink-0 transition-transform" style={{ color: 'var(--theme-text-muted)', transform: open ? 'rotate(180deg)' : 'none' }}>
+          <polyline points="6 9 12 15 18 9" />
+        </svg>
       </button>
 
-      {/* Detail */}
-      {isOpen && (
-        <div className="px-4 pb-4 border-t"
+      {open && (
+        <div className="px-4 pb-4 border-t space-y-3"
           style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-secondary)' }}>
-          <div className="pt-4 space-y-3">
-            {/* Options */}
-            <div className="space-y-2">
-              {question.options.map(opt => {
-                const isUserAnswer = opt.id === detail?.userAnswer;
-                const isCorrectAnswer = opt.id === question.correctAnswer;
-                let borderColor = 'var(--theme-border)';
-                let bgColor = 'transparent';
-                let textColor = 'var(--theme-text-secondary)';
-                if (isCorrectAnswer) { borderColor = '#22C55E'; bgColor = 'rgba(34,197,94,.08)'; textColor = '#22C55E'; }
-                if (isUserAnswer && !isCorrectAnswer) { borderColor = '#EF4444'; bgColor = 'rgba(239,68,68,.08)'; textColor = '#EF4444'; }
+          <div className="grid grid-cols-2 gap-2 pt-3">
+            {question.options.map((opt, oi) => {
+              const isUser = opt.id === detail?.userAnswer;
+              const isCorrectOpt = opt.id === question.correctAnswer;
+              let border = 'var(--theme-border)';
+              let bg = 'transparent';
+              let color = 'var(--theme-text-secondary)';
+              if (isCorrectOpt) { border = '#22C55E'; bg = 'rgba(34,197,94,.08)'; color = '#22C55E'; }
+              if (isUser && !isCorrectOpt) { border = '#EF4444'; bg = 'rgba(239,68,68,.08)'; color = '#EF4444'; }
 
-                return (
-                  <div key={opt.id} className="flex items-center gap-2 px-3 py-2.5 rounded-xl border text-[13px]"
-                    style={{ borderColor, backgroundColor: bgColor, color: textColor }}>
-                    <span className="font-bold">{opt.id.toUpperCase()}.</span>
-                    <span>{opt.text}</span>
-                    {isCorrectAnswer && <span className="ml-auto text-[10px] font-bold">✓ Đúng</span>}
-                    {isUserAnswer && !isCorrectAnswer && <span className="ml-auto text-[10px] font-bold">✗ Bạn chọn</span>}
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Explanations */}
-            {detail?.explanationVi && (
-              <div className="rounded-xl p-3" style={{ backgroundColor: 'rgba(34,197,94,.06)' }}>
-                <p className="text-[12px] font-bold mb-1" style={{ color: ACCENT }}>Giải thích (VN):</p>
-                <p className="text-[13px]" style={{ color: 'var(--theme-text-primary)' }}>{detail.explanationVi}</p>
-              </div>
-            )}
-            {detail?.explanationDe && (
-              <div className="rounded-xl p-3" style={{ backgroundColor: 'rgba(59,130,246,.06)' }}>
-                <p className="text-[12px] font-bold mb-1" style={{ color: '#3B82F6' }}>Erklärung (DE):</p>
-                <p className="text-[13px]" style={{ color: 'var(--theme-text-primary)' }}>{detail.explanationDe}</p>
-              </div>
-            )}
+              return (
+                <div key={opt.id} className="flex items-center gap-2 px-3 py-2.5 rounded-xl border text-xs"
+                  style={{ borderColor: border, backgroundColor: bg, color }}>
+                  <span className="w-5 h-5 rounded-full border flex items-center justify-center text-caption font-bold shrink-0"
+                    style={{ borderColor: border, color }}>
+                    {LABELS[oi] ?? opt.id.toUpperCase()}
+                  </span>
+                  <span className="flex-1 leading-snug">{opt.text}</span>
+                  {isCorrectOpt && <span className="text-caption font-bold shrink-0">✓</span>}
+                  {isUser && !isCorrectOpt && <span className="text-caption font-bold shrink-0">✗</span>}
+                </div>
+              );
+            })}
           </div>
+
+          {detail?.explanationVi && (
+            <div className="rounded-xl p-3" style={{ backgroundColor: 'rgba(34,197,94,.07)' }}>
+              <p className="text-caption font-bold mb-1" style={{ color: ACCENT.reading }}>Giải thích:</p>
+              <p className="text-body" style={{ color: 'var(--theme-text-primary)' }}>{detail.explanationVi}</p>
+            </div>
+          )}
         </div>
       )}
     </div>
   );
 }
 
-// ─── Main Page ───
 export default function ReadingResultPage() {
   const { id } = useParams<{ id: string }>();
+  const router = useRouter();
   const { data: session, isLoading, error } = useReadingSession(id);
-  const [showPassage, setShowPassage] = useState(false);
-  const [showVocab, setShowVocab] = useState(false);
+  const [filter, setFilter] = useState<'all' | 'wrong' | 'correct'>('all');
+  const [timeMs, setTimeMs] = useState<number | null>(null);
+
+  useEffect(() => {
+    const stored = localStorage.getItem(`reading_time_${id}`);
+    if (stored) setTimeMs(parseInt(stored, 10));
+  }, [id]);
 
   if (isLoading) {
     return (
-      <div className="py-6 flex items-center justify-center min-h-[60vh]">
+      <div className="flex items-center justify-center min-h-[60vh]">
         <div className="flex flex-col items-center gap-3">
-          <IconLoader size={32} style={{ color: ACCENT }} />
+          <IconLoader size={32} style={{ color: ACCENT.reading }} />
           <p style={{ color: 'var(--theme-text-muted)' }}>Đang tải kết quả...</p>
         </div>
       </div>
@@ -188,9 +131,9 @@ export default function ReadingResultPage() {
 
   if (error || !session) {
     return (
-      <div className="py-6 text-center">
+      <div className="py-10 text-center">
         <p className="mb-4" style={{ color: 'var(--theme-text-muted)' }}>Không tìm thấy kết quả.</p>
-        <Link href="/practice-test/reading" className="text-[14px] font-semibold" style={{ color: ACCENT }}>
+        <Link href="/practice-test/reading" className="text-sm font-semibold" style={{ color: ACCENT.reading }}>
           Quay lại danh sách
         </Link>
       </div>
@@ -199,131 +142,124 @@ export default function ReadingResultPage() {
 
   const questions = session.questions as ReadingQuestion[];
   const gradingDetails = (session.gradingDetails || []) as GradingDetail[];
-  const vocabHighlights = (session.vocabHighlights || []) as VocabHighlight[];
-  const score = session.score ?? 0;
+  const correct = session.correctCount;
+  const total = session.totalQuestions;
+  const wrong = total - correct;
+  const scorePct = total > 0 ? (correct / total) * 100 : 0;
+  const grade = getGradeInfo(scorePct);
+
+  const filteredQuestions = questions.filter(q => {
+    const detail = gradingDetails.find(d => d.questionId === q.id);
+    if (filter === 'correct') return detail?.isCorrect === true;
+    if (filter === 'wrong') return detail?.isCorrect === false;
+    return true;
+  });
+
+  const TABS: { key: typeof filter; label: string }[] = [
+    { key: 'all', label: 'Tất cả' },
+    { key: 'wrong', label: 'Sai' },
+    { key: 'correct', label: 'Đúng' },
+  ];
+
+  const stats: StatItem[] = [
+    { icon: <span style={{ fontSize: 18 }}>✓</span>, label: 'Đúng', value: correct, accent: 'reading' },
+    { icon: <span style={{ fontSize: 18 }}>✗</span>, label: 'Sai', value: wrong },
+    { icon: <span style={{ fontSize: 18 }}>⏱</span>, label: 'Thời gian', value: timeMs !== null ? formatTime(timeMs) : '—', accent: 'srs' },
+    { icon: <span style={{ fontSize: 18 }}>★</span>, label: 'Điểm', value: `${Math.round(scorePct)}%`, accent: 'xp' },
+  ];
 
   return (
     <div className="py-6">
-      {/* Header */}
-      <div className="flex items-center gap-3 mb-4">
-        <Link href="/practice-test/reading"
-          className="flex items-center gap-1 text-[13px] font-medium transition-opacity hover:opacity-70"
-          style={{ color: 'var(--theme-text-muted)' }}>
-          <IconChevronLeft size={14} /> Danh sách
-        </Link>
-        <div className="flex-1" />
-        <span className="px-3 py-1 rounded-xl text-[12px] font-bold"
-          style={{ backgroundColor: 'rgba(34,197,94,.1)', color: ACCENT }}>
-          {session.cefrLevel}
-        </span>
-      </div>
+      <PageHeader
+        backHref="/practice-test/reading"
+        title="Kết quả bài đọc"
+        subtitle={`${session.title} · ${session.topic} · ${session.textType}`}
+        accent="reading"
+        right={
+          <span className="px-3 py-1 rounded-xl text-xs font-bold"
+            style={{ backgroundColor: 'rgba(34,197,94,.1)', color: ACCENT.reading }}>
+            {session.cefrLevel}
+          </span>
+        }
+      />
 
-      {/* Score Ring */}
-      <div className="rounded-2xl border mb-6"
+      {/* Hero Result Card */}
+      <div className="rounded-2xl border mb-5 overflow-hidden"
         style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
-        <div className="p-4 text-center border-b" style={{ borderColor: 'var(--theme-border)' }}>
-          <h1 className="text-[16px] font-bold" style={{ color: 'var(--theme-text-primary)' }}>
-            {session.title}
-          </h1>
-          <p className="text-[12px] mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>
-            {session.topic} · {session.textType}
-          </p>
-        </div>
-        <ScoreRing score={score} />
-        <div className="px-4 pb-4">
-          <StatsRow correct={session.correctCount} total={session.totalQuestions} />
+        <div className="flex flex-col sm:flex-row">
+          <div className="sm:w-1/2 flex flex-col items-center justify-center gap-4 py-6 px-4 border-b sm:border-b-0 sm:border-r"
+            style={{ borderColor: 'var(--theme-border)' }}>
+            <ScoreRing
+              value={scorePct}
+              label={`${correct}/${total}`}
+              sublabel={`${Math.round(scorePct)}%`}
+              accent="reading"
+              variant="free"
+              size={144}
+            />
+            <div className="flex items-center gap-2 px-4 py-1.5 rounded-full text-body font-bold"
+              style={{ backgroundColor: grade.bg, color: grade.color }}>
+              <span>{grade.emoji}</span>
+              <span>{grade.label}</span>
+            </div>
+          </div>
+          <div className="sm:w-1/2 flex items-center p-4">
+            <StatGrid items={stats} columns={2} className="w-full" />
+          </div>
         </div>
       </div>
 
-      {/* Action Buttons */}
-      <div className="flex gap-3 mb-6">
-        <button onClick={() => setShowPassage(v => !v)}
-          className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-[13px] font-semibold transition-all hover:-translate-y-0.5"
-          style={showPassage
-            ? { background: GRADIENT, color: 'white', boxShadow: '0 4px 12px rgba(34,197,94,.3)' }
-            : { backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-secondary)' }
-          }>
-          <IconBookOpen size={14} />
-          {showPassage ? 'Ẩn bài đọc' : 'Xem lại bài đọc'}
-        </button>
-        {vocabHighlights.length > 0 && (
-          <button onClick={() => setShowVocab(v => !v)}
-            className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-[13px] font-semibold transition-all hover:-translate-y-0.5"
-            style={showVocab
-              ? { background: GRADIENT, color: 'white', boxShadow: '0 4px 12px rgba(34,197,94,.3)' }
-              : { backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-secondary)' }
-            }>
-            <IconList size={14} />
-            Từ vựng ({vocabHighlights.length})
-          </button>
+      {/* Question Review */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between mb-1">
+          <h3 className="text-body font-bold uppercase tracking-wider" style={{ color: 'var(--theme-text-muted)' }}>
+            Xem lại từng câu
+          </h3>
+        </div>
+
+        {/* Filter Tabs */}
+        <div className="flex gap-1 p-1 rounded-xl mb-3"
+          style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
+          {TABS.map(tab => (
+            <button key={tab.key} onClick={() => setFilter(tab.key)}
+              className="flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all"
+              style={filter === tab.key
+                ? { background: 'linear-gradient(135deg, #22C55E, #14B8A6)', color: 'white', boxShadow: '0 2px 8px rgba(34,197,94,.25)' }
+                : { color: 'var(--theme-text-muted)' }
+              }>
+              {tab.label}
+              {tab.key !== 'all' && (
+                <span className="ml-1 opacity-75">
+                  ({tab.key === 'wrong' ? wrong : correct})
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
+
+        {filteredQuestions.length === 0 ? (
+          <div className="text-center py-8" style={{ color: 'var(--theme-text-muted)' }}>
+            <p className="text-sm">Không có câu nào</p>
+          </div>
+        ) : (
+          filteredQuestions.map(q => {
+            const detail = gradingDetails.find(d => d.questionId === q.id);
+            const originalIndex = questions.findIndex(orig => orig.id === q.id);
+            return (
+              <QuestionItem key={q.id} question={q} detail={detail} index={originalIndex} />
+            );
+          })
         )}
       </div>
 
-      {/* Passage (collapsible) */}
-      {showPassage && (
-        <div className="rounded-2xl border p-5 mb-6"
-          style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
-          <div className="flex items-start justify-between gap-3 mb-3">
-            <h2 className="text-[15px] font-bold" style={{ color: 'var(--theme-text-primary)' }}>{session.title}</h2>
-            <button onClick={() => speakText(session.passage)}
-              className="p-2 rounded-xl flex-shrink-0 transition-all hover:scale-110"
-              style={{ backgroundColor: 'rgba(34,197,94,.1)', color: ACCENT }}>
-              <IconVolume2 size={16} />
-            </button>
-          </div>
-          <div className="text-[14px] leading-relaxed whitespace-pre-wrap"
-            style={{ color: 'var(--theme-text-primary)', fontFamily: 'Georgia, serif' }}>
-            {session.passage}
-          </div>
-        </div>
-      )}
-
-      {/* Vocab (collapsible) */}
-      {showVocab && vocabHighlights.length > 0 && (
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mb-6">
-          {vocabHighlights.map((v, i) => (
-            <div key={i} className="flex items-center gap-2 p-3 rounded-xl border"
-              style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
-              <button onClick={() => speakText(v.word)}
-                className="p-1 rounded-lg transition-all hover:scale-110 flex-shrink-0"
-                style={{ color: ACCENT }}>
-                <IconVolume2 size={14} />
-              </button>
-              <div className="min-w-0">
-                <div className="text-[13px] font-semibold truncate" style={{ color: 'var(--theme-text-primary)' }}>{v.word}</div>
-                <div className="text-[11px] truncate" style={{ color: 'var(--theme-text-muted)' }}>{v.translation}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Questions Review */}
-      <div className="space-y-3">
-        <h3 className="text-[13px] font-bold uppercase tracking-wider" style={{ color: 'var(--theme-text-muted)' }}>
-          Xem lại từng câu
-        </h3>
-        {questions.map((q, i) => {
-          const detail = gradingDetails.find(d => d.questionId === q.id);
-          return (
-            <QuestionReview key={q.id} question={q} detail={detail} index={i} />
-          );
-        })}
-      </div>
-
-      {/* Bottom CTA */}
-      <div className="flex gap-3 mt-8">
-        <Link href="/practice-test/reading/new"
-          className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-[14px] text-white transition-all hover:-translate-y-0.5"
-          style={{ background: GRADIENT, boxShadow: '0 4px 12px rgba(34,197,94,.3)' }}>
-          Bài mới
-        </Link>
-        <Link href="/practice-test/reading"
-          className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-[14px] transition-all hover:-translate-y-0.5 border-2"
-          style={{ borderColor: ACCENT, color: ACCENT }}>
+      <FixedActionBar columns={2}>
+        <Button variant="outline" fullWidth onClick={() => router.push('/practice-test/reading')}>
           Danh sách
-        </Link>
-      </div>
+        </Button>
+        <Button variant="game" accent="reading" fullWidth onClick={() => router.push('/practice-test/reading/new')}>
+          Bài mới
+        </Button>
+      </FixedActionBar>
     </div>
   );
 }

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import type { TopicWord } from '@/types/topic';
@@ -199,7 +199,7 @@ export function TopicQuiz({ words, topicColor, onMarkLearned }: Props) {
         <h3 className="text-xl font-bold mb-1" style={{ color: 'var(--theme-text-primary)' }}>
           Kết quả: {score}/{total}
         </h3>
-        <p className="text-[14px] mb-6" style={{ color: 'var(--theme-text-muted)' }}>
+        <p className="text-sm mb-6" style={{ color: 'var(--theme-text-muted)' }}>
           {pct >= 80 ? 'Xuất sắc! 🎉' : pct >= 50 ? 'Khá tốt, tiếp tục cố gắng!' : 'Cần ôn lại thêm nhé!'}
         </p>
 
@@ -214,19 +214,19 @@ export function TopicQuiz({ words, topicColor, onMarkLearned }: Props) {
                   'linear-gradient(90deg, #EF4444, #DC2626)',
               }} />
           </div>
-          <div className="text-[13px] font-bold mt-1" style={{ color: topicColor }}>{pct}%</div>
+          <div className="text-body font-bold mt-1" style={{ color: topicColor }}>{pct}%</div>
         </div>
 
         {/* Wrong words recap */}
         {wrongWords.size > 0 && (
           <div className="max-w-sm mx-auto mb-6 text-left p-4 rounded-xl"
             style={{ backgroundColor: 'rgba(239,68,68,.06)', border: '1px solid rgba(239,68,68,.15)' }}>
-            <div className="text-[12px] font-bold mb-2" style={{ color: '#EF4444' }}>
+            <div className="text-xs font-bold mb-2" style={{ color: '#EF4444' }}>
               Từ cần ôn lại ({wrongWords.size}):
             </div>
             <div className="space-y-1.5">
               {words.filter(w => wrongWords.has(w.id)).map(w => (
-                <div key={w.id} className="flex items-center gap-2 text-[13px]">
+                <div key={w.id} className="flex items-center gap-2 text-body">
                   <span className="font-semibold" style={{ color: ArticleColor[w.article] || 'var(--theme-text-primary)' }}>
                     {w.article} {w.word}
                   </span>
@@ -247,13 +247,13 @@ export function TopicQuiz({ words, topicColor, onMarkLearned }: Props) {
               if (wrongList.length >= 4) startQuiz(wrongList);
               else startQuiz();
             }}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-[13px] font-semibold transition-all hover:-translate-y-0.5"
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-body font-semibold transition-all hover:-translate-y-0.5"
               style={{ background: 'rgba(239,68,68,.1)', color: '#EF4444' }}>
               <IconRotateCcw size={15} /> Ôn từ sai
             </button>
           )}
           <button onClick={() => startQuiz()}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-[13px] font-semibold transition-all hover:-translate-y-0.5"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-body font-semibold transition-all hover:-translate-y-0.5"
             style={{ background: `${topicColor}15`, color: topicColor }}>
             <IconRotateCcw size={15} /> Quiz mới
           </button>
@@ -275,10 +275,10 @@ export function TopicQuiz({ words, topicColor, onMarkLearned }: Props) {
     <div>
       {/* Progress */}
       <div className="flex items-center justify-between mb-3">
-        <span className="text-[13px] font-medium" style={{ color: 'var(--theme-text-muted)' }}>
+        <span className="text-body font-medium" style={{ color: 'var(--theme-text-muted)' }}>
           Câu {currentIndex + 1}/{total}
         </span>
-        <span className="text-[13px] font-bold" style={{ color: topicColor }}>
+        <span className="text-body font-bold" style={{ color: topicColor }}>
           Điểm: {score}/{currentIndex + (isAnswered ? 1 : 0)}
         </span>
       </div>
@@ -291,7 +291,7 @@ export function TopicQuiz({ words, topicColor, onMarkLearned }: Props) {
       {/* Question Card */}
       <div className="p-6 rounded-2xl border mb-5"
         style={{ backgroundColor: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}>
-        <div className="text-[12px] font-semibold uppercase tracking-wide mb-3"
+        <div className="text-xs font-semibold uppercase tracking-wide mb-3"
           style={{ color: 'var(--theme-text-muted)' }}>
           {questionLabel}
         </div>
@@ -355,7 +355,7 @@ export function TopicQuiz({ words, topicColor, onMarkLearned }: Props) {
               className={`p-4 rounded-xl border-2 text-left text-[15px] font-medium transition-all
                 ${!isAnswered ? 'hover:-translate-y-0.5 hover:shadow-sm cursor-pointer' : ''}`}
               style={optStyle}>
-              <span className="text-[12px] font-bold mr-3 opacity-50">{i + 1}</span>
+              <span className="text-xs font-bold mr-3 opacity-50">{i + 1}</span>
               {opt}
             </button>
           );
@@ -365,12 +365,12 @@ export function TopicQuiz({ words, topicColor, onMarkLearned }: Props) {
       {/* Feedback + Next */}
       {isAnswered && (
         <div className="flex items-center justify-between">
-          <div className="text-[14px] font-semibold"
+          <div className="text-sm font-semibold"
             style={{ color: selectedOption === current.correctIndex ? '#22C55E' : '#EF4444' }}>
             {selectedOption === current.correctIndex ? '✓ Chính xác!' : '✗ Sai rồi!'}
           </div>
           <button onClick={handleNext}
-            className="px-5 py-2.5 rounded-xl text-[13px] font-semibold text-white transition-all hover:-translate-y-0.5"
+            className="px-5 py-2.5 rounded-xl text-body font-semibold text-white transition-all hover:-translate-y-0.5"
             style={{ background: `linear-gradient(135deg, ${topicColor}, ${topicColor}cc)` }}>
             {currentIndex < total - 1 ? 'Câu tiếp → Enter' : 'Xem kết quả'}
           </button>

@@ -1,8 +1,8 @@
-'use client';
+﻿'use client';
 
 import Link from 'next/link';
 import {
-  IconGamepad, IconCards, IconLayers, IconBook,
+  IconLayers, IconBook,
   IconBrain, IconArrowRight, IconZap, IconGraduationCap, IconRotateCcw,
 } from '@/components/ui/Icons';
 
@@ -11,24 +11,6 @@ interface QuickActionsProps {
 }
 
 const actions = [
-  {
-    icon: IconGamepad,
-    label: 'Quick Quiz',
-    description: 'Luyện Der/Die/Das',
-    href: '/games/quick-quiz',
-    gradient: 'linear-gradient(135deg, rgba(59,130,246,.1), rgba(99,102,241,.06))',
-    iconBg: 'linear-gradient(135deg, #3B82F6, #6366F1)',
-    accent: '#3B82F6',
-  },
-  {
-    icon: IconCards,
-    label: 'Flashcards',
-    description: 'Thẻ ghi nhớ',
-    href: '/games/flashcards',
-    gradient: 'linear-gradient(135deg, rgba(16,185,129,.1), rgba(52,211,153,.06))',
-    iconBg: 'linear-gradient(135deg, #10B981, #34D399)',
-    accent: '#10B981',
-  },
   {
     icon: IconLayers,
     label: 'Học chủ đề',
@@ -70,7 +52,7 @@ const actions = [
 export function QuickActions({ wordsToReview }: QuickActionsProps) {
   return (
     <div
-      className="p-5 rounded-2xl border"
+      className="p-5 rounded-card border shadow-card"
       style={{
         borderColor: 'var(--theme-border)',
         backgroundColor: 'var(--theme-bg-card)',
@@ -84,7 +66,7 @@ export function QuickActions({ wordsToReview }: QuickActionsProps) {
           style={{ background: 'linear-gradient(135deg, #FBBF24, #F97316)' }}>
           <IconZap size={15} className="text-white" />
         </div>
-        <h3 className="text-[15px] font-bold" style={{ color: 'var(--theme-text-primary)' }}>
+        <h3 className="text-title font-bold" style={{ color: 'var(--theme-text-primary)' }}>
           Hành động nhanh
         </h3>
       </div>
@@ -130,10 +112,10 @@ export function QuickActions({ wordsToReview }: QuickActionsProps) {
                 <Icon size={17} className="text-white" />
               </div>
               <div className="min-w-0">
-                <div className="text-[13px] font-semibold truncate" style={{ color: action.accent }}>
+                <div className="text-body font-semibold truncate" style={{ color: action.accent }}>
                   {action.label}
                 </div>
-                <div className="text-[11px] truncate" style={{ color: 'var(--theme-text-muted)' }}>
+                <div className="text-caption truncate" style={{ color: 'var(--theme-text-muted)' }}>
                   {action.description}
                 </div>
               </div>

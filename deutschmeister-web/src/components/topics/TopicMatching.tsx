@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import type { TopicWord } from '@/types/topic';
@@ -185,26 +185,26 @@ export function TopicMatching({ words, topicColor, onMarkLearned }: Props) {
         <div className="flex justify-center gap-6 mb-6 mt-4">
           <div className="text-center">
             <div className="text-2xl font-bold" style={{ color: topicColor }}>{roundWords.length}</div>
-            <div className="text-[12px]" style={{ color: 'var(--theme-text-muted)' }}>Cặp từ</div>
+            <div className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>Cặp từ</div>
           </div>
           <div className="text-center">
             <div className="text-2xl font-bold" style={{ color: 'var(--theme-text-primary)' }}>{attempts}</div>
-            <div className="text-[12px]" style={{ color: 'var(--theme-text-muted)' }}>Lần thử</div>
+            <div className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>Lần thử</div>
           </div>
           <div className="text-center">
             <div className="text-2xl font-bold" style={{ color: '#22C55E' }}>{formatTime(elapsed)}</div>
-            <div className="text-[12px]" style={{ color: 'var(--theme-text-muted)' }}>Thời gian</div>
+            <div className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>Thời gian</div>
           </div>
           <div className="text-center">
             <div className="text-2xl font-bold" style={{ color: accuracy >= 70 ? '#22C55E' : '#F59E0B' }}>
               {accuracy}%
             </div>
-            <div className="text-[12px]" style={{ color: 'var(--theme-text-muted)' }}>Chính xác</div>
+            <div className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>Chính xác</div>
           </div>
         </div>
         <div className="flex justify-center gap-3">
           <button onClick={() => startRound()}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-[13px] font-semibold transition-all hover:-translate-y-0.5"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-body font-semibold transition-all hover:-translate-y-0.5"
             style={{ background: `${topicColor}15`, color: topicColor }}>
             <IconRotateCcw size={15} /> Chơi lại
           </button>
@@ -218,14 +218,14 @@ export function TopicMatching({ words, topicColor, onMarkLearned }: Props) {
       {/* Header */}
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-3">
-          <span className="text-[13px] font-medium" style={{ color: 'var(--theme-text-muted)' }}>
+          <span className="text-body font-medium" style={{ color: 'var(--theme-text-muted)' }}>
             Nối: {matched.size}/{roundWords.length}
           </span>
-          <span className="text-[12px] px-2 py-0.5 rounded-md" style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }}>
+          <span className="text-xs px-2 py-0.5 rounded-md" style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }}>
             Thử: {attempts}
           </span>
         </div>
-        <div className="flex items-center gap-1.5 text-[13px]" style={{ color: 'var(--theme-text-muted)' }}>
+        <div className="flex items-center gap-1.5 text-body" style={{ color: 'var(--theme-text-muted)' }}>
           <IconClock size={14} />
           {formatTime(elapsed)}
         </div>
@@ -242,7 +242,7 @@ export function TopicMatching({ words, topicColor, onMarkLearned }: Props) {
       <div className="grid grid-cols-2 gap-4">
         {/* Left column - German */}
         <div className="space-y-2.5">
-          <div className="text-[11px] font-bold uppercase tracking-wide mb-2"
+          <div className="text-caption font-bold uppercase tracking-wide mb-2"
             style={{ color: 'var(--theme-text-muted)' }}>
             🇩🇪 Tiếng Đức
           </div>
@@ -283,7 +283,7 @@ export function TopicMatching({ words, topicColor, onMarkLearned }: Props) {
               <button key={item.id}
                 onClick={() => handleLeftClick(item.id)}
                 disabled={isMatched}
-                className={`w-full p-3.5 rounded-xl border-2 text-[14px] font-semibold text-center transition-all
+                className={`w-full p-3.5 rounded-xl border-2 text-sm font-semibold text-center transition-all
                   ${!isMatched ? 'cursor-pointer hover:-translate-y-0.5' : ''}`}
                 style={style}>
                 {isMatched ? '✓ ' : ''}{item.text}
@@ -294,7 +294,7 @@ export function TopicMatching({ words, topicColor, onMarkLearned }: Props) {
 
         {/* Right column - Vietnamese */}
         <div className="space-y-2.5">
-          <div className="text-[11px] font-bold uppercase tracking-wide mb-2"
+          <div className="text-caption font-bold uppercase tracking-wide mb-2"
             style={{ color: 'var(--theme-text-muted)' }}>
             🇻🇳 Tiếng Việt
           </div>
@@ -335,7 +335,7 @@ export function TopicMatching({ words, topicColor, onMarkLearned }: Props) {
               <button key={item.id}
                 onClick={() => handleRightClick(item.id)}
                 disabled={isMatched}
-                className={`w-full p-3.5 rounded-xl border-2 text-[14px] font-medium text-center transition-all
+                className={`w-full p-3.5 rounded-xl border-2 text-sm font-medium text-center transition-all
                   ${!isMatched ? 'cursor-pointer hover:-translate-y-0.5' : ''}`}
                 style={style}>
                 {isMatched ? '✓ ' : ''}{item.text}
@@ -346,7 +346,7 @@ export function TopicMatching({ words, topicColor, onMarkLearned }: Props) {
       </div>
 
       {/* Hint */}
-      <div className="text-center mt-5 text-[12px]" style={{ color: 'var(--theme-text-muted)' }}>
+      <div className="text-center mt-5 text-xs" style={{ color: 'var(--theme-text-muted)' }}>
         Chọn 1 từ bên trái → chọn nghĩa bên phải để nối
       </div>
     </div>

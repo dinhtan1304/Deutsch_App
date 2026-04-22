@@ -1,10 +1,11 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useGenerateListening } from '@/hooks/useListening';
 import { QuotaPaywall } from '@/components/subscription/QuotaPaywall';
+import { PageHeader } from '@/components/ui';
 
 function IconHeadphones({ size = 20, style }: { size?: number; style?: React.CSSProperties }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}><path d="M3 18v-6a9 9 0 0 1 18 0v6" /><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z" /></svg>;
@@ -54,23 +55,16 @@ export default function NewListeningPage() {
   return (
     <QuotaPaywall feature="listening">
     <div className="py-6 max-w-lg mx-auto">
-      <div className="flex items-center gap-3 mb-6">
-        <Link href="/practice-test/listening" className="p-2 rounded-xl transition-all hover:scale-110"
-          style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }}>
-          <IconChevronLeft size={18} />
-        </Link>
-        <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: GRADIENT }}>
-          <IconHeadphones size={18} style={{ color: 'white' }} />
-        </div>
-        <div>
-          <h1 className="text-[17px] font-bold" style={{ color: 'var(--theme-text-primary)' }}>Tạo Bài Nghe Mới</h1>
-          <p className="text-[12px]" style={{ color: 'var(--theme-text-muted)' }}>AI tạo audio script + câu hỏi</p>
-        </div>
-      </div>
+      <PageHeader
+        backHref="/practice-test/listening"
+        title="Tạo Bài Nghe Mới"
+        subtitle="AI tạo audio script + câu hỏi"
+        accent="listening"
+      />
 
       {/* Level */}
       <div className="rounded-2xl border p-5 mb-4" style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
-        <p className="text-[13px] font-bold mb-3 uppercase tracking-wide" style={{ color: 'var(--theme-text-muted)' }}>Trình độ</p>
+        <p className="text-body font-bold mb-3 uppercase tracking-wide" style={{ color: 'var(--theme-text-muted)' }}>Trình độ</p>
         <div className="grid grid-cols-3 gap-2">
           {LEVELS.map(l => {
             const sel = level === l.id;
@@ -81,7 +75,7 @@ export default function NewListeningPage() {
                   ? { borderColor: ACCENT, backgroundColor: 'rgba(236,72,153,.08)' }
                   : { borderColor: 'var(--theme-border)', backgroundColor: 'transparent' }}>
                 <p className="text-[15px] font-extrabold mb-0.5" style={{ color: sel ? ACCENT : 'var(--theme-text-primary)' }}>{l.id}</p>
-                <p className="text-[10px] leading-tight" style={{ color: 'var(--theme-text-muted)' }}>{l.desc}</p>
+                <p className="text-caption leading-tight" style={{ color: 'var(--theme-text-muted)' }}>{l.desc}</p>
               </button>
             );
           })}
@@ -90,7 +84,7 @@ export default function NewListeningPage() {
 
       {/* Script Type */}
       <div className="rounded-2xl border p-5 mb-5" style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
-        <p className="text-[13px] font-bold mb-3 uppercase tracking-wide" style={{ color: 'var(--theme-text-muted)' }}>Loại bài nghe</p>
+        <p className="text-body font-bold mb-3 uppercase tracking-wide" style={{ color: 'var(--theme-text-muted)' }}>Loại bài nghe</p>
         <div className="space-y-2">
           {SCRIPT_TYPES.map(st => {
             const sel = scriptType === st.id;
@@ -100,10 +94,10 @@ export default function NewListeningPage() {
                 style={sel
                   ? { borderColor: ACCENT, backgroundColor: 'rgba(236,72,153,.08)' }
                   : { borderColor: 'var(--theme-border)', backgroundColor: 'transparent' }}>
-                <span className="text-[18px]">{st.emoji}</span>
+                <span className="text-title">{st.emoji}</span>
                 <div>
-                  <p className="text-[13px] font-bold" style={{ color: sel ? ACCENT : 'var(--theme-text-primary)' }}>{st.label}</p>
-                  <p className="text-[11px]" style={{ color: 'var(--theme-text-muted)' }}>{st.desc}</p>
+                  <p className="text-body font-bold" style={{ color: sel ? ACCENT : 'var(--theme-text-primary)' }}>{st.label}</p>
+                  <p className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>{st.desc}</p>
                 </div>
               </button>
             );
@@ -111,7 +105,7 @@ export default function NewListeningPage() {
         </div>
       </div>
 
-      {error && <p className="text-[13px] mb-3 text-center" style={{ color: '#EF4444' }}>{error}</p>}
+      {error && <p className="text-body mb-3 text-center" style={{ color: '#EF4444' }}>{error}</p>}
 
       <button onClick={handleGenerate} disabled={loading}
         className="w-full py-3.5 rounded-2xl text-[15px] font-bold text-white flex items-center justify-center gap-2 transition-all hover:scale-[1.02] disabled:opacity-60 disabled:scale-100"

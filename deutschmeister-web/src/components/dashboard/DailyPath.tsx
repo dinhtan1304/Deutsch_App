@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import Link from 'next/link';
 import { useDailyPath } from '@/hooks/useDashboard';
@@ -49,10 +49,10 @@ export function DailyPath() {
           )}
         </div>
         <div className="flex-1 min-w-0">
-          <div className="text-[13px] font-bold truncate" style={{ color: 'var(--theme-text-primary)' }}>
+          <div className="text-body font-bold truncate" style={{ color: 'var(--theme-text-primary)' }}>
             Bài học hôm nay
           </div>
-          <div className="text-[11px] truncate" style={{ color: 'var(--theme-text-muted)' }}>
+          <div className="text-caption truncate" style={{ color: 'var(--theme-text-muted)' }}>
             {allDone ? 'Hoàn thành! Hẹn ngày mai' : `${completedCount}/${totalCount} hoàn thành`}
           </div>
         </div>

@@ -6,10 +6,10 @@ import Link from 'next/link';
 import { useExamWritingSession } from '@/hooks/useExamWriting';
 import { ExamWritingTeil, TeilGrading } from '@/lib/api/examWriting';
 import { CriterionRadar } from '@/components/writing/CriterionRadar';
+import { PageHeader, FixedActionBar } from '@/components/ui';
 
-// ─── Icons ────────────────────────────────────────────────────────────────────
-function IconLoader({ size = 24 }: { size?: number }) {
-  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="animate-spin" style={{ display: 'block' }}><path d="M21 12a9 9 0 1 1-6.219-8.56" /></svg>;
+function IconLoader({ size = 24, style }: { size?: number; style?: React.CSSProperties }) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="animate-spin" style={{ display: 'block', ...style }}><path d="M21 12a9 9 0 1 1-6.219-8.56" /></svg>;
 }
 function IconChevronDown({ size = 16 }: { size?: number }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}><polyline points="6 9 12 15 18 9" /></svg>;
@@ -39,8 +39,8 @@ function getScoreColor(s: number) {
   return '#EF4444';
 }
 
-// ─── Score Ring ───────────────────────────────────────────────────────────────
-function ScoreRing({ score, size = 112 }: { score: number; size?: number }) {
+// ─── Score Ring ───
+function ScoreRing({ score, size = 128 }: { score: number; size?: number }) {
   const r = (size - 16) / 2;
   const c = 2 * Math.PI * r;
   const pct = Math.max(0, Math.min(100, score));
@@ -51,7 +51,8 @@ function ScoreRing({ score, size = 112 }: { score: number; size?: number }) {
       <svg width={size} height={size} style={{ transform: 'rotate(-90deg)' }}>
         <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="var(--theme-border)" strokeWidth={8} />
         <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={color} strokeWidth={8}
-          strokeDasharray={c} strokeDashoffset={c - (c * pct) / 100} strokeLinecap="round" />
+          strokeDasharray={c} strokeDashoffset={c - (c * pct) / 100} strokeLinecap="round"
+          style={{ transition: 'stroke-dashoffset 1.2s ease' }} />
       </svg>
       <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
         <span style={{ fontSize: 26, fontWeight: 800, color, lineHeight: 1 }}>{Math.round(pct)}%</span>
@@ -63,19 +64,11 @@ function ScoreRing({ score, size = 112 }: { score: number; size?: number }) {
   );
 }
 
-// ─── Grading card per Teil ────────────────────────────────────────────────────
+// ─── Teil Grading Card ───
 function TeilGradingCard({
-  teil,
-  grading,
-  userText,
-  expanded,
-  onToggle,
+  teil, grading, userText, expanded, onToggle,
 }: {
-  teil: ExamWritingTeil;
-  grading: TeilGrading;
-  userText: string;
-  expanded: boolean;
-  onToggle: () => void;
+  teil: ExamWritingTeil; grading: TeilGrading; userText: string; expanded: boolean; onToggle: () => void;
 }) {
   const pct = grading.maxPoints > 0 ? (grading.score / grading.maxPoints) * 100 : 0;
   const [showText, setShowText] = useState(false);
@@ -83,22 +76,18 @@ function TeilGradingCard({
   return (
     <div className="rounded-2xl border overflow-hidden"
       style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
-      {/* Header */}
-      <button
-        className="w-full flex items-center gap-3 p-4 transition-opacity hover:opacity-80"
-        onClick={onToggle}
-      >
-        <span className="w-8 h-8 rounded-xl flex items-center justify-center text-[12px] font-extrabold text-white flex-shrink-0"
+      <button className="w-full flex items-center gap-3 p-4 transition-opacity hover:opacity-80" onClick={onToggle}>
+        <span className="w-8 h-8 rounded-xl flex items-center justify-center text-xs font-extrabold text-white shrink-0"
           style={{ background: GRADIENT }}>{teil.number}</span>
         <div className="flex-1 text-left">
-          <p className="text-[14px] font-bold" style={{ color: 'var(--theme-text-primary)' }}>
+          <p className="text-sm font-bold" style={{ color: 'var(--theme-text-primary)' }}>
             {taskTypeLabel(teil.taskType)}
           </p>
           <div className="flex items-center gap-2 mt-0.5">
-            <div className="flex-1 h-1.5 rounded-full max-w-[100px]" style={{ backgroundColor: 'var(--theme-border)' }}>
+            <div className="flex-1 h-1.5 rounded-full max-w-24" style={{ backgroundColor: 'var(--theme-border)' }}>
               <div className="h-1.5 rounded-full" style={{ width: `${pct}%`, backgroundColor: getScoreColor(pct) }} />
             </div>
-            <span className="text-[12px] font-semibold" style={{ color: getScoreColor(pct) }}>
+            <span className="text-xs font-semibold" style={{ color: getScoreColor(pct) }}>
               {grading.score}/{grading.maxPoints} Punkte · {Math.round(pct)}%
             </span>
           </div>
@@ -110,83 +99,62 @@ function TeilGradingCard({
 
       {expanded && (
         <div className="border-t px-4 pb-4 space-y-4" style={{ borderColor: 'var(--theme-border)' }}>
-          {/* Criterion radar */}
           {grading.criterionScores && (
             <div className="pt-3 flex justify-center">
               <CriterionRadar scores={grading.criterionScores} size={240} />
             </div>
           )}
-
-          {/* Overall feedback */}
           {grading.feedback && (
             <div className="pt-3">
-              <p className="text-[11px] font-bold uppercase tracking-wide mb-1.5" style={{ color: ACCENT }}>Bewertung</p>
-              <p className="text-[13px] leading-relaxed" style={{ color: 'var(--theme-text-primary)' }}>
+              <p className="text-caption font-bold uppercase tracking-wide mb-1.5" style={{ color: ACCENT }}>Bewertung</p>
+              <p className="text-body leading-relaxed" style={{ color: 'var(--theme-text-primary)' }}>
                 {grading.feedback}
               </p>
             </div>
           )}
-
-          {/* Strengths */}
           {grading.strengths?.length > 0 && (
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-wide mb-1.5" style={{ color: '#22C55E' }}>
-                Stärken
-              </p>
+              <p className="text-caption font-bold uppercase tracking-wide mb-1.5" style={{ color: '#22C55E' }}>Stärken</p>
               <ul className="space-y-1">
                 {grading.strengths.map((s, i) => (
-                  <li key={i} className="flex items-start gap-2 text-[12px]" style={{ color: 'var(--theme-text-secondary)' }}>
-                    <IconStar size={13} filled color="#22C55E" />
-                    {s}
+                  <li key={i} className="flex items-start gap-2 text-xs" style={{ color: 'var(--theme-text-secondary)' }}>
+                    <IconStar size={13} filled color="#22C55E" />{s}
                   </li>
                 ))}
               </ul>
             </div>
           )}
-
-          {/* Improvements */}
           {grading.improvements?.length > 0 && (
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-wide mb-1.5" style={{ color: '#F59E0B' }}>
-                Verbesserungen
-              </p>
+              <p className="text-caption font-bold uppercase tracking-wide mb-1.5" style={{ color: '#F59E0B' }}>Verbesserungen</p>
               <ul className="space-y-1">
                 {grading.improvements.map((imp, i) => (
-                  <li key={i} className="flex items-start gap-2 text-[12px]" style={{ color: 'var(--theme-text-secondary)' }}>
-                    <span className="flex-shrink-0 mt-1 w-1.5 h-1.5 rounded-full" style={{ backgroundColor: '#F59E0B' }} />
-                    {imp}
+                  <li key={i} className="flex items-start gap-2 text-xs" style={{ color: 'var(--theme-text-secondary)' }}>
+                    <span className="shrink-0 mt-1 w-1.5 h-1.5 rounded-full" style={{ backgroundColor: '#F59E0B' }} />{imp}
                   </li>
                 ))}
               </ul>
             </div>
           )}
-
-          {/* Corrections */}
           {grading.corrections?.length > 0 && (
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-wide mb-2" style={{ color: '#EF4444' }}>
-                Korrekturen
-              </p>
+              <p className="text-caption font-bold uppercase tracking-wide mb-2" style={{ color: '#EF4444' }}>Korrekturen</p>
               <div className="space-y-2">
                 {grading.corrections.map((corr, i) => (
                   <div key={i} className="rounded-xl border p-3 space-y-1.5"
                     style={{ borderColor: 'rgba(239,68,68,.2)', backgroundColor: 'rgba(239,68,68,.04)' }}>
-                    <div className="flex items-start gap-2 text-[12px]">
-                      <span className="line-through flex-shrink-0 font-medium" style={{ color: '#EF4444' }}>
-                        {corr.original}
-                      </span>
+                    <div className="flex items-start gap-2 text-xs">
+                      <span className="line-through shrink-0 font-medium" style={{ color: '#EF4444' }}>{corr.original}</span>
                       <span style={{ color: 'var(--theme-text-muted)' }}>→</span>
-                      <span className="font-semibold flex-shrink-0" style={{ color: '#22C55E' }}>
-                        {corr.corrected}
-                      </span>
+                      <span className="font-semibold shrink-0" style={{ color: '#22C55E' }}>{corr.corrected}</span>
                     </div>
                     {corr.explanationVi && (
-                      <p className="text-[11px] leading-relaxed" style={{ color: 'var(--theme-text-secondary)' }}>
+                      <p className="text-caption leading-relaxed" style={{ color: 'var(--theme-text-secondary)' }}>
                         🇻🇳 {corr.explanationVi}
                       </p>
                     )}
                     {corr.explanationDe && (
-                      <p className="text-[11px] leading-relaxed italic" style={{ color: 'var(--theme-text-muted)' }}>
+                      <p className="text-caption leading-relaxed italic" style={{ color: 'var(--theme-text-muted)' }}>
                         🇩🇪 {corr.explanationDe}
                       </p>
                     )}
@@ -195,20 +163,20 @@ function TeilGradingCard({
               </div>
             </div>
           )}
-
-          {/* User text */}
           {userText && (
             <div>
               <button
-                className="flex items-center gap-1.5 text-[12px] font-semibold mb-2"
+                className="flex items-center gap-1.5 text-xs font-semibold mb-2"
                 style={{ color: 'var(--theme-text-muted)' }}
                 onClick={() => setShowText(v => !v)}>
                 {showText ? <IconChevronUp size={13} /> : <IconChevronDown size={13} />}
                 {showText ? 'Ẩn bài viết' : 'Xem lại bài viết của bạn'}
               </button>
               {showText && (
-                <div className="rounded-xl p-3 border" style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-secondary)' }}>
-                  <p className="text-[12px] leading-relaxed whitespace-pre-wrap" style={{ color: 'var(--theme-text-primary)', fontFamily: 'Georgia, serif' }}>
+                <div className="rounded-xl p-3 border"
+                  style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-secondary)' }}>
+                  <p className="text-xs leading-relaxed whitespace-pre-wrap"
+                    style={{ color: 'var(--theme-text-primary)', fontFamily: 'Georgia, serif' }}>
                     {userText}
                   </p>
                 </div>
@@ -221,20 +189,20 @@ function TeilGradingCard({
   );
 }
 
-// ─── Grading / Loading state ─────────────────────────────────────────────────
+// ─── Grading in Progress ───
 function GradingInProgress() {
   return (
-    <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--theme-bg-primary)' }}>
+    <div className="flex items-center justify-center min-h-[60vh]">
       <div className="text-center space-y-4 px-8">
         <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto"
           style={{ background: GRADIENT }}>
           <IconLoader size={28} />
         </div>
-        <h2 className="text-[18px] font-bold" style={{ color: 'var(--theme-text-primary)' }}>
+        <h2 className="text-title font-bold" style={{ color: 'var(--theme-text-primary)' }}>
           AI đang chấm bài...
         </h2>
-        <p className="text-[13px] leading-relaxed" style={{ color: 'var(--theme-text-muted)' }}>
-          Hệ thống đang đánh giá bài viết của bạn theo tiêu chí Goethe/TELC. Thường mất 10–30 giây.
+        <p className="text-body leading-relaxed" style={{ color: 'var(--theme-text-muted)' }}>
+          Hệ thống đang đánh giá bài viết theo tiêu chí Goethe/TELC. Thường mất 10–30 giây.
         </p>
         <div className="flex justify-center gap-1.5 mt-4">
           {[0, 1, 2].map(i => (
@@ -247,42 +215,40 @@ function GradingInProgress() {
   );
 }
 
-// ─── Main Page ────────────────────────────────────────────────────────────────
+// ─── Main Page ───
 export default function ExamWritingResultPage() {
   const { id } = useParams<{ id: string }>();
   const { data: session, isLoading } = useExamWritingSession(id);
-  const [expandedTeil, setExpandedTeil] = useState<number | null>(0); // open first by default
+  const [expandedTeil, setExpandedTeil] = useState<number | null>(0);
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--theme-bg-primary)' }}>
-        <IconLoader size={28} />
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <IconLoader size={28} style={{ color: ACCENT }} />
       </div>
     );
   }
 
   if (!session) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--theme-bg-primary)' }}>
+      <div className="flex items-center justify-center min-h-[60vh]">
         <p style={{ color: 'var(--theme-text-muted)' }}>Không tìm thấy bài thi.</p>
       </div>
     );
   }
 
-  if (session.status === 'GRADING') {
-    return <GradingInProgress />;
-  }
+  if (session.status === 'GRADING') return <GradingInProgress />;
 
   if (session.status === 'ERROR') {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--theme-bg-primary)' }}>
+      <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center space-y-3 px-8">
-          <p className="text-[18px] font-bold" style={{ color: '#EF4444' }}>Lỗi chấm bài</p>
-          <p className="text-[13px]" style={{ color: 'var(--theme-text-muted)' }}>
+          <p className="text-title font-bold" style={{ color: '#EF4444' }}>Lỗi chấm bài</p>
+          <p className="text-body" style={{ color: 'var(--theme-text-muted)' }}>
             AI gặp sự cố khi chấm bài. Vui lòng thử lại.
           </p>
           <Link href={`/practice-test/writing/exam/${id}`}
-            className="inline-block mt-3 px-4 py-2 rounded-xl text-[13px] font-bold text-white"
+            className="inline-block mt-3 px-4 py-2 rounded-xl text-body font-bold text-white"
             style={{ background: GRADIENT }}>
             Quay lại bài viết
           </Link>
@@ -297,137 +263,137 @@ export default function ExamWritingResultPage() {
   const userTexts = session.userTexts ?? {};
 
   return (
-    <div className="min-h-screen pb-24" style={{ backgroundColor: 'var(--theme-bg-primary)' }}>
-      {/* Header */}
-      <div className="sticky top-0 z-10 border-b" style={{ backgroundColor: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}>
-        <div className="max-w-2xl mx-auto px-4 h-14 flex items-center gap-3">
-          <Link href="/practice-test/writing/exam"
-            className="flex items-center gap-1.5 text-[13px] font-semibold transition-opacity hover:opacity-70"
-            style={{ color: 'var(--theme-text-secondary)' }}>
-            <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
-            Danh sách
-          </Link>
-          <div className="w-px h-4 flex-shrink-0" style={{ backgroundColor: 'var(--theme-border)' }} />
-          <p className="text-[13px] font-bold" style={{ color: 'var(--theme-text-primary)' }}>
-            {session.examType} {session.cefrLevel} · Schreiben · Ergebnis
+    <div className="py-6">
+      <PageHeader
+        backHref="/practice-test/writing/exam"
+        title="Kết quả bài viết theo đề"
+        accent="writingExam"
+        right={
+          <span className="px-3 py-1 rounded-xl text-xs font-bold"
+            style={{ backgroundColor: 'rgba(168,85,247,.1)', color: ACCENT }}>
+            {session.examType} {session.cefrLevel}
+          </span>
+        }
+      />
+
+      {/* Hero Score Card */}
+      <div className="rounded-2xl border mb-5 overflow-hidden"
+        style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
+        <div className="px-5 pt-4 pb-3 border-b text-center" style={{ borderColor: 'var(--theme-border)' }}>
+          <p className="text-xs font-medium mb-0.5" style={{ color: 'var(--theme-text-muted)' }}>
+            {session.examType} · Deutsch {session.cefrLevel} · Schreiben
           </p>
-        </div>
-      </div>
-
-      <div className="max-w-2xl mx-auto px-4 pt-6 space-y-5">
-        {/* Score card */}
-        <div className="rounded-2xl border overflow-hidden"
-          style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
-          <div className="p-5">
-            <div className="flex items-center gap-5">
-              <ScoreRing score={score} size={112} />
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <span style={{ color: passed ? '#22C55E' : '#EF4444', fontSize: 20 }}>{passed ? '✓' : '✗'}</span>
-                  <h2 className="text-[17px] font-extrabold" style={{ color: 'var(--theme-text-primary)' }}>
-                    {passed ? 'Bestanden!' : 'Nicht bestanden'}
-                  </h2>
-                </div>
-                <p className="text-[13px]" style={{ color: 'var(--theme-text-secondary)' }}>
-                  Gesamtergebnis: <strong style={{ color: 'var(--theme-text-primary)' }}>{Math.round(score)}%</strong>
-                </p>
-                <p className="text-[12px] mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>
-                  {session.examType} · Deutsch {session.cefrLevel} · Schreiben
-                </p>
-                {session.gradedAt && (
-                  <p className="text-[11px] mt-1.5" style={{ color: 'var(--theme-text-muted)' }}>
-                    AI chấm: {new Date(session.gradedAt).toLocaleString('vi-VN')}
-                  </p>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Per-Teil summary */}
-          {Object.keys(grading).length > 0 && (
-            <div className="border-t px-5 py-4 space-y-3" style={{ borderColor: 'var(--theme-border)' }}>
-              <p className="text-[12px] font-bold uppercase tracking-wide" style={{ color: 'var(--theme-text-muted)' }}>Punkte je Teil</p>
-              {session.teile.map(teil => {
-                const g = grading[`teil_${teil.number}`];
-                if (!g) return null;
-                const pct = g.maxPoints > 0 ? (g.score / g.maxPoints) * 100 : 0;
-                return (
-                  <div key={teil.number}>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <span className="w-6 h-6 rounded-lg flex items-center justify-center text-[11px] font-extrabold text-white"
-                          style={{ background: GRADIENT }}>{teil.number}</span>
-                        <span className="text-[13px] font-semibold" style={{ color: 'var(--theme-text-primary)' }}>
-                          {taskTypeLabel(teil.taskType)}
-                        </span>
-                      </div>
-                      <span className="text-[12px] font-bold" style={{ color: getScoreColor(pct) }}>
-                        {g.score}/{g.maxPoints} · {Math.round(pct)}%
-                      </span>
-                    </div>
-                    <div className="flex-1 h-1.5 rounded-full mt-1.5" style={{ backgroundColor: 'var(--theme-border)' }}>
-                      <div className="h-1.5 rounded-full transition-all" style={{ width: `${pct}%`, backgroundColor: getScoreColor(pct) }} />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+          {session.gradedAt && (
+            <p className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>
+              AI chấm: {new Date(session.gradedAt).toLocaleString('vi-VN')}
+            </p>
           )}
         </div>
 
-        {/* Encouragement */}
-        <div className="rounded-2xl border p-4 flex items-start gap-4"
-          style={{ borderColor: passed ? 'rgba(168,85,247,.3)' : 'rgba(239,68,68,.2)', backgroundColor: passed ? 'rgba(168,85,247,.04)' : 'rgba(239,68,68,.04)' }}>
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 text-[20px]">
-            {passed ? '✍️' : '📝'}
+        <div className="flex flex-col sm:flex-row">
+          <div className="sm:w-1/2 flex items-center justify-center border-b sm:border-b-0 sm:border-r py-6"
+            style={{ borderColor: 'var(--theme-border)' }}>
+            <ScoreRing score={score} size={128} />
           </div>
-          <div>
-            <p className="text-[14px] font-bold" style={{ color: 'var(--theme-text-primary)' }}>
-              {passed ? score >= 80 ? 'Ausgezeichnet! Tolle Leistung!' : 'Gut gemacht!' : 'Übung macht den Meister!'}
+          <div className="sm:w-1/2 flex flex-col justify-center p-5 gap-3">
+            <div className="flex items-center gap-2">
+              <span className="text-h2">{passed ? '✓' : '✗'}</span>
+              <h2 className="text-title font-extrabold" style={{ color: passed ? '#22C55E' : '#EF4444' }}>
+                {passed ? 'Bestanden!' : 'Nicht bestanden'}
+              </h2>
+            </div>
+            <p className="text-body" style={{ color: 'var(--theme-text-secondary)' }}>
+              Gesamtergebnis: <strong style={{ color: 'var(--theme-text-primary)' }}>{Math.round(score)}%</strong>
             </p>
-            <p className="text-[12px] mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>
+            <p className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>
               {passed
                 ? 'Xem lại nhận xét từ AI để cải thiện thêm.'
-                : 'Đọc kỹ phần Korrekturen và Verbesserungen bên dưới để cải thiện bài viết.'}
+                : 'Đọc kỹ phần Korrekturen và Verbesserungen để cải thiện.'}
             </p>
           </div>
         </div>
 
-        {/* Detailed grading per Teil */}
-        <div>
-          <h3 className="text-[15px] font-extrabold mb-3" style={{ color: 'var(--theme-text-primary)' }}>Chi tiết từng Teil</h3>
-          <div className="space-y-3">
-            {session.teile.map((teil, i) => {
+        {/* Per-Teil summary */}
+        {Object.keys(grading).length > 0 && (
+          <div className="border-t px-5 py-4 space-y-3" style={{ borderColor: 'var(--theme-border)' }}>
+            <p className="text-xs font-bold uppercase tracking-wide" style={{ color: 'var(--theme-text-muted)' }}>
+              Punkte je Teil
+            </p>
+            {session.teile.map(teil => {
               const g = grading[`teil_${teil.number}`];
               if (!g) return null;
+              const pct = g.maxPoints > 0 ? (g.score / g.maxPoints) * 100 : 0;
               return (
-                <TeilGradingCard
-                  key={teil.number}
-                  teil={teil}
-                  grading={g}
-                  userText={userTexts[`teil_${teil.number}`] ?? ''}
-                  expanded={expandedTeil === i}
-                  onToggle={() => setExpandedTeil(expandedTeil === i ? null : i)}
-                />
+                <div key={teil.number}>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="w-6 h-6 rounded-lg flex items-center justify-center text-caption font-extrabold text-white"
+                        style={{ background: GRADIENT }}>{teil.number}</span>
+                      <span className="text-body font-semibold" style={{ color: 'var(--theme-text-primary)' }}>
+                        {taskTypeLabel(teil.taskType)}
+                      </span>
+                    </div>
+                    <span className="text-xs font-bold" style={{ color: getScoreColor(pct) }}>
+                      {g.score}/{g.maxPoints} · {Math.round(pct)}%
+                    </span>
+                  </div>
+                  <div className="flex-1 h-1.5 rounded-full mt-1.5" style={{ backgroundColor: 'var(--theme-border)' }}>
+                    <div className="h-1.5 rounded-full transition-all" style={{ width: `${pct}%`, backgroundColor: getScoreColor(pct) }} />
+                  </div>
+                </div>
               );
             })}
           </div>
-        </div>
+        )}
+      </div>
 
-        {/* CTAs */}
-        <div className="flex gap-3 pt-2 pb-4">
-          <Link href="/practice-test/writing/exam"
-            className="flex-1 py-3 rounded-2xl text-[14px] font-bold text-center border transition-opacity hover:opacity-80"
-            style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-primary)', backgroundColor: 'var(--theme-bg-card)' }}>
-            Danh sách
-          </Link>
-          <Link href="/practice-test/writing/exam/new"
-            className="flex-1 py-3 rounded-2xl text-[14px] font-bold text-center text-white transition-opacity hover:opacity-90"
-            style={{ background: GRADIENT }}>
-            Bài mới +
-          </Link>
+      {/* Detailed grading per Teil */}
+      <div>
+        <h3 className="text-body font-bold uppercase tracking-wider mb-3"
+          style={{ color: 'var(--theme-text-muted)' }}>
+          Chi tiết từng Teil
+        </h3>
+        <div className="space-y-3">
+          {session.teile.map((teil, i) => {
+            const g = grading[`teil_${teil.number}`];
+            if (!g) return null;
+            return (
+              <TeilGradingCard
+                key={teil.number}
+                teil={teil}
+                grading={g}
+                userText={userTexts[`teil_${teil.number}`] ?? ''}
+                expanded={expandedTeil === i}
+                onToggle={() => setExpandedTeil(expandedTeil === i ? null : i)}
+              />
+            );
+          })}
         </div>
       </div>
+
+      <FixedActionBar columns={3}>
+        <Link href="/practice-test/writing/exam"
+          className="flex flex-col items-center gap-1 py-2 px-3 rounded-xl text-xs font-semibold transition-all hover:opacity-70"
+          style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-secondary)' }}>
+          <span className="text-base">📋</span>
+          Danh sách
+        </Link>
+        <Link href="/practice-test/writing/exam/new"
+          className="flex flex-col items-center gap-1 py-2 px-3 rounded-xl text-xs font-bold text-white transition-all hover:-translate-y-0.5"
+          style={{ background: GRADIENT }}>
+          <span className="text-base">✍️</span>
+          Bài mới
+        </Link>
+        <button
+          className="flex flex-col items-center gap-1 py-2 px-3 rounded-xl text-xs font-semibold transition-all hover:opacity-70"
+          style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-secondary)' }}
+          onClick={() => {
+            navigator.share?.({ title: 'DeutschMeister', text: `Tôi đạt ${Math.round(score)}% bài viết ${session.examType} ${session.cefrLevel}!` }).catch(() => {});
+          }}>
+          <span className="text-base">🔗</span>
+          Chia sẻ
+        </button>
+      </FixedActionBar>
     </div>
   );
 }

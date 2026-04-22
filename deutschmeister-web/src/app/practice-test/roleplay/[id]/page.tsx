@@ -150,7 +150,7 @@ export default function RoleplayChatPage() {
               {info?.titleDe ?? session.scenario}
             </div>
             <div
-              className="text-[11px] truncate"
+              className="text-caption truncate"
               style={{ color: 'var(--theme-text-muted)' }}
             >
               {session.level} • {info?.titleVi}
@@ -188,7 +188,7 @@ export default function RoleplayChatPage() {
           >
             <div className="max-w-3xl mx-auto">
               <div
-                className="text-[11px] font-bold mb-1"
+                className="text-caption font-bold mb-1"
                 style={{ color: '#6366F1' }}
               >
                 💡 GỢI Ý
@@ -283,7 +283,7 @@ export default function RoleplayChatPage() {
               disabled={sendMut.isPending || typing}
             />
             <p
-              className="text-[10px] mt-1.5 text-center"
+              className="text-caption mt-1.5 text-center"
               style={{ color: 'var(--theme-text-muted)' }}
             >
               Nhấn Enter để gửi • Shift+Enter để xuống dòng

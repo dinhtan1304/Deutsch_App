@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import type { DashboardStats } from '@/types/dashboard';
 import {
@@ -114,7 +114,7 @@ export function StatsCards({ stats }: StatsCardsProps) {
             {/* Streak freeze badge — only on streak card */}
             {isStreakCard && stats.streakFreezesAvailable > 0 && (
               <div
-                className="absolute top-2 right-2 flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-bold z-10"
+                className="absolute top-2 right-2 flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-caption font-bold z-10"
                 style={{
                   background: 'rgba(59,130,246,.15)',
                   color: '#3B82F6',
@@ -147,12 +147,12 @@ export function StatsCards({ stats }: StatsCardsProps) {
             </div>
 
             {/* Label */}
-            <div className="text-[12.5px] font-medium" style={{ color: 'var(--theme-text-secondary)' }}>
+            <div className="text-body font-medium" style={{ color: 'var(--theme-text-secondary)' }}>
               {card.label}
             </div>
 
             {/* Sub value */}
-            <div className="text-[11px] mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>
+            <div className="text-caption mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>
               {sub}
             </div>
           </div>

@@ -1,9 +1,10 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import Link from 'next/link';
 import { useExamReadingHistory, useExamReadingStats, useDeleteExamReading } from '@/hooks/useExamReading';
 import { ExamReadingHistoryItem, TeilScore } from '@/lib/api/examReading';
+import { PageHeader } from '@/components/ui';
 
 // ─── Inline icons ─────────────────────────────────────────────────────────────
 function IconBookOpen({ size = 16, style }: { size?: number; style?: React.CSSProperties }) {
@@ -60,7 +61,7 @@ function getScoreColor(s: number) {
 function ExamBadge({ examType, cefrLevel }: { examType: string; cefrLevel: string }) {
   const color = examType === 'GOETHE' ? '#3B82F6' : '#8B5CF6';
   return (
-    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[11px] font-bold"
+    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-caption font-bold"
       style={{ backgroundColor: `${color}18`, color }}>
       {examType} · {cefrLevel}
     </span>
@@ -80,7 +81,7 @@ function HistoryCard({ item, onDelete }: { item: ExamReadingHistoryItem; onDelet
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap mb-1.5">
             <ExamBadge examType={item.examType} cefrLevel={item.cefrLevel} />
-            <span className="text-[11px] px-2 py-0.5 rounded-lg font-medium"
+            <span className="text-caption px-2 py-0.5 rounded-lg font-medium"
               style={{
                 backgroundColor: isGraded ? 'rgba(34,197,94,.1)' : 'rgba(99,102,241,.1)',
                 color: isGraded ? '#22C55E' : '#6366F1',
@@ -88,17 +89,17 @@ function HistoryCard({ item, onDelete }: { item: ExamReadingHistoryItem; onDelet
               {isGraded ? 'Đã chấm' : 'Chưa nộp'}
             </span>
           </div>
-          <p className="text-[13px] font-semibold" style={{ color: 'var(--theme-text-primary)' }}>
+          <p className="text-body font-semibold" style={{ color: 'var(--theme-text-primary)' }}>
             Luyện Đọc Theo Đề
           </p>
-          <p className="text-[12px] mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>
+          <p className="text-xs mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>
             {item.totalQuestions} câu · {new Date(item.createdAt).toLocaleDateString('vi-VN')}
           </p>
           {/* Per-Teil mini bars */}
           {isGraded && teilScores.length > 0 && (
             <div className="flex gap-1 mt-2 flex-wrap">
               {teilScores.map(ts => (
-                <span key={ts.teil} className="text-[10px] px-1.5 py-0.5 rounded-md font-medium"
+                <span key={ts.teil} className="text-caption px-1.5 py-0.5 rounded-md font-medium"
                   style={{ backgroundColor: `${getScoreColor((ts.correct / ts.total) * 100)}18`, color: getScoreColor((ts.correct / ts.total) * 100) }}>
                   T{ts.teil}: {ts.correct}/{ts.total}
                 </span>
@@ -108,7 +109,7 @@ function HistoryCard({ item, onDelete }: { item: ExamReadingHistoryItem; onDelet
         </div>
         <div className="flex flex-col items-end gap-2">
           {isGraded && score !== null && (
-            <span className="text-[18px] font-extrabold" style={{ color: getScoreColor(score) }}>
+            <span className="text-title font-extrabold" style={{ color: getScoreColor(score) }}>
               {Math.round(score)}%
             </span>
           )}
@@ -148,30 +149,19 @@ function ExamReadingListContent() {
 
   return (
     <div className="py-6">
-      {/* Header */}
-      <div className="flex items-center gap-3 mb-6">
-        <Link href="/practice-test" className="flex items-center gap-1 text-[13px] font-medium transition-opacity hover:opacity-70"
-          style={{ color: 'var(--theme-text-muted)' }}>
-          <IconChevronLeft size={14} /> Luyện Test
-        </Link>
-        <div className="flex-1" />
-        <Link href="/practice-test/reading/exam/new"
-          className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-[13px] font-bold text-white transition-all hover:-translate-y-0.5"
-          style={{ background: GRADIENT, boxShadow: '0 4px 12px rgba(34,197,94,.25)' }}>
-          <IconPlus size={14} /> Làm bài mới
-        </Link>
-      </div>
-
-      <div className="flex items-center gap-3 mb-4">
-        <div className="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0"
-          style={{ background: GRADIENT }}>
-          <IconBookOpen size={22} style={{ color: 'white' }} />
-        </div>
-        <div>
-          <h1 className="text-xl font-bold" style={{ color: 'var(--theme-text-primary)' }}>Luyện Đọc Theo Đề Chuẩn</h1>
-          <p className="text-[12px] mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>Goethe & TELC · A1 / A2 / B1 · Đầy đủ tất cả Teile</p>
-        </div>
-      </div>
+      <PageHeader
+        backHref="/practice-test/reading"
+        title="Luyện Đọc Theo Đề Chuẩn"
+        subtitle="Goethe & TELC · A1 / A2 / B1 · Đầy đủ tất cả Teile"
+        accent="reading"
+        right={
+          <Link href="/practice-test/reading/exam/new"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-body font-bold text-white transition-all hover:-translate-y-0.5"
+            style={{ background: GRADIENT, boxShadow: '0 4px 12px rgba(34,197,94,.25)' }}>
+            <IconPlus size={14} /> Làm bài mới
+          </Link>
+        }
+      />
 
       {/* Stats */}
       {stats && (
@@ -183,8 +173,8 @@ function ExamReadingListContent() {
           ].map((c, i) => (
             <div key={i} className="rounded-xl p-3 text-center"
               style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
-              <div className="text-[20px] font-extrabold" style={{ color: c.color }}>{c.value}</div>
-              <div className="text-[11px] mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>{c.label}</div>
+              <div className="text-h2 font-extrabold" style={{ color: c.color }}>{c.value}</div>
+              <div className="text-caption mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>{c.label}</div>
             </div>
           ))}
         </div>
@@ -194,7 +184,7 @@ function ExamReadingListContent() {
       <div className="flex gap-2 mb-4">
         {filters.map(f => (
           <button key={f.key} onClick={() => { setFilter(f.key); setPage(1); }}
-            className="px-3 py-1.5 rounded-xl text-[12px] font-semibold transition-all"
+            className="px-3 py-1.5 rounded-xl text-xs font-semibold transition-all"
             style={filter === f.key
               ? { background: GRADIENT, color: 'white' }
               : { backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }}>
@@ -210,9 +200,9 @@ function ExamReadingListContent() {
         </div>
       ) : !history?.items.length ? (
         <div className="text-center py-12">
-          <p className="text-[14px] mb-4" style={{ color: 'var(--theme-text-muted)' }}>Chưa có bài thi nào.</p>
+          <p className="text-sm mb-4" style={{ color: 'var(--theme-text-muted)' }}>Chưa có bài thi nào.</p>
           <Link href="/practice-test/reading/exam/new"
-            className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl font-bold text-[14px] text-white"
+            className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl font-bold text-sm text-white"
             style={{ background: GRADIENT }}>
             <IconPlus size={14} /> Làm bài đầu tiên
           </Link>
@@ -234,7 +224,7 @@ function ExamReadingListContent() {
         <div className="flex justify-center gap-2 mt-6">
           {Array.from({ length: history.totalPages }, (_, i) => i + 1).map(p => (
             <button key={p} onClick={() => setPage(p)}
-              className="w-8 h-8 rounded-xl text-[13px] font-bold transition-all"
+              className="w-8 h-8 rounded-xl text-body font-bold transition-all"
               style={page === p
                 ? { background: GRADIENT, color: 'white' }
                 : { backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }}>

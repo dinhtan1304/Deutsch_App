@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { useCheckQuota } from '@/hooks/useSubscription';
@@ -41,10 +41,10 @@ export function QuotaPaywall({ feature, children, featureContext }: Props) {
           </svg>
         </div>
 
-        <h3 className="text-[16px] font-bold mb-1" style={{ color: 'var(--theme-text-primary)' }}>
+        <h3 className="text-base font-bold mb-1" style={{ color: 'var(--theme-text-primary)' }}>
           Hết lượt luyện tập tuần này
         </h3>
-        <p className="text-[13px] mb-4" style={{ color: 'var(--theme-text-muted)' }}>
+        <p className="text-body mb-4" style={{ color: 'var(--theme-text-muted)' }}>
           Bạn đã sử dụng {quota.used}/{quota.limit} lượt miễn phí tuần này
         </p>
 
@@ -58,13 +58,13 @@ export function QuotaPaywall({ feature, children, featureContext }: Props) {
 
         <button
           onClick={() => setUpgradeOpen(true)}
-          className="w-full py-3 rounded-xl text-[14px] font-bold text-white mb-3 transition-transform hover:scale-[1.01]"
+          className="w-full py-3 rounded-xl text-sm font-bold text-white mb-3 transition-transform hover:scale-[1.01]"
           style={{ background: 'linear-gradient(135deg, #6366F1, #8B5CF6)' }}
         >
           Nâng cấp Premium — Không giới hạn
         </button>
 
-        <p className="text-[12px]" style={{ color: 'var(--theme-text-muted)' }}>
+        <p className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>
           Lượt miễn phí reset vào thứ Hai hàng tuần (00:00 UTC+7)
         </p>
       </div>

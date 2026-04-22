@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
@@ -87,14 +87,10 @@ const navSections: NavSection[] = [
       {
         label: 'Test', labelVi: 'Luyện thi', icon: IconGraduationCap, href: '/practice-test',
         children: [
-          { label: 'Reading', labelVi: 'Luyện đọc', icon: IconBookOpen, href: '/practice-test/reading' },
-          { label: 'Reading Exam', labelVi: 'Đọc theo đề', icon: IconBookOpen, href: '/practice-test/reading/exam' },
-          { label: 'Listening', labelVi: 'Luyện nghe', icon: IconHeadphones, href: '/practice-test/listening' },
-          { label: 'Listening Exam', labelVi: 'Nghe theo đề', icon: IconHeadphones, href: '/practice-test/listening/exam' },
-          { label: 'Writing', labelVi: 'Luyện viết', icon: IconPenLine, href: '/practice-test/writing' },
-          { label: 'Writing Exam', labelVi: 'Viết theo đề', icon: IconPenLine, href: '/practice-test/writing/exam' },
-          { label: 'Speaking', labelVi: 'Luyện nói', icon: IconMic, href: '/practice-test/speaking' },
-          { label: 'Speaking Exam', labelVi: 'Nói theo đề', icon: IconMic, href: '/practice-test/speaking/exam' },
+          { label: 'Reading', labelVi: 'Đọc', icon: IconBookOpen, href: '/practice-test/reading' },
+          { label: 'Listening', labelVi: 'Nghe', icon: IconHeadphones, href: '/practice-test/listening' },
+          { label: 'Writing', labelVi: 'Viết', icon: IconPenLine, href: '/practice-test/writing' },
+          { label: 'Speaking', labelVi: 'Nói', icon: IconMic, href: '/practice-test/speaking' },
         ],
       },
       { label: 'Review', labelVi: 'Ôn tập SM-2', icon: IconRefresh, href: '/review' },
@@ -242,7 +238,7 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
             {/* Tooltip — collapsed hover (parent with children) */}
             {tooltip?.href === item.href && (
               <div
-                className="fixed z-50 px-3 py-2 rounded-xl shadow-lg text-[13px] font-medium whitespace-nowrap pointer-events-none"
+                className="fixed z-50 px-3 py-2 rounded-xl shadow-lg text-body font-medium whitespace-nowrap pointer-events-none"
                 style={{
                   left: `${SIDEBAR_COLLAPSED_WIDTH + 8}px`,
                   top: `${tooltip.top}px`,
@@ -257,7 +253,7 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                 {item.labelVi}
                 <div className="mt-1.5 pt-1.5 space-y-0.5" style={{ borderTop: '1px solid var(--theme-border)' }}>
                   {item.children.map(c => (
-                    <div key={c.href} className="text-[12px]" style={{ color: 'var(--theme-text-muted)' }}>{c.labelVi}</div>
+                    <div key={c.href} className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>{c.labelVi}</div>
                   ))}
                 </div>
               </div>
@@ -280,7 +276,7 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                     <li key={child.href}>
                       <Link
                         href={child.href}
-                        className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px]"
+                        className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-body"
                         style={{
                           color: childActive ? '#3B82F6' : 'var(--theme-text-muted)',
                           fontWeight: childActive ? 600 : 400,
@@ -294,7 +290,7 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                         <span className="min-w-0 truncate flex-1">{child.labelVi}</span>
                         {PREMIUM_ROUTES.has(child.href) && <PremiumLockIcon size={12} />}
                         {child.href === '/word-bank/review' && srsDue > 0 && (
-                          <span className="shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded-full leading-none"
+                          <span className="shrink-0 text-caption font-bold px-1.5 py-0.5 rounded-full leading-none"
                             style={{ background: '#EF4444', color: 'white', minWidth: 18, textAlign: 'center' }}>
                             {srsDue > 99 ? '99+' : srsDue}
                           </span>
@@ -328,7 +324,7 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                 isCollapsed ? (
                   <span className="absolute top-1.5 right-2 w-2 h-2 rounded-full" style={{ background: '#EF4444' }} />
                 ) : (
-                  <span className="shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded-full leading-none"
+                  <span className="shrink-0 text-caption font-bold px-1.5 py-0.5 rounded-full leading-none"
                     style={{ background: '#EF4444', color: 'white', minWidth: 18, textAlign: 'center' }}>
                     {builtInDue > 99 ? '99+' : builtInDue}
                   </span>
@@ -339,7 +335,7 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
             {/* Tooltip — collapsed hover (single) */}
             {tooltip?.href === item.href && (
               <div
-                className="fixed z-60 px-3 py-1.5 rounded-lg shadow-lg text-[13px] font-medium whitespace-nowrap pointer-events-none"
+                className="fixed z-60 px-3 py-1.5 rounded-lg shadow-lg text-body font-medium whitespace-nowrap pointer-events-none"
                 style={{
                   left: `${SIDEBAR_COLLAPSED_WIDTH + 8}px`,
                   top: `${tooltip.top}px`,
@@ -457,7 +453,7 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
           {user.subscription?.plan === 'premium' && user.subscription?.status === 'active' ? (
             <Link
               href="/profile/subscription"
-              className="flex items-center justify-center gap-2 py-2 rounded-xl text-[12px] font-bold transition-colors"
+              className="flex items-center justify-center gap-2 py-2 rounded-xl text-xs font-bold transition-colors"
               style={{ color: '#8B5CF6', backgroundColor: 'rgba(139,92,246,0.08)' }}
             >
               {!isCollapsed && <span>Premium</span>}
@@ -468,7 +464,7 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
           ) : (
             <Link
               href="/pricing"
-              className="flex items-center justify-center gap-2 py-2 rounded-xl text-[12px] font-bold text-white transition-transform hover:scale-[1.02]"
+              className="flex items-center justify-center gap-2 py-2 rounded-xl text-xs font-bold text-white transition-transform hover:scale-[1.02]"
               style={{ background: 'linear-gradient(135deg, #6366F1, #8B5CF6)' }}
             >
               {!isCollapsed && <span>Nâng cấp Premium</span>}
@@ -496,8 +492,19 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                 ≈ {xpInfo.cefrLabel}
               </div>
             )}
-            <div style={{ height: 4, borderRadius: 999, background: 'var(--theme-border)', overflow: 'hidden' }}>
-              <div style={{ height: '100%', borderRadius: 999, background: 'linear-gradient(90deg, #F59E0B, #EF4444)', width: `${xpInfo.progress}%`, transition: 'width 0.5s' }} />
+            <div style={{ position: 'relative', height: 7, borderRadius: 999, background: 'var(--theme-border)', overflow: 'hidden' }}>
+              <div style={{
+                height: '100%', borderRadius: 999,
+                background: 'linear-gradient(90deg, #F59E0B, #EF4444)',
+                width: `${xpInfo.progress}%`,
+                transition: 'width 0.6s cubic-bezier(.4,0,.2,1)',
+                boxShadow: '0 0 6px rgba(245,158,11,0.55)',
+              }} />
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 2 }}>
+              <span style={{ fontSize: 9.5, color: 'var(--theme-text-muted)', fontWeight: 500 }}>
+                {Math.round(xpInfo.progress)}%
+              </span>
             </div>
           </div>
         )}
@@ -509,7 +516,7 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
           </div>
         )}
         {!isCollapsed && (
-          <div className="text-[11px] text-center whitespace-nowrap" style={{ color: 'var(--theme-text-muted)' }}>
+          <div className="text-caption text-center whitespace-nowrap" style={{ color: 'var(--theme-text-muted)' }}>
             v1.0.0 · Made with Yuii ❤️
           </div>
         )}

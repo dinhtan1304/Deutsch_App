@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import Link from 'next/link';
 import { usePhonemeDrills, usePhonemeDrillStats } from '@/hooks/usePronunciationScoring';
@@ -43,7 +43,7 @@ export default function PhonemeDrillsPage() {
           </span>
           Drill âm khó cho người Việt
         </h1>
-        <p className="text-[13px] mt-1" style={{ color: 'var(--theme-text-muted)' }}>
+        <p className="text-body mt-1" style={{ color: 'var(--theme-text-muted)' }}>
           Tập trung luyện từng âm mà người Việt thường phát âm sai — ü, ö, ch, r và hơn nữa
         </p>
       </div>
@@ -73,7 +73,7 @@ export default function PhonemeDrillsPage() {
                     {drill.label}
                   </div>
                   <span
-                    className="px-2 py-0.5 rounded-md text-[10px] font-bold"
+                    className="px-2 py-0.5 rounded-md text-caption font-bold"
                     style={{ backgroundColor: diff.bg, color: diff.text }}
                   >
                     {diff.label}
@@ -81,16 +81,16 @@ export default function PhonemeDrillsPage() {
                 </div>
 
                 {/* IPA + description */}
-                <div className="text-[12px] font-mono mb-1" style={{ color: '#A855F7' }}>
+                <div className="text-xs font-mono mb-1" style={{ color: '#A855F7' }}>
                   {drill.ipa}
                 </div>
-                <p className="text-[12px] leading-relaxed mb-3" style={{ color: 'var(--theme-text-muted)' }}>
+                <p className="text-xs leading-relaxed mb-3" style={{ color: 'var(--theme-text-muted)' }}>
                   {drill.description}
                 </p>
 
                 {/* Stats or CTA */}
                 {stat ? (
-                  <div className="flex items-center gap-3 text-[11px]">
+                  <div className="flex items-center gap-3 text-caption">
                     <span style={{ color: 'var(--theme-text-muted)' }}>
                       {stat.count} lần
                     </span>
@@ -102,7 +102,7 @@ export default function PhonemeDrillsPage() {
                     </span>
                   </div>
                 ) : (
-                  <div className="text-[11px] font-medium" style={{ color: '#A855F7' }}>
+                  <div className="text-caption font-medium" style={{ color: '#A855F7' }}>
                     Chưa luyện — Bắt đầu →
                   </div>
                 )}

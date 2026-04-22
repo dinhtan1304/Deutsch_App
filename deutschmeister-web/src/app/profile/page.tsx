@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
@@ -53,8 +53,8 @@ function StatCard({
         style={{ background: `linear-gradient(135deg, ${color}, ${color}cc)` }}>
         <Icon size={17} style={{ color: 'white' }} />
       </div>
-      <div className="text-[22px] font-extrabold leading-none mb-1" style={{ color }}>{value}</div>
-      <div className="text-[11px] font-medium" style={{ color: 'var(--theme-text-muted)' }}>{label}</div>
+      <div className="text-h2 font-extrabold leading-none mb-1" style={{ color }}>{value}</div>
+      <div className="text-caption font-medium" style={{ color: 'var(--theme-text-muted)' }}>{label}</div>
     </div>
   );
 }
@@ -111,10 +111,10 @@ function LearningRoadmap() {
           </div>
           <div>
             <h2 className="text-[15px] font-bold" style={{ color: 'var(--theme-text-primary)' }}>Lộ trình học tập</h2>
-            <p className="text-[11px]" style={{ color: 'var(--theme-text-muted)' }}>Theo dõi tiến độ ngữ pháp từng trình độ</p>
+            <p className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>Theo dõi tiến độ ngữ pháp từng trình độ</p>
           </div>
         </div>
-        <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold"
+        <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-caption font-bold"
           style={{ background: `${color}18`, color }}>
           <IconGraduationCap size={12} />
           Trình độ: {selectedLevel}
@@ -134,7 +134,7 @@ function LearningRoadmap() {
             return (
               <button key={level} onClick={() => setSelectedLevel(level)}
                 className="flex-1 flex flex-col items-center gap-2 relative z-10 outline-none">
-                <div className="w-10 h-10 rounded-full flex items-center justify-center text-[13px] font-extrabold transition-all duration-200"
+                <div className="w-10 h-10 rounded-full flex items-center justify-center text-body font-extrabold transition-all duration-200"
                   style={{
                     background: isSel ? `linear-gradient(135deg, ${lColor}, ${lColor}cc)` : 'var(--theme-bg-secondary)',
                     color: isSel ? 'white' : 'var(--theme-text-muted)',
@@ -144,7 +144,7 @@ function LearningRoadmap() {
                   }}>
                   {level}
                 </div>
-                <div className="text-[12px] font-bold" style={{ color: stat.pct > 0 ? lColor : 'var(--theme-text-muted)' }}>
+                <div className="text-xs font-bold" style={{ color: stat.pct > 0 ? lColor : 'var(--theme-text-muted)' }}>
                   {loadingLessons ? '—' : `${stat.pct}%`}
                 </div>
                 <div className="w-full max-w-16 h-1.5 rounded-full overflow-hidden"
@@ -166,7 +166,7 @@ function LearningRoadmap() {
               style={{ background: 'var(--theme-bg-secondary)', border: '2px solid var(--theme-border)' }}>
               <IconLock size={15} style={{ color: 'var(--theme-text-muted)' }} />
             </div>
-            <div className="text-[12px] font-bold" style={{ color: 'var(--theme-text-muted)' }}>B2</div>
+            <div className="text-xs font-bold" style={{ color: 'var(--theme-text-muted)' }}>B2</div>
             <div className="w-full max-w-16 h-1.5 rounded-full" style={{ backgroundColor: 'var(--theme-bg-secondary)' }} />
             <div className="text-[10.5px] font-medium" style={{ color: 'var(--theme-text-muted)' }}>Sắp ra mắt</div>
           </div>
@@ -178,11 +178,11 @@ function LearningRoadmap() {
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <IconBookOpen size={15} style={{ color }} />
-            <span className="text-[14px] font-bold" style={{ color: 'var(--theme-text-primary)' }}>
+            <span className="text-sm font-bold" style={{ color: 'var(--theme-text-primary)' }}>
               Ngữ pháp {selectedLevel}
             </span>
           </div>
-          <span className="text-[12px] font-semibold px-2 py-0.5 rounded-md"
+          <span className="text-xs font-semibold px-2 py-0.5 rounded-md"
             style={{ background: `${color}12`, color }}>
             {selStats?.passed || 0}/{selStats?.total || 0} đạt qua thi
           </span>
@@ -195,7 +195,7 @@ function LearningRoadmap() {
             style={{ width: `${selStats?.pct || 0}%`, background: `linear-gradient(90deg, ${color}, ${color}cc)` }} />
         </div>
         {!loadingLessons && selStats && (
-          <div className="text-[11px] mb-4 text-right" style={{ color: 'var(--theme-text-muted)' }}>
+          <div className="text-caption mb-4 text-right" style={{ color: 'var(--theme-text-muted)' }}>
             {selStats.passed}/{selStats.total} đã kiểm tra qua bài thi
           </div>
         )}
@@ -237,17 +237,17 @@ function LearningRoadmap() {
                   </div>
 
                   {/* Number */}
-                  <span className="shrink-0 w-5 h-5 rounded-md flex items-center justify-center text-[10px] font-bold"
+                  <span className="shrink-0 w-5 h-5 rounded-md flex items-center justify-center text-caption font-bold"
                     style={{ backgroundColor: `${color}15`, color }}>
                     {i + 1}
                   </span>
 
-                  <span className="flex-1 text-[13px] font-medium truncate"
+                  <span className="flex-1 text-body font-medium truncate"
                     style={{ color: 'var(--theme-text-primary)' }}>
                     {lesson.titleVi}
                   </span>
 
-                  <span className="text-[11px] font-semibold shrink-0" style={{ color: statusColor }}>
+                  <span className="text-caption font-semibold shrink-0" style={{ color: statusColor }}>
                     {statusLabel}
                   </span>
 
@@ -266,7 +266,7 @@ function LearningRoadmap() {
               { dot: '#F59E0B', label: 'Cần bổ sung', value: selStats.needsReview },
               { dot: 'var(--theme-border)', label: 'Chưa thi', value: selStats.total - selStats.passed - selStats.needsReview, border: true },
             ].map(s => (
-              <span key={s.label} className="flex items-center gap-1.5 text-[12px]">
+              <span key={s.label} className="flex items-center gap-1.5 text-xs">
                 <span className="w-2.5 h-2.5 rounded-full shrink-0 border"
                   style={{ backgroundColor: s.border ? 'transparent' : s.dot, borderColor: s.dot }} />
                 <span style={{ color: 'var(--theme-text-secondary)' }}>
@@ -282,14 +282,14 @@ function LearningRoadmap() {
           <div className="rounded-xl p-3.5 mb-4"
             style={{ background: 'rgba(245,158,11,.06)', border: '1px solid rgba(245,158,11,.18)' }}>
             <p className="text-[11.5px] font-semibold mb-2 flex items-center gap-1.5" style={{ color: '#F59E0B' }}>
-              <span className="w-4 h-4 rounded-full flex items-center justify-center text-white text-[10px]"
+              <span className="w-4 h-4 rounded-full flex items-center justify-center text-white text-caption"
                 style={{ background: '#F59E0B' }}>!</span>
               Chưa đạt ({notPassed.length} bài)
             </p>
             <div className="flex flex-wrap gap-1.5">
               {notPassed.map(l => (
                 <Link key={l.id} href={`/grammar/${l.slug}`}
-                  className="px-2.5 py-1 rounded-lg text-[11px] font-medium hover:opacity-80 transition-opacity"
+                  className="px-2.5 py-1 rounded-lg text-caption font-medium hover:opacity-80 transition-opacity"
                   style={{
                     backgroundColor: l.status === 'needs_review' ? 'rgba(245,158,11,.15)' : 'rgba(107,114,128,.1)',
                     color: l.status === 'needs_review' ? '#F59E0B' : 'var(--theme-text-muted)',
@@ -304,13 +304,13 @@ function LearningRoadmap() {
         {/* Actions */}
         <div className="flex gap-2">
           <Link href="/grammar"
-            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-[13px] font-semibold text-white transition-all hover:-translate-y-0.5"
+            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-body font-semibold text-white transition-all hover:-translate-y-0.5"
             style={{ background: `linear-gradient(135deg, ${color}, ${color}cc)`, boxShadow: `0 4px 12px ${color}28` }}>
             <IconBookOpen size={15} />
             Luyện tập {selectedLevel}
           </Link>
           <Link href="/practice-test"
-            className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-[13px] font-semibold transition-all hover:-translate-y-0.5"
+            className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-body font-semibold transition-all hover:-translate-y-0.5"
             style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-secondary)', border: '1px solid var(--theme-border)' }}>
             <IconGraduationCap size={15} />
             Đề kiểm tra
@@ -347,11 +347,11 @@ export default function ProfilePage() {
         <h1 className="text-2xl font-bold mb-2" style={{ color: 'var(--theme-text-primary)' }}>
           Đăng nhập để xem hồ sơ
         </h1>
-        <p className="text-[14px] mb-8" style={{ color: 'var(--theme-text-muted)' }}>
+        <p className="text-sm mb-8" style={{ color: 'var(--theme-text-muted)' }}>
           Theo dõi tiến trình và thống kê học tập của bạn
         </p>
         <Link href="/auth/login"
-          className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-[14px] font-semibold text-white transition-all hover:-translate-y-0.5"
+          className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white transition-all hover:-translate-y-0.5"
           style={{ background: 'linear-gradient(135deg, #3B82F6, #6366F1)', boxShadow: '0 4px 16px rgba(59,130,246,.35)' }}>
           <IconLogIn size={16} />
           Đăng nhập
@@ -407,7 +407,7 @@ export default function ProfilePage() {
               <div className="rounded-full p-[3px]"
                 style={{ background: 'linear-gradient(135deg, #3B82F6, #8B5CF6, #22C55E)' }}>
                 <div className="rounded-full p-[3px]" style={{ backgroundColor: 'var(--theme-bg-card)' }}>
-                  <div className="rounded-full flex items-center justify-center text-white text-[28px] font-extrabold overflow-hidden"
+                  <div className="rounded-full flex items-center justify-center text-white text-h1 font-extrabold overflow-hidden"
                     style={{
                       width: 86, height: 86,
                       background: user?.avatar ? undefined : 'linear-gradient(135deg, #3B82F6, #8B5CF6)',
@@ -459,7 +459,7 @@ export default function ProfilePage() {
 
           {/* Name + inline badges */}
           <div className="flex items-center gap-2 flex-wrap mb-2">
-            <h1 className="text-[22px] font-extrabold leading-tight" style={{ color: 'var(--theme-text-primary)' }}>
+            <h1 className="text-h2 font-extrabold leading-tight" style={{ color: 'var(--theme-text-primary)' }}>
               {user?.name || 'User'}
             </h1>
             {/* Blue verify checkmark */}
@@ -471,7 +471,7 @@ export default function ProfilePage() {
               <IconCheck size={11} style={{ color: 'white' }} />
             </span>
             {/* ACTIVE pill */}
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold tracking-wider text-white"
+            <span className="px-2 py-0.5 rounded-full text-caption font-extrabold tracking-wider text-white"
               style={{
                 background: 'linear-gradient(135deg, #22C55E, #14B8A6)',
                 boxShadow: '0 2px 6px rgba(34,197,94,.3)',
@@ -518,7 +518,7 @@ export default function ProfilePage() {
               {isLoading ? '—' : points} Points
             </span>
             {/* Email verified */}
-            <span className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[11px] font-bold tracking-wide uppercase"
+            <span className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-caption font-bold tracking-wide uppercase"
               style={{
                 background: 'rgba(34,197,94,.12)',
                 color: '#22C55E',
@@ -528,7 +528,7 @@ export default function ProfilePage() {
               Email Verified
             </span>
             {/* Plan */}
-            <span className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[11px] font-bold tracking-wide uppercase"
+            <span className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-caption font-bold tracking-wide uppercase"
               style={{
                 background: isPremium ? 'rgba(139,92,246,.14)' : 'rgba(107,114,128,.12)',
                 color: isPremium ? '#A855F7' : 'var(--theme-text-muted)',
@@ -539,7 +539,7 @@ export default function ProfilePage() {
             </span>
             {/* Placement retake */}
             <Link href="/placement"
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[11px] font-bold transition-all hover:opacity-80"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-caption font-bold transition-all hover:opacity-80"
               style={{
                 background: 'linear-gradient(135deg, rgba(59,130,246,.12), rgba(139,92,246,.08))',
                 color: '#3B82F6',
@@ -586,12 +586,12 @@ export default function ProfilePage() {
           {/* Accuracy bar */}
           <div className="mb-4 p-3.5 rounded-xl" style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
             <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-1.5 text-[13px] font-medium"
+              <div className="flex items-center gap-1.5 text-body font-medium"
                 style={{ color: 'var(--theme-text-secondary)' }}>
                 <IconTarget size={14} style={{ color: '#22C55E' }} />
                 Tỉ lệ chính xác
               </div>
-              <span className="text-[14px] font-extrabold" style={{ color: '#22C55E' }}>
+              <span className="text-sm font-extrabold" style={{ color: '#22C55E' }}>
                 {isLoading ? '—' : `${accuracyPct}%`}
               </span>
             </div>
@@ -619,8 +619,8 @@ export default function ProfilePage() {
                     style={{ background: `${row.accent}15` }}>
                     <RowIcon size={14} style={{ color: row.accent }} />
                   </div>
-                  <span className="flex-1 text-[13px]" style={{ color: 'var(--theme-text-muted)' }}>{row.label}</span>
-                  <span className="text-[14px] font-bold" style={{ color: row.color }}>
+                  <span className="flex-1 text-body" style={{ color: 'var(--theme-text-muted)' }}>{row.label}</span>
+                  <span className="text-sm font-bold" style={{ color: row.color }}>
                     {isLoading ? '—' : row.value}
                   </span>
                 </div>
@@ -644,8 +644,8 @@ export default function ProfilePage() {
                   style={{ background: qa.gradient, boxShadow: `0 4px 12px ${qa.shadow}` }}>
                   <QaIcon size={20} style={{ color: 'white' }} />
                   <div>
-                    <div className="text-[13px] font-bold leading-tight">{qa.label}</div>
-                    <div className="text-[11px] opacity-75 mt-0.5">{qa.sub}</div>
+                    <div className="text-body font-bold leading-tight">{qa.label}</div>
+                    <div className="text-caption opacity-75 mt-0.5">{qa.sub}</div>
                   </div>
                   <div className="flex justify-end">
                     <IconArrowRight size={14} style={{ color: 'white', opacity: 0.6 }} />

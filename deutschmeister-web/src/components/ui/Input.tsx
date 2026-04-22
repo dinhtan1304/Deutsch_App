@@ -13,7 +13,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
     return (
       <div className="w-full">
         {label && (
-          <label className="block text-[13px] font-semibold mb-1.5"
+          <label className="block text-body font-semibold mb-1.5"
             style={{ color: 'var(--theme-text-secondary)' }}>
             {label}
           </label>
@@ -22,7 +22,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           ref={ref}
           type={type}
           className={cn(
-            'w-full px-4 py-2.5 rounded-xl border text-[14px] transition-colors',
+            'w-full px-4 py-2.5 rounded-xl border text-sm transition-colors',
             'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
             className
           )}
@@ -35,7 +35,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           {...props}
         />
         {error && (
-          <p className="mt-1 text-[12px]" style={{ color: '#EF4444' }}>{error}</p>
+          <p className="mt-1 text-xs" style={{ color: '#EF4444' }}>{error}</p>
         )}
       </div>
     );

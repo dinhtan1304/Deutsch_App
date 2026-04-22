@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
@@ -96,7 +96,7 @@ export default function PronunciationPage() {
                 <span>🎙️</span> Luyện Phát Âm
                 {quota && (
                   <span
-                    className="px-2 py-0.5 rounded-md text-[10px] font-bold"
+                    className="px-2 py-0.5 rounded-md text-caption font-bold"
                     style={{
                       backgroundColor: quotaExhausted ? 'rgba(239,68,68,0.1)' : 'rgba(34,197,94,0.1)',
                       color: quotaExhausted ? '#EF4444' : '#22C55E',
@@ -134,10 +134,10 @@ export default function PronunciationPage() {
               </svg>
             </div>
             <div className="flex-1 min-w-0">
-              <h3 className="text-[14px] font-bold" style={{ color: 'var(--theme-text-primary)' }}>
+              <h3 className="text-sm font-bold" style={{ color: 'var(--theme-text-primary)' }}>
                 Drill âm khó cho người Việt
               </h3>
-              <p className="text-[12px]" style={{ color: 'var(--theme-text-muted)' }}>
+              <p className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>
                 ü, ö, ch, r, ß, ei/ie — luyện chuyên sâu từng âm
               </p>
             </div>
@@ -165,7 +165,7 @@ export default function PronunciationPage() {
                 {stats.totalAttempts}
               </div>
               <div
-                className="text-[11px]"
+                className="text-caption"
                 style={{ color: 'var(--theme-text-muted)' }}
               >
                 Lần luyện
@@ -185,7 +185,7 @@ export default function PronunciationPage() {
                 {stats.averageScore}
               </div>
               <div
-                className="text-[11px]"
+                className="text-caption"
                 style={{ color: 'var(--theme-text-muted)' }}
               >
                 Điểm TB
@@ -205,7 +205,7 @@ export default function PronunciationPage() {
                 {Object.keys(stats.byLevel).length}
               </div>
               <div
-                className="text-[11px]"
+                className="text-caption"
                 style={{ color: 'var(--theme-text-muted)' }}
               >
                 Level đã luyện
@@ -259,7 +259,7 @@ export default function PronunciationPage() {
                 >
                   {g.category}
                   <span
-                    className="text-[10px] font-normal px-1.5 py-0.5 rounded-full"
+                    className="text-caption font-normal px-1.5 py-0.5 rounded-full"
                     style={{
                       backgroundColor: 'var(--theme-bg-secondary)',
                       color: 'var(--theme-text-muted)',
@@ -299,7 +299,7 @@ export default function PronunciationPage() {
                             {t.text}
                           </div>
                           <div
-                            className="text-[11px] truncate"
+                            className="text-caption truncate"
                             style={{ color: 'var(--theme-text-muted)' }}
                           >
                             {t.translationVi}
@@ -360,7 +360,7 @@ export default function PronunciationPage() {
                       {h.targetText}
                     </div>
                     <div
-                      className="text-[10px]"
+                      className="text-caption"
                       style={{ color: 'var(--theme-text-muted)' }}
                     >
                       {h.level} • {formatDate(h.createdAt)}

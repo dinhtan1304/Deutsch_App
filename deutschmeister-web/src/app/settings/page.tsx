@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
@@ -144,8 +144,8 @@ function SettingToggle({ label, desc, checked, onChange }: {
     <div className="flex items-center justify-between py-4 border-b last:border-b-0"
       style={{ borderColor: 'var(--theme-border)' }}>
       <div className="flex-1 mr-4">
-        <div className="text-[14px] font-semibold" style={{ color: 'var(--theme-text-primary)' }}>{label}</div>
-        <div className="text-[12px] mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>{desc}</div>
+        <div className="text-sm font-semibold" style={{ color: 'var(--theme-text-primary)' }}>{label}</div>
+        <div className="text-xs mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>{desc}</div>
       </div>
       <button onClick={() => onChange(!checked)}
         className="relative w-12 h-6 rounded-full transition-all duration-300 shrink-0"
@@ -168,8 +168,8 @@ function SettingSlider({ label, value, min, max, step, unit, onChange, color = '
   return (
     <div className="py-4 border-b last:border-b-0" style={{ borderColor: 'var(--theme-border)' }}>
       <div className="flex justify-between mb-3">
-        <span className="text-[14px] font-semibold" style={{ color: 'var(--theme-text-primary)' }}>{label}</span>
-        <span className="text-[14px] font-bold px-2 py-0.5 rounded-md"
+        <span className="text-sm font-semibold" style={{ color: 'var(--theme-text-primary)' }}>{label}</span>
+        <span className="text-sm font-bold px-2 py-0.5 rounded-md"
           style={{ background: `${color}12`, color }}>{value} {unit}</span>
       </div>
       <div className="relative h-6 flex items-center">
@@ -204,7 +204,7 @@ function SectionCard({ title, icon: Icon, color, children }: {
           style={{ background: `linear-gradient(135deg, ${color}, ${color}cc)` }}>
           <Icon size={16} style={{ color: 'white' }} />
         </div>
-        <h2 className="text-[16px] font-bold" style={{ color: 'var(--theme-text-primary)' }}>{title}</h2>
+        <h2 className="text-base font-bold" style={{ color: 'var(--theme-text-primary)' }}>{title}</h2>
       </div>
       <div className="px-5 pb-5">
         {children}
@@ -304,13 +304,13 @@ export default function SettingsPage() {
             </div>
             <div>
               <h1 className="text-2xl font-bold" style={{ color: 'var(--theme-text-primary)' }}>Cài đặt</h1>
-              <p className="text-[13px]" style={{ color: 'var(--theme-text-muted)' }}>Tuỳ chỉnh trải nghiệm học tập</p>
+              <p className="text-body" style={{ color: 'var(--theme-text-muted)' }}>Tuỳ chỉnh trải nghiệm học tập</p>
             </div>
           </div>
 
           {/* Toast */}
           {toast && (
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[13px] font-semibold text-white animate-pulse"
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-body font-semibold text-white animate-pulse"
               style={{ background: 'linear-gradient(135deg, #22C55E, #16A34A)' }}>
               <IconCheck size={14} /> {toast}
             </div>
@@ -324,7 +324,7 @@ export default function SettingsPage() {
             const isActive = activeTab === tab.id;
             return (
               <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[13px] font-semibold whitespace-nowrap transition-all duration-200 hover:-translate-y-0.5"
+                className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-body font-semibold whitespace-nowrap transition-all duration-200 hover:-translate-y-0.5"
                 style={isActive
                   ? { background: `linear-gradient(135deg, ${tab.color}, ${tab.color}cc)`, color: 'white', boxShadow: `0 4px 12px ${tab.color}30` }
                   : { backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }
@@ -340,7 +340,7 @@ export default function SettingsPage() {
           <SectionCard title="Cài đặt hiển thị" icon={IconPalette} color="#8B5CF6">
             {/* Theme picker */}
             <div className="mb-4">
-              <label className="block text-[13px] font-medium mb-3" style={{ color: 'var(--theme-text-muted)' }}>
+              <label className="block text-body font-medium mb-3" style={{ color: 'var(--theme-text-muted)' }}>
                 Giao diện (Theme)
               </label>
               <div className="grid grid-cols-3 gap-3">
@@ -359,7 +359,7 @@ export default function SettingsPage() {
                         style={{ background: isActive ? `linear-gradient(135deg, ${opt.color}, ${opt.color}cc)` : 'var(--theme-bg-secondary)' }}>
                         <Ic size={20} style={{ color: isActive ? 'white' : 'var(--theme-text-muted)' }} />
                       </div>
-                      <div className="text-[13px] font-semibold" style={{ color: 'var(--theme-text-primary)' }}>
+                      <div className="text-body font-semibold" style={{ color: 'var(--theme-text-primary)' }}>
                         {opt.label}
                       </div>
                       {isActive && (
@@ -414,10 +414,10 @@ export default function SettingsPage() {
             {/* Speech rate slider */}
             <div className="py-4 border-b" style={{ borderColor: 'var(--theme-border)' }}>
               <div className="flex justify-between mb-3">
-                <span className="text-[14px] font-semibold" style={{ color: 'var(--theme-text-primary)' }}>
+                <span className="text-sm font-semibold" style={{ color: 'var(--theme-text-primary)' }}>
                   Tốc độ phát âm
                 </span>
-                <span className="text-[14px] font-bold px-2 py-0.5 rounded-md"
+                <span className="text-sm font-bold px-2 py-0.5 rounded-md"
                   style={{ background: 'rgba(59,130,246,.1)', color: '#3B82F6' }}>
                   {settings.speechRate}x
                 </span>
@@ -437,7 +437,7 @@ export default function SettingsPage() {
                   </div>
                 );
               })()}
-              <div className="flex justify-between text-[11px] mt-2" style={{ color: 'var(--theme-text-muted)' }}>
+              <div className="flex justify-between text-caption mt-2" style={{ color: 'var(--theme-text-muted)' }}>
                 <span>Chậm (0.5x)</span>
                 <span>Bình thường</span>
                 <span>Nhanh (1.5x)</span>
@@ -455,7 +455,7 @@ export default function SettingsPage() {
                   window.speechSynthesis.speak(u);
                 }
               }}
-              className="w-full mt-4 px-4 py-3 rounded-xl font-semibold text-[14px] transition-all duration-200
+              className="w-full mt-4 px-4 py-3 rounded-xl font-semibold text-sm transition-all duration-200
                 hover:-translate-y-0.5 hover:shadow-md flex items-center justify-center gap-2"
               style={{ background: 'rgba(59,130,246,.08)', color: '#3B82F6', border: '1px solid rgba(59,130,246,.15)' }}>
               <IconVolume2 size={18} /> Thử phát âm "der Apfel"
@@ -474,13 +474,13 @@ export default function SettingsPage() {
 
             {/* Level select */}
             <div className="py-4 border-b" style={{ borderColor: 'var(--theme-border)' }}>
-              <label className="block text-[14px] font-semibold mb-2" style={{ color: 'var(--theme-text-primary)' }}>
+              <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--theme-text-primary)' }}>
                 Cấp độ ưu tiên
               </label>
               <div className="relative">
                 <select value={settings.preferredLevel}
                   onChange={e => handleChange('preferredLevel', e.target.value as any)}
-                  className="w-full px-4 py-2.5 rounded-xl border text-[14px] font-medium appearance-none cursor-pointer
+                  className="w-full px-4 py-2.5 rounded-xl border text-sm font-medium appearance-none cursor-pointer
                     focus:outline-none focus:ring-2"
                   style={{
                     backgroundColor: 'var(--theme-bg-secondary)',
@@ -550,10 +550,10 @@ export default function SettingsPage() {
                     {user?.name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || 'U'}
                   </div>
                   <div>
-                    <div className="text-[16px] font-bold" style={{ color: 'var(--theme-text-primary)' }}>
+                    <div className="text-base font-bold" style={{ color: 'var(--theme-text-primary)' }}>
                       {user?.name || 'Chưa đặt tên'}
                     </div>
-                    <div className="text-[13px]" style={{ color: 'var(--theme-text-muted)' }}>{user?.email}</div>
+                    <div className="text-body" style={{ color: 'var(--theme-text-muted)' }}>{user?.email}</div>
                   </div>
                 </div>
 
@@ -561,10 +561,10 @@ export default function SettingsPage() {
                 <div className="pt-4 border-t" style={{ borderColor: 'var(--theme-border)' }}>
                   <div className="flex items-center gap-2 mb-4">
                     <IconAlertTriangle size={16} style={{ color: '#EF4444' }} />
-                    <span className="text-[14px] font-semibold" style={{ color: '#EF4444' }}>Vùng nguy hiểm</span>
+                    <span className="text-sm font-semibold" style={{ color: '#EF4444' }}>Vùng nguy hiểm</span>
                   </div>
                   <button onClick={handleLogout}
-                    className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-semibold text-[14px]
+                    className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-semibold text-sm
                       text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
                     style={{ background: 'linear-gradient(135deg, #EF4444, #DC2626)' }}>
                     <IconLogOut size={16} /> Đăng xuất
@@ -577,21 +577,21 @@ export default function SettingsPage() {
                   style={{ background: 'linear-gradient(135deg, rgba(59,130,246,.12), rgba(99,102,241,.08))' }}>
                   <IconUser size={28} style={{ color: '#3B82F6' }} />
                 </div>
-                <h3 className="text-[16px] font-bold mb-2" style={{ color: 'var(--theme-text-primary)' }}>
+                <h3 className="text-base font-bold mb-2" style={{ color: 'var(--theme-text-primary)' }}>
                   Chưa đăng nhập
                 </h3>
-                <p className="text-[13px] mb-6" style={{ color: 'var(--theme-text-muted)' }}>
+                <p className="text-body mb-6" style={{ color: 'var(--theme-text-muted)' }}>
                   Đăng nhập để đồng bộ tiến độ học tập
                 </p>
                 <div className="flex gap-3 justify-center">
                   <Link href="/auth/login"
-                    className="px-6 py-2.5 rounded-xl font-semibold text-[14px] text-white
+                    className="px-6 py-2.5 rounded-xl font-semibold text-sm text-white
                       transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
                     style={{ background: 'linear-gradient(135deg, #3B82F6, #6366F1)' }}>
                     Đăng nhập
                   </Link>
                   <Link href="/auth/register"
-                    className="px-6 py-2.5 rounded-xl font-semibold text-[14px] border-2
+                    className="px-6 py-2.5 rounded-xl font-semibold text-sm border-2
                       transition-all duration-200 hover:-translate-y-0.5"
                     style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)' }}>
                     Đăng ký
@@ -605,12 +605,12 @@ export default function SettingsPage() {
         {/* Reset + Back */}
         <div className="flex items-center justify-between mt-2">
           <button onClick={handleReset}
-            className="flex items-center gap-1.5 text-[13px] font-medium transition-opacity hover:opacity-70"
+            className="flex items-center gap-1.5 text-body font-medium transition-opacity hover:opacity-70"
             style={{ color: 'var(--theme-text-muted)' }}>
             <IconRefresh size={14} /> Đặt lại về mặc định
           </button>
           <Link href="/"
-            className="flex items-center gap-1 text-[13px] font-medium transition-opacity hover:opacity-70"
+            className="flex items-center gap-1 text-body font-medium transition-opacity hover:opacity-70"
             style={{ color: '#3B82F6' }}>
             <IconChevronLeft size={14} /> Trang chủ
           </Link>

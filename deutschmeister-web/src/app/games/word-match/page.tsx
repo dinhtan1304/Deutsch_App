@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
@@ -8,9 +8,11 @@ import { useSoundEffects } from '@/hooks/useSoundEffects';
 import { useGameSession } from '@/hooks/useGameSession';
 import { GenderInfo, Word } from '@/types';
 import {
-  GameSetupCard, GameResultCard, GameButton, StatCard, GameInfoBox,
-  IconLink, IconRocket, IconChevronLeft, IconRefresh, IconX, IconCheck,
+  GameSetupCard, GameResultCard, StatCard, GameInfoBox,
+  GamePlayHeader, GameStatsBar,
+  IconLink, IconRocket, IconChevronLeft, IconRefresh, IconCheck,
 } from '@/components/games/GameUI';
+import { Button } from '@/components/ui';
 
 const PAIRS = 6;
 const AC: Record<string, string> = { masculine: '#3B82F6', feminine: '#EC4899', neuter: '#22C55E' };
@@ -181,10 +183,10 @@ export default function WordMatchPage() {
   if (phase === 'setup') {
     return (
       <GameSetupCard icon={({ size }) => <span style={{ color: 'white' }}><IconLink size={size} /></span>} iconColor="#06B6D4" title="Word Match">
-        <p className="text-[14px] mb-1" style={{ color: 'var(--theme-text-secondary)' }}>
+        <p className="text-sm mb-1" style={{ color: 'var(--theme-text-secondary)' }}>
           Ghép <span className="font-bold" style={{ color: '#06B6D4' }}>{PAIRS} cặp</span> từ với nghĩa tương ứng
         </p>
-        <p className="text-[12px] mb-6" style={{ color: 'var(--theme-text-muted)' }}>
+        <p className="text-xs mb-6" style={{ color: 'var(--theme-text-muted)' }}>
           Click từ bên trái, rồi click nghĩa tương ứng bên phải
         </p>
 
@@ -200,12 +202,12 @@ export default function WordMatchPage() {
         </GameInfoBox>
 
         <div className="flex gap-3 justify-center mt-6">
-          <GameButton onClick={startGame} loading={isLoading} color="#06B6D4">
+          <Button variant="game" accent="srs" onClick={startGame} isLoading={isLoading}>
             <IconRocket size={16} /> Bắt đầu
-          </GameButton>
-          <GameButton variant="outline" onClick={() => router.push('/games')}>
+          </Button>
+          <Button variant="outline" onClick={() => router.push('/games')}>
             <IconChevronLeft size={16} /> Quay lại
-          </GameButton>
+          </Button>
         </div>
       </GameSetupCard>
     );
@@ -220,20 +222,20 @@ export default function WordMatchPage() {
         <GameResultCard accuracy={accuracy} title="Kết quả">
           <div className="my-5">
             <div className="text-5xl font-extrabold" style={{ color: '#06B6D4' }}>{score}</div>
-            <p className="text-[13px] mt-1" style={{ color: 'var(--theme-text-muted)' }}>điểm</p>
+            <p className="text-body mt-1" style={{ color: 'var(--theme-text-muted)' }}>điểm</p>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-6">
             <StatCard label="Đúng" value={correctCount} color="#22C55E" />
-            <StatCard label="Cặp" value={PAIRS} color="#06B6D4" />
+            <StatCard label="Cặp" value={PAIRS} />
             <StatCard label="Chính xác" value={`${accuracy}%`} color="#3B82F6" />
             <StatCard label="Best Combo" value={`x${bestCombo}`} color="#F59E0B" />
           </div>
-          <div className="text-[13px] mb-4" style={{ color: 'var(--theme-text-muted)' }}>
+          <div className="text-body mb-4" style={{ color: 'var(--theme-text-muted)' }}>
             Thời gian: {formatTime(elapsedSec)}
           </div>
           <div className="flex gap-3 justify-center">
-            <GameButton onClick={startGame} color="#06B6D4"><IconRefresh size={16} /> Chơi lại</GameButton>
-            <GameButton variant="outline" onClick={() => router.push('/games')}><IconChevronLeft size={16} /> Menu</GameButton>
+            <Button variant="game" accent="srs" onClick={startGame}><IconRefresh size={16} /> Chơi lại</Button>
+            <Button variant="outline" onClick={() => router.push('/games')}><IconChevronLeft size={16} /> Menu</Button>
           </div>
         </GameResultCard>
       </>
@@ -243,28 +245,14 @@ export default function WordMatchPage() {
   // ─── Playing Screen ───
   return (
     <div className="max-w-2xl mx-auto px-4 sm:px-6 py-5">
-      {/* Header */}
-      <div className="flex justify-between items-center mb-4">
-        <div className="text-xl font-extrabold" style={{ color: '#06B6D4' }}>
-          {score} <span className="text-[13px] font-medium" style={{ color: 'var(--theme-text-muted)' }}>điểm</span>
-        </div>
-        <div className="text-[13px] font-semibold" style={{ color: 'var(--theme-text-muted)' }}>
-          {matchedIds.size}/{PAIRS} cặp
-        </div>
-        <div className="text-[13px] font-semibold font-mono" style={{ color: 'var(--theme-text-muted)' }}>
-          {formatTime(elapsedSec)}
-        </div>
-      </div>
-
-      {/* Combo badge */}
-      {combo >= 2 && (
-        <div className="text-center mb-3">
-          <span className="inline-block px-3 py-1 rounded-full text-[12px] font-bold text-white"
-            style={{ background: 'linear-gradient(135deg, #F59E0B, #EF4444)' }}>
-            Combo x{Math.min(combo, 4)}!
-          </span>
-        </div>
-      )}
+      <GamePlayHeader title="Word Match" streak={combo} timer={formatTime(elapsedSec)}
+        onExit={() => { playClick(); router.push('/games'); }} />
+      <GameStatsBar stats={[
+        { label: 'Điểm',     value: score,                       color: '#06B6D4' },
+        { label: 'Cặp',      value: `${matchedIds.size}/${PAIRS}`, color: '#22C55E', dot: true },
+        { label: 'Sai',      value: wrongRef.current,            color: '#EF4444', dot: true },
+        { label: 'Thời gian', value: formatTime(elapsedSec),     color: 'var(--theme-text-primary)' },
+      ]} />
 
       {/* Match Grid */}
       <div className="grid grid-cols-2 gap-3">
@@ -279,7 +267,7 @@ export default function WordMatchPage() {
               <button key={item.id}
                 onClick={() => handleLeftClick(item.id)}
                 disabled={isMatched}
-                className="rounded-xl border px-3 py-3 text-left transition-all duration-200 text-[14px] font-semibold"
+                className="rounded-xl border px-3 py-3 text-left transition-all duration-200 text-sm font-semibold"
                 style={{
                   borderColor: isMatched ? '#22C55E'
                     : isWrongLeft ? '#EF4444'
@@ -314,7 +302,7 @@ export default function WordMatchPage() {
               <button key={item.id}
                 onClick={() => handleRightClick(item.id)}
                 disabled={isMatched || !selectedLeft}
-                className="rounded-xl border px-3 py-3 text-left transition-all duration-200 text-[13px]"
+                className="rounded-xl border px-3 py-3 text-left transition-all duration-200 text-body"
                 style={{
                   borderColor: isMatched ? '#22C55E'
                     : isWrongRight ? '#EF4444'
@@ -337,21 +325,15 @@ export default function WordMatchPage() {
 
       {/* Hint */}
       {!selectedLeft && matchedIds.size < PAIRS && (
-        <p className="text-center text-[12px] mt-4" style={{ color: 'var(--theme-text-muted)' }}>
+        <p className="text-center text-xs mt-4" style={{ color: 'var(--theme-text-muted)' }}>
           Click một từ bên trái để bắt đầu ghép cặp
         </p>
       )}
       {selectedLeft && (
-        <p className="text-center text-[12px] mt-4 font-semibold" style={{ color: '#06B6D4' }}>
+        <p className="text-center text-xs mt-4 font-semibold" style={{ color: '#06B6D4' }}>
           Bây giờ chọn nghĩa tương ứng bên phải →
         </p>
       )}
-
-      <div className="text-center mt-5">
-        <GameButton variant="ghost" onClick={() => { playClick(); router.push('/games'); }}>
-          <IconX size={14} /> Thoát
-        </GameButton>
-      </div>
     </div>
   );
 }

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
@@ -66,7 +66,7 @@ export function QuickReviewWidget() {
             <h3 className="text-[15px] font-bold" style={{ color: 'var(--theme-text-primary)' }}>
               Ôn nhanh xong!
             </h3>
-            <p className="text-[12px]" style={{ color: 'var(--theme-text-muted)' }}>
+            <p className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>
               {remaining > 0
                 ? `Còn ${remaining} từ chờ ôn — tiếp tục để giữ đà`
                 : 'Đã ôn hết hôm nay. Hẹn ngày mai!'}
@@ -75,7 +75,7 @@ export function QuickReviewWidget() {
         </div>
         {remaining > 0 && (
           <Link href="/review"
-            className="block text-center text-[13px] font-bold px-4 py-2.5 rounded-xl transition-all hover:scale-[1.02]"
+            className="block text-center text-body font-bold px-4 py-2.5 rounded-xl transition-all hover:scale-[1.02]"
             style={{
               background: 'linear-gradient(135deg, #8B5CF6, #A855F7)',
               color: 'white',
@@ -112,15 +112,15 @@ export function QuickReviewWidget() {
         <div className="flex items-center gap-2">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#EF4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" /></svg>
           <div>
-            <h3 className="text-[14px] font-bold" style={{ color: 'var(--theme-text-primary)' }}>
+            <h3 className="text-sm font-bold" style={{ color: 'var(--theme-text-primary)' }}>
               Ôn nhanh {cards.length} từ
             </h3>
-            <p className="text-[11px]" style={{ color: 'var(--theme-text-muted)' }}>
+            <p className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>
               Tổng {dueTotal} từ chờ ôn — bấm 1 lần là xong
             </p>
           </div>
         </div>
-        <Link href="/review" className="text-[11px] font-medium shrink-0"
+        <Link href="/review" className="text-caption font-medium shrink-0"
           style={{ color: 'var(--theme-text-muted)' }}>
           Xem tất cả →
         </Link>
@@ -149,18 +149,18 @@ export function QuickReviewWidget() {
               cursor: revealed ? 'default' : 'pointer',
               minHeight: 120,
             }}>
-            <div className="text-[11px] font-medium mb-1" style={{ color: 'var(--theme-text-muted)' }}>
+            <div className="text-caption font-medium mb-1" style={{ color: 'var(--theme-text-muted)' }}>
               {index + 1} / {cards.length}
             </div>
             <div className="text-xl font-extrabold mb-1" style={{ color: 'var(--theme-text-primary)' }}>
               {current.word.article} {current.word.word}
             </div>
             {revealed ? (
-              <div className="text-[13px]" style={{ color: 'var(--theme-text-secondary)' }}>
+              <div className="text-body" style={{ color: 'var(--theme-text-secondary)' }}>
                 {current.word.translationVi || current.word.translationEn}
               </div>
             ) : (
-              <div className="text-[11px] font-medium" style={{ color: '#6366F1' }}>
+              <div className="text-caption font-medium" style={{ color: '#6366F1' }}>
                 Nhấn để xem nghĩa
               </div>
             )}
@@ -174,7 +174,7 @@ export function QuickReviewWidget() {
                 type="button"
                 onClick={() => handleRate(btn.rating)}
                 disabled={!revealed}
-                className="py-2 rounded-lg text-[11px] font-bold transition-all disabled:opacity-40"
+                className="py-2 rounded-lg text-caption font-bold transition-all disabled:opacity-40"
                 style={{
                   backgroundColor: revealed ? `${btn.color}18` : 'var(--theme-bg-secondary)',
                   color: revealed ? btn.color : 'var(--theme-text-muted)',

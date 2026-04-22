@@ -80,10 +80,10 @@ function TTSPlayer({ texts, speed, onSpeedChange, playCount, onPlay }: {
           <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round"><path d="M3 18v-6a9 9 0 0 1 18 0v6" /><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z" /></svg>
         </div>
         <div className="flex-1">
-          <p className="text-[13px] font-bold" style={{ color: 'var(--theme-text-primary)' }}>
+          <p className="text-body font-bold" style={{ color: 'var(--theme-text-primary)' }}>
             Audio — Text ẩn trong khi làm bài
           </p>
-          <p className="text-[11px]" style={{ color: 'var(--theme-text-muted)' }}>
+          <p className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>
             Đã nghe: {playCount} lần
           </p>
         </div>
@@ -91,7 +91,7 @@ function TTSPlayer({ texts, speed, onSpeedChange, playCount, onPlay }: {
         <div className="flex gap-1">
           {[0.75, 1.0].map(s => (
             <button key={s} onClick={() => onSpeedChange(s)}
-              className="px-2 py-1 rounded-lg text-[11px] font-bold border transition-all"
+              className="px-2 py-1 rounded-lg text-caption font-bold border transition-all"
               style={speed === s
                 ? { background: GRADIENT, color: 'white', borderColor: 'transparent' }
                 : { borderColor: 'var(--theme-border)', color: 'var(--theme-text-muted)', backgroundColor: 'transparent' }}>
@@ -102,7 +102,7 @@ function TTSPlayer({ texts, speed, onSpeedChange, playCount, onPlay }: {
       </div>
 
       <button onClick={handlePlay}
-        className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-[14px] text-white transition-all hover:-translate-y-0.5 active:scale-95"
+        className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm text-white transition-all hover:-translate-y-0.5 active:scale-95"
         style={{ background: playing ? 'linear-gradient(135deg, #F97316, #EF4444)' : GRADIENT, boxShadow: '0 4px 12px rgba(236,72,153,.3)' }}>
         {playing ? <><IconSquare size={14} /> Stop</> : <><IconPlay size={14} /> {playCount === 0 ? 'Nghe audio' : 'Nghe lại'}</>}
       </button>
@@ -117,7 +117,7 @@ function RichtigFalschTeil({ teil, answers, onAnswer }: { teil: ExamListeningTei
     <div className="space-y-3">
       {(teil.questions as ExamListeningQuestion[]).map((q, i) => (
         <div key={q.id} className="rounded-xl border p-3" style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
-          <p className="text-[13px] font-semibold mb-2.5" style={{ color: 'var(--theme-text-primary)' }}>
+          <p className="text-body font-semibold mb-2.5" style={{ color: 'var(--theme-text-primary)' }}>
             {i + 1}. {q.questionText}
           </p>
           <div className="flex gap-2">
@@ -125,7 +125,7 @@ function RichtigFalschTeil({ teil, answers, onAnswer }: { teil: ExamListeningTei
               const sel = answers[q.id] === opt.id;
               return (
                 <button key={opt.id} onClick={() => onAnswer(q.id, opt.id)}
-                  className="flex-1 py-2 rounded-xl text-[13px] font-semibold border-2 transition-all"
+                  className="flex-1 py-2 rounded-xl text-body font-semibold border-2 transition-all"
                   style={sel
                     ? { borderColor: opt.id === 'richtig' ? '#22C55E' : '#EF4444', backgroundColor: opt.id === 'richtig' ? 'rgba(34,197,94,.1)' : 'rgba(239,68,68,.1)', color: opt.id === 'richtig' ? '#22C55E' : '#EF4444' }
                     : { borderColor: 'var(--theme-border)', backgroundColor: 'transparent', color: 'var(--theme-text-secondary)' }}>
@@ -145,7 +145,7 @@ function MCQTeil({ teil, answers, onAnswer }: { teil: ExamListeningTeil; answers
     <div className="space-y-5">
       {(teil.questions as ExamListeningQuestion[]).map((q, i) => (
         <div key={q.id}>
-          <p className="text-[13px] font-semibold mb-2.5" style={{ color: 'var(--theme-text-primary)' }}>
+          <p className="text-body font-semibold mb-2.5" style={{ color: 'var(--theme-text-primary)' }}>
             {i + 1}. {q.questionText}
           </p>
           <div className="space-y-2">
@@ -153,7 +153,7 @@ function MCQTeil({ teil, answers, onAnswer }: { teil: ExamListeningTeil; answers
               const sel = answers[q.id] === opt.id;
               return (
                 <button key={opt.id} onClick={() => onAnswer(q.id, opt.id)}
-                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl border-2 text-[13px] text-left transition-all"
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl border-2 text-body text-left transition-all"
                   style={sel
                     ? { borderColor: ACCENT, backgroundColor: 'rgba(236,72,153,.08)', color: ACCENT }
                     : { borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)', color: 'var(--theme-text-secondary)' }}>
@@ -177,13 +177,13 @@ function ZuordnungTeil({ teil, answers, onAnswer }: { teil: ExamListeningTeil; a
       {(teil.questions as ExamListeningQuestion[]).map((q, i) => (
         <div key={q.id} className="rounded-xl border p-3"
           style={{ borderColor: answers[q.id] ? 'rgba(236,72,153,.3)' : 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
-          <p className="text-[13px] font-semibold mb-2" style={{ color: 'var(--theme-text-primary)' }}>
+          <p className="text-body font-semibold mb-2" style={{ color: 'var(--theme-text-primary)' }}>
             {i + 1}. {q.questionText}
           </p>
           <select
             value={answers[q.id] || ''}
             onChange={e => onAnswer(q.id, e.target.value)}
-            className="w-full px-3 py-2 rounded-xl border text-[13px] font-semibold outline-none"
+            className="w-full px-3 py-2 rounded-xl border text-body font-semibold outline-none"
             style={{
               borderColor: answers[q.id] ? ACCENT : 'var(--theme-border)',
               backgroundColor: 'var(--theme-bg-secondary)',
@@ -276,7 +276,7 @@ export default function ExamListeningPage() {
     return (
       <div className="py-6 text-center">
         <p className="mb-4" style={{ color: 'var(--theme-text-muted)' }}>Không tìm thấy bài thi.</p>
-        <Link href="/practice-test/listening/exam" className="text-[14px] font-semibold" style={{ color: ACCENT }}>Quay lại</Link>
+        <Link href="/practice-test/listening/exam" className="text-sm font-semibold" style={{ color: ACCENT }}>Quay lại</Link>
       </div>
     );
   }
@@ -322,13 +322,13 @@ export default function ExamListeningPage() {
       {/* Top bar */}
       <div className="flex items-center gap-2 mb-4">
         <Link href="/practice-test/listening/exam"
-          className="flex items-center gap-1 text-[13px] font-medium transition-opacity hover:opacity-70"
+          className="flex items-center gap-1 text-body font-medium transition-opacity hover:opacity-70"
           style={{ color: 'var(--theme-text-muted)' }}>
           <IconChevronLeft size={14} /> Thoát
         </Link>
         <div className="flex-1" />
         {timeRemaining > 0 && (
-          <span className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[12px] font-bold tabular-nums"
+          <span className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold tabular-nums"
             style={{
               backgroundColor: timeRemaining < 300 ? 'rgba(239,68,68,.12)' : 'rgba(236,72,153,.08)',
               color: timeRemaining < 300 ? '#EF4444' : ACCENT,
@@ -336,10 +336,10 @@ export default function ExamListeningPage() {
             ⏱ {formatTime(timeRemaining)}
           </span>
         )}
-        <span className="text-[12px] font-semibold" style={{ color: 'var(--theme-text-muted)' }}>
+        <span className="text-xs font-semibold" style={{ color: 'var(--theme-text-muted)' }}>
           {totalAnswered}/{totalQ} câu
         </span>
-        <span className="px-2 py-0.5 rounded-lg text-[11px] font-bold"
+        <span className="px-2 py-0.5 rounded-lg text-caption font-bold"
           style={{ backgroundColor: `${examColor}18`, color: examColor }}>
           {session.examType} · {session.cefrLevel}
         </span>
@@ -360,7 +360,7 @@ export default function ExamListeningPage() {
           const isDone = tAnswered >= tTotal;
           return (
             <button key={t.number} onClick={() => setCurrentTeil(i)}
-              className="shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-xl text-[12px] font-bold transition-all border"
+              className="shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold transition-all border"
               style={isCurrent
                 ? { background: GRADIENT, color: 'white', borderColor: 'transparent' }
                 : isDone
@@ -380,9 +380,9 @@ export default function ExamListeningPage() {
       {/* Teil header */}
       <div className="rounded-2xl border mb-5" style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)', overflow: 'hidden' }}>
         <div className="flex items-center gap-2 px-4 pt-3 pb-2 border-b" style={{ borderColor: 'var(--theme-border)' }}>
-          <span className="w-7 h-7 rounded-lg flex items-center justify-center text-[12px] font-extrabold text-white shrink-0"
+          <span className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-extrabold text-white shrink-0"
             style={{ background: GRADIENT }}>{teil.number}</span>
-          <span className="text-[13px] font-bold" style={{ color: 'var(--theme-text-primary)' }}>
+          <span className="text-body font-bold" style={{ color: 'var(--theme-text-primary)' }}>
             {TASK_TYPE_LABELS[teil.taskType] || teil.taskType}
           </span>
           <div className="ml-auto flex items-center gap-2">
@@ -392,13 +392,13 @@ export default function ExamListeningPage() {
                   style={{ backgroundColor: teilAnswers[q.id] ? ACCENT : 'var(--theme-border)' }} />
               ))}
             </div>
-            <span className="text-[11px]" style={{ color: teilDone ? ACCENT : 'var(--theme-text-muted)' }}>
+            <span className="text-caption" style={{ color: teilDone ? ACCENT : 'var(--theme-text-muted)' }}>
               {teilAnsweredCount}/{teilTotalQ}
             </span>
           </div>
         </div>
         <div className="px-4 py-2.5">
-          <p className="text-[13px] italic leading-relaxed" style={{ color: 'var(--theme-text-secondary)', fontFamily: 'Georgia, serif' }}>
+          <p className="text-body italic leading-relaxed" style={{ color: 'var(--theme-text-secondary)', fontFamily: 'Georgia, serif' }}>
             {teil.instruction}
           </p>
         </div>
@@ -424,7 +424,7 @@ export default function ExamListeningPage() {
       <div className="flex gap-3 mt-6">
         {currentTeil > 0 && (
           <button onClick={() => setCurrentTeil(i => i - 1)}
-            className="flex items-center gap-1 px-4 py-2.5 rounded-xl text-[13px] font-semibold border transition-all hover:-translate-y-0.5"
+            className="flex items-center gap-1 px-4 py-2.5 rounded-xl text-body font-semibold border transition-all hover:-translate-y-0.5"
             style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)', color: 'var(--theme-text-secondary)' }}>
             <IconChevronLeft size={14} /> Teil {teile[currentTeil - 1].number}
           </button>
@@ -432,7 +432,7 @@ export default function ExamListeningPage() {
         <div className="flex-1" />
         {!isLastTeil && (
           <button onClick={() => setCurrentTeil(i => i + 1)}
-            className="flex items-center gap-1 px-4 py-2.5 rounded-xl text-[13px] font-semibold text-white transition-all hover:-translate-y-0.5"
+            className="flex items-center gap-1 px-4 py-2.5 rounded-xl text-body font-semibold text-white transition-all hover:-translate-y-0.5"
             style={{ background: GRADIENT }}>
             Teil {teile[currentTeil + 1].number} <IconChevronRight size={14} />
           </button>
@@ -444,8 +444,8 @@ export default function ExamListeningPage() {
         <div className="mt-6 rounded-2xl border p-4"
           style={{ borderColor: allAnswered ? 'rgba(236,72,153,.3)' : 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
           <div className="flex items-center justify-between mb-3">
-            <p className="text-[13px] font-semibold" style={{ color: 'var(--theme-text-primary)' }}>Kết quả trả lời</p>
-            <span className="text-[13px] font-bold" style={{ color: allAnswered ? ACCENT : 'var(--theme-text-muted)' }}>
+            <p className="text-body font-semibold" style={{ color: 'var(--theme-text-primary)' }}>Kết quả trả lời</p>
+            <span className="text-body font-bold" style={{ color: allAnswered ? ACCENT : 'var(--theme-text-muted)' }}>
               {totalAnswered}/{totalQ} câu
             </span>
           </div>
@@ -456,7 +456,7 @@ export default function ExamListeningPage() {
               const done = tAns >= tTot;
               return (
                 <button key={t.number} onClick={() => setCurrentTeil(teile.indexOf(t))}
-                  className="flex items-center gap-1 px-2.5 py-1 rounded-xl text-[11px] font-bold border transition-all"
+                  className="flex items-center gap-1 px-2.5 py-1 rounded-xl text-caption font-bold border transition-all"
                   style={done
                     ? { backgroundColor: 'rgba(236,72,153,.08)', color: ACCENT, borderColor: 'rgba(236,72,153,.3)' }
                     : { backgroundColor: 'rgba(239,68,68,.06)', color: '#EF4444', borderColor: 'rgba(239,68,68,.2)' }}>
@@ -467,17 +467,17 @@ export default function ExamListeningPage() {
             })}
           </div>
 
-          {error && <p className="text-[12px] text-center mb-3" style={{ color: '#EF4444' }}>{error}</p>}
+          {error && <p className="text-xs text-center mb-3" style={{ color: '#EF4444' }}>{error}</p>}
 
           {confirmSubmit ? (
             <div className="flex gap-2">
               <button onClick={() => setConfirmSubmit(false)}
-                className="flex-1 py-3 rounded-xl text-[13px] font-semibold border transition-all"
+                className="flex-1 py-3 rounded-xl text-body font-semibold border transition-all"
                 style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)', backgroundColor: 'transparent' }}>
                 Hủy
               </button>
               <button onClick={handleSubmit} disabled={submitMut.isPending}
-                className="flex-1 py-3 rounded-xl text-[14px] font-bold text-white flex items-center justify-center gap-2 transition-all"
+                className="flex-1 py-3 rounded-xl text-sm font-bold text-white flex items-center justify-center gap-2 transition-all"
                 style={{ background: GRADIENT }}>
                 {submitMut.isPending ? <><IconLoader size={15} style={{ color: 'white' }} /> Đang nộp...</> : 'Xác nhận nộp bài'}
               </button>
@@ -486,7 +486,7 @@ export default function ExamListeningPage() {
             <button
               onClick={() => allAnswered && setConfirmSubmit(true)}
               disabled={!allAnswered || submitMut.isPending}
-              className="w-full py-3.5 rounded-xl font-bold text-[14px] text-white flex items-center justify-center gap-2 transition-all hover:-translate-y-0.5 disabled:opacity-40 disabled:cursor-not-allowed disabled:transform-none"
+              className="w-full py-3.5 rounded-xl font-bold text-sm text-white flex items-center justify-center gap-2 transition-all hover:-translate-y-0.5 disabled:opacity-40 disabled:cursor-not-allowed disabled:transform-none"
               style={{ background: GRADIENT, boxShadow: allAnswered ? '0 4px 12px rgba(236,72,153,.3)' : 'none' }}>
               {allAnswered ? 'Nộp bài' : `Còn ${totalQ - totalAnswered} câu chưa trả lời`}
             </button>

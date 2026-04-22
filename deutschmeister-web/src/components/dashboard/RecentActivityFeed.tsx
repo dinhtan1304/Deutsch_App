@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import type { RecentActivity } from '@/types/dashboard';
@@ -65,7 +65,7 @@ export function RecentActivityFeed({ data, initialCount = 2 }: RecentActivityFee
 
   return (
     <div
-      className="p-5 rounded-2xl border"
+      className="p-5 rounded-card border shadow-card"
       style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}
     >
       {/* Header */}
@@ -75,12 +75,12 @@ export function RecentActivityFeed({ data, initialCount = 2 }: RecentActivityFee
             style={{ background: 'linear-gradient(135deg, rgba(139,92,246,.15), rgba(168,85,247,.1))' }}>
             <IconClock size={15} style={{ color: '#8B5CF6' }} />
           </div>
-          <h3 className="text-[15px] font-bold" style={{ color: 'var(--theme-text-primary)' }}>
+          <h3 className="text-title font-bold" style={{ color: 'var(--theme-text-primary)' }}>
             Hoạt động gần đây
           </h3>
         </div>
         {data.length > 0 && (
-          <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full"
+          <span className="text-caption font-semibold px-2 py-0.5 rounded-full"
             style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }}>
             {data.length}
           </span>
@@ -92,10 +92,10 @@ export function RecentActivityFeed({ data, initialCount = 2 }: RecentActivityFee
           <div className="w-14 h-14 mx-auto mb-3 rounded-2xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, rgba(34,197,94,.12), rgba(20,184,166,.08))' }}>
             <svg width={28} height={28} viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round"><path d="M7 20h10" /><path d="M10 20c5.5-2.5 .8-6.4 3-10" /><path d="M9.5 9.4c1.1.8 1.8 2.2 2.3 3.7-2 .4-3.5.4-4.8-.3-1.2-.6-2.3-1.9-3-4.2 2.8-.5 4.4 0 5.5.8z" /><path d="M14.1 6a7 7 0 0 0-1.1 4c1.9-.1 3.3-.6 4.3-1.4 1-1 1.6-2.3 1.7-4.6-2.7.1-4 1-4.9 2z" /></svg>
           </div>
-          <p className="text-[13px] font-medium" style={{ color: 'var(--theme-text-secondary)' }}>
+          <p className="text-body font-medium" style={{ color: 'var(--theme-text-secondary)' }}>
             Chưa có hoạt động nào
           </p>
-          <p className="text-[12px] mt-1" style={{ color: 'var(--theme-text-muted)' }}>
+          <p className="text-xs mt-1" style={{ color: 'var(--theme-text-muted)' }}>
             Bắt đầu học để thấy tiến độ!
           </p>
         </div>
@@ -123,17 +123,17 @@ export function RecentActivityFeed({ data, initialCount = 2 }: RecentActivityFee
 
                   {/* Content */}
                   <div className="flex-1 min-w-0">
-                    <p className="text-[13px] font-medium truncate" style={{ color: 'var(--theme-text-primary)' }}>
+                    <p className="text-body font-medium truncate" style={{ color: 'var(--theme-text-primary)' }}>
                       {activity.description}
                     </p>
-                    <p className="text-[11px] mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>
+                    <p className="text-caption mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>
                       {formatTimeAgo(activity.timestamp)}
                     </p>
                   </div>
 
                   {/* Badge */}
                   <div
-                    className="px-2 py-0.5 rounded-full text-[10px] font-semibold shrink-0"
+                    className="px-2 py-0.5 rounded-full text-caption font-semibold shrink-0"
                     style={{ backgroundColor: `${config.accent}15`, color: config.accent }}
                   >
                     {config.label}
@@ -147,7 +147,7 @@ export function RecentActivityFeed({ data, initialCount = 2 }: RecentActivityFee
           {hasMore && (
             <button
               onClick={() => setExpanded(!expanded)}
-              className="w-full mt-3 py-2 rounded-xl text-[12px] font-semibold
+              className="w-full mt-3 py-2 rounded-xl text-xs font-semibold
                 flex items-center justify-center gap-1.5 transition-all duration-200
                 hover:bg-(--theme-bg-secondary)"
               style={{ color: 'var(--theme-text-muted)' }}

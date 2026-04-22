@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import Link from 'next/link';
@@ -79,7 +79,7 @@ export function NotificationDrawer({ open, onClose }: Props) {
             {(data?.unreadCount ?? 0) > 0 && (
               <button
                 onClick={() => markAllRead.mutate()}
-                className="text-[12px] font-medium px-2 py-1 rounded-lg transition-colors"
+                className="text-xs font-medium px-2 py-1 rounded-lg transition-colors"
                 style={{ color: '#3B82F6' }}
                 onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'rgba(59,130,246,.08)')}
                 onMouseLeave={e => (e.currentTarget.style.backgroundColor = '')}
@@ -118,12 +118,12 @@ export function NotificationDrawer({ open, onClose }: Props) {
                 <line x1="12" y1="8" x2="12" y2="12" />
                 <line x1="12" y1="16" x2="12.01" y2="16" />
               </svg>
-              <div className="text-[13px] font-medium" style={{ color: 'var(--theme-text-muted)' }}>
+              <div className="text-body font-medium" style={{ color: 'var(--theme-text-muted)' }}>
                 Không tải được thông báo
               </div>
               <button
                 onClick={() => refetch()}
-                className="text-[12px] font-medium px-3 py-1.5 rounded-lg border transition-colors"
+                className="text-xs font-medium px-3 py-1.5 rounded-lg border transition-colors"
                 style={{ color: '#3B82F6', borderColor: 'rgba(59,130,246,.3)' }}
               >
                 Thử lại
@@ -135,7 +135,7 @@ export function NotificationDrawer({ open, onClose }: Props) {
                 <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
                 <path d="M13.73 21a2 2 0 0 1-3.46 0" />
               </svg>
-              <div className="text-[13px] font-medium" style={{ color: 'var(--theme-text-muted)' }}>
+              <div className="text-body font-medium" style={{ color: 'var(--theme-text-muted)' }}>
                 Chưa có thông báo nào
               </div>
             </div>
@@ -158,7 +158,7 @@ export function NotificationDrawer({ open, onClose }: Props) {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <span
-                        className="font-semibold text-[13px] truncate"
+                        className="font-semibold text-body truncate"
                         style={{ color: 'var(--theme-text-primary)' }}
                       >
                         {notif.title}
@@ -171,13 +171,13 @@ export function NotificationDrawer({ open, onClose }: Props) {
                       )}
                     </div>
                     <div
-                      className="text-[12px] mt-0.5 line-clamp-2"
+                      className="text-xs mt-0.5 line-clamp-2"
                       style={{ color: 'var(--theme-text-muted)' }}
                     >
                       {notif.body}
                     </div>
                     <div
-                      className="text-[11px] mt-1"
+                      className="text-caption mt-1"
                       style={{ color: 'var(--theme-text-muted)', opacity: 0.7 }}
                     >
                       {timeAgo(notif.createdAt)}
@@ -204,7 +204,7 @@ export function NotificationDrawer({ open, onClose }: Props) {
             style={{ borderTop: '1px solid var(--theme-border)' }}
           >
             <span
-              className="text-[12px] font-medium"
+              className="text-xs font-medium"
               style={{ color: 'var(--theme-text-muted)' }}
             >
               {data.total} thông báo

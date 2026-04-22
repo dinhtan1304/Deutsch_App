@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 interface LoadingProps {
   size?: 'sm' | 'md' | 'lg';
@@ -20,7 +20,7 @@ export function Loading({ size = 'md', text, fullScreen = false }: LoadingProps)
         style={{ borderColor: 'var(--theme-border)', borderTopColor: '#3B82F6' }}
       />
       {text && (
-        <p className="text-[13px]" style={{ color: 'var(--theme-text-muted)' }}>{text}</p>
+        <p className="text-body" style={{ color: 'var(--theme-text-muted)' }}>{text}</p>
       )}
     </div>
   );

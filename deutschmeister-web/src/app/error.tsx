@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect } from 'react';
 
@@ -32,18 +32,18 @@ export default function Error({
         <h2 className="text-xl font-bold mb-2" style={{ color: 'var(--theme-text-primary)' }}>
           Oops! Có lỗi xảy ra
         </h2>
-        <p className="text-[13px] mb-6" style={{ color: 'var(--theme-text-muted)' }}>
+        <p className="text-body mb-6" style={{ color: 'var(--theme-text-muted)' }}>
           Trang này gặp sự cố. Vui lòng thử lại.
         </p>
 
         <div className="flex gap-3 justify-center">
           <button onClick={reset}
-            className="px-5 py-2.5 rounded-xl font-semibold text-[14px] text-white transition-all duration-200 hover:-translate-y-0.5"
+            className="px-5 py-2.5 rounded-xl font-semibold text-sm text-white transition-all duration-200 hover:-translate-y-0.5"
             style={{ background: 'linear-gradient(135deg, #3B82F6, #6366F1)', boxShadow: '0 4px 12px rgba(59,130,246,.25)' }}>
             Thử lại
           </button>
           <a href="/"
-            className="px-5 py-2.5 rounded-xl font-semibold text-[14px] transition-all duration-200 hover:-translate-y-0.5"
+            className="px-5 py-2.5 rounded-xl font-semibold text-sm transition-all duration-200 hover:-translate-y-0.5"
             style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-secondary)', border: '1px solid var(--theme-border)' }}>
             Về trang chủ
           </a>

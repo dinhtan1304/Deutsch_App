@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import Link from 'next/link';
@@ -97,25 +97,25 @@ function RuleCard({ rule }: { rule: GenderRule }) {
     <div className="rounded-xl p-4 transition-all duration-200 hover:-translate-y-0.5"
       style={{ backgroundColor: gc.bg, borderLeft: `4px solid ${gc.color}` }}>
       <div className="flex items-start justify-between gap-2 mb-2">
-        <h3 className="text-[14px] font-bold" style={{ color: gc.color }}>
+        <h3 className="text-sm font-bold" style={{ color: gc.color }}>
           {rule.type === 'ending' && `Đuôi ${rule.pattern.replace('$', '')}`}
           {rule.type === 'prefix' && `Tiền tố ${rule.pattern.replace('^', '')}`}
           {rule.type === 'category' && rule.description}
           {rule.type === 'special' && rule.description}
         </h3>
-        <span className="px-2 py-0.5 rounded-full text-[11px] font-bold text-white shrink-0"
+        <span className="px-2 py-0.5 rounded-full text-caption font-bold text-white shrink-0"
           style={{ backgroundColor: gc.color }}>
           {rule.reliability}%
         </span>
       </div>
 
-      <p className="text-[13px] mb-2.5" style={{ color: 'var(--theme-text-secondary)' }}>
+      <p className="text-body mb-2.5" style={{ color: 'var(--theme-text-secondary)' }}>
         {rule.description}
       </p>
 
       <div className="flex flex-wrap gap-1.5 mb-2">
         {rule.examples.map((ex, i) => (
-          <span key={i} className="px-2 py-0.5 rounded-md text-[12px] font-semibold"
+          <span key={i} className="px-2 py-0.5 rounded-md text-xs font-semibold"
             style={{ backgroundColor: `${gc.color}15`, color: gc.color }}>
             {ex}
           </span>
@@ -123,7 +123,7 @@ function RuleCard({ rule }: { rule: GenderRule }) {
       </div>
 
       {rule.exceptions && rule.exceptions.length > 0 && (
-        <p className="text-[11px] flex items-center gap-1" style={{ color: 'var(--theme-text-muted)' }}>
+        <p className="text-caption flex items-center gap-1" style={{ color: 'var(--theme-text-muted)' }}>
           <IconAlertTriangle size={12} style={{ color: '#F59E0B' }} />
           Ngoại lệ: {rule.exceptions.join(', ')}
         </p>
@@ -149,13 +149,13 @@ export default function TipsPage() {
               <h1 className="text-2xl font-bold" style={{ color: 'var(--theme-text-primary)' }}>
                 Mẹo nhớ Der / Die / Das
               </h1>
-              <p className="text-[13px] mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>
+              <p className="text-body mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>
                 Các quy tắc giúp bạn đoán đúng mạo từ tiếng Đức
               </p>
             </div>
           </div>
           <Link href="/words"
-            className="flex items-center gap-1 px-3 py-2 rounded-xl text-[13px] font-semibold transition-all duration-200 hover:-translate-y-0.5"
+            className="flex items-center gap-1 px-3 py-2 rounded-xl text-body font-semibold transition-all duration-200 hover:-translate-y-0.5"
             style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }}>
             <IconChevronLeft size={14} /> Từ điển
           </Link>
@@ -169,7 +169,7 @@ export default function TipsPage() {
               style={{ background: 'linear-gradient(135deg, #F59E0B, #F59E0Bcc)' }}>
               <IconZap size={16} style={{ color: 'white' }} />
             </div>
-            <h2 className="text-[16px] font-bold" style={{ color: 'var(--theme-text-primary)' }}>Tra cứu nhanh</h2>
+            <h2 className="text-base font-bold" style={{ color: 'var(--theme-text-primary)' }}>Tra cứu nhanh</h2>
           </div>
           <div className="px-5 pb-5 grid grid-cols-1 md:grid-cols-3 gap-3">
             {(['der', 'die', 'das'] as const).map(article => {
@@ -179,12 +179,12 @@ export default function TipsPage() {
               return (
                 <div key={article} className="rounded-xl p-4"
                   style={{ backgroundColor: gc.bg, borderLeft: `4px solid ${gc.color}` }}>
-                  <div className="text-[14px] font-bold mb-2" style={{ color: gc.color }}>
+                  <div className="text-sm font-bold mb-2" style={{ color: gc.color }}>
                     {gc.label}
                   </div>
                   <div className="flex flex-wrap gap-1.5">
                     {endings.map((e, i) => (
-                      <span key={i} className="px-2 py-0.5 rounded-md text-[12px] font-semibold"
+                      <span key={i} className="px-2 py-0.5 rounded-md text-xs font-semibold"
                         style={{ backgroundColor: `${gc.color}18`, color: gc.color }}>
                         {e}
                       </span>
@@ -202,7 +202,7 @@ export default function TipsPage() {
             const isActive = activeTab === tab.id;
             return (
               <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[13px] font-semibold whitespace-nowrap transition-all duration-200 hover:-translate-y-0.5"
+                className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-body font-semibold whitespace-nowrap transition-all duration-200 hover:-translate-y-0.5"
                 style={isActive
                   ? { background: `linear-gradient(135deg, ${tab.color}, ${tab.color}cc)`, color: 'white', boxShadow: `0 4px 12px ${tab.color}30` }
                   : { backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }
@@ -222,7 +222,7 @@ export default function TipsPage() {
                 style={{ background: 'linear-gradient(135deg, #F59E0B, #F59E0Bcc)' }}>
                 <IconBrain size={14} style={{ color: 'white' }} />
               </div>
-              <h2 className="text-[18px] font-bold" style={{ color: 'var(--theme-text-primary)' }}>
+              <h2 className="text-title font-bold" style={{ color: 'var(--theme-text-primary)' }}>
                 Câu vần dễ nhớ
               </h2>
             </div>
@@ -232,13 +232,13 @@ export default function TipsPage() {
                 return (
                   <div key={i} className="rounded-xl p-4 transition-all duration-200 hover:-translate-y-0.5"
                     style={{ backgroundColor: gc.bg, borderLeft: `4px solid ${gc.color}` }}>
-                    <h3 className="text-[14px] font-bold mb-1.5" style={{ color: 'var(--theme-text-primary)' }}>
+                    <h3 className="text-sm font-bold mb-1.5" style={{ color: 'var(--theme-text-primary)' }}>
                       {trick.title}
                     </h3>
-                    <p className="text-[16px] italic mb-1.5 font-medium" style={{ color: gc.color }}>
+                    <p className="text-base italic mb-1.5 font-medium" style={{ color: gc.color }}>
                       &ldquo;{trick.rhyme}&rdquo;
                     </p>
-                    <p className="text-[13px]" style={{ color: 'var(--theme-text-secondary)' }}>
+                    <p className="text-body" style={{ color: 'var(--theme-text-secondary)' }}>
                       → {trick.translation}
                     </p>
                   </div>
@@ -256,7 +256,7 @@ export default function TipsPage() {
                 style={{ background: 'linear-gradient(135deg, #3B82F6, #3B82F6cc)' }}>
                 <IconShield size={14} style={{ color: 'white' }} />
               </div>
-              <h2 className="text-[18px] font-bold" style={{ color: '#3B82F6' }}>
+              <h2 className="text-title font-bold" style={{ color: '#3B82F6' }}>
                 Quy tắc DER (Maskulinum)
               </h2>
             </div>
@@ -274,7 +274,7 @@ export default function TipsPage() {
                 style={{ background: 'linear-gradient(135deg, #EC4899, #EC4899cc)' }}>
                 <IconShield size={14} style={{ color: 'white' }} />
               </div>
-              <h2 className="text-[18px] font-bold" style={{ color: '#EC4899' }}>
+              <h2 className="text-title font-bold" style={{ color: '#EC4899' }}>
                 Quy tắc DIE (Femininum)
               </h2>
             </div>
@@ -292,7 +292,7 @@ export default function TipsPage() {
                 style={{ background: 'linear-gradient(135deg, #22C55E, #22C55Ecc)' }}>
                 <IconShield size={14} style={{ color: 'white' }} />
               </div>
-              <h2 className="text-[18px] font-bold" style={{ color: '#22C55E' }}>
+              <h2 className="text-title font-bold" style={{ color: '#22C55E' }}>
                 Quy tắc DAS (Neutrum)
               </h2>
             </div>
@@ -310,7 +310,7 @@ export default function TipsPage() {
               style={{ background: 'linear-gradient(135deg, #8B5CF6, #8B5CF6cc)' }}>
               <IconBookOpen size={16} style={{ color: 'white' }} />
             </div>
-            <h2 className="text-[16px] font-bold" style={{ color: 'var(--theme-text-primary)' }}>Lời khuyên học tập</h2>
+            <h2 className="text-base font-bold" style={{ color: 'var(--theme-text-primary)' }}>Lời khuyên học tập</h2>
           </div>
           <div className="px-5 pb-5 space-y-3">
             {[
@@ -321,13 +321,13 @@ export default function TipsPage() {
               { num: '5', text: 'Ôn tập SRS', desc: 'Dùng tính năng SRS Review để nhớ lâu hơn' },
             ].map(tip => (
               <div key={tip.num} className="flex items-start gap-3 py-2">
-                <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 text-[12px] font-bold text-white"
+                <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 text-xs font-bold text-white"
                   style={{ background: 'linear-gradient(135deg, #8B5CF6, #8B5CF6cc)' }}>
                   {tip.num}
                 </div>
                 <div>
-                  <div className="text-[14px] font-semibold" style={{ color: 'var(--theme-text-primary)' }}>{tip.text}</div>
-                  <div className="text-[13px]" style={{ color: 'var(--theme-text-secondary)' }}>{tip.desc}</div>
+                  <div className="text-sm font-semibold" style={{ color: 'var(--theme-text-primary)' }}>{tip.text}</div>
+                  <div className="text-body" style={{ color: 'var(--theme-text-secondary)' }}>{tip.desc}</div>
                 </div>
               </div>
             ))}

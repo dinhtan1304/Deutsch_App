@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
@@ -54,14 +54,14 @@ export default function ResourcesPage() {
           >
             <span>🌐</span> Tài nguyên tiếng Đức thật
           </h1>
-          <p className="text-[13px] mt-2" style={{ color: 'var(--theme-text-muted)' }}>
+          <p className="text-body mt-2" style={{ color: 'var(--theme-text-muted)' }}>
             Tài nguyên gốc từ báo, đài, podcast Đức — giúp bạn luyện tai và mắt với tiếng Đức thật.
           </p>
         </div>
 
         {/* Disclaimer */}
         <div
-          className="rounded-xl p-3 mb-5 flex items-start gap-2 text-[12px]"
+          className="rounded-xl p-3 mb-5 flex items-start gap-2 text-xs"
           style={{
             backgroundColor: 'rgba(245,158,11,0.08)',
             border: '1px solid rgba(245,158,11,0.2)',
@@ -77,7 +77,7 @@ export default function ResourcesPage() {
 
         {/* Level filter */}
         <div className="mb-3">
-          <div className="text-[11px] font-bold mb-2 uppercase tracking-wider" style={{ color: 'var(--theme-text-muted)' }}>
+          <div className="text-caption font-bold mb-2 uppercase tracking-wider" style={{ color: 'var(--theme-text-muted)' }}>
             Trình độ
           </div>
           <div className="flex flex-wrap gap-2">
@@ -88,7 +88,7 @@ export default function ResourcesPage() {
                 <button
                   key={lv}
                   onClick={() => setLevelFilter(lv)}
-                  className="px-3 py-1.5 rounded-lg text-[12px] font-bold transition-all"
+                  className="px-3 py-1.5 rounded-lg text-xs font-bold transition-all"
                   style={{
                     backgroundColor: active ? color : 'var(--theme-bg-card)',
                     color: active ? 'white' : color,
@@ -104,7 +104,7 @@ export default function ResourcesPage() {
 
         {/* Skill filter */}
         <div className="mb-5">
-          <div className="text-[11px] font-bold mb-2 uppercase tracking-wider" style={{ color: 'var(--theme-text-muted)' }}>
+          <div className="text-caption font-bold mb-2 uppercase tracking-wider" style={{ color: 'var(--theme-text-muted)' }}>
             Kỹ năng
           </div>
           <div className="flex flex-wrap gap-2">
@@ -114,7 +114,7 @@ export default function ResourcesPage() {
                 <button
                   key={sk}
                   onClick={() => setSkillFilter(sk)}
-                  className="px-3 py-1.5 rounded-lg text-[12px] font-bold transition-all"
+                  className="px-3 py-1.5 rounded-lg text-xs font-bold transition-all"
                   style={{
                     backgroundColor: active ? '#6366F1' : 'var(--theme-bg-card)',
                     color: active ? 'white' : 'var(--theme-text-secondary)',
@@ -164,22 +164,22 @@ function ResourceCard({ resource }: { resource: AuthenticResource }) {
     >
       <div className="flex items-start justify-between gap-3 mb-2">
         <div className="flex items-center gap-2">
-          <span className="text-[18px]">{TYPE_ICONS[resource.type]}</span>
+          <span className="text-title">{TYPE_ICONS[resource.type]}</span>
           <span
-            className="px-2 py-0.5 rounded-md text-[10px] font-bold"
+            className="px-2 py-0.5 rounded-md text-caption font-bold"
             style={{ backgroundColor: `${color}18`, color, border: `1px solid ${color}35` }}
           >
             {resource.level}
           </span>
           <span
-            className="px-2 py-0.5 rounded-md text-[10px] font-semibold"
+            className="px-2 py-0.5 rounded-md text-caption font-semibold"
             style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }}
           >
             {TYPE_LABELS[resource.type]}
           </span>
           {!resource.free && (
             <span
-              className="px-2 py-0.5 rounded-md text-[10px] font-semibold"
+              className="px-2 py-0.5 rounded-md text-caption font-semibold"
               style={{ backgroundColor: 'rgba(245,158,11,0.12)', color: '#F59E0B' }}
             >
               Có trả phí
@@ -192,7 +192,7 @@ function ResourceCard({ resource }: { resource: AuthenticResource }) {
       <h3 className="text-[15px] font-bold mb-0.5" style={{ color: 'var(--theme-text-primary)' }}>
         {resource.titleVi}
       </h3>
-      <p className="text-[11px] italic mb-2" style={{ color }}>
+      <p className="text-caption italic mb-2" style={{ color }}>
         {resource.title} · {resource.source}
       </p>
       <p className="text-[12.5px] leading-relaxed" style={{ color: 'var(--theme-text-secondary)' }}>

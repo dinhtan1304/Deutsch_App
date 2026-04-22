@@ -130,14 +130,14 @@ export default function PhonemeDrillPage() {
         <div className="text-4xl font-extrabold" style={{ color: '#A855F7' }}>{drill.label}</div>
         <div>
           <h1 className="text-xl font-bold" style={{ color: 'var(--theme-text-primary)' }}>{drill.labelVi}</h1>
-          <p className="text-[12px] font-mono" style={{ color: '#A855F7' }}>{drill.ipa}</p>
-          <p className="text-[12px]" style={{ color: 'var(--theme-text-muted)' }}>{drill.description}</p>
+          <p className="text-xs font-mono" style={{ color: '#A855F7' }}>{drill.ipa}</p>
+          <p className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>{drill.description}</p>
         </div>
       </div>
 
       {/* Minimal pairs */}
       <section className="mb-6">
-        <h2 className="text-[13px] font-bold uppercase tracking-wider mb-2" style={{ color: '#EC4899' }}>
+        <h2 className="text-body font-bold uppercase tracking-wider mb-2" style={{ color: '#EC4899' }}>
           Cặp tối thiểu (Minimal Pairs)
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -145,11 +145,11 @@ export default function PhonemeDrillPage() {
             <div key={i} className="rounded-xl border p-3 flex items-center gap-3"
               style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
               <div className="flex items-center gap-2 flex-1 min-w-0">
-                <span className="font-bold text-[14px]" style={{ color: 'var(--theme-text-primary)' }}>{pair.wordA}</span>
+                <span className="font-bold text-sm" style={{ color: 'var(--theme-text-primary)' }}>{pair.wordA}</span>
                 <span style={{ color: 'var(--theme-text-muted)' }}>↔</span>
-                <span className="font-bold text-[14px]" style={{ color: '#A855F7' }}>{pair.wordB}</span>
+                <span className="font-bold text-sm" style={{ color: '#A855F7' }}>{pair.wordB}</span>
               </div>
-              <span className="text-[11px] shrink-0" style={{ color: 'var(--theme-text-muted)' }}>{pair.noteVi}</span>
+              <span className="text-caption shrink-0" style={{ color: 'var(--theme-text-muted)' }}>{pair.noteVi}</span>
             </div>
           ))}
         </div>
@@ -157,13 +157,13 @@ export default function PhonemeDrillPage() {
 
       {/* Practice words — clickable to select */}
       <section className="mb-6">
-        <h2 className="text-[13px] font-bold uppercase tracking-wider mb-2" style={{ color: '#6366F1' }}>
+        <h2 className="text-body font-bold uppercase tracking-wider mb-2" style={{ color: '#6366F1' }}>
           Từ luyện tập — chọn để đọc
         </h2>
         <div className="flex flex-wrap gap-2">
           {drill.practiceWords.map(w => (
             <button key={w} onClick={() => { setSelectedText(w); handleRetry(); }}
-              className="px-3 py-1.5 rounded-lg text-[13px] font-medium transition-all"
+              className="px-3 py-1.5 rounded-lg text-body font-medium transition-all"
               style={{
                 backgroundColor: selectedText === w ? '#A855F7' : 'var(--theme-bg-card)',
                 color: selectedText === w ? 'white' : 'var(--theme-text-primary)',
@@ -177,13 +177,13 @@ export default function PhonemeDrillPage() {
 
       {/* Practice sentences — clickable */}
       <section className="mb-6">
-        <h2 className="text-[13px] font-bold uppercase tracking-wider mb-2" style={{ color: '#22C55E' }}>
+        <h2 className="text-body font-bold uppercase tracking-wider mb-2" style={{ color: '#22C55E' }}>
           Câu luyện tập — chọn để đọc
         </h2>
         <div className="space-y-1.5">
           {drill.practiceSentences.map(s => (
             <button key={s} onClick={() => { setSelectedText(s); handleRetry(); }}
-              className="w-full text-left rounded-xl border p-3 text-[13px] font-medium transition-all"
+              className="w-full text-left rounded-xl border p-3 text-body font-medium transition-all"
               style={{
                 backgroundColor: selectedText === s ? 'rgba(168,85,247,.08)' : 'var(--theme-bg-card)',
                 borderColor: selectedText === s ? '#A855F7' : 'var(--theme-border)',
@@ -219,14 +219,14 @@ export default function PhonemeDrillPage() {
           <div className="flex justify-center gap-3">
             {recState === 'idle' && (
               <button onClick={startRecording}
-                className="px-6 py-3 rounded-xl text-white font-bold text-[14px] transition-all hover:-translate-y-0.5"
+                className="px-6 py-3 rounded-xl text-white font-bold text-sm transition-all hover:-translate-y-0.5"
                 style={{ background: 'linear-gradient(135deg, #EC4899, #A855F7)', boxShadow: '0 4px 12px rgba(168,85,247,.3)' }}>
                 🎙️ Ghi âm
               </button>
             )}
             {recState === 'recording' && (
               <button onClick={stopRecording}
-                className="px-6 py-3 rounded-xl text-white font-bold text-[14px]"
+                className="px-6 py-3 rounded-xl text-white font-bold text-sm"
                 style={{ backgroundColor: '#EF4444' }}>
                 ⏹ Dừng
               </button>
@@ -234,19 +234,19 @@ export default function PhonemeDrillPage() {
             {recState === 'done' && !result && (
               <div className="flex gap-3">
                 <button onClick={handleRetry}
-                  className="px-4 py-2.5 rounded-xl border font-semibold text-[13px]"
+                  className="px-4 py-2.5 rounded-xl border font-semibold text-body"
                   style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)' }}>
                   Ghi lại
                 </button>
                 <button onClick={handleScore}
-                  className="px-6 py-2.5 rounded-xl text-white font-bold text-[14px]"
+                  className="px-6 py-2.5 rounded-xl text-white font-bold text-sm"
                   style={{ background: 'linear-gradient(135deg, #6366F1, #8B5CF6)' }}>
                   Chấm điểm
                 </button>
               </div>
             )}
             {recState === 'scoring' && (
-              <div className="flex items-center gap-2 text-[13px]" style={{ color: 'var(--theme-text-muted)' }}>
+              <div className="flex items-center gap-2 text-body" style={{ color: 'var(--theme-text-muted)' }}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="animate-spin">
                   <path d="M21 12a9 9 0 1 1-6.219-8.56" />
                 </svg>
@@ -256,7 +256,7 @@ export default function PhonemeDrillPage() {
           </div>
 
           {error && (
-            <p className="text-center text-[12px] mt-3" style={{ color: '#EF4444' }}>{error}</p>
+            <p className="text-center text-xs mt-3" style={{ color: '#EF4444' }}>{error}</p>
           )}
 
           {/* Result */}
@@ -267,19 +267,19 @@ export default function PhonemeDrillPage() {
                 <div className="text-4xl font-extrabold" style={{ color: getWordColor(result.overallScore) }}>
                   {result.overallScore}
                 </div>
-                <div className="text-[11px]" style={{ color: 'var(--theme-text-muted)' }}>/100</div>
+                <div className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>/100</div>
               </div>
 
               {/* Word scores */}
               <div className="flex flex-wrap justify-center gap-2">
                 {result.wordScores.map((ws, i) => (
                   <div key={i} className="text-center">
-                    <div className="text-[14px] font-bold" style={{ color: getWordColor(ws.score) }}>
+                    <div className="text-sm font-bold" style={{ color: getWordColor(ws.score) }}>
                       {ws.word}
                     </div>
-                    <div className="text-[10px]" style={{ color: getWordColor(ws.score) }}>{ws.score}</div>
+                    <div className="text-caption" style={{ color: getWordColor(ws.score) }}>{ws.score}</div>
                     {ws.issue && (
-                      <div className="text-[10px] max-w-24" style={{ color: '#EF4444' }}>{ws.issue}</div>
+                      <div className="text-caption max-w-24" style={{ color: '#EF4444' }}>{ws.issue}</div>
                     )}
                   </div>
                 ))}
@@ -288,10 +288,10 @@ export default function PhonemeDrillPage() {
               {/* Suggestions */}
               {result.suggestions.length > 0 && (
                 <div className="rounded-xl p-3" style={{ backgroundColor: 'rgba(168,85,247,.06)' }}>
-                  <p className="text-[11px] font-bold uppercase mb-1" style={{ color: '#A855F7' }}>Gợi ý</p>
+                  <p className="text-caption font-bold uppercase mb-1" style={{ color: '#A855F7' }}>Gợi ý</p>
                   <ul className="space-y-1">
                     {result.suggestions.map((s, i) => (
-                      <li key={i} className="text-[12px] flex items-start gap-1.5" style={{ color: 'var(--theme-text-secondary)' }}>
+                      <li key={i} className="text-xs flex items-start gap-1.5" style={{ color: 'var(--theme-text-secondary)' }}>
                         <span style={{ color: '#A855F7' }}>•</span>{s}
                       </li>
                     ))}
@@ -301,7 +301,7 @@ export default function PhonemeDrillPage() {
 
               <div className="flex justify-center">
                 <button onClick={handleRetry}
-                  className="px-5 py-2 rounded-xl font-semibold text-[13px] transition-all"
+                  className="px-5 py-2 rounded-xl font-semibold text-body transition-all"
                   style={{ color: '#A855F7', backgroundColor: 'rgba(168,85,247,.08)' }}>
                   Thử lại
                 </button>

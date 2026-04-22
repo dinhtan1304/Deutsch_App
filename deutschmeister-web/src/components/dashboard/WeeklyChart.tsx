@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useMemo } from 'react';
 import type { WeeklyProgress } from '@/types/dashboard';
@@ -25,12 +25,12 @@ export function WeeklyChart({ data }: WeeklyChartProps) {
 
   return (
     <div
-      className="p-5 rounded-2xl border"
+      className="p-5 rounded-card border shadow-card"
       style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}
     >
       {/* Header */}
       <div className="flex items-center justify-between mb-5">
-        <h3 className="text-[15px] font-bold flex items-center gap-2"
+        <h3 className="text-title font-bold flex items-center gap-2"
           style={{ color: 'var(--theme-text-primary)' }}>
           <span className="w-7 h-7 rounded-lg flex items-center justify-center text-xs"
             style={{ background: 'linear-gradient(135deg, rgba(59,130,246,.15), rgba(99,102,241,.1))' }}>
@@ -38,7 +38,7 @@ export function WeeklyChart({ data }: WeeklyChartProps) {
           </span>
           Tiến độ 7 ngày qua
         </h3>
-        <div className="flex items-center gap-4 text-[12px]">
+        <div className="flex items-center gap-4 text-xs">
           <div className="flex items-center gap-1.5">
             <div className="w-2.5 h-2.5 rounded-full" style={{ background: 'linear-gradient(135deg, #3B82F6, #6366F1)' }} />
             <span style={{ color: 'var(--theme-text-muted)' }}>Từ vựng</span>
@@ -72,7 +72,7 @@ export function WeeklyChart({ data }: WeeklyChartProps) {
                   />
                   {day.wordsLearned > 0 && (
                     <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1
-                      text-[11px] font-medium rounded-md shadow-lg pointer-events-none
+                      text-caption font-medium rounded-md shadow-lg pointer-events-none
                       opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10
                       text-white"
                       style={{ backgroundColor: '#3B82F6' }}>
@@ -93,7 +93,7 @@ export function WeeklyChart({ data }: WeeklyChartProps) {
                   />
                   {day.gamesPlayed > 0 && (
                     <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1
-                      text-[11px] font-medium rounded-md shadow-lg pointer-events-none
+                      text-caption font-medium rounded-md shadow-lg pointer-events-none
                       opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10
                       text-white"
                       style={{ backgroundColor: '#10B981' }}>
@@ -105,7 +105,7 @@ export function WeeklyChart({ data }: WeeklyChartProps) {
 
               {/* Day label */}
               <div
-                className={`text-[11px] font-semibold px-2.5 py-1 rounded-full transition-colors
+                className={`text-caption font-semibold px-2.5 py-1 rounded-full transition-colors
                   ${today
                     ? 'text-white shadow-sm'
                     : ''
@@ -136,7 +136,7 @@ export function WeeklyChart({ data }: WeeklyChartProps) {
         ].map((item, i) => (
           <div key={i} className="text-center">
             <div className="text-xl font-extrabold" style={{ color: item.color }}>{item.value}</div>
-            <div className="text-[11px] mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>{item.label}</div>
+            <div className="text-caption mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>{item.label}</div>
           </div>
         ))}
       </div>

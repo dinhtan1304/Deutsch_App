@@ -1,9 +1,10 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
+import { usePronunciation } from '@/hooks/usePronunciation';
 import { useRandomWords } from '@/hooks/useWords';
 import { useDueCards, useReviewCard, useAddWordsToSRS, useProgressStats } from '@/hooks/useProgress';
 import { previewIntervals, getIntervalText } from '@/lib/srs';
@@ -69,6 +70,37 @@ const GENDER_HEX: Record<string, { color: string; gradient: string }> = {
   green: { color: '#22C55E', gradient: 'linear-gradient(135deg, #22C55E, #15803D)' },
 };
 
+// Artikel → card gradient + chip colors
+const ARTIKEL_STYLE: Record<string, { gradient: string; chipBg: string; chipColor: string }> = {
+  der: { gradient: 'linear-gradient(135deg, #0a1628 0%, #1e3a8a 100%)', chipBg: 'rgba(59,130,246,.3)',  chipColor: '#93C5FD' },
+  die: { gradient: 'linear-gradient(135deg, #2a0a1e 0%, #9d174d 100%)', chipBg: 'rgba(236,72,153,.3)', chipColor: '#F9A8D4' },
+  das: { gradient: 'linear-gradient(135deg, #0a2218 0%, #065f46 100%)', chipBg: 'rgba(20,184,166,.3)',  chipColor: '#5EEAD4' },
+};
+const DEFAULT_CARD_GRADIENT = 'linear-gradient(135deg, #1e1b4b 0%, #4338ca 100%)';
+
+function getLastSeenText(dateStr: string | null | undefined): string {
+  if (!dateStr) return '';
+  const days = Math.floor((Date.now() - new Date(dateStr).getTime()) / 86400000);
+  if (days === 0) return 'hôm nay';
+  if (days === 1) return '1 ngày trước';
+  return `${days} ngày trước`;
+}
+
+function HighlightExample({ sentence, word }: { sentence: string; word: string }) {
+  if (!word || !sentence) return <>{sentence}</>;
+  const escaped = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const parts = sentence.split(new RegExp(`(${escaped})`, 'i'));
+  return (
+    <>
+      {parts.map((part, i) =>
+        part.toLowerCase() === word.toLowerCase()
+          ? <strong key={i} style={{ textDecoration: 'underline', textUnderlineOffset: '3px' }}>{part}</strong>
+          : <span key={i}>{part}</span>
+      )}
+    </>
+  );
+}
+
 type Phase = 'loading' | 'empty' | 'setup' | 'reviewing' | 'complete';
 
 export default function SRSReviewPage() {
@@ -89,6 +121,9 @@ export default function SRSReviewPage() {
   const [isFlipped, setIsFlipped] = useState(false);
   const [sessionStats, setSessionStats] = useState({ correct: 0, wrong: 0, streak: 0, bestStreak: 0 });
   const [cardModes, setCardModes] = useState<Record<number, Exclude<QuizMode, 'mixed'>>>({});
+  const [sessionSeconds, setSessionSeconds] = useState(0);
+  const [showExampleTrans, setShowExampleTrans] = useState(false);
+  const { speak } = usePronunciation();
 
   // Stable ref for reviewMutation.mutate — avoids recreating handleReview on every
   // mutation state change (idle→pending→success→idle), which would thrash the keydown listener.
@@ -107,6 +142,14 @@ export default function SRSReviewPage() {
   }, []);
 
   useEffect(() => { loadSettings(); }, [loadSettings]);
+
+  useEffect(() => {
+    if (phase !== 'reviewing') { setSessionSeconds(0); return; }
+    const id = setInterval(() => setSessionSeconds(s => s + 1), 1000);
+    return () => clearInterval(id);
+  }, [phase]);
+
+  useEffect(() => { setShowExampleTrans(false); }, [currentIndex]);
 
   useEffect(() => {
     if (dueLoading) { setPhase('loading'); return; }
@@ -145,6 +188,12 @@ export default function SRSReviewPage() {
   const intervals = currentCard ? previewIntervals(currentCard) : null;
   const genderInfo = currentWord ? GenderInfo[currentWord.gender] : null;
   const genderHex = genderInfo ? GENDER_HEX[genderInfo.color] || GENDER_HEX.blue : GENDER_HEX.blue;
+
+  const artikelKey = currentWord?.article?.toLowerCase() ?? '';
+  const artikelStyle = ARTIKEL_STYLE[artikelKey] ?? { gradient: DEFAULT_CARD_GRADIENT, chipBg: 'rgba(255,255,255,.15)', chipColor: 'rgba(255,255,255,.8)' };
+  const cardGradient = currentMode !== 'vi-de' ? artikelStyle.gradient : DEFAULT_CARD_GRADIENT;
+  const queueNew = reviewQueue.filter(c => (c.repetitions ?? 0) === 0).length;
+  const timerText = `${String(Math.floor(sessionSeconds / 60)).padStart(2, '0')}:${String(sessionSeconds % 60).padStart(2, '0')}`;
 
   const flipCard = () => { if (!isFlipped) { playClick(); setIsFlipped(true); } };
 
@@ -208,12 +257,7 @@ export default function SRSReviewPage() {
     } catch { /* silently ignore – non-critical */ }
   };
 
-  // Mode accent colors
-  const modeAccent = currentMode === 'gender' ? genderHex.color
-    : currentMode === 'de-vi' ? '#8B5CF6' : '#F59E0B';
-  const modeGradient = currentMode === 'gender' ? genderHex.gradient
-    : currentMode === 'de-vi' ? 'linear-gradient(135deg, #8B5CF6, #6366F1)'
-    : 'linear-gradient(135deg, #F59E0B, #D97706)';
+
 
   // ─── LOADING ───
   if (phase === 'loading') {
@@ -235,21 +279,21 @@ export default function SRSReviewPage() {
           style={{ background: 'linear-gradient(135deg, rgba(59,130,246,.15), rgba(99,102,241,.1))' }}>
           <IconBrain size={36} style={{ color: '#3B82F6' }} /></div>
         <h1 className="text-2xl font-bold mb-3" style={{ color: 'var(--theme-text-primary)' }}>SRS Review</h1>
-        <p className="text-[14px] mb-8 max-w-sm mx-auto" style={{ color: 'var(--theme-text-muted)' }}>
+        <p className="text-sm mb-8 max-w-sm mx-auto" style={{ color: 'var(--theme-text-muted)' }}>
           Bạn chưa có từ nào trong danh sách ôn tập.<br/>Thêm từ vào để bắt đầu học với thuật toán SM-2!</p>
         <button onClick={addRandomWords}
-          className="flex items-center gap-2 mx-auto px-6 py-3 rounded-xl font-semibold text-[14px] text-white transition-all hover:shadow-lg hover:-translate-y-0.5"
+          className="flex items-center gap-2 mx-auto px-6 py-3 rounded-xl font-semibold text-sm text-white transition-all hover:shadow-lg hover:-translate-y-0.5"
           style={{ background: 'linear-gradient(135deg, #3B82F6, #6366F1)' }}>
           <IconPlus size={17} /> Thêm 20 từ ngẫu nhiên</button>
-        <p className="text-[12px] mt-3" style={{ color: 'var(--theme-text-muted)' }}>
+        <p className="text-xs mt-3" style={{ color: 'var(--theme-text-muted)' }}>
           Hoặc thêm từ từ trang Từ vựng bằng nút ⭐</p>
         <div className="mt-8 p-4 rounded-xl text-left"
           style={{ backgroundColor: 'rgba(59,130,246,.06)', border: '1px solid rgba(59,130,246,.12)' }}>
-          <h3 className="font-bold text-[14px] mb-2 flex items-center gap-2" style={{ color: '#3B82F6' }}>
+          <h3 className="font-bold text-sm mb-2 flex items-center gap-2" style={{ color: '#3B82F6' }}>
             <span className="w-6 h-6 rounded-md flex items-center justify-center"
               style={{ background: 'rgba(59,130,246,.12)' }}><IconBrain size={14} style={{ color: '#3B82F6' }} /></span>
             SM-2 là gì?</h3>
-          <p className="text-[13px]" style={{ color: 'var(--theme-text-secondary)' }}>
+          <p className="text-body" style={{ color: 'var(--theme-text-secondary)' }}>
             SM-2 (SuperMemo 2) là thuật toán lặp lại ngắt quãng giúp bạn nhớ từ lâu hơn. Từ bạn nhớ tốt sẽ xuất hiện ít hơn, từ khó sẽ xuất hiện thường xuyên hơn.</p>
         </div>
       </div></div>
@@ -287,14 +331,14 @@ export default function SRSReviewPage() {
                 style={{ background: `linear-gradient(135deg, ${item.color}, ${item.color}cc)` }}>
                 <Ic size={14} className="text-white" /></div>
               <div className="text-2xl font-extrabold" style={{ color: item.color }}>{item.value}</div>
-              <div className="text-[11px] font-medium" style={{ color: 'var(--theme-text-muted)' }}>{item.label}</div>
+              <div className="text-caption font-medium" style={{ color: 'var(--theme-text-muted)' }}>{item.label}</div>
             </div>);
           })}
         </div>
 
         {(stats?.due ?? 0) > 0 ? (<>
           {/* Quiz mode selector */}
-          <p className="text-[13px] font-semibold mb-3" style={{ color: 'var(--theme-text-secondary)' }}>Chọn chế độ ôn tập</p>
+          <p className="text-body font-semibold mb-3" style={{ color: 'var(--theme-text-secondary)' }}>Chọn chế độ ôn tập</p>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-6 max-w-md mx-auto">
             {QUIZ_MODES.map(mode => {
               const active = quizMode === mode.key;
@@ -306,26 +350,26 @@ export default function SRSReviewPage() {
                 <div className="w-8 h-8 rounded-lg flex items-center justify-center mx-auto mb-1.5"
                   style={{ background: active ? `linear-gradient(135deg, ${mode.color}, ${mode.color}cc)` : 'var(--theme-bg-secondary)' }}>
                   <Ic size={16} style={{ color: active ? 'white' : 'var(--theme-text-muted)' }} /></div>
-                <div className="text-[12px] font-bold" style={{ color: active ? mode.color : 'var(--theme-text-secondary)' }}>{mode.label}</div>
-                <div className="text-[10px]" style={{ color: 'var(--theme-text-muted)' }}>{mode.desc}</div>
+                <div className="text-xs font-bold" style={{ color: active ? mode.color : 'var(--theme-text-secondary)' }}>{mode.label}</div>
+                <div className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>{mode.desc}</div>
               </button>);
             })}
           </div>
-          <p className="text-[14px] mb-6" style={{ color: 'var(--theme-text-secondary)' }}>
+          <p className="text-sm mb-6" style={{ color: 'var(--theme-text-secondary)' }}>
             Bạn có <span className="font-bold" style={{ color: '#3B82F6' }}>{stats?.due} từ</span> cần ôn tập hôm nay</p>
           <button onClick={startReview}
             className="flex items-center gap-2 mx-auto px-8 py-3 rounded-xl font-semibold text-[15px] text-white transition-all hover:shadow-lg hover:-translate-y-0.5"
             style={{ background: 'linear-gradient(135deg, #3B82F6, #6366F1)' }}>
             <IconZap size={18} /> Bắt đầu ôn tập</button>
         </>) : (<>
-          <p className="text-[14px] mb-6" style={{ color: '#22C55E' }}>✅ Tuyệt vời! Bạn đã ôn hết tất cả cho hôm nay.</p>
+          <p className="text-sm mb-6" style={{ color: '#22C55E' }}>✅ Tuyệt vời! Bạn đã ôn hết tất cả cho hôm nay.</p>
           <button onClick={addRandomWords}
-            className="flex items-center gap-2 mx-auto px-6 py-3 rounded-xl font-semibold text-[14px] border transition-all hover:-translate-y-0.5"
+            className="flex items-center gap-2 mx-auto px-6 py-3 rounded-xl font-semibold text-sm border transition-all hover:-translate-y-0.5"
             style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)' }}>
             <IconPlus size={16} /> Thêm từ mới</button>
         </>)}
         <div className="mt-6"><button onClick={() => router.push('/games')}
-          className="flex items-center gap-1.5 mx-auto text-[13px] font-medium transition-all hover:opacity-70"
+          className="flex items-center gap-1.5 mx-auto text-body font-medium transition-all hover:opacity-70"
           style={{ color: 'var(--theme-text-muted)' }}><IconChevronLeft size={16} /> Quay lại</button></div>
       </div></div>
 );
@@ -352,21 +396,21 @@ export default function SRSReviewPage() {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 my-6">
           {resultItems.map(item => (<div key={item.label} className="p-4 rounded-2xl" style={{ background: item.bg }}>
             <div className="text-2xl font-extrabold" style={{ color: item.color }}>{item.value}</div>
-            <div className="text-[11px] font-medium" style={{ color: 'var(--theme-text-muted)' }}>{item.label}</div>
+            <div className="text-caption font-medium" style={{ color: 'var(--theme-text-muted)' }}>{item.label}</div>
           </div>))}
         </div>
         <div className="space-y-3">
           {(stats?.due ?? 0) > 0 && (
             <button onClick={() => { refetchDue(); setPhase('setup'); }}
-              className="flex items-center gap-2 mx-auto px-6 py-3 rounded-xl font-semibold text-[14px] text-white transition-all hover:shadow-md hover:-translate-y-0.5"
+              className="flex items-center gap-2 mx-auto px-6 py-3 rounded-xl font-semibold text-sm text-white transition-all hover:shadow-md hover:-translate-y-0.5"
               style={{ background: 'linear-gradient(135deg, #3B82F6, #6366F1)' }}>
               <IconRefresh size={16} /> Ôn tiếp ({stats?.due} từ còn lại)</button>)}
           <button onClick={addRandomWords}
-            className="flex items-center gap-2 mx-auto px-6 py-3 rounded-xl font-medium text-[14px] border transition-all hover:-translate-y-0.5"
+            className="flex items-center gap-2 mx-auto px-6 py-3 rounded-xl font-medium text-sm border transition-all hover:-translate-y-0.5"
             style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)' }}>
             <IconPlus size={16} /> Thêm từ mới</button>
           <button onClick={() => router.push('/games')}
-            className="flex items-center gap-1.5 mx-auto text-[13px] font-medium transition-all hover:opacity-70"
+            className="flex items-center gap-1.5 mx-auto text-body font-medium transition-all hover:opacity-70"
             style={{ color: 'var(--theme-text-muted)' }}><IconChevronLeft size={16} /> Quay lại</button>
         </div>
       </div></div>
@@ -376,145 +420,241 @@ export default function SRSReviewPage() {
   // ─── REVIEWING ───
   const progress = (currentIndex / reviewQueue.length) * 100;
 
-  const renderFront = () => {
-    if (!currentWord) return null;
-    switch (currentMode) {
-      case 'gender': return (<>
-        <p className="text-[13px] mb-3" style={{ color: 'var(--theme-text-muted)' }}>Mạo từ nào?</p>
-        <h2 className="text-4xl md:text-5xl font-bold mb-4" style={{ color: 'var(--theme-text-primary)' }}>
-          <span style={{ color: 'var(--theme-text-muted)', letterSpacing: '2px' }}>_____</span>{' '}{currentWord.word}</h2>
-        <p className="text-[14px]" style={{ color: 'var(--theme-text-secondary)' }}>{currentWord.translationEn}</p>
-        {settings.showVietnamese && currentWord.translationVi && (
-          <p className="text-[13px] mt-1" style={{ color: 'var(--theme-text-muted)' }}>{currentWord.translationVi}</p>)}
-      </>);
-      case 'de-vi': return (<>
-        <div className="px-3 py-1 rounded-lg mb-4 inline-block" style={{ background: 'rgba(139,92,246,.1)' }}>
-          <span className="text-[11px] font-semibold" style={{ color: '#8B5CF6' }}>Đức → Việt</span></div>
-        <h2 className="text-4xl md:text-5xl font-bold mb-3" style={{ color: 'var(--theme-text-primary)' }}>
-          {currentWord.article && <span style={{ color: genderHex.color }}>{currentWord.article} </span>}{currentWord.word}</h2>
-        {currentWord.pronunciation && <p className="text-[13px]" style={{ color: 'var(--theme-text-muted)' }}>[{currentWord.pronunciation}]</p>}
-        <p className="text-[14px] mt-3" style={{ color: 'var(--theme-text-muted)' }}>Nghĩa của từ này là gì?</p>
-      </>);
-      case 'vi-de': return (<>
-        <div className="px-3 py-1 rounded-lg mb-4 inline-block" style={{ background: 'rgba(245,158,11,.1)' }}>
-          <span className="text-[11px] font-semibold" style={{ color: '#F59E0B' }}>Việt → Đức</span></div>
-        <h2 className="text-3xl md:text-4xl font-bold mb-3" style={{ color: 'var(--theme-text-primary)' }}>
-          {currentWord.translationVi || currentWord.translationEn}</h2>
-        {currentWord.translationVi && currentWord.translationEn && (
-          <p className="text-[14px]" style={{ color: 'var(--theme-text-muted)' }}>({currentWord.translationEn})</p>)}
-        <p className="text-[14px] mt-3" style={{ color: 'var(--theme-text-muted)' }}>Từ tiếng Đức là gì?</p>
-      </>);
-    }
-  };
-
-  const renderBack = () => {
-    if (!currentWord) return null;
-    switch (currentMode) {
-      case 'gender': return (<>
-        <p className="relative text-white/70 text-[13px] mb-2">Đáp án</p>
-        <h2 className="relative text-4xl md:text-5xl font-bold text-white mb-4">{currentWord.article} {currentWord.word}</h2>
-        <p className="relative text-white/90 text-[16px] mb-1">{currentWord.translationEn}</p>
-        {settings.showVietnamese && currentWord.translationVi && <p className="relative text-white/60 text-[14px]">{currentWord.translationVi}</p>}
-        <div className="relative mt-4 px-4 py-1.5 bg-white/15 rounded-lg backdrop-blur-sm">
-          <span className="text-white font-semibold text-[13px]">{genderInfo?.label}</span></div>
-      </>);
-      case 'de-vi': return (<>
-        <p className="relative text-white/70 text-[13px] mb-2">Nghĩa</p>
-        <h2 className="relative text-3xl md:text-4xl font-bold text-white mb-2">{currentWord.translationVi || currentWord.translationEn}</h2>
-        {currentWord.translationVi && currentWord.translationEn && <p className="relative text-white/70 text-[15px] mb-3">({currentWord.translationEn})</p>}
-        {currentWord.article && <div className="relative mt-2 px-4 py-1.5 bg-white/15 rounded-lg backdrop-blur-sm">
-          <span className="text-white font-semibold text-[13px]">{currentWord.article} {currentWord.word} • {genderInfo?.label}</span></div>}
-        {currentWord.examples?.[0] && <div className="relative mt-3 p-3 bg-white/10 rounded-xl max-w-sm">
-          <p className="text-[12px] text-white/50 mb-0.5">Ví dụ:</p>
-          <p className="text-white/90 italic text-[13px]">„{currentWord.examples[0]}</p></div>}
-      </>);
-      case 'vi-de': return (<>
-        <p className="relative text-white/70 text-[13px] mb-2">Từ tiếng Đức</p>
-        <h2 className="relative text-4xl md:text-5xl font-bold text-white mb-3">
-          {currentWord.article && <span className="text-white/70">{currentWord.article}</span>}{currentWord.word}</h2>
-        {currentWord.pronunciation && <p className="relative text-white/60 text-[14px]">[{currentWord.pronunciation}]</p>}
-        {genderInfo && <div className="relative mt-3 px-4 py-1.5 bg-white/15 rounded-lg backdrop-blur-sm">
-          <span className="text-white font-semibold text-[13px]">{genderInfo.label}</span></div>}
-        {currentWord.examples?.[0] && <div className="relative mt-3 p-3 bg-white/10 rounded-xl max-w-sm">
-          <p className="text-[12px] text-white/50 mb-0.5">Ví dụ:</p>
-          <p className="text-white/90 italic text-[13px]">„{currentWord.examples[0]}</p></div>}
-      </>);
-    }
-  };
-
   return (
 <div className="max-w-2xl mx-auto py-6">
-    {/* Header */}
-    <div className="flex justify-between items-center mb-4">
-      <div className="text-[13px] font-semibold" style={{ color: 'var(--theme-text-muted)' }}>
-        {currentIndex + 1} / {reviewQueue.length}</div>
-      <div className="flex items-center gap-2">
-        <div className="px-2.5 py-1 rounded-lg text-[11px] font-semibold"
-          style={{ backgroundColor: `${modeAccent}15`, color: modeAccent }}>
-          {QUIZ_MODES.find(m => m.key === currentMode)?.label}</div>
-        {sessionStats.streak > 0 && (
-          <div className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-[13px] font-bold text-white"
-            style={{ background: 'linear-gradient(135deg, #F97316, #EF4444)' }}>
-            <IconFlame size={14} /> {sessionStats.streak}</div>)}
+
+  {/* ── Session header ── */}
+  <div className="flex items-center justify-between mb-5">
+    <div className="flex items-center gap-3">
+      <button
+        onClick={() => { playClick(); refetchDue(); setPhase('setup'); }}
+        className="w-9 h-9 rounded-xl flex items-center justify-center transition-all hover:opacity-70"
+        style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }}
+      >
+        <IconX size={16} />
+      </button>
+      <div>
+        <p className="text-caption font-medium" style={{ color: 'var(--theme-text-muted)' }}>Phiên ôn tập SRS</p>
+        <p className="text-[15px] font-bold leading-tight" style={{ color: 'var(--theme-text-primary)' }}>
+          {QUIZ_MODES.find(m => m.key === currentMode)?.label ?? 'Ôn tập'}
+        </p>
       </div>
     </div>
-
-    {/* Progress */}
-    <div className="h-2 rounded-full mb-6 overflow-hidden" style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
-      <div className="h-full rounded-full transition-all duration-500"
-        style={{ width: `${progress}%`, background: 'linear-gradient(90deg, #3B82F6, #22C55E)' }} /></div>
-
-    {/* Card */}
-    {currentWord && (<div className="relative h-72 mb-6">
-      <div className={`absolute inset-0 rounded-3xl p-8 flex flex-col items-center justify-center cursor-pointer
-        transition-all duration-300 border-2 ${isFlipped ? 'opacity-0 pointer-events-none scale-95' : 'opacity-100'}`}
-        style={{ backgroundColor: 'var(--theme-bg-card)', borderColor: modeAccent, boxShadow: `0 8px 32px ${modeAccent}18` }}
-        onClick={flipCard}>
-        {renderFront()}
-        <p className="absolute bottom-4 text-[13px]" style={{ color: modeAccent }}>Click để xem đáp án</p>
+    <div className="flex items-center gap-2">
+      {sessionStats.streak > 0 && (
+        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-body font-bold"
+          style={{ background: 'rgba(249,115,22,.12)', color: '#F97316' }}>
+          🔥 {sessionStats.streak}
+        </div>
+      )}
+      <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-body font-mono font-semibold"
+        style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }}>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+        </svg>
+        {timerText}
       </div>
-      <div className={`absolute inset-0 rounded-3xl p-8 flex flex-col items-center justify-center overflow-hidden
-        transition-all duration-300 ${isFlipped ? 'opacity-100' : 'opacity-0 pointer-events-none scale-95'}`}
-        style={{ background: modeGradient, boxShadow: `0 8px 32px ${modeAccent}30` }}>
-        <div className="absolute -top-10 -right-10 w-36 h-36 rounded-full bg-white/10" />
-        <div className="absolute -bottom-8 -left-8 w-28 h-28 rounded-full bg-white/5" />
-        {renderBack()}
-      </div>
-    </div>)}
-
-    {/* Rating */}
-    {isFlipped && intervals ? (<>
-      <div className="grid grid-cols-4 gap-2">
-        {([
-          { rating: 'again' as ReviewRating, label: 'Quên', color: '#EF4444', interval: intervals.again, hotkey: '1' },
-          { rating: 'hard' as ReviewRating, label: 'Khó', color: '#F59E0B', interval: intervals.hard, hotkey: '2' },
-          { rating: 'good' as ReviewRating, label: 'Được', color: '#22C55E', interval: intervals.good, hotkey: '3' },
-          { rating: 'easy' as ReviewRating, label: 'Dễ', color: '#3B82F6', interval: intervals.easy, hotkey: '4' },
-        ]).map(btn => (
-          <button key={btn.rating} onClick={() => handleReview(btn.rating)}
-            className="py-4 rounded-2xl font-medium transition-all duration-200 hover:-translate-y-1 hover:shadow-lg active:translate-y-0"
-            style={{ background: `${btn.color}12`, border: `2px solid ${btn.color}30` }}>
-            <div className="text-[14px] font-bold" style={{ color: btn.color }}>{btn.label}</div>
-            <div className="text-[11px] mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>{getIntervalText(btn.interval)}</div>
-            <kbd className="inline-block mt-1.5 px-2 py-0.5 rounded-md text-[10px] font-semibold"
-              style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }}>{btn.hotkey}</kbd>
-          </button>))}
-      </div>
-      <p className="text-center text-[11px] mt-4" style={{ color: 'var(--theme-text-muted)' }}>
-        Phím {['1 Quên','2 Khó','3 Được','4 Dễ'].map((t,i) => (
-          <span key={i}><kbd className="px-1.5 py-0.5 rounded text-[10px]"
-            style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>{t.split(' ')[0]}</kbd>{' '}{t.split(' ')[1]}{i < 3 ? '  ' : ''}</span>))}</p>
-    </>) : (
-      <button onClick={flipCard}
-        className="w-full py-3.5 rounded-xl font-semibold text-[14px] text-white transition-all hover:shadow-md hover:-translate-y-0.5"
-        style={{ background: modeGradient }}>
-        <IconRefresh size={16} className="inline mr-2" style={{ verticalAlign: '-2px' }} />Xem đáp án (Space)</button>)}
-
-    <div className="text-center mt-6">
-      <button onClick={() => { playClick(); refetchDue(); setPhase('setup'); }}
-        className="flex items-center gap-1.5 mx-auto text-[13px] font-medium transition-all hover:opacity-70"
-        style={{ color: 'var(--theme-text-muted)' }}><IconX size={14} /> Dừng ôn tập</button>
     </div>
   </div>
+
+  {/* ── Stats bar ── */}
+  <div className="grid grid-cols-4 gap-1 mb-5 rounded-2xl p-3.5"
+    style={{ backgroundColor: 'var(--theme-bg-card)', border: '1px solid var(--theme-border)' }}>
+    {[
+      { label: 'Tổng',   value: reviewQueue.length,              color: 'var(--theme-text-primary)', dot: false },
+      { label: 'Mới',    value: queueNew,                        color: '#3B82F6', dot: true },
+      { label: 'Cần ôn', value: reviewQueue.length - queueNew,   color: '#F59E0B', dot: true },
+      { label: 'Thuộc',  value: sessionStats.correct,            color: '#22C55E', dot: true },
+    ].map(s => (
+      <div key={s.label} className="text-center">
+        <div className="text-h2 font-extrabold leading-tight" style={{ color: s.color }}>{s.value}</div>
+        <div className="text-caption flex items-center justify-center gap-1 mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>
+          {s.dot && <span style={{ color: s.color, fontSize: 9 }}>■</span>}
+          {s.label}
+        </div>
+      </div>
+    ))}
+  </div>
+
+  {/* ── Progress bar ── */}
+  <div className="flex items-center gap-3 mb-5">
+    <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
+      <div className="h-full rounded-full transition-all duration-500"
+        style={{ width: `${progress}%`, background: 'linear-gradient(90deg, #3B82F6, #22C55E)' }} />
+    </div>
+    <span className="shrink-0 text-caption font-bold px-2 py-0.5 rounded-lg"
+      style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }}>
+      {currentIndex + 1} / {reviewQueue.length}
+    </span>
+  </div>
+
+  {/* ── Card 3D flip ── */}
+  {currentWord && (
+    <div className="mb-5" style={{ perspective: '1200px' }}>
+      <div style={{
+        transformStyle: 'preserve-3d',
+        transition: 'transform 0.55s cubic-bezier(0.4,0,0.2,1)',
+        transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
+        position: 'relative',
+        height: 320,
+      }}>
+        {/* ─ Front ─ */}
+        <div
+          className="absolute inset-0 rounded-3xl overflow-hidden cursor-pointer"
+          style={{ backfaceVisibility: 'hidden', background: cardGradient, WebkitBackfaceVisibility: 'hidden' }}
+          onClick={flipCard}
+        >
+          {/* Article chip */}
+          {currentWord.article && currentMode !== 'vi-de' && (
+            <div className="absolute top-4 left-4">
+              <span className="px-2.5 py-1 rounded-lg text-caption font-extrabold tracking-widest uppercase"
+                style={{ backgroundColor: artikelStyle.chipBg, color: artikelStyle.chipColor }}>
+                {currentWord.article}
+              </span>
+            </div>
+          )}
+          {/* Space hint */}
+          <div className="absolute top-4 right-4 flex items-center gap-1.5 text-caption"
+            style={{ color: 'rgba(255,255,255,0.38)' }}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="2" y="4" width="20" height="16" rx="2"/><path d="M8 15h8"/>
+            </svg>
+            Space để lật
+          </div>
+          {/* Word */}
+          <div className="absolute inset-0 flex flex-col items-center justify-center px-6 gap-4">
+            <h2 className="text-4xl md:text-5xl font-extrabold text-white text-center leading-tight">
+              {currentMode === 'de-vi'  ? currentWord.word
+               : currentMode === 'vi-de' ? (currentWord.translationVi || currentWord.translationEn)
+               : <><span style={{ color: 'rgba(255,255,255,0.25)' }}>_____</span>{' '}{currentWord.word}</>}
+            </h2>
+            {currentMode !== 'vi-de' && (
+              <button
+                onClick={e => { e.stopPropagation(); speak(`${currentWord.article ? currentWord.article + ' ' : ''}${currentWord.word}`); }}
+                className="w-12 h-12 rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-95"
+                style={{ backgroundColor: 'rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.9)' }}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                  <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+                  <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+                </svg>
+              </button>
+            )}
+          </div>
+          {/* Bottom stats */}
+          <div className="absolute bottom-4 left-5 right-5 flex items-center justify-between">
+            <span className="text-caption" style={{ color: 'rgba(255,255,255,0.32)' }}>
+              Lần thấy: {currentCard?.totalReviews ?? 0}
+              {currentCard?.lastReviewAt ? ` · Cuối: ${getLastSeenText(currentCard.lastReviewAt)}` : ''}
+            </span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
+              style={{ color: 'rgba(255,255,255,0.28)' }}>
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+            </svg>
+          </div>
+        </div>
+
+        {/* ─ Back ─ */}
+        <div
+          className="absolute inset-0 rounded-3xl overflow-hidden"
+          style={{
+            backfaceVisibility: 'hidden',
+            WebkitBackfaceVisibility: 'hidden',
+            transform: 'rotateY(180deg)',
+            background: 'linear-gradient(135deg, #0f2a1a 0%, #064e3b 60%, #065f46 100%)',
+          }}
+        >
+          <div className="absolute inset-0 flex flex-col items-center justify-center px-6 text-center gap-2">
+            {/* VN chip */}
+            <div className="px-3 py-1 rounded-full text-caption font-bold mb-1"
+              style={{ backgroundColor: 'rgba(52,211,153,.2)', color: '#34D399' }}>
+              🇻🇳 VN Nghĩa
+            </div>
+            <h2 className="text-3xl md:text-4xl font-extrabold text-white leading-tight">
+              {currentMode === 'vi-de'
+                ? `${currentWord.article ? currentWord.article + ' ' : ''}${currentWord.word}`
+                : (currentWord.translationVi || currentWord.translationEn)}
+            </h2>
+            {currentMode !== 'vi-de' && currentWord.translationVi && currentWord.translationEn && (
+              <p className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>({currentWord.translationEn})</p>
+            )}
+            {genderInfo && currentMode !== 'vi-de' && (
+              <p className="text-xs" style={{ color: 'rgba(255,255,255,0.38)' }}>({genderInfo.label})</p>
+            )}
+            {currentWord.examples?.[0] && (
+              <div className="mt-1 max-w-sm w-full px-4 py-3 rounded-2xl text-left"
+                style={{ backgroundColor: 'rgba(255,255,255,0.08)' }}>
+                <p className="text-[13.5px] italic leading-relaxed" style={{ color: 'rgba(255,255,255,0.85)' }}>
+                  „<HighlightExample sentence={currentWord.examples[0]} word={currentWord.word} />"
+                </p>
+                {showExampleTrans && currentWord.examples[1] && (
+                  <p className="text-xs mt-1.5" style={{ color: 'rgba(255,255,255,0.5)' }}>→ {currentWord.examples[1]}</p>
+                )}
+                {!showExampleTrans && currentWord.examples[1] && (
+                  <button onClick={() => setShowExampleTrans(true)}
+                    className="text-caption mt-1.5 transition-all hover:opacity-80"
+                    style={{ color: 'rgba(255,255,255,0.38)' }}>
+                    → xem bản dịch
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  )}
+
+  {/* ── Rating buttons or flip CTA ── */}
+  {isFlipped && intervals ? (
+    <div className="grid grid-cols-4 gap-2.5">
+      {([
+        { rating: 'again' as ReviewRating, label: 'Quên', emoji: '😵', textColor: '#FCA5A5', bg: 'linear-gradient(160deg, #450a0a, #991b1b)', border: 'rgba(239,68,68,.45)',  hotkey: '1', interval: intervals.again },
+        { rating: 'hard'  as ReviewRating, label: 'Khó',  emoji: '😓', textColor: '#FCD34D', bg: 'linear-gradient(160deg, #431407, #92400e)', border: 'rgba(245,158,11,.45)', hotkey: '2', interval: intervals.hard  },
+        { rating: 'good'  as ReviewRating, label: 'Được', emoji: '🙂', textColor: '#86EFAC', bg: 'linear-gradient(160deg, #052e16, #166534)', border: 'rgba(34,197,94,.45)',  hotkey: '3', interval: intervals.good  },
+        { rating: 'easy'  as ReviewRating, label: 'Dễ',   emoji: '😎', textColor: '#93C5FD', bg: 'linear-gradient(160deg, #0c1a3f, #1e40af)', border: 'rgba(59,130,246,.45)', hotkey: '4', interval: intervals.easy  },
+      ]).map(btn => (
+        <button
+          key={btn.rating}
+          onClick={() => handleReview(btn.rating)}
+          title={`Bạn sẽ thấy lại từ này sau ${getIntervalText(btn.interval)}`}
+          className="relative py-5 rounded-2xl transition-all duration-200 hover:-translate-y-1.5 hover:shadow-2xl active:scale-95"
+          style={{ background: btn.bg, border: `1.5px solid ${btn.border}` }}
+        >
+          <span className="absolute top-2 right-2.5 text-caption font-bold" style={{ color: btn.textColor, opacity: 0.55 }}>{btn.hotkey}</span>
+          <div className="text-h1 mb-1.5 leading-none">{btn.emoji}</div>
+          <div className="text-sm font-extrabold" style={{ color: btn.textColor }}>{btn.label}</div>
+          <div className="text-caption mt-0.5 font-medium" style={{ color: btn.textColor, opacity: 0.65 }}>{getIntervalText(btn.interval)}</div>
+        </button>
+      ))}
+    </div>
+  ) : (
+    <button
+      onClick={flipCard}
+      className="w-full py-4 rounded-2xl font-semibold text-sm transition-all hover:-translate-y-0.5"
+      style={{ backgroundColor: 'var(--theme-bg-card)', border: '1.5px dashed var(--theme-border)', color: 'var(--theme-text-secondary)' }}
+    >
+      Tự nhớ trước rồi{' '}
+      <span className="mx-1 px-2 py-0.5 rounded-md text-xs font-bold"
+        style={{ backgroundColor: 'var(--theme-bg-secondary)', border: '1px solid var(--theme-border)', fontFamily: 'monospace', color: 'var(--theme-text-muted)' }}>
+        Space
+      </span>
+      {' '}để lật xem đáp án
+    </button>
+  )}
+
+  {/* ── Footer ── */}
+  <div className="flex items-center justify-between mt-5">
+    <p className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>
+      Phím tắt: 1 Quên · 2 Khó · 3 Được · 4 Dễ
+    </p>
+    <button onClick={() => { playClick(); refetchDue(); setPhase('setup'); }}
+      className="flex items-center gap-1.5 text-xs font-medium transition-all hover:opacity-70"
+      style={{ color: 'var(--theme-text-muted)' }}>
+      <IconX size={13} /> Dừng
+    </button>
+  </div>
+</div>
 );
 }

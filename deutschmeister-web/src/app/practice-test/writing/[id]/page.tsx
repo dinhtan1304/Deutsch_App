@@ -115,9 +115,9 @@ export default function WritingEditorPage() {
             style={{ background: 'linear-gradient(135deg, #EF4444, #EF4444cc)' }}>
             <IconPenLine size={28} style={{ color: 'white' }} />
           </div>
-          <p className="text-[14px] mb-4" style={{ color: 'var(--theme-text-muted)' }}>Không tìm thấy bài viết</p>
+          <p className="text-sm mb-4" style={{ color: 'var(--theme-text-muted)' }}>Không tìm thấy bài viết</p>
           <Link href="/practice-test/writing"
-            className="text-[13px] font-medium" style={{ color: '#3B82F6' }}>
+            className="text-body font-medium" style={{ color: '#3B82F6' }}>
             <IconChevronLeft size={14} /> Quay lại danh sách
           </Link>
         </div>
@@ -138,22 +138,22 @@ export default function WritingEditorPage() {
         <div className="flex items-center justify-between mb-5">
           <div>
             <Link href="/practice-test/writing"
-              className="flex items-center gap-1 text-[13px] font-medium mb-1 transition-opacity hover:opacity-70"
+              className="flex items-center gap-1 text-body font-medium mb-1 transition-opacity hover:opacity-70"
               style={{ color: 'var(--theme-text-muted)' }}>
               <IconChevronLeft size={14} /> Quay lại
             </Link>
-            <h1 className="text-[18px] font-bold flex items-center gap-2 flex-wrap" style={{ color: 'var(--theme-text-primary)' }}>
+            <h1 className="text-title font-bold flex items-center gap-2 flex-wrap" style={{ color: 'var(--theme-text-primary)' }}>
               {session.topic}
-              <span className="px-2 py-0.5 rounded-md text-[10px] font-bold"
+              <span className="px-2 py-0.5 rounded-md text-caption font-bold"
                 style={{ backgroundColor: 'rgba(59,130,246,.1)', color: '#3B82F6' }}>
                 {session.cefrLevel}
               </span>
-              <span className="text-[12px] font-normal" style={{ color: 'var(--theme-text-muted)' }}>
+              <span className="text-xs font-normal" style={{ color: 'var(--theme-text-muted)' }}>
                 {WRITING_TYPE_LABELS[session.writingType] || session.writingType}
               </span>
             </h1>
           </div>
-          <div className="text-[12px]" style={{ color: 'var(--theme-text-muted)' }}>
+          <div className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>
             {saveDraftMutation.isPending
               ? <span className="flex items-center gap-1"><IconLoader size={12} /> Đang lưu...</span>
               : lastSaved
@@ -178,14 +178,14 @@ export default function WritingEditorPage() {
               >
                 <IconPin size={12} />
                 <IconBookOpen size={12} />
-                <span className="text-[12px] font-bold truncate flex-1" style={{ color: 'var(--theme-text-primary)' }}>
+                <span className="text-xs font-bold truncate flex-1" style={{ color: 'var(--theme-text-primary)' }}>
                   Aufgabe / Đề bài
                 </span>
                 {stickyPromptOpen ? <IconChevronUp size={14} /> : <IconChevronDown size={14} />}
               </button>
               {stickyPromptOpen && (
                 <div className="border-t px-3 pb-3 pt-2" style={{ borderColor: 'var(--theme-border)', maxHeight: '40vh', overflowY: 'auto' }}>
-                  <p className="text-[12px] leading-relaxed whitespace-pre-line"
+                  <p className="text-xs leading-relaxed whitespace-pre-line"
                     style={{ color: 'var(--theme-text-primary)' }}>
                     {session.prompt}
                   </p>
@@ -201,17 +201,17 @@ export default function WritingEditorPage() {
           <div className="lg:col-span-2 space-y-3 lg:sticky lg:top-20 lg:self-start">
             {/* Prompt */}
             <div ref={promptRef} className="rounded-xl border-2 p-4" style={{ borderColor: 'rgba(59,130,246,.3)', backgroundColor: 'rgba(59,130,246,.04)' }}>
-              <h3 className="text-[12px] font-bold uppercase tracking-wider mb-2 flex items-center gap-1.5" style={{ color: '#3B82F6' }}>
+              <h3 className="text-xs font-bold uppercase tracking-wider mb-2 flex items-center gap-1.5" style={{ color: '#3B82F6' }}>
                 <IconBookOpen size={13} /> Aufgabe / Đề bài
               </h3>
-              <p className="text-[13px] leading-relaxed whitespace-pre-line" style={{ color: 'var(--theme-text-primary)' }}>
+              <p className="text-body leading-relaxed whitespace-pre-line" style={{ color: 'var(--theme-text-primary)' }}>
                 {session.prompt}
               </p>
             </div>
 
             {/* Toggle hints */}
             <button onClick={() => setShowHints(!showHints)}
-              className="w-full text-[12px] font-medium flex items-center justify-center gap-1 py-2 rounded-lg transition-all"
+              className="w-full text-xs font-medium flex items-center justify-center gap-1 py-2 rounded-lg transition-all"
               style={{ color: 'var(--theme-text-muted)', backgroundColor: 'var(--theme-bg-secondary)' }}>
               {showHints ? <><IconEyeOff size={13} /> Ẩn gợi ý</> : <><IconEye size={13} /> Hiện gợi ý</>}
             </button>
@@ -220,12 +220,12 @@ export default function WritingEditorPage() {
               <>
                 {session.vocabHints && (session.vocabHints as string[]).length > 0 && (
                   <div className="rounded-xl border p-4" style={{ borderColor: 'rgba(34,197,94,.2)', backgroundColor: 'rgba(34,197,94,.04)' }}>
-                    <h4 className="text-[11px] font-bold uppercase tracking-wider mb-2" style={{ color: '#22C55E' }}>
+                    <h4 className="text-caption font-bold uppercase tracking-wider mb-2" style={{ color: '#22C55E' }}>
                       Vokabelhilfe / Từ vựng
                     </h4>
                     <ul className="space-y-1">
                       {(session.vocabHints as string[]).map((h, i) => (
-                        <li key={i} className="text-[12px] flex items-start gap-1.5" style={{ color: 'var(--theme-text-secondary)' }}>
+                        <li key={i} className="text-xs flex items-start gap-1.5" style={{ color: 'var(--theme-text-secondary)' }}>
                           <span style={{ color: '#22C55E' }}>•</span>{h}
                         </li>
                       ))}
@@ -234,12 +234,12 @@ export default function WritingEditorPage() {
                 )}
                 {session.grammarHints && (session.grammarHints as string[]).length > 0 && (
                   <div className="rounded-xl border p-4" style={{ borderColor: 'rgba(245,158,11,.2)', backgroundColor: 'rgba(245,158,11,.04)' }}>
-                    <h4 className="text-[11px] font-bold uppercase tracking-wider mb-2" style={{ color: '#F59E0B' }}>
+                    <h4 className="text-caption font-bold uppercase tracking-wider mb-2" style={{ color: '#F59E0B' }}>
                       Grammatik / Ngữ pháp
                     </h4>
                     <ul className="space-y-1">
                       {(session.grammarHints as string[]).map((h, i) => (
-                        <li key={i} className="text-[12px] flex items-start gap-1.5" style={{ color: 'var(--theme-text-secondary)' }}>
+                        <li key={i} className="text-xs flex items-start gap-1.5" style={{ color: 'var(--theme-text-secondary)' }}>
                           <span style={{ color: '#F59E0B' }}>•</span>{h}
                         </li>
                       ))}
@@ -257,10 +257,10 @@ export default function WritingEditorPage() {
               {/* Editor header */}
               <div className="px-4 py-3 border-b flex items-center justify-between"
                 style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-secondary)' }}>
-                <span className="text-[13px] font-semibold flex items-center gap-1.5" style={{ color: 'var(--theme-text-secondary)' }}>
+                <span className="text-body font-semibold flex items-center gap-1.5" style={{ color: 'var(--theme-text-secondary)' }}>
                   <IconPenLine size={14} /> Bài viết của bạn
                 </span>
-                <span className="text-[12px] font-mono font-semibold px-2.5 py-1 rounded-lg"
+                <span className="text-xs font-mono font-semibold px-2.5 py-1 rounded-lg"
                   style={{
                     backgroundColor: isInRange ? 'rgba(34,197,94,.1)' : isUnderMin ? 'var(--theme-bg-secondary)' : 'rgba(249,115,22,.1)',
                     color: isInRange ? '#22C55E' : isUnderMin ? 'var(--theme-text-muted)' : '#F97316',
@@ -287,12 +287,12 @@ export default function WritingEditorPage() {
             {/* Action buttons */}
             <div className="flex items-center gap-3 mt-4">
               <button onClick={handleSaveDraft} disabled={!text.trim() || saveDraftMutation.isPending}
-                className="py-3 px-6 rounded-xl border-2 font-semibold text-[14px] transition-all duration-200 hover:-translate-y-0.5 disabled:opacity-40 flex items-center justify-center gap-2"
+                className="py-3 px-6 rounded-xl border-2 font-semibold text-sm transition-all duration-200 hover:-translate-y-0.5 disabled:opacity-40 flex items-center justify-center gap-2"
                 style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)' }}>
                 <IconSave size={16} /> Lưu nháp
               </button>
               <button onClick={handleSubmit} disabled={!text.trim() || submitMutation.isPending || isUnderMin}
-                className="flex-1 py-3 rounded-xl font-bold text-[14px] text-white transition-all duration-200 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="flex-1 py-3 rounded-xl font-bold text-sm text-white transition-all duration-200 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 style={{ background: 'linear-gradient(135deg, #6366F1, #8B5CF6)', boxShadow: '0 4px 12px rgba(99,102,241,.3)' }}>
                 {submitMutation.isPending
                   ? <><IconLoader size={16} /> AI đang chấm bài...</>
@@ -302,10 +302,10 @@ export default function WritingEditorPage() {
             </div>
 
             {submitMutation.isError && (
-              <p className="text-[13px] text-center mt-3" style={{ color: '#EF4444' }}>Không thể chấm bài. Vui lòng thử lại.</p>
+              <p className="text-body text-center mt-3" style={{ color: '#EF4444' }}>Không thể chấm bài. Vui lòng thử lại.</p>
             )}
             {isUnderMin && text.trim() && (
-              <p className="text-[12px] text-center mt-2" style={{ color: 'var(--theme-text-muted)' }}>
+              <p className="text-xs text-center mt-2" style={{ color: 'var(--theme-text-muted)' }}>
                 Cần thêm {session.wordCountMin - wordCount} từ nữa để nộp bài
               </p>
             )}

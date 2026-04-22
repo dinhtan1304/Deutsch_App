@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useCallback, useState } from 'react';
 import { Word, GenderInfo } from '@/types';
@@ -149,7 +149,7 @@ export function WordDetailModal({
             </div>
 
             {word.plural && (
-              <p className="mt-2 text-white/70 text-[14px]">
+              <p className="mt-2 text-white/70 text-sm">
                 Plural: <span className="font-medium text-white/90">die {word.plural}</span>
               </p>
             )}
@@ -161,7 +161,7 @@ export function WordDetailModal({
             {/* Badges */}
             <div className="flex justify-center gap-2 mt-4 flex-wrap">
               {[genderInfo.label, word.level, word.category].map((badge, i) => (
-                <span key={i} className="px-3 py-1 rounded-lg text-[12px] font-medium bg-white/15 backdrop-blur-sm">
+                <span key={i} className="px-3 py-1 rounded-lg text-xs font-medium bg-white/15 backdrop-blur-sm">
                   {badge}
                 </span>
               ))}
@@ -185,7 +185,7 @@ export function WordDetailModal({
 
           {/* Translations */}
           <div>
-            <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3 flex items-center gap-2"
+            <h3 className="text-caption font-bold uppercase tracking-wider mb-3 flex items-center gap-2"
               style={{ color: gs.text }}>
               <span className="w-6 h-6 rounded-md flex items-center justify-center shrink-0"
                 style={{ backgroundColor: gs.bg }}>
@@ -196,7 +196,7 @@ export function WordDetailModal({
             <div className="space-y-2">
               <div className="flex items-center gap-3 p-3 rounded-xl"
                 style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-md shrink-0"
+                <span className="text-caption font-bold px-2 py-0.5 rounded-md shrink-0"
                   style={{ backgroundColor: gs.bg, color: gs.text }}>EN</span>
                 <span className="text-[15px]" style={{ color: 'var(--theme-text-primary)' }}>
                   {word.translationEn}
@@ -205,7 +205,7 @@ export function WordDetailModal({
               {settings.showVietnamese && word.translationVi && (
                 <div className="flex items-center gap-3 p-3 rounded-xl"
                   style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-md shrink-0"
+                  <span className="text-caption font-bold px-2 py-0.5 rounded-md shrink-0"
                     style={{ backgroundColor: 'rgba(239,68,68,.08)', color: '#EF4444' }}>VN</span>
                   <span className="text-[15px]" style={{ color: 'var(--theme-text-primary)' }}>
                     {word.translationVi}
@@ -218,7 +218,7 @@ export function WordDetailModal({
           {/* Examples */}
           {settings.showExamples && word.examples && word.examples.length > 0 && (
             <div>
-              <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3 flex items-center gap-2"
+              <h3 className="text-caption font-bold uppercase tracking-wider mb-3 flex items-center gap-2"
                 style={{ color: gs.text }}>
                 <span className="w-6 h-6 rounded-md flex items-center justify-center shrink-0"
                   style={{ backgroundColor: gs.bg }}>
@@ -231,7 +231,7 @@ export function WordDetailModal({
                   <div key={i} className="p-3 rounded-xl"
                     style={{ backgroundColor: gs.light, borderLeft: `3px solid ${gs.text}` }}>
                     <div className="flex items-start justify-between gap-2">
-                      <p className="italic flex-1 text-[14px]" style={{ color: 'var(--theme-text-primary)' }}>
+                      <p className="italic flex-1 text-sm" style={{ color: 'var(--theme-text-primary)' }}>
                         {'„'}{example}{'"'}
                       </p>
                       <button onClick={() => speak(example)}
@@ -249,7 +249,7 @@ export function WordDetailModal({
           {/* Tips */}
           {word.tips && word.tips.length > 0 && (
             <div>
-              <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3 flex items-center gap-2"
+              <h3 className="text-caption font-bold uppercase tracking-wider mb-3 flex items-center gap-2"
                 style={{ color: '#EAB308' }}>
                 <span className="w-6 h-6 rounded-md flex items-center justify-center shrink-0"
                   style={{ backgroundColor: 'rgba(234,179,8,.1)' }}>
@@ -261,7 +261,7 @@ export function WordDetailModal({
                 {word.tips.map((tip, i) => (
                   <div key={i} className="p-3 rounded-xl"
                     style={{ backgroundColor: 'rgba(234,179,8,.06)', borderLeft: '3px solid #EAB308' }}>
-                    <p className="text-[14px]" style={{ color: 'var(--theme-text-primary)' }}>{tip}</p>
+                    <p className="text-sm" style={{ color: 'var(--theme-text-primary)' }}>{tip}</p>
                   </div>
                 ))}
               </div>
@@ -274,7 +274,7 @@ export function WordDetailModal({
           <button
             onClick={(isAdded && !pendingWordId) ? undefined : handleAddToWordBank}
             disabled={(isAdded && !pendingWordId) || isAdding}
-            className="w-full py-2.5 rounded-xl font-semibold text-[14px] border-2 transition-all duration-200 flex items-center justify-center gap-2"
+            className="w-full py-2.5 rounded-xl font-semibold text-sm border-2 transition-all duration-200 flex items-center justify-center gap-2"
             style={(isAdded && !pendingWordId)
               ? { borderColor: 'var(--theme-border)', color: 'var(--theme-text-muted)', cursor: 'default', backgroundColor: 'var(--theme-bg-secondary)' }
               : { borderColor: gs.text, color: gs.text, backgroundColor: 'transparent' }
@@ -292,7 +292,7 @@ export function WordDetailModal({
           )}
           <button
             onClick={onClose}
-            className="w-full py-3 rounded-xl font-semibold text-white text-[14px] transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0"
+            className="w-full py-3 rounded-xl font-semibold text-white text-sm transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0"
             style={{ background: gs.gradient }}>
             Đóng
           </button>

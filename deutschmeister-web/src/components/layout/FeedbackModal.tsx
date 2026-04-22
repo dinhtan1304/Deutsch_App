@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useRef, useCallback } from 'react';
 import { useMutation } from '@tanstack/react-query';
@@ -121,7 +121,7 @@ export function FeedbackModal({ onClose }: FeedbackModalProps) {
         <div className="flex items-center justify-between px-5 py-4 border-b shrink-0" style={{ borderColor: 'var(--theme-border)' }}>
           <div>
             <p className="font-bold text-[15px]" style={{ color: 'var(--theme-text-primary)' }}>Phản hồi</p>
-            <p className="text-[11px] mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>Giúp chúng tôi cải thiện DeutschMeister</p>
+            <p className="text-caption mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>Giúp chúng tôi cải thiện DeutschMeister</p>
           </div>
           <button
             onClick={onClose}
@@ -147,7 +147,7 @@ export function FeedbackModal({ onClose }: FeedbackModalProps) {
             </p>
             <button
               onClick={onClose}
-              className="mt-5 px-5 py-2 rounded-xl text-[13px] font-semibold text-white"
+              className="mt-5 px-5 py-2 rounded-xl text-body font-semibold text-white"
               style={{ background: 'linear-gradient(135deg, #6366F1, #8B5CF6)' }}
             >
               Đóng
@@ -171,7 +171,7 @@ export function FeedbackModal({ onClose }: FeedbackModalProps) {
                     }}
                   >
                     <span style={{ color: active ? t.color : 'var(--theme-text-muted)', display: 'flex' }}><Icon size={17} /></span>
-                    <span className="text-[11px] font-semibold leading-tight"
+                    <span className="text-caption font-semibold leading-tight"
                       style={{ color: active ? t.color : 'var(--theme-text-secondary)' }}>
                       {t.label}
                     </span>
@@ -192,7 +192,7 @@ export function FeedbackModal({ onClose }: FeedbackModalProps) {
                   ? 'Bạn muốn thêm tính năng gì hoặc cải thiện điều gì...'
                   : 'Chia sẻ suy nghĩ của bạn về ứng dụng...'
               }
-              className="w-full rounded-xl border px-4 py-3 text-[13px] resize-none focus:outline-none focus:ring-2 transition-all"
+              className="w-full rounded-xl border px-4 py-3 text-body resize-none focus:outline-none focus:ring-2 transition-all"
               style={{
                 backgroundColor: 'var(--theme-bg-secondary)',
                 borderColor: 'var(--theme-border)',
@@ -200,7 +200,7 @@ export function FeedbackModal({ onClose }: FeedbackModalProps) {
                 '--tw-ring-color': selected.color,
               } as React.CSSProperties}
             />
-            <p className="text-[11px] mt-1 text-right" style={{ color: content.trim().length < 10 ? '#EF4444' : 'var(--theme-text-muted)' }}>
+            <p className="text-caption mt-1 text-right" style={{ color: content.trim().length < 10 ? '#EF4444' : 'var(--theme-text-muted)' }}>
               {content.trim().length}/10 ký tự tối thiểu
             </p>
 
@@ -229,7 +229,7 @@ export function FeedbackModal({ onClose }: FeedbackModalProps) {
                       />
                       <button
                         onClick={() => removeImage(i)}
-                        className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full flex items-center justify-center text-white text-[10px] font-bold opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full flex items-center justify-center text-white text-caption font-bold opacity-0 group-hover:opacity-100 transition-opacity"
                         style={{ backgroundColor: '#EF4444' }}
                       >
                         <IconX size={10} />
@@ -243,7 +243,7 @@ export function FeedbackModal({ onClose }: FeedbackModalProps) {
               {images.length < MAX_IMAGES && (
                 <button
                   onClick={() => fileRef.current?.click()}
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg border text-[12px] transition-colors"
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg border text-xs transition-colors"
                   style={{
                     borderColor: 'var(--theme-border)',
                     color: 'var(--theme-text-secondary)',
@@ -258,7 +258,7 @@ export function FeedbackModal({ onClose }: FeedbackModalProps) {
               )}
 
               {imgError && (
-                <p className="text-[11px] mt-1" style={{ color: '#EF4444' }}>{imgError}</p>
+                <p className="text-caption mt-1" style={{ color: '#EF4444' }}>{imgError}</p>
               )}
             </div>
 
@@ -266,7 +266,7 @@ export function FeedbackModal({ onClose }: FeedbackModalProps) {
             <button
               onClick={() => mutate()}
               disabled={!canSubmit}
-              className="w-full mt-3 py-2.5 rounded-xl text-[13px] font-bold text-white flex items-center justify-center gap-2 transition-all"
+              className="w-full mt-3 py-2.5 rounded-xl text-body font-bold text-white flex items-center justify-center gap-2 transition-all"
               style={{
                 background: canSubmit ? `linear-gradient(135deg, ${selected.color}, ${selected.color}cc)` : 'rgba(255,255,255,.1)',
                 color: canSubmit ? '#fff' : 'var(--theme-text-muted)',

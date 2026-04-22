@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useMemo, useState } from 'react';
 import type { ActivityHeatmap as HeatmapData, ActivityDay } from '@/types/dashboard';
@@ -84,12 +84,12 @@ export function ActivityHeatmap({ data }: ActivityHeatmapProps) {
 
   return (
     <div
-      className="p-5 rounded-2xl border"
+      className="p-5 rounded-card border shadow-card"
       style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)', minHeight: '16.5rem' }}
     >
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-[15px] font-bold flex items-center gap-2"
+        <h3 className="text-title font-bold flex items-center gap-2"
           style={{ color: 'var(--theme-text-primary)' }}>
           <span className="w-7 h-7 rounded-lg flex items-center justify-center"
             style={{ background: 'linear-gradient(135deg, rgba(16,185,129,.15), rgba(52,211,153,.1))' }}>
@@ -97,7 +97,7 @@ export function ActivityHeatmap({ data }: ActivityHeatmapProps) {
           </span>
           Hoạt động trong năm
         </h3>
-        <div className="flex items-center gap-4 text-[12px]">
+        <div className="flex items-center gap-4 text-xs">
           <div className="flex items-center gap-1.5">
             <IconFlame size={14} style={{ color: '#F97316' }} />
             <span className="font-bold" style={{ color: '#F97316' }}>{data.currentStreak}</span>
@@ -117,7 +117,7 @@ export function ActivityHeatmap({ data }: ActivityHeatmapProps) {
             {monthLabels.map((label, i) => (
               <div
                 key={i}
-                className="text-[10px] font-medium"
+                className="text-caption font-medium"
                 style={{
                   color: 'var(--theme-text-muted)',
                   position: 'relative',
@@ -134,7 +134,7 @@ export function ActivityHeatmap({ data }: ActivityHeatmapProps) {
           <div className="flex">
             <div className="flex flex-col mr-2">
               {DAYS.map((day, i) => (
-                <div key={i} className="text-[10px] h-3.5 flex items-center"
+                <div key={i} className="text-caption h-3.5 flex items-center"
                   style={{ color: 'var(--theme-text-muted)' }}>
                   {day}
                 </div>
@@ -165,17 +165,17 @@ export function ActivityHeatmap({ data }: ActivityHeatmapProps) {
 
       {/* Legend */}
       <div className="flex items-center justify-end gap-1.5 mt-4">
-        <span className="text-[10px]" style={{ color: 'var(--theme-text-muted)' }}>Ít</span>
+        <span className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>Ít</span>
         {LEVEL_COLORS.map((color, i) => (
           <div key={i} className="w-3 h-3 rounded-sm" style={{ backgroundColor: color }} />
         ))}
-        <span className="text-[10px]" style={{ color: 'var(--theme-text-muted)' }}>Nhiều</span>
+        <span className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>Nhiều</span>
       </div>
 
       {/* Tooltip */}
       {hoveredDay && (
         <div
-          className="fixed z-50 px-3 py-2 text-[12px] rounded-xl shadow-xl pointer-events-none
+          className="fixed z-50 px-3 py-2 text-xs rounded-xl shadow-xl pointer-events-none
             transform -translate-x-1/2 -translate-y-full border"
           style={{
             left: tooltipPos.x,
@@ -187,7 +187,7 @@ export function ActivityHeatmap({ data }: ActivityHeatmapProps) {
           <div className="font-semibold" style={{ color: 'var(--theme-text-primary)' }}>
             {hoveredDay.count} hoạt động
           </div>
-          <div className="text-[11px]" style={{ color: 'var(--theme-text-muted)' }}>
+          <div className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>
             {formatDate(hoveredDay.date)}
           </div>
         </div>

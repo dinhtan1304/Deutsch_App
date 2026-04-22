@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useCallback, useEffect } from 'react';
 import type { TopicWord } from '@/types/topic';
@@ -171,27 +171,27 @@ export function TopicFlashcard({ words, topicColor, onMarkLearned }: Props) {
         <div className="flex justify-center gap-6 mb-6">
           <div className="text-center">
             <div className="text-2xl font-bold" style={{ color: '#22C55E' }}>{known.size}</div>
-            <div className="text-[12px]" style={{ color: 'var(--theme-text-muted)' }}>Đã biết</div>
+            <div className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>Đã biết</div>
           </div>
           <div className="text-center">
             <div className="text-2xl font-bold" style={{ color: '#EF4444' }}>{unknown.size}</div>
-            <div className="text-[12px]" style={{ color: 'var(--theme-text-muted)' }}>Cần ôn</div>
+            <div className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>Cần ôn</div>
           </div>
           <div className="text-center">
             <div className="text-2xl font-bold" style={{ color: topicColor }}>{pct}%</div>
-            <div className="text-[12px]" style={{ color: 'var(--theme-text-muted)' }}>Chính xác</div>
+            <div className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>Chính xác</div>
           </div>
         </div>
         <div className="flex justify-center gap-3">
           {unknown.size > 0 && (
             <button onClick={() => restart(true)}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-[13px] font-semibold transition-all hover:-translate-y-0.5"
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-body font-semibold transition-all hover:-translate-y-0.5"
               style={{ background: 'rgba(239,68,68,.1)', color: '#EF4444' }}>
               <IconRotateCcw size={15} /> Ôn {unknown.size} từ chưa biết
             </button>
           )}
           <button onClick={() => restart(false)}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-[13px] font-semibold transition-all hover:-translate-y-0.5"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-body font-semibold transition-all hover:-translate-y-0.5"
             style={{ background: `${topicColor}15`, color: topicColor }}>
             <IconShuffle size={15} /> Học lại tất cả
           </button>
@@ -206,10 +206,10 @@ export function TopicFlashcard({ words, topicColor, onMarkLearned }: Props) {
     <div>
       {/* Progress */}
       <div className="flex items-center justify-between mb-4">
-        <span className="text-[13px] font-medium" style={{ color: 'var(--theme-text-muted)' }}>
+        <span className="text-body font-medium" style={{ color: 'var(--theme-text-muted)' }}>
           {currentIndex + 1} / {total}
         </span>
-        <div className="flex items-center gap-3 text-[12px]">
+        <div className="flex items-center gap-3 text-xs">
           <span style={{ color: '#22C55E' }}>✓ {known.size}</span>
           <span style={{ color: '#EF4444' }}>✗ {unknown.size}</span>
         </div>
@@ -242,7 +242,7 @@ export function TopicFlashcard({ words, topicColor, onMarkLearned }: Props) {
                 backgroundColor: 'var(--theme-bg-card)',
                 borderColor: ac,
               }}>
-              <div className="text-[13px] font-bold mb-3 px-3 py-1 rounded-lg"
+              <div className="text-body font-bold mb-3 px-3 py-1 rounded-lg"
                 style={{ backgroundColor: `${ac}15`, color: ac }}>
                 {currentWord.article}
               </div>
@@ -250,7 +250,7 @@ export function TopicFlashcard({ words, topicColor, onMarkLearned }: Props) {
                 {currentWord.word}
               </div>
               {currentWord.plural && (
-                <div className="text-[13px] mb-3" style={{ color: 'var(--theme-text-muted)' }}>
+                <div className="text-body mb-3" style={{ color: 'var(--theme-text-muted)' }}>
                   Pl. {currentWord.plural}
                 </div>
               )}
@@ -260,7 +260,7 @@ export function TopicFlashcard({ words, topicColor, onMarkLearned }: Props) {
                 style={{ backgroundColor: `${ac}15`, color: ac }}>
                 <IconVolume size={20} />
               </button>
-              <div className="absolute bottom-4 text-[11px]" style={{ color: 'var(--theme-text-muted)' }}>
+              <div className="absolute bottom-4 text-caption" style={{ color: 'var(--theme-text-muted)' }}>
                 Nhấn để lật · Space
               </div>
             </div>
@@ -273,7 +273,7 @@ export function TopicFlashcard({ words, topicColor, onMarkLearned }: Props) {
                 backgroundColor: 'var(--theme-bg-card)',
                 borderColor: topicColor,
               }}>
-              <div className="text-[11px] font-bold uppercase mb-4 px-3 py-1 rounded-lg tracking-wide"
+              <div className="text-caption font-bold uppercase mb-4 px-3 py-1 rounded-lg tracking-wide"
                 style={{ backgroundColor: `${topicColor}15`, color: topicColor }}>
                 Nghĩa
               </div>
@@ -287,13 +287,13 @@ export function TopicFlashcard({ words, topicColor, onMarkLearned }: Props) {
               </div>
               {currentWord.examples && currentWord.examples.length > 0 && (
                 <div className="w-full mt-2 px-4">
-                  <div className="text-[12px] italic text-center py-2 rounded-lg"
+                  <div className="text-xs italic text-center py-2 rounded-lg"
                     style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-secondary)' }}>
                     „{currentWord.examples[0]}"
                   </div>
                 </div>
               )}
-              <div className="absolute bottom-4 text-[11px]" style={{ color: 'var(--theme-text-muted)' }}>
+              <div className="absolute bottom-4 text-caption" style={{ color: 'var(--theme-text-muted)' }}>
                 Nhấn để lật · Space
               </div>
             </div>
@@ -304,12 +304,12 @@ export function TopicFlashcard({ words, topicColor, onMarkLearned }: Props) {
       {/* Actions */}
       <div className="flex justify-center gap-4">
         <button onClick={handleUnknown}
-          className="flex items-center gap-2 px-6 py-3 rounded-xl text-[14px] font-semibold transition-all hover:-translate-y-0.5 hover:shadow-md"
+          className="flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold transition-all hover:-translate-y-0.5 hover:shadow-md"
           style={{ background: 'rgba(239,68,68,.1)', color: '#EF4444', border: '1px solid rgba(239,68,68,.2)' }}>
           <IconX size={18} /> Chưa biết · ←
         </button>
         <button onClick={handleKnown}
-          className="flex items-center gap-2 px-6 py-3 rounded-xl text-[14px] font-semibold transition-all hover:-translate-y-0.5 hover:shadow-md"
+          className="flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold transition-all hover:-translate-y-0.5 hover:shadow-md"
           style={{ background: 'rgba(34,197,94,.1)', color: '#22C55E', border: '1px solid rgba(34,197,94,.2)' }}>
           <IconCheck size={18} /> Đã biết · →
         </button>

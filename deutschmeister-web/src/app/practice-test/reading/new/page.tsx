@@ -1,11 +1,12 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useReadingTopics, useGenerateReading } from '@/hooks/useReading';
 import { QuotaPaywall } from '@/components/subscription/QuotaPaywall';
-import { IconChevronLeft, IconDice, IconLoader, IconRobot } from '../icons';
+import { IconDice, IconLoader, IconRobot } from '../icons';
+import { PageHeader } from '@/components/ui';
 
 const LEVEL_COLORS: Record<string, string> = {
   A1: '#22C55E', A2: '#3B82F6', B1: '#8B5CF6', B2: '#F97316',
@@ -57,26 +58,12 @@ export default function NewReadingPage() {
     <QuotaPaywall feature="reading">
     <div className="py-6">
 
-      {/* Header */}
-      <div className="mb-6">
-        <Link href="/practice-test/reading"
-          className="flex items-center gap-1 text-[13px] font-medium mb-2 transition-opacity hover:opacity-70"
-          style={{ color: 'var(--theme-text-muted)' }}>
-          <IconChevronLeft size={14} /> Quay lại
-        </Link>
-        <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-2xl flex items-center justify-center"
-            style={{ background: 'linear-gradient(135deg, #22C55E, #14B8A6)' }}>
-            <IconDice size={22} style={{ color: 'white' }} />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold" style={{ color: 'var(--theme-text-primary)' }}>Tạo bài đọc mới</h1>
-            <p className="text-[13px] mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>
-              AI tạo bài đọc hiểu tiếng Đức theo cấu hình của bạn
-            </p>
-          </div>
-        </div>
-      </div>
+      <PageHeader
+        backHref="/practice-test/reading"
+        title="Tạo bài đọc mới"
+        subtitle="AI tạo bài đọc hiểu tiếng Đức theo cấu hình của bạn"
+        accent="reading"
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
@@ -85,7 +72,7 @@ export default function NewReadingPage() {
 
           {/* Step 1: Level */}
           <section>
-            <h2 className="text-[12px] font-bold uppercase tracking-wider mb-3"
+            <h2 className="text-xs font-bold uppercase tracking-wider mb-3"
               style={{ color: 'var(--theme-text-muted)' }}>1. Trình độ CEFR</h2>
             <div className="flex gap-2">
               {['A1', 'A2', 'B1', 'B2'].map(l => {
@@ -93,7 +80,7 @@ export default function NewReadingPage() {
                 const c = LEVEL_COLORS[l];
                 return (
                   <button key={l} onClick={() => setLevel(l)}
-                    className="px-5 py-2.5 rounded-xl text-[13px] font-bold border-2 transition-all duration-200 hover:-translate-y-0.5"
+                    className="px-5 py-2.5 rounded-xl text-body font-bold border-2 transition-all duration-200 hover:-translate-y-0.5"
                     style={isActive
                       ? { background: `linear-gradient(135deg, ${c}, ${c}cc)`, color: 'white', borderColor: c, boxShadow: `0 4px 12px ${c}30` }
                       : { borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)', backgroundColor: 'transparent' }
@@ -107,7 +94,7 @@ export default function NewReadingPage() {
 
           {/* Step 2: Topic */}
           <section>
-            <h2 className="text-[12px] font-bold uppercase tracking-wider mb-3"
+            <h2 className="text-xs font-bold uppercase tracking-wider mb-3"
               style={{ color: 'var(--theme-text-muted)' }}>2. Chủ đề</h2>
             {isLoading ? (
               <div className="grid grid-cols-3 md:grid-cols-4 gap-2">
@@ -129,9 +116,9 @@ export default function NewReadingPage() {
                           backgroundColor: isActive ? `${activeColor}08` : 'var(--theme-bg-card)',
                           boxShadow: isActive ? `0 4px 12px ${activeColor}15` : 'none',
                         }}>
-                        <span className="text-[16px]">{t.icon}</span>
-                        <div className="text-[12px] font-semibold mt-1 truncate" style={{ color: 'var(--theme-text-primary)' }}>{t.labelDe}</div>
-                        <div className="text-[11px] truncate" style={{ color: 'var(--theme-text-muted)' }}>{t.labelVi}</div>
+                        <span className="text-base">{t.icon}</span>
+                        <div className="text-xs font-semibold mt-1 truncate" style={{ color: 'var(--theme-text-primary)' }}>{t.labelDe}</div>
+                        <div className="text-caption truncate" style={{ color: 'var(--theme-text-muted)' }}>{t.labelVi}</div>
                       </button>
                     );
                   })}
@@ -140,14 +127,14 @@ export default function NewReadingPage() {
                   <input type="text" value={customTopic}
                     onChange={e => { setCustomTopic(e.target.value); if (e.target.value) setSelectedTopic(''); }}
                     placeholder="Hoặc nhập chủ đề tùy chỉnh..."
-                    className="w-full px-4 py-3 rounded-xl border-2 border-dashed text-[14px] focus:outline-none transition-colors"
+                    className="w-full px-4 py-3 rounded-xl border-2 border-dashed text-sm focus:outline-none transition-colors"
                     style={{
                       borderColor: customTopic ? activeColor : 'var(--theme-border)',
                       backgroundColor: 'var(--theme-bg-secondary)',
                       color: 'var(--theme-text-primary)',
                     }} />
                   {customTopic && (
-                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[12px] font-bold" style={{ color: activeColor }}>
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold" style={{ color: activeColor }}>
                       Tùy chỉnh ✓
                     </span>
                   )}
@@ -162,7 +149,7 @@ export default function NewReadingPage() {
 
           {/* Step 3: Text Type */}
           <section>
-            <h2 className="text-[12px] font-bold uppercase tracking-wider mb-3"
+            <h2 className="text-xs font-bold uppercase tracking-wider mb-3"
               style={{ color: 'var(--theme-text-muted)' }}>3. Loại văn bản</h2>
             <div className="grid grid-cols-2 gap-2">
               {suggestions?.textTypes.map(t => {
@@ -176,10 +163,10 @@ export default function NewReadingPage() {
                       boxShadow: isActive ? `0 4px 12px ${activeColor}15` : 'none',
                     }}>
                     <div className="flex items-center gap-2">
-                      <span className="text-[16px]">{t.icon}</span>
+                      <span className="text-base">{t.icon}</span>
                       <div>
-                        <div className="text-[12px] font-semibold" style={{ color: 'var(--theme-text-primary)' }}>{t.labelDe}</div>
-                        <div className="text-[11px]" style={{ color: 'var(--theme-text-muted)' }}>{t.labelVi}</div>
+                        <div className="text-xs font-semibold" style={{ color: 'var(--theme-text-primary)' }}>{t.labelDe}</div>
+                        <div className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>{t.labelVi}</div>
                       </div>
                     </div>
                   </button>
@@ -190,7 +177,7 @@ export default function NewReadingPage() {
 
           {/* Step 4: Question Count */}
           <section>
-            <h2 className="text-[12px] font-bold uppercase tracking-wider mb-3"
+            <h2 className="text-xs font-bold uppercase tracking-wider mb-3"
               style={{ color: 'var(--theme-text-muted)' }}>4. Số câu hỏi</h2>
             <div className="flex gap-2 flex-wrap">
               {QUESTION_COUNT_OPTIONS.map(n => {
@@ -214,10 +201,10 @@ export default function NewReadingPage() {
           {/* Summary */}
           <div className="rounded-2xl border p-5"
             style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-secondary)' }}>
-            <h3 className="text-[13px] font-bold mb-3" style={{ color: 'var(--theme-text-secondary)' }}>
+            <h3 className="text-body font-bold mb-3" style={{ color: 'var(--theme-text-secondary)' }}>
               Tóm tắt cấu hình
             </h3>
-            <div className="grid grid-cols-2 gap-y-2 text-[13px]">
+            <div className="grid grid-cols-2 gap-y-2 text-body">
               <span style={{ color: 'var(--theme-text-muted)' }}>Trình độ:</span>
               <span className="font-semibold" style={{ color: 'var(--theme-text-primary)' }}>{level}</span>
               <span style={{ color: 'var(--theme-text-muted)' }}>Chủ đề:</span>
@@ -235,7 +222,7 @@ export default function NewReadingPage() {
 
           {/* Generate Button */}
           <button onClick={handleGenerate} disabled={!canGenerate || generateMutation.isPending}
-            className="w-full py-3.5 rounded-xl font-bold text-[16px] text-white transition-all duration-200 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            className="w-full py-3.5 rounded-xl font-bold text-base text-white transition-all duration-200 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             style={{
               background: `linear-gradient(135deg, ${activeColor}, ${activeColor}cc)`,
               boxShadow: `0 4px 12px ${activeColor}30`,
@@ -247,7 +234,7 @@ export default function NewReadingPage() {
           </button>
 
           {generateMutation.isError && (
-            <p className="text-[13px] text-center" style={{ color: '#EF4444' }}>
+            <p className="text-body text-center" style={{ color: '#EF4444' }}>
               Không thể tạo bài đọc. Vui lòng thử lại.
             </p>
           )}

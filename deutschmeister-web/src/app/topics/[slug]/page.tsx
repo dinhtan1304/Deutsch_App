@@ -110,11 +110,11 @@ function WordCard({ word, index, isLearned, onToggleLearned }: WordCardProps) {
           {/* Left: Word info */}
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-[11px] font-mono" style={{ color: 'var(--theme-text-muted)' }}>
+              <span className="text-caption font-mono" style={{ color: 'var(--theme-text-muted)' }}>
                 {index}.
               </span>
               {word.article && (
-                <span className="text-[14px] font-semibold" style={{ color: ac.color }}>
+                <span className="text-sm font-semibold" style={{ color: ac.color }}>
                   {word.article}
                 </span>
               )}
@@ -122,7 +122,7 @@ function WordCard({ word, index, isLearned, onToggleLearned }: WordCardProps) {
                 {word.word}
               </span>
               {word.isCore && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold"
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-caption font-bold"
                   style={{ background: ac.gradient, color: 'white' }}>
                   <IconStar size={9} /> Core
                 </span>
@@ -130,22 +130,22 @@ function WordCard({ word, index, isLearned, onToggleLearned }: WordCardProps) {
             </div>
 
             {word.plural && (
-              <p className="text-[11px] mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>
+              <p className="text-caption mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>
                 Pl. {word.plural}
               </p>
             )}
 
             <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-0.5">
-              <span className="text-[13px] flex items-center gap-1"
+              <span className="text-body flex items-center gap-1"
                 style={{ color: 'var(--theme-text-secondary)' }}>
-                <span className="text-[10px] px-1 py-0.5 rounded font-bold"
+                <span className="text-caption px-1 py-0.5 rounded font-bold"
                   style={{ background: 'rgba(59,130,246,.08)', color: '#3B82F6' }}>EN</span>
                 {word.translationEn}
               </span>
               {word.translationVi && (
-                <span className="text-[13px] flex items-center gap-1"
+                <span className="text-body flex items-center gap-1"
                   style={{ color: 'var(--theme-text-muted)' }}>
-                  <span className="text-[10px] px-1 py-0.5 rounded font-bold"
+                  <span className="text-caption px-1 py-0.5 rounded font-bold"
                     style={{ background: 'rgba(239,68,68,.08)', color: '#EF4444' }}>VN</span>
                   {word.translationVi}
                 </span>
@@ -177,7 +177,7 @@ function WordCard({ word, index, isLearned, onToggleLearned }: WordCardProps) {
 
         {/* Expand hint */}
         {!showDetails && (word.examples?.length || word.tips?.length) ? (
-          <p className="mt-2 text-[11px]" style={{ color: ac.color }}>
+          <p className="mt-2 text-caption" style={{ color: ac.color }}>
             Nhấn để xem chi tiết →
           </p>
         ) : null}
@@ -188,7 +188,7 @@ function WordCard({ word, index, isLearned, onToggleLearned }: WordCardProps) {
         <div className="px-4 pb-4 pt-2 space-y-3" style={{ borderTop: '1px solid var(--theme-border)' }}>
           {word.examples && word.examples.length > 0 && (
             <div>
-              <p className="text-[11px] font-semibold mb-1.5 flex items-center gap-1.5"
+              <p className="text-caption font-semibold mb-1.5 flex items-center gap-1.5"
                 style={{ color: 'var(--theme-text-muted)' }}>
                 <span className="w-5 h-5 rounded-md flex items-center justify-center"
                   style={{ background: ac.bg }}>
@@ -198,7 +198,7 @@ function WordCard({ word, index, isLearned, onToggleLearned }: WordCardProps) {
               </p>
               <ul className="space-y-1.5">
                 {word.examples.map((ex, i) => (
-                  <li key={i} className="text-[13px] italic pl-3 border-l-2"
+                  <li key={i} className="text-body italic pl-3 border-l-2"
                     style={{ borderColor: ac.color, color: 'var(--theme-text-secondary)' }}>
                     „{ex}"
                   </li>
@@ -209,7 +209,7 @@ function WordCard({ word, index, isLearned, onToggleLearned }: WordCardProps) {
 
           {word.tips && word.tips.length > 0 && (
             <div>
-              <p className="text-[11px] font-semibold mb-1.5 flex items-center gap-1.5"
+              <p className="text-caption font-semibold mb-1.5 flex items-center gap-1.5"
                 style={{ color: 'var(--theme-text-muted)' }}>
                 <span className="w-5 h-5 rounded-md flex items-center justify-center"
                   style={{ background: 'rgba(245,158,11,.1)' }}>
@@ -219,7 +219,7 @@ function WordCard({ word, index, isLearned, onToggleLearned }: WordCardProps) {
               </p>
               <ul className="space-y-1">
                 {word.tips.map((tip, i) => (
-                  <li key={i} className="text-[13px] pl-3"
+                  <li key={i} className="text-body pl-3"
                     style={{ color: 'var(--theme-text-secondary)' }}>
                     • {tip}
                   </li>
@@ -385,11 +385,11 @@ export default function TopicDetailPage() {
           <h1 className="text-xl font-bold mb-2" style={{ color: 'var(--theme-text-primary)' }}>
             Không tìm thấy chủ đề
           </h1>
-          <p className="text-[13px] mb-4" style={{ color: 'var(--theme-text-muted)' }}>
+          <p className="text-body mb-4" style={{ color: 'var(--theme-text-muted)' }}>
             Chủ đề &quot;{slug}&quot; không tồn tại hoặc đã bị xóa
           </p>
           <Link href="/topics"
-            className="flex items-center gap-1.5 mx-auto w-fit text-[13px] font-medium transition-opacity hover:opacity-70"
+            className="flex items-center gap-1.5 mx-auto w-fit text-body font-medium transition-opacity hover:opacity-70"
             style={{ color: '#3B82F6' }}>
             <IconChevronLeft size={16} /> Quay lại danh sách
           </Link>
@@ -400,7 +400,7 @@ export default function TopicDetailPage() {
   return (
       <div className="py-6">
         {/* Breadcrumb */}
-        <div className="flex items-center gap-1.5 text-[13px] mb-5">
+        <div className="flex items-center gap-1.5 text-body mb-5">
           <Link href="/topics" className="font-medium transition-opacity hover:opacity-70"
             style={{ color: '#3B82F6' }}>
             Chủ đề
@@ -433,16 +433,16 @@ export default function TopicDetailPage() {
                 <h1 className="text-2xl font-bold" style={{ color: 'var(--theme-text-primary)' }}>
                   {topic.nameDe}
                 </h1>
-                <p className="text-[14px]" style={{ color: 'var(--theme-text-muted)' }}>{topic.nameVi}</p>
+                <p className="text-sm" style={{ color: 'var(--theme-text-muted)' }}>{topic.nameVi}</p>
                 {topic.descriptionVi && (
-                  <p className="text-[12px] mt-1" style={{ color: 'var(--theme-text-muted)' }}>
+                  <p className="text-xs mt-1" style={{ color: 'var(--theme-text-muted)' }}>
                     {topic.descriptionVi}
                   </p>
                 )}
               </div>
             </div>
 
-            <span className="text-[12px] font-bold px-2.5 py-1 rounded-lg"
+            <span className="text-xs font-bold px-2.5 py-1 rounded-lg"
               style={{ background: `${topicColor}18`, color: topicColor }}>
               {topic.level}
             </span>
@@ -450,7 +450,7 @@ export default function TopicDetailPage() {
 
           {/* Progress bar */}
           <div className="relative mt-5">
-            <div className="flex items-center justify-between text-[13px] mb-2">
+            <div className="flex items-center justify-between text-body mb-2">
               <span style={{ color: 'var(--theme-text-secondary)' }}>
                 Đã học: {learnedWords.size}/{topic.words?.length || 0} từ
               </span>
@@ -471,19 +471,19 @@ export default function TopicDetailPage() {
           {/* Quick actions */}
           <div className="relative flex flex-wrap gap-2 mt-4">
             <button onClick={markAllLearned}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold transition-all hover:-translate-y-0.5"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all hover:-translate-y-0.5"
               style={{ background: 'rgba(34,197,94,.1)', color: '#22C55E' }}>
               <IconCheckAll size={14} /> Đánh dấu tất cả
             </button>
             <button onClick={resetProgress}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold transition-all hover:-translate-y-0.5"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all hover:-translate-y-0.5"
               style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }}>
               <IconRotateCcw size={14} /> Học lại từ đầu
             </button>
           </div>
 
           {updateProgressMutation.isPending && (
-            <div className="relative mt-2 text-[11px]" style={{ color: 'var(--theme-text-muted)' }}>
+            <div className="relative mt-2 text-caption" style={{ color: 'var(--theme-text-muted)' }}>
               Đang lưu...
             </div>
           )}
@@ -505,7 +505,7 @@ export default function TopicDetailPage() {
                   style={{ background: `${topicColor}15` }}>
                   <IconLightbulb size={16} style={{ color: topicColor }} />
                 </div>
-                <span className="text-[14px] font-semibold" style={{ color: 'var(--theme-text-primary)' }}>
+                <span className="text-sm font-semibold" style={{ color: 'var(--theme-text-primary)' }}>
                   {LEVEL_TIPS[topic.level].title}
                 </span>
               </div>
@@ -521,11 +521,11 @@ export default function TopicDetailPage() {
               <div className="px-5 py-4 space-y-3">
                 {LEVEL_TIPS[topic.level].tips.map((tip, i) => (
                   <div key={i} className="flex gap-3">
-                    <div className="w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5 text-[11px] font-bold"
+                    <div className="w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5 text-caption font-bold"
                       style={{ background: `${topicColor}15`, color: topicColor }}>
                       {i + 1}
                     </div>
-                    <p className="text-[13px] leading-relaxed" style={{ color: 'var(--theme-text-secondary)' }}>
+                    <p className="text-body leading-relaxed" style={{ color: 'var(--theme-text-secondary)' }}>
                       {tip}
                     </p>
                   </div>
@@ -546,7 +546,7 @@ export default function TopicDetailPage() {
             return (
               <button key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
-                className="flex-1 flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-lg text-[13px] font-semibold transition-all duration-200"
+                className="flex-1 flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-lg text-body font-semibold transition-all duration-200"
                 style={isActive
                   ? {
                     backgroundColor: 'var(--theme-bg-card)',
@@ -580,7 +580,7 @@ export default function TopicDetailPage() {
                   </div>
                   <input type="text" value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
                     placeholder="Tìm từ..."
-                    className="w-full pl-9 pr-4 py-2 rounded-xl border text-[13px] transition-all
+                    className="w-full pl-9 pr-4 py-2 rounded-xl border text-body transition-all
                       focus:outline-none focus:ring-2"
                     style={{
                       borderColor: 'var(--theme-border)',
@@ -603,7 +603,7 @@ export default function TopicDetailPage() {
                     return (
                       <button key={item.key}
                         onClick={() => setFilterMode(item.key as FilterMode)}
-                        className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-[12px] font-semibold transition-all duration-200"
+                        className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200"
                         style={isActive
                           ? { background: `linear-gradient(135deg, ${topicColor}, ${topicColor}cc)`, color: 'white' }
                           : { backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }
@@ -616,7 +616,7 @@ export default function TopicDetailPage() {
                 </div>
               </div>
 
-              <div className="mt-2.5 text-[11px]" style={{ color: 'var(--theme-text-muted)' }}>
+              <div className="mt-2.5 text-caption" style={{ color: 'var(--theme-text-muted)' }}>
                 Hiển thị {filteredWords.length} / {topic.words?.length || 0} từ
               </div>
             </div>
@@ -641,7 +641,7 @@ export default function TopicDetailPage() {
                   style={{ background: 'linear-gradient(135deg, rgba(107,114,128,.12), rgba(107,114,128,.06))' }}>
                   <IconSearch size={24} style={{ color: 'var(--theme-text-muted)' }} />
                 </div>
-                <p className="text-[14px]" style={{ color: 'var(--theme-text-muted)' }}>
+                <p className="text-sm" style={{ color: 'var(--theme-text-muted)' }}>
                   {searchQuery
                     ? `Không tìm thấy từ nào khớp với "${searchQuery}"`
                     : filterMode === 'learned'
@@ -685,18 +685,18 @@ export default function TopicDetailPage() {
         {/* Bottom navigation */}
         <div className="mt-8 flex items-center justify-between">
           <Link href="/topics"
-            className="flex items-center gap-1.5 text-[13px] font-medium transition-opacity hover:opacity-70"
+            className="flex items-center gap-1.5 text-body font-medium transition-opacity hover:opacity-70"
             style={{ color: 'var(--theme-text-muted)' }}>
             <IconChevronLeft size={16} /> Quay lại
           </Link>
 
           {progress === 100 && (
             <div className="flex items-center gap-3">
-              <span className="text-[13px] font-semibold" style={{ color: '#22C55E' }}>
+              <span className="text-body font-semibold" style={{ color: '#22C55E' }}>
                 🎉 Hoàn thành!
               </span>
               <Link href="/topics"
-                className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[13px] font-semibold text-white
+                className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-body font-semibold text-white
                   transition-all hover:shadow-md hover:-translate-y-0.5"
                 style={{ background: 'linear-gradient(135deg, #22C55E, #16A34A)' }}>
                 Chủ đề tiếp theo <IconChevronRight size={14} />

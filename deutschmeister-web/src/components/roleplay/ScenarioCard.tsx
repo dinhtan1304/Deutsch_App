@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { RoleplayScenario } from '@/lib/api/roleplay';
 
@@ -29,7 +29,7 @@ export function ScenarioCard({ scenario, locked, onClick }: Props) {
     >
       {locked && (
         <div
-          className="absolute top-3 right-3 px-2 py-0.5 rounded-full text-[10px] font-bold text-white"
+          className="absolute top-3 right-3 px-2 py-0.5 rounded-full text-caption font-bold text-white"
           style={{ background: 'linear-gradient(135deg, #F59E0B, #EF4444)' }}
         >
           PREMIUM
@@ -46,7 +46,7 @@ export function ScenarioCard({ scenario, locked, onClick }: Props) {
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
             <span
-              className="px-2 py-0.5 rounded-md text-[10px] font-bold"
+              className="px-2 py-0.5 rounded-md text-caption font-bold"
               style={{ backgroundColor: `${levelColor}1a`, color: levelColor }}
             >
               {scenario.level}

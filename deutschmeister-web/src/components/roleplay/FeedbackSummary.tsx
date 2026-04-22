@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { RoleplayFeedback } from '@/lib/api/roleplay';
 
@@ -60,7 +60,7 @@ export function FeedbackSummary({ feedback }: Props) {
               {s.value}
             </div>
             <div
-              className="text-[11px] mt-0.5"
+              className="text-caption mt-0.5"
               style={{ color: 'var(--theme-text-muted)' }}
             >
               {s.label}
@@ -176,7 +176,7 @@ export function FeedbackSummary({ feedback }: Props) {
                   ✅ {c.corrected}
                 </div>
                 <div
-                  className="text-[11px] italic"
+                  className="text-caption italic"
                   style={{ color: 'var(--theme-text-muted)' }}
                 >
                   {c.explanationVi}

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useCallback } from 'react';
 import type { TopicWord } from '@/types/topic';
@@ -111,11 +111,11 @@ export function TopicWordCard({
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-[11px] font-mono" style={{ color: 'var(--theme-text-muted)' }}>
+              <span className="text-caption font-mono" style={{ color: 'var(--theme-text-muted)' }}>
                 {index}.
               </span>
               {word.article && (
-                <span className="text-[14px] font-semibold" style={{ color: ac.color }}>
+                <span className="text-sm font-semibold" style={{ color: ac.color }}>
                   {word.article}
                 </span>
               )}
@@ -123,7 +123,7 @@ export function TopicWordCard({
                 {word.word}
               </span>
               {word.isCore && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold"
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-caption font-bold"
                   style={{ background: ac.gradient, color: 'white' }}>
                   <IconStar size={9} /> Core
                 </span>
@@ -131,22 +131,22 @@ export function TopicWordCard({
             </div>
 
             {word.plural && (
-              <p className="text-[11px] mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>
+              <p className="text-caption mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>
                 Pl. {word.plural}
               </p>
             )}
 
             <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-0.5">
-              <span className="text-[13px] flex items-center gap-1"
+              <span className="text-body flex items-center gap-1"
                 style={{ color: 'var(--theme-text-secondary)' }}>
-                <span className="text-[10px] px-1 py-0.5 rounded font-bold"
+                <span className="text-caption px-1 py-0.5 rounded font-bold"
                   style={{ background: 'rgba(59,130,246,.08)', color: '#3B82F6' }}>EN</span>
                 {word.translationEn}
               </span>
               {word.translationVi && (
-                <span className="text-[13px] flex items-center gap-1"
+                <span className="text-body flex items-center gap-1"
                   style={{ color: 'var(--theme-text-muted)' }}>
-                  <span className="text-[10px] px-1 py-0.5 rounded font-bold"
+                  <span className="text-caption px-1 py-0.5 rounded font-bold"
                     style={{ background: 'rgba(239,68,68,.08)', color: '#EF4444' }}>VN</span>
                   {word.translationVi}
                 </span>
@@ -209,7 +209,7 @@ export function TopicWordCard({
         <div className="px-4 pb-4 pt-2 space-y-3" style={{ borderTop: '1px solid var(--theme-border)' }}>
           {word.examples && word.examples.length > 0 && (
             <div>
-              <p className="text-[11px] font-semibold mb-1.5 flex items-center gap-1.5"
+              <p className="text-caption font-semibold mb-1.5 flex items-center gap-1.5"
                 style={{ color: 'var(--theme-text-muted)' }}>
                 <span className="w-5 h-5 rounded-md flex items-center justify-center"
                   style={{ background: ac.bg }}>
@@ -219,7 +219,7 @@ export function TopicWordCard({
               </p>
               <ul className="space-y-1.5">
                 {word.examples.map((ex, i) => (
-                  <li key={i} className="text-[13px] italic pl-3 border-l-2"
+                  <li key={i} className="text-body italic pl-3 border-l-2"
                     style={{ borderColor: ac.color, color: 'var(--theme-text-secondary)' }}>
                     „{ex}"
                   </li>
@@ -230,7 +230,7 @@ export function TopicWordCard({
 
           {word.tips && word.tips.length > 0 && (
             <div>
-              <p className="text-[11px] font-semibold mb-1.5 flex items-center gap-1.5"
+              <p className="text-caption font-semibold mb-1.5 flex items-center gap-1.5"
                 style={{ color: 'var(--theme-text-muted)' }}>
                 <span className="w-5 h-5 rounded-md flex items-center justify-center"
                   style={{ background: 'rgba(245,158,11,.1)' }}>
@@ -240,7 +240,7 @@ export function TopicWordCard({
               </p>
               <ul className="space-y-1">
                 {word.tips.map((tip, i) => (
-                  <li key={i} className="text-[13px] pl-3"
+                  <li key={i} className="text-body pl-3"
                     style={{ color: 'var(--theme-text-secondary)' }}>
                     • {tip}
                   </li>

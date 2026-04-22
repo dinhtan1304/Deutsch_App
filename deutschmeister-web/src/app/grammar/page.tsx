@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useMemo } from 'react';
 import { useGrammarLessons, useGrammarProgress } from '@/hooks/useGrammar';
@@ -101,7 +101,7 @@ export default function GrammarDashboardPage() {
             <h1 className="text-2xl font-bold" style={{ color: 'var(--theme-text-primary)' }}>
               Ngữ pháp tiếng Đức
             </h1>
-            <p className="text-[13px]" style={{ color: 'var(--theme-text-muted)' }}>
+            <p className="text-body" style={{ color: 'var(--theme-text-muted)' }}>
               Lộ trình học ngữ pháp từ A1 đến B1
             </p>
           </div>
@@ -110,7 +110,7 @@ export default function GrammarDashboardPage() {
         <div className="flex items-center gap-2">
           {/* Cheatsheet link */}
           <a href="/grammar/cheatsheet"
-            className="flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-[13px] font-semibold transition-all hover:-translate-y-0.5"
+            className="flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-body font-semibold transition-all hover:-translate-y-0.5"
             style={{
               background: 'linear-gradient(135deg,rgba(139,92,246,.12),rgba(139,92,246,.06))',
               color: '#8B5CF6',
@@ -126,7 +126,7 @@ export default function GrammarDashboardPage() {
             const lc = level !== 'ALL' ? LEVEL_COLORS[level] : null;
             return (
               <button key={level} onClick={() => setFilterLevel(level)}
-                className="px-4 py-1.5 rounded-lg text-[13px] font-semibold transition-all duration-200"
+                className="px-4 py-1.5 rounded-lg text-body font-semibold transition-all duration-200"
                 style={isActive ? {
                   background: lc ? lc.gradient : 'linear-gradient(135deg, #8B5CF6, #6366F1)',
                   color: 'white',
@@ -162,7 +162,7 @@ export default function GrammarDashboardPage() {
                   <Ic size={16} className="text-white" />
                 </div>
                 <div className="text-2xl font-extrabold" style={{ color: s.color }}>{s.value}</div>
-                <div className="text-[12px] font-medium" style={{ color: 'var(--theme-text-muted)' }}>{s.label}</div>
+                <div className="text-xs font-medium" style={{ color: 'var(--theme-text-muted)' }}>{s.label}</div>
               </div>
             );
           })}
@@ -173,7 +173,7 @@ export default function GrammarDashboardPage() {
       {totalCount > 0 && (
         <div className="p-4 rounded-2xl border mb-6"
           style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
-          <div className="flex justify-between mb-2 text-[13px]">
+          <div className="flex justify-between mb-2 text-body">
             <span style={{ color: 'var(--theme-text-secondary)' }}>Tiến độ tổng thể</span>
             <span className="font-bold" style={{ color: '#8B5CF6' }}>{overallPct}%</span>
           </div>
@@ -181,7 +181,7 @@ export default function GrammarDashboardPage() {
             <div className="h-full rounded-full transition-all duration-700"
               style={{ width: `${overallPct}%`, background: 'linear-gradient(90deg, #8B5CF6, #6366F1)' }} />
           </div>
-          <div className="flex justify-between mt-1.5 text-[11px]" style={{ color: 'var(--theme-text-muted)' }}>
+          <div className="flex justify-between mt-1.5 text-caption" style={{ color: 'var(--theme-text-muted)' }}>
             <span>{completedCount} bài hoàn thành</span>
             <span>{totalCount} tổng</span>
           </div>
@@ -227,11 +227,11 @@ export default function GrammarDashboardPage() {
                     <h2 className="text-[17px] font-bold" style={{ color: 'var(--theme-text-primary)' }}>
                       Chặng {lvl}
                     </h2>
-                    <span className="text-[12px]" style={{ color: 'var(--theme-text-muted)' }}>
+                    <span className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>
                       {lvlCompleted}/{levelLessons.length} bài
                     </span>
                   </div>
-                  <p className="text-[12px] leading-snug mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>
+                  <p className="text-xs leading-snug mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>
                     {levelDescriptions[lvl]}
                   </p>
                   {/* Mini progress bar */}
@@ -271,7 +271,7 @@ export default function GrammarDashboardPage() {
           <p className="text-[15px] font-semibold mb-1" style={{ color: 'var(--theme-text-secondary)' }}>
             Chưa có bài học nào
           </p>
-          <p className="text-[13px]" style={{ color: 'var(--theme-text-muted)' }}>
+          <p className="text-body" style={{ color: 'var(--theme-text-muted)' }}>
             Chọn cấp độ khác hoặc quay lại sau
           </p>
         </div>

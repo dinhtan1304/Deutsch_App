@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useMemo } from 'react';
 import { TopicCard } from '@/components/topics/TopicCard';
@@ -114,7 +114,7 @@ export default function TopicsPage() {
             <h1 className="text-2xl font-bold" style={{ color: 'var(--theme-text-primary)' }}>
               Chủ đề từ vựng
             </h1>
-            <p className="text-[13px]" style={{ color: 'var(--theme-text-muted)' }}>
+            <p className="text-body" style={{ color: 'var(--theme-text-muted)' }}>
               Học từ vựng theo chủ đề chuẩn Goethe
             </p>
           </div>
@@ -135,7 +135,7 @@ export default function TopicsPage() {
                   <Ic size={16} className="text-white" />
                 </div>
                 <div className="text-2xl font-extrabold" style={{ color: item.color }}>{item.value}</div>
-                <div className="text-[12px] font-medium" style={{ color: 'var(--theme-text-muted)' }}>{item.label}</div>
+                <div className="text-xs font-medium" style={{ color: 'var(--theme-text-muted)' }}>{item.label}</div>
               </div>
             );
           })}
@@ -145,17 +145,17 @@ export default function TopicsPage() {
         <div className="p-4 rounded-2xl border mb-6"
           style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[14px] font-semibold" style={{ color: 'var(--theme-text-primary)' }}>
+            <span className="text-sm font-semibold" style={{ color: 'var(--theme-text-primary)' }}>
               Tiến độ tổng
             </span>
-            <span className="text-[14px] font-bold" style={{ color: '#3B82F6' }}>{overallProgress}%</span>
+            <span className="text-sm font-bold" style={{ color: '#3B82F6' }}>{overallProgress}%</span>
           </div>
           <div className="h-2.5 rounded-full overflow-hidden"
             style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
             <div className="h-full rounded-full transition-all duration-700"
               style={{ width: `${overallProgress}%`, background: 'linear-gradient(90deg, #3B82F6, #22C55E)' }} />
           </div>
-          <div className="flex justify-between mt-1.5 text-[11px]" style={{ color: 'var(--theme-text-muted)' }}>
+          <div className="flex justify-between mt-1.5 text-caption" style={{ color: 'var(--theme-text-muted)' }}>
             <span>{learnedWords} từ đã học</span>
             <span>{totalWords} tổng</span>
           </div>
@@ -163,13 +163,13 @@ export default function TopicsPage() {
 
         {/* Level filter */}
         <div className="flex items-center gap-2 mb-6">
-          <span className="text-[13px] font-medium" style={{ color: 'var(--theme-text-muted)' }}>Cấp độ:</span>
+          <span className="text-body font-medium" style={{ color: 'var(--theme-text-muted)' }}>Cấp độ:</span>
           {['A1', 'A2', 'B1', 'B2'].map(level => {
             const lc = LEVEL_COLORS[level] || LEVEL_COLORS.A1;
             const isActive = selectedLevel === level;
             return (
               <button key={level} onClick={() => setSelectedLevel(level)}
-                className="px-3.5 py-1.5 rounded-lg text-[13px] font-semibold transition-all duration-200 hover:-translate-y-0.5"
+                className="px-3.5 py-1.5 rounded-lg text-body font-semibold transition-all duration-200 hover:-translate-y-0.5"
                 style={isActive
                   ? { background: lc.gradient, color: 'white', boxShadow: `0 4px 12px ${lc.color}30` }
                   : { backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }
@@ -206,7 +206,7 @@ export default function TopicsPage() {
             <h3 className="text-lg font-bold mb-2" style={{ color: 'var(--theme-text-primary)' }}>
               Chưa có chủ đề nào
             </h3>
-            <p className="text-[13px]" style={{ color: 'var(--theme-text-muted)' }}>
+            <p className="text-body" style={{ color: 'var(--theme-text-muted)' }}>
               Vui lòng chọn cấp độ khác hoặc liên hệ admin
             </p>
           </div>
@@ -232,7 +232,7 @@ export default function TopicsPage() {
                     style={{ background: `${tip.color}12` }}>
                     <TipIcon size={13} style={{ color: tip.color }} />
                   </span>
-                  <span className="text-[13px]" style={{ color: 'var(--theme-text-secondary)' }}>{tip.text}</span>
+                  <span className="text-body" style={{ color: 'var(--theme-text-secondary)' }}>{tip.text}</span>
                 </div>
               );
             })}

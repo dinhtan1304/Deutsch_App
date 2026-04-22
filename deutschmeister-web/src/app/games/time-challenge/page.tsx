@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
@@ -8,11 +8,12 @@ import { useGameSession } from '@/hooks/useGameSession';
 import { wordsApi } from '@/lib/api/words';
 import { Gender, Word } from '@/types';
 import {
-  GameSetupCard, GameResultCard, GameButton, ComboBadge, StatCard,
+  GameSetupCard, GameResultCard, StatCard,
   GenderButtons, GameInfoBox, KBD,
   IconClock, IconTarget, IconCheck, IconX, IconRocket, IconKeyboard, IconVolume,
   IconRefresh, IconChevronLeft, IconZap,
 } from '@/components/games/GameUI';
+import { Button } from '@/components/ui';
 
 // Batch size per API call. Small enough to keep initial load fast (<100ms),
 // large enough that a typical 60-second session never exhausts the buffer.
@@ -172,18 +173,18 @@ export default function TimedChallengePage() {
   if (phase === 'setup') {
     return (
         <GameSetupCard icon={({ size }) => <IconClock size={size} style={{ color: 'white' }} />} iconColor="#EF4444" title="Timed Challenge">
-          <p className="text-[14px] mb-1" style={{ color: 'var(--theme-text-secondary)' }}>
+          <p className="text-sm mb-1" style={{ color: 'var(--theme-text-secondary)' }}>
             Trả lời nhanh trong <span className="font-bold" style={{ color: '#EF4444' }}>{duration} giây</span>!
           </p>
-          <p className="text-[12px] mb-6" style={{ color: 'var(--theme-text-muted)' }}>(Thay đổi trong Settings → Học tập)</p>
+          <p className="text-xs mb-6" style={{ color: 'var(--theme-text-muted)' }}>(Thay đổi trong Settings → Học tập)</p>
           <GameInfoBox>
             <div className="flex items-center gap-2"><IconTarget size={14} style={{ color: '#EF4444' }} /><span>10 điểm/câu đúng · Combo tối đa x4 · Sai = mất combo</span></div>
             <div className="flex items-center gap-2"><IconKeyboard size={14} style={{ color: '#8B5CF6' }} /><span>Phím: <KBD>1</KBD> der, <KBD>2</KBD> die, <KBD>3</KBD> das</span></div>
             <div className="flex items-center gap-2"><IconVolume size={14} style={{ color: '#22C55E' }} /><span>Âm thanh: {settings.soundEnabled ? 'Bật' : 'Tắt'}</span></div>
           </GameInfoBox>
           <div className="flex gap-3 justify-center mt-6">
-            <GameButton onClick={startGame} loading={starting} color="#EF4444"><IconRocket size={16} /> Bắt đầu</GameButton>
-            <GameButton variant="outline" onClick={() => router.push('/games')}><IconChevronLeft size={16} /> Quay lại</GameButton>
+            <Button variant="game" accent="gamesAlt" onClick={startGame} isLoading={starting}><IconRocket size={16} /> Bắt đầu</Button>
+            <Button variant="outline" onClick={() => router.push('/games')}><IconChevronLeft size={16} /> Quay lại</Button>
           </div>
         </GameSetupCard>
     );
@@ -214,21 +215,21 @@ export default function TimedChallengePage() {
         <GameResultCard accuracy={acc} title="Hết giờ!">
           <div className="my-5">
             <div className="text-5xl font-extrabold" style={{ color: '#3B82F6' }}>{score}</div>
-            <p className="text-[13px] mt-1" style={{ color: 'var(--theme-text-muted)' }}>điểm</p>
+            <p className="text-body mt-1" style={{ color: 'var(--theme-text-muted)' }}>điểm</p>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">
             <StatCard label="Đúng" value={correct} color="#22C55E" />
-            <StatCard label="Sai" value={wrong} color="#EF4444" />
+            <StatCard label="Sai" value={wrong} />
             <StatCard label="Chính xác" value={`${acc}%`} color="#3B82F6" />
             <StatCard label="Best Combo" value={`x${bestCombo}`} color="#F59E0B" />
           </div>
-          <div className="flex items-center justify-center gap-1.5 mb-6 text-[14px] font-semibold"
+          <div className="flex items-center justify-center gap-1.5 mb-6 text-sm font-semibold"
             style={{ color: 'var(--theme-text-secondary)' }}>
             <IconZap size={16} style={{ color: '#F59E0B' }} /> Tốc độ: {wpm} từ/phút
           </div>
           <div className="flex gap-3 justify-center">
-            <GameButton onClick={startGame} color="#EF4444"><IconRefresh size={16} /> Chơi lại</GameButton>
-            <GameButton variant="outline" onClick={() => router.push('/games')}><IconChevronLeft size={16} /> Quay lại</GameButton>
+            <Button variant="game" accent="gamesAlt" onClick={startGame}><IconRefresh size={16} /> Chơi lại</Button>
+            <Button variant="outline" onClick={() => router.push('/games')}><IconChevronLeft size={16} /> Quay lại</Button>
           </div>
         </GameResultCard>
     );
@@ -248,7 +249,7 @@ export default function TimedChallengePage() {
               <IconClock size={18} style={{ color: timerColor }} />
             </div>
             <span className="text-3xl font-extrabold transition-colors duration-300" style={{ color: timerColor }}>
-              {timeLeft}<span className="text-[14px] font-medium" style={{ color: 'var(--theme-text-muted)' }}>s</span>
+              {timeLeft}<span className="text-sm font-medium" style={{ color: 'var(--theme-text-muted)' }}>s</span>
             </span>
           </div>
           <div className="text-2xl font-extrabold" style={{ color: '#3B82F6' }}>{score}</div>
@@ -262,12 +263,17 @@ export default function TimedChallengePage() {
 
         {/* Combo + Score counters */}
         <div className="flex justify-between items-center mb-4">
-          <ComboBadge combo={combo} />
+          {combo >= 2 ? (
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold text-white"
+              style={{ background: 'linear-gradient(135deg, #F59E0B, #EF4444)' }}>
+              🔥 Combo x{Math.min(combo, 4)}
+            </span>
+          ) : <span />}
           <div className="flex gap-4">
-            <span className="flex items-center gap-1 text-[14px] font-bold" style={{ color: '#22C55E' }}>
+            <span className="flex items-center gap-1 text-sm font-bold" style={{ color: '#22C55E' }}>
               <IconCheck size={14} /> {correct}
             </span>
-            <span className="flex items-center gap-1 text-[14px] font-bold" style={{ color: '#EF4444' }}>
+            <span className="flex items-center gap-1 text-sm font-bold" style={{ color: '#EF4444' }}>
               <IconX size={14} /> {wrong}
             </span>
           </div>
@@ -275,21 +281,22 @@ export default function TimedChallengePage() {
 
         {/* Word Card */}
         {currentWord && (
-          <div className="rounded-2xl border p-8 md:p-10 text-center mb-5 transition-all duration-200"
+          <div className="rounded-3xl overflow-hidden mb-5 transition-all duration-200"
             style={{
-              borderColor: 'var(--theme-border)',
-              backgroundColor: 'var(--theme-bg-card)',
-              boxShadow: lastAnswer === 'correct'
-                ? '0 0 30px rgba(34,197,94,.15)'
+              background: lastAnswer === 'correct'
+                ? 'linear-gradient(135deg, #052e16 0%, #166534 100%)'
                 : lastAnswer === 'wrong'
-                ? '0 0 30px rgba(239,68,68,.15)' : 'none',
+                ? 'linear-gradient(135deg, #450a0a 0%, #991b1b 100%)'
+                : 'linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%)',
             }}>
-            <h2 className="text-4xl md:text-5xl font-bold mb-3" style={{ color: 'var(--theme-text-primary)' }}>
-              {currentWord.word}
-            </h2>
-            <p className="text-[16px]" style={{ color: 'var(--theme-text-secondary)' }}>
-              {currentWord.translationVi || currentWord.translationEn}
-            </p>
+            <div className="px-8 py-10 text-center" style={{ minHeight: 160 }}>
+              <h2 className="text-4xl md:text-5xl font-extrabold mb-3 text-white">
+                {currentWord.word}
+              </h2>
+              <p className="text-base" style={{ color: 'rgba(255,255,255,0.65)' }}>
+                {currentWord.translationVi || currentWord.translationEn}
+              </p>
+            </div>
           </div>
         )}
 
@@ -297,9 +304,9 @@ export default function TimedChallengePage() {
         <GenderButtons onAnswer={answer} answered={false} selectedAnswer={null} />
 
         <div className="text-center mt-5">
-          <GameButton variant="ghost" onClick={() => { clearTimers(); playClick(); router.push('/games'); }}>
+          <Button variant="ghost" onClick={() => { clearTimers(); playClick(); router.push('/games'); }}>
             <IconX size={14} /> Thoát
-          </GameButton>
+          </Button>
         </div>
       </div>
   );

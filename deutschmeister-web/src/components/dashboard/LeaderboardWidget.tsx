@@ -33,43 +33,41 @@ export function LeaderboardWidget() {
   const { user } = useAuthStore();
 
   return (
-    <div style={{ background: 'var(--theme-card)', borderRadius: 16, padding: '1.25rem', border: '1px solid var(--theme-border)' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <div style={{ width: 28, height: 28, borderRadius: 8, background: 'linear-gradient(135deg, #F59E0B, #EF4444)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    <div className="rounded-card p-5 border shadow-card" style={{ backgroundColor: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}>
+      <div className="flex justify-between items-center mb-4">
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #F59E0B, #EF4444)' }}>
             <IconTrophy size={14} style={{ color: '#fff' }} />
           </div>
-          <h3 style={{ fontWeight: 700, fontSize: 15, color: 'var(--theme-text)', margin: 0 }}>BXH tuần này</h3>
+          <h3 className="text-title font-bold m-0" style={{ color: 'var(--theme-text-primary)' }}>BXH tuần này</h3>
         </div>
-        <Link href="/leaderboard" style={{ fontSize: 13, color: '#F59E0B', textDecoration: 'none', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 2 }}>
+        <Link href="/leaderboard" className="text-body font-semibold flex items-center gap-0.5" style={{ color: '#F59E0B', textDecoration: 'none' }}>
           Xem tất cả <IconArrowRight size={13} />
         </Link>
       </div>
 
       {isLoading && (
-        <div style={{ color: 'var(--theme-text-muted)', fontSize: 13, textAlign: 'center', padding: '20px 0' }}>Đang tải...</div>
+        <div className="text-body text-center py-5" style={{ color: 'var(--theme-text-muted)' }}>Đang tải...</div>
       )}
 
       {!isLoading && data?.length === 0 && (
-        <div style={{ color: 'var(--theme-text-muted)', fontSize: 13, textAlign: 'center', padding: '12px 0' }}>
+        <div className="text-body text-center py-3" style={{ color: 'var(--theme-text-muted)' }}>
           Chưa có dữ liệu tuần này
         </div>
       )}
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <div className="flex flex-col gap-2">
         {data?.slice(0, 3).map((entry) => {
           const isMe = user?.id === entry.userId;
           return (
-            <div key={entry.rank} style={{
-              display: 'flex', alignItems: 'center', gap: 8,
-              background: isMe ? 'rgba(245,158,11,0.08)' : 'transparent',
-              borderRadius: 8, padding: '5px 8px', margin: '0 -8px',
-            }}>
+            <div key={entry.rank} className="flex items-center gap-2 rounded-lg px-2 py-1.5 -mx-2"
+              style={{ background: isMe ? 'rgba(245,158,11,0.08)' : 'transparent' }}>
               <MiniRank rank={entry.rank} />
-              <div style={{ flex: 1, minWidth: 0, fontSize: 13, fontWeight: isMe ? 700 : 500, color: 'var(--theme-text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              <div className="flex-1 min-w-0 text-body truncate"
+                style={{ fontWeight: isMe ? 700 : 500, color: 'var(--theme-text-primary)' }}>
                 {entry.name}
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 3, fontWeight: 700, fontSize: 12, color: '#F59E0B', flexShrink: 0 }}>
+              <div className="flex items-center gap-1 shrink-0 text-caption font-bold" style={{ color: '#F59E0B' }}>
                 <IconZap size={11} /> {entry.xp.toLocaleString()}
               </div>
             </div>

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import Link from 'next/link';
@@ -7,6 +7,7 @@ import {
   IconBookOpen, IconDice, IconStar, IconTrash,
   IconChevronLeft, IconChevronRight, IconList,
 } from './icons';
+import { PageHeader } from '@/components/ui';
 
 // ─── Helpers ───
 
@@ -75,9 +76,9 @@ function StatsOverview() {
                 style={{ background: `linear-gradient(135deg, ${card.color}, ${card.color}cc)` }}>
                 <Ic size={12} style={{ color: 'white' }} />
               </div>
-              <span className="text-[11px] font-medium" style={{ color: 'var(--theme-text-muted)' }}>{card.label}</span>
+              <span className="text-caption font-medium" style={{ color: 'var(--theme-text-muted)' }}>{card.label}</span>
             </div>
-            <div className="text-[18px] font-extrabold" style={{ color: 'var(--theme-text-primary)' }}>
+            <div className="text-title font-extrabold" style={{ color: 'var(--theme-text-primary)' }}>
               {card.value}
             </div>
           </div>
@@ -110,43 +111,26 @@ export default function ReadingListPage() {
   return (
     <div className="py-6">
 
-      {/* ─── Back ─── */}
-      <div className="flex items-center gap-2 mb-5">
-        <Link href="/practice-test" className="flex items-center gap-1 text-[13px] font-medium transition-opacity hover:opacity-70"
-          style={{ color: 'var(--theme-text-muted)' }}>
-          <IconChevronLeft size={14} /> Luyện Test
-        </Link>
-      </div>
-
-      {/* ─── Header ─── */}
-      <div className="flex items-start justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-2xl flex items-center justify-center"
-            style={{ background: GRADIENT }}>
-            <IconBookOpen size={22} style={{ color: 'white' }} />
+      <PageHeader
+        backHref="/practice-test"
+        title="Luyện Đọc"
+        subtitle="AI tạo bài đọc tiếng Đức — Luyện kỹ năng đọc hiểu Goethe/TELC"
+        accent="reading"
+        right={
+          <div className="flex items-center gap-2">
+            <Link href="/practice-test/reading/exam"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-body font-semibold border transition-all hover:-translate-y-0.5"
+              style={{ borderColor: 'rgba(34,197,94,.4)', color: '#22C55E', backgroundColor: 'rgba(34,197,94,.06)' }}>
+              Theo đề chuẩn →
+            </Link>
+            <Link href="/practice-test/reading/new"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white transition-all duration-200 hover:-translate-y-0.5"
+              style={{ background: GRADIENT, boxShadow: '0 4px 12px rgba(34,197,94,.3)' }}>
+              <IconDice size={16} /> Bài đọc mới
+            </Link>
           </div>
-          <div>
-            <h1 className="text-2xl font-bold" style={{ color: 'var(--theme-text-primary)' }}>
-              Luyện Đọc
-            </h1>
-            <p className="text-[13px] mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>
-              AI tạo bài đọc tiếng Đức — Luyện kỹ năng đọc hiểu Goethe/TELC
-            </p>
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <Link href="/practice-test/reading/exam"
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-[13px] font-semibold border transition-all hover:-translate-y-0.5"
-            style={{ borderColor: 'rgba(34,197,94,.4)', color: '#22C55E', backgroundColor: 'rgba(34,197,94,.06)' }}>
-            Theo đề chuẩn →
-          </Link>
-          <Link href="/practice-test/reading/new"
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-[14px] font-semibold text-white transition-all duration-200 hover:-translate-y-0.5"
-            style={{ background: GRADIENT, boxShadow: '0 4px 12px rgba(34,197,94,.3)' }}>
-            <IconDice size={16} /> Bài đọc mới
-          </Link>
-        </div>
-      </div>
+        }
+      />
 
       {/* ─── Stats ─── */}
       <StatsOverview />
@@ -161,7 +145,7 @@ export default function ReadingListPage() {
           return (
             <button key={status}
               onClick={() => { setFilterStatus(status); setPage(1); }}
-              className="px-4 py-2 rounded-xl text-[13px] font-semibold whitespace-nowrap transition-all duration-200 hover:-translate-y-0.5"
+              className="px-4 py-2 rounded-xl text-body font-semibold whitespace-nowrap transition-all duration-200 hover:-translate-y-0.5"
               style={isActive
                 ? { background: `linear-gradient(135deg, ${color}, ${color}cc)`, color: 'white', boxShadow: `0 4px 12px ${color}30` }
                 : { backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }
@@ -187,9 +171,9 @@ export default function ReadingListPage() {
             style={{ background: GRADIENT }}>
             <IconBookOpen size={28} style={{ color: 'white' }} />
           </div>
-          <p className="text-[14px] mb-4" style={{ color: 'var(--theme-text-muted)' }}>Bạn chưa có bài đọc nào</p>
+          <p className="text-sm mb-4" style={{ color: 'var(--theme-text-muted)' }}>Bạn chưa có bài đọc nào</p>
           <Link href="/practice-test/reading/new"
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-[14px] font-semibold text-white"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white"
             style={{ background: GRADIENT }}>
             <IconDice size={16} /> Bắt đầu bài đọc đầu tiên
           </Link>
@@ -205,7 +189,7 @@ export default function ReadingListPage() {
 
             return (
               <Link key={item.id} href={targetHref}
-                className="flex items-center gap-4 p-4 rounded-xl border transition-all duration-200 hover:-translate-y-0.5 group"
+                className="flex items-center gap-4 p-4 rounded-card border shadow-card transition-all duration-200 hover:-translate-y-0.5 group"
                 style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
 
                 {/* Icon */}
@@ -217,19 +201,19 @@ export default function ReadingListPage() {
                 {/* Info */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-0.5 flex-wrap">
-                    <span className="text-[14px] font-semibold truncate" style={{ color: 'var(--theme-text-primary)' }}>
+                    <span className="text-sm font-semibold truncate" style={{ color: 'var(--theme-text-primary)' }}>
                       {item.title || item.topic}
                     </span>
-                    <span className="px-2 py-0.5 rounded-md text-[10px] font-bold shrink-0"
+                    <span className="px-2 py-0.5 rounded-md text-caption font-bold shrink-0"
                       style={{ backgroundColor: 'rgba(34,197,94,.1)', color: ACCENT }}>
                       {item.cefrLevel}
                     </span>
-                    <span className="px-2 py-0.5 rounded-md text-[10px] font-bold shrink-0"
+                    <span className="px-2 py-0.5 rounded-md text-caption font-bold shrink-0"
                       style={{ backgroundColor: statusCfg.bg, color: statusCfg.color }}>
                       {statusCfg.label}
                     </span>
                   </div>
-                  <div className="flex items-center gap-2 text-[12px]" style={{ color: 'var(--theme-text-muted)' }}>
+                  <div className="flex items-center gap-2 text-xs" style={{ color: 'var(--theme-text-muted)' }}>
                     <span>{typeInfo.vi}</span>
                     <span>·</span>
                     <span>{item.totalQuestions} câu</span>
@@ -244,7 +228,7 @@ export default function ReadingListPage() {
                 {/* Score */}
                 {item.score !== null && item.score !== undefined && (
                   <div className="text-right shrink-0">
-                    <div className="text-[22px] font-extrabold" style={{ color: getScoreColor(item.score) }}>
+                    <div className="text-h2 font-extrabold" style={{ color: getScoreColor(item.score) }}>
                       {Math.round(item.score)}%
                     </div>
                   </div>
@@ -267,15 +251,15 @@ export default function ReadingListPage() {
       {history && history.totalPages > 1 && (
         <div className="flex items-center justify-center gap-2 mt-6">
           <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
-            className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-[13px] font-medium disabled:opacity-40 transition-all"
+            className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-body font-medium disabled:opacity-40 transition-all"
             style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-secondary)' }}>
             <IconChevronLeft size={14} /> Trước
           </button>
-          <span className="text-[13px] font-medium px-3" style={{ color: 'var(--theme-text-muted)' }}>
+          <span className="text-body font-medium px-3" style={{ color: 'var(--theme-text-muted)' }}>
             {page} / {history.totalPages}
           </span>
           <button onClick={() => setPage(p => Math.min(history.totalPages, p + 1))} disabled={page === history.totalPages}
-            className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-[13px] font-medium disabled:opacity-40 transition-all"
+            className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-body font-medium disabled:opacity-40 transition-all"
             style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-secondary)' }}>
             Sau <IconChevronRight size={14} />
           </button>

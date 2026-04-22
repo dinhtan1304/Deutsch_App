@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import Link from 'next/link';
@@ -33,8 +33,8 @@ export default function SubscriptionPage() {
   if (!isAuthenticated) {
     return (
       <div className="max-w-lg mx-auto px-4 py-20 text-center">
-        <p className="text-[14px] mb-4" style={{ color: 'var(--theme-text-muted)' }}>Vui lòng đăng nhập để xem gói đăng ký.</p>
-        <Link href="/login" className="text-[14px] font-bold" style={{ color: '#6366F1' }}>Đăng nhập</Link>
+        <p className="text-sm mb-4" style={{ color: 'var(--theme-text-muted)' }}>Vui lòng đăng nhập để xem gói đăng ký.</p>
+        <Link href="/login" className="text-sm font-bold" style={{ color: '#6366F1' }}>Đăng nhập</Link>
       </div>
     );
   }
@@ -59,7 +59,7 @@ export default function SubscriptionPage() {
 
       {/* Header */}
       <div>
-        <Link href="/profile" className="text-[13px] mb-2 inline-block" style={{ color: 'var(--theme-text-muted)' }}>
+        <Link href="/profile" className="text-body mb-2 inline-block" style={{ color: 'var(--theme-text-muted)' }}>
           &larr; Hồ sơ
         </Link>
         <h1 className="text-xl font-bold" style={{ color: 'var(--theme-text-primary)' }}>Gói đăng ký</h1>
@@ -97,27 +97,27 @@ export default function SubscriptionPage() {
                 {isLifetime ? 'Lifetime' : isPremium ? 'Premium' : 'Free'}
               </div>
               {isPremium && !isLifetime && data.expiresAt && (
-                <div className="text-[12px]" style={{ color: 'var(--theme-text-muted)' }}>
+                <div className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>
                   Còn {daysUntil(data.expiresAt)} ngày &middot; Hết hạn {formatDate(data.expiresAt)}
                 </div>
               )}
               {isLifetime && (
-                <div className="text-[12px] font-semibold" style={{ color: '#EC4899' }}>
+                <div className="text-xs font-semibold" style={{ color: '#EC4899' }}>
                   ⭐ Trọn đời — Early Backer
                 </div>
               )}
               {isExpired && (
-                <div className="text-[12px]" style={{ color: '#EF4444' }}>
+                <div className="text-xs" style={{ color: '#EF4444' }}>
                   Đã hết hạn {data.expiresAt ? formatDate(data.expiresAt) : ''}
                 </div>
               )}
               {!isPremium && !isExpired && (
-                <div className="text-[12px]" style={{ color: 'var(--theme-text-muted)' }}>3 lượt luyện tập/ngày</div>
+                <div className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>3 lượt luyện tập/ngày</div>
               )}
             </div>
           </div>
           {isPremium && (
-            <span className="text-[11px] font-bold px-2.5 py-1 rounded-lg" style={{ backgroundColor: 'rgba(34,197,94,0.1)', color: '#22C55E' }}>
+            <span className="text-caption font-bold px-2.5 py-1 rounded-lg" style={{ backgroundColor: 'rgba(34,197,94,0.1)', color: '#22C55E' }}>
               ACTIVE
             </span>
           )}
@@ -126,7 +126,7 @@ export default function SubscriptionPage() {
         {!isPremium && (
           <button
             onClick={() => setUpgradeOpen(true)}
-            className="w-full py-2.5 rounded-xl text-[14px] font-bold text-white transition-transform hover:scale-[1.01]"
+            className="w-full py-2.5 rounded-xl text-sm font-bold text-white transition-transform hover:scale-[1.01]"
             style={{ background: 'linear-gradient(135deg, #6366F1, #8B5CF6)' }}
           >
             {isExpired ? 'Gia hạn Premium' : 'Nâng cấp lên Premium'}
@@ -135,7 +135,7 @@ export default function SubscriptionPage() {
         {isPremium && !isLifetime && data.expiresAt && daysUntil(data.expiresAt) <= 30 && (
           <button
             onClick={() => setUpgradeOpen(true)}
-            className="w-full py-2.5 rounded-xl text-[14px] font-bold transition-colors"
+            className="w-full py-2.5 rounded-xl text-sm font-bold transition-colors"
             style={{ color: '#8B5CF6', backgroundColor: 'rgba(139,92,246,0.1)' }}
           >
             Gia hạn
@@ -159,15 +159,15 @@ export default function SubscriptionPage() {
                   style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}
                 >
                   <div>
-                    <div className="text-[13px] font-semibold" style={{ color: 'var(--theme-text-primary)' }}>
+                    <div className="text-body font-semibold" style={{ color: 'var(--theme-text-primary)' }}>
                       Premium {p.period === 'yearly' ? 'Năm' : p.period === 'lifetime' ? 'Trọn đời' : 'Tháng'}
                     </div>
-                    <div className="text-[12px]" style={{ color: 'var(--theme-text-muted)' }}>
+                    <div className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>
                       {formatDate(p.createdAt)} &middot; {formatVND(p.amount)}
                     </div>
                   </div>
                   <span
-                    className="text-[11px] font-bold px-2 py-0.5 rounded-md"
+                    className="text-caption font-bold px-2 py-0.5 rounded-md"
                     style={{ color: s.color, backgroundColor: s.bg }}
                   >
                     {s.text}
@@ -181,7 +181,7 @@ export default function SubscriptionPage() {
 
       {/* Link to pricing */}
       <div className="text-center pt-2">
-        <Link href="/pricing" className="text-[13px] font-medium" style={{ color: '#8B5CF6' }}>
+        <Link href="/pricing" className="text-body font-medium" style={{ color: '#8B5CF6' }}>
           Xem so sánh chi tiết các gói &rarr;
         </Link>
       </div>

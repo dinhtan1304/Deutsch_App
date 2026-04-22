@@ -25,11 +25,11 @@ export function EmptyState({
   return (
     <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
       <div className="text-6xl mb-4">{icon}</div>
-      <h3 className="text-xl font-bold text-[var(--text-primary)] mb-2">
+      <h3 className="text-xl font-bold text-theme-text mb-2">
         {title}
       </h3>
       {description && (
-        <p className="text-[var(--text-muted)] mb-6 max-w-md">
+        <p className="text-theme-muted mb-6 max-w-md">
           {description}
         </p>
       )}
@@ -37,14 +37,14 @@ export function EmptyState({
         action.href ? (
           <Link
             href={action.href}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-status-info text-white rounded-xl font-medium hover:opacity-90 transition-opacity"
           >
             {action.label}
           </Link>
         ) : (
           <button
             onClick={action.onClick}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-status-info text-white rounded-xl font-medium hover:opacity-90 transition-opacity"
           >
             {action.label}
           </button>

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import Link from 'next/link';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
@@ -40,7 +40,7 @@ export default function GamesPage() {
           </div>
           <div>
             <h1 className="text-2xl font-bold" style={{ color: 'var(--theme-text-primary)' }}>Trò chơi</h1>
-            <p className="text-[13px]" style={{ color: 'var(--theme-text-muted)' }}>
+            <p className="text-body" style={{ color: 'var(--theme-text-muted)' }}>
               Học tiếng Đức qua các trò chơi thú vị
             </p>
           </div>
@@ -54,7 +54,7 @@ export default function GamesPage() {
               <Link key={game.id}
                 href={game.href}
                 onClick={() => playClick()}
-                className="group relative overflow-hidden rounded-2xl border p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
+                className="group relative overflow-hidden rounded-card border shadow-card p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-hero"
                 style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
 
                 {/* Hover overlay */}
@@ -67,7 +67,7 @@ export default function GamesPage() {
 
                 {/* Special Badge */}
                 {game.badge && (
-                  <div className="absolute top-3 right-3 px-2 py-0.5 rounded-md text-[10px] font-bold text-white"
+                  <div className="absolute top-3 right-3 px-2 py-0.5 rounded-md text-caption font-bold text-white"
                     style={{ background: `linear-gradient(135deg, ${game.color}, ${game.color}cc)` }}>
                     {game.badge}
                   </div>
@@ -81,15 +81,15 @@ export default function GamesPage() {
                 </div>
 
                 {/* Content */}
-                <h3 className="relative text-[16px] font-bold mb-1" style={{ color: 'var(--theme-text-primary)' }}>
+                <h3 className="relative text-base font-bold mb-1" style={{ color: 'var(--theme-text-primary)' }}>
                   {game.name}
                 </h3>
-                <p className="relative text-[12px] leading-relaxed" style={{ color: 'var(--theme-text-muted)' }}>
+                <p className="relative text-xs leading-relaxed" style={{ color: 'var(--theme-text-muted)' }}>
                   {game.description}
                 </p>
 
                 {/* Play hint */}
-                <div className="relative mt-3 text-[12px] font-semibold opacity-0 group-hover:opacity-100
+                <div className="relative mt-3 text-xs font-semibold opacity-0 group-hover:opacity-100
                   transition-all duration-300 translate-y-1 group-hover:translate-y-0"
                   style={{ color: game.color }}>
                   Chơi ngay →
@@ -100,9 +100,9 @@ export default function GamesPage() {
         </div>
 
         {/* Tips */}
-        <div className="mt-8 p-5 rounded-2xl border"
+        <div className="mt-8 p-5 rounded-card border shadow-card"
           style={{ backgroundColor: 'rgba(59,130,246,.03)', borderColor: 'rgba(59,130,246,.1)' }}>
-          <h3 className="text-[15px] font-bold mb-4 flex items-center gap-2"
+          <h3 className="text-title font-bold mb-4 flex items-center gap-2"
             style={{ color: 'var(--theme-text-primary)' }}>
             <span className="w-7 h-7 rounded-lg flex items-center justify-center"
               style={{ background: 'linear-gradient(135deg, rgba(245,158,11,.15), rgba(245,158,11,.08))' }}>
@@ -124,7 +124,7 @@ export default function GamesPage() {
                     style={{ background: `${tip.color}12` }}>
                     <TipIcon size={13} style={{ color: tip.color }} />
                   </span>
-                  <span className="text-[13px]" style={{ color: 'var(--theme-text-secondary)' }}>{tip.text}</span>
+                  <span className="text-body" style={{ color: 'var(--theme-text-secondary)' }}>{tip.text}</span>
                 </div>
               );
             })}

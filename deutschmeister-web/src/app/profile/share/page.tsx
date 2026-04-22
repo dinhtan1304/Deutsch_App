@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useEffect, useRef, useState, forwardRef } from 'react';
 import { useRouter } from 'next/navigation';
@@ -68,7 +68,7 @@ export default function ProfileSharePage() {
           Chia sẻ thành tích
         </h1>
         <p
-          className="text-[13px] mt-1"
+          className="text-body mt-1"
           style={{ color: 'var(--theme-text-muted)' }}
         >
           Tải ảnh xuống rồi đăng Instagram / Facebook để khoe bạn bè — giúp lan
@@ -114,7 +114,7 @@ export default function ProfileSharePage() {
         <button
           onClick={handleDownload}
           disabled={downloading}
-          className="px-6 py-3 rounded-xl font-bold text-white text-[14px] transition-transform hover:scale-105 disabled:opacity-60 disabled:cursor-not-allowed"
+          className="px-6 py-3 rounded-xl font-bold text-white text-sm transition-transform hover:scale-105 disabled:opacity-60 disabled:cursor-not-allowed"
           style={{
             background: 'linear-gradient(135deg, #3B82F6, #8B5CF6)',
             boxShadow: '0 8px 24px -6px rgba(99,102,241,0.5)',
@@ -125,7 +125,7 @@ export default function ProfileSharePage() {
 
         {error && (
           <div
-            className="text-[13px] font-medium px-4 py-2 rounded-lg"
+            className="text-body font-medium px-4 py-2 rounded-lg"
             style={{
               background: 'rgba(239,68,68,0.12)',
               color: '#EF4444',
@@ -137,7 +137,7 @@ export default function ProfileSharePage() {
         )}
 
         <p
-          className="text-[12px] text-center max-w-md"
+          className="text-xs text-center max-w-md"
           style={{ color: 'var(--theme-text-muted)' }}
         >
           Ảnh kích thước 1080×1350 (Instagram Portrait). Dùng trong story hoặc
