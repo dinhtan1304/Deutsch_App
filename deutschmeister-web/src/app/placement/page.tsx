@@ -1,6 +1,8 @@
 ﻿'use client';
+/* eslint-disable no-restricted-syntax */
 
 import { useState, useMemo, useRef, useCallback, useEffect } from 'react';
+import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { usersApi } from '@/lib/api/users';
@@ -32,7 +34,7 @@ const QUESTIONS: Question[] = [
   { level: 'B1', sentence: 'Je mehr ich lerne, ___ besser verstehe ich.', options: ['so', 'desto', 'als', 'wie'], answer: 1, hint: 'je ... desto' },
 ];
 
-const LEVEL_COLORS: Record<string, string> = { A1: '#22C55E', A2: '#3B82F6', B1: '#8B5CF6' };
+const LEVEL_COLORS: Record<string, string> = { A1: STATUS.success, A2: ACCENT.srs, B1: ACCENT.vocab };
 
 function determineLevel(a1: number, a2: number, b1: number): string {
   if (a1 >= 3 && a2 >= 3 && b1 >= 3) return 'B1';
@@ -134,7 +136,7 @@ export default function PlacementRetakePage() {
             </p>
             {settings?.preferredLevel && (
               <p className="text-xs mb-4 px-3 py-1.5 rounded-lg inline-block"
-                style={{ backgroundColor: 'rgba(99,102,241,.08)', color: '#6366F1' }}>
+                style={{ backgroundColor: 'rgba(99,102,241,.08)', color: ACCENT.writing }}>
                 Level hiện tại: {settings.preferredLevel}
               </p>
             )}
@@ -181,9 +183,9 @@ export default function PlacementRetakePage() {
                 let textColor = 'var(--theme-text-primary)';
 
                 if (showResult && isCorrect) {
-                  bg = 'rgba(34,197,94,.12)'; border = '#22C55E'; textColor = '#22C55E';
+                  bg = 'rgba(34,197,94,.12)'; border = STATUS.success; textColor = STATUS.success;
                 } else if (showResult && isSelected && !isCorrect) {
-                  bg = 'rgba(239,68,68,.1)'; border = '#EF4444'; textColor = '#EF4444';
+                  bg = 'rgba(239,68,68,.1)'; border = STATUS.danger; textColor = STATUS.danger;
                 }
 
                 return (

@@ -1,40 +1,40 @@
-﻿'use client';
+'use client';
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useWritingHistory, useWritingStats, useDeleteWriting } from '@/hooks/useWriting';
 import { IconAlertTriangle, IconChevronLeft, IconChevronRight, IconDice, IconPenLine, IconSearch, IconStar, IconTrash } from './icons';
-import { PageHeader } from '@/components/ui';
+import { PageHeader, GridSkeleton } from '@/components/ui';
+import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 
 // ─── Helpers ───
 const WRITING_TYPE_LABELS: Record<string, { de: string; vi: string; color: string }> = {
-  email:         { de: 'E-Mail',        vi: 'Email',      color: '#3B82F6' },
-  brief:         { de: 'Brief',         vi: 'Thư',        color: '#8B5CF6' },
-  beschreibung:  { de: 'Beschreibung',  vi: 'Mô tả',     color: '#6366F1' },
-  tagebuch:      { de: 'Tagebuch',      vi: 'Nhật ký',    color: '#EC4899' },
-  dialog:        { de: 'Dialog',        vi: 'Hội thoại',  color: '#14B8A6' },
-  aufsatz:       { de: 'Aufsatz',       vi: 'Bài luận',   color: '#F59E0B' },
-  einladung:     { de: 'Einladung',     vi: 'Thư mời',    color: '#22C55E' },
-  beschwerde:    { de: 'Beschwerde',    vi: 'Khiếu nại',  color: '#EF4444' },
-  bewerbung:     { de: 'Bewerbung',     vi: 'Xin việc',   color: '#0EA5E9' },
-  formular:      { de: 'Formular',      vi: 'Mẫu đơn',   color: '#6B7280' },
+  email:         { de: 'E-Mail',        vi: 'Email',      color: ACCENT.srs },
+  brief:         { de: 'Brief',         vi: 'Thư',        color: ACCENT.vocab },
+  beschreibung:  { de: 'Beschreibung',  vi: 'Mô tả',     color: ACCENT.writing },
+  tagebuch:      { de: 'Tagebuch',      vi: 'Nhật ký',    color: ACCENT.listening },
+  dialog:        { de: 'Dialog',        vi: 'Hội thoại',  color: ACCENT.teal },
+  aufsatz:       { de: 'Aufsatz',       vi: 'Bài luận',   color: ACCENT.xp },
+  einladung:     { de: 'Einladung',     vi: 'Thư mời',    color: STATUS.success },
+  beschwerde:    { de: 'Beschwerde',    vi: 'Khiếu nại',  color: STATUS.danger },
+  bewerbung:     { de: 'Bewerbung',     vi: 'Xin việc',   color: STATUS.info },
+  formular:      { de: 'Formular',      vi: 'Mẫu đơn',   color: 'var(--theme-text-muted)' },
 };
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
-  DRAFT:     { label: 'Nháp',        color: '#6B7280', bg: 'rgba(107,114,128,.1)' },
-  SUBMITTED: { label: 'Đã nộp',     color: '#3B82F6', bg: 'rgba(59,130,246,.1)' },
-  GRADING:   { label: 'Đang chấm…', color: '#F59E0B', bg: 'rgba(245,158,11,.1)' },
-  GRADED:    { label: 'Đã chấm',    color: '#22C55E', bg: 'rgba(34,197,94,.1)' },
-  ERROR:     { label: 'Lỗi',        color: '#EF4444', bg: 'rgba(239,68,68,.1)' },
+  DRAFT:     { label: 'Nháp',        color: 'var(--theme-text-muted)', bg: 'rgba(107,114,128,.1)' },
+  SUBMITTED: { label: 'Đã nộp',     color: STATUS.info,               bg: `${STATUS.info}1A` },
+  GRADING:   { label: 'Đang chấm…', color: STATUS.warning,            bg: `${STATUS.warning}1A` },
+  GRADED:    { label: 'Đã chấm',    color: STATUS.success,            bg: `${STATUS.success}1A` },
+  ERROR:     { label: 'Lỗi',        color: STATUS.danger,             bg: `${STATUS.danger}1A` },
 };
 
 function getScoreColor(score: number | null) {
   if (score === null) return 'var(--theme-text-muted)';
-  if (score >= 80) return '#22C55E';
-  if (score >= 60) return '#F59E0B';
-  if (score >= 40) return '#F97316';
-  return '#EF4444';
+  if (score >= 80) return STATUS.success;
+  if (score >= 60) return STATUS.warning;
+  if (score >= 40) return ACCENT.games;
+  return STATUS.danger;
 }
 
 function formatDate(dateStr: string) {
@@ -60,10 +60,10 @@ function StatsOverview() {
   if (!stats) return null;
 
   const cards = [
-    { label: 'Tổng bài viết', value: stats.totalSessions, color: '#3B82F6', icon: IconPenLine },
-    { label: 'Điểm TB', value: stats.averageScore || '—', color: '#F59E0B', icon: IconStar },
-    { label: 'Tổng lỗi', value: stats.totalErrors, color: '#EF4444', icon: IconSearch },
-    { label: 'Lỗi phổ biến', value: stats.topErrors[0]?.label.vi || '—', color: '#8B5CF6', icon: IconAlertTriangle },
+    { label: 'Tổng bài viết', value: stats.totalSessions, color: ACCENT.srs,     icon: IconPenLine },
+    { label: 'Điểm TB',       value: stats.averageScore || '—', color: ACCENT.xp, icon: IconStar },
+    { label: 'Tổng lỗi',      value: stats.totalErrors,  color: STATUS.danger,   icon: IconSearch },
+    { label: 'Lỗi phổ biến',  value: stats.topErrors[0]?.label.vi || '—', color: ACCENT.vocab, icon: IconAlertTriangle },
   ];
 
   return (
@@ -92,13 +92,16 @@ function StatsOverview() {
 
 // ─── Main Page ───
 export default function WritingListPage() {
-  const router = useRouter();
   const [page, setPage] = useState(1);
   const [filterStatus, setFilterStatus] = useState<string>('');
+  const [filterLevel, setFilterLevel] = useState<string>('');
   const { data: history, isLoading } = useWritingHistory({
-    page, limit: 10, status: filterStatus || undefined,
+    page, limit: 10,
+    status: filterStatus || undefined,
+    cefrLevel: filterLevel || undefined,
   });
   const deleteMutation = useDeleteWriting();
+  const { data: stats } = useWritingStats();
 
   const handleDelete = async (id: string, e: React.MouseEvent) => {
     e.preventDefault();
@@ -106,8 +109,8 @@ export default function WritingListPage() {
     if (!confirm('Bạn có chắc muốn xóa bài viết này?')) return;
     try {
       await deleteMutation.mutateAsync(id);
-    } catch (e) {
-      /* delete error handled by React Query's onError */
+    } catch {
+      // Mutation error already shown via global handleGlobalError toast
     }
   };
 
@@ -123,68 +126,96 @@ export default function WritingListPage() {
             <div className="flex items-center gap-2">
               <Link href="/practice-test/writing/exam"
                 className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-body font-semibold border transition-all hover:-translate-y-0.5"
-                style={{ borderColor: 'rgba(168,85,247,.4)', color: '#A855F7', backgroundColor: 'rgba(168,85,247,.06)' }}>
+                style={{ borderColor: `${ACCENT.examWriting}40`, color: ACCENT.examWriting, backgroundColor: `${ACCENT.examWriting}0A` }}>
                 Theo đề chuẩn →
               </Link>
               <Link href="/practice-test/writing/new"
                 className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white transition-all duration-200 hover:-translate-y-0.5"
-                style={{ background: 'linear-gradient(135deg, #6366F1, #8B5CF6)', boxShadow: '0 4px 12px rgba(99,102,241,.3)' }}>
+                style={{ background: GRADIENT.writing, boxShadow: `0 4px 12px ${ACCENT.writing}33` }}>
                 <IconDice size={16} /> Tạo đề mới
               </Link>
             </div>
           }
         />
 
-        {/* ─── Stats ─── */}
-        <StatsOverview />
+        {/* ─── Stats Banner ─── */}
+        {stats && (
+          <div className="flex items-center gap-3 mb-5 overflow-x-auto no-scrollbar">
+            {[
+              { label: 'Tổng bài', value: stats.totalSessions, color: ACCENT.writing },
+              { label: 'TB điểm', value: stats.averageScore ? `${Math.round(stats.averageScore)}%` : '—', color: ACCENT.xp },
+              { label: 'Tổng lỗi', value: stats.totalErrors, color: STATUS.danger },
+              { label: 'Lỗi phổ biến', value: stats.topErrors[0]?.label.vi || '—', color: ACCENT.vocab },
+            ].map((s, i) => (
+              <div key={i} className="flex items-center gap-2 px-3 py-2 rounded-xl shrink-0"
+                style={{ backgroundColor: `${s.color}1A` }}>
+                <span className="text-base font-extrabold" style={{ color: s.color }}>{s.value}</span>
+                <span className="text-[10px] font-medium" style={{ color: 'var(--theme-text-muted)' }}>{s.label}</span>
+              </div>
+            ))}
+          </div>
+        )}
 
-        {/* ─── Filter ─── */}
-        <div className="flex gap-1.5 mb-5 overflow-x-auto pb-1">
-          {['', 'DRAFT', 'GRADED', 'ERROR'].map(status => {
-            const isActive = filterStatus === status;
-            const cfg = status ? STATUS_CONFIG[status] : null;
-            const label = status === '' ? 'Tất cả' : cfg?.label || status;
-            const color = cfg?.color || '#6B7280';
-            return (
-              <button key={status}
-                onClick={() => { setFilterStatus(status); setPage(1); }}
-                className="px-4 py-2 rounded-xl text-body font-semibold whitespace-nowrap transition-all duration-200 hover:-translate-y-0.5"
-                style={isActive
-                  ? { background: `linear-gradient(135deg, ${color}, ${color}cc)`, color: 'white', boxShadow: `0 4px 12px ${color}30` }
-                  : { backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }
-                }>
-                {label}
-              </button>
-            );
-          })}
+        {/* ─── Filters ─── */}
+        <div className="flex flex-col gap-3 mb-6">
+          <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
+            {['', 'A1', 'A2', 'B1', 'B2', 'C1'].map(lvl => {
+              const isActive = filterLevel === lvl;
+              return (
+                <button key={lvl}
+                  onClick={() => { setFilterLevel(lvl); setPage(1); }}
+                  className="px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all duration-200"
+                  style={isActive
+                    ? { background: GRADIENT.writing, color: 'white', boxShadow: `0 4px 12px ${ACCENT.writing}33` }
+                    : { backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }
+                  }>
+                  {lvl || 'TẤT CẢ TRÌNH ĐỘ'}
+                </button>
+              );
+            })}
+          </div>
+          <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
+            {['', 'DRAFT', 'GRADED', 'ERROR'].map(status => {
+              const isActive = filterStatus === status;
+              const cfg = status ? STATUS_CONFIG[status] : null;
+              const label = status === '' ? 'Tất cả trạng thái' : cfg?.label || status;
+              const color = cfg?.color || 'var(--theme-text-muted)';
+              return (
+                <button key={status}
+                  onClick={() => { setFilterStatus(status); setPage(1); }}
+                  className="px-4 py-2 rounded-xl text-body font-semibold whitespace-nowrap transition-all duration-200"
+                  style={isActive
+                    ? { background: `linear-gradient(135deg, ${color}, ${color}cc)`, color: 'white', boxShadow: `0 4px 12px ${color}30` }
+                    : { backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }
+                  }>
+                  {label}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {/* ─── History List ─── */}
         {isLoading ? (
-          <div className="space-y-3">
-            {[1, 2, 3].map(i => (
-              <div key={i} className="h-20 rounded-xl animate-pulse"
-                style={{ backgroundColor: 'var(--theme-bg-secondary)' }} />
-            ))}
-          </div>
+          <GridSkeleton cols={1} count={3} height="h-20" gap="gap-3" />
         ) : !history?.data.length ? (
           <div className="text-center py-16 rounded-2xl border-2 border-dashed"
             style={{ borderColor: 'var(--theme-border)' }}>
             <div className="w-16 h-16 rounded-2xl mx-auto flex items-center justify-center mb-4"
-              style={{ background: 'linear-gradient(135deg, #6366F1, #8B5CF6)' }}>
+              style={{ background: GRADIENT.writing }}>
               <IconPenLine size={28} style={{ color: 'white' }} />
             </div>
             <p className="text-sm mb-4" style={{ color: 'var(--theme-text-muted)' }}>Bạn chưa có bài viết nào</p>
             <Link href="/practice-test/writing/new"
               className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white"
-              style={{ background: 'linear-gradient(135deg, #6366F1, #8B5CF6)' }}>
+              style={{ background: GRADIENT.writing }}>
               <IconDice size={16} /> Bắt đầu viết bài đầu tiên
             </Link>
           </div>
         ) : (
           <div className="space-y-2">
             {history.data.map(item => {
-              const typeInfo = WRITING_TYPE_LABELS[item.writingType] || { de: item.writingType, vi: item.writingType, color: '#6B7280' };
+              const typeInfo = WRITING_TYPE_LABELS[item.writingType] || { de: item.writingType, vi: item.writingType, color: 'var(--theme-text-muted)' };
               const statusCfg = STATUS_CONFIG[item.status] || STATUS_CONFIG.DRAFT;
 
               return (
@@ -206,7 +237,7 @@ export default function WritingListPage() {
                         {item.topic}
                       </span>
                       <span className="px-2 py-0.5 rounded-md text-caption font-bold shrink-0"
-                        style={{ backgroundColor: 'rgba(59,130,246,.1)', color: '#3B82F6' }}>
+                        style={{ backgroundColor: `${STATUS.info}1A`, color: STATUS.info }}>
                         {item.cefrLevel}
                       </span>
                       <span className="px-2 py-0.5 rounded-md text-caption font-bold shrink-0"

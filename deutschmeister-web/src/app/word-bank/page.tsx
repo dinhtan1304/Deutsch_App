@@ -1,9 +1,18 @@
-﻿'use client';
+'use client';
 
 import { useState, useCallback } from 'react';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
+import { useAuthStore } from '@/stores/authStore';
+import { AuthGate } from '@/components/ui';
+import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 import { WordBankCard } from '@/components/word-bank/WordBankCard';
-import { ImportModal } from '@/components/word-bank/ImportModal';
+import { WordDetailModal } from '@/components/word-bank/WordDetailModal';
+
+const ImportModal = dynamic(
+  () => import('@/components/word-bank/ImportModal').then(m => ({ default: m.ImportModal })),
+  { ssr: false }
+);
 import { useWordBankUI } from '@/stores/wordBankStore';
 import {
   usePersonalWords,
@@ -32,9 +41,11 @@ const levels: Level[] = ['A1', 'A2', 'B1', 'B2', 'C1'];
 const genders: Gender[] = ['masculine', 'feminine', 'neuter'];
 
 export default function WordBankPage() {
+  const { isAuthenticated } = useAuthStore();
   const { filters, page, limit, setFilters, resetFilters, setPage, getApiParams } = useWordBankUI();
   const [showImportModal, setShowImportModal] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
+  const [selectedWord, setSelectedWord] = useState<any | null>(null);
   const [selectedView, setSelectedView] = useState<string>('all'); // 'all' | 'favorites' | collectionId
   const [showNewCollection, setShowNewCollection] = useState(false);
   const [newCollectionName, setNewCollectionName] = useState('');
@@ -108,8 +119,8 @@ export default function WordBankPage() {
       await createCollection.mutateAsync({ name });
       setNewCollectionName('');
       setShowNewCollection(false);
-    } catch (err: any) {
-      const msg = err?.response?.data?.message || err?.message || '';
+    } catch (err) {
+      const msg = (err as { response?: { data?: { message?: string } } } | undefined)?.response?.data?.message || (err as Error | undefined)?.message || '';
       setCollectionError(msg.includes('Conflict') || msg.includes('duplicate') || msg.includes('exists')
         ? 'Tên thư mục đã tồn tại'
         : 'Tạo thư mục thất bại. Vui lòng thử lại.');
@@ -123,11 +134,20 @@ export default function WordBankPage() {
     await deleteCollection.mutateAsync(id);
   };
 
+  if (!isAuthenticated) return (
+    <AuthGate
+      icon={<IconNotebook size={28} className="text-white" />}
+      gradient={GRADIENT.writing}
+      title="Đăng nhập để dùng Sổ tay"
+      description="Lưu từ vựng cá nhân, phân loại theo chủ đề và ôn tập với SRS."
+    />
+  );
+
   if (isLoading) {
     return (
         <div className="flex items-center justify-center py-20">
           <div className="w-12 h-12 rounded-2xl flex items-center justify-center animate-pulse"
-            style={{ background: 'linear-gradient(135deg, #8B5CF6, #6366F1)' }}>
+            style={{ background: GRADIENT.history }}>
             <IconNotebook size={24} className="text-white" />
           </div>
         </div>
@@ -142,7 +162,7 @@ export default function WordBankPage() {
         <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
           <div className="flex items-center gap-3">
             <div className="w-11 h-11 rounded-2xl flex items-center justify-center"
-              style={{ background: 'linear-gradient(135deg, #8B5CF6, #6366F1)' }}>
+              style={{ background: GRADIENT.history }}>
               <IconNotebook size={22} className="text-white" />
             </div>
             <div>
@@ -159,6 +179,7 @@ export default function WordBankPage() {
             <button onClick={() => setShowImportModal(true)}
               className="flex items-center gap-2 px-4 py-2 rounded-xl text-body font-semibold text-white
                 transition-all hover:shadow-md hover:-translate-y-0.5"
+              // eslint-disable-next-line no-restricted-syntax
               style={{ background: 'linear-gradient(135deg, #10B981, #059669)' }}>
               <IconDownload size={15} /> Import
             </button>
@@ -171,134 +192,58 @@ export default function WordBankPage() {
           </div>
         </div>
 
-        {/* ─── SRS Review Card ─── */}
+        {/* ─── SRS Review Banner ─── */}
         {statTotal > 0 && srsStats && (
-          <div className="mb-6 p-5 rounded-2xl border-2 transition-all hover:shadow-md"
+          <div className="mb-6 p-4 rounded-2xl border flex flex-wrap items-center justify-between gap-4 transition-all hover:shadow-md"
             style={{
-              borderColor: srsStats.due > 0 ? '#EF4444' : '#22C55E',
-              backgroundColor: srsStats.due > 0 ? 'rgba(239,68,68,.04)' : 'rgba(34,197,94,.04)',
+              borderColor: srsStats.due > 0 ? `${STATUS.danger}30` : `${STATUS.success}30`,
+              backgroundColor: srsStats.due > 0 ? `${STATUS.danger}0D` : `${STATUS.success}0D`,
             }}>
-            <div className="flex flex-wrap items-center justify-between gap-4">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl flex items-center justify-center"
-                  style={{
-                    background: srsStats.due > 0
-                      ? 'linear-gradient(135deg, rgba(239,68,68,.15), rgba(239,68,68,.08))'
-                      : 'linear-gradient(135deg, rgba(34,197,94,.15), rgba(34,197,94,.08))',
-                  }}>
-                  <IconBrain size={24} style={{ color: srsStats.due > 0 ? '#EF4444' : '#22C55E' }} />
-                </div>
-                <div>
-                  <h3 className="font-bold text-base" style={{ color: 'var(--theme-text-primary)' }}>
-                    Ôn tập SRS
-                  </h3>
-                  <p className="text-body" style={{ color: 'var(--theme-text-muted)' }}>
-                    {srsStats.due > 0 ? (
-                      <>
-                        <span className="font-bold" style={{ color: '#EF4444' }}>{srsStats.due}</span> từ cần ôn
-                        {srsStats.new > 0 && (
-                          <> • <span style={{ color: '#3B82F6' }}>{srsStats.new}</span> từ mới</>
-                        )}
-                      </>
-                    ) : (
-                      'Tuyệt vời! Bạn đã ôn hết cho hôm nay'
-                    )}
-                  </p>
-                </div>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+                style={{
+                  background: srsStats.due > 0
+                    ? `linear-gradient(135deg, ${STATUS.danger}26, ${STATUS.danger}14)`
+                    : `linear-gradient(135deg, ${STATUS.success}26, ${STATUS.success}14)`,
+                }}>
+                <IconBrain size={20} style={{ color: srsStats.due > 0 ? STATUS.danger : STATUS.success }} />
               </div>
-
-              <div className="flex items-center gap-3">
-                <div className="hidden sm:flex gap-2 text-xs">
-                  {[
-                    { label: srsStats.learning, color: '#F59E0B', bg: 'rgba(245,158,11,.1)', icon: IconFlame, title: 'Đang học' },
-                    { label: srsStats.mature,   color: '#22C55E', bg: 'rgba(34,197,94,.1)',  icon: IconTarget, title: 'Thuộc lòng' },
-                    { label: `${srsStats.retentionRate}%`, color: '#3B82F6', bg: 'rgba(59,130,246,.1)', icon: IconBrain, title: 'Retention' },
-                  ].map((s, i) => {
-                    const Ic = s.icon;
-                    return (
-                      <span key={i} className="flex items-center gap-1 px-2.5 py-1 rounded-lg font-medium"
-                        style={{ backgroundColor: s.bg, color: s.color }}
-                        title={s.title}>
-                        <Ic size={12} />
-                        {s.label}
-                      </span>
-                    );
-                  })}
+              <div>
+                <p className="text-sm" style={{ color: 'var(--theme-text-primary)' }}>
+                  {srsStats.due > 0 ? (
+                    <>Có <span className="font-bold" style={{ color: STATUS.danger }}>{srsStats.due}</span> từ cần ôn tập hôm nay</>
+                  ) : (
+                    <span className="font-medium" style={{ color: STATUS.success }}>Tuyệt vời! Bạn đã ôn hết từ cho hôm nay.</span>
+                  )}
+                </p>
+                <div className="flex items-center gap-3 mt-1 text-xs" style={{ color: 'var(--theme-text-muted)' }}>
+                  <span>{srsStats.mature} / {statTotal} đã thuộc ({Math.round((srsStats.mature / statTotal) * 100)}%)</span>
+                  {srsStats.new > 0 && <span>• {srsStats.new} từ mới</span>}
                 </div>
-
-                <Link href="/word-bank/review?mode=weak"
-                  className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl font-semibold text-body
-                    transition-all hover:shadow-md hover:-translate-y-0.5"
-                  style={{
-                    background: 'linear-gradient(135deg, rgba(239,68,68,.12), rgba(245,158,11,.08))',
-                    color: '#EF4444',
-                    border: '1px solid rgba(239,68,68,.25)',
-                  }}
-                  title="Ôn các từ có accuracy thấp nhất">
-                  <IconTarget size={14} />
-                  Từ yếu
-                </Link>
-
-                <Link href="/word-bank/review"
-                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-body text-white
-                    transition-all hover:shadow-md hover:-translate-y-0.5"
-                  style={{
-                    background: srsStats.due > 0
-                      ? 'linear-gradient(135deg, #EF4444, #DC2626)'
-                      : 'linear-gradient(135deg, #3B82F6, #6366F1)',
-                  }}>
-                  <IconRefresh size={15} />
-                  {srsStats.due > 0 ? 'Ôn ngay' : 'Học thêm'}
-                </Link>
               </div>
             </div>
 
-            {/* Progress bar */}
-            {statTotal > 0 && (
-              <div className="mt-4">
-                <div className="flex justify-between text-caption mb-1.5"
-                  style={{ color: 'var(--theme-text-muted)' }}>
-                  <span>Đã ôn hôm nay: {srsStats.reviewedToday} từ</span>
-                  <span>{srsStats.mature} / {statTotal} đã thuộc ({Math.round((srsStats.mature / statTotal) * 100)}%)</span>
-                </div>
-                <div className="h-1.5 rounded-full overflow-hidden"
-                  style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
-                  <div className="h-full rounded-full transition-all duration-700"
-                    style={{
-                      width: `${Math.min(100, (srsStats.mature / statTotal) * 100)}%`,
-                      background: 'linear-gradient(90deg, #F59E0B, #22C55E, #10B981)',
-                    }} />
-                </div>
-              </div>
-            )}
+            <div className="flex items-center gap-2">
+              <Link href="/word-bank/review?mode=weak"
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl font-semibold text-xs transition-all hover:scale-105"
+                style={{ background: `${STATUS.danger}1A`, color: STATUS.danger }}>
+                <IconTarget size={14} /> Từ yếu
+              </Link>
+              <Link href="/word-bank/review"
+                className="flex items-center gap-1.5 px-4 py-2 rounded-xl font-semibold text-xs text-white transition-all hover:scale-105"
+                style={{
+                  background: srsStats.due > 0
+                    // eslint-disable-next-line no-restricted-syntax
+                    ? 'linear-gradient(135deg, #EF4444, #DC2626)'
+                    : GRADIENT.action,
+                }}>
+                <IconRefresh size={14} /> {srsStats.due > 0 ? 'Ôn ngay' : 'Học thêm'}
+              </Link>
+            </div>
           </div>
         )}
 
-        {/* ─── Word Type Chips ─── */}
-        {statTotal > 0 && stats && (
-          <div className="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-9 gap-2 mb-6">
-            {wordTypes.map(t => {
-              const info = WordTypeInfo[t];
-              const count = stats.byType[t] || 0;
-              const active = filters.wordType === t;
-              return (
-                <button key={t}
-                  onClick={() => setFilters({ wordType: active ? 'all' : t })}
-                  className="p-2.5 rounded-xl text-center transition-all duration-200 border hover:-translate-y-0.5"
-                  style={{
-                    backgroundColor: active ? info.color : 'var(--theme-bg-card)',
-                    color: active ? 'white' : 'var(--theme-text-secondary)',
-                    borderColor: active ? info.color : 'var(--theme-border)',
-                    opacity: count === 0 && !active ? 0.4 : 1,
-                  }}>
-                  <div className="text-sm font-bold">{info.icon}</div>
-                  <div className="text-caption font-medium mt-0.5">{info.label}</div>
-                  <div className="text-caption font-bold">{count}</div>
-                </button>
-              );
-            })}
-          </div>
-        )}
+
 
         {/* ─── Two-column layout: Sidebar + Main ─── */}
         <div className="flex gap-5 items-start">
@@ -312,15 +257,15 @@ export default function WordBankPage() {
               onClick={handleSelectAll}
               className="flex items-center gap-2.5 px-3.5 py-2.5 text-body font-medium transition-all text-left"
               style={{
-                backgroundColor: selectedView === 'all' ? 'rgba(99,102,241,.1)' : 'transparent',
-                color: selectedView === 'all' ? '#6366F1' : 'var(--theme-text-secondary)',
+                backgroundColor: selectedView === 'all' ? `${ACCENT.writing}1A` : 'transparent',
+                color: selectedView === 'all' ? ACCENT.writing : 'var(--theme-text-secondary)',
               }}>
               <svg width={15} height={15} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" /><rect x="8" y="2" width="8" height="4" rx="1" ry="1" /></svg>
               <span className="flex-1">Tất cả</span>
               <span className="text-caption font-semibold px-1.5 py-0.5 rounded-full"
                 style={{
-                  backgroundColor: selectedView === 'all' ? 'rgba(99,102,241,.15)' : 'var(--theme-bg-secondary)',
-                  color: selectedView === 'all' ? '#6366F1' : 'var(--theme-text-muted)',
+                  backgroundColor: selectedView === 'all' ? `${ACCENT.writing}26` : 'var(--theme-bg-secondary)',
+                  color: selectedView === 'all' ? ACCENT.writing : 'var(--theme-text-muted)',
                 }}>
                 {statTotal}
               </span>
@@ -330,15 +275,15 @@ export default function WordBankPage() {
               onClick={handleSelectFavorites}
               className="flex items-center gap-2.5 px-3.5 py-2.5 text-body font-medium transition-all text-left"
               style={{
-                backgroundColor: selectedView === 'favorites' ? 'rgba(234,179,8,.1)' : 'transparent',
-                color: selectedView === 'favorites' ? '#EAB308' : 'var(--theme-text-secondary)',
+                backgroundColor: selectedView === 'favorites' ? `${ACCENT.xp}1A` : 'transparent',
+                color: selectedView === 'favorites' ? ACCENT.xp : 'var(--theme-text-secondary)',
               }}>
               <svg width={15} height={15} viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
               <span className="flex-1">Yêu thích</span>
               <span className="text-caption font-semibold px-1.5 py-0.5 rounded-full"
                 style={{
-                  backgroundColor: selectedView === 'favorites' ? 'rgba(234,179,8,.15)' : 'var(--theme-bg-secondary)',
-                  color: selectedView === 'favorites' ? '#EAB308' : 'var(--theme-text-muted)',
+                  backgroundColor: selectedView === 'favorites' ? `${ACCENT.xp}26` : 'var(--theme-bg-secondary)',
+                  color: selectedView === 'favorites' ? ACCENT.xp : 'var(--theme-text-muted)',
                 }}>
                 {statFavorites}
               </span>
@@ -404,14 +349,14 @@ export default function WordBankPage() {
                   }}
                 />
                 {collectionError && (
-                  <p className="text-caption mt-1 px-0.5" style={{ color: '#EF4444' }}>{collectionError}</p>
+                  <p className="text-caption mt-1 px-0.5" style={{ color: STATUS.danger }}>{collectionError}</p>
                 )}
                 <div className="flex gap-1.5 mt-1.5">
                   <button
                     onClick={handleCreateCollection}
                     disabled={!newCollectionName.trim() || createCollection.isPending}
                     className="flex-1 py-1 rounded-lg text-caption font-semibold text-white transition-all disabled:opacity-40"
-                    style={{ background: 'linear-gradient(135deg, #6366F1, #8B5CF6)' }}>
+                    style={{ background: GRADIENT.writing }}>
                     Tạo
                   </button>
                   <button
@@ -461,9 +406,9 @@ export default function WordBankPage() {
                   <button onClick={() => setShowFilters(!showFilters)}
                     className="flex items-center gap-2 px-4 py-2.5 rounded-xl border text-body font-medium transition-all"
                     style={{
-                      borderColor: showFilters ? '#3B82F6' : 'var(--theme-border)',
-                      backgroundColor: showFilters ? 'rgba(59,130,246,.08)' : 'var(--theme-bg-card)',
-                      color: showFilters ? '#3B82F6' : 'var(--theme-text-secondary)',
+                      borderColor: showFilters ? ACCENT.srs : 'var(--theme-border)',
+                      backgroundColor: showFilters ? `${ACCENT.srs}14` : 'var(--theme-bg-card)',
+                      color: showFilters ? ACCENT.srs : 'var(--theme-text-secondary)',
                     }}>
                     <IconFilter size={14} /> Lọc
                   </button>
@@ -472,11 +417,11 @@ export default function WordBankPage() {
                     <button onClick={() => setFilters({ favoritesOnly: !filters.favoritesOnly })}
                       className="flex items-center gap-2 px-4 py-2.5 rounded-xl border text-body font-medium transition-all"
                       style={{
-                        borderColor: filters.favoritesOnly ? '#EAB308' : 'var(--theme-border)',
-                        backgroundColor: filters.favoritesOnly ? 'rgba(234,179,8,.08)' : 'var(--theme-bg-card)',
-                        color: filters.favoritesOnly ? '#EAB308' : 'var(--theme-text-secondary)',
+                        borderColor: filters.favoritesOnly ? ACCENT.xp : 'var(--theme-border)',
+                        backgroundColor: filters.favoritesOnly ? `${ACCENT.xp}14` : 'var(--theme-bg-card)',
+                        color: filters.favoritesOnly ? ACCENT.xp : 'var(--theme-text-secondary)',
                       }}>
-                      <IconStar size={14} style={filters.favoritesOnly ? { fill: '#EAB308' } : {}} /> Yêu thích
+                      <IconStar size={14} style={filters.favoritesOnly ? { fill: ACCENT.xp } : {}} /> Yêu thích
                     </button>
                   )}
 
@@ -504,8 +449,37 @@ export default function WordBankPage() {
 
                 {/* Extended filters */}
                 {showFilters && (
-                  <div className="p-4 rounded-2xl border mb-4 space-y-3"
+                  <div className="p-4 rounded-2xl border mb-4 space-y-4 shadow-sm"
                     style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
+                    
+                    {/* Word Type inside filters */}
+                    {stats && (
+                      <div>
+                        <label className="block text-caption font-semibold mb-2" style={{ color: 'var(--theme-text-muted)' }}>Từ loại</label>
+                        <div className="flex flex-wrap gap-2">
+                          {wordTypes.map(t => {
+                            const info = WordTypeInfo[t];
+                            const count = stats.byType[t] || 0;
+                            const active = filters.wordType === t;
+                            if (count === 0 && !active) return null; // hide empty types inside filter to save space
+                            return (
+                              <button key={t}
+                                onClick={() => setFilters({ wordType: active ? 'all' : t })}
+                                className="px-2.5 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-all border"
+                                style={{
+                                  backgroundColor: active ? info.color : 'var(--theme-bg-secondary)',
+                                  color: active ? 'white' : 'var(--theme-text-secondary)',
+                                  borderColor: active ? info.color : 'transparent',
+                                }}>
+                                <span>{info.icon} {info.labelDe}</span>
+                                <span className="opacity-70 text-[10px]">({count})</span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+
                     <div className="flex flex-wrap gap-5">
                       {/* Level */}
                       <div>
@@ -515,7 +489,7 @@ export default function WordBankPage() {
                           <button onClick={() => setFilters({ level: 'all' })}
                             className="px-2.5 py-1 rounded-lg text-xs font-medium transition-all"
                             style={{
-                              backgroundColor: filters.level === 'all' ? '#3B82F6' : 'var(--theme-bg-secondary)',
+                              backgroundColor: filters.level === 'all' ? ACCENT.srs : 'var(--theme-bg-secondary)',
                               color: filters.level === 'all' ? 'white' : 'var(--theme-text-secondary)',
                             }}>
                             Tất cả
@@ -525,7 +499,7 @@ export default function WordBankPage() {
                               onClick={() => setFilters({ level: filters.level === l ? 'all' : l })}
                               className="px-2.5 py-1 rounded-lg text-xs font-medium transition-all"
                               style={{
-                                backgroundColor: filters.level === l ? '#3B82F6' : 'var(--theme-bg-secondary)',
+                                backgroundColor: filters.level === l ? ACCENT.srs : 'var(--theme-bg-secondary)',
                                 color: filters.level === l ? 'white' : 'var(--theme-text-secondary)',
                               }}>
                               {l}
@@ -542,7 +516,7 @@ export default function WordBankPage() {
                           <button onClick={() => setFilters({ gender: 'all' })}
                             className="px-2.5 py-1 rounded-lg text-xs font-medium transition-all"
                             style={{
-                              backgroundColor: filters.gender === 'all' ? '#6B7280' : 'var(--theme-bg-secondary)',
+                              backgroundColor: filters.gender === 'all' ? 'var(--theme-text-muted)' : 'var(--theme-bg-secondary)',
                               color: filters.gender === 'all' ? 'white' : 'var(--theme-text-secondary)',
                             }}>
                             Tất cả
@@ -586,7 +560,7 @@ export default function WordBankPage() {
                     </div>
                     <button onClick={resetFilters}
                       className="flex items-center gap-1.5 text-xs font-medium transition-all hover:opacity-70"
-                      style={{ color: '#3B82F6' }}>
+                      style={{ color: ACCENT.srs }}>
                       <IconRefresh size={13} /> Reset bộ lọc
                     </button>
                   </div>
@@ -605,8 +579,8 @@ export default function WordBankPage() {
                 {statTotal === 0 ? (
                   <>
                     <div className="w-16 h-16 rounded-2xl mx-auto flex items-center justify-center mb-4"
-                      style={{ background: 'linear-gradient(135deg, rgba(139,92,246,.12), rgba(139,92,246,.06))' }}>
-                      <IconNotebook size={30} style={{ color: '#8B5CF6' }} />
+                      style={{ background: `linear-gradient(135deg, ${ACCENT.vocab}1F, ${ACCENT.vocab}0F)` }}>
+                      <IconNotebook size={30} style={{ color: ACCENT.vocab }} />
                     </div>
                     <h3 className="text-title font-bold mb-2" style={{ color: 'var(--theme-text-primary)' }}>
                       Sổ từ vựng trống
@@ -617,15 +591,16 @@ export default function WordBankPage() {
                     <button onClick={() => setShowImportModal(true)}
                       className="flex items-center gap-2 mx-auto px-6 py-3 rounded-xl font-semibold text-sm text-white
                         transition-all hover:shadow-md hover:-translate-y-0.5"
-                      style={{ background: 'linear-gradient(135deg, #10B981, #059669)' }}>
+                      // eslint-disable-next-line no-restricted-syntax
+              style={{ background: 'linear-gradient(135deg, #10B981, #059669)' }}>
                       <IconDownload size={17} /> Import từ vựng
                     </button>
                   </>
                 ) : (
                   <>
                     <div className="w-14 h-14 rounded-2xl mx-auto flex items-center justify-center mb-4"
-                      style={{ background: 'linear-gradient(135deg, rgba(59,130,246,.12), rgba(59,130,246,.06))' }}>
-                      <IconSearch size={26} style={{ color: '#3B82F6' }} />
+                      style={{ background: `linear-gradient(135deg, ${ACCENT.srs}1F, ${ACCENT.srs}0F)` }}>
+                      <IconSearch size={26} style={{ color: ACCENT.srs }} />
                     </div>
                     <h3 className="text-base font-bold mb-2" style={{ color: 'var(--theme-text-primary)' }}>
                       Không tìm thấy từ nào
@@ -636,16 +611,32 @@ export default function WordBankPage() {
               </div>
             ) : (
               <>
-                <div className="space-y-3">
-                  {words.map(w => (
-                    <WordBankCard
-                      key={w.id}
-                      word={w}
-                      onToggleFavorite={id => toggleFavoriteMutation.mutate(id)}
-                      onSpeak={speak}
-                      collections={collections}
-                    />
-                  ))}
+                <div className="border border-black/5 dark:border-white/5 rounded-2xl shadow-sm overflow-x-auto"
+                  style={{ backgroundColor: 'var(--theme-bg-card)' }}>
+                  <table className="w-full text-left text-sm whitespace-nowrap">
+                    <thead className="border-b border-black/5 dark:border-white/5 bg-black/5 dark:bg-white/5">
+                      <tr>
+                        <th className="px-4 py-3 font-semibold" style={{ color: 'var(--theme-text-muted)' }}>TỪ VỰNG</th>
+                        <th className="px-4 py-3 font-semibold" style={{ color: 'var(--theme-text-muted)' }}>NGHĨA</th>
+                        <th className="px-4 py-3 font-semibold" style={{ color: 'var(--theme-text-muted)' }}>PHÂN LOẠI</th>
+                        <th className="px-4 py-3 font-semibold" style={{ color: 'var(--theme-text-muted)' }}>ĐẶC TÍNH</th>
+                        <th className="px-4 py-3 font-semibold" style={{ color: 'var(--theme-text-muted)' }}>VÍ DỤ</th>
+                        <th className="px-4 py-3 font-semibold text-right" style={{ color: 'var(--theme-text-muted)' }}>THAO TÁC</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {words.map(w => (
+                        <WordBankCard
+                          key={w.id}
+                          word={w}
+                          onClick={() => setSelectedWord(w)}
+                          onToggleFavorite={id => toggleFavoriteMutation.mutate(id)}
+                          onSpeak={speak}
+                          collections={collections}
+                        />
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
 
                 {/* Pagination */}
@@ -674,7 +665,7 @@ export default function WordBankPage() {
                           className="w-9 h-9 rounded-lg flex items-center justify-center text-body font-semibold
                             transition-all duration-200"
                           style={pageNum === page ? {
-                            background: 'linear-gradient(135deg, #8B5CF6, #6366F1)',
+                            background: GRADIENT.history,
                             color: 'white',
                           } : {
                             color: 'var(--theme-text-secondary)',
@@ -710,6 +701,15 @@ export default function WordBankPage() {
         onClose={() => setShowImportModal(false)}
         onImport={handleImport}
       />
+
+      {selectedWord && (
+        <WordDetailModal
+          word={selectedWord}
+          onClose={() => setSelectedWord(null)}
+          onSpeak={speak}
+          onToggleFavorite={id => toggleFavoriteMutation.mutate(id)}
+        />
+      )}
     </>
   );
 }

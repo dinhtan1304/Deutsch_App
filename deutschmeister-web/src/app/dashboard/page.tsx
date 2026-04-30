@@ -1,31 +1,31 @@
-﻿'use client';
+'use client';
 
-import { useMemo, useEffect } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   StatsCards,
-  ActivityHeatmap,
   WeeklyChart,
   TopicProgressList,
+  ActivityHeatmap,
   RecentActivityFeed,
-  QuickActions,
 } from '@/components/dashboard';
-import { TodayFocusCard } from '@/components/dashboard/TodayFocusCard';
 import { WeeklyChallengesWidget } from '@/components/dashboard/WeeklyChallengesWidget';
-import { LeaderboardWidget } from '@/components/dashboard/LeaderboardWidget';
-import { FirstDayJourney } from '@/components/dashboard/FirstDayJourney';
 import { StudyPlanWidget } from '@/components/dashboard/StudyPlanWidget';
 import { CelebrationModal } from '@/components/ui/CelebrationModal';
 import { DailyBonusToast } from '@/components/dashboard/DailyBonusToast';
 import { StreakWarningBanner } from '@/components/dashboard/StreakWarningBanner';
 import { UpsellTrigger } from '@/components/subscription/UpsellTrigger';
-import { ErrorPatternsWidget } from '@/components/dashboard/ErrorPatternsWidget';
 import { QuickReviewWidget } from '@/components/dashboard/QuickReviewWidget';
-import { HeroActionCard } from '@/components/dashboard/HeroActionCard';
+import { DashboardHero } from '@/components/dashboard/DashboardHero';
+import { StatusPill } from '@/components/ui/StatusPill';
 import { useFullDashboard } from '@/hooks/useDashboard';
+import { useXp } from '@/hooks/useXp';
 import { useMilestoneCheck } from '@/hooks/useMilestones';
 import { useAutoDailyBonus } from '@/hooks/useDailyBonus';
 import { useAuthStore } from '@/stores/authStore';
+import { AuthGate } from '@/components/ui';
+import { GRADIENT } from '@/lib/tokens';
+import { IconBook } from '@/components/ui/Icons';
 import type {
   FullDashboard,
   DashboardStats,
@@ -77,26 +77,26 @@ function DashboardSkeleton() {
   );
 }
 
+type DashboardTab = 'overview' | 'detailed';
+
 export default function DashboardPage() {
   const { isAuthenticated, isLoading: authLoading, user, _hasHydrated } = useAuthStore();
   const router = useRouter();
   const { data, isLoading } = useFullDashboard();
+  const { data: xpInfo } = useXp();
   useMilestoneCheck();
   const { bonus, dismiss } = useAutoDailyBonus(
     _hasHydrated && isAuthenticated && user?.onboardingCompleted !== false,
   );
+  const [activeTab, setActiveTab] = useState<DashboardTab>('overview');
 
-  // Must be before any early returns (Rules of Hooks)
   const todayLabel = useMemo(() => new Date().toLocaleDateString('vi-VN', {
     weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
   }), []);
 
-  // Redirect unauthenticated users to landing page, or to onboarding if not completed
   useEffect(() => {
     if (!_hasHydrated) return;
-    if (!isAuthenticated) {
-      router.replace('/');
-    } else if (user?.onboardingCompleted === false) {
+    if (isAuthenticated && user?.onboardingCompleted === false) {
       router.replace('/onboarding');
     }
   }, [_hasHydrated, isAuthenticated, user, router]);
@@ -107,7 +107,14 @@ export default function DashboardPage() {
     </div>
   );
 
-  if (!isAuthenticated) return null;
+  if (!isAuthenticated) return (
+    <AuthGate
+      icon={<IconBook size={28} className="text-white" />}
+      gradient={GRADIENT.brand}
+      title="Đăng nhập để xem trang chính"
+      description="Theo dõi streak, XP và tiến trình học tập của bạn."
+    />
+  );
 
   const dashboardData: FullDashboard = {
     stats: data?.stats ?? getEmptyStats(),
@@ -120,67 +127,124 @@ export default function DashboardPage() {
   const { stats } = dashboardData;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-5 space-y-4">
+    <div className="max-w-7xl mx-auto px-4 pb-8 space-y-6 lg:space-y-8">
 
-      {/* ── Header ── */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-bold" style={{ color: 'var(--theme-text-primary)' }}>
-            Hallo, {user?.name || 'Freund'}!
-          </h1>
-          <p className="text-body mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>
-            {stats.streak > 0 ? (
-              <>Du lernst seit <span className="text-orange-500 font-bold">{stats.streak} Tagen</span> in Folge
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#F97316" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="inline ml-1 -mt-0.5"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" /></svg>
-              </>
-            ) : stats.totalWordsLearned > 0 ? (
-              <>Du hast <span className="text-blue-500 font-bold">{stats.totalWordsLearned} Wörter</span> gelernt. Weiter so!</>
-            ) : stats.gamesPlayed === 0 ? (
-              'Heute ist ein toller Tag, um Deutsch zu lernen!'
-            ) : (
-              'Lerne weiter, um deinen Streak zu halten!'
+      {/* ═══ Sticky Header Area ═══ */}
+      <div
+        className="sticky top-16 z-20 -mx-4 px-4 py-3"
+        style={{
+          backgroundColor: 'var(--theme-bg-body)',
+          borderBottom: '1px solid var(--theme-border)',
+          boxShadow: 'var(--shadow-soft, 0 2px 8px rgba(0,0,0,0.06))',
+        }}
+      >
+        <div className="flex items-center justify-between gap-4 flex-wrap">
+          <div className="min-w-0">
+            <h1 className="text-h2 font-bold leading-tight" style={{ color: 'var(--theme-text-primary)' }}>
+              Hallo, {user?.name || 'Freund'}!
+            </h1>
+            <p className="text-caption mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>{todayLabel}</p>
+          </div>
+          <div className="flex items-center gap-2 flex-wrap">
+            {stats.streak > 0 && (
+              <StatusPill type="streak" value={stats.streak} label="ngày" />
             )}
-          </p>
-        </div>
-        <div className="text-right text-xs hidden sm:block" style={{ color: 'var(--theme-text-muted)' }}>{todayLabel}</div>
-      </div>
-
-      {/* ── Streak Warning (only shows if streak ≥3 and no activity today) ── */}
-      <StreakWarningBanner />
-
-      {/* ── Hero: Smart "Do This Next" ── */}
-      <HeroActionCard />
-
-      {/* ── Today's Focus ── */}
-      <TodayFocusCard />
-
-      {/* ── Quick Review (inline SRS, only renders when cards are due) ── */}
-      <QuickReviewWidget />
-
-      {/* ── Quick Cards Row ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <StudyPlanWidget />
-        <FirstDayJourney />
-      </div>
-
-      {/* ── Stats ── */}
-      <StatsCards stats={dashboardData.stats} />
-
-      {/* ── Row 1: Chart (2/3) + Actions+Challenges (1/3) ── */}
-      <div className="grid gap-4 items-stretch" style={{ gridTemplateColumns: 'minmax(0,2fr) minmax(0,1fr)' }}>
-        <div className="flex flex-col gap-4 min-w-0">
-          <WeeklyChart data={dashboardData.weeklyProgress} />
-          <ActivityHeatmap data={dashboardData.heatmap} />
-        </div>
-        <div className="flex flex-col gap-4 min-w-0">
-          <QuickActions wordsToReview={dashboardData.stats.wordsToReview} />
-          <div className="flex-1 min-h-0">
-            <WeeklyChallengesWidget />
+            {xpInfo && (
+              <StatusPill type="xp" value={xpInfo.xp.toLocaleString('vi-VN')} label="XP" />
+            )}
+            {xpInfo && (
+              <StatusPill type="level" value={`Lv.${xpInfo.level}`} label={xpInfo.nameVi} />
+            )}
           </div>
         </div>
       </div>
 
-      {/* ── Premium upsell — full-width highlight (hidden for Premium/beta users) ── */}
+      <StreakWarningBanner />
+
+      {/* ═══ Tab Switcher ═══ */}
+      <div
+        className="flex items-center gap-1 p-1 rounded-xl w-fit"
+        style={{ backgroundColor: 'var(--theme-bg-secondary)' }}
+        role="tablist"
+        aria-label="Chế độ xem dashboard"
+      >
+        {([
+          { id: 'overview', label: 'Tổng quan' },
+          { id: 'detailed', label: 'Chi tiết' },
+        ] as { id: DashboardTab; label: string }[]).map((tab) => (
+          <button
+            key={tab.id}
+            role="tab"
+            aria-selected={activeTab === tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className="px-4 py-1.5 rounded-lg text-body font-semibold transition-all duration-200"
+            style={
+              activeTab === tab.id
+                ? {
+                    backgroundColor: 'var(--theme-bg-card)',
+                    color: 'var(--theme-text-primary)',
+                    boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
+                  }
+                : { color: 'var(--theme-text-muted)' }
+            }
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {/* ═══ Tab Content ═══ */}
+      {activeTab === 'overview' && (
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+          {/* Main Content (8 cols) */}
+          <div className="lg:col-span-8 flex flex-col gap-6">
+            <DashboardHero />
+
+            <div className="space-y-4">
+              <h2 className="text-h4 font-bold px-1" style={{ color: 'var(--theme-text-primary)' }}>
+                Tổng quan học tập
+              </h2>
+              <StatsCards stats={dashboardData.stats} />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <WeeklyChart data={dashboardData.weeklyProgress} />
+              <TopicProgressList data={dashboardData.topicProgress} limit={5} />
+            </div>
+          </div>
+
+          {/* Sidebar (4 cols) */}
+          <div className="lg:col-span-4 flex flex-col gap-6">
+            <QuickReviewWidget />
+            <StudyPlanWidget />
+            <WeeklyChallengesWidget />
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'detailed' && (
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+          {/* Main Content (8 cols) */}
+          <div className="lg:col-span-8 flex flex-col gap-6">
+            <ActivityHeatmap data={dashboardData.heatmap} />
+            <RecentActivityFeed
+              data={dashboardData.recentActivity}
+              initialCount={10}
+            />
+          </div>
+
+          {/* Sidebar (4 cols) */}
+          <div className="lg:col-span-4 flex flex-col gap-6">
+            <QuickReviewWidget />
+            <StudyPlanWidget />
+            <WeeklyChallengesWidget />
+          </div>
+        </div>
+      )}
+
+      {/* ═══ Premium Upsell — bottom of page, non-interruptive ═══ */}
       <UpsellTrigger
         variant="card"
         source="dashboard"
@@ -189,18 +253,7 @@ export default function DashboardPage() {
         ctaLabel="Nâng cấp Premium"
       />
 
-      {/* ── Row 2: Leaderboard + Activity + Topics + Error Patterns ── */}
-      <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
-        <LeaderboardWidget />
-        <RecentActivityFeed data={dashboardData.recentActivity} initialCount={3} />
-        <TopicProgressList data={dashboardData.topicProgress} limit={3} />
-        <ErrorPatternsWidget />
-      </div>
-
-      {/* Milestone celebration modal */}
       <CelebrationModal />
-
-      {/* Daily login bonus toast (auto-claimed on mount) */}
       <DailyBonusToast bonus={bonus} onDismiss={dismiss} />
     </div>
   );

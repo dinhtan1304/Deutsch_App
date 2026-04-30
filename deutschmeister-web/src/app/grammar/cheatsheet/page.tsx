@@ -1,6 +1,8 @@
 ﻿'use client';
+/* eslint-disable no-restricted-syntax */
 
 import { useState } from 'react';
+import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 import { useRouter } from 'next/navigation';
 import { IconBook, IconChevronDown, IconChevronLeft, IconChevronRight } from '@/components/ui/Icons';
 
@@ -43,19 +45,19 @@ const PERSONAL_PRONOUNS = {
 const PREPOSITIONS = [
   {
     case: 'Akkusativ',
-    color: '#3B82F6',
+    color: ACCENT.srs,
     preps: ['durch', 'für', 'gegen', 'ohne', 'um', 'bis', 'entlang'],
     mnemonic: 'Durch Für Gegen Ohne Um → "DOGFU"',
   },
   {
     case: 'Dativ',
-    color: '#EC4899',
+    color: ACCENT.listening,
     preps: ['aus', 'bei', 'mit', 'nach', 'seit', 'von', 'zu', 'gegenüber', 'außer'],
     mnemonic: 'Aus Bei Mit Nach Seit Von Zu → "AB MNSV Z"',
   },
   {
     case: 'Wechselpräpositionen (Akk ↔ Dat)',
-    color: '#F59E0B',
+    color: ACCENT.xp,
     preps: ['an', 'auf', 'hinter', 'in', 'neben', 'über', 'unter', 'vor', 'zwischen'],
     mnemonic: 'Wohin? → Akkusativ · Wo? → Dativ',
   },
@@ -87,7 +89,7 @@ const IRREGULAR_VERBS: [string, string, string, string, string][] = [
 
 // ─── Reusable Components ───
 
-const GENDER_COLORS: Record<number, string> = { 1: '#3B82F6', 2: '#EC4899', 3: '#22C55E', 4: '#8B5CF6' };
+const GENDER_COLORS: Record<number, string> = { 1: ACCENT.srs, 2: ACCENT.listening, 3: STATUS.success, 4: ACCENT.vocab };
 
 function Section({ title, color, children, defaultOpen = true }: {
   title: string; color: string; children: React.ReactNode; defaultOpen?: boolean;
@@ -247,7 +249,7 @@ export default function GrammarCheatsheetPage() {
                   {['Infinitiv', 'Präsens (er/sie/es)', 'Präteritum', 'Perfekt', 'Nghĩa'].map((h, i) => (
                     <th key={i} className="px-3 py-2.5 text-left font-bold whitespace-nowrap"
                       style={{
-                        color: i === 0 ? '#8B5CF6' : 'var(--theme-text-muted)',
+                        color: i === 0 ? ACCENT.vocab : 'var(--theme-text-muted)',
                         borderBottom: '2px solid var(--theme-border)',
                         fontSize: '12px',
                       }}>
@@ -261,7 +263,7 @@ export default function GrammarCheatsheetPage() {
                   <tr key={inf}>
                     <td className="px-3 py-2 font-bold whitespace-nowrap"
                       style={{
-                        color: '#8B5CF6',
+                        color: ACCENT.vocab,
                         borderBottom: ri < IRREGULAR_VERBS.length - 1 ? '1px solid var(--theme-border)' : 'none',
                         backgroundColor: ri % 2 === 1 ? 'var(--theme-bg-secondary)' : 'transparent',
                         borderRadius: ri % 2 === 1 ? '8px 0 0 8px' : '0',

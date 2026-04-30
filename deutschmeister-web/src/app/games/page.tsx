@@ -1,136 +1,168 @@
-﻿'use client';
+'use client';
+/* eslint-disable no-restricted-syntax */
 
 import Link from 'next/link';
+import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
 import {
   IconGamepad, IconTarget, IconClock, IconPenTool, IconLayers,
   IconBookOpen, IconLink, IconHeadphones, IconSpellCheck,
   IconLightbulb, IconKeyboard, IconFlame, IconZap, KBD,
+  IconChevronRight,
 } from '@/components/games/GameUI';
 
 const games = [
   { id: 'gender-quiz', name: 'Gender Quiz', description: 'Chọn mạo từ đúng (der/die/das) cho mỗi từ',
-    icon: IconTarget, color: '#3B82F6', href: '/games/gender-quiz' },
+    icon: IconTarget, color: ACCENT.srs, href: '/games/gender-quiz' },
   { id: 'timed-challenge', name: 'Timed Challenge', description: 'Trả lời nhanh nhất có thể trong thời gian giới hạn',
-    icon: IconClock, color: '#EF4444', href: '/games/time-challenge' },
+    icon: IconClock, color: STATUS.danger, href: '/games/time-challenge' },
   { id: 'fill-blank', name: 'Fill in the Blank', description: 'Điền mạo từ đúng vào chỗ trống',
-    icon: IconPenTool, color: '#8B5CF6', href: '/games/fill-blank' },
+    icon: IconPenTool, color: ACCENT.vocab, href: '/games/fill-blank' },
   { id: 'flashcards', name: 'Flashcards', description: 'Học từ vựng với thẻ ghi nhớ',
-    icon: IconLayers, color: '#22C55E', href: '/games/flashcards' },
+    icon: IconLayers, color: STATUS.success, href: '/games/flashcards' },
   { id: 'srs-review', name: 'SRS Review', description: 'Ôn tập thông minh với thuật toán SM-2',
-    icon: IconBookOpen, color: '#F59E0B', href: '/review', badge: 'SM-2' },
+    icon: IconBookOpen, color: ACCENT.xp, href: '/review', badge: 'SM-2' },
   { id: 'word-match', name: 'Word Match', description: 'Ghép từ với nghĩa tương ứng',
-    icon: IconLink, color: '#06B6D4', href: '/games/word-match' },
+    icon: IconLink, color: ACCENT.cyan, href: '/games/word-match' },
   { id: 'listening', name: 'Listening Quiz', description: 'Nghe và chọn từ đúng',
-    icon: IconHeadphones, color: '#F97316', href: '/games/listening' },
+    icon: IconHeadphones, color: ACCENT.games, href: '/games/listening' },
   { id: 'spelling', name: 'Spelling Bee', description: 'Viết đúng chính tả từ tiếng Đức',
-    icon: IconSpellCheck, color: '#EC4899', href: '/games/spelling' },
+    icon: IconSpellCheck, color: ACCENT.listening, href: '/games/spelling' },
 ];
 
 export default function GamesPage() {
   const { playClick } = useSoundEffects();
 
   return (
-      <div className="py-6">
-        {/* Header */}
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-11 h-11 rounded-2xl flex items-center justify-center"
-            style={{ background: 'linear-gradient(135deg, #8B5CF6, #6366F1)' }}>
-            <IconGamepad size={22} style={{ color: 'white' }} />
+    <div className="py-6 pb-12">
+      {/* Hero Section */}
+      <div className="relative rounded-[2rem] overflow-hidden mb-8 bg-slate-900 group">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_-20%,#4338ca,transparent)] opacity-40" />
+        
+        <div className="relative z-10 px-6 py-10 md:py-12 flex flex-col items-center text-center">
+          <div className="w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center mb-4 shadow-xl transform transition-transform group-hover:rotate-6">
+            <IconGamepad size={28} className="text-white" />
           </div>
-          <div>
-            <h1 className="text-2xl font-bold" style={{ color: 'var(--theme-text-primary)' }}>Trò chơi</h1>
-            <p className="text-body" style={{ color: 'var(--theme-text-muted)' }}>
-              Học tiếng Đức qua các trò chơi thú vị
-            </p>
+          <h1 className="text-3xl md:text-4xl font-black text-white tracking-tight mb-2">
+            Game <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">Center</span>
+          </h1>
+          <p className="text-sm md:text-base text-slate-400 max-w-xl font-medium leading-relaxed">
+            Học tiếng Đức qua các thử thách kịch tính và tích lũy từ vựng mỗi ngày.
+          </p>
+          
+          <div className="flex gap-3 mt-6">
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-white text-[10px] font-black uppercase tracking-widest">
+              <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+              8 Games
+            </div>
           </div>
         </div>
+      </div>
 
-        {/* Games grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {games.map(game => {
-            const Ic = game.icon;
-            return (
-              <Link key={game.id}
-                href={game.href}
-                onClick={() => playClick()}
-                className="group relative overflow-hidden rounded-card border shadow-card p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-hero"
-                style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
+      {/* Games grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {games.map((game, idx) => {
+          const Ic = game.icon;
+          return (
+            <Link key={game.id}
+              href={game.href}
+              onClick={() => playClick()}
+              className="group relative h-full rounded-3xl border-2 p-5 transition-all duration-300 hover:-translate-y-1.5 active:scale-95 flex flex-col"
+              style={{ 
+                borderColor: 'var(--theme-border)', 
+                backgroundColor: 'var(--theme-bg-card)',
+                animation: `slideUp .4s cubic-bezier(0.16, 1, 0.3, 1) ${idx * 0.05}s both`
+              }}>
 
-                {/* Hover overlay */}
-                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                  style={{ background: `linear-gradient(135deg, ${game.color}06, ${game.color}03)` }} />
+              {/* Hover Glow */}
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-3xl pointer-events-none"
+                style={{ boxShadow: `0 12px 30px ${game.color}10` }} />
 
-                {/* Decorative circle */}
-                <div className="absolute -top-6 -right-6 w-20 h-20 rounded-full transition-transform duration-300 group-hover:scale-110"
-                  style={{ backgroundColor: game.color, opacity: 0.04 }} />
+              {/* Special Badge */}
+              {game.badge && (
+                <div className="absolute top-4 right-4 px-2 py-0.5 rounded-lg text-[9px] font-black tracking-widest text-white shadow-sm"
+                  style={{ background: `linear-gradient(135deg, ${game.color}, ${game.color}cc)` }}>
+                  {game.badge}
+                </div>
+              )}
 
-                {/* Special Badge */}
-                {game.badge && (
-                  <div className="absolute top-3 right-3 px-2 py-0.5 rounded-md text-caption font-bold text-white"
-                    style={{ background: `linear-gradient(135deg, ${game.color}, ${game.color}cc)` }}>
-                    {game.badge}
-                  </div>
-                )}
-
+              <div className="flex items-start gap-4 flex-1">
                 {/* Icon */}
-                <div className="relative w-12 h-12 rounded-xl flex items-center justify-center mb-3
-                  transition-transform duration-300 group-hover:scale-110"
-                  style={{ background: `linear-gradient(135deg, ${game.color}20, ${game.color}10)` }}>
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 shadow-sm transition-all duration-300 group-hover:scale-110"
+                  style={{ 
+                    background: `${game.color}10`,
+                    border: `1px solid ${game.color}20`
+                  }}>
                   <Ic size={22} style={{ color: game.color }} />
                 </div>
 
-                {/* Content */}
-                <h3 className="relative text-base font-bold mb-1" style={{ color: 'var(--theme-text-primary)' }}>
-                  {game.name}
-                </h3>
-                <p className="relative text-xs leading-relaxed" style={{ color: 'var(--theme-text-muted)' }}>
-                  {game.description}
-                </p>
-
-                {/* Play hint */}
-                <div className="relative mt-3 text-xs font-semibold opacity-0 group-hover:opacity-100
-                  transition-all duration-300 translate-y-1 group-hover:translate-y-0"
-                  style={{ color: game.color }}>
-                  Chơi ngay →
+                <div className="min-w-0">
+                  <h3 className="text-base font-black mb-1 tracking-tight truncate" style={{ color: 'var(--theme-text-primary)' }}>
+                    {game.name}
+                  </h3>
+                  <p className="text-xs font-medium leading-relaxed opacity-60 line-clamp-2" style={{ color: 'var(--theme-text-muted)' }}>
+                    {game.description}
+                  </p>
                 </div>
-              </Link>
-            );
-          })}
-        </div>
+              </div>
 
-        {/* Tips */}
-        <div className="mt-8 p-5 rounded-card border shadow-card"
-          style={{ backgroundColor: 'rgba(59,130,246,.03)', borderColor: 'rgba(59,130,246,.1)' }}>
-          <h3 className="text-title font-bold mb-4 flex items-center gap-2"
-            style={{ color: 'var(--theme-text-primary)' }}>
-            <span className="w-7 h-7 rounded-lg flex items-center justify-center"
-              style={{ background: 'linear-gradient(135deg, rgba(245,158,11,.15), rgba(245,158,11,.08))' }}>
-              <IconLightbulb size={15} style={{ color: '#F59E0B' }} />
-            </span>
-            Mẹo
-          </h3>
-          <div className="grid sm:grid-cols-2 gap-2.5">
+              {/* Action */}
+              <div className="mt-4 pt-4 border-t border-dashed flex items-center justify-between" style={{ borderColor: 'var(--theme-border)' }}>
+                <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest opacity-40 group-hover:opacity-100 transition-all"
+                  style={{ color: game.color }}>
+                  Chơi ngay <IconChevronRight size={12} />
+                </div>
+                <IconZap size={16} className="opacity-20 group-hover:opacity-100 transition-opacity" style={{ color: game.color }} />
+              </div>
+            </Link>
+          );
+        })}
+      </div>
+
+      {/* Tips Section */}
+      <div className="mt-12 relative rounded-3xl p-8 border-2 overflow-hidden shadow-sm"
+        style={{ backgroundColor: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}>
+        
+        {/* Background watermark */}
+        <IconLightbulb size={120} className="absolute -right-10 -bottom-10 opacity-[0.02] rotate-12" />
+
+        <div className="relative z-10">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center shadow-md"
+              style={{ background: 'linear-gradient(135deg, #F59E0B, #D97706)' }}>
+              <IconLightbulb size={20} className="text-white" />
+            </div>
+            <h3 className="text-xl font-black tracking-tight" style={{ color: 'var(--theme-text-primary)' }}>
+              Mẹo chinh phục
+            </h3>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-6">
             {[
-              { icon: IconKeyboard, text: <>Dùng phím <KBD>1</KBD> <KBD>2</KBD> <KBD>3</KBD> để trả lời nhanh</>, color: '#3B82F6' },
-              { icon: IconFlame, text: 'Combo liên tiếp sẽ được nhân điểm (tối đa x4)', color: '#EF4444' },
-              { icon: IconBookOpen, text: 'SRS Review dùng thuật toán SM-2 giúp nhớ từ lâu hơn', color: '#F59E0B' },
-              { icon: IconZap, text: 'Thay đổi số câu hỏi và thời gian trong Settings', color: '#8B5CF6' },
+              { icon: IconKeyboard, title: 'Phím tắt', text: <>Dùng <KBD>1</KBD> <KBD>2</KBD> <KBD>3</KBD> để trả lời nhanh.</>, color: ACCENT.srs },
+              { icon: IconFlame, title: 'Chuỗi Combo', text: 'Nhân điểm tối đa x4 khi trả lời đúng liên tiếp.', color: STATUS.danger },
+              { icon: IconBookOpen, title: 'Kết hợp SRS', text: 'Ôn tập từ vựng trước sẽ giúp đạt điểm cao hơn.', color: ACCENT.xp },
+              { icon: IconZap, title: 'Tùy chỉnh', text: 'Thay đổi số câu hỏi hoặc thời gian trong Cài đặt.', color: ACCENT.vocab },
             ].map((tip, i) => {
               const TipIcon = tip.icon;
               return (
-                <div key={i} className="flex items-start gap-2.5">
-                  <span className="w-6 h-6 rounded-md flex items-center justify-center shrink-0 mt-0.5"
-                    style={{ background: `${tip.color}12` }}>
-                    <TipIcon size={13} style={{ color: tip.color }} />
-                  </span>
-                  <span className="text-body" style={{ color: 'var(--theme-text-secondary)' }}>{tip.text}</span>
+                <div key={i} className="flex gap-4 group/tip">
+                  <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0"
+                    style={{ background: `${tip.color}10`, border: `1px solid ${tip.color}15` }}>
+                    <TipIcon size={18} style={{ color: tip.color }} />
+                  </div>
+                  <div>
+                    <h4 className="font-black text-sm mb-0.5" style={{ color: 'var(--theme-text-primary)' }}>{tip.title}</h4>
+                    <p className="text-xs font-medium opacity-60 leading-relaxed" style={{ color: 'var(--theme-text-muted)' }}>{tip.text}</p>
+                  </div>
                 </div>
               );
             })}
           </div>
         </div>
       </div>
+
+    </div>
   );
 }
 

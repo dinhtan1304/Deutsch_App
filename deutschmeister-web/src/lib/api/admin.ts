@@ -244,10 +244,10 @@ export interface CreateGrammarLessonPayload {
 
 export const adminGrammarApi = {
   createLesson: (data: CreateGrammarLessonPayload) =>
-    apiPost<any>('/grammar/lessons', data),
+    apiPost<{ id: string }>('/grammar/lessons', data),
 
   updateLesson: (id: string, data: Partial<CreateGrammarLessonPayload>) =>
-    api<any>(`/grammar/lessons/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+    api<{ id: string }>(`/grammar/lessons/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
 
   deleteLesson: (id: string) =>
     api<{ success: boolean }>(`/grammar/lessons/${id}`, { method: 'DELETE' }),

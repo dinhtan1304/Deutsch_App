@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { useExamListeningSession } from '@/hooks/useExamListening';
 import { ExamListeningTeil, TeilGradingDetail, ExamListeningQuestion } from '@/lib/api/examListening';
 import { PageHeader, FixedActionBar } from '@/components/ui';
+import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 
 function IconCheck({ size = 16 }: { size?: number }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}><polyline points="20 6 9 17 4 12" /></svg>;
@@ -19,18 +19,18 @@ function IconChevronDown({ size = 16 }: { size?: number }) {
 function IconChevronUp({ size = 16 }: { size?: number }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}><polyline points="18 15 12 9 6 15" /></svg>;
 }
-function IconChevronLeft({ size = 14 }: { size?: number }) {
-  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}><polyline points="15 18 9 12 15 6" /></svg>;
-}
 function IconLoader({ size = 24, style }: { size?: number; style?: React.CSSProperties }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="animate-spin" style={{ display: 'block', ...style }}><path d="M21 12a9 9 0 1 1-6.219-8.56" /></svg>;
 }
 function IconVolume2({ size = 14, style }: { size?: number; style?: React.CSSProperties }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" /><path d="M15.54 8.46a5 5 0 0 1 0 7.07" /></svg>;
 }
-
-const ACCENT = '#EC4899';
-const GRADIENT = 'linear-gradient(135deg, #EC4899, #8B5CF6)';
+function IconShare({ size = 16 }: { size?: number }) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" /><polyline points="16 6 12 2 8 6" /><line x1="12" y1="2" x2="12" y2="15" /></svg>;
+}
+function IconSparkles({ size = 16 }: { size?: number }) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" /><path d="M5 3v4" /><path d="M3 5h4" /><path d="M21 17v4" /><path d="M19 19h4" /></svg>;
+}
 
 function speakText(text: string) {
   if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
@@ -49,13 +49,17 @@ function taskTypeLabel(type: string) {
   return map[type] || type;
 }
 
+function scoreColor(pct: number) {
+  return pct >= 80 ? STATUS.success : pct >= 60 ? STATUS.warning : STATUS.danger;
+}
+
 // ─── Score Ring ───
 function ScoreRing({ score, size = 120 }: { score: number; size?: number }) {
   const r = (size - 16) / 2;
   const c = 2 * Math.PI * r;
   const pct = Math.max(0, Math.min(100, score));
+  const color = scoreColor(pct);
   const passed = pct >= 60;
-  const color = pct >= 80 ? '#22C55E' : pct >= 60 ? '#F59E0B' : '#EF4444';
   return (
     <div style={{ position: 'relative', width: size, height: size }}>
       <svg width={size} height={size} style={{ transform: 'rotate(-90deg)' }}>
@@ -65,7 +69,7 @@ function ScoreRing({ score, size = 120 }: { score: number; size?: number }) {
       </svg>
       <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
         <span style={{ fontSize: 26, fontWeight: 800, color, lineHeight: 1 }}>{Math.round(pct)}%</span>
-        <span style={{ fontSize: 11, color: passed ? '#22C55E' : '#EF4444', fontWeight: 700, marginTop: 2 }}>
+        <span style={{ fontSize: 11, color: passed ? STATUS.success : STATUS.danger, fontWeight: 700, marginTop: 2 }}>
           {passed ? 'Bestanden' : 'Nicht b.'}
         </span>
       </div>
@@ -76,7 +80,7 @@ function ScoreRing({ score, size = 120 }: { score: number; size?: number }) {
 // ─── Teil Score Bar ───
 function TeilScoreBar({ correct, total }: { correct: number; total: number }) {
   const pct = total > 0 ? (correct / total) * 100 : 0;
-  const color = pct >= 80 ? '#22C55E' : pct >= 60 ? '#F59E0B' : '#EF4444';
+  const color = scoreColor(pct);
   return (
     <div className="flex items-center gap-2 mt-1">
       <div className="flex-1 h-2 rounded-full" style={{ backgroundColor: 'var(--theme-border)' }}>
@@ -97,7 +101,7 @@ function TranscriptSection({ texts }: { texts: ExamListeningTeil['texts'] }) {
         style={{ backgroundColor: 'var(--theme-bg-secondary)' }}
         onClick={() => setShow(v => !v)}>
         <div className="flex items-center gap-2">
-          <IconVolume2 size={14} style={{ color: ACCENT }} />
+          <IconVolume2 size={14} style={{ color: ACCENT.listening }} />
           <span className="text-body font-semibold" style={{ color: 'var(--theme-text-primary)' }}>
             {show ? 'Ẩn transcript' : 'Xem transcript (audio text)'}
           </span>
@@ -112,7 +116,7 @@ function TranscriptSection({ texts }: { texts: ExamListeningTeil['texts'] }) {
                 <div className="flex items-center gap-2 mb-1">
                   {text.label && (
                     <span className="w-6 h-6 rounded-lg flex items-center justify-center text-caption font-extrabold text-white"
-                      style={{ background: GRADIENT }}>{text.label}</span>
+                      style={{ background: GRADIENT.listening }}>{text.label}</span>
                   )}
                   {text.title && <p className="text-xs font-bold" style={{ color: 'var(--theme-text-primary)' }}>{text.title}</p>}
                 </div>
@@ -123,8 +127,8 @@ function TranscriptSection({ texts }: { texts: ExamListeningTeil['texts'] }) {
               </p>
               <button onClick={() => speakText(text.content)}
                 className="flex items-center gap-1 mt-1.5 text-caption font-semibold"
-                style={{ color: ACCENT }}>
-                <IconVolume2 size={11} style={{ color: ACCENT }} /> Nghe lại
+                style={{ color: ACCENT.listening }}>
+                <IconVolume2 size={11} style={{ color: ACCENT.listening }} /> Nghe lại
               </button>
             </div>
           ))}
@@ -147,12 +151,13 @@ function QuestionReview({ teil, details }: { teil: ExamListeningTeil; details: T
         const expanded = expandedQ === q.id;
         return (
           <div key={q.id} className="rounded-xl border overflow-hidden"
-            style={{ borderColor: detail.isCorrect ? 'rgba(34,197,94,.3)' : 'rgba(239,68,68,.3)' }}>
+            style={{ borderColor: detail.isCorrect ? `${STATUS.success}4D` : `${STATUS.danger}4D` }}>
             <button
               className="w-full flex items-start gap-3 p-3 text-left transition-colors hover:opacity-80"
-              style={{ backgroundColor: detail.isCorrect ? 'rgba(34,197,94,.05)' : 'rgba(239,68,68,.05)' }}
+              style={{ backgroundColor: detail.isCorrect ? `${STATUS.success}0D` : `${STATUS.danger}0D` }}
               onClick={() => setExpandedQ(expanded ? null : q.id)}>
-              <span className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5 text-white ${detail.isCorrect ? 'bg-green-500' : 'bg-red-500'}`}>
+              <span className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5 text-white"
+                style={{ backgroundColor: detail.isCorrect ? STATUS.success : STATUS.danger }}>
                 {detail.isCorrect ? <IconCheck size={12} /> : <IconX size={12} />}
               </span>
               <div className="flex-1 min-w-0">
@@ -160,7 +165,7 @@ function QuestionReview({ teil, details }: { teil: ExamListeningTeil; details: T
                   {i + 1}. {q.questionText}
                 </p>
                 {!detail.isCorrect && (
-                  <p className="text-xs mt-0.5" style={{ color: '#EF4444' }}>
+                  <p className="text-xs mt-0.5" style={{ color: STATUS.danger }}>
                     Bạn: <strong>{detail.userAnswer ?? '—'}</strong> · Đáp án: <strong>{detail.correctAnswer}</strong>
                   </p>
                 )}
@@ -176,14 +181,14 @@ function QuestionReview({ teil, details }: { teil: ExamListeningTeil; details: T
                   <div className="flex items-center gap-1.5 text-xs">
                     <span style={{ color: 'var(--theme-text-muted)' }}>Bạn trả lời:</span>
                     <span className="font-bold px-2 py-0.5 rounded-lg"
-                      style={{ backgroundColor: detail.isCorrect ? 'rgba(34,197,94,.1)' : 'rgba(239,68,68,.1)', color: detail.isCorrect ? '#22C55E' : '#EF4444' }}>
+                      style={{ backgroundColor: detail.isCorrect ? `${STATUS.success}1A` : `${STATUS.danger}1A`, color: detail.isCorrect ? STATUS.success : STATUS.danger }}>
                       {detail.userAnswer ?? '(bỏ qua)'}
                     </span>
                   </div>
                   {!detail.isCorrect && (
                     <div className="flex items-center gap-1.5 text-xs">
                       <span style={{ color: 'var(--theme-text-muted)' }}>Đúng:</span>
-                      <span className="font-bold px-2 py-0.5 rounded-lg" style={{ backgroundColor: 'rgba(34,197,94,.1)', color: '#22C55E' }}>{detail.correctAnswer}</span>
+                      <span className="font-bold px-2 py-0.5 rounded-lg" style={{ backgroundColor: `${STATUS.success}1A`, color: STATUS.success }}>{detail.correctAnswer}</span>
                     </div>
                   )}
                 </div>
@@ -195,8 +200,8 @@ function QuestionReview({ teil, details }: { teil: ExamListeningTeil; details: T
                       return (
                         <div key={opt.id} className="flex items-start gap-2 rounded-lg px-2.5 py-1.5 text-xs"
                           style={{
-                            backgroundColor: isCorrect ? 'rgba(34,197,94,.08)' : isUser && !isCorrect ? 'rgba(239,68,68,.08)' : 'transparent',
-                            color: isCorrect ? '#22C55E' : isUser && !isCorrect ? '#EF4444' : 'var(--theme-text-secondary)',
+                            backgroundColor: isCorrect ? `${STATUS.success}14` : isUser && !isCorrect ? `${STATUS.danger}14` : 'transparent',
+                            color: isCorrect ? STATUS.success : isUser && !isCorrect ? STATUS.danger : 'var(--theme-text-secondary)',
                           }}>
                           <span className="font-bold w-4 shrink-0">{opt.id.toUpperCase()})</span>
                           <span>{opt.text}</span>
@@ -242,7 +247,7 @@ export default function ExamListeningResultPage() {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="flex flex-col items-center gap-3">
-          <IconLoader size={28} style={{ color: ACCENT }} />
+          <IconLoader size={28} style={{ color: ACCENT.listening }} />
           <p className="text-sm" style={{ color: 'var(--theme-text-muted)' }}>Đang tải kết quả...</p>
         </div>
       </div>
@@ -266,13 +271,12 @@ export default function ExamListeningResultPage() {
         accent="listening"
         right={
           <span className="px-3 py-1 rounded-xl text-xs font-bold"
-            style={{ backgroundColor: 'rgba(236,72,153,.1)', color: ACCENT }}>
+            style={{ backgroundColor: `${ACCENT.listening}1A`, color: ACCENT.listening }}>
             {session.examType} {session.cefrLevel}
           </span>
         }
       />
 
-      {/* Hero Score Card */}
       <div className="rounded-2xl border mb-5 overflow-hidden"
         style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
         <div className="px-5 pt-4 pb-3 border-b text-center" style={{ borderColor: 'var(--theme-border)' }}>
@@ -294,7 +298,7 @@ export default function ExamListeningResultPage() {
           <div className="sm:w-1/2 flex flex-col justify-center p-5 gap-3">
             <div className="flex items-center gap-2">
               <span className="text-h2">{passed ? '✓' : '✗'}</span>
-              <h2 className="text-title font-extrabold" style={{ color: passed ? '#22C55E' : '#EF4444' }}>
+              <h2 className="text-title font-extrabold" style={{ color: passed ? STATUS.success : STATUS.danger }}>
                 {passed ? 'Bestanden!' : 'Nicht bestanden'}
               </h2>
             </div>
@@ -305,8 +309,8 @@ export default function ExamListeningResultPage() {
             </p>
             <div className="grid grid-cols-2 gap-2 mt-1">
               {[
-                { label: 'Đúng', value: session.correctCount, color: '#22C55E', bg: 'rgba(34,197,94,.1)' },
-                { label: 'Sai', value: (session.totalQuestions ?? 0) - (session.correctCount ?? 0), color: '#EF4444', bg: 'rgba(239,68,68,.1)' },
+                { label: 'Đúng', value: session.correctCount,                                          color: STATUS.success, bg: `${STATUS.success}1A` },
+                { label: 'Sai',  value: (session.totalQuestions ?? 0) - (session.correctCount ?? 0),  color: STATUS.danger,  bg: `${STATUS.danger}1A` },
               ].map(s => (
                 <div key={s.label} className="flex flex-col items-center gap-1 rounded-xl py-3"
                   style={{ backgroundColor: s.bg }}>
@@ -318,7 +322,6 @@ export default function ExamListeningResultPage() {
           </div>
         </div>
 
-        {/* Per-Teil breakdown */}
         {teilScores.length > 0 && (
           <div className="border-t px-5 py-4 space-y-3" style={{ borderColor: 'var(--theme-border)' }}>
             <p className="text-xs font-bold uppercase tracking-wide" style={{ color: 'var(--theme-text-muted)' }}>
@@ -332,12 +335,12 @@ export default function ExamListeningResultPage() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <span className="w-6 h-6 rounded-lg flex items-center justify-center text-caption font-extrabold text-white"
-                        style={{ background: GRADIENT }}>{ts.teil}</span>
+                        style={{ background: GRADIENT.listening }}>{ts.teil}</span>
                       <span className="text-body font-semibold" style={{ color: 'var(--theme-text-primary)' }}>
                         {teil ? taskTypeLabel(teil.taskType) : `Teil ${ts.teil}`}
                       </span>
                     </div>
-                    <span className="text-xs font-bold" style={{ color: pct >= 60 ? '#22C55E' : '#EF4444' }}>
+                    <span className="text-xs font-bold" style={{ color: scoreColor(pct) }}>
                       {Math.round(pct)}%
                     </span>
                   </div>
@@ -349,7 +352,6 @@ export default function ExamListeningResultPage() {
         )}
       </div>
 
-      {/* Detailed Review per Teil */}
       <div>
         <h3 className="text-body font-bold uppercase tracking-wider mb-3"
           style={{ color: 'var(--theme-text-muted)' }}>
@@ -370,13 +372,13 @@ export default function ExamListeningResultPage() {
                   onClick={() => setExpandedTeil(isExpanded ? null : teil.number)}>
                   <div className="flex items-center gap-3">
                     <span className="w-8 h-8 rounded-xl flex items-center justify-center text-xs font-extrabold text-white"
-                      style={{ background: GRADIENT }}>{teil.number}</span>
+                      style={{ background: GRADIENT.listening }}>{teil.number}</span>
                     <div className="text-left">
                       <p className="text-sm font-bold" style={{ color: 'var(--theme-text-primary)' }}>
                         {taskTypeLabel(teil.taskType)}
                       </p>
                       {ts && (
-                        <p className="text-xs" style={{ color: pct >= 60 ? '#22C55E' : '#EF4444' }}>
+                        <p className="text-xs" style={{ color: scoreColor(pct) }}>
                           {ts.correct}/{ts.total} richtig · {Math.round(pct)}%
                         </p>
                       )}
@@ -404,27 +406,20 @@ export default function ExamListeningResultPage() {
         </div>
       </div>
 
-      <FixedActionBar columns={3}>
-        <Link href="/practice-test/listening/exam"
-          className="flex flex-col items-center gap-1 py-2 px-3 rounded-xl text-xs font-semibold transition-all hover:opacity-70"
-          style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-secondary)' }}>
-          <span className="text-base">📋</span>
-          Danh sách
-        </Link>
-        <Link href="/practice-test/listening/exam/new"
-          className="flex flex-col items-center gap-1 py-2 px-3 rounded-xl text-xs font-bold text-white transition-all hover:-translate-y-0.5"
-          style={{ background: GRADIENT }}>
-          <span className="text-base">🎧</span>
-          Bài mới
-        </Link>
+      <FixedActionBar columns={2}>
         <button
-          className="flex flex-col items-center gap-1 py-2 px-3 rounded-xl text-xs font-semibold transition-all hover:opacity-70"
-          style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-secondary)' }}
+          className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl font-bold text-sm border-2 transition-all hover:bg-black/5"
+          style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)', backgroundColor: 'var(--theme-bg-card)' }}
           onClick={() => {
             navigator.share?.({ title: 'DeutschMeister', text: `Tôi đạt ${Math.round(score)}% bài nghe ${session.examType} ${session.cefrLevel}!` }).catch(() => {});
           }}>
-          <span className="text-base">🔗</span>
-          Chia sẻ
+          <IconShare size={16} /> Chia sẻ
+        </button>
+        <button
+          className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl font-bold text-sm text-white transition-all hover:-translate-y-0.5 shadow-lg"
+          style={{ background: GRADIENT.listening, boxShadow: `0 8px 24px ${ACCENT.listening}40` }}
+          onClick={() => router.push('/practice-test/listening/exam/new')}>
+          <IconSparkles size={16} /> Bài mới
         </button>
       </FixedActionBar>
     </div>

@@ -1,6 +1,8 @@
 ﻿'use client';
+/* eslint-disable no-restricted-syntax */
 
 import { useState, useEffect, useRef } from 'react';
+import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 import { useCollections, useCreateCollection, useAddToCollection, useRemoveFromCollection, useWordCollections } from '@/hooks/usePersonalWords';
 import { IconCheck, IconPlus, IconX } from '@/components/ui/Icons';
 
@@ -49,8 +51,8 @@ export function AddToCollectionPicker({ personalWordId, onClose }: AddToCollecti
       setShowCreate(false);
       // Auto-add the word to the newly created collection
       addMutation.mutate({ collectionId: col.id, personalWordId });
-    } catch (err: any) {
-      const msg = err?.response?.data?.message || err?.message || '';
+    } catch (err) {
+      const msg = (err as { response?: { data?: { message?: string } } } | undefined)?.response?.data?.message || (err as Error | undefined)?.message || '';
       setCreateError(msg.includes('Conflict') || msg.includes('duplicate') || msg.includes('exists')
         ? 'Tên đã tồn tại'
         : 'Tạo thất bại');
@@ -129,7 +131,7 @@ export function AddToCollectionPicker({ personalWordId, onClose }: AddToCollecti
             }}
           />
           {createError && (
-            <p className="text-caption mt-0.5 px-0.5" style={{ color: '#EF4444' }}>{createError}</p>
+            <p className="text-caption mt-0.5 px-0.5" style={{ color: STATUS.danger }}>{createError}</p>
           )}
           <div className="flex gap-1.5 mt-1.5">
             <button

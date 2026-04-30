@@ -1,10 +1,12 @@
-﻿'use client';
+'use client';
+/* eslint-disable no-restricted-syntax */
 
 import type { DashboardStats } from '@/types/dashboard';
 import {
   IconFlame, IconBookOpen, IconTarget,
   IconClock, IconLayers, IconBrain, IconGraduationCap,
 } from '@/components/ui/Icons';
+import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 
 interface StatsCardsProps {
   stats: DashboardStats;
@@ -28,7 +30,7 @@ const cardConfigs: StatCardConfig[] = [
     getSubValue: s => s.streak > 0 ? 'ngày liên tiếp' : 'Bắt đầu hôm nay!',
     gradient: 'linear-gradient(135deg, rgba(249,115,22,.12), rgba(251,191,36,.08))',
     iconBg: 'linear-gradient(135deg, #F97316, #FBBF24)',
-    accent: '#F97316',
+    accent: ACCENT.games,
   },
   {
     icon: IconBookOpen,
@@ -37,7 +39,7 @@ const cardConfigs: StatCardConfig[] = [
     getSubValue: s => `/ ${s.totalWords} từ`,
     gradient: 'linear-gradient(135deg, rgba(59,130,246,.12), rgba(99,102,241,.08))',
     iconBg: 'linear-gradient(135deg, #3B82F6, #6366F1)',
-    accent: '#3B82F6',
+    accent: ACCENT.srs,
   },
   {
     icon: IconTarget,
@@ -64,7 +66,7 @@ const cardConfigs: StatCardConfig[] = [
     },
     gradient: 'linear-gradient(135deg, rgba(139,92,246,.12), rgba(168,85,247,.08))',
     iconBg: 'linear-gradient(135deg, #8B5CF6, #A855F7)',
-    accent: '#8B5CF6',
+    accent: ACCENT.vocab,
   },
   {
     icon: IconLayers,
@@ -73,7 +75,7 @@ const cardConfigs: StatCardConfig[] = [
     getSubValue: s => `/ ${s.totalTopics} chủ đề`,
     gradient: 'linear-gradient(135deg, rgba(236,72,153,.12), rgba(244,114,182,.08))',
     iconBg: 'linear-gradient(135deg, #EC4899, #F472B6)',
-    accent: '#EC4899',
+    accent: ACCENT.listening,
   },
   {
     icon: IconGraduationCap,
@@ -82,7 +84,7 @@ const cardConfigs: StatCardConfig[] = [
     getSubValue: s => `/ ${s.grammarTotal ?? 0} bài học`,
     gradient: 'linear-gradient(135deg, rgba(245,158,11,.12), rgba(252,211,77,.08))',
     iconBg: 'linear-gradient(135deg, #F59E0B, #FCD34D)',
-    accent: '#F59E0B',
+    accent: ACCENT.xp,
   },
   {
     icon: IconBrain,
@@ -91,24 +93,35 @@ const cardConfigs: StatCardConfig[] = [
     getSubValue: s => s.wordsToReview > 0 ? 'từ hôm nay' : 'Tuyệt vời!',
     gradient: 'linear-gradient(135deg, rgba(6,182,212,.12), rgba(34,211,238,.08))',
     iconBg: 'linear-gradient(135deg, #06B6D4, #22D3EE)',
-    accent: '#06B6D4',
+    accent: ACCENT.cyan,
   },
 ];
 
 export function StatsCards({ stats }: StatsCardsProps) {
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-3 xl:grid-cols-4 gap-3">
       {cardConfigs.map((card, i) => {
         const Icon = card.icon;
         const value = card.getValue(stats);
         const sub = card.getSubValue(stats);
         const isStreakCard = card.label === 'Streak liên tiếp';
+        const isReviewCard = card.label === 'Cần ôn tập';
+
+        // Balance the 7-item grid:
+        // md & xl (4 cols): Streak takes 2 cols, others 1 col (2+1+1 + 1+1+1+1 = 8 slots = 2 rows)
+        // sm & lg (3 cols): Review takes 3 cols, others 1 col (1+1+1 + 1+1+1 + 3 = 9 slots = 3 rows)
+        // mobile (2 cols): Review takes 2 cols
+        const colSpanClass = isStreakCard
+          ? 'col-span-1 md:col-span-2 lg:col-span-1 xl:col-span-2'
+          : isReviewCard
+            ? 'col-span-2 sm:col-span-3 md:col-span-1 lg:col-span-3 xl:col-span-1'
+            : 'col-span-1';
 
         return (
           <div
             key={i}
-            className="relative overflow-hidden rounded-2xl p-4 transition-all duration-300
-              hover:-translate-y-0.5 hover:shadow-lg cursor-default group"
+            className={`relative overflow-hidden rounded-2xl p-4 transition-all duration-300
+              hover:-translate-y-0.5 hover:shadow-lg cursor-default group ${colSpanClass}`}
             style={{ background: card.gradient }}
           >
             {/* Streak freeze badge — only on streak card */}
@@ -117,7 +130,7 @@ export function StatsCards({ stats }: StatsCardsProps) {
                 className="absolute top-2 right-2 flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-caption font-bold z-10"
                 style={{
                   background: 'rgba(59,130,246,.15)',
-                  color: '#3B82F6',
+                  color: ACCENT.srs,
                   border: '1px solid rgba(59,130,246,.3)',
                 }}
                 title={`${stats.streakFreezesAvailable} streak freeze — bảo vệ streak nếu bạn lỡ 1 ngày`}

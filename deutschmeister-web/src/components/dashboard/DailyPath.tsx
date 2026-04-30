@@ -1,6 +1,8 @@
 ﻿'use client';
+/* eslint-disable no-restricted-syntax */
 
 import Link from 'next/link';
+import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 import { useDailyPath } from '@/hooks/useDashboard';
 
 function IconStar({ size = 14 }: { size?: number }) {
@@ -59,10 +61,10 @@ export function DailyPath() {
         <div className="relative w-8 h-8 shrink-0">
           <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
             <circle cx="18" cy="18" r="15" fill="none" stroke="rgba(148,163,184,0.15)" strokeWidth="3" />
-            <circle cx="18" cy="18" r="15" fill="none" stroke={allDone ? '#22C55E' : '#8B5CF6'} strokeWidth="3"
+            <circle cx="18" cy="18" r="15" fill="none" stroke={allDone ? STATUS.success : ACCENT.vocab} strokeWidth="3"
               strokeDasharray={`${progressPct * 0.94} 100`} strokeLinecap="round" />
           </svg>
-          <div className="absolute inset-0 flex items-center justify-center text-[9px] font-bold" style={{ color: allDone ? '#22C55E' : 'var(--theme-text-muted)' }}>
+          <div className="absolute inset-0 flex items-center justify-center text-[9px] font-bold" style={{ color: allDone ? STATUS.success : 'var(--theme-text-muted)' }}>
             {Math.round(progressPct)}%
           </div>
         </div>

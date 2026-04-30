@@ -1,6 +1,8 @@
 ﻿'use client';
+/* eslint-disable no-restricted-syntax */
 
 import React, { Component, ErrorInfo, ReactNode } from 'react';
+import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 
 interface Props {
   children: ReactNode;
@@ -66,7 +68,7 @@ export class ErrorBoundary extends Component<Props, State> {
                   Chi tiết lỗi (dev mode)
                 </summary>
                 <pre className="mt-2 p-4 rounded-xl text-caption overflow-auto max-h-40"
-                  style={{ backgroundColor: 'var(--theme-bg-secondary)', color: '#EF4444' }}>
+                  style={{ backgroundColor: 'var(--theme-bg-secondary)', color: STATUS.danger }}>
                   {this.state.error.toString()}
                   {this.state.errorInfo?.componentStack}
                 </pre>

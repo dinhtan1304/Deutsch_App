@@ -1,6 +1,8 @@
-﻿'use client';
+'use client';
+/* eslint-disable no-restricted-syntax */
 
 import Link from 'next/link';
+import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 import { useSkills } from '@/hooks/useUser';
 import type { SkillScores, SkillScore } from '@/lib/api/users';
 
@@ -12,11 +14,11 @@ const SKILLS: {
   color: string;
   href: string;
 }[] = [
-  { key: 'reading',   label: 'Đọc',      color: '#22C55E', href: '/practice-test/reading' },
-  { key: 'writing',   label: 'Viết',      color: '#6366F1', href: '/practice-test/writing' },
-  { key: 'listening', label: 'Nghe',      color: '#06B6D4', href: '/practice-test/listening' },
-  { key: 'speaking',  label: 'Nói',       color: '#F59E0B', href: '/practice-test/pronunciation' },
-  { key: 'grammar',   label: 'Ngữ pháp', color: '#8B5CF6', href: '/grammar' },
+  { key: 'reading',   label: 'Đọc',      color: STATUS.success, href: '/practice-test/reading' },
+  { key: 'writing',   label: 'Viết',      color: ACCENT.writing, href: '/practice-test/writing' },
+  { key: 'listening', label: 'Nghe',      color: ACCENT.cyan, href: '/practice-test/listening' },
+  { key: 'speaking',  label: 'Nói',       color: ACCENT.xp, href: '/practice-test/pronunciation' },
+  { key: 'grammar',   label: 'Ngữ pháp', color: ACCENT.vocab, href: '/grammar' },
 ];
 
 const CX = 140;
@@ -74,7 +76,7 @@ function RadarChart({ data }: { data: SkillScores }) {
     .join(' ');
 
   return (
-    <svg viewBox="0 0 280 280" className="w-full max-w-[280px] mx-auto">
+    <svg viewBox="0 0 280 280" className="w-full max-w-[280px] mx-auto drop-shadow-[0_0_15px_rgba(99,102,241,0.1)]">
       {/* Grid rings */}
       {LEVELS.map((pct) => {
         const pts = Array.from({ length: n }, (_, i) => {
@@ -87,8 +89,8 @@ function RadarChart({ data }: { data: SkillScores }) {
             points={pts}
             fill="none"
             stroke="var(--theme-border)"
-            strokeWidth={pct === 100 ? 1.5 : 0.8}
-            opacity={pct === 100 ? 0.6 : 0.3}
+            strokeWidth={pct === 100 ? 1.5 : 0.5}
+            opacity={pct === 100 ? 0.4 : 0.15}
           />
         );
       })}
@@ -104,8 +106,8 @@ function RadarChart({ data }: { data: SkillScores }) {
             x2={x}
             y2={y}
             stroke="var(--theme-border)"
-            strokeWidth={0.8}
-            opacity={0.3}
+            strokeWidth={0.5}
+            opacity={0.15}
           />
         );
       })}
@@ -113,10 +115,11 @@ function RadarChart({ data }: { data: SkillScores }) {
       {/* Data polygon */}
       <polygon
         points={polyPoints}
-        fill="rgba(99,102,241,.12)"
+        fill="rgba(99,102,241,.15)"
         stroke="#6366F1"
-        strokeWidth={2}
+        strokeWidth={2.5}
         strokeLinejoin="round"
+        className="transition-all duration-1000"
       />
 
       {/* Data dots */}
@@ -125,21 +128,23 @@ function RadarChart({ data }: { data: SkillScores }) {
         const sk = data[SKILLS[i].key] as SkillScore;
         if (sk.score === null) return null;
         return (
-          <circle
-            key={i}
-            cx={x}
-            cy={y}
-            r={4}
-            fill={SKILLS[i].color}
-            stroke="white"
-            strokeWidth={2}
-          />
+          <g key={i} className="transition-all duration-500">
+            <circle cx={x} cy={y} r={6} fill={SKILLS[i].color} opacity={0.2} />
+            <circle
+              cx={x}
+              cy={y}
+              r={3.5}
+              fill={SKILLS[i].color}
+              stroke="white"
+              strokeWidth={2}
+            />
+          </g>
         );
       })}
 
       {/* Axis labels */}
       {SKILLS.map((s, i) => {
-        const labelR = R + 22;
+        const labelR = R + 26;
         const [x, y] = polarToXY(i * step, labelR);
         const sk = data[s.key] as SkillScore;
         return (
@@ -149,9 +154,11 @@ function RadarChart({ data }: { data: SkillScores }) {
             y={y}
             textAnchor="middle"
             dominantBaseline="central"
-            fontSize={11}
-            fontWeight={700}
-            fill={sk.score !== null ? s.color : 'var(--theme-text-muted)'}
+            className="text-[10px] font-black uppercase tracking-widest"
+            style={{
+              fill: sk.score !== null ? s.color : 'var(--theme-text-muted)',
+              opacity: sk.score !== null ? 1 : 0.4
+            }}
           >
             {s.label}
           </text>
@@ -174,27 +181,27 @@ function SkillRow({
 }) {
   return (
     <div
-      className="flex items-center gap-3 px-3 py-2 rounded-xl transition-colors"
+      className="group flex items-center gap-3 px-4 py-2.5 rounded-2xl transition-all duration-300"
       style={{
-        backgroundColor: isWeakest ? 'rgba(239,68,68,.06)' : 'var(--theme-bg-secondary)',
-        border: isWeakest ? '1px solid rgba(239,68,68,.18)' : '1px solid transparent',
+        backgroundColor: isWeakest ? 'rgba(239,68,68,.1)' : 'var(--theme-bg-secondary)44',
+        border: `1px solid ${isWeakest ? 'rgba(239,68,68,.25)' : 'var(--theme-border)'}`,
       }}
     >
       {/* Color dot */}
-      <span
-        className="w-2.5 h-2.5 rounded-full shrink-0"
-        style={{ backgroundColor: skill.color }}
+      <div
+        className="w-2.5 h-2.5 rounded-full shrink-0 shadow-[0_0_8px_currentColor]"
+        style={{ backgroundColor: skill.color, color: skill.color }}
       />
       {/* Label */}
       <span
-        className="flex-1 text-body font-medium"
+        className="flex-1 text-[11px] font-black uppercase tracking-widest opacity-70 group-hover:opacity-100 transition-opacity"
         style={{ color: 'var(--theme-text-primary)' }}
       >
         {skill.label}
       </span>
       {/* Score */}
       <span
-        className="text-sm font-bold min-w-10 text-right"
+        className="text-sm font-black min-w-10 text-right"
         style={{ color: data.score !== null ? skill.color : 'var(--theme-text-muted)' }}
       >
         {data.score !== null ? data.score : '—'}
@@ -204,10 +211,10 @@ function SkillRow({
       {/* Weakest badge */}
       {isWeakest && (
         <span
-          className="text-[9px] font-bold px-1.5 py-0.5 rounded-md uppercase tracking-wider shrink-0"
-          style={{ background: 'rgba(239,68,68,.12)', color: '#EF4444' }}
+          className="text-[9px] font-black px-2 py-0.5 rounded-lg uppercase tracking-tighter shrink-0"
+          style={{ background: STATUS.danger, color: 'white' }}
         >
-          yếu
+          Weakest
         </span>
       )}
     </div>
@@ -302,29 +309,29 @@ export function SkillRadar() {
       style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}
     >
       {/* Header */}
-      <div className="flex items-center justify-between mb-1">
-        <div className="flex items-center gap-2.5">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-3">
           <div
-            className="w-8 h-8 rounded-lg flex items-center justify-center"
+            className="w-10 h-10 rounded-2xl flex items-center justify-center shadow-lg"
             style={{ background: 'linear-gradient(135deg, #6366F1, #8B5CF6)' }}
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
             </svg>
           </div>
           <div>
-            <h2 className="text-[15px] font-bold" style={{ color: 'var(--theme-text-primary)' }}>
+            <h2 className="text-base font-black tracking-tight" style={{ color: 'var(--theme-text-primary)' }}>
               Phân tích kỹ năng
             </h2>
-            <p className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>
-              Tổng quan 5 kỹ năng
+            <p className="text-[11px] opacity-50 font-medium" style={{ color: 'var(--theme-text-muted)' }}>
+              Cấp độ tinh thông 5 kỹ năng
             </p>
           </div>
         </div>
         {data.overall !== null && (
           <span
             className="text-[20px] font-extrabold"
-            style={{ color: '#6366F1' }}
+            style={{ color: ACCENT.writing }}
           >
             {data.overall}
             <span className="text-caption font-medium" style={{ color: 'var(--theme-text-muted)' }}>

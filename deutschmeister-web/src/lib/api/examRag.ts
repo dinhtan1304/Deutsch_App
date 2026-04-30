@@ -27,7 +27,7 @@ export interface ExamChunkItem {
   teilNumber: number;
   teilType: string;
   content: string;
-  metadata: any;
+  metadata: Record<string, unknown>;
   createdAt: string;
 }
 

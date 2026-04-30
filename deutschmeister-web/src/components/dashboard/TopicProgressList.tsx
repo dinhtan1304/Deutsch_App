@@ -1,6 +1,8 @@
 ﻿'use client';
+/* eslint-disable no-restricted-syntax */
 
 import Link from 'next/link';
+import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 import type { TopicProgress } from '@/types/dashboard';
 import { IconLayers, IconArrowRight } from '@/components/ui/Icons';
 
@@ -32,14 +34,14 @@ export function TopicProgressList({ data, limit }: TopicProgressListProps) {
           style={{ color: 'var(--theme-text-primary)' }}>
           <span className="w-7 h-7 rounded-lg flex items-center justify-center"
             style={{ background: 'linear-gradient(135deg, rgba(236,72,153,.15), rgba(244,114,182,.1))' }}>
-            <IconLayers size={15} style={{ color: '#EC4899' }} />
+            <IconLayers size={15} style={{ color: ACCENT.listening }} />
           </span>
           Tiến độ theo chủ đề
         </h3>
         <Link
           href="/topics"
           className="flex items-center gap-1 text-xs font-medium transition-colors hover:opacity-80"
-          style={{ color: '#3B82F6' }}
+          style={{ color: ACCENT.srs }}
         >
           Xem tất cả
           <IconArrowRight size={13} />
@@ -137,16 +139,24 @@ export function TopicProgressList({ data, limit }: TopicProgressListProps) {
 
       {/* Empty state */}
       {data.length === 0 && (
-        <div className="text-center py-8">
-          <div className="w-14 h-14 mx-auto mb-3 rounded-2xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, rgba(236,72,153,.12), rgba(244,114,182,.08))' }}>
-            <IconLayers size={28} style={{ color: '#EC4899' }} />
+        <div className="text-center py-8 px-4">
+          <div className="w-14 h-14 mx-auto mb-3 rounded-2xl flex items-center justify-center"
+            style={{ background: 'linear-gradient(135deg, rgba(236,72,153,.12), rgba(244,114,182,.08))' }}>
+            <IconLayers size={28} style={{ color: ACCENT.listening }} />
           </div>
-          <p className="text-body font-medium" style={{ color: 'var(--theme-text-secondary)' }}>
-            Chưa có chủ đề nào
+          <p className="text-body font-semibold mb-1" style={{ color: 'var(--theme-text-primary)' }}>
+            Bắt đầu học theo chủ đề
           </p>
-          <Link href="/topics" className="text-xs font-medium mt-1 inline-block"
-            style={{ color: '#3B82F6' }}>
-            Bắt đầu học ngay →
+          <p className="text-caption mb-4" style={{ color: 'var(--theme-text-muted)' }}>
+            Chọn một chủ đề để học từ vựng có hệ thống
+          </p>
+          <Link
+            href="/topics"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-body font-semibold text-white transition-all hover:-translate-y-0.5"
+            style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' }}
+          >
+            Khám phá chủ đề
+            <IconArrowRight size={14} />
           </Link>
         </div>
       )}

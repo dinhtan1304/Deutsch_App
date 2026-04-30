@@ -1,6 +1,8 @@
 'use client';
+/* eslint-disable no-restricted-syntax */
 
 import Link from 'next/link';
+import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 import { useErrorPatterns } from '@/hooks/useErrorPatterns';
 
 const ERROR_LABELS: Record<string, string> = {
@@ -16,7 +18,7 @@ const ERROR_LABELS: Record<string, string> = {
   vocabulary: 'Từ vựng',
 };
 
-const BAR_COLORS = ['#EF4444', '#F59E0B', '#3B82F6', '#8B5CF6', '#06B6D4'];
+const BAR_COLORS = [STATUS.danger, ACCENT.xp, ACCENT.srs, ACCENT.vocab, ACCENT.cyan];
 
 export function ErrorPatternsWidget() {
   const { data, isLoading } = useErrorPatterns();
@@ -46,7 +48,7 @@ export function ErrorPatternsWidget() {
           <p className="text-body mb-3" style={{ color: 'var(--theme-text-muted)' }}>
             Hoàn thành bài viết để xem phân tích lỗi
           </p>
-          <Link href="/practice-test/writing" className="text-body font-semibold" style={{ color: '#6366F1', textDecoration: 'none' }}>
+          <Link href="/practice-test/writing" className="text-body font-semibold" style={{ color: ACCENT.writing, textDecoration: 'none' }}>
             Luyện viết ngay →
           </Link>
         </div>
@@ -57,12 +59,12 @@ export function ErrorPatternsWidget() {
             const color = BAR_COLORS[idx % BAR_COLORS.length];
             return (
               <div key={pattern.errorType}>
-                <div className="flex justify-between items-center mb-1">
-                  <span className="text-body font-semibold" style={{ color: 'var(--theme-text-primary)' }}>{label}</span>
-                  <div className="flex items-center gap-2">
+                <div className="flex justify-between items-center mb-1 gap-2">
+                  <span className="text-body font-semibold truncate" style={{ color: 'var(--theme-text-primary)' }}>{label}</span>
+                  <div className="flex items-center gap-2 shrink-0">
                     <span className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>{pattern.count} lần ({Math.round(pattern.percentage)}%)</span>
                     {pattern.grammarSlug && (
-                      <Link href={`/grammar/${pattern.grammarSlug}`} className="text-caption font-semibold" style={{ color: '#3B82F6', textDecoration: 'none' }}>
+                      <Link href={`/grammar/${pattern.grammarSlug}`} className="text-caption font-semibold" style={{ color: ACCENT.srs, textDecoration: 'none' }}>
                         Ôn tập
                       </Link>
                     )}

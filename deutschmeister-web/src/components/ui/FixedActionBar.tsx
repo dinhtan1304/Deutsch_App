@@ -16,19 +16,22 @@ export function FixedActionBar({ children, columns = 3, className }: FixedAction
   const gridCols = columns === 1 ? 'grid-cols-1' : columns === 2 ? 'grid-cols-2' : 'grid-cols-3';
   return (
     <>
-      {/* spacer so scroll content is not hidden behind the bar */}
-      <div aria-hidden="true" style={{ height: 'calc(72px + env(safe-area-inset-bottom))' }} />
+      <div aria-hidden="true" style={{ height: 'calc(80px + env(safe-area-inset-bottom))' }} />
       <div
-        className={`fixed bottom-0 left-0 right-0 z-50 border-t backdrop-blur-lg ${className ?? ''}`}
-        style={{
-          backgroundColor: 'var(--theme-bg-card)',
-          borderColor: 'var(--theme-border)',
-          paddingBottom: 'env(safe-area-inset-bottom)',
-          boxShadow: '0 -4px 16px rgba(0,0,0,0.06)',
-        }}
+        className="fixed bottom-0 left-0 right-0 z-50 flex justify-center px-4 pointer-events-none"
+        style={{ paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom))' }}
       >
-        <div className={`max-w-5xl mx-auto px-4 py-3 grid ${gridCols} gap-2`}>
-          {children}
+        <div 
+          className={`w-full max-w-2xl rounded-3xl border shadow-2xl pointer-events-auto backdrop-blur-xl ${className ?? ''}`}
+          style={{
+            backgroundColor: 'var(--theme-bg-card)',
+            borderColor: 'var(--theme-border)',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
+          }}
+        >
+          <div className={`px-4 py-3.5 grid ${gridCols} gap-2.5`}>
+            {children}
+          </div>
         </div>
       </div>
     </>

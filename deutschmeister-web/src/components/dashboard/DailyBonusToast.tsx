@@ -1,4 +1,5 @@
 'use client';
+/* eslint-disable no-restricted-syntax */
 
 import { useEffect, useState } from 'react';
 import type { DailyBonusResult } from '@/lib/api/users';

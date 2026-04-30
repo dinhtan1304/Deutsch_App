@@ -1,4 +1,5 @@
-﻿'use client';
+'use client';
+/* eslint-disable no-restricted-syntax -- game pages use custom dark-theme gradients that don't map to design tokens */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
@@ -11,13 +12,14 @@ import {
   GameSetupCard, GameResultCard,
   StatCard, AnswerReview, AddWrongWordsToBank, GameResultUpsell, GameInfoBox,
   GamePlayHeader, GameStatsBar, useGameTimer,
-  IconHeadphones, IconRocket, IconChevronLeft, IconRefresh, IconX,
+  IconHeadphones, IconRocket, IconChevronLeft, IconRefresh, IconVolume, IconX,
 } from '@/components/games/GameUI';
 import { Button } from '@/components/ui';
+import { ACCENT, STATUS } from '@/lib/tokens';
 
 type Phase = 'setup' | 'playing' | 'result';
 
-const AC: Record<string, string> = { masculine: '#3B82F6', feminine: '#EC4899', neuter: '#22C55E' };
+const AC: Record<string, string> = { masculine: ACCENT.srs, feminine: ACCENT.listening, neuter: STATUS.success };
 const MAX_REPLAYS = 3;
 const OPTIONS_PER_Q = 4;
 
@@ -52,6 +54,7 @@ export default function ListeningQuizPage() {
   const session = useGameSession('listening');
 
   const [phase, setPhase] = useState<Phase>('setup');
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [questions, setQuestions] = useState<QuestionSet[]>([]);
   const [index, setIndex] = useState(0);
   const [score, setScore] = useState(0);
@@ -101,8 +104,9 @@ export default function ListeningQuizPage() {
 
   const startGame = async () => {
     playClick();
+    setLoadError(null);
     const result = await refetch();
-    if (!result.data?.length) { alert('Không có từ vựng!'); return; }
+    if (!result.data?.length) { setLoadError('Không có từ vựng! Vui lòng thêm từ hoặc seed database.'); return; }
 
     const qs = buildQuestions(result.data, questionsCount);
     setQuestions(qs);
@@ -137,7 +141,8 @@ export default function ListeningQuizPage() {
     if (!q) return;
 
     const isCorrect = option.id === q.correct.id;
-    const label = `${GenderInfo[option.gender].article} ${option.word}`;
+    const article = option.gender && GenderInfo[option.gender] ? GenderInfo[option.gender].article : '';
+    const label = `${article} ${option.word}`.trim();
     setSelectedAnswer(label);
     setAnswered(true);
 
@@ -198,9 +203,9 @@ export default function ListeningQuizPage() {
   // ─── Setup Screen ───
   if (phase === 'setup') {
     return (
-      <GameSetupCard icon={({ size }) => <span style={{ color: 'white' }}><IconHeadphones size={size} /></span>} iconColor="#F97316" title="Listening Quiz">
+      <GameSetupCard icon={({ size }) => <span style={{ color: 'white' }}><IconHeadphones size={size} /></span>} iconColor={ACCENT.games} title="Listening Quiz" loadError={loadError}>
         <p className="text-sm mb-1" style={{ color: 'var(--theme-text-secondary)' }}>
-          Nghe và chọn đúng <span className="font-bold" style={{ color: '#F97316' }}>{questionsCount} từ</span> tiếng Đức
+          Nghe và chọn đúng <span className="font-bold" style={{ color: ACCENT.games }}>{questionsCount} từ</span> tiếng Đức
         </p>
         <p className="text-xs mb-6" style={{ color: 'var(--theme-text-muted)' }}>
           (Thay đổi số câu trong Settings → Học tập)
@@ -208,15 +213,15 @@ export default function ListeningQuizPage() {
 
         <GameInfoBox>
           <div className="flex items-center gap-2">
-            <span style={{ color: '#F97316' }}><IconHeadphones size={14} /></span>
+            <span style={{ color: ACCENT.games }}><IconHeadphones size={14} /></span>
             <span>Nghe lần 1: +15 · Lần 2: +10 · Lần 3+: +5</span>
           </div>
           <div className="flex items-center gap-2">
-            <span style={{ color: '#F97316' }}>⟳</span>
+            <span style={{ color: ACCENT.games }}><IconRefresh size={14} /></span>
             <span>Có thể nghe lại tối đa {MAX_REPLAYS} lần</span>
           </div>
           <div className="flex items-center gap-2">
-            <span style={{ color: '#F97316' }}>🔊</span>
+            <span style={{ color: ACCENT.games }}><IconVolume size={14} /></span>
             <span>Dùng Web Speech API (cần kết nối và trình duyệt hỗ trợ)</span>
           </div>
         </GameInfoBox>
@@ -241,14 +246,14 @@ export default function ListeningQuizPage() {
       <>
         <GameResultCard accuracy={accuracy} title="Kết quả">
           <div className="my-5">
-            <div className="text-5xl font-extrabold" style={{ color: '#F97316' }}>{score}</div>
+            <div className="text-5xl font-extrabold" style={{ color: ACCENT.games }}>{score}</div>
             <p className="text-body mt-1" style={{ color: 'var(--theme-text-muted)' }}>điểm</p>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-6">
-            <StatCard label="Đúng" value={correctCount} color="#22C55E" />
-            <StatCard label="Sai" value={questionsCount - correctCount} color="#EF4444" />
+            <StatCard label="Đúng" value={correctCount} color={STATUS.success} />
+            <StatCard label="Sai" value={questionsCount - correctCount} color={STATUS.danger} />
             <StatCard label="Chính xác" value={`${accuracy}%`} />
-            <StatCard label="Best Combo" value={`x${bestCombo}`} color="#F59E0B" />
+            <StatCard label="Best Combo" value={`x${bestCombo}`} color={ACCENT.xp} />
           </div>
           <div className="flex gap-3 justify-center">
             <Button variant="game" accent="games" onClick={startGame}><IconRefresh size={16} /> Chơi lại</Button>
@@ -260,8 +265,8 @@ export default function ListeningQuizPage() {
           <AnswerReview
             answers={answers}
             getCorrectArticle={a => ({
-              article: `${GenderInfo[a.word.gender].article} ${a.word.word}`,
-              color: AC[a.word.gender] || '#F97316',
+              article: `${a.word.gender && GenderInfo[a.word.gender] ? GenderInfo[a.word.gender].article : ''} ${a.word.word}`.trim(),
+              color: AC[a.word.gender] || ACCENT.games,
             })}
             getSelectedLabel={a => !a.isCorrect ? a.selectedAnswer : null}
           />
@@ -282,28 +287,28 @@ export default function ListeningQuizPage() {
       <GamePlayHeader title="Listening Quiz" streak={combo} timer={timer}
         onExit={() => { window.speechSynthesis?.cancel(); playClick(); router.push('/games'); }} />
       <GameStatsBar stats={[
-        { label: 'Điểm',  value: score,                          color: '#F97316' },
-        { label: 'Đúng',  value: correctCount,                   color: '#22C55E', dot: true },
-        { label: 'Sai',   value: index - correctCount,           color: '#EF4444', dot: true },
+        { label: 'Điểm',  value: score,                          color: ACCENT.games },
+        { label: 'Đúng',  value: correctCount,                   color: STATUS.success, dot: true },
+        { label: 'Sai',   value: index - correctCount,           color: STATUS.danger, dot: true },
         { label: 'Câu',   value: `${index + 1}/${questionsCount}`, color: 'var(--theme-text-primary)' },
       ]} />
 
       {/* Audio Card */}
       <div className="rounded-3xl overflow-hidden mb-5 mt-3 transition-all duration-300"
-        style={{ background: 'linear-gradient(135deg, #1a0a00 0%, #7c2d12 100%)' }}>
-        <div className="flex flex-col items-center justify-center px-6 py-8 text-center">
+        style={{ background: 'linear-gradient(135deg, #1a0000 0%, #451a03 100%)' }}>
+        <div className="flex flex-col items-center justify-center px-6 py-6 text-center">
           <button
             onClick={answered ? undefined : handleReplay}
             disabled={answered || replayCount >= MAX_REPLAYS || isSpeaking}
-            className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 transition-all duration-300
-              disabled:opacity-40 disabled:cursor-not-allowed hover:scale-105 active:scale-95"
+            className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3 transition-all duration-300
+              disabled:opacity-40 disabled:cursor-not-allowed hover:scale-105 disabled:hover:scale-100 active:scale-95"
             style={{
               background: isSpeaking
                 ? 'linear-gradient(135deg, #F97316aa, #EF4444aa)'
                 : 'linear-gradient(135deg, #F97316, #EF4444)',
-              boxShadow: isSpeaking ? '0 0 0 8px rgba(249,115,22,.15)' : '0 4px 20px rgba(249,115,22,.3)',
+              boxShadow: isSpeaking ? '0 0 0 6px rgba(249,115,22,.1)' : '0 4px 16px rgba(249,115,22,.2)',
             }}>
-            <span style={{ color: 'white' }}><IconHeadphones size={32} /></span>
+            <span style={{ color: 'white' }}><IconHeadphones size={28} /></span>
           </button>
 
           {!answered && (
@@ -316,7 +321,7 @@ export default function ListeningQuizPage() {
             <div className="flex justify-center gap-1.5 mt-1">
               {Array.from({ length: MAX_REPLAYS }, (_, i) => (
                 <div key={i} className="w-2 h-2 rounded-full"
-                  style={{ backgroundColor: i < replayCount ? '#F97316' : 'rgba(255,255,255,0.2)' }} />
+                  style={{ backgroundColor: i < replayCount ? ACCENT.games : 'rgba(255,255,255,0.2)' }} />
               ))}
             </div>
           )}
@@ -338,7 +343,7 @@ export default function ListeningQuizPage() {
               </p>
               <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.7)' }}>
                 Đáp án: <span className="font-bold text-white">
-                  {GenderInfo[currentQ.correct.gender].article} {currentQ.correct.word}
+                  {currentQ.correct.gender && GenderInfo[currentQ.correct.gender] ? `${GenderInfo[currentQ.correct.gender].article} ` : ''}{currentQ.correct.word}
                 </span>
               </p>
             </div>
@@ -360,8 +365,8 @@ export default function ListeningQuizPage() {
           let textColor = 'var(--theme-text-primary)';
 
           if (answered) {
-            if (isCorrectOption) { borderColor = '#22C55E'; bgColor = 'rgba(34,197,94,.08)'; textColor = '#22C55E'; }
-            else if (isSelected) { borderColor = '#EF4444'; bgColor = 'rgba(239,68,68,.08)'; textColor = '#EF4444'; }
+            if (isCorrectOption) { borderColor = STATUS.success; bgColor = 'rgba(34,197,94,.08)'; textColor = STATUS.success; }
+            else if (isSelected) { borderColor = STATUS.danger; bgColor = 'rgba(239,68,68,.08)'; textColor = STATUS.danger; }
           }
 
           return (
@@ -371,8 +376,8 @@ export default function ListeningQuizPage() {
               className="rounded-xl border px-4 py-4 text-center transition-all duration-200 font-semibold text-[15px]
                 disabled:cursor-default hover:scale-[1.02] active:scale-[0.98]"
               style={{ borderColor, backgroundColor: bgColor, color: textColor }}>
-              <span style={{ color: answered && isCorrectOption ? '#22C55E' : AC[option.gender] }}>
-                {GenderInfo[option.gender].article}
+              <span style={{ color: answered && isCorrectOption ? STATUS.success : (AC[option.gender] || 'inherit') }}>
+                {option.gender && GenderInfo[option.gender] ? GenderInfo[option.gender].article : ''}
               </span>{' '}
               {option.word}
               {settings.showVietnamese && option.translationVi && (

@@ -1,4 +1,5 @@
-﻿'use client';
+'use client';
+/* eslint-disable no-restricted-syntax -- game pages use custom dark-theme gradients that don't map to design tokens */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
@@ -14,11 +15,12 @@ import {
   IconSpellCheck, IconRocket, IconChevronLeft, IconRefresh, IconX, IconCheck,
 } from '@/components/games/GameUI';
 import { Button } from '@/components/ui';
+import { ACCENT, STATUS } from '@/lib/tokens';
 
 type Phase = 'setup' | 'playing' | 'result';
 type Feedback = 'correct' | 'wrong' | null;
 
-const AC: Record<string, string> = { masculine: '#3B82F6', feminine: '#EC4899', neuter: '#22C55E' };
+const AC: Record<string, string> = { masculine: ACCENT.srs, feminine: ACCENT.listening, neuter: STATUS.success };
 const SPECIAL_CHARS = ['ä', 'ö', 'ü', 'Ä', 'Ö', 'Ü', 'ß'];
 
 interface AnswerRecord {
@@ -34,6 +36,7 @@ export default function SpellingBeePage() {
   const session = useGameSession('spelling');
 
   const [phase, setPhase] = useState<Phase>('setup');
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [index, setIndex] = useState(0);
   const [score, setScore] = useState(0);
   const [combo, setCombo] = useState(0);
@@ -64,8 +67,9 @@ export default function SpellingBeePage() {
 
   const startGame = async () => {
     playClick();
+    setLoadError(null);
     const result = await refetch();
-    if (!result.data?.length) { alert('Không có từ vựng!'); return; }
+    if (!result.data?.length) { setLoadError('Không có từ vựng! Vui lòng thêm từ hoặc seed database.'); return; }
     setIndex(0); setScore(0); setCombo(0); setBestCombo(0);
     scoreRef.current = 0; comboRef.current = 0; bestComboRef.current = 0;
     correctRef.current = 0; wrongRef.current = 0;
@@ -149,9 +153,9 @@ export default function SpellingBeePage() {
   // ─── Setup Screen ───
   if (phase === 'setup') {
     return (
-      <GameSetupCard icon={({ size }) => <span style={{ color: 'white' }}><IconSpellCheck size={size} /></span>} iconColor="#EC4899" title="Spelling Bee">
+      <GameSetupCard icon={({ size }) => <span style={{ color: 'white' }}><IconSpellCheck size={size} /></span>} iconColor={ACCENT.listening} title="Spelling Bee" loadError={loadError}>
         <p className="text-sm mb-1" style={{ color: 'var(--theme-text-secondary)' }}>
-          Gõ đúng chính tả <span className="font-bold" style={{ color: '#EC4899' }}>{questionsCount} từ</span> tiếng Đức
+          Gõ đúng chính tả <span className="font-bold" style={{ color: ACCENT.listening }}>{questionsCount} từ</span> tiếng Đức
         </p>
         <p className="text-xs mb-6" style={{ color: 'var(--theme-text-muted)' }}>
           (Thay đổi số câu trong Settings → Học tập)
@@ -159,7 +163,7 @@ export default function SpellingBeePage() {
 
         <GameInfoBox>
           <div className="flex items-center gap-2">
-            <span style={{ color: '#EC4899' }}><IconSpellCheck size={14} /></span>
+            <span style={{ color: ACCENT.listening }}><IconSpellCheck size={14} /></span>
             <span>15 điểm/câu đúng · Combo tối đa x4</span>
           </div>
           <div className="flex items-center gap-2">
@@ -167,7 +171,7 @@ export default function SpellingBeePage() {
             <span>để xác nhận đáp án</span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="font-mono text-body" style={{ color: '#EC4899' }}>ä ö ü ß</span>
+            <span className="font-mono text-body" style={{ color: ACCENT.listening }}>ä ö ü ß</span>
             <span>Nút ký tự đặc biệt có sẵn</span>
           </div>
         </GameInfoBox>
@@ -192,14 +196,14 @@ export default function SpellingBeePage() {
       <>
         <GameResultCard accuracy={accuracy} title="Kết quả">
           <div className="my-5">
-            <div className="text-5xl font-extrabold" style={{ color: '#EC4899' }}>{score}</div>
+            <div className="text-5xl font-extrabold" style={{ color: ACCENT.listening }}>{score}</div>
             <p className="text-body mt-1" style={{ color: 'var(--theme-text-muted)' }}>điểm</p>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-6">
-            <StatCard label="Đúng" value={correctCount} color="#22C55E" />
-            <StatCard label="Sai" value={questionsCount - correctCount} color="#EF4444" />
+            <StatCard label="Đúng" value={correctCount} color={STATUS.success} />
+            <StatCard label="Sai" value={questionsCount - correctCount} color={STATUS.danger} />
             <StatCard label="Chính xác" value={`${accuracy}%`} />
-            <StatCard label="Best Combo" value={`x${bestCombo}`} color="#F59E0B" />
+            <StatCard label="Best Combo" value={`x${bestCombo}`} color={ACCENT.xp} />
           </div>
           <div className="flex gap-3 justify-center">
             <Button variant="game" accent="listening" onClick={startGame}><IconRefresh size={16} /> Chơi lại</Button>
@@ -210,7 +214,7 @@ export default function SpellingBeePage() {
         <div className="max-w-2xl mx-auto px-4 sm:px-6">
           <AnswerReview
             answers={answers}
-            getCorrectArticle={a => ({ article: a.word.word, color: AC[a.word.gender] || '#EC4899' })}
+            getCorrectArticle={a => ({ article: a.word.word, color: AC[a.word.gender] || ACCENT.listening })}
             getSelectedLabel={a => !a.isCorrect ? a.selectedAnswer : null}
           />
         </div>
@@ -228,9 +232,9 @@ export default function SpellingBeePage() {
       <GamePlayHeader title="Spelling Bee" streak={combo} timer={timer}
         onExit={() => { playClick(); router.push('/games'); }} />
       <GameStatsBar stats={[
-        { label: 'Điểm',  value: score,                          color: '#EC4899' },
-        { label: 'Đúng',  value: correctCount,                   color: '#22C55E', dot: true },
-        { label: 'Sai',   value: index - correctCount,           color: '#EF4444', dot: true },
+        { label: 'Điểm',  value: score,                          color: ACCENT.listening },
+        { label: 'Đúng',  value: correctCount,                   color: STATUS.success, dot: true },
+        { label: 'Sai',   value: index - correctCount,           color: STATUS.danger, dot: true },
         { label: 'Câu',   value: `${index + 1}/${questionsCount}`, color: 'var(--theme-text-primary)' },
       ]} />
       <GameProgressBar current={index + 1} total={questionsCount} />
@@ -244,11 +248,11 @@ export default function SpellingBeePage() {
               ? 'linear-gradient(135deg, #450a0a 0%, #991b1b 100%)'
               : 'linear-gradient(135deg, #2a0a1e 0%, #9d174d 100%)',
           }}>
-          <div className="flex flex-col items-center justify-center px-6 py-8 text-center" style={{ minHeight: 200 }}>
-            <div className="text-body font-semibold mb-2" style={{ color: 'rgba(255,255,255,0.6)' }}>
+          <div className="flex flex-col items-center justify-center px-6 py-6 text-center" style={{ minHeight: 160 }}>
+            <div className="text-xs font-semibold mb-1" style={{ color: 'rgba(255,255,255,0.5)' }}>
               Mạo từ:{' '}
-              <span className="font-bold" style={{ color: AC[currentWord.gender] }}>
-                {GenderInfo[currentWord.gender].article}
+              <span className="font-bold" style={{ color: AC[currentWord.gender] || ACCENT.listening }}>
+                {currentWord.gender && GenderInfo[currentWord.gender] ? GenderInfo[currentWord.gender].article : ''}
               </span>
             </div>
 
@@ -256,12 +260,12 @@ export default function SpellingBeePage() {
               {currentWord.translationEn}
             </h2>
             {settings.showVietnamese && currentWord.translationVi && (
-              <p className="text-[15px] mb-2" style={{ color: 'rgba(255,255,255,0.65)' }}>
+              <p className="text-sm mb-2" style={{ color: 'rgba(255,255,255,0.6)' }}>
                 {currentWord.translationVi}
               </p>
             )}
 
-            <p className="text-xs font-mono tracking-widest mb-4" style={{ color: 'rgba(255,255,255,0.45)' }}>
+            <p className="text-[10px] font-mono tracking-widest mb-3 opacity-40 text-white">
               {lengthHint}
             </p>
 
@@ -279,7 +283,7 @@ export default function SpellingBeePage() {
                 </div>
                 <p className="text-sm" style={{ color: 'rgba(255,255,255,0.7)' }}>
                   Đáp án: <span className="font-bold text-white">
-                    {GenderInfo[currentWord.gender].article} {currentWord.word}
+                    {currentWord.gender && GenderInfo[currentWord.gender] ? `${GenderInfo[currentWord.gender].article} ` : ''}{currentWord.word}
                   </span>
                 </p>
               </div>
@@ -295,20 +299,20 @@ export default function SpellingBeePage() {
                   placeholder="Gõ từ tiếng Đức..."
                   className="w-full rounded-xl px-4 py-3 text-center text-base font-semibold outline-none transition-all border-2"
                   style={{
-                    borderColor: '#EC4899',
+                    borderColor: ACCENT.listening,
                     backgroundColor: 'rgba(0,0,0,0.3)',
                     color: 'white',
                   }}
                 />
-                <div className="flex justify-center gap-2 mt-3 flex-wrap">
+                <div className="flex justify-center gap-1.5 mt-3 flex-wrap">
                   {SPECIAL_CHARS.map(ch => (
                     <button key={ch}
                       onClick={() => insertSpecial(ch)}
-                      className="w-9 h-9 rounded-lg text-sm font-bold transition-all hover:scale-105"
+                      className="w-8 h-8 rounded-lg text-xs font-bold transition-all hover:scale-105"
                       style={{
-                        border: '1px solid rgba(236,72,153,.5)',
+                        border: '1px solid rgba(236,72,153,.3)',
                         color: '#F9A8D4',
-                        backgroundColor: 'rgba(236,72,153,.15)',
+                        backgroundColor: 'rgba(236,72,153,.1)',
                       }}>
                       {ch}
                     </button>

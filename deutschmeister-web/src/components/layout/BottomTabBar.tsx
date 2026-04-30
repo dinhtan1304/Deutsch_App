@@ -3,66 +3,20 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ACCENT } from '@/lib/tokens';
+import { PRIMARY_NAV, type NavItem } from '@/config/navigation';
 
-interface Tab {
-  href: string;
-  label: string;
-  icon: React.ReactNode;
+/**
+ * Mobile-viewport navigation. Renders the 5 top-level PRIMARY_NAV items flat —
+ * children of each are not shown here, accessible via their hub page instead.
+ * Desktop Sidebar renders the same PRIMARY_NAV with expandable children,
+ * so taxonomy stays 1:1 across viewports.
+ */
+
+function isItemActive(pathname: string, item: NavItem): boolean {
+  if (pathname === item.href) return true;
+  if (pathname.startsWith(item.href + '/')) return true;
+  return item.children?.some(c => pathname === c.href || pathname.startsWith(c.href + '/')) ?? false;
 }
-
-function HomeIcon() {
-  return (
-    <svg width={22} height={22} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-      <polyline points="9 22 9 12 15 12 15 22" />
-    </svg>
-  );
-}
-
-function GamesIcon() {
-  return (
-    <svg width={22} height={22} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <line x1="6" y1="12" x2="18" y2="12" />
-      <line x1="12" y1="6" x2="12" y2="18" />
-      <rect x="2" y="6" width="20" height="12" rx="3" />
-    </svg>
-  );
-}
-
-function PracticeIcon() {
-  return (
-    <svg width={22} height={22} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
-      <path d="M6 12v5c3 3 9 3 12 0v-5" />
-    </svg>
-  );
-}
-
-function WordsIcon() {
-  return (
-    <svg width={22} height={22} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
-      <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
-    </svg>
-  );
-}
-
-function ProfileIcon() {
-  return (
-    <svg width={22} height={22} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-      <circle cx="12" cy="7" r="4" />
-    </svg>
-  );
-}
-
-const TABS: Tab[] = [
-  { href: '/dashboard', label: 'Trang chủ', icon: <HomeIcon /> },
-  { href: '/games', label: 'Trò chơi', icon: <GamesIcon /> },
-  { href: '/practice-test', label: 'Luyện thi', icon: <PracticeIcon /> },
-  { href: '/words', label: 'Từ vựng', icon: <WordsIcon /> },
-  { href: '/profile', label: 'Hồ sơ', icon: <ProfileIcon /> },
-];
 
 export function BottomTabBar() {
   const pathname = usePathname();
@@ -82,25 +36,26 @@ export function BottomTabBar() {
         }}
       >
         <div className="flex items-stretch" style={{ height: 64 }}>
-          {TABS.map(tab => {
-            const active = pathname === tab.href || pathname.startsWith(tab.href + '/');
-            const color = active ? ACCENT.srs : 'var(--theme-text-muted)';
+          {PRIMARY_NAV.map(item => {
+            const Icon = item.icon;
+            const active = isItemActive(pathname, item);
+            const color = active ? ACCENT.brand : 'var(--theme-text-muted)';
             return (
               <Link
-                key={tab.href}
-                href={tab.href}
-                className="flex-1 flex flex-col items-center justify-center gap-0.5 transition-colors"
+                key={item.key}
+                href={item.href}
+                className="relative flex-1 flex flex-col items-center justify-center gap-0.5 transition-colors"
                 style={{ color }}
                 aria-current={active ? 'page' : undefined}
               >
                 <span className="transition-transform" style={{ transform: active ? 'scale(1.1)' : 'scale(1)' }}>
-                  {tab.icon}
+                  <Icon size={22} />
                 </span>
-                <span className="text-[10px] font-semibold leading-none">{tab.label}</span>
+                <span className="text-[10px] font-semibold leading-none">{item.label}</span>
                 {active && (
                   <span
                     className="absolute bottom-0 w-8 h-0.5 rounded-full"
-                    style={{ background: ACCENT.srs }}
+                    style={{ background: ACCENT.brand }}
                   />
                 )}
               </Link>

@@ -6,14 +6,17 @@ import Link from 'next/link';
 import { useTopic, useUpdateTopicProgress } from '@/hooks/useTopics';
 import { useAuthStore } from '@/stores/authStore';
 import type { TopicWord } from '@/types/topic';
+import { ACCENT, STATUS, GRADIENT } from '@/lib/tokens';
 import {
   IconSearch, IconChevronLeft, IconChevronRight,
-  IconVolume, IconCheck, IconCheckAll, IconRotateCcw,
-  IconLightbulb, IconStar, IconBookOpen, IconCards, IconPenLine, IconLink,
+  IconVolume, IconCheckAll, IconRotateCcw,
+  IconLightbulb, IconCards, IconPenLine, IconLink,
+  IconHeadphones, IconKeyboard, IconFlame,
 } from '@/components/ui/Icons';
 import { TopicFlashcard } from '@/components/topics/TopicFlashcard';
 import { TopicQuiz } from '@/components/topics/TopicQuiz';
 import { TopicMatching } from '@/components/topics/TopicMatching';
+import { TopicWordDetailModal } from '@/components/topics/TopicWordDetailModal';
 
 // ─── Level-based Learning Tips ───
 const LEVEL_TIPS: Record<string, { title: string; tips: string[] }> = {
@@ -53,197 +56,24 @@ const LEVEL_TIPS: Record<string, { title: string; tips: string[] }> = {
 
 // ─── Article Colors ───
 const ArticleColor: Record<string, { color: string; gradient: string; bg: string }> = {
-  der: { color: '#3B82F6', gradient: 'linear-gradient(135deg, #3B82F6, #1D4ED8)', bg: 'rgba(59,130,246,.08)' },
-  die: { color: '#EC4899', gradient: 'linear-gradient(135deg, #EC4899, #BE185D)', bg: 'rgba(236,72,153,.08)' },
-  das: { color: '#22C55E', gradient: 'linear-gradient(135deg, #22C55E, #15803D)', bg: 'rgba(34,197,94,.08)' },
+  der: { color: ACCENT.srs,       gradient: `linear-gradient(135deg, ${ACCENT.srs}, #1D4ED8)`,       bg: `${ACCENT.srs}14` },
+  die: { color: ACCENT.listening, gradient: `linear-gradient(135deg, ${ACCENT.listening}, #BE185D)`, bg: `${ACCENT.listening}14` },
+  das: { color: ACCENT.reading,   gradient: `linear-gradient(135deg, ${ACCENT.reading}, #15803D)`,   bg: `${ACCENT.reading}14` },
 };
 
 // ─── Tab type ───
 type TabKey = 'words' | 'flashcard' | 'quiz' | 'matching';
 
-const TABS: { key: TabKey; label: string; icon: React.ComponentType<{ size?: number; className?: string }> }[] = [
-  { key: 'words',     label: 'Từ vựng',  icon: IconBookOpen },
-  { key: 'flashcard', label: 'Flashcard', icon: IconCards    },
-  { key: 'quiz',      label: 'Quiz',      icon: IconPenLine  },
-  { key: 'matching',  label: 'Nối từ',   icon: IconLink     },
+// ─── Study Modes Data ───
+const STUDY_MODES = [
+  { key: 'flashcard', label: 'Flashcard', desc: 'Lật thẻ học từ vựng',    icon: IconCards,      color: ACCENT.vocab,     gradient: GRADIENT.vocab,    disabled: false },
+  { key: 'quiz',      label: 'Quiz',      desc: 'Trắc nghiệm chọn đáp án', icon: IconPenLine,    color: ACCENT.games,     gradient: GRADIENT.xp,       disabled: false },
+  { key: 'listening', label: 'Listening', desc: 'Nghe và đoán từ',         icon: IconHeadphones, color: ACCENT.srs,       gradient: GRADIENT.action,   disabled: true },
+  { key: 'typing',    label: 'Typing',    desc: 'Gõ từ tiếng Đức',         icon: IconKeyboard,   color: ACCENT.reading,   gradient: GRADIENT.reading,  disabled: true },
+  { key: 'matching',  label: 'Ghép cặp', desc: 'Nối từ với nghĩa',        icon: IconLink,       color: ACCENT.srs,       gradient: GRADIENT.action,   disabled: false },
+  { key: 'mixed',     label: 'Tổng hợp', desc: 'Kết hợp nhiều chế độ',    icon: IconFlame,      color: ACCENT.listening, gradient: GRADIENT.listening, disabled: true },
 ];
 
-// ============================================
-// Word Card Component (giữ nguyên)
-// ============================================
-interface WordCardProps {
-  word: TopicWord;
-  index: number;
-  isLearned: boolean;
-  onToggleLearned: (wordId: string) => void;
-}
-
-function WordCard({ word, index, isLearned, onToggleLearned }: WordCardProps) {
-  const [showDetails, setShowDetails] = useState(false);
-  const ac = ArticleColor[word.article] || { color: '#6B7280', gradient: 'linear-gradient(135deg, #6B7280, #4B5563)', bg: 'rgba(107,114,128,.08)' };
-
-  const handlePlayAudio = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    const text = word.article ? `${word.article} ${word.word}` : word.word;
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'de-DE';
-    utterance.rate = 0.9;
-    speechSynthesis.speak(utterance);
-  };
-
-  return (
-    <div className={`relative overflow-hidden rounded-2xl border transition-all duration-300
-      ${isLearned ? 'opacity-50' : ''}
-      ${showDetails ? 'shadow-md' : 'hover:-translate-y-0.5 hover:shadow-sm'}`}
-      style={{
-        backgroundColor: 'var(--theme-bg-card)',
-        borderTopColor: showDetails ? ac.color : 'var(--theme-border)',
-        borderRightColor: showDetails ? ac.color : 'var(--theme-border)',
-        borderBottomColor: showDetails ? ac.color : 'var(--theme-border)',
-        borderLeftWidth: '3px',
-        borderLeftColor: ac.color,
-      }}>
-
-      {/* Main content */}
-      <div className="p-4 cursor-pointer" onClick={() => setShowDetails(!showDetails)}>
-        <div className="flex items-start justify-between gap-3">
-          {/* Left: Word info */}
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-caption font-mono" style={{ color: 'var(--theme-text-muted)' }}>
-                {index}.
-              </span>
-              {word.article && (
-                <span className="text-sm font-semibold" style={{ color: ac.color }}>
-                  {word.article}
-                </span>
-              )}
-              <span className="text-[17px] font-bold" style={{ color: 'var(--theme-text-primary)' }}>
-                {word.word}
-              </span>
-              {word.isCore && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-caption font-bold"
-                  style={{ background: ac.gradient, color: 'white' }}>
-                  <IconStar size={9} /> Core
-                </span>
-              )}
-            </div>
-
-            {word.plural && (
-              <p className="text-caption mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>
-                Pl. {word.plural}
-              </p>
-            )}
-
-            <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-0.5">
-              <span className="text-body flex items-center gap-1"
-                style={{ color: 'var(--theme-text-secondary)' }}>
-                <span className="text-caption px-1 py-0.5 rounded font-bold"
-                  style={{ background: 'rgba(59,130,246,.08)', color: '#3B82F6' }}>EN</span>
-                {word.translationEn}
-              </span>
-              {word.translationVi && (
-                <span className="text-body flex items-center gap-1"
-                  style={{ color: 'var(--theme-text-muted)' }}>
-                  <span className="text-caption px-1 py-0.5 rounded font-bold"
-                    style={{ background: 'rgba(239,68,68,.08)', color: '#EF4444' }}>VN</span>
-                  {word.translationVi}
-                </span>
-              )}
-            </div>
-          </div>
-
-          {/* Right: Actions */}
-          <div className="flex flex-col items-center gap-2 shrink-0">
-            <button onClick={handlePlayAudio}
-              className="w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200
-                opacity-50 hover:opacity-100 hover:scale-110"
-              style={{ backgroundColor: ac.bg, color: ac.color }}
-              title="Nghe phát âm">
-              <IconVolume size={16} />
-            </button>
-            <button
-              onClick={(e) => { e.stopPropagation(); onToggleLearned(word.id); }}
-              className="w-8 h-8 rounded-lg flex items-center justify-center border-2 transition-all duration-200"
-              style={isLearned
-                ? { background: 'linear-gradient(135deg, #22C55E, #16A34A)', borderColor: 'transparent', color: 'white' }
-                : { borderColor: 'var(--theme-border)', color: 'transparent' }
-              }
-              title={isLearned ? 'Đã học' : 'Đánh dấu đã học'}>
-              <IconCheck size={14} />
-            </button>
-          </div>
-        </div>
-
-        {/* Expand hint */}
-        {!showDetails && (word.examples?.length || word.tips?.length) ? (
-          <p className="mt-2 text-caption" style={{ color: ac.color }}>
-            Nhấn để xem chi tiết →
-          </p>
-        ) : null}
-      </div>
-
-      {/* Expanded details */}
-      {showDetails && (
-        <div className="px-4 pb-4 pt-2 space-y-3" style={{ borderTop: '1px solid var(--theme-border)' }}>
-          {word.examples && word.examples.length > 0 && (
-            <div>
-              <p className="text-caption font-semibold mb-1.5 flex items-center gap-1.5"
-                style={{ color: 'var(--theme-text-muted)' }}>
-                <span className="w-5 h-5 rounded-md flex items-center justify-center"
-                  style={{ background: ac.bg }}>
-                  <IconVolume size={11} style={{ color: ac.color }} />
-                </span>
-                Ví dụ
-              </p>
-              <ul className="space-y-1.5">
-                {word.examples.map((ex, i) => (
-                  <li key={i} className="text-body italic pl-3 border-l-2"
-                    style={{ borderColor: ac.color, color: 'var(--theme-text-secondary)' }}>
-                    „{ex}"
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {word.tips && word.tips.length > 0 && (
-            <div>
-              <p className="text-caption font-semibold mb-1.5 flex items-center gap-1.5"
-                style={{ color: 'var(--theme-text-muted)' }}>
-                <span className="w-5 h-5 rounded-md flex items-center justify-center"
-                  style={{ background: 'rgba(245,158,11,.1)' }}>
-                  <IconLightbulb size={11} style={{ color: '#F59E0B' }} />
-                </span>
-                Mẹo nhớ
-              </p>
-              <ul className="space-y-1">
-                {word.tips.map((tip, i) => (
-                  <li key={i} className="text-body pl-3"
-                    style={{ color: 'var(--theme-text-secondary)' }}>
-                    • {tip}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {word.imageUrl && (
-            <div className="mt-2">
-              <img src={word.imageUrl} alt={word.word}
-                className="w-full max-w-50 h-auto rounded-xl border"
-                style={{ borderColor: 'var(--theme-border)' }} />
-            </div>
-          )}
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ============================================
-// Filter Types
-// ============================================
 type FilterMode = 'all' | 'core' | 'learned' | 'unlearned';
 
 // ============================================
@@ -262,6 +92,7 @@ export default function TopicDetailPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState<TabKey>('words');
   const [showTips, setShowTips] = useState(false);
+  const [selectedWord, setSelectedWord] = useState<TopicWord | null>(null);
 
   // localStorage key scoped per user so different accounts on the same browser
   // don't share or overwrite each other's progress.
@@ -287,6 +118,7 @@ export default function TopicDetailPage() {
         setLearnedWords(new Set());
       }
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- lsKey only depends on user?.id which is already listed
   }, [topic, user?.id]);
 
   const syncProgressToServer = (newLearnedCount: number) => {
@@ -334,9 +166,10 @@ export default function TopicDetailPage() {
     saveLearned(newSet);
   };
 
+  const topicWords = topic?.words;
   const filteredWords = useMemo(() => {
-    if (!topic?.words) return [];
-    let words = [...topic.words];
+    if (!topicWords) return [];
+    let words = [...topicWords];
     switch (filterMode) {
       case 'core': words = words.filter(w => w.isCore); break;
       case 'learned': words = words.filter(w => learnedWords.has(w.id)); break;
@@ -351,10 +184,10 @@ export default function TopicDetailPage() {
       );
     }
     return words;
-  }, [topic?.words, filterMode, searchQuery, learnedWords]);
+  }, [topicWords, filterMode, searchQuery, learnedWords]);
 
   const progress = topic?.words ? Math.round((learnedWords.size / topic.words.length) * 100) : 0;
-  const topicColor = topic?.color || '#3B82F6';
+  const topicColor = topic?.color || ACCENT.srs;
 
   // Loading state
   if (isLoading) {
@@ -379,8 +212,8 @@ export default function TopicDetailPage() {
     return (
         <div className="py-16 text-center">
           <div className="w-16 h-16 rounded-2xl mx-auto flex items-center justify-center mb-4"
-            style={{ background: 'linear-gradient(135deg, rgba(239,68,68,.12), rgba(239,68,68,.06))' }}>
-            <IconSearch size={28} style={{ color: '#EF4444' }} />
+            style={{ background: `linear-gradient(135deg, ${STATUS.danger}1F, ${STATUS.danger}0F)` }}>
+            <IconSearch size={28} style={{ color: STATUS.danger }} />
           </div>
           <h1 className="text-xl font-bold mb-2" style={{ color: 'var(--theme-text-primary)' }}>
             Không tìm thấy chủ đề
@@ -390,7 +223,7 @@ export default function TopicDetailPage() {
           </p>
           <Link href="/topics"
             className="flex items-center gap-1.5 mx-auto w-fit text-body font-medium transition-opacity hover:opacity-70"
-            style={{ color: '#3B82F6' }}>
+            style={{ color: ACCENT.srs }}>
             <IconChevronLeft size={16} /> Quay lại danh sách
           </Link>
         </div>
@@ -399,24 +232,9 @@ export default function TopicDetailPage() {
 
   return (
       <div className="py-6">
-        {/* Breadcrumb */}
-        <div className="flex items-center gap-1.5 text-body mb-5">
-          <Link href="/topics" className="font-medium transition-opacity hover:opacity-70"
-            style={{ color: '#3B82F6' }}>
-            Chủ đề
-          </Link>
-          <IconChevronRight size={14} style={{ color: 'var(--theme-text-muted)' }} />
-          <span className="font-semibold" style={{ color: 'var(--theme-text-primary)' }}>
-            {topic.nameDe}
-          </span>
-        </div>
-
         {/* Header card */}
-        <div className="relative overflow-hidden p-6 rounded-2xl mb-6"
-          style={{
-            background: `linear-gradient(135deg, ${topicColor}15, ${topicColor}05)`,
-            border: `1px solid ${topicColor}25`,
-          }}>
+        <div className="relative overflow-hidden p-6 rounded-2xl mb-6 shadow-sm border border-black/5 dark:border-white/5"
+          style={{ backgroundColor: 'var(--theme-bg-card)' }}>
           {/* Decorative circles */}
           <div className="absolute -top-10 -right-10 w-36 h-36 rounded-full"
             style={{ backgroundColor: topicColor, opacity: 0.04 }} />
@@ -442,10 +260,10 @@ export default function TopicDetailPage() {
               </div>
             </div>
 
-            <span className="text-xs font-bold px-2.5 py-1 rounded-lg"
-              style={{ background: `${topicColor}18`, color: topicColor }}>
+            <div className="w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
+              style={{ background: `${topicColor}15`, color: topicColor }}>
               {topic.level}
-            </span>
+            </div>
           </div>
 
           {/* Progress bar */}
@@ -462,7 +280,7 @@ export default function TopicDetailPage() {
                 style={{
                   width: `${progress}%`,
                   background: progress >= 100
-                    ? 'linear-gradient(90deg, #22C55E, #16A34A)'
+                    ? `linear-gradient(90deg, ${ACCENT.reading}, #16A34A)`
                     : `linear-gradient(90deg, ${topicColor}, ${topicColor}cc)`,
                 }} />
             </div>
@@ -471,12 +289,12 @@ export default function TopicDetailPage() {
           {/* Quick actions */}
           <div className="relative flex flex-wrap gap-2 mt-4">
             <button onClick={markAllLearned}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all hover:-translate-y-0.5"
-              style={{ background: 'rgba(34,197,94,.1)', color: '#22C55E' }}>
+              className="flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-semibold transition-all hover:scale-105"
+              style={{ background: `${ACCENT.reading}1A`, color: ACCENT.reading }}>
               <IconCheckAll size={14} /> Đánh dấu tất cả
             </button>
             <button onClick={resetProgress}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all hover:-translate-y-0.5"
+              className="flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-semibold transition-all hover:scale-105"
               style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }}>
               <IconRotateCcw size={14} /> Học lại từ đầu
             </button>
@@ -489,11 +307,250 @@ export default function TopicDetailPage() {
           )}
         </div>
 
+
         {/* ═══════════════════════════════════════════ */}
-        {/* MINI LESSON TIPS                             */}
+        {/* STUDY MODES GRID                            */}
+        {/* ═══════════════════════════════════════════ */}
+        {activeTab === 'words' && (
+          <div className="mb-8">
+            <h2 className="text-lg font-bold mb-4" style={{ color: 'var(--theme-text-primary)' }}>Chọn chế độ học</h2>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+              {STUDY_MODES.map(mode => {
+                const Icon = mode.icon;
+                return (
+                  <button
+                    key={mode.key}
+                    onClick={() => !mode.disabled && setActiveTab(mode.key as TabKey)}
+                    disabled={mode.disabled}
+                    className={`relative p-4 rounded-2xl text-left transition-all duration-200 overflow-hidden group 
+                      ${mode.disabled ? 'opacity-60 cursor-not-allowed' : 'hover:-translate-y-1 hover:shadow-lg'}`}
+                    style={{ background: mode.gradient }}
+                  >
+                    {/* Decorative faint icon */}
+                    <div className="absolute -right-2 -bottom-2 opacity-10 transform group-hover:scale-110 transition-transform">
+                      <Icon size={64} style={{ color: 'white' }} />
+                    </div>
+                    
+                    {mode.disabled && (
+                      <div className="absolute top-2 right-2 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase text-white"
+                        style={{ backgroundColor: 'rgba(0,0,0,0.2)' }}>
+                        Sắp ra mắt
+                      </div>
+                    )}
+
+                    <div className="w-10 h-10 rounded-xl mb-3 flex items-center justify-center shadow-sm"
+                      style={{ backgroundColor: 'rgba(255,255,255,0.2)' }}>
+                      <Icon size={20} style={{ color: 'white' }} />
+                    </div>
+                    <h3 className="font-bold text-white text-[15px] leading-tight mb-1">{mode.label}</h3>
+                    <p className="text-xs text-white opacity-80 leading-snug">{mode.desc}</p>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* ═══════════════════════════════════════════ */}
+        {/* WORD LIST TABLE                             */}
+        {/* ═══════════════════════════════════════════ */}
+
+        {activeTab === 'words' && (
+          <div className="mb-6 border border-black/5 dark:border-white/5 rounded-2xl overflow-hidden shadow-sm"
+            style={{ backgroundColor: 'var(--theme-bg-card)' }}>
+            
+            {/* Header / Toolbar */}
+            <div className="p-4 border-b border-black/5 dark:border-white/5 flex flex-wrap items-center justify-between gap-4"
+              style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
+              <h2 className="text-lg font-bold" style={{ color: 'var(--theme-text-primary)' }}>
+                Danh sách từ vựng
+              </h2>
+              
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                {/* Search */}
+                <div className="flex-1 sm:w-64 relative">
+                  <div className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--theme-text-muted)' }}>
+                    <IconSearch size={14} />
+                  </div>
+                  <input type="text" value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
+                    placeholder="Tìm kiếm từ vựng..."
+                    className="w-full pl-8 pr-3 py-2 rounded-xl border text-sm transition-all focus:outline-none focus:ring-2"
+                    style={{
+                      borderColor: 'var(--theme-border)',
+                      backgroundColor: 'var(--theme-bg-card)',
+                      color: 'var(--theme-text-primary)',
+                      '--tw-ring-color': topicColor,
+                    } as React.CSSProperties} />
+                </div>
+                
+                {/* Filter dropdown */}
+                <select value={filterMode} onChange={e => setFilterMode(e.target.value as FilterMode)}
+                  className="px-3 py-2 rounded-xl border text-sm font-medium focus:outline-none"
+                  style={{
+                    borderColor: 'var(--theme-border)',
+                    backgroundColor: 'var(--theme-bg-card)',
+                    color: 'var(--theme-text-primary)',
+                  }}>
+                  <option value="all">Tất cả ({topic.words?.length || 0})</option>
+                  <option value="learned">Đã thuộc ({learnedWords.size})</option>
+                  <option value="unlearned">Chưa thuộc</option>
+                  <option value="core">Từ Core</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Table */}
+            <div className="overflow-x-auto">
+              {filteredWords.length === 0 ? (
+                <div className="text-center py-12">
+                  <p className="text-sm" style={{ color: 'var(--theme-text-muted)' }}>Không tìm thấy từ nào.</p>
+                </div>
+              ) : (
+                <table className="w-full text-left text-sm whitespace-nowrap">
+                  <thead className="border-b border-black/5 dark:border-white/5">
+                    <tr>
+                      <th className="px-5 py-3 font-semibold" style={{ color: 'var(--theme-text-muted)' }}>TỪ VỰNG</th>
+                      <th className="px-5 py-3 font-semibold" style={{ color: 'var(--theme-text-muted)' }}>NGHĨA</th>
+                      <th className="px-5 py-3 font-semibold" style={{ color: 'var(--theme-text-muted)' }}>LOẠI TỪ</th>
+                      <th className="px-5 py-3 font-semibold" style={{ color: 'var(--theme-text-muted)' }}>VÍ DỤ</th>
+                      <th className="px-5 py-3 font-semibold text-center" style={{ color: 'var(--theme-text-muted)' }}>THUỘC</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-black/5 dark:divide-white/5">
+                    {filteredWords.map((word) => {
+                      const isLearned = learnedWords.has(word.id);
+                      const ac = ArticleColor[word.article] || { color: 'var(--theme-text-muted)', bg: 'var(--theme-bg-secondary)' };
+                      
+                      const handlePlay = () => {
+                        const text = word.article ? `${word.article} ${word.word}` : word.word;
+                        const u = new SpeechSynthesisUtterance(text);
+                        u.lang = 'de-DE'; u.rate = 0.9;
+                        speechSynthesis.speak(u);
+                      };
+
+                      return (
+                        <tr key={word.id} onClick={() => setSelectedWord(word)} className="transition-colors hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer">
+                          {/* TỪ VỰNG */}
+                          <td className="px-5 py-3.5 align-middle">
+                            <div className="flex items-center gap-3">
+                              <button onClick={(e) => { e.stopPropagation(); handlePlay(); }}
+                                className="w-8 h-8 rounded-full flex items-center justify-center transition-all hover:scale-110 shrink-0"
+                                style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-secondary)' }}>
+                                <IconVolume size={14} />
+                              </button>
+                              <div className="flex flex-col">
+                                <span className="text-base font-bold" style={{ color: 'var(--theme-text-primary)' }}>
+                                  {word.article && <span style={{ color: ac.color }} className="mr-1">{word.article}</span>}
+                                  {word.word}
+                                </span>
+                                {word.plural && (
+                                  <span className="text-[11px] font-mono mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>
+                                    Pl: {word.plural}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </td>
+                          
+                          {/* NGHĨA */}
+                          <td className="px-5 py-3.5 align-middle">
+                            <span className="font-medium whitespace-normal line-clamp-2" style={{ color: 'var(--theme-text-primary)' }}>
+                              {word.translationVi || word.translationEn}
+                            </span>
+                          </td>
+                          
+                          {/* LOẠI TỪ */}
+                          <td className="px-5 py-3.5 align-middle">
+                            {word.article ? (
+                              <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider"
+                                style={{ backgroundColor: ac.bg, color: ac.color }}>
+                                Danh từ
+                              </span>
+                            ) : (
+                              <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider"
+                                style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }}>
+                                Khác
+                              </span>
+                            )}
+                          </td>
+                          
+                          {/* VÍ DỤ */}
+                          <td className="px-5 py-3.5 align-middle max-w-62.5">
+                            <span className="text-xs italic whitespace-normal line-clamp-2" style={{ color: 'var(--theme-text-secondary)' }}>
+                              {word.examples?.[0] || word.tips?.[0] || '—'}
+                            </span>
+                          </td>
+                          
+                          {/* THUỘC */}
+                          <td className="px-5 py-3.5 align-middle text-center">
+                            <button
+                              onClick={(e) => { e.stopPropagation(); toggleLearned(word.id); }}
+                              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none
+                                ${isLearned ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-600'}`}
+                            >
+                              <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform
+                                ${isLearned ? 'translate-x-6' : 'translate-x-1'}`} 
+                              />
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Toolbar for Study Modes */}
+        {activeTab !== 'words' && (
+          <div className="mb-6 flex items-center justify-between p-2 rounded-2xl"
+            style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
+            <button onClick={() => setActiveTab('words')}
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold transition-all hover:bg-black/5 dark:hover:bg-white/5"
+              style={{ color: 'var(--theme-text-primary)' }}>
+              <IconChevronLeft size={18} /> Quay lại danh sách
+            </button>
+            <h2 className="text-lg font-bold px-4" style={{ color: topicColor }}>
+              {STUDY_MODES.find(m => m.key === activeTab)?.label}
+            </h2>
+            <div className="w-37.5" /> {/* spacer to center title */}
+          </div>
+        )}
+
+        {/* Tab: Flashcard */}
+        {activeTab === 'flashcard' && topic.words && (
+          <TopicFlashcard
+            words={topic.words}
+            topicColor={topicColor}
+            onMarkLearned={markLearned}
+          />
+        )}
+
+        {/* Tab: Quiz */}
+        {activeTab === 'quiz' && topic.words && (
+          <TopicQuiz
+            words={topic.words}
+            topicColor={topicColor}
+            onMarkLearned={markLearned}
+          />
+        )}
+
+        {/* Tab: Matching */}
+        {activeTab === 'matching' && topic.words && (
+          <TopicMatching
+            words={topic.words}
+            topicColor={topicColor}
+            onMarkLearned={markLearned}
+          />
+        )}
+
+        {/* ═══════════════════════════════════════════ */}
+        {/* MINI LESSON TIPS (Moved to bottom)           */}
         {/* ═══════════════════════════════════════════ */}
         {LEVEL_TIPS[topic.level] && (
-          <div className="mb-6 rounded-2xl border overflow-hidden"
+          <div className="mt-8 mb-6 rounded-2xl border overflow-hidden"
             style={{ borderColor: `${topicColor}20`, backgroundColor: 'var(--theme-bg-card)' }}>
             <button
               onClick={() => setShowTips(!showTips)}
@@ -535,153 +592,6 @@ export default function TopicDetailPage() {
           </div>
         )}
 
-        {/* ═══════════════════════════════════════════ */}
-        {/* TAB NAVIGATION                              */}
-        {/* ═══════════════════════════════════════════ */}
-        <div className="flex items-center gap-1 p-1 rounded-xl mb-6"
-          style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
-          {TABS.map(tab => {
-            const isActive = activeTab === tab.key;
-            const TabIcon = tab.icon;
-            return (
-              <button key={tab.key}
-                onClick={() => setActiveTab(tab.key)}
-                className="flex-1 flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-lg text-body font-semibold transition-all duration-200"
-                style={isActive
-                  ? {
-                    backgroundColor: 'var(--theme-bg-card)',
-                    color: topicColor,
-                    boxShadow: '0 1px 3px rgba(0,0,0,.1)',
-                  }
-                  : { color: 'var(--theme-text-muted)' }
-                }>
-                <TabIcon size={15} />
-                <span className="hidden sm:inline">{tab.label}</span>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* ═══════════════════════════════════════════ */}
-        {/* TAB CONTENT                                 */}
-        {/* ═══════════════════════════════════════════ */}
-
-        {/* Tab: Từ vựng */}
-        {activeTab === 'words' && (
-          <>
-            {/* Filters */}
-            <div className="p-4 rounded-2xl border mb-6"
-              style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
-              <div className="flex flex-wrap items-center gap-3">
-                {/* Search */}
-                <div className="flex-1 min-w-50 relative">
-                  <div className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--theme-text-muted)' }}>
-                    <IconSearch size={16} />
-                  </div>
-                  <input type="text" value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
-                    placeholder="Tìm từ..."
-                    className="w-full pl-9 pr-4 py-2 rounded-xl border text-body transition-all
-                      focus:outline-none focus:ring-2"
-                    style={{
-                      borderColor: 'var(--theme-border)',
-                      backgroundColor: 'var(--theme-bg-secondary)',
-                      color: 'var(--theme-text-primary)',
-                      '--tw-ring-color': topicColor,
-                    } as React.CSSProperties} />
-                </div>
-
-                {/* Filter pills */}
-                <div className="flex items-center gap-1">
-                  {[
-                    { key: 'all', label: 'Tất cả', icon: null },
-                    { key: 'core', label: 'Core', icon: IconStar },
-                    { key: 'unlearned', label: 'Chưa học', icon: null },
-                    { key: 'learned', label: 'Đã học', icon: IconCheck },
-                  ].map(item => {
-                    const isActive = filterMode === item.key;
-                    const Ic = item.icon;
-                    return (
-                      <button key={item.key}
-                        onClick={() => setFilterMode(item.key as FilterMode)}
-                        className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200"
-                        style={isActive
-                          ? { background: `linear-gradient(135deg, ${topicColor}, ${topicColor}cc)`, color: 'white' }
-                          : { backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }
-                        }>
-                        {Ic && <Ic size={12} />}
-                        {item.label}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              <div className="mt-2.5 text-caption" style={{ color: 'var(--theme-text-muted)' }}>
-                Hiển thị {filteredWords.length} / {topic.words?.length || 0} từ
-              </div>
-            </div>
-
-            {/* Word list */}
-            <div className="space-y-3">
-              {filteredWords.map((word, index) => (
-                <WordCard
-                  key={word.id}
-                  word={word}
-                  index={index + 1}
-                  isLearned={learnedWords.has(word.id)}
-                  onToggleLearned={toggleLearned}
-                />
-              ))}
-            </div>
-
-            {/* Empty state */}
-            {filteredWords.length === 0 && (
-              <div className="text-center py-12">
-                <div className="w-14 h-14 rounded-2xl mx-auto flex items-center justify-center mb-3"
-                  style={{ background: 'linear-gradient(135deg, rgba(107,114,128,.12), rgba(107,114,128,.06))' }}>
-                  <IconSearch size={24} style={{ color: 'var(--theme-text-muted)' }} />
-                </div>
-                <p className="text-sm" style={{ color: 'var(--theme-text-muted)' }}>
-                  {searchQuery
-                    ? `Không tìm thấy từ nào khớp với "${searchQuery}"`
-                    : filterMode === 'learned'
-                    ? 'Bạn chưa học từ nào trong chủ đề này'
-                    : filterMode === 'unlearned'
-                    ? 'Bạn đã học hết tất cả từ trong chủ đề này! 🎉'
-                    : 'Chủ đề này chưa có từ vựng'}
-                </p>
-              </div>
-            )}
-          </>
-        )}
-
-        {/* Tab: Flashcard */}
-        {activeTab === 'flashcard' && topic.words && (
-          <TopicFlashcard
-            words={topic.words}
-            topicColor={topicColor}
-            onMarkLearned={markLearned}
-          />
-        )}
-
-        {/* Tab: Quiz */}
-        {activeTab === 'quiz' && topic.words && (
-          <TopicQuiz
-            words={topic.words}
-            topicColor={topicColor}
-            onMarkLearned={markLearned}
-          />
-        )}
-
-        {/* Tab: Matching */}
-        {activeTab === 'matching' && topic.words && (
-          <TopicMatching
-            words={topic.words}
-            topicColor={topicColor}
-            onMarkLearned={markLearned}
-          />
-        )}
-
         {/* Bottom navigation */}
         <div className="mt-8 flex items-center justify-between">
           <Link href="/topics"
@@ -692,18 +602,30 @@ export default function TopicDetailPage() {
 
           {progress === 100 && (
             <div className="flex items-center gap-3">
-              <span className="text-body font-semibold" style={{ color: '#22C55E' }}>
+              <span className="text-body font-semibold" style={{ color: ACCENT.reading }}>
                 🎉 Hoàn thành!
               </span>
               <Link href="/topics"
                 className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-body font-semibold text-white
                   transition-all hover:shadow-md hover:-translate-y-0.5"
-                style={{ background: 'linear-gradient(135deg, #22C55E, #16A34A)' }}>
+                style={{ background: GRADIENT.reading }}>
                 Chủ đề tiếp theo <IconChevronRight size={14} />
               </Link>
             </div>
           )}
         </div>
+
+        {selectedWord && (
+          <TopicWordDetailModal
+            word={selectedWord}
+            onClose={() => setSelectedWord(null)}
+            onSpeak={(text) => {
+              const u = new SpeechSynthesisUtterance(text);
+              u.lang = 'de-DE'; u.rate = 0.9;
+              speechSynthesis.speak(u);
+            }}
+          />
+        )}
       </div>
   );
 }

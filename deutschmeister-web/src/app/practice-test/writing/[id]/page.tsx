@@ -5,9 +5,14 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useWritingSession, useSaveDraft, useSubmitWriting } from '@/hooks/useWriting';
 import { IconBookOpen, IconChevronDown, IconChevronLeft, IconEye, IconEyeOff, IconLoader, IconPenLine, IconSave, IconSend } from '../icons';
+import { PageHeader, FixedActionBar } from '@/components/ui';
+import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 
 function IconChevronUp({ size = 14 }: { size?: number }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}><polyline points="18 15 12 9 6 15" /></svg>;
+}
+function IconCheck({ size = 14, style }: { size?: number; style?: React.CSSProperties }) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}><polyline points="20 6 9 17 4 12" /></svg>;
 }
 function IconPin({ size = 13 }: { size?: number }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}><path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 1 1 0 0 0 1-1V4a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1 1 1 0 0 1 1 1z"/></svg>;
@@ -21,8 +26,10 @@ function countWords(text: string): number {
 const WRITING_TYPE_LABELS: Record<string, string> = {
   email: 'E-Mail', brief: 'Formeller Brief', beschreibung: 'Beschreibung',
   tagebuch: 'Tagebuch', dialog: 'Dialog', aufsatz: 'Aufsatz',
-  einladung: 'Einladung', beschwerde: 'Beschwerde', bewerbung: 'Bewerbung', formular: 'Formular',
+  einladung: 'Einladung', bhwerde: 'Beschwerde', bewerbung: 'Bewerbung', formular: 'Formular',
 };
+
+const SPECIAL_CHARS = ['ä', 'ö', 'ü', 'ß', 'Ä', 'Ö', 'Ü'];
 
 export default function WritingEditorPage() {
   const params = useParams();
@@ -32,9 +39,9 @@ export default function WritingEditorPage() {
   const { data: session, isLoading, isError } = useWritingSession(id);
   const saveDraftMutation = useSaveDraft();
   const submitMutation = useSubmitWriting();
-  // Ref để tránh saveDraftMutation object (unstable) vào deps của auto-save timer.
-  // saveDraftMutation.mutate function là stable, nhưng object thay reference mỗi khi
-  // state thay đổi (idle→pending→success→idle) → timer bị reset sau mỗi lần save.
+  // Ref mirrors saveDraftMutation.mutate — lets the auto-save timer call the latest
+  // version without adding saveDraftMutation to useCallback deps (would recreate on
+  // every save cycle, resetting the 30 s debounce).
   const saveDraftMutateRef = useRef(saveDraftMutation.mutate);
   saveDraftMutateRef.current = saveDraftMutation.mutate;
 
@@ -49,7 +56,6 @@ export default function WritingEditorPage() {
   useEffect(() => { if (session?.userText) setText(session.userText); }, [session?.userText]);
   useEffect(() => { if (session?.status === 'GRADED') router.replace(`/practice-test/writing/${id}/result`); }, [session?.status, id, router]);
 
-  // Show sticky prompt bar on mobile when prompt scrolls out of view
   useEffect(() => {
     const el = promptRef.current;
     if (!el) return;
@@ -61,14 +67,13 @@ export default function WritingEditorPage() {
     return () => observer.disconnect();
   }, [session]);
 
-  // Auto-save every 30s sau lần cuối user gõ phím
   useEffect(() => {
     if (!text.trim() || !id) return;
     const timer = setTimeout(() => {
       saveDraftMutateRef.current({ id, userText: text }, { onSuccess: () => setLastSaved(new Date()) });
     }, 30000);
     return () => clearTimeout(timer);
-  }, [text, id]); // saveDraftMutation sẽ không vào deps để tránh reset timer
+  }, [text, id]);
 
   const handleSaveDraft = useCallback(() => {
     if (!text.trim()) return;
@@ -86,7 +91,9 @@ export default function WritingEditorPage() {
     try {
       await submitMutation.mutateAsync({ id, userText: text });
       router.push(`/practice-test/writing/${id}/result`);
-    } catch { /* handled */ }
+    } catch {
+      // Mutation error already shown via global handleGlobalError toast
+    }
   }, [id, text, session, submitMutation, router]);
 
   useEffect(() => {
@@ -95,7 +102,19 @@ export default function WritingEditorPage() {
     return () => window.removeEventListener('keydown', handler);
   }, [handleSaveDraft]);
 
-  // Loading / Error
+  const insertSpecial = useCallback((char: string) => {
+    if (!textareaRef.current) return;
+    const { selectionStart, selectionEnd } = textareaRef.current;
+    const newText = text.substring(0, selectionStart) + char + text.substring(selectionEnd);
+    setText(newText);
+    setTimeout(() => {
+      if (textareaRef.current) {
+        textareaRef.current.focus();
+        textareaRef.current.setSelectionRange(selectionStart + 1, selectionStart + 1);
+      }
+    }, 0);
+  }, [text]);
+
   if (isLoading) {
     return (
         <div className="py-6">
@@ -112,12 +131,12 @@ export default function WritingEditorPage() {
     return (
         <div className="py-20 text-center">
           <div className="w-16 h-16 rounded-2xl mx-auto flex items-center justify-center mb-4"
-            style={{ background: 'linear-gradient(135deg, #EF4444, #EF4444cc)' }}>
+            style={{ background: `linear-gradient(135deg, ${STATUS.danger}, ${STATUS.danger}cc)` }}>
             <IconPenLine size={28} style={{ color: 'white' }} />
           </div>
           <p className="text-sm mb-4" style={{ color: 'var(--theme-text-muted)' }}>Không tìm thấy bài viết</p>
           <Link href="/practice-test/writing"
-            className="text-body font-medium" style={{ color: '#3B82F6' }}>
+            className="text-body font-medium" style={{ color: STATUS.info }}>
             <IconChevronLeft size={14} /> Quay lại danh sách
           </Link>
         </div>
@@ -129,46 +148,59 @@ export default function WritingEditorPage() {
   const isUnderMin = wordCount < session.wordCountMin;
 
   const progressPct = Math.min(100, (wordCount / session.wordCountMax) * 100);
-  const progressColor = wordCount > session.wordCountMax ? '#F97316' : isInRange ? '#22C55E' : '#3B82F6';
+  const progressColor = wordCount > session.wordCountMax ? ACCENT.games : isInRange ? STATUS.success : STATUS.info;
 
   return (
-      <div className="py-6">
+      <div className="pb-24">
+        {/* Immersive Header */}
+        <div className="relative -mx-6 px-6 pt-8 pb-12 mb-6 overflow-hidden">
+          <div className="absolute inset-0 opacity-10 pointer-events-none"
+            style={{ background: GRADIENT.writing, maskImage: 'radial-gradient(circle at top right, white, transparent)' }} />
 
-        {/* Header */}
-        <div className="flex items-center justify-between mb-5">
-          <div>
-            <Link href="/practice-test/writing"
-              className="flex items-center gap-1 text-body font-medium mb-1 transition-opacity hover:opacity-70"
-              style={{ color: 'var(--theme-text-muted)' }}>
-              <IconChevronLeft size={14} /> Quay lại
-            </Link>
-            <h1 className="text-title font-bold flex items-center gap-2 flex-wrap" style={{ color: 'var(--theme-text-primary)' }}>
-              {session.topic}
-              <span className="px-2 py-0.5 rounded-md text-caption font-bold"
-                style={{ backgroundColor: 'rgba(59,130,246,.1)', color: '#3B82F6' }}>
-                {session.cefrLevel}
-              </span>
-              <span className="text-xs font-normal" style={{ color: 'var(--theme-text-muted)' }}>
-                {WRITING_TYPE_LABELS[session.writingType] || session.writingType}
-              </span>
-            </h1>
-          </div>
-          <div className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>
-            {saveDraftMutation.isPending
-              ? <span className="flex items-center gap-1"><IconLoader size={12} /> Đang lưu...</span>
-              : lastSaved
-                ? <span className="flex items-center gap-1"><IconSave size={12} /> {lastSaved.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}</span>
-                : <span>Ctrl+S để lưu</span>
-            }
+          <div className="relative flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 shadow-lg"
+                style={{ background: GRADIENT.writing }}>
+                <IconPenLine size={28} style={{ color: 'white' }} />
+              </div>
+              <div>
+                <Link href="/practice-test/writing" className="text-xs font-bold uppercase tracking-widest mb-1 block opacity-60 hover:opacity-100 transition-opacity" style={{ color: 'var(--theme-text-primary)' }}>
+                  ← Luyện Viết
+                </Link>
+                <h1 className="text-h2 font-black tracking-tight" style={{ color: 'var(--theme-text-primary)' }}>
+                  {session.topic}
+                </h1>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="px-2 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-widest"
+                    style={{ backgroundColor: `${ACCENT.writing}14`, color: ACCENT.writing, border: `1px solid ${ACCENT.writing}33` }}>
+                    {session.cefrLevel}
+                  </span>
+                  <span className="text-xs font-medium opacity-60">
+                    {WRITING_TYPE_LABELS[session.writingType] || session.writingType}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="hidden sm:flex flex-col items-end text-right">
+              <div className="text-xs font-bold mb-1" style={{ color: 'var(--theme-text-muted)' }}>
+                {saveDraftMutation.isPending
+                  ? <span className="flex items-center gap-1.5"><IconLoader size={12} /> Đang lưu...</span>
+                  : lastSaved
+                    ? <span className="flex items-center gap-1.5"><IconCheck size={12} style={{ color: STATUS.success }} /> Đã lưu {lastSaved.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}</span>
+                    : <span className="opacity-40">Ctrl+S để lưu</span>
+                }
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* ── Sticky prompt bar on mobile (appears when prompt scrolls away) ── */}
+        {/* ── Sticky prompt bar on mobile ── */}
         {showStickyPrompt && (
           <div className="sticky z-20 -mx-6 lg:hidden px-6 pb-3" style={{ top: '64px', paddingTop: '8px' }}>
             <div className="rounded-2xl border overflow-hidden transition-all"
               style={{
-                borderColor: 'rgba(59,130,246,.35)',
+                borderColor: `${STATUS.info}40`,
                 backgroundColor: 'var(--theme-bg-card)',
                 boxShadow: '0 4px 20px rgba(0,0,0,.1)',
               }}>
@@ -195,13 +227,14 @@ export default function WritingEditorPage() {
           </div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
+        <div className="flex flex-col lg:flex-row gap-6">
 
-          {/* Left: Prompt + Hints */}
-          <div className="lg:col-span-2 space-y-3 lg:sticky lg:top-20 lg:self-start">
+          {/* Left Side: Prompt + Hints */}
+          <div className="lg:w-1/2 shrink-0 lg:sticky lg:top-20 lg:self-start lg:max-h-[calc(100vh-10rem)] lg:overflow-y-auto lg:pr-1 space-y-4">
             {/* Prompt */}
-            <div ref={promptRef} className="rounded-xl border-2 p-4" style={{ borderColor: 'rgba(59,130,246,.3)', backgroundColor: 'rgba(59,130,246,.04)' }}>
-              <h3 className="text-xs font-bold uppercase tracking-wider mb-2 flex items-center gap-1.5" style={{ color: '#3B82F6' }}>
+            <div ref={promptRef} className="rounded-xl border-2 p-4"
+              style={{ borderColor: `${STATUS.info}4D`, backgroundColor: `${STATUS.info}0A` }}>
+              <h3 className="text-xs font-bold uppercase tracking-wider mb-2 flex items-center gap-1.5" style={{ color: STATUS.info }}>
                 <IconBookOpen size={13} /> Aufgabe / Đề bài
               </h3>
               <p className="text-body leading-relaxed whitespace-pre-line" style={{ color: 'var(--theme-text-primary)' }}>
@@ -219,28 +252,30 @@ export default function WritingEditorPage() {
             {showHints && (
               <>
                 {session.vocabHints && (session.vocabHints as string[]).length > 0 && (
-                  <div className="rounded-xl border p-4" style={{ borderColor: 'rgba(34,197,94,.2)', backgroundColor: 'rgba(34,197,94,.04)' }}>
-                    <h4 className="text-caption font-bold uppercase tracking-wider mb-2" style={{ color: '#22C55E' }}>
+                  <div className="rounded-xl border p-4"
+                    style={{ borderColor: `${STATUS.success}33`, backgroundColor: `${STATUS.success}08` }}>
+                    <h4 className="text-caption font-bold uppercase tracking-wider mb-2" style={{ color: STATUS.success }}>
                       Vokabelhilfe / Từ vựng
                     </h4>
                     <ul className="space-y-1">
                       {(session.vocabHints as string[]).map((h, i) => (
                         <li key={i} className="text-xs flex items-start gap-1.5" style={{ color: 'var(--theme-text-secondary)' }}>
-                          <span style={{ color: '#22C55E' }}>•</span>{h}
+                          <span style={{ color: STATUS.success }}>•</span>{h}
                         </li>
                       ))}
                     </ul>
                   </div>
                 )}
                 {session.grammarHints && (session.grammarHints as string[]).length > 0 && (
-                  <div className="rounded-xl border p-4" style={{ borderColor: 'rgba(245,158,11,.2)', backgroundColor: 'rgba(245,158,11,.04)' }}>
-                    <h4 className="text-caption font-bold uppercase tracking-wider mb-2" style={{ color: '#F59E0B' }}>
+                  <div className="rounded-xl border p-4"
+                    style={{ borderColor: `${STATUS.warning}33`, backgroundColor: `${STATUS.warning}08` }}>
+                    <h4 className="text-caption font-bold uppercase tracking-wider mb-2" style={{ color: STATUS.warning }}>
                       Grammatik / Ngữ pháp
                     </h4>
                     <ul className="space-y-1">
                       {(session.grammarHints as string[]).map((h, i) => (
                         <li key={i} className="text-xs flex items-start gap-1.5" style={{ color: 'var(--theme-text-secondary)' }}>
-                          <span style={{ color: '#F59E0B' }}>•</span>{h}
+                          <span style={{ color: STATUS.warning }}>•</span>{h}
                         </li>
                       ))}
                     </ul>
@@ -250,8 +285,8 @@ export default function WritingEditorPage() {
             )}
           </div>
 
-          {/* Right: Text Editor */}
-          <div className="lg:col-span-3">
+          {/* Right Side: Text Editor */}
+          <div className="lg:w-1/2 min-w-0">
             <div className="rounded-2xl border overflow-hidden"
               style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
               {/* Editor header */}
@@ -262,11 +297,28 @@ export default function WritingEditorPage() {
                 </span>
                 <span className="text-xs font-mono font-semibold px-2.5 py-1 rounded-lg"
                   style={{
-                    backgroundColor: isInRange ? 'rgba(34,197,94,.1)' : isUnderMin ? 'var(--theme-bg-secondary)' : 'rgba(249,115,22,.1)',
-                    color: isInRange ? '#22C55E' : isUnderMin ? 'var(--theme-text-muted)' : '#F97316',
+                    backgroundColor: isInRange ? `${STATUS.success}1A` : isUnderMin ? 'var(--theme-bg-secondary)' : `${ACCENT.games}1A`,
+                    color: isInRange ? STATUS.success : isUnderMin ? 'var(--theme-text-muted)' : ACCENT.games,
                   }}>
                   {wordCount} / {session.wordCountMin}–{session.wordCountMax} từ
                 </span>
+              </div>
+
+              {/* Special Characters Toolbar */}
+              <div className="flex items-center gap-1.5 px-4 py-2 border-b overflow-x-auto no-scrollbar"
+                style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
+                <span className="text-[10px] font-bold uppercase tracking-widest opacity-40 mr-1" style={{ color: 'var(--theme-text-primary)' }}>Ký tự:</span>
+                {SPECIAL_CHARS.map(char => (
+                  <button key={char} onClick={() => insertSpecial(char)}
+                    className="w-8 h-8 rounded-lg text-sm font-bold transition-all hover:scale-110 active:scale-90 flex items-center justify-center border"
+                    style={{
+                      borderColor: 'var(--theme-border)',
+                      backgroundColor: 'var(--theme-bg-secondary)',
+                      color: 'var(--theme-text-primary)'
+                    }}>
+                    {char}
+                  </button>
+                ))}
               </div>
 
               {/* Textarea */}
@@ -284,25 +336,25 @@ export default function WritingEditorPage() {
               </div>
             </div>
 
-            {/* Action buttons */}
-            <div className="flex items-center gap-3 mt-4">
+            {/* Fixed Action Bar */}
+            <FixedActionBar columns={2}>
               <button onClick={handleSaveDraft} disabled={!text.trim() || saveDraftMutation.isPending}
-                className="py-3 px-6 rounded-xl border-2 font-semibold text-sm transition-all duration-200 hover:-translate-y-0.5 disabled:opacity-40 flex items-center justify-center gap-2"
-                style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)' }}>
+                className="py-3 px-6 rounded-xl border-2 font-bold text-sm transition-all duration-200 hover:-translate-y-0.5 disabled:opacity-40 flex items-center justify-center gap-2"
+                style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)', backgroundColor: 'var(--theme-bg-card)' }}>
                 <IconSave size={16} /> Lưu nháp
               </button>
               <button onClick={handleSubmit} disabled={!text.trim() || submitMutation.isPending || isUnderMin}
                 className="flex-1 py-3 rounded-xl font-bold text-sm text-white transition-all duration-200 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                style={{ background: 'linear-gradient(135deg, #6366F1, #8B5CF6)', boxShadow: '0 4px 12px rgba(99,102,241,.3)' }}>
+                style={{ background: GRADIENT.writing, boxShadow: !isUnderMin ? `0 8px 24px ${ACCENT.writing}33` : 'none' }}>
                 {submitMutation.isPending
                   ? <><IconLoader size={16} /> AI đang chấm bài...</>
                   : <><IconSend size={16} /> Nộp bài & Chấm điểm</>
                 }
               </button>
-            </div>
+            </FixedActionBar>
 
             {submitMutation.isError && (
-              <p className="text-body text-center mt-3" style={{ color: '#EF4444' }}>Không thể chấm bài. Vui lòng thử lại.</p>
+              <p className="text-body text-center mt-3" style={{ color: STATUS.danger }}>Không thể chấm bài. Vui lòng thử lại.</p>
             )}
             {isUnderMin && text.trim() && (
               <p className="text-xs text-center mt-2" style={{ color: 'var(--theme-text-muted)' }}>

@@ -5,28 +5,20 @@ import { useParams, useRouter } from 'next/navigation';
 import { useExamReadingSession } from '@/hooks/useExamReading';
 import { ExamReadingTeil, TeilGradingDetail, ExamTeilQuestion } from '@/lib/api/examReading';
 import {
-  PageHeader, ScoreRing, StatGrid, FixedActionBar, Button, type StatItem,
+  PageHeader, ScoreRing, StatGrid, FixedActionBar, type StatItem,
 } from '@/components/ui';
-import { ACCENT, GRADIENT } from '@/lib/tokens';
-
-// ─── Icons ────────────────────────────────────────────────────────────────────
-function IconCheck({ size = 16 }: { size?: number }) {
-  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}><polyline points="20 6 9 17 4 12" /></svg>;
-}
-function IconX({ size = 16 }: { size?: number }) {
-  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>;
-}
-function IconLoader({ size = 24, style }: { size?: number; style?: React.CSSProperties }) {
-  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="animate-spin" style={{ display: 'block', ...style }}><path d="M21 12a9 9 0 1 1-6.219-8.56" /></svg>;
-}
+import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import {
+  IconCheck, IconX, IconLoader, IconShare, IconSparkles,
+} from '../../../icons';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 function getGradeInfo(score: number): { emoji: string; label: string; color: string; bg: string } {
-  if (score >= 90) return { emoji: '🏆', label: 'Xuất sắc!',           color: '#22C55E', bg: 'rgba(34,197,94,.15)' };
-  if (score >= 75) return { emoji: '🌟', label: 'Rất tốt! 👏',         color: '#22C55E', bg: 'rgba(34,197,94,.12)' };
-  if (score >= 60) return { emoji: '✓',  label: 'Bestanden! 💪',        color: '#F59E0B', bg: 'rgba(245,158,11,.12)' };
-  if (score >= 40) return { emoji: '📖', label: 'Cần cố gắng thêm',     color: '#F97316', bg: 'rgba(249,115,22,.12)' };
-  return              { emoji: '💪', label: 'Hãy ôn luyện thêm',     color: '#EF4444', bg: 'rgba(239,68,68,.12)' };
+  if (score >= 90) return { emoji: '🏆', label: 'Xuất sắc!',        color: STATUS.success, bg: `${STATUS.success}26` };
+  if (score >= 75) return { emoji: '🌟', label: 'Rất tốt! 👏',      color: STATUS.success, bg: `${STATUS.success}1F` };
+  if (score >= 60) return { emoji: '✓',  label: 'Bestanden! 💪',     color: STATUS.warning, bg: `${STATUS.warning}1F` };
+  if (score >= 40) return { emoji: '📖', label: 'Cần cố gắng thêm', color: ACCENT.games,   bg: `${ACCENT.games}1F` };
+  return              { emoji: '💪', label: 'Hãy ôn luyện thêm', color: STATUS.danger,  bg: `${STATUS.danger}1F` };
 }
 
 function taskTypeLabel(type: string) {
@@ -98,14 +90,14 @@ function QuestionReview({ teil, details }: { teil: ExamReadingTeil; details: Tei
 
         return (
           <div key={q.id} className="rounded-2xl border overflow-hidden"
-            style={{ borderColor: isCorrect ? 'rgba(34,197,94,.25)' : 'rgba(239,68,68,.25)' }}>
+            style={{ borderColor: isCorrect ? `${STATUS.success}40` : `${STATUS.danger}40` }}>
             <button
               className="w-full flex items-center gap-3 px-4 py-3.5 text-left"
-              style={{ backgroundColor: isCorrect ? 'rgba(34,197,94,.04)' : 'rgba(239,68,68,.04)' }}
+              style={{ backgroundColor: isCorrect ? `${STATUS.success}0A` : `${STATUS.danger}0A` }}
               onClick={() => setExpandedQ(expanded ? null : q.id)}
             >
               <div className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 text-white text-caption"
-                style={{ background: isCorrect ? '#22C55E' : '#EF4444' }}>
+                style={{ background: isCorrect ? STATUS.success : STATUS.danger }}>
                 {isCorrect ? <IconCheck size={11} /> : <IconX size={11} />}
               </div>
               <div className="flex-1 min-w-0">
@@ -113,7 +105,7 @@ function QuestionReview({ teil, details }: { teil: ExamReadingTeil; details: Tei
                   Câu {i + 1}: {q.questionText}
                 </p>
                 {!isCorrect && (
-                  <p className="text-xs mt-0.5" style={{ color: '#EF4444' }}>
+                  <p className="text-xs mt-0.5" style={{ color: STATUS.danger }}>
                     Bạn: <strong>{detail.userAnswer ?? '—'}</strong> · Đáp án: <strong>{detail.correctAnswer}</strong>
                   </p>
                 )}
@@ -135,8 +127,8 @@ function QuestionReview({ teil, details }: { teil: ExamReadingTeil; details: Tei
                       let border = 'var(--theme-border)';
                       let bg = 'transparent';
                       let color = 'var(--theme-text-secondary)';
-                      if (isCorrectOpt)      { border = '#22C55E'; bg = 'rgba(34,197,94,.08)'; color = '#22C55E'; }
-                      if (isUser && !isCorrectOpt) { border = '#EF4444'; bg = 'rgba(239,68,68,.08)'; color = '#EF4444'; }
+                      if (isCorrectOpt)           { border = STATUS.success; bg = `${STATUS.success}14`; color = STATUS.success; }
+                      if (isUser && !isCorrectOpt) { border = STATUS.danger;  bg = `${STATUS.danger}14`;  color = STATUS.danger; }
                       return (
                         <div key={opt.id} className="flex items-center gap-2 px-3 py-2.5 rounded-xl border text-xs"
                           style={{ borderColor: border, backgroundColor: bg, color }}>
@@ -158,7 +150,7 @@ function QuestionReview({ teil, details }: { teil: ExamReadingTeil; details: Tei
                     <div className="flex items-center gap-1.5 text-xs" style={{ color: 'var(--theme-text-secondary)' }}>
                       <span style={{ color: 'var(--theme-text-muted)' }}>Bạn trả lời:</span>
                       <span className="font-bold px-2 py-0.5 rounded-lg"
-                        style={{ backgroundColor: isCorrect ? 'rgba(34,197,94,.1)' : 'rgba(239,68,68,.1)', color: isCorrect ? '#22C55E' : '#EF4444' }}>
+                        style={{ backgroundColor: isCorrect ? `${STATUS.success}1A` : `${STATUS.danger}1A`, color: isCorrect ? STATUS.success : STATUS.danger }}>
                         {detail.userAnswer ?? '(bỏ qua)'}
                       </span>
                     </div>
@@ -166,7 +158,7 @@ function QuestionReview({ teil, details }: { teil: ExamReadingTeil; details: Tei
                       <div className="flex items-center gap-1.5 text-xs">
                         <span style={{ color: 'var(--theme-text-muted)' }}>Đúng:</span>
                         <span className="font-bold px-2 py-0.5 rounded-lg"
-                          style={{ backgroundColor: 'rgba(34,197,94,.1)', color: '#22C55E' }}>
+                          style={{ backgroundColor: `${STATUS.success}1A`, color: STATUS.success }}>
                           {detail.correctAnswer}
                         </span>
                       </div>
@@ -174,7 +166,7 @@ function QuestionReview({ teil, details }: { teil: ExamReadingTeil; details: Tei
                   </div>
                 )}
                 {detail.explanationVi && (
-                  <div className="rounded-xl p-3" style={{ backgroundColor: 'rgba(34,197,94,.07)' }}>
+                  <div className="rounded-xl p-3" style={{ backgroundColor: `${ACCENT.reading}12` }}>
                     <p className="text-caption font-bold mb-1" style={{ color: ACCENT.reading }}>Giải thích:</p>
                     <p className="text-body" style={{ color: 'var(--theme-text-primary)' }}>{detail.explanationVi}</p>
                     {detail.explanationDe && (
@@ -242,7 +234,7 @@ export default function ExamReadingResultPage() {
         accent="reading"
         right={
           <span className="px-3 py-1 rounded-xl text-xs font-bold"
-            style={{ backgroundColor: 'rgba(34,197,94,.1)', color: ACCENT.reading }}>
+            style={{ backgroundColor: `${ACCENT.reading}1A`, color: ACCENT.reading }}>
             {session.examType} {session.cefrLevel}
           </span>
         }
@@ -291,10 +283,10 @@ export default function ExamReadingResultPage() {
 
           return (
             <div key={teil.number} className="rounded-2xl border overflow-hidden"
-              style={{ borderColor: passed ? 'rgba(34,197,94,.25)' : 'rgba(239,68,68,.25)' }}>
+              style={{ borderColor: passed ? `${STATUS.success}40` : `${STATUS.danger}40` }}>
               <button
                 className="w-full flex items-center gap-3 px-4 py-3.5 text-left"
-                style={{ backgroundColor: passed ? 'rgba(34,197,94,.04)' : 'rgba(239,68,68,.04)' }}
+                style={{ backgroundColor: passed ? `${STATUS.success}0A` : `${STATUS.danger}0A` }}
                 onClick={() => setExpandedTeil(isExpanded ? null : teil.number)}
               >
                 <span className="w-8 h-8 rounded-xl flex items-center justify-center text-xs font-extrabold text-white shrink-0"
@@ -304,7 +296,7 @@ export default function ExamReadingResultPage() {
                     {taskTypeLabel(teil.taskType)}
                   </p>
                   {ts && (
-                    <p className="text-xs mt-0.5" style={{ color: passed ? '#22C55E' : '#EF4444' }}>
+                    <p className="text-xs mt-0.5" style={{ color: passed ? STATUS.success : STATUS.danger }}>
                       {ts.correct}/{ts.total} đúng · {Math.round(pct)}%
                     </p>
                   )}
@@ -332,12 +324,20 @@ export default function ExamReadingResultPage() {
       </div>
 
       <FixedActionBar columns={2}>
-        <Button variant="outline" fullWidth onClick={() => router.push('/practice-test/reading/exam')}>
-          Danh sách
-        </Button>
-        <Button variant="game" accent="reading" fullWidth onClick={() => router.push('/practice-test/reading/exam/new')}>
-          Bài mới
-        </Button>
+        <button
+          className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl font-bold text-sm border-2 transition-all hover:bg-black/5"
+          style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)', backgroundColor: 'var(--theme-bg-card)' }}
+          onClick={() => {
+            navigator.share?.({ title: 'DeutschMeister', text: `Tôi đạt ${Math.round(score)}% bài đọc ${session.examType} ${session.cefrLevel}!` }).catch(() => {});
+          }}>
+          <IconShare size={16} /> Chia sẻ
+        </button>
+        <button
+          className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl font-bold text-sm text-white transition-all hover:-translate-y-0.5 shadow-lg"
+          style={{ background: GRADIENT.reading, boxShadow: `0 8px 24px ${ACCENT.reading}40` }}
+          onClick={() => router.push('/practice-test/reading/exam/new')}>
+          <IconSparkles size={16} /> Bài mới
+        </button>
       </FixedActionBar>
     </div>
   );

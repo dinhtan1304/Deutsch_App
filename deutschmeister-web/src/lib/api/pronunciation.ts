@@ -83,7 +83,7 @@ export const pronunciationApi = {
 
   getStats: () => apiGet<PronunciationStats>('/pronunciation/stats'),
 
-  getAttempt: (id: string) => apiGet<any>(`/pronunciation/${id}`),
+  getAttempt: (id: string) => apiGet<PronunciationResult>(`/pronunciation/${id}`),
 
   getPhonemeDrills: () => apiGet<PhonemeDrillSummary[]>('/pronunciation/phoneme-drills'),
 

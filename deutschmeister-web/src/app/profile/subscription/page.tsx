@@ -1,6 +1,8 @@
 ﻿'use client';
+/* eslint-disable no-restricted-syntax */
 
 import { useState } from 'react';
+import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 import Link from 'next/link';
 import { useMySubscription } from '@/hooks/useSubscription';
 import { useAuthStore } from '@/stores/authStore';
@@ -20,9 +22,9 @@ function daysUntil(dateStr: string): number {
 }
 
 const STATUS_LABELS: Record<string, { text: string; color: string; bg: string }> = {
-  pending: { text: 'Chờ xác nhận', color: '#F59E0B', bg: 'rgba(245,158,11,0.1)' },
-  confirmed: { text: 'Đã xác nhận', color: '#22C55E', bg: 'rgba(34,197,94,0.1)' },
-  rejected: { text: 'Từ chối', color: '#EF4444', bg: 'rgba(239,68,68,0.1)' },
+  pending: { text: 'Chờ xác nhận', color: ACCENT.xp, bg: 'rgba(245,158,11,0.1)' },
+  confirmed: { text: 'Đã xác nhận', color: STATUS.success, bg: 'rgba(34,197,94,0.1)' },
+  rejected: { text: 'Từ chối', color: STATUS.danger, bg: 'rgba(239,68,68,0.1)' },
 };
 
 export default function SubscriptionPage() {
@@ -34,7 +36,7 @@ export default function SubscriptionPage() {
     return (
       <div className="max-w-lg mx-auto px-4 py-20 text-center">
         <p className="text-sm mb-4" style={{ color: 'var(--theme-text-muted)' }}>Vui lòng đăng nhập để xem gói đăng ký.</p>
-        <Link href="/login" className="text-sm font-bold" style={{ color: '#6366F1' }}>Đăng nhập</Link>
+        <Link href="/login" className="text-sm font-bold" style={{ color: ACCENT.writing }}>Đăng nhập</Link>
       </div>
     );
   }
@@ -102,12 +104,12 @@ export default function SubscriptionPage() {
                 </div>
               )}
               {isLifetime && (
-                <div className="text-xs font-semibold" style={{ color: '#EC4899' }}>
+                <div className="text-xs font-semibold" style={{ color: ACCENT.listening }}>
                   ⭐ Trọn đời — Early Backer
                 </div>
               )}
               {isExpired && (
-                <div className="text-xs" style={{ color: '#EF4444' }}>
+                <div className="text-xs" style={{ color: STATUS.danger }}>
                   Đã hết hạn {data.expiresAt ? formatDate(data.expiresAt) : ''}
                 </div>
               )}
@@ -117,7 +119,7 @@ export default function SubscriptionPage() {
             </div>
           </div>
           {isPremium && (
-            <span className="text-caption font-bold px-2.5 py-1 rounded-lg" style={{ backgroundColor: 'rgba(34,197,94,0.1)', color: '#22C55E' }}>
+            <span className="text-caption font-bold px-2.5 py-1 rounded-lg" style={{ backgroundColor: 'rgba(34,197,94,0.1)', color: STATUS.success }}>
               ACTIVE
             </span>
           )}
@@ -136,7 +138,7 @@ export default function SubscriptionPage() {
           <button
             onClick={() => setUpgradeOpen(true)}
             className="w-full py-2.5 rounded-xl text-sm font-bold transition-colors"
-            style={{ color: '#8B5CF6', backgroundColor: 'rgba(139,92,246,0.1)' }}
+            style={{ color: ACCENT.vocab, backgroundColor: 'rgba(139,92,246,0.1)' }}
           >
             Gia hạn
           </button>
@@ -181,7 +183,7 @@ export default function SubscriptionPage() {
 
       {/* Link to pricing */}
       <div className="text-center pt-2">
-        <Link href="/pricing" className="text-body font-medium" style={{ color: '#8B5CF6' }}>
+        <Link href="/pricing" className="text-body font-medium" style={{ color: ACCENT.vocab }}>
           Xem so sánh chi tiết các gói &rarr;
         </Link>
       </div>

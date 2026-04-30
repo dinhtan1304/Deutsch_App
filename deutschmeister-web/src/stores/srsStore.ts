@@ -53,8 +53,8 @@ export const useSRSStore = create<SRSState>((set, get) => ({
         cards[p.wordId] = p;
       });
       set({ cards, isLoaded: true, isLoading: false });
-    } catch (e: any) {
-      if (e?.status === 401) {
+    } catch (e) {
+      if ((e as { status?: number } | undefined)?.status === 401) {
         set({ cards: {}, isLoaded: false, isLoading: false });
         return;
       }
@@ -69,8 +69,8 @@ export const useSRSStore = create<SRSState>((set, get) => ({
       const updated = await progressApi.review(wordId, rating);
       const { cards } = get();
       set({ cards: { ...cards, [wordId]: updated } });
-    } catch (e: any) {
-      if (e?.status === 401) return;
+    } catch (e) {
+      if ((e as { status?: number } | undefined)?.status === 401) return;
       if (process.env.NODE_ENV === 'development') console.error('Failed to review card:', e);
     }
   },
@@ -81,9 +81,9 @@ export const useSRSStore = create<SRSState>((set, get) => ({
       await progressApi.addWords(wordIds);
       // Reload all cards to get the new ones with word data
       await get().loadCards();
-    } catch (e: any) {
+    } catch (e) {
       // Silently handle auth errors (redirect handled by API client)
-      if (e?.status === 401) return;
+      if ((e as { status?: number } | undefined)?.status === 401) return;
       if (process.env.NODE_ENV === 'development') console.error('Failed to add words:', e);
     }
   },

@@ -1,6 +1,8 @@
-﻿'use client';
+'use client';
+/* eslint-disable no-restricted-syntax */
 
 import { useMemo } from 'react';
+import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 import type { WeeklyProgress } from '@/types/dashboard';
 
 interface WeeklyChartProps {
@@ -51,15 +53,15 @@ export function WeeklyChart({ data }: WeeklyChartProps) {
       </div>
 
       {/* Chart */}
-      <div className="flex items-end justify-between gap-2 mb-3" style={{ height: '9.5rem' }}>
+      <div className="flex items-end justify-between gap-2 mb-3 h-48">
         {data.map((day, i) => {
           const wH = (day.wordsLearned / maxWords) * 100;
           const gH = (day.gamesPlayed / maxGames) * 100;
           const today = isToday(day.date);
 
           return (
-            <div key={i} className="flex-1 flex flex-col items-center gap-1.5">
-              <div className="w-full flex items-end justify-center gap-1" style={{ height: '9rem' }}>
+            <div key={i} className="flex-1 flex flex-col items-center gap-1.5 h-full">
+              <div className="w-full flex-1 flex items-end justify-center gap-1 min-h-0">
                 {/* Words bar */}
                 <div className="relative w-5 group cursor-pointer self-stretch flex flex-col justify-end">
                   <div
@@ -75,7 +77,7 @@ export function WeeklyChart({ data }: WeeklyChartProps) {
                       text-caption font-medium rounded-md shadow-lg pointer-events-none
                       opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10
                       text-white"
-                      style={{ backgroundColor: '#3B82F6' }}>
+                      style={{ backgroundColor: ACCENT.srs }}>
                       {day.wordsLearned} từ
                     </div>
                   )}
@@ -124,14 +126,14 @@ export function WeeklyChart({ data }: WeeklyChartProps) {
       {/* Summary */}
       <div className="grid grid-cols-3 gap-3 pt-4" style={{ borderTop: '1px solid var(--theme-border)' }}>
         {[
-          { value: totals.words, label: 'Từ đã học', color: '#3B82F6' },
+          { value: totals.words, label: 'Từ đã học', color: ACCENT.srs },
           { value: totals.games, label: 'Games đã chơi', color: '#10B981' },
           {
             value: totals.minutes < 60
               ? `${totals.minutes}m`
               : `${Math.floor(totals.minutes / 60)}h ${totals.minutes % 60}m`,
             label: 'Thời gian học',
-            color: '#8B5CF6',
+            color: ACCENT.vocab,
           },
         ].map((item, i) => (
           <div key={i} className="text-center">

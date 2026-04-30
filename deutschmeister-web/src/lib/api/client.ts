@@ -59,7 +59,7 @@ export class ApiError extends Error {
   constructor(
     public status: number,
     message: string,
-    public data?: any
+    public data?: unknown
   ) {
     super(message);
     this.name = 'ApiError';
@@ -178,19 +178,19 @@ export async function api<T>(
 export const apiGet = <T>(endpoint: string) =>
   api<T>(endpoint, { method: 'GET' });
 
-export const apiPost = <T>(endpoint: string, data?: any) =>
+export const apiPost = <T>(endpoint: string, data?: unknown) =>
   api<T>(endpoint, {
     method: 'POST',
     body: data ? JSON.stringify(data) : undefined,
   });
 
-export const apiPut = <T>(endpoint: string, data?: any) =>
+export const apiPut = <T>(endpoint: string, data?: unknown) =>
   api<T>(endpoint, {
     method: 'PUT',
     body: data ? JSON.stringify(data) : undefined,
   });
 
-export const apiPatch = <T>(endpoint: string, data?: any) =>
+export const apiPatch = <T>(endpoint: string, data?: unknown) =>
   api<T>(endpoint, {
     method: 'PATCH',
     body: data ? JSON.stringify(data) : undefined,

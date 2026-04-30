@@ -6,11 +6,14 @@ import Link from 'next/link';
 import { useExamWritingSession, useSaveExamWritingDraft, useSubmitExamWriting } from '@/hooks/useExamWriting';
 import { ExamWritingTeil } from '@/lib/api/examWriting';
 import { HighlightedText } from '@/components/word-highlight/HighlightedText';
+import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
 function IconLoader({ size = 24, style }: { size?: number; style?: React.CSSProperties }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="animate-spin" style={{ display: 'block', ...style }}><path d="M21 12a9 9 0 1 1-6.219-8.56" /></svg>;
 }
+import { FixedActionBar } from '@/components/ui';
+
 function IconCheck({ size = 14, style }: { size?: number; style?: React.CSSProperties }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}><polyline points="20 6 9 17 4 12" /></svg>;
 }
@@ -23,18 +26,9 @@ function IconChevronRight({ size = 15 }: { size?: number }) {
 function IconSend({ size = 15 }: { size?: number }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}><line x1="22" y1="2" x2="11" y2="13" /><polygon points="22 2 15 22 11 13 2 9 22 2" /></svg>;
 }
-function IconChevronDown({ size = 14 }: { size?: number }) {
-  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}><polyline points="6 9 12 15 18 9" /></svg>;
+function IconPenLine({ size = 16, style }: { size?: number; style?: React.CSSProperties }) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>;
 }
-function IconChevronUp({ size = 14 }: { size?: number }) {
-  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}><polyline points="18 15 12 9 6 15" /></svg>;
-}
-function IconPin({ size = 13 }: { size?: number }) {
-  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}><path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 1 1 0 0 0 1-1V4a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1 1 1 0 0 1 1 1z"/></svg>;
-}
-
-const ACCENT = '#A855F7';
-const GRADIENT = 'linear-gradient(135deg, #A855F7, #6366F1)';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 function taskTypeLabel(type: string) {
@@ -52,13 +46,15 @@ function countWords(text: string) {
   return text.trim() ? text.trim().split(/\s+/).length : 0;
 }
 
+const SPECIAL_CHARS = ['ä', 'ö', 'ü', 'ß', 'Ä', 'Ö', 'Ü'];
+
 // ─── Word Count Bar ────────────────────────────────────────────────────────────
 function WordCountBar({ count, min, max }: { count: number; min: number; max: number }) {
   const pct = max > 0 ? Math.min((count / max) * 100, 100) : 0;
   const ok = count >= min && count <= max;
   const over = count > max;
   const started = count > 0;
-  const color = ok ? '#22C55E' : over ? '#EF4444' : started ? '#F59E0B' : 'var(--theme-border)';
+  const color = ok ? STATUS.success : over ? STATUS.danger : started ? STATUS.warning : 'var(--theme-border)';
 
   return (
     <div className="space-y-1.5">
@@ -79,59 +75,104 @@ function WordCountBar({ count, min, max }: { count: number; min: number; max: nu
 }
 
 // ─── Teil Writer ──────────────────────────────────────────────────────────────
-function TeilWriter({ teil, value, onChange, promptRef }: { teil: ExamWritingTeil; value: string; onChange: (v: string) => void; promptRef?: React.RefObject<HTMLDivElement | null> }) {
+function TeilWriter({ teil, value, onChange, promptRef, hidePrompt = false }: {
+  teil: ExamWritingTeil;
+  value: string;
+  onChange: (v: string) => void;
+  promptRef?: React.RefObject<HTMLDivElement | null>;
+  hidePrompt?: boolean;
+}) {
   const wc = countWords(value);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const insertSpecial = useCallback((char: string) => {
+    if (!textareaRef.current) return;
+    const { selectionStart, selectionEnd } = textareaRef.current;
+    const newText = value.substring(0, selectionStart) + char + value.substring(selectionEnd);
+    onChange(newText);
+    setTimeout(() => {
+      if (textareaRef.current) {
+        textareaRef.current.focus();
+        textareaRef.current.setSelectionRange(selectionStart + 1, selectionStart + 1);
+      }
+    }, 0);
+  }, [value, onChange]);
 
   return (
-    <div className="space-y-3">
-      <div ref={promptRef}>
-      {/* Situation */}
-      <div className="rounded-2xl p-4 mb-3" style={{ background: 'linear-gradient(135deg, rgba(168,85,247,.1), rgba(99,102,241,.08))', border: '1px solid rgba(168,85,247,.25)' }}>
-        <p className="text-caption font-extrabold uppercase tracking-widest mb-2" style={{ color: ACCENT }}>Situation</p>
-        <p className="text-body leading-relaxed" style={{ color: 'var(--theme-text-primary)', fontFamily: 'Georgia, serif' }}>
-          <HighlightedText text={teil.scenario} />
-        </p>
-      </div>
-
-      {/* Task */}
-      <div className="rounded-2xl p-4" style={{ backgroundColor: 'var(--theme-bg-secondary)', border: '1px solid var(--theme-border)' }}>
-        <p className="text-caption font-extrabold uppercase tracking-widest mb-2" style={{ color: 'var(--theme-text-muted)' }}>Aufgabe</p>
-        <p className="text-body leading-relaxed" style={{ color: 'var(--theme-text-primary)' }}>
-          <HighlightedText text={teil.taskDescription} />
-        </p>
-        {teil.requiredPoints.length > 0 && (
-          <div className="mt-3 space-y-1.5">
-            {teil.requiredPoints.map((pt, i) => (
-              <div key={i} className="flex items-start gap-2.5">
-                <span className="w-5 h-5 rounded-full flex items-center justify-center text-caption font-extrabold text-white shrink-0 mt-0.5"
-                  style={{ background: GRADIENT }}>{i + 1}</span>
-                <span className="text-xs leading-snug pt-0.5" style={{ color: 'var(--theme-text-secondary)' }}><HighlightedText text={pt} /></span>
-              </div>
-            ))}
+    <div className="space-y-4">
+      {!hidePrompt && (
+        <div ref={promptRef} className="space-y-4">
+          <div className="rounded-2xl p-4" style={{ background: `linear-gradient(135deg, ${ACCENT.examWriting}1A, ${ACCENT.writing}14)`, border: `1px solid ${ACCENT.examWriting}40` }}>
+            <p className="text-caption font-extrabold uppercase tracking-widest mb-1" style={{ color: ACCENT.examWriting }}>Situation</p>
+            <p className="text-body leading-relaxed" style={{ color: 'var(--theme-text-primary)', fontFamily: 'Georgia, serif' }}>
+              <HighlightedText text={teil.scenario} />
+            </p>
           </div>
-        )}
-        <p className="text-caption mt-3 font-medium" style={{ color: 'var(--theme-text-muted)' }}>
-          Schreiben Sie ca. {teil.minWords}–{teil.maxWords} Wörter · max. {teil.maxPoints} Punkte
-        </p>
-      </div>
-      </div>
+
+          <div className="rounded-2xl p-4" style={{ backgroundColor: 'var(--theme-bg-secondary)', border: '1px solid var(--theme-border)' }}>
+            <p className="text-caption font-extrabold uppercase tracking-widest mb-2" style={{ color: 'var(--theme-text-muted)' }}>Aufgabe</p>
+            <p className="text-body leading-relaxed" style={{ color: 'var(--theme-text-primary)' }}>
+              <HighlightedText text={teil.taskDescription} />
+            </p>
+            {teil.requiredPoints.length > 0 && (
+              <div className="mt-3 space-y-1.5">
+                {teil.requiredPoints.map((pt, i) => (
+                  <div key={i} className="flex items-start gap-2.5">
+                    <span className="w-5 h-5 rounded-full flex items-center justify-center text-caption font-extrabold text-white shrink-0 mt-0.5"
+                      style={{ background: GRADIENT.examWriting }}>{i + 1}</span>
+                    <span className="text-xs leading-snug pt-0.5" style={{ color: 'var(--theme-text-secondary)' }}><HighlightedText text={pt} /></span>
+                  </div>
+                ))}
+              </div>
+            )}
+            <p className="text-caption mt-3 font-medium" style={{ color: 'var(--theme-text-muted)' }}>
+              Schreiben Sie ca. {teil.minWords}–{teil.maxWords} Wörter · max. {teil.maxPoints} Punkte
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Textarea */}
-      <div className="rounded-2xl overflow-hidden" style={{ border: `1.5px solid ${value.trim() ? 'rgba(168,85,247,.5)' : 'var(--theme-border)'}`, backgroundColor: 'var(--theme-bg-card)' }}>
+      <div className="rounded-3xl overflow-hidden shadow-sm border-2"
+        style={{ borderColor: value.trim() ? `${ACCENT.examWriting}66` : 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
+        <div className="px-5 py-3 border-b flex justify-between items-center" style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-secondary)' }}>
+          <span className="text-xs font-black uppercase tracking-widest opacity-40">Mein Text</span>
+          <span className="text-xs font-mono font-bold" style={{ color: value.trim() ? ACCENT.examWriting : 'var(--theme-text-muted)' }}>
+            {wc} Wörter
+          </span>
+        </div>
+
+        {/* Special Characters Toolbar */}
+        <div className="flex items-center gap-1.5 px-4 py-2 border-b overflow-x-auto no-scrollbar"
+          style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
+          <span className="text-[10px] font-bold uppercase tracking-widest opacity-40 mr-1" style={{ color: 'var(--theme-text-primary)' }}>Ký tự:</span>
+          {SPECIAL_CHARS.map(char => (
+            <button key={char} onClick={() => insertSpecial(char)}
+              className="w-8 h-8 rounded-lg text-sm font-bold transition-all hover:scale-110 active:scale-90 flex items-center justify-center border"
+              style={{
+                borderColor: 'var(--theme-border)',
+                backgroundColor: 'var(--theme-bg-secondary)',
+                color: 'var(--theme-text-primary)'
+              }}>
+              {char}
+            </button>
+          ))}
+        </div>
+
         <textarea
+          ref={textareaRef}
           value={value}
           onChange={e => onChange(e.target.value)}
           placeholder={`Schreiben Sie hier Ihren Text…`}
-          rows={8}
-          className="w-full px-4 pt-4 pb-2 text-sm leading-relaxed resize-none outline-none block"
+          rows={14}
+          className="w-full px-5 py-5 text-body leading-relaxed resize-none outline-none block bg-transparent"
           style={{
-            backgroundColor: 'transparent',
             color: 'var(--theme-text-primary)',
             fontFamily: 'Georgia, serif',
-            minHeight: '160px',
+            minHeight: '400px',
           }}
         />
-        <div className="px-4 pb-4 pt-1">
+        <div className="px-5 pb-5 pt-1">
           <WordCountBar count={wc} min={teil.minWords} max={teil.maxWords} />
         </div>
       </div>
@@ -152,12 +193,9 @@ export default function ExamWritingPage() {
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved'>('idle');
   const [confirmSubmit, setConfirmSubmit] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
-  const [stickyPromptOpen, setStickyPromptOpen] = useState(false);
   const [showStickyPrompt, setShowStickyPrompt] = useState(false);
   const promptRef = useRef<HTMLDivElement>(null);
   const autoSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  // Ref mirrors userTexts — lets the debounced callback read latest value
-  // without adding userTexts to useCallback deps (would recreate on every keystroke)
   const userTextsRef = useRef<Record<string, string>>({});
 
   useEffect(() => {
@@ -173,15 +211,12 @@ export default function ExamWritingPage() {
     }
   }, [session?.status, id, router]);
 
-  // Cancel pending autosave on unmount — prevents state updates after navigation
   useEffect(() => {
     return () => { if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current); };
   }, []);
 
-  // Keep ref in sync with latest state value
   useEffect(() => { userTextsRef.current = userTexts; }, [userTexts]);
 
-  // Show sticky prompt bar when original prompt scrolls out of view
   useEffect(() => {
     const el = promptRef.current;
     if (!el) return;
@@ -193,8 +228,7 @@ export default function ExamWritingPage() {
     return () => observer.disconnect();
   }, [activeTeil]);
 
-  // Close sticky prompt when switching Teil
-  useEffect(() => { setStickyPromptOpen(false); }, [activeTeil]);
+  useEffect(() => { }, [activeTeil, showStickyPrompt]);
 
   const handleTextChange = useCallback((teilNum: number, value: string) => {
     const key = `teil_${teilNum}`;
@@ -204,13 +238,12 @@ export default function ExamWritingPage() {
     autoSaveTimer.current = setTimeout(async () => {
       setSaveState('saving');
       try {
-        // Use ref instead of stale closure — always contains latest texts
         await saveDraft.mutateAsync({ id, userTexts: { ...userTextsRef.current, [key]: value } });
         setSaveState('saved');
         setTimeout(() => setSaveState('idle'), 2500);
       } catch { setSaveState('idle'); }
     }, 1800);
-  }, [id, saveDraft]); // userTexts removed — accessed via ref
+  }, [id, saveDraft]);
 
   const handleSubmit = async () => {
     setConfirmSubmit(false);
@@ -253,209 +286,185 @@ export default function ExamWritingPage() {
   return (
     <div className="min-h-screen pb-10" style={{ backgroundColor: 'var(--theme-bg-primary)' }}>
 
-      {/* ── Sticky header ── */}
-      <div className="sticky z-10 border-b" style={{ top: '64px', backgroundColor: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}>
-        <div className="max-w-2xl mx-auto px-4">
-          {/* Top row */}
-          <div className="h-13 flex items-center gap-3" style={{ height: '52px' }}>
-            <Link href="/practice-test/writing/exam"
-              className="flex items-center gap-1 text-body font-semibold transition-opacity hover:opacity-70"
-              style={{ color: 'var(--theme-text-secondary)' }}>
-              <IconChevronLeft size={14} /> Danh sách
-            </Link>
-            <div className="w-px h-4 shrink-0" style={{ backgroundColor: 'var(--theme-border)' }} />
-            <p className="text-body font-bold flex-1 truncate" style={{ color: 'var(--theme-text-primary)' }}>
-              {session.examType} {session.cefrLevel} · Schreiben
-            </p>
-            {/* Autosave indicator */}
+      {/* Immersive Header */}
+      <div className="relative -mx-6 px-6 pt-8 pb-12 mb-6 overflow-hidden">
+        <div className="absolute inset-0 opacity-10 pointer-events-none"
+          style={{ background: GRADIENT.examWriting, maskImage: 'radial-gradient(circle at top right, white, transparent)' }} />
+
+        <div className="relative flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 shadow-lg"
+              style={{ background: GRADIENT.examWriting }}>
+              <IconPenLine size={28} style={{ color: 'white' }} />
+            </div>
+            <div>
+              <Link href="/practice-test/writing/exam" className="text-xs font-bold uppercase tracking-widest mb-1 block opacity-60 hover:opacity-100 transition-opacity" style={{ color: 'var(--theme-text-primary)' }}>
+                ← Luyện Viết Theo Đề
+              </Link>
+              <h1 className="text-h2 font-black tracking-tight" style={{ color: 'var(--theme-text-primary)' }}>
+                {session.examType} {session.cefrLevel}
+              </h1>
+              <div className="flex items-center gap-2 mt-1">
+                <span className="px-2 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-widest"
+                  style={{ backgroundColor: `${ACCENT.examWriting}1A`, color: ACCENT.examWriting, border: `1px solid ${ACCENT.examWriting}33` }}>
+                  {session.cefrLevel}
+                </span>
+                <span className="text-xs font-medium opacity-60">Schreiben · Đề chuẩn Goethe/TELC</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="hidden sm:flex flex-col items-end text-right">
             {saveState === 'saving' && (
-              <span className="flex items-center gap-1 text-caption" style={{ color: 'var(--theme-text-muted)' }}>
-                <IconLoader size={11} /> Speichern…
+              <span className="flex items-center gap-1.5 text-xs font-bold" style={{ color: 'var(--theme-text-muted)' }}>
+                <IconLoader size={12} /> Speichern…
               </span>
             )}
             {saveState === 'saved' && (
-              <span className="flex items-center gap-1 text-caption" style={{ color: '#22C55E' }}>
-                <IconCheck size={11} /> Gespeichert
+              <span className="flex items-center gap-1.5 text-xs font-bold" style={{ color: STATUS.success }}>
+                <IconCheck size={12} /> Gespeichert
               </span>
             )}
-          </div>
-
-          {/* Teil tabs + overall progress */}
-          <div className="pb-2.5 flex items-center gap-2">
-            <div className="flex gap-1.5 flex-1 overflow-x-auto">
-              {teile.map((teil, i) => {
-                const filled = (userTexts[`teil_${teil.number}`] ?? '').trim().length > 0;
-                const active = i === activeTeil;
-                return (
-                  <button key={teil.number} onClick={() => setActiveTeil(i)}
-                    className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all border"
-                    style={active
-                      ? { background: GRADIENT, color: 'white', borderColor: 'transparent' }
-                      : filled
-                        ? { backgroundColor: 'rgba(168,85,247,.08)', color: ACCENT, borderColor: 'rgba(168,85,247,.3)' }
-                        : { backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)', borderColor: 'var(--theme-border)' }}>
-                    Teil {teil.number}
-                    {filled && !active && (
-                      <span className="w-4 h-4 rounded-full flex items-center justify-center" style={{ backgroundColor: ACCENT }}>
-                        <IconCheck size={9} style={{ color: 'white' }} />
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-            <span className="text-caption font-semibold shrink-0" style={{ color: allFilled ? ACCENT : 'var(--theme-text-muted)' }}>
-              {filledCount}/{teile.length}
-            </span>
           </div>
         </div>
       </div>
 
-      {/* ── Content ── */}
-      <div className="max-w-2xl mx-auto px-4 pt-5 pb-6">
-
-        {/* Teil header */}
-        <div className="flex items-center gap-3 mb-4">
-          <span className="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-extrabold text-white shrink-0"
-            style={{ background: GRADIENT }}>{currentTeil.number}</span>
-          <div className="min-w-0">
-            <p className="text-[15px] font-extrabold truncate" style={{ color: 'var(--theme-text-primary)' }}>
-              {taskTypeLabel(currentTeil.taskType)}
-            </p>
-            <p className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>
-              {currentTeil.minWords}–{currentTeil.maxWords} Wörter · max. {currentTeil.maxPoints} Punkte
-            </p>
-          </div>
-        </div>
-
-        {/* ── Sticky prompt bar (appears when prompt scrolls away) ── */}
-        {showStickyPrompt && (
-          <div className="sticky z-10 -mx-4 px-4 pb-3" style={{ top: '156px' }}>
-            <div className="rounded-2xl border overflow-hidden transition-all"
-              style={{
-                borderColor: 'rgba(168,85,247,.35)',
-                backgroundColor: 'var(--theme-bg-card)',
-                boxShadow: '0 4px 20px rgba(0,0,0,.1)',
-              }}>
-              <button
-                onClick={() => setStickyPromptOpen(o => !o)}
-                className="w-full flex items-center gap-2 px-3 py-2.5 text-left transition-all"
-              >
-                <span className="w-6 h-6 rounded-md flex items-center justify-center text-caption font-extrabold text-white shrink-0"
-                  style={{ background: GRADIENT }}>{currentTeil.number}</span>
-                <IconPin size={12} />
-                <span className="text-xs font-bold truncate flex-1" style={{ color: 'var(--theme-text-primary)' }}>
-                  {taskTypeLabel(currentTeil.taskType)}
-                  <span className="font-normal ml-1.5" style={{ color: 'var(--theme-text-muted)' }}>— Đề bài</span>
-                </span>
-                {stickyPromptOpen ? <IconChevronUp size={14} /> : <IconChevronDown size={14} />}
+      {/* Teil tabs */}
+      <div className="max-w-2xl mx-auto px-4 mb-6">
+        <div className="flex gap-1.5 overflow-x-auto no-scrollbar">
+          {teile.map((teil, i) => {
+            const filled = (userTexts[`teil_${teil.number}`] ?? '').trim().length > 0;
+            const active = i === activeTeil;
+            return (
+              <button key={teil.number} onClick={() => setActiveTeil(i)}
+                className="shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all border"
+                style={active
+                  ? { background: GRADIENT.examWriting, color: 'white', borderColor: 'transparent', boxShadow: `0 4px 12px ${ACCENT.examWriting}40` }
+                  : filled
+                    ? { backgroundColor: `${ACCENT.examWriting}14`, color: ACCENT.examWriting, borderColor: `${ACCENT.examWriting}4D` }
+                    : { backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)', borderColor: 'var(--theme-border)' }}>
+                Teil {teil.number}
+                {filled && !active && <IconCheck size={10} />}
               </button>
-              {stickyPromptOpen && (
-                <div className="border-t px-3 pb-3 pt-2 space-y-2" style={{ borderColor: 'var(--theme-border)', maxHeight: '40vh', overflowY: 'auto' }}>
-                  <div className="rounded-xl p-3" style={{ background: 'linear-gradient(135deg, rgba(168,85,247,.1), rgba(99,102,241,.08))' }}>
-                    <p className="text-caption font-extrabold uppercase tracking-widest mb-1" style={{ color: ACCENT }}>Situation</p>
-                    <p className="text-xs leading-relaxed" style={{ color: 'var(--theme-text-primary)', fontFamily: 'Georgia, serif' }}>
-                      <HighlightedText text={currentTeil.scenario} />
-                    </p>
-                  </div>
-                  <div className="rounded-xl p-3" style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
-                    <p className="text-caption font-extrabold uppercase tracking-widest mb-1" style={{ color: 'var(--theme-text-muted)' }}>Aufgabe</p>
-                    <p className="text-xs leading-relaxed" style={{ color: 'var(--theme-text-primary)' }}>
-                      <HighlightedText text={currentTeil.taskDescription} />
-                    </p>
-                    {currentTeil.requiredPoints.length > 0 && (
-                      <div className="mt-2 space-y-1">
-                        {currentTeil.requiredPoints.map((pt, i) => (
-                          <div key={i} className="flex items-start gap-2">
-                            <span className="w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-extrabold text-white shrink-0 mt-0.5"
-                              style={{ background: GRADIENT }}>{i + 1}</span>
-                            <span className="text-caption leading-snug" style={{ color: 'var(--theme-text-secondary)' }}><HighlightedText text={pt} /></span>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* ── Content ── */}
+      <div className="px-6 pb-24">
+        <div className="flex flex-col lg:flex-row gap-8">
+
+          {/* Left Side: Exam Task */}
+          <div className="lg:w-1/2 shrink-0 lg:sticky lg:top-20 lg:self-start lg:max-h-[calc(100vh-12rem)] lg:overflow-y-auto lg:pr-1 space-y-4">
+            {/* Teil header */}
+            <div className="flex items-center gap-3 mb-2">
+              <span className="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-extrabold text-white shrink-0"
+                style={{ background: GRADIENT.examWriting }}>{currentTeil.number}</span>
+              <div className="min-w-0">
+                <p className="text-[15px] font-extrabold truncate" style={{ color: 'var(--theme-text-primary)' }}>
+                  {taskTypeLabel(currentTeil.taskType)}
+                </p>
+                <p className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>
+                  {currentTeil.minWords}–{currentTeil.maxWords} Wörter · max. {currentTeil.maxPoints} Punkte
+                </p>
+              </div>
+            </div>
+
+            {/* Situation */}
+            <div className="rounded-2xl p-5 border" style={{ background: `linear-gradient(135deg, ${ACCENT.examWriting}14, ${ACCENT.writing}0D)`, borderColor: `${ACCENT.examWriting}33` }}>
+              <p className="text-caption font-extrabold uppercase tracking-widest mb-2" style={{ color: ACCENT.examWriting }}>Situation / Ngữ cảnh</p>
+              <p className="text-[15px] leading-relaxed" style={{ color: 'var(--theme-text-primary)', fontFamily: 'Georgia, serif' }}>
+                <HighlightedText text={currentTeil.scenario} />
+              </p>
+            </div>
+
+            {/* Task Description */}
+            <div className="rounded-2xl p-5 border" style={{ backgroundColor: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}>
+              <p className="text-caption font-extrabold uppercase tracking-widest mb-3" style={{ color: 'var(--theme-text-muted)' }}>Aufgabe / Nhiệm vụ</p>
+              <p className="text-[15px] leading-relaxed mb-4" style={{ color: 'var(--theme-text-primary)' }}>
+                <HighlightedText text={currentTeil.taskDescription} />
+              </p>
+              {currentTeil.requiredPoints.length > 0 && (
+                <div className="space-y-2.5">
+                  {currentTeil.requiredPoints.map((pt, i) => (
+                    <div key={i} className="flex items-start gap-3">
+                      <span className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-extrabold text-white shrink-0 mt-0.5"
+                        style={{ background: GRADIENT.examWriting }}>{i + 1}</span>
+                      <span className="text-body leading-snug" style={{ color: 'var(--theme-text-secondary)' }}><HighlightedText text={pt} /></span>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
           </div>
-        )}
 
-        <TeilWriter
-          teil={currentTeil}
-          value={userTexts[`teil_${currentTeil.number}`] ?? ''}
-          onChange={v => handleTextChange(currentTeil.number, v)}
-          promptRef={promptRef}
-        />
-
-        {/* ── Navigation ── */}
-        <div className="flex gap-3 mt-5">
-          {activeTeil > 0 && (
-            <button onClick={() => setActiveTeil(activeTeil - 1)}
-              className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-body font-semibold border transition-all hover:-translate-y-0.5"
-              style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)', color: 'var(--theme-text-secondary)' }}>
-              <IconChevronLeft /> Teil {teile[activeTeil - 1].number}
-            </button>
-          )}
-          <div className="flex-1" />
-          {!isLastTeil && (
-            <button onClick={() => setActiveTeil(activeTeil + 1)}
-              className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-body font-semibold text-white transition-all hover:-translate-y-0.5"
-              style={{ background: GRADIENT }}>
-              Teil {teile[activeTeil + 1].number} <IconChevronRight />
-            </button>
-          )}
+          {/* Right Side: Editor */}
+          <div className="lg:w-1/2 min-w-0">
+            <TeilWriter
+              teil={currentTeil}
+              value={userTexts[`teil_${currentTeil.number}`] ?? ''}
+              onChange={v => handleTextChange(currentTeil.number, v)}
+              promptRef={promptRef}
+              hidePrompt={true}
+            />
+          </div>
         </div>
 
-        {/* ── Submit section (only on last Teil) ── */}
-        {isLastTeil && (
-          <div className="mt-5 rounded-2xl border p-4"
-            style={{ borderColor: allFilled ? 'rgba(168,85,247,.3)' : 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
-            {/* Per-Teil status chips */}
-            <div className="flex flex-wrap gap-1.5 mb-4">
-              {teile.map(t => {
-                const filled = (userTexts[`teil_${t.number}`] ?? '').trim().length > 0;
-                const wc = countWords(userTexts[`teil_${t.number}`] ?? '');
-                return (
-                  <button key={t.number} onClick={() => setActiveTeil(teile.indexOf(t))}
-                    className="flex items-center gap-1 px-2.5 py-1 rounded-xl text-caption font-bold border transition-all"
-                    style={filled
-                      ? { backgroundColor: 'rgba(168,85,247,.08)', color: ACCENT, borderColor: 'rgba(168,85,247,.3)' }
-                      : { backgroundColor: 'rgba(239,68,68,.06)', color: '#EF4444', borderColor: 'rgba(239,68,68,.2)' }}>
-                    Teil {t.number}
-                    {filled ? <><IconCheck size={9} /> {wc}W</> : ' — leer'}
-                  </button>
-                );
-              })}
-            </div>
+        {/* Fixed Action Bar */}
+        <FixedActionBar columns={3}>
+          <button onClick={() => activeTeil > 0 && setActiveTeil(activeTeil - 1)}
+            disabled={activeTeil === 0}
+            className="flex flex-col items-center gap-1 py-2 px-3 rounded-xl text-xs font-semibold transition-all hover:opacity-70 disabled:opacity-20"
+            style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-secondary)' }}>
+            <IconChevronLeft size={16} /> Trước
+          </button>
 
-            {errorMsg && <p className="text-xs text-center mb-3" style={{ color: '#EF4444' }}>{errorMsg}</p>}
+          {!isLastTeil ? (
+            <button onClick={() => setActiveTeil(activeTeil + 1)}
+              className="flex flex-col items-center gap-1 py-2 px-3 rounded-xl text-xs font-bold text-white transition-all hover:-translate-y-0.5"
+              style={{ background: GRADIENT.examWriting }}>
+              <IconChevronRight size={16} /> Tiếp theo
+            </button>
+          ) : (
+            <button onClick={() => allFilled && setConfirmSubmit(true)}
+              disabled={!allFilled || submitMut.isPending}
+              className="flex flex-col items-center gap-1 py-2 px-3 rounded-xl text-xs font-bold text-white transition-all hover:-translate-y-0.5 disabled:opacity-40"
+              style={{ background: GRADIENT.examWriting, boxShadow: allFilled ? `0 8px 24px ${ACCENT.examWriting}40` : 'none' }}>
+              <IconSend size={16} /> {submitMut.isPending ? 'Đang chấm...' : 'Nộp bài'}
+            </button>
+          )}
 
-            {confirmSubmit ? (
-              <div className="flex gap-2">
+          <div className="flex flex-col items-center justify-center py-2 px-3 rounded-xl"
+            style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
+            <span className="text-xs font-black" style={{ color: allFilled ? ACCENT.examWriting : 'var(--theme-text-muted)' }}>
+              {filledCount}/{teile.length}
+            </span>
+            <span className="text-[10px] font-medium opacity-60">Đã xong</span>
+          </div>
+        </FixedActionBar>
+
+        {errorMsg && (
+          <p className="text-center text-body mt-3" style={{ color: STATUS.danger }}>{errorMsg}</p>
+        )}
+
+        {/* Submit confirmation overlay */}
+        {confirmSubmit && (
+          <div className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+            <div className="w-full max-w-sm rounded-3xl p-6 shadow-2xl" style={{ backgroundColor: 'var(--theme-bg-card)' }}>
+              <h3 className="text-title font-black mb-2" style={{ color: 'var(--theme-text-primary)' }}>Nộp bài thi?</h3>
+              <p className="text-body mb-6" style={{ color: 'var(--theme-text-muted)' }}>
+                AI sẽ bắt đầu chấm điểm bài viết của bạn theo tiêu chuẩn {session.examType}. Quá trình này mất khoảng 30 giây.
+              </p>
+              <div className="flex gap-3">
                 <button onClick={() => setConfirmSubmit(false)}
-                  className="flex-1 py-3 rounded-xl text-body font-semibold border transition-all"
-                  style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)', backgroundColor: 'transparent' }}>
-                  Hủy
-                </button>
-                <button onClick={handleSubmit} disabled={submitMut.isPending}
-                  className="flex-1 py-3 rounded-xl text-sm font-bold text-white flex items-center justify-center gap-2 transition-all"
-                  style={{ background: GRADIENT }}>
-                  {submitMut.isPending
-                    ? <><IconLoader size={15} style={{ color: 'white' }} /> AI đang chấm...</>
-                    : 'Xác nhận nộp bài'}
-                </button>
+                  className="flex-1 py-3 rounded-xl text-sm font-bold border transition-all"
+                  style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)' }}>Hủy</button>
+                <button onClick={handleSubmit}
+                  className="flex-1 py-3 rounded-xl text-sm font-bold text-white transition-all"
+                  style={{ background: GRADIENT.examWriting }}>Xác nhận</button>
               </div>
-            ) : (
-              <button
-                onClick={() => allFilled && setConfirmSubmit(true)}
-                disabled={!allFilled || submitMut.isPending}
-                className="w-full py-3.5 rounded-xl font-bold text-sm text-white flex items-center justify-center gap-2 transition-all hover:-translate-y-0.5 disabled:opacity-40 disabled:cursor-not-allowed disabled:transform-none"
-                style={{ background: GRADIENT, boxShadow: allFilled ? '0 4px 14px rgba(168,85,247,.35)' : 'none' }}>
-                <IconSend size={15} />
-                {allFilled ? 'Nộp bài & AI chấm điểm' : `Còn ${teile.length - filledCount} Teil chưa viết`}
-              </button>
-            )}
+            </div>
           </div>
         )}
       </div>

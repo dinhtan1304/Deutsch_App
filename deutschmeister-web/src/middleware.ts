@@ -26,7 +26,7 @@ export function middleware(request: NextRequest) {
 
     if (!refreshToken?.value) {
       const loginUrl = new URL('/auth/login', request.url);
-      loginUrl.searchParams.set('from', pathname);
+      loginUrl.searchParams.set('returnTo', pathname);
       return NextResponse.redirect(loginUrl);
     }
   }

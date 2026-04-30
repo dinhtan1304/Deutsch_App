@@ -1,18 +1,19 @@
-﻿'use client';
+'use client';
 
 import Link from 'next/link';
 import { usePhonemeDrills, usePhonemeDrillStats } from '@/hooks/usePronunciationScoring';
+import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 
 const DIFFICULTY_COLORS: Record<string, { bg: string; text: string; label: string }> = {
-  high:   { bg: 'rgba(239,68,68,.1)',  text: '#EF4444', label: 'Khó' },
-  medium: { bg: 'rgba(245,158,11,.1)', text: '#F59E0B', label: 'Trung bình' },
-  low:    { bg: 'rgba(34,197,94,.1)',   text: '#22C55E', label: 'Dễ' },
+  high:   { bg: 'rgba(239,68,68,.1)',  text: STATUS.danger,  label: 'Khó' },
+  medium: { bg: 'rgba(245,158,11,.1)', text: STATUS.warning, label: 'Trung bình' },
+  low:    { bg: 'rgba(34,197,94,.1)',   text: STATUS.success, label: 'Dễ' },
 };
 
 function getScoreColor(score: number) {
-  if (score >= 80) return '#22C55E';
-  if (score >= 60) return '#F59E0B';
-  return '#EF4444';
+  if (score >= 80) return STATUS.success;
+  if (score >= 60) return STATUS.warning;
+  return STATUS.danger;
 }
 
 export default function PhonemeDrillsPage() {
@@ -34,7 +35,7 @@ export default function PhonemeDrillsPage() {
         </Link>
         <h1 className="text-2xl font-bold flex items-center gap-2" style={{ color: 'var(--theme-text-primary)' }}>
           <span className="w-10 h-10 rounded-xl flex items-center justify-center text-white shrink-0"
-            style={{ background: 'linear-gradient(135deg, #EC4899, #A855F7)' }}>
+            style={{ background: GRADIENT.pronunciation }}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
               <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
@@ -69,7 +70,7 @@ export default function PhonemeDrillsPage() {
               >
                 {/* Top: phoneme label + difficulty */}
                 <div className="flex items-start justify-between mb-3">
-                  <div className="text-3xl font-extrabold" style={{ color: '#A855F7' }}>
+                  <div className="text-3xl font-extrabold" style={{ color: ACCENT.examWriting }}>
                     {drill.label}
                   </div>
                   <span
@@ -81,7 +82,7 @@ export default function PhonemeDrillsPage() {
                 </div>
 
                 {/* IPA + description */}
-                <div className="text-xs font-mono mb-1" style={{ color: '#A855F7' }}>
+                <div className="text-xs font-mono mb-1" style={{ color: ACCENT.examWriting }}>
                   {drill.ipa}
                 </div>
                 <p className="text-xs leading-relaxed mb-3" style={{ color: 'var(--theme-text-muted)' }}>
@@ -102,7 +103,7 @@ export default function PhonemeDrillsPage() {
                     </span>
                   </div>
                 ) : (
-                  <div className="text-caption font-medium" style={{ color: '#A855F7' }}>
+                  <div className="text-caption font-medium" style={{ color: ACCENT.examWriting }}>
                     Chưa luyện — Bắt đầu →
                   </div>
                 )}

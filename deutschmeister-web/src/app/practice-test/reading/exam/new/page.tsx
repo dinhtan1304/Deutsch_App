@@ -1,13 +1,12 @@
-﻿'use client';
+'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { useGenerateExamReading } from '@/hooks/useExamReading';
 import { PageHeader } from '@/components/ui';
 import { EXAM_READING_DISPLAY } from '@/lib/examConfig';
+import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 
-// ─── Inline icons ─────────────────────────────────────────────────────────────
 function IconLoader({ size = 18 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -16,20 +15,10 @@ function IconLoader({ size = 18 }: { size?: number }) {
     </svg>
   );
 }
-function IconChevronLeft({ size = 16 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
-      strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}>
-      <polyline points="15 18 9 12 15 6" />
-    </svg>
-  );
-}
-
-const GRADIENT = 'linear-gradient(135deg, #22C55E, #14B8A6)';
 
 const EXAM_TYPES = [
-  { id: 'GOETHE', label: 'Goethe-Zertifikat', color: '#3B82F6', desc: 'Chứng chỉ Goethe-Institut' },
-  { id: 'TELC', label: 'TELC Deutsch', color: '#8B5CF6', desc: 'The European Language Certificates' },
+  { id: 'GOETHE', label: 'Goethe-Zertifikat', color: ACCENT.srs, desc: 'Chứng chỉ Goethe-Institut' },
+  { id: 'TELC', label: 'TELC Deutsch', color: ACCENT.vocab, desc: 'The European Language Certificates' },
 ];
 
 const LEVELS = ['A1', 'A2', 'B1'];
@@ -42,9 +31,7 @@ export default function ExamReadingNewPage() {
 
   const generateMut = useGenerateExamReading();
 
-  // Check if combination is supported
   const isTelcA1 = examType === 'TELC' && cefrLevel === 'A1';
-
   const examInfo = EXAM_READING_DISPLAY[examType]?.[cefrLevel];
 
   const handleGenerate = async () => {
@@ -77,7 +64,7 @@ export default function ExamReadingNewPage() {
             <button key={et.id} onClick={() => setExamType(et.id)}
               className="p-4 rounded-2xl border-2 text-left transition-all"
               style={examType === et.id
-                ? { borderColor: et.color, backgroundColor: `${et.color}10` }
+                ? { borderColor: et.color, backgroundColor: `${et.color}1A` }
                 : { borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
               <div className="text-[15px] font-bold" style={{ color: examType === et.id ? et.color : 'var(--theme-text-primary)' }}>
                 {et.label}
@@ -101,7 +88,7 @@ export default function ExamReadingNewPage() {
                 disabled={unsupported}
                 className="flex-1 py-3 rounded-2xl border-2 font-bold text-[15px] transition-all"
                 style={cefrLevel === lvl && !unsupported
-                  ? { borderColor: '#22C55E', backgroundColor: 'rgba(34,197,94,.1)', color: '#22C55E' }
+                  ? { borderColor: STATUS.success, backgroundColor: `${STATUS.success}1A`, color: STATUS.success }
                   : unsupported
                     ? { borderColor: 'var(--theme-border)', color: 'var(--theme-text-muted)', opacity: 0.4, cursor: 'not-allowed', backgroundColor: 'transparent' }
                     : { borderColor: 'var(--theme-border)', color: 'var(--theme-text-primary)', backgroundColor: 'transparent' }}>
@@ -116,8 +103,8 @@ export default function ExamReadingNewPage() {
       {/* Summary card */}
       {examInfo && !isTelcA1 && (
         <div className="rounded-2xl border p-4 mb-6"
-          style={{ borderColor: 'rgba(34,197,94,.3)', backgroundColor: 'rgba(34,197,94,.04)' }}>
-          <p className="text-body font-bold mb-2" style={{ color: '#22C55E' }}>
+          style={{ borderColor: `${STATUS.success}4D`, backgroundColor: `${STATUS.success}0A` }}>
+          <p className="text-body font-bold mb-2" style={{ color: STATUS.success }}>
             {examType} {cefrLevel} — Lesen
           </p>
           <div className="grid grid-cols-3 gap-2 text-center">
@@ -147,16 +134,15 @@ export default function ExamReadingNewPage() {
 
       {errorMsg && (
         <div className="p-3 rounded-xl text-body mb-4"
-          style={{ backgroundColor: 'rgba(239,68,68,.08)', color: '#EF4444' }}>
+          style={{ backgroundColor: `${STATUS.danger}14`, color: STATUS.danger }}>
           {errorMsg}
         </div>
       )}
 
-      {/* Generate button */}
       <button onClick={handleGenerate}
         disabled={generateMut.isPending || isTelcA1}
         className="w-full py-3.5 rounded-2xl font-bold text-[15px] text-white flex items-center justify-center gap-2 transition-all hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-        style={{ background: GRADIENT, boxShadow: '0 4px 12px rgba(34,197,94,.3)' }}>
+        style={{ background: GRADIENT.reading, boxShadow: `0 4px 12px ${STATUS.success}4D` }}>
         {generateMut.isPending ? (
           <><IconLoader size={18} /> Đang tạo đề (có thể mất 20-40 giây)...</>
         ) : (

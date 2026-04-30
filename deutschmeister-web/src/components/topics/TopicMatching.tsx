@@ -1,6 +1,7 @@
 ﻿'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 import type { TopicWord } from '@/types/topic';
 
 function IconRotateCcw({ size = 16 }: { size?: number }) {
@@ -21,7 +22,7 @@ function IconClock({ size = 16 }: { size?: number }) {
 }
 
 const ArticleColor: Record<string, string> = {
-  der: '#3B82F6', die: '#EC4899', das: '#22C55E',
+  der: ACCENT.srs, die: ACCENT.listening, das: STATUS.success,
 };
 
 function shuffle<T>(arr: T[]): T[] {
@@ -192,11 +193,11 @@ export function TopicMatching({ words, topicColor, onMarkLearned }: Props) {
             <div className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>Lần thử</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-bold" style={{ color: '#22C55E' }}>{formatTime(elapsed)}</div>
+            <div className="text-2xl font-bold" style={{ color: STATUS.success }}>{formatTime(elapsed)}</div>
             <div className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>Thời gian</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-bold" style={{ color: accuracy >= 70 ? '#22C55E' : '#F59E0B' }}>
+            <div className="text-2xl font-bold" style={{ color: accuracy >= 70 ? STATUS.success : ACCENT.xp }}>
               {accuracy}%
             </div>
             <div className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>Chính xác</div>
@@ -260,15 +261,15 @@ export function TopicMatching({ words, topicColor, onMarkLearned }: Props) {
             if (isMatched) {
               style = {
                 backgroundColor: 'rgba(34,197,94,.08)',
-                borderColor: '#22C55E',
-                color: '#22C55E',
+                borderColor: STATUS.success,
+                color: STATUS.success,
                 opacity: 0.5,
               };
             } else if (isWrong) {
               style = {
                 backgroundColor: 'rgba(239,68,68,.08)',
-                borderColor: '#EF4444',
-                color: '#EF4444',
+                borderColor: STATUS.danger,
+                color: STATUS.danger,
               };
             } else if (isSelected) {
               style = {
@@ -312,15 +313,15 @@ export function TopicMatching({ words, topicColor, onMarkLearned }: Props) {
             if (isMatched) {
               style = {
                 backgroundColor: 'rgba(34,197,94,.08)',
-                borderColor: '#22C55E',
-                color: '#22C55E',
+                borderColor: STATUS.success,
+                color: STATUS.success,
                 opacity: 0.5,
               };
             } else if (isWrong) {
               style = {
                 backgroundColor: 'rgba(239,68,68,.08)',
-                borderColor: '#EF4444',
-                color: '#EF4444',
+                borderColor: STATUS.danger,
+                color: STATUS.danger,
               };
             } else if (isSelected) {
               style = {

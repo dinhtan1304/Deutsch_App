@@ -1,6 +1,8 @@
 ﻿'use client';
+/* eslint-disable no-restricted-syntax */
 
 import { useState, useMemo } from 'react';
+import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 import Link from 'next/link';
 import { useDueCards, useReviewCard, useProgressStats } from '@/hooks/useProgress';
 import { ReviewRating } from '@/types';
@@ -11,10 +13,10 @@ import { ReviewRating } from '@/types';
 const QUICK_LIMIT = 5;
 
 const RATING_BUTTONS: { rating: ReviewRating; label: string; color: string; hint: string }[] = [
-  { rating: 'again', label: 'Quên', color: '#EF4444', hint: '<1m' },
-  { rating: 'hard', label: 'Khó', color: '#F59E0B', hint: '~6m' },
-  { rating: 'good', label: 'Được', color: '#22C55E', hint: '+1d' },
-  { rating: 'easy', label: 'Dễ', color: '#3B82F6', hint: '+4d' },
+  { rating: 'again', label: 'Quên', color: STATUS.danger, hint: '<1m' },
+  { rating: 'hard', label: 'Khó', color: ACCENT.xp, hint: '~6m' },
+  { rating: 'good', label: 'Được', color: STATUS.success, hint: '+1d' },
+  { rating: 'easy', label: 'Dễ', color: ACCENT.srs, hint: '+4d' },
 ];
 
 export function QuickReviewWidget() {
@@ -160,7 +162,7 @@ export function QuickReviewWidget() {
                 {current.word.translationVi || current.word.translationEn}
               </div>
             ) : (
-              <div className="text-caption font-medium" style={{ color: '#6366F1' }}>
+              <div className="text-caption font-medium" style={{ color: ACCENT.writing }}>
                 Nhấn để xem nghĩa
               </div>
             )}

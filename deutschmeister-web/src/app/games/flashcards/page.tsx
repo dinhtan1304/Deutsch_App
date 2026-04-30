@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
@@ -15,8 +15,9 @@ import {
   IconRefresh, IconChevronLeft, IconChevronRight,
 } from '@/components/games/GameUI';
 import { Button } from '@/components/ui';
+import { ACCENT, STATUS } from '@/lib/tokens';
 
-const AC: Record<string, string> = { masculine: '#3B82F6', feminine: '#EC4899', neuter: '#22C55E' };
+const AC: Record<string, string> = { masculine: ACCENT.srs, feminine: ACCENT.listening, neuter: STATUS.success };
 
 type Phase = 'setup' | 'playing' | 'result';
 interface CardResult { word: Word; knew: boolean; }
@@ -49,6 +50,7 @@ export default function FlashcardsPage() {
   const session = useGameSession('flashcard');
 
   const [phase, setPhase] = useState<Phase>('setup');
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [index, setIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
   const [results, setResults] = useState<CardResult[]>([]);
@@ -66,8 +68,9 @@ export default function FlashcardsPage() {
 
   const startGame = async () => {
     playClick();
+    setLoadError(null);
     const result = await refetch();
-    if (!result.data?.length) { alert('Không có từ vựng!'); return; }
+    if (!result.data?.length) { setLoadError('Không có từ vựng! Vui lòng thêm từ hoặc seed database.'); return; }
     setIndex(0); setIsFlipped(false); setResults([]); setStreak(0); setBestStreak(0);
     knewRef.current = 0; bestStreakRef.current = 0; didntKnowRef.current = 0;
     setPhase('playing');
@@ -128,15 +131,15 @@ export default function FlashcardsPage() {
   // ─── Setup ───
   if (phase === 'setup') {
     return (
-      <GameSetupCard icon={({ size }) => <IconLayers size={size} style={{ color: 'white' }} />} iconColor="#22C55E" title="Flashcards">
+      <GameSetupCard icon={({ size }) => <IconLayers size={size} style={{ color: 'white' }} />} iconColor={STATUS.success} title="Flashcards" loadError={loadError}>
         <p className="text-sm mb-1" style={{ color: 'var(--theme-text-secondary)' }}>
-          Ôn tập <span className="font-bold" style={{ color: '#22C55E' }}>{cardsCount} từ</span> với thẻ ghi nhớ
+          Ôn tập <span className="font-bold" style={{ color: STATUS.success }}>{cardsCount} từ</span> với thẻ ghi nhớ
         </p>
         <p className="text-xs mb-6" style={{ color: 'var(--theme-text-muted)' }}>(Thay đổi số thẻ trong Settings → Học tập)</p>
         <GameInfoBox>
-          <div className="flex items-center gap-2"><IconLayers size={14} style={{ color: '#22C55E' }} /><span>Click thẻ hoặc nhấn <KBD>Space</KBD> để lật</span></div>
-          <div className="flex items-center gap-2"><IconKeyboard size={14} style={{ color: '#8B5CF6' }} /><span><KBD>←</KBD> Chưa nhớ · <KBD>→</KBD> Đã nhớ</span></div>
-          <div className="flex items-center gap-2"><IconVolume size={14} style={{ color: '#3B82F6' }} /><span>Nút 🔊 để nghe phát âm tiếng Đức</span></div>
+          <div className="flex items-center gap-2"><IconLayers size={14} style={{ color: STATUS.success }} /><span>Click thẻ hoặc nhấn <KBD>Space</KBD> để lật</span></div>
+          <div className="flex items-center gap-2"><IconKeyboard size={14} style={{ color: ACCENT.vocab }} /><span><KBD>←</KBD> Chưa nhớ · <KBD>→</KBD> Đã nhớ</span></div>
+          <div className="flex items-center gap-2"><IconVolume size={14} style={{ color: ACCENT.srs }} /><span>Nút 🔊 để nghe phát âm tiếng Đức</span></div>
         </GameInfoBox>
         <div className="flex gap-3 justify-center mt-6">
           <Button variant="game" accent="reading" onClick={startGame} isLoading={isLoading} ><IconRocket size={16} /> Bắt đầu</Button>
@@ -158,8 +161,8 @@ export default function FlashcardsPage() {
         <GameResultCard accuracy={accuracy} title="Hoàn thành!">
           <div className="grid grid-cols-3 gap-2 my-5">
             <StatCard label="Đã nhớ" value={knewCount} />
-            <StatCard label="Cần ôn" value={didntKnowCount} color="#EF4444" />
-            <StatCard label="Best Streak" value={bestStreak} color="#F59E0B" />
+            <StatCard label="Cần ôn" value={didntKnowCount} color={STATUS.danger} />
+            <StatCard label="Best Streak" value={bestStreak} color={ACCENT.xp} />
           </div>
           <div className="flex gap-3 justify-center">
             <Button variant="game" accent="reading" onClick={startGame} ><IconRefresh size={16} /> Học lại</Button>
@@ -173,17 +176,17 @@ export default function FlashcardsPage() {
               style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
               <div className="px-5 py-4 border-b flex items-center gap-2"
                 style={{ borderColor: 'var(--theme-border)' }}>
-                <IconX size={15} style={{ color: '#EF4444' }} />
+                <IconX size={15} style={{ color: STATUS.danger }} />
                 <h2 className="text-[15px] font-bold" style={{ color: 'var(--theme-text-primary)' }}>
                   Từ cần ôn lại ({needReview.length})
                 </h2>
               </div>
               <div className="max-h-64 overflow-y-auto divide-y" style={{ borderColor: 'var(--theme-border)' }}>
                 {needReview.map((record, i) => {
-                  const gc = AC[record.word.gender] || '#3B82F6';
+                  const gc = AC[record.word.gender] || ACCENT.srs;
                   return (
                     <div key={i} className="flex items-center justify-between px-4 py-3"
-                      style={{ background: 'rgba(239,68,68,.03)' }}>
+                      style={{ background: `${STATUS.danger}08` }}>
                       <div>
                         <span className="text-body font-semibold" style={{ color: gc }}>{record.word.article}</span>
                         <span className="text-sm font-bold ml-1.5" style={{ color: 'var(--theme-text-primary)' }}>{record.word.word}</span>
@@ -203,7 +206,7 @@ export default function FlashcardsPage() {
   }
 
   // ─── Playing ───
-  const genderColor = currentWord ? (AC[currentWord.gender] || '#3B82F6') : '#3B82F6';
+  const genderColor = currentWord ? (AC[currentWord.gender] || ACCENT.srs) : ACCENT.srs;
   const knewCount = results.filter(r => r.knew).length;
 
   return (
@@ -211,36 +214,36 @@ export default function FlashcardsPage() {
       <GamePlayHeader title="Flashcards" streak={streak} timer={timer}
         onExit={() => { window.speechSynthesis?.cancel(); playClick(); router.push('/games'); }} />
       <GameStatsBar stats={[
-        { label: 'Đã nhớ', value: knewCount,                        color: '#22C55E', dot: true },
-        { label: 'Cần ôn', value: results.length - knewCount,       color: '#EF4444', dot: true },
-        { label: 'Streak', value: streak,                           color: '#F59E0B' },
+        { label: 'Đã nhớ', value: knewCount,                        color: STATUS.success, dot: true },
+        { label: 'Cần ôn', value: results.length - knewCount,       color: STATUS.danger, dot: true },
+        { label: 'Streak', value: streak,                           color: ACCENT.xp },
         { label: 'Thẻ',    value: `${index + 1}/${words?.length || 0}`, color: 'var(--theme-text-primary)' },
       ]} />
       <GameProgressBar current={index} total={words?.length || 1} />
 
       {/* 3D Flashcard */}
       {currentWord && (
-        <div className="my-7" style={{ perspective: '1200px' }}>
+        <div className="my-5" style={{ perspective: '1200px' }}>
           <div
             onClick={flipCard}
             className="relative cursor-pointer select-none transition-transform duration-500"
             style={{
               transformStyle: 'preserve-3d',
               transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
-              minHeight: '300px',
+              minHeight: '260px',
             }}
           >
             {/* ─── FRONT (Word — article hidden intentionally) ─── */}
-            <div className="absolute inset-0 rounded-2xl border-2 p-8 flex flex-col items-center justify-center"
+            <div className="absolute inset-0 rounded-2xl border-2 p-6 flex flex-col items-center justify-center"
               style={{
                 backfaceVisibility: 'hidden',
                 WebkitBackfaceVisibility: 'hidden',
                 backgroundColor: 'var(--theme-bg-card)',
-                borderColor: '#3B82F6',
+                borderColor: ACCENT.srs,
               }}>
-              <p className="text-xs mb-4" style={{ color: 'var(--theme-text-muted)' }}>Từ tiếng Đức</p>
+              <p className="text-[10px] mb-2 opacity-40 uppercase tracking-widest" style={{ color: 'var(--theme-text-primary)' }}>Từ tiếng Đức</p>
 
-              <h2 className="text-4xl md:text-5xl font-bold mb-2" style={{ color: 'var(--theme-text-primary)' }}>
+              <h2 className="text-3xl md:text-4xl font-bold mb-1" style={{ color: 'var(--theme-text-primary)' }}>
                 {currentWord.word}
               </h2>
 
@@ -262,11 +265,11 @@ export default function FlashcardsPage() {
               <button
                 onClick={(e) => { e.stopPropagation(); speakWord(currentWord.word); }}
                 className="w-10 h-10 rounded-xl flex items-center justify-center transition-all hover:scale-110 mb-5"
-                style={{ backgroundColor: 'rgba(59,130,246,.1)', color: '#3B82F6' }}>
+                style={{ backgroundColor: 'rgba(59,130,246,.1)', color: ACCENT.srs }}>
                 <IconVolume size={20} />
               </button>
 
-              <p className="text-body font-medium" style={{ color: '#3B82F6' }}>
+              <p className="text-body font-medium" style={{ color: ACCENT.srs }}>
                 Click để lật thẻ · <KBD>Space</KBD>
               </p>
             </div>
@@ -289,7 +292,11 @@ export default function FlashcardsPage() {
                 <p className="text-white/70 text-sm mb-3">{currentWord.translationVi}</p>
               )}
               <div className="mb-3 px-4 py-1.5 bg-white/15 rounded-full">
-                <span className="text-white text-body font-medium">{GenderInfo[currentWord.gender].label}</span>
+                <span className="text-white text-body font-medium">
+                  {currentWord.gender && GenderInfo[currentWord.gender] 
+                    ? GenderInfo[currentWord.gender].label 
+                    : 'Unbekannt'}
+                </span>
               </div>
 
               {/* Example sentence */}
@@ -311,14 +318,16 @@ export default function FlashcardsPage() {
           <button onClick={() => handleResponse(false)}
             className="py-5 rounded-2xl font-bold text-title text-white transition-all duration-200
               hover:-translate-y-1 hover:shadow-lg active:scale-95 flex items-center justify-center gap-2"
-            style={{ background: 'linear-gradient(135deg, #EF4444, #DC2626)', boxShadow: '0 4px 16px rgba(239,68,68,.25)' }}>
+            // eslint-disable-next-line no-restricted-syntax
+            style={{ background: 'linear-gradient(135deg, #EF4444, #DC2626)', boxShadow: `0 4px 16px ${STATUS.danger}40` }}>
             <IconX size={18} /> Chưa nhớ
             <span className="text-caption font-medium opacity-70 ml-1">← / 1</span>
           </button>
           <button onClick={() => handleResponse(true)}
             className="py-5 rounded-2xl font-bold text-title text-white transition-all duration-200
               hover:-translate-y-1 hover:shadow-lg active:scale-95 flex items-center justify-center gap-2"
-            style={{ background: 'linear-gradient(135deg, #22C55E, #16A34A)', boxShadow: '0 4px 16px rgba(34,197,94,.25)' }}>
+            // eslint-disable-next-line no-restricted-syntax
+            style={{ background: 'linear-gradient(135deg, #22C55E, #16A34A)', boxShadow: `0 4px 16px ${STATUS.success}40` }}>
             <IconCheck size={18} /> Đã nhớ
             <span className="text-caption font-medium opacity-70 ml-1">→ / 2</span>
           </button>

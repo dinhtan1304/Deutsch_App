@@ -2,6 +2,8 @@
  * Personal Word Bank Types
  */
 
+import { ACCENT, STATUS } from '@/lib/tokens';
+
 export type WordType =
   | 'nomen' | 'verb' | 'adjektiv' | 'adverb'
   | 'praposition' | 'konjunktion' | 'pronomen' | 'partikel' | 'andere';
@@ -10,21 +12,21 @@ export type Gender = 'masculine' | 'feminine' | 'neuter';
 export type Level = 'A1' | 'A2' | 'B1' | 'B2' | 'C1';
 
 export const WordTypeInfo: Record<WordType, { label: string; labelDe: string; icon: string; color: string }> = {
-  nomen:       { label: 'Danh từ',    labelDe: 'Nomen',        icon: 'N',  color: '#3b82f6' },
-  verb:        { label: 'Động từ',    labelDe: 'Verb',         icon: 'V',  color: '#ef4444' },
-  adjektiv:    { label: 'Tính từ',    labelDe: 'Adjektiv',     icon: 'Adj', color: '#f59e0b' },
-  adverb:      { label: 'Trạng từ',   labelDe: 'Adverb',       icon: 'Adv', color: '#8b5cf6' },
-  praposition: { label: 'Giới từ',    labelDe: 'Präposition',  icon: 'Pr', color: '#ec4899' },
-  konjunktion: { label: 'Liên từ',    labelDe: 'Konjunktion',  icon: 'Kj', color: '#14b8a6' },
-  pronomen:    { label: 'Đại từ',     labelDe: 'Pronomen',     icon: 'Pn', color: '#6366f1' },
-  partikel:    { label: 'Tiểu từ',    labelDe: 'Partikel',     icon: 'Pt', color: '#78716c' },
-  andere:      { label: 'Khác',       labelDe: 'Andere',       icon: 'An', color: '#64748b' },
+  nomen:       { label: 'Danh từ',    labelDe: 'Nomen',        icon: 'N',   color: ACCENT.srs },
+  verb:        { label: 'Động từ',    labelDe: 'Verb',         icon: 'V',   color: STATUS.danger },
+  adjektiv:    { label: 'Tính từ',    labelDe: 'Adjektiv',     icon: 'Adj', color: ACCENT.xp },
+  adverb:      { label: 'Trạng từ',   labelDe: 'Adverb',       icon: 'Adv', color: ACCENT.vocab },
+  praposition: { label: 'Giới từ',    labelDe: 'Präposition',  icon: 'Pr',  color: ACCENT.listening },
+  konjunktion: { label: 'Liên từ',    labelDe: 'Konjunktion',  icon: 'Kj',  color: ACCENT.teal },
+  pronomen:    { label: 'Đại từ',     labelDe: 'Pronomen',     icon: 'Pn',  color: ACCENT.writing },
+  partikel:    { label: 'Tiểu từ',    labelDe: 'Partikel',     icon: 'Pt',  color: 'var(--theme-text-muted)' },
+  andere:      { label: 'Khác',       labelDe: 'Andere',       icon: 'An',  color: 'var(--theme-text-muted)' },
 };
 
 export const GenderInfo: Record<Gender, { article: string; label: string; color: string }> = {
-  masculine: { article: 'der', label: 'Maskulin',  color: '#3b82f6' },
-  feminine:  { article: 'die', label: 'Feminin',   color: '#ec4899' },
-  neuter:    { article: 'das', label: 'Neutrum',   color: '#22c55e' },
+  masculine: { article: 'der', label: 'Maskulin',  color: ACCENT.srs },
+  feminine:  { article: 'die', label: 'Feminin',   color: ACCENT.listening },
+  neuter:    { article: 'das', label: 'Neutrum',   color: STATUS.success },
 };
 
 export interface NomenData { article: 'der' | 'die' | 'das'; gender: Gender; plural?: string; }
@@ -90,10 +92,10 @@ export function getIntervalText(interval: number): string {
 }
 
 export const SRSStatusInfo: Record<SRSStatus, { label: string; color: string; bgColor: string }> = {
-  new:      { label: 'Mới',        color: '#3b82f6', bgColor: '#dbeafe' },
-  learning: { label: 'Đang học',   color: '#f59e0b', bgColor: '#fef3c7' },
-  review:   { label: 'Ôn tập',     color: '#8b5cf6', bgColor: '#ede9fe' },
-  mature:   { label: 'Thuộc lòng', color: '#22c55e', bgColor: '#dcfce7' },
+  new:      { label: 'Mới',        color: ACCENT.srs,     bgColor: `${ACCENT.srs}26` },
+  learning: { label: 'Đang học',   color: ACCENT.xp,      bgColor: `${ACCENT.xp}26` },
+  review:   { label: 'Ôn tập',     color: ACCENT.vocab,   bgColor: `${ACCENT.vocab}26` },
+  mature:   { label: 'Thuộc lòng', color: STATUS.success, bgColor: `${STATUS.success}26` },
 };
 
 export interface ImportRow {

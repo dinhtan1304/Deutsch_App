@@ -12,6 +12,7 @@ import { GenderInfo, ReviewRating, Progress } from '@/types';
 import {
   IconBrain, IconRefresh, IconTarget, IconFlame, IconBookOpen, IconChevronLeft,
 } from '@/components/ui/Icons';
+import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 import type { SVGProps } from 'react';
 
 type IconProps = { size?: number } & SVGProps<SVGSVGElement>;
@@ -57,26 +58,28 @@ function IconShuffle({ size = 16 }: { size?: number }) {
 
 type QuizMode = 'gender' | 'de-vi' | 'vi-de' | 'mixed';
 
-const QUIZ_MODES: { key: QuizMode; label: string; desc: string; icon: any; color: string }[] = [
-  { key: 'gender', label: 'Mạo từ', desc: 'der / die / das', icon: IconTarget, color: '#3B82F6' },
-  { key: 'de-vi', label: 'Đức → Việt', desc: 'Nhìn từ, đoán nghĩa', icon: IconLanguages, color: '#8B5CF6' },
-  { key: 'vi-de', label: 'Việt → Đức', desc: 'Nhìn nghĩa, nhớ từ', icon: IconBookOpen, color: '#F59E0B' },
-  { key: 'mixed', label: 'Hỗn hợp', desc: 'Ngẫu nhiên tất cả', icon: IconShuffle, color: '#22C55E' },
+const QUIZ_MODES: { key: QuizMode; label: string; desc: string; icon: React.ComponentType<{ size?: number; style?: React.CSSProperties }>; color: string }[] = [
+  { key: 'gender', label: 'Mạo từ', desc: 'der / die / das', icon: IconTarget,    color: ACCENT.srs },
+  { key: 'de-vi',  label: 'Đức → Việt', desc: 'Nhìn từ, đoán nghĩa', icon: IconLanguages, color: ACCENT.vocab },
+  { key: 'vi-de',  label: 'Việt → Đức', desc: 'Nhìn nghĩa, nhớ từ',  icon: IconBookOpen,  color: ACCENT.xp },
+  { key: 'mixed',  label: 'Hỗn hợp', desc: 'Ngẫu nhiên tất cả',     icon: IconShuffle,   color: STATUS.success },
 ];
 
+/* eslint-disable no-restricted-syntax */
 const GENDER_HEX: Record<string, { color: string; gradient: string }> = {
-  blue: { color: '#3B82F6', gradient: 'linear-gradient(135deg, #3B82F6, #1D4ED8)' },
-  pink: { color: '#EC4899', gradient: 'linear-gradient(135deg, #EC4899, #BE185D)' },
-  green: { color: '#22C55E', gradient: 'linear-gradient(135deg, #22C55E, #15803D)' },
+  blue:  { color: ACCENT.srs,       gradient: 'linear-gradient(135deg, #3B82F6, #1D4ED8)' },
+  pink:  { color: ACCENT.listening, gradient: 'linear-gradient(135deg, #EC4899, #BE185D)' },
+  green: { color: STATUS.success,   gradient: 'linear-gradient(135deg, #22C55E, #15803D)' },
 };
 
-// Artikel → card gradient + chip colors
+// Artikel → card gradient + chip colors (custom dark-theme palette for review cards)
 const ARTIKEL_STYLE: Record<string, { gradient: string; chipBg: string; chipColor: string }> = {
-  der: { gradient: 'linear-gradient(135deg, #0a1628 0%, #1e3a8a 100%)', chipBg: 'rgba(59,130,246,.3)',  chipColor: '#93C5FD' },
-  die: { gradient: 'linear-gradient(135deg, #2a0a1e 0%, #9d174d 100%)', chipBg: 'rgba(236,72,153,.3)', chipColor: '#F9A8D4' },
-  das: { gradient: 'linear-gradient(135deg, #0a2218 0%, #065f46 100%)', chipBg: 'rgba(20,184,166,.3)',  chipColor: '#5EEAD4' },
+  der: { gradient: 'linear-gradient(135deg, #0a1628 0%, #1e3a8a 100%)', chipBg: `${ACCENT.srs}4D`,       chipColor: '#93C5FD' },
+  die: { gradient: 'linear-gradient(135deg, #2a0a1e 0%, #9d174d 100%)', chipBg: `${ACCENT.listening}4D`, chipColor: '#F9A8D4' },
+  das: { gradient: 'linear-gradient(135deg, #0a2218 0%, #065f46 100%)', chipBg: `${ACCENT.teal}4D`,      chipColor: '#5EEAD4' },
 };
 const DEFAULT_CARD_GRADIENT = 'linear-gradient(135deg, #1e1b4b 0%, #4338ca 100%)';
+/* eslint-enable no-restricted-syntax */
 
 function getLastSeenText(dateStr: string | null | undefined): string {
   if (!dateStr) return '';
@@ -264,7 +267,7 @@ export default function SRSReviewPage() {
     return (
 <div className="flex items-center justify-center min-h-[60vh]">
       <div className="w-14 h-14 rounded-2xl flex items-center justify-center animate-pulse"
-        style={{ background: 'linear-gradient(135deg, #3B82F6, #6366F1)' }}>
+        style={{ background: GRADIENT.action }}>
         <IconBrain size={28} className="text-white" /></div></div>
 );
   }
@@ -276,22 +279,22 @@ export default function SRSReviewPage() {
       <div className="rounded-3xl p-8 text-center border"
         style={{ backgroundColor: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}>
         <div className="w-20 h-20 rounded-3xl mx-auto flex items-center justify-center mb-6"
-          style={{ background: 'linear-gradient(135deg, rgba(59,130,246,.15), rgba(99,102,241,.1))' }}>
-          <IconBrain size={36} style={{ color: '#3B82F6' }} /></div>
+          style={{ background: `linear-gradient(135deg, ${ACCENT.srs}26, ${ACCENT.writing}1A)` }}>
+          <IconBrain size={36} style={{ color: ACCENT.srs }} /></div>
         <h1 className="text-2xl font-bold mb-3" style={{ color: 'var(--theme-text-primary)' }}>SRS Review</h1>
         <p className="text-sm mb-8 max-w-sm mx-auto" style={{ color: 'var(--theme-text-muted)' }}>
           Bạn chưa có từ nào trong danh sách ôn tập.<br/>Thêm từ vào để bắt đầu học với thuật toán SM-2!</p>
         <button onClick={addRandomWords}
           className="flex items-center gap-2 mx-auto px-6 py-3 rounded-xl font-semibold text-sm text-white transition-all hover:shadow-lg hover:-translate-y-0.5"
-          style={{ background: 'linear-gradient(135deg, #3B82F6, #6366F1)' }}>
+          style={{ background: GRADIENT.action }}>
           <IconPlus size={17} /> Thêm 20 từ ngẫu nhiên</button>
         <p className="text-xs mt-3" style={{ color: 'var(--theme-text-muted)' }}>
           Hoặc thêm từ từ trang Từ vựng bằng nút ⭐</p>
         <div className="mt-8 p-4 rounded-xl text-left"
-          style={{ backgroundColor: 'rgba(59,130,246,.06)', border: '1px solid rgba(59,130,246,.12)' }}>
-          <h3 className="font-bold text-sm mb-2 flex items-center gap-2" style={{ color: '#3B82F6' }}>
+          style={{ backgroundColor: `${ACCENT.srs}0F`, border: `1px solid ${ACCENT.srs}1F` }}>
+          <h3 className="font-bold text-sm mb-2 flex items-center gap-2" style={{ color: ACCENT.srs }}>
             <span className="w-6 h-6 rounded-md flex items-center justify-center"
-              style={{ background: 'rgba(59,130,246,.12)' }}><IconBrain size={14} style={{ color: '#3B82F6' }} /></span>
+              style={{ background: `${ACCENT.srs}1F` }}><IconBrain size={14} style={{ color: ACCENT.srs }} /></span>
             SM-2 là gì?</h3>
           <p className="text-body" style={{ color: 'var(--theme-text-secondary)' }}>
             SM-2 (SuperMemo 2) là thuật toán lặp lại ngắt quãng giúp bạn nhớ từ lâu hơn. Từ bạn nhớ tốt sẽ xuất hiện ít hơn, từ khó sẽ xuất hiện thường xuyên hơn.</p>
@@ -303,22 +306,22 @@ export default function SRSReviewPage() {
   // ─── SETUP ───
   if (phase === 'setup') {
     const statItems = [
-      { label: 'Cần ôn', value: stats?.due ?? 0, icon: IconFlame, color: '#EF4444',
-        bg: 'linear-gradient(135deg, rgba(239,68,68,.12), rgba(239,68,68,.06))' },
-      { label: 'Đã thuộc', value: stats?.mastered ?? 0, icon: IconTarget, color: '#22C55E',
-        bg: 'linear-gradient(135deg, rgba(34,197,94,.12), rgba(34,197,94,.06))' },
-      { label: 'Đang học', value: stats?.learning ?? 0, icon: IconBookOpen, color: '#F59E0B',
-        bg: 'linear-gradient(135deg, rgba(245,158,11,.12), rgba(245,158,11,.06))' },
-      { label: 'Tổng', value: stats?.total ?? 0, icon: IconBrain, color: '#6366F1',
-        bg: 'linear-gradient(135deg, rgba(99,102,241,.12), rgba(99,102,241,.06))' },
+      { label: 'Cần ôn', value: stats?.due ?? 0, icon: IconFlame, color: STATUS.danger,
+        bg: `linear-gradient(135deg, ${STATUS.danger}1F, ${STATUS.danger}0F)` },
+      { label: 'Đã thuộc', value: stats?.mastered ?? 0, icon: IconTarget, color: STATUS.success,
+        bg: `linear-gradient(135deg, ${STATUS.success}1F, ${STATUS.success}0F)` },
+      { label: 'Đang học', value: stats?.learning ?? 0, icon: IconBookOpen, color: ACCENT.xp,
+        bg: `linear-gradient(135deg, ${ACCENT.xp}1F, ${ACCENT.xp}0F)` },
+      { label: 'Tổng', value: stats?.total ?? 0, icon: IconBrain, color: ACCENT.writing,
+        bg: `linear-gradient(135deg, ${ACCENT.writing}1F, ${ACCENT.writing}0F)` },
     ];
     return (
 <div className="max-w-2xl mx-auto py-12">
       <div className="rounded-3xl p-8 text-center border"
         style={{ backgroundColor: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}>
         <div className="w-20 h-20 rounded-3xl mx-auto flex items-center justify-center mb-6"
-          style={{ background: 'linear-gradient(135deg, rgba(59,130,246,.15), rgba(99,102,241,.1))' }}>
-          <IconBrain size={36} style={{ color: '#3B82F6' }} /></div>
+          style={{ background: `linear-gradient(135deg, ${ACCENT.srs}26, ${ACCENT.writing}1A)` }}>
+          <IconBrain size={36} style={{ color: ACCENT.srs }} /></div>
         <h1 className="text-2xl font-bold mb-6" style={{ color: 'var(--theme-text-primary)' }}>SRS Review</h1>
 
         {/* Stats */}
@@ -356,13 +359,13 @@ export default function SRSReviewPage() {
             })}
           </div>
           <p className="text-sm mb-6" style={{ color: 'var(--theme-text-secondary)' }}>
-            Bạn có <span className="font-bold" style={{ color: '#3B82F6' }}>{stats?.due} từ</span> cần ôn tập hôm nay</p>
+            Bạn có <span className="font-bold" style={{ color: ACCENT.srs }}>{stats?.due} từ</span> cần ôn tập hôm nay</p>
           <button onClick={startReview}
             className="flex items-center gap-2 mx-auto px-8 py-3 rounded-xl font-semibold text-[15px] text-white transition-all hover:shadow-lg hover:-translate-y-0.5"
-            style={{ background: 'linear-gradient(135deg, #3B82F6, #6366F1)' }}>
+            style={{ background: GRADIENT.action }}>
             <IconZap size={18} /> Bắt đầu ôn tập</button>
         </>) : (<>
-          <p className="text-sm mb-6" style={{ color: '#22C55E' }}>✅ Tuyệt vời! Bạn đã ôn hết tất cả cho hôm nay.</p>
+          <p className="text-sm mb-6" style={{ color: STATUS.success }}>✅ Tuyệt vời! Bạn đã ôn hết tất cả cho hôm nay.</p>
           <button onClick={addRandomWords}
             className="flex items-center gap-2 mx-auto px-6 py-3 rounded-xl font-semibold text-sm border transition-all hover:-translate-y-0.5"
             style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)' }}>
@@ -380,18 +383,18 @@ export default function SRSReviewPage() {
     const accuracy = sessionStats.correct + sessionStats.wrong > 0
       ? Math.round((sessionStats.correct / (sessionStats.correct + sessionStats.wrong)) * 100) : 0;
     const resultItems = [
-      { label: 'Đúng', value: sessionStats.correct, color: '#22C55E', bg: 'linear-gradient(135deg, rgba(34,197,94,.12), rgba(34,197,94,.06))' },
-      { label: 'Sai', value: sessionStats.wrong, color: '#EF4444', bg: 'linear-gradient(135deg, rgba(239,68,68,.12), rgba(239,68,68,.06))' },
-      { label: 'Chính xác', value: `${accuracy}%`, color: '#3B82F6', bg: 'linear-gradient(135deg, rgba(59,130,246,.12), rgba(59,130,246,.06))' },
-      { label: 'Best Streak', value: sessionStats.bestStreak, color: '#F97316', bg: 'linear-gradient(135deg, rgba(249,115,22,.12), rgba(249,115,22,.06))' },
+      { label: 'Đúng', value: sessionStats.correct, color: STATUS.success, bg: `linear-gradient(135deg, ${STATUS.success}1F, ${STATUS.success}0F)` },
+      { label: 'Sai', value: sessionStats.wrong, color: STATUS.danger, bg: `linear-gradient(135deg, ${STATUS.danger}1F, ${STATUS.danger}0F)` },
+      { label: 'Chính xác', value: `${accuracy}%`, color: ACCENT.srs, bg: `linear-gradient(135deg, ${ACCENT.srs}1F, ${ACCENT.srs}0F)` },
+      { label: 'Best Streak', value: sessionStats.bestStreak, color: ACCENT.games, bg: `linear-gradient(135deg, ${ACCENT.games}1F, ${ACCENT.games}0F)` },
     ];
     return (
 <div className="max-w-2xl mx-auto py-12">
       <div className="rounded-3xl p-8 text-center border"
         style={{ backgroundColor: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}>
         <div className="w-20 h-20 rounded-3xl mx-auto flex items-center justify-center mb-4"
-          style={{ background: 'linear-gradient(135deg, rgba(34,197,94,.15), rgba(52,211,153,.1))' }}>
-          <IconTrophy size={36} style={{ color: '#22C55E' }} /></div>
+          style={{ background: `linear-gradient(135deg, ${STATUS.success}26, ${STATUS.success}1A)` }}>
+          <IconTrophy size={36} style={{ color: STATUS.success }} /></div>
         <h1 className="text-2xl font-bold mb-2" style={{ color: 'var(--theme-text-primary)' }}>Hoàn thành! 🎉</h1>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 my-6">
           {resultItems.map(item => (<div key={item.label} className="p-4 rounded-2xl" style={{ background: item.bg }}>
@@ -403,7 +406,7 @@ export default function SRSReviewPage() {
           {(stats?.due ?? 0) > 0 && (
             <button onClick={() => { refetchDue(); setPhase('setup'); }}
               className="flex items-center gap-2 mx-auto px-6 py-3 rounded-xl font-semibold text-sm text-white transition-all hover:shadow-md hover:-translate-y-0.5"
-              style={{ background: 'linear-gradient(135deg, #3B82F6, #6366F1)' }}>
+              style={{ background: GRADIENT.action }}>
               <IconRefresh size={16} /> Ôn tiếp ({stats?.due} từ còn lại)</button>)}
           <button onClick={addRandomWords}
             className="flex items-center gap-2 mx-auto px-6 py-3 rounded-xl font-medium text-sm border transition-all hover:-translate-y-0.5"
@@ -443,7 +446,7 @@ export default function SRSReviewPage() {
     <div className="flex items-center gap-2">
       {sessionStats.streak > 0 && (
         <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-body font-bold"
-          style={{ background: 'rgba(249,115,22,.12)', color: '#F97316' }}>
+          style={{ background: `${ACCENT.games}1F`, color: ACCENT.games }}>
           🔥 {sessionStats.streak}
         </div>
       )}
@@ -462,9 +465,9 @@ export default function SRSReviewPage() {
     style={{ backgroundColor: 'var(--theme-bg-card)', border: '1px solid var(--theme-border)' }}>
     {[
       { label: 'Tổng',   value: reviewQueue.length,              color: 'var(--theme-text-primary)', dot: false },
-      { label: 'Mới',    value: queueNew,                        color: '#3B82F6', dot: true },
-      { label: 'Cần ôn', value: reviewQueue.length - queueNew,   color: '#F59E0B', dot: true },
-      { label: 'Thuộc',  value: sessionStats.correct,            color: '#22C55E', dot: true },
+      { label: 'Mới',    value: queueNew,                        color: ACCENT.srs, dot: true },
+      { label: 'Cần ôn', value: reviewQueue.length - queueNew,   color: ACCENT.xp, dot: true },
+      { label: 'Thuộc',  value: sessionStats.correct,            color: STATUS.success, dot: true },
     ].map(s => (
       <div key={s.label} className="text-center">
         <div className="text-h2 font-extrabold leading-tight" style={{ color: s.color }}>{s.value}</div>
@@ -480,7 +483,7 @@ export default function SRSReviewPage() {
   <div className="flex items-center gap-3 mb-5">
     <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
       <div className="h-full rounded-full transition-all duration-500"
-        style={{ width: `${progress}%`, background: 'linear-gradient(90deg, #3B82F6, #22C55E)' }} />
+        style={{ width: `${progress}%`, background: `linear-gradient(90deg, ${ACCENT.srs}, ${STATUS.success})` }} />
     </div>
     <span className="shrink-0 text-caption font-bold px-2 py-0.5 rounded-lg"
       style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }}>
@@ -562,12 +565,14 @@ export default function SRSReviewPage() {
             backfaceVisibility: 'hidden',
             WebkitBackfaceVisibility: 'hidden',
             transform: 'rotateY(180deg)',
+            // eslint-disable-next-line no-restricted-syntax
             background: 'linear-gradient(135deg, #0f2a1a 0%, #064e3b 60%, #065f46 100%)',
           }}
         >
           <div className="absolute inset-0 flex flex-col items-center justify-center px-6 text-center gap-2">
             {/* VN chip */}
             <div className="px-3 py-1 rounded-full text-caption font-bold mb-1"
+              // eslint-disable-next-line no-restricted-syntax
               style={{ backgroundColor: 'rgba(52,211,153,.2)', color: '#34D399' }}>
               🇻🇳 VN Nghĩa
             </div>
@@ -609,12 +614,14 @@ export default function SRSReviewPage() {
   {/* ── Rating buttons or flip CTA ── */}
   {isFlipped && intervals ? (
     <div className="grid grid-cols-4 gap-2.5">
+      {/* eslint-disable no-restricted-syntax */}
       {([
-        { rating: 'again' as ReviewRating, label: 'Quên', emoji: '😵', textColor: '#FCA5A5', bg: 'linear-gradient(160deg, #450a0a, #991b1b)', border: 'rgba(239,68,68,.45)',  hotkey: '1', interval: intervals.again },
-        { rating: 'hard'  as ReviewRating, label: 'Khó',  emoji: '😓', textColor: '#FCD34D', bg: 'linear-gradient(160deg, #431407, #92400e)', border: 'rgba(245,158,11,.45)', hotkey: '2', interval: intervals.hard  },
-        { rating: 'good'  as ReviewRating, label: 'Được', emoji: '🙂', textColor: '#86EFAC', bg: 'linear-gradient(160deg, #052e16, #166534)', border: 'rgba(34,197,94,.45)',  hotkey: '3', interval: intervals.good  },
-        { rating: 'easy'  as ReviewRating, label: 'Dễ',   emoji: '😎', textColor: '#93C5FD', bg: 'linear-gradient(160deg, #0c1a3f, #1e40af)', border: 'rgba(59,130,246,.45)', hotkey: '4', interval: intervals.easy  },
+        { rating: 'again' as ReviewRating, label: 'Quên', emoji: '😵', textColor: '#FCA5A5', bg: 'linear-gradient(160deg, #450a0a, #991b1b)', border: `${STATUS.danger}73`,  hotkey: '1', interval: intervals.again },
+        { rating: 'hard'  as ReviewRating, label: 'Khó',  emoji: '😓', textColor: '#FCD34D', bg: 'linear-gradient(160deg, #431407, #92400e)', border: `${ACCENT.xp}73`,      hotkey: '2', interval: intervals.hard  },
+        { rating: 'good'  as ReviewRating, label: 'Được', emoji: '🙂', textColor: '#86EFAC', bg: 'linear-gradient(160deg, #052e16, #166534)', border: `${STATUS.success}73`, hotkey: '3', interval: intervals.good  },
+        { rating: 'easy'  as ReviewRating, label: 'Dễ',   emoji: '😎', textColor: '#93C5FD', bg: 'linear-gradient(160deg, #0c1a3f, #1e40af)', border: `${ACCENT.srs}73`,     hotkey: '4', interval: intervals.easy  },
       ]).map(btn => (
+      /* eslint-enable no-restricted-syntax */
         <button
           key={btn.rating}
           onClick={() => handleReview(btn.rating)}

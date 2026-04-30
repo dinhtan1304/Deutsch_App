@@ -5,23 +5,22 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useReadingSession } from '@/hooks/useReading';
 import { ReadingQuestion, GradingDetail } from '@/lib/api/reading';
-import { IconCheck, IconX, IconLoader } from '../../icons';
+import { IconCheck, IconX, IconLoader, IconShare, IconSparkles } from '../../icons';
 import {
   PageHeader,
   ScoreRing,
   StatGrid,
   FixedActionBar,
-  Button,
   type StatItem,
 } from '@/components/ui';
-import { ACCENT } from '@/lib/tokens';
+import { ACCENT, STATUS, GRADIENT } from '@/lib/tokens';
 
 function getGradeInfo(score: number): { emoji: string; label: string; color: string; bg: string } {
-  if (score >= 90) return { emoji: '🏆', label: 'Xuất sắc!', color: '#22C55E', bg: 'rgba(34,197,94,.15)' };
-  if (score >= 75) return { emoji: '🌟', label: 'Rất tốt! 👏', color: '#22C55E', bg: 'rgba(34,197,94,.12)' };
-  if (score >= 60) return { emoji: '👍', label: 'Khá tốt!', color: '#F59E0B', bg: 'rgba(245,158,11,.12)' };
-  if (score >= 40) return { emoji: '📖', label: 'Cần cố gắng thêm', color: '#F97316', bg: 'rgba(249,115,22,.12)' };
-  return { emoji: '💪', label: 'Hãy ôn luyện thêm', color: '#EF4444', bg: 'rgba(239,68,68,.12)' };
+  if (score >= 90) return { emoji: '🏆', label: 'Xuất sắc!',           color: STATUS.success, bg: `${STATUS.success}26` };
+  if (score >= 75) return { emoji: '🌟', label: 'Rất tốt! 👏',         color: STATUS.success, bg: `${STATUS.success}1F` };
+  if (score >= 60) return { emoji: '👍', label: 'Khá tốt!',            color: STATUS.warning, bg: `${STATUS.warning}1F` };
+  if (score >= 40) return { emoji: '📖', label: 'Cần cố gắng thêm',    color: ACCENT.games,   bg: `${ACCENT.games}1F` };
+  return              { emoji: '💪', label: 'Hãy ôn luyện thêm',    color: STATUS.danger,  bg: `${STATUS.danger}1F` };
 }
 
 function formatTime(ms: number): string {
@@ -42,12 +41,12 @@ function QuestionItem({
 
   return (
     <div className="rounded-2xl border overflow-hidden"
-      style={{ borderColor: isCorrect ? 'rgba(34,197,94,.25)' : 'rgba(239,68,68,.25)' }}>
+      style={{ borderColor: isCorrect ? `${STATUS.success}40` : `${STATUS.danger}40` }}>
       <button onClick={() => setOpen(v => !v)}
         className="w-full flex items-center gap-3 px-4 py-3.5 text-left"
-        style={{ backgroundColor: isCorrect ? 'rgba(34,197,94,.04)' : 'rgba(239,68,68,.04)' }}>
+        style={{ backgroundColor: isCorrect ? `${STATUS.success}0A` : `${STATUS.danger}0A` }}>
         <div className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 text-white text-caption"
-          style={{ background: isCorrect ? '#22C55E' : '#EF4444' }}>
+          style={{ backgroundColor: isCorrect ? STATUS.success : STATUS.danger }}>
           {isCorrect ? <IconCheck size={11} /> : <IconX size={11} />}
         </div>
         <div className="flex-1 min-w-0">
@@ -55,7 +54,7 @@ function QuestionItem({
             Câu {index + 1}: {question.questionText}
           </p>
           {!isCorrect && (
-            <p className="text-xs mt-0.5" style={{ color: '#EF4444' }}>
+            <p className="text-xs mt-0.5" style={{ color: STATUS.danger }}>
               Đáp án đúng: {correctOpt?.text || question.correctAnswer}
             </p>
           )}
@@ -76,8 +75,8 @@ function QuestionItem({
               let border = 'var(--theme-border)';
               let bg = 'transparent';
               let color = 'var(--theme-text-secondary)';
-              if (isCorrectOpt) { border = '#22C55E'; bg = 'rgba(34,197,94,.08)'; color = '#22C55E'; }
-              if (isUser && !isCorrectOpt) { border = '#EF4444'; bg = 'rgba(239,68,68,.08)'; color = '#EF4444'; }
+              if (isCorrectOpt)           { border = STATUS.success; bg = `${STATUS.success}14`; color = STATUS.success; }
+              if (isUser && !isCorrectOpt) { border = STATUS.danger;  bg = `${STATUS.danger}14`;  color = STATUS.danger; }
 
               return (
                 <div key={opt.id} className="flex items-center gap-2 px-3 py-2.5 rounded-xl border text-xs"
@@ -95,7 +94,7 @@ function QuestionItem({
           </div>
 
           {detail?.explanationVi && (
-            <div className="rounded-xl p-3" style={{ backgroundColor: 'rgba(34,197,94,.07)' }}>
+            <div className="rounded-xl p-3" style={{ backgroundColor: `${ACCENT.reading}12` }}>
               <p className="text-caption font-bold mb-1" style={{ color: ACCENT.reading }}>Giải thích:</p>
               <p className="text-body" style={{ color: 'var(--theme-text-primary)' }}>{detail.explanationVi}</p>
             </div>
@@ -115,6 +114,7 @@ export default function ReadingResultPage() {
 
   useEffect(() => {
     const stored = localStorage.getItem(`reading_time_${id}`);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (stored) setTimeMs(parseInt(stored, 10));
   }, [id]);
 
@@ -177,13 +177,12 @@ export default function ReadingResultPage() {
         accent="reading"
         right={
           <span className="px-3 py-1 rounded-xl text-xs font-bold"
-            style={{ backgroundColor: 'rgba(34,197,94,.1)', color: ACCENT.reading }}>
+            style={{ backgroundColor: `${ACCENT.reading}1A`, color: ACCENT.reading }}>
             {session.cefrLevel}
           </span>
         }
       />
 
-      {/* Hero Result Card */}
       <div className="rounded-2xl border mb-5 overflow-hidden"
         style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
         <div className="flex flex-col sm:flex-row">
@@ -209,7 +208,6 @@ export default function ReadingResultPage() {
         </div>
       </div>
 
-      {/* Question Review */}
       <div className="space-y-3">
         <div className="flex items-center justify-between mb-1">
           <h3 className="text-body font-bold uppercase tracking-wider" style={{ color: 'var(--theme-text-muted)' }}>
@@ -217,14 +215,13 @@ export default function ReadingResultPage() {
           </h3>
         </div>
 
-        {/* Filter Tabs */}
         <div className="flex gap-1 p-1 rounded-xl mb-3"
           style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
           {TABS.map(tab => (
             <button key={tab.key} onClick={() => setFilter(tab.key)}
               className="flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all"
               style={filter === tab.key
-                ? { background: 'linear-gradient(135deg, #22C55E, #14B8A6)', color: 'white', boxShadow: '0 2px 8px rgba(34,197,94,.25)' }
+                ? { background: GRADIENT.reading, color: 'white', boxShadow: `0 2px 8px ${ACCENT.reading}40` }
                 : { color: 'var(--theme-text-muted)' }
               }>
               {tab.label}
@@ -253,12 +250,22 @@ export default function ReadingResultPage() {
       </div>
 
       <FixedActionBar columns={2}>
-        <Button variant="outline" fullWidth onClick={() => router.push('/practice-test/reading')}>
-          Danh sách
-        </Button>
-        <Button variant="game" accent="reading" fullWidth onClick={() => router.push('/practice-test/reading/new')}>
-          Bài mới
-        </Button>
+        <button
+          className="flex items-center justify-center gap-2 py-3.5 rounded-2xl font-bold text-sm border-2 transition-all hover:bg-black/5"
+          style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)', backgroundColor: 'var(--theme-bg-card)' }}
+          onClick={() => {
+            if (navigator.share) {
+              navigator.share({ title: 'DeutschMeister', text: `Tôi vừa hoàn thành bài luyện đọc!`, url: window.location.href }).catch(() => {});
+            }
+          }}>
+          <IconShare size={16} /> Chia sẻ
+        </button>
+        <button
+          className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl font-bold text-sm text-white transition-all hover:-translate-y-0.5 shadow-lg"
+          style={{ background: GRADIENT.reading, boxShadow: `0 8px 24px ${ACCENT.reading}40` }}
+          onClick={() => router.push('/practice-test/reading/new')}>
+          <IconSparkles size={16} /> Bài mới
+        </button>
       </FixedActionBar>
     </div>
   );

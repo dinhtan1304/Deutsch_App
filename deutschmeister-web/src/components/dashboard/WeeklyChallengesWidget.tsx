@@ -1,6 +1,8 @@
 'use client';
+/* eslint-disable no-restricted-syntax */
 
 import Link from 'next/link';
+import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 import { useWeeklyChallenges } from '@/hooks/useChallenges';
 import { IconZap, IconCheck, IconArrowRight } from '@/components/ui/Icons';
 
@@ -19,7 +21,7 @@ export function WeeklyChallengesWidget() {
         </div>
         <div className="flex items-center gap-2">
           <span className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>{completedCount}/3</span>
-          <Link href="/challenges" className="text-body font-semibold flex items-center gap-0.5" style={{ color: '#3B82F6', textDecoration: 'none' }}>
+          <Link href="/challenges" className="text-body font-semibold flex items-center gap-0.5" style={{ color: ACCENT.srs, textDecoration: 'none' }}>
             Chi tiết <IconArrowRight size={13} />
           </Link>
         </div>
@@ -39,7 +41,7 @@ export function WeeklyChallengesWidget() {
                   {c.titleVi}
                 </div>
                 {c.completed
-                  ? <div className="shrink-0 w-4.5 h-4.5 rounded-full flex items-center justify-center" style={{ width: 18, height: 18, background: '#22C55E' }}>
+                  ? <div className="shrink-0 w-4.5 h-4.5 rounded-full flex items-center justify-center" style={{ width: 18, height: 18, background: STATUS.success }}>
                       <IconCheck size={10} style={{ color: '#fff' }} />
                     </div>
                   : <div className="text-caption shrink-0" style={{ color: 'var(--theme-text-muted)' }}>{c.current}/{c.target}</div>
@@ -48,7 +50,7 @@ export function WeeklyChallengesWidget() {
               <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--theme-border)' }}>
                 <div style={{
                   height: '100%', borderRadius: 999,
-                  background: c.completed ? '#22C55E' : 'linear-gradient(90deg, #3B82F6, #6366F1)',
+                  background: c.completed ? STATUS.success : 'linear-gradient(90deg, #3B82F6, #6366F1)',
                   width: `${pct}%`, transition: 'width 0.5s',
                 }} />
               </div>

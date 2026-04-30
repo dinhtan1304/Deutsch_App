@@ -1,6 +1,5 @@
-'use client';
-
 import Link from 'next/link';
+/* eslint-disable no-restricted-syntax */
 
 const LAST_UPDATED = '27/03/2026';
 

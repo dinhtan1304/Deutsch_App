@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
+import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 import { useWordHighlightStore } from '@/stores/wordHighlightStore';
 
 interface HighlightedTextProps {
@@ -23,11 +24,11 @@ const SKIP_WORDS = new Set(['der','die','das','ein','eine','einer','einem','eine
   'auch','noch','nur','schon','sehr','wie','was','wer','wo','wenn','dann','als']);
 
 const LEVEL_COLORS: Record<string, { underline: string; bg: string; dot: string }> = {
-  A1: { underline: '#22C55E', bg: 'rgba(34, 197, 94, 0.12)', dot: '#22C55E' },
-  A2: { underline: '#3B82F6', bg: 'rgba(59, 130, 246, 0.12)', dot: '#3B82F6' },
-  B1: { underline: '#8B5CF6', bg: 'rgba(139, 92, 246, 0.12)', dot: '#8B5CF6' },
-  B2: { underline: '#F59E0B', bg: 'rgba(245, 158, 11, 0.12)', dot: '#F59E0B' },
-  C1: { underline: '#EF4444', bg: 'rgba(239, 68, 68, 0.12)', dot: '#EF4444' },
+  A1: { underline: STATUS.success, bg: 'rgba(34, 197, 94, 0.12)', dot: STATUS.success },
+  A2: { underline: ACCENT.srs, bg: 'rgba(59, 130, 246, 0.12)', dot: ACCENT.srs },
+  B1: { underline: ACCENT.vocab, bg: 'rgba(139, 92, 246, 0.12)', dot: ACCENT.vocab },
+  B2: { underline: ACCENT.xp, bg: 'rgba(245, 158, 11, 0.12)', dot: ACCENT.xp },
+  C1: { underline: STATUS.danger, bg: 'rgba(239, 68, 68, 0.12)', dot: STATUS.danger },
 };
 
 /**

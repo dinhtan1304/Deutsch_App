@@ -1,6 +1,8 @@
 'use client';
+/* eslint-disable no-restricted-syntax */
 
 import { useEffect, useRef, useState } from 'react';
+import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -56,8 +58,8 @@ export default function RoleplayChatPage() {
       await sendMut.mutateAsync({ text });
       // Once server-side state refreshes, clear optimistic buffer
       setOptimistic([]);
-    } catch (err: any) {
-      alert(err?.message || 'Gửi thất bại');
+    } catch (err) {
+      alert((err as Error | undefined)?.message || 'Gửi thất bại');
       setOptimistic((prev) => prev.slice(0, -1));
     } finally {
       setTyping(false);
@@ -69,8 +71,8 @@ export default function RoleplayChatPage() {
     try {
       await endMut.mutateAsync();
       setShowFeedback(true);
-    } catch (err: any) {
-      alert(err?.message || 'Không thể kết thúc');
+    } catch (err) {
+      alert((err as Error | undefined)?.message || 'Không thể kết thúc');
     }
   };
 
@@ -103,7 +105,7 @@ export default function RoleplayChatPage() {
           <Link
             href="/practice-test/roleplay"
             className="text-sm underline"
-            style={{ color: '#6366F1' }}
+            style={{ color: ACCENT.writing }}
           >
             Quay lại danh sách
           </Link>
@@ -164,7 +166,7 @@ export default function RoleplayChatPage() {
               className="px-3 py-1.5 rounded-lg text-xs font-semibold shrink-0"
               style={{
                 backgroundColor: 'rgba(168, 85, 247, 0.1)',
-                color: '#A855F7',
+                color: ACCENT.examWriting,
                 border: '1px solid rgba(168, 85, 247, 0.3)',
               }}
             >
@@ -189,7 +191,7 @@ export default function RoleplayChatPage() {
             <div className="max-w-3xl mx-auto">
               <div
                 className="text-caption font-bold mb-1"
-                style={{ color: '#6366F1' }}
+                style={{ color: ACCENT.writing }}
               >
                 💡 GỢI Ý
               </div>

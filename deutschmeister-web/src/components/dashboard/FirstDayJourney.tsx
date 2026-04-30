@@ -1,8 +1,10 @@
 ﻿'use client';
+/* eslint-disable no-restricted-syntax -- custom UI gradients */
 
 import Link from 'next/link';
 import { useFullDashboard } from '@/hooks/useDashboard';
 import { useAuthStore } from '@/stores/authStore';
+import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 
 interface JourneyStep {
   title: string;
@@ -15,19 +17,19 @@ const STEPS: JourneyStep[] = [
   {
     title: 'Khám phá chủ đề & học 5 từ',
     href: '/topics',
-    color: '#3B82F6',
+    color: ACCENT.srs,
     checkFn: (s) => s.totalWordsLearned >= 5,
   },
   {
     title: 'Chơi 1 trò chơi để ôn tập',
     href: '/games',
-    color: '#8B5CF6',
+    color: ACCENT.vocab,
     checkFn: (s) => s.gamesPlayed >= 1,
   },
   {
     title: 'Học 1 bài ngữ pháp',
     href: '/grammar',
-    color: '#F59E0B',
+    color: ACCENT.xp,
     checkFn: (s) => s.grammarCompleted >= 1,
   },
 ];
@@ -95,7 +97,7 @@ export function FirstDayJourney() {
           className="text-xs font-bold px-2 py-0.5 rounded-md shrink-0"
           style={{
             background: completedCount > 0 ? 'rgba(34,197,94,0.12)' : 'rgba(59,130,246,0.12)',
-            color: completedCount > 0 ? '#22C55E' : '#3B82F6',
+            color: completedCount > 0 ? STATUS.success : ACCENT.srs,
           }}
         >
           {completedCount}/{STEPS.length}

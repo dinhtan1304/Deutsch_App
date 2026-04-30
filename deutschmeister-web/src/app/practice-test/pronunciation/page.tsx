@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
@@ -11,20 +11,22 @@ import {
 import { useCheckQuota } from '@/hooks/useSubscription';
 import { UpgradeModal } from '@/components/subscription/UpgradeModal';
 import type { PronunciationLevel } from '@/lib/api/pronunciation';
+import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import { GridSkeleton } from '@/components/ui';
 
 const LEVELS: (PronunciationLevel | 'all')[] = ['all', 'A1', 'A2', 'B1'];
 
 const LEVEL_COLORS: Record<string, string> = {
-  A1: '#22C55E',
-  A2: '#3B82F6',
-  B1: '#A855F7',
+  A1: STATUS.success,
+  A2: ACCENT.srs,
+  B1: ACCENT.examWriting,
 };
 
 function getScoreColor(score: number) {
-  if (score >= 80) return '#22C55E';
-  if (score >= 60) return '#F59E0B';
-  if (score >= 40) return '#F97316';
-  return '#EF4444';
+  if (score >= 80) return STATUS.success;
+  if (score >= 60) return STATUS.warning;
+  if (score >= 40) return ACCENT.games;
+  return STATUS.danger;
 }
 
 function formatDate(dateStr: string) {
@@ -49,7 +51,6 @@ export default function PronunciationPage() {
   const { data: stats } = usePronunciationStats();
   const { data: history } = usePronunciationHistory({ page: 1, limit: 5 });
 
-  // Group targets by category
   const groups = useMemo(() => {
     if (!targets) return [];
     const map = new Map<string, typeof targets>();
@@ -58,10 +59,7 @@ export default function PronunciationPage() {
       arr.push(t);
       map.set(t.category, arr);
     }
-    return Array.from(map.entries()).map(([category, items]) => ({
-      category,
-      items,
-    }));
+    return Array.from(map.entries()).map(([category, items]) => ({ category, items }));
   }, [targets]);
 
   const handleSelect = (targetId: string) => {
@@ -73,43 +71,30 @@ export default function PronunciationPage() {
   };
 
   return (
-    <div
-      className="min-h-screen"
-      style={{ backgroundColor: 'var(--theme-bg-primary)' }}
-    >
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--theme-bg-primary)' }}>
       <div className="max-w-5xl mx-auto px-4 py-6">
         {/* Header */}
         <div className="mb-6">
-          <Link
-            href="/practice-test"
-            className="text-xs mb-2 inline-flex items-center gap-1"
-            style={{ color: 'var(--theme-text-muted)' }}
-          >
+          <Link href="/practice-test" className="text-xs mb-2 inline-flex items-center gap-1"
+            style={{ color: 'var(--theme-text-muted)' }}>
             ← Luyện thi
           </Link>
           <div className="flex items-start justify-between gap-4 flex-wrap">
             <div>
-              <h1
-                className="text-2xl md:text-3xl font-bold flex items-center gap-2"
-                style={{ color: 'var(--theme-text-primary)' }}
-              >
+              <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-2"
+                style={{ color: 'var(--theme-text-primary)' }}>
                 <span>🎙️</span> Luyện Phát Âm
                 {quota && (
-                  <span
-                    className="px-2 py-0.5 rounded-md text-caption font-bold"
+                  <span className="px-2 py-0.5 rounded-md text-caption font-bold"
                     style={{
-                      backgroundColor: quotaExhausted ? 'rgba(239,68,68,0.1)' : 'rgba(34,197,94,0.1)',
-                      color: quotaExhausted ? '#EF4444' : '#22C55E',
-                    }}
-                  >
+                      backgroundColor: quotaExhausted ? `${STATUS.danger}1A` : `${STATUS.success}1A`,
+                      color: quotaExhausted ? STATUS.danger : STATUS.success,
+                    }}>
                     {quota.used}/{quota.limit} lượt/tuần
                   </span>
                 )}
               </h1>
-              <p
-                className="text-sm mt-1"
-                style={{ color: 'var(--theme-text-muted)' }}
-              >
+              <p className="text-sm mt-1" style={{ color: 'var(--theme-text-muted)' }}>
                 Ghi âm và nhận đánh giá phát âm từng từ bằng AI
               </p>
             </div>
@@ -117,17 +102,15 @@ export default function PronunciationPage() {
         </div>
 
         {/* Phoneme drills CTA */}
-        <Link
-          href="/practice-test/pronunciation/drills"
+        <Link href="/practice-test/pronunciation/drills"
           className="block mb-6 rounded-2xl border p-4 transition-all hover:-translate-y-0.5 hover:shadow-md"
           style={{
-            borderColor: 'rgba(168,85,247,.25)',
-            background: 'linear-gradient(135deg, rgba(236,72,153,.06), rgba(168,85,247,.06))',
-          }}
-        >
+            borderColor: `${ACCENT.examWriting}40`,
+            background: `linear-gradient(135deg, ${ACCENT.listening}0F, ${ACCENT.examWriting}0F)`,
+          }}>
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white shrink-0"
-              style={{ background: 'linear-gradient(135deg, #EC4899, #A855F7)' }}>
+              style={{ background: GRADIENT.pronunciation }}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="10" />
                 <path d="m8 12 2 2 4-4" />
@@ -142,7 +125,7 @@ export default function PronunciationPage() {
               </p>
             </div>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
-              strokeLinecap="round" strokeLinejoin="round" style={{ color: '#A855F7', flexShrink: 0 }}>
+              strokeLinecap="round" strokeLinejoin="round" style={{ color: ACCENT.examWriting, flexShrink: 0 }}>
               <polyline points="9 18 15 12 9 6" />
             </svg>
           </div>
@@ -151,65 +134,26 @@ export default function PronunciationPage() {
         {/* Stats */}
         {stats && stats.totalAttempts > 0 && (
           <div className="grid grid-cols-3 gap-3 mb-6">
-            <div
-              className="rounded-xl border p-3 text-center"
-              style={{
-                borderColor: 'var(--theme-border)',
-                backgroundColor: 'var(--theme-bg-card)',
-              }}
-            >
-              <div
-                className="text-xl font-bold"
-                style={{ color: '#6366F1' }}
-              >
+            <div className="rounded-xl border p-3 text-center"
+              style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
+              <div className="text-xl font-bold" style={{ color: ACCENT.writing }}>
                 {stats.totalAttempts}
               </div>
-              <div
-                className="text-caption"
-                style={{ color: 'var(--theme-text-muted)' }}
-              >
-                Lần luyện
-              </div>
+              <div className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>Lần luyện</div>
             </div>
-            <div
-              className="rounded-xl border p-3 text-center"
-              style={{
-                borderColor: 'var(--theme-border)',
-                backgroundColor: 'var(--theme-bg-card)',
-              }}
-            >
-              <div
-                className="text-xl font-bold"
-                style={{ color: getScoreColor(stats.averageScore) }}
-              >
+            <div className="rounded-xl border p-3 text-center"
+              style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
+              <div className="text-xl font-bold" style={{ color: getScoreColor(stats.averageScore) }}>
                 {stats.averageScore}
               </div>
-              <div
-                className="text-caption"
-                style={{ color: 'var(--theme-text-muted)' }}
-              >
-                Điểm TB
-              </div>
+              <div className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>Điểm TB</div>
             </div>
-            <div
-              className="rounded-xl border p-3 text-center"
-              style={{
-                borderColor: 'var(--theme-border)',
-                backgroundColor: 'var(--theme-bg-card)',
-              }}
-            >
-              <div
-                className="text-xl font-bold"
-                style={{ color: '#A855F7' }}
-              >
+            <div className="rounded-xl border p-3 text-center"
+              style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
+              <div className="text-xl font-bold" style={{ color: ACCENT.examWriting }}>
                 {Object.keys(stats.byLevel).length}
               </div>
-              <div
-                className="text-caption"
-                style={{ color: 'var(--theme-text-muted)' }}
-              >
-                Level đã luyện
-              </div>
+              <div className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>Level đã luyện</div>
             </div>
           </div>
         )}
@@ -219,19 +163,13 @@ export default function PronunciationPage() {
           {LEVELS.map((lv) => {
             const active = levelFilter === lv;
             return (
-              <button
-                key={lv}
-                type="button"
-                onClick={() => setLevelFilter(lv)}
+              <button key={lv} type="button" onClick={() => setLevelFilter(lv)}
                 className="px-4 py-1.5 rounded-full text-xs font-semibold shrink-0 transition-all"
                 style={{
-                  background: active
-                    ? 'linear-gradient(135deg, #EC4899, #A855F7)'
-                    : 'var(--theme-bg-card)',
+                  background: active ? GRADIENT.pronunciation : 'var(--theme-bg-card)',
                   color: active ? 'white' : 'var(--theme-text-secondary)',
                   border: `1px solid ${active ? 'transparent' : 'var(--theme-border)'}`,
-                }}
-              >
+                }}>
                 {lv === 'all' ? 'Tất cả' : lv}
               </button>
             );
@@ -240,82 +178,41 @@ export default function PronunciationPage() {
 
         {/* Targets grouped by category */}
         {isLoading ? (
-          <div className="space-y-4">
-            {[1, 2, 3].map((i) => (
-              <div
-                key={i}
-                className="h-32 rounded-2xl animate-pulse"
-                style={{ backgroundColor: 'var(--theme-bg-secondary)' }}
-              />
-            ))}
-          </div>
+          <GridSkeleton cols={1} count={3} height="h-32" rounded="rounded-2xl" gap="gap-4" />
         ) : (
           <div className="space-y-6">
             {groups.map((g) => (
               <div key={g.category}>
-                <h3
-                  className="text-sm font-bold mb-2 flex items-center gap-2"
-                  style={{ color: 'var(--theme-text-primary)' }}
-                >
+                <h3 className="text-sm font-bold mb-2 flex items-center gap-2"
+                  style={{ color: 'var(--theme-text-primary)' }}>
                   {g.category}
-                  <span
-                    className="text-caption font-normal px-1.5 py-0.5 rounded-full"
-                    style={{
-                      backgroundColor: 'var(--theme-bg-secondary)',
-                      color: 'var(--theme-text-muted)',
-                    }}
-                  >
+                  <span className="text-caption font-normal px-1.5 py-0.5 rounded-full"
+                    style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }}>
                     {g.items.length}
                   </span>
                 </h3>
                 <div className="space-y-1.5">
                   {g.items.map((t) => {
-                    const lColor = LEVEL_COLORS[t.level] ?? '#6366F1';
+                    const lColor = LEVEL_COLORS[t.level] ?? ACCENT.writing;
                     return (
-                      <button
-                        key={t.id}
-                        type="button"
-                        onClick={() => handleSelect(t.id)}
+                      <button key={t.id} type="button" onClick={() => handleSelect(t.id)}
                         className="w-full text-left rounded-xl border p-3 flex items-center gap-3 transition-all hover:-translate-y-0.5 hover:shadow-sm"
-                        style={{
-                          borderColor: 'var(--theme-border)',
-                          backgroundColor: 'var(--theme-bg-card)',
-                        }}
-                      >
-                        <span
-                          className="px-1.5 py-0.5 rounded text-[9px] font-bold shrink-0"
-                          style={{
-                            backgroundColor: `${lColor}1a`,
-                            color: lColor,
-                          }}
-                        >
+                        style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
+                        <span className="px-1.5 py-0.5 rounded text-[9px] font-bold shrink-0"
+                          style={{ backgroundColor: `${lColor}1a`, color: lColor }}>
                           {t.level}
                         </span>
                         <div className="flex-1 min-w-0">
-                          <div
-                            className="text-sm font-medium truncate"
-                            style={{ color: 'var(--theme-text-primary)' }}
-                          >
+                          <div className="text-sm font-medium truncate" style={{ color: 'var(--theme-text-primary)' }}>
                             {t.text}
                           </div>
-                          <div
-                            className="text-caption truncate"
-                            style={{ color: 'var(--theme-text-muted)' }}
-                          >
+                          <div className="text-caption truncate" style={{ color: 'var(--theme-text-muted)' }}>
                             {t.translationVi}
                           </div>
                         </div>
-                        <svg
-                          width="14"
-                          height="14"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          style={{ color: 'var(--theme-text-muted)', flexShrink: 0 }}
-                        >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                          strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                          style={{ color: 'var(--theme-text-muted)', flexShrink: 0 }}>
                           <polyline points="9 18 15 12 9 6" />
                         </svg>
                       </button>
@@ -330,39 +227,21 @@ export default function PronunciationPage() {
         {/* Recent history */}
         {history && history.data.length > 0 && (
           <div className="mt-10">
-            <h2
-              className="text-lg font-bold mb-3"
-              style={{ color: 'var(--theme-text-primary)' }}
-            >
+            <h2 className="text-lg font-bold mb-3" style={{ color: 'var(--theme-text-primary)' }}>
               Luyện tập gần đây
             </h2>
             <div className="space-y-1.5">
               {history.data.map((h) => (
-                <div
-                  key={h.id}
-                  className="rounded-xl border p-3 flex items-center gap-3"
-                  style={{
-                    borderColor: 'var(--theme-border)',
-                    backgroundColor: 'var(--theme-bg-card)',
-                  }}
-                >
-                  <div
-                    className="text-sm font-bold w-10 text-center"
-                    style={{ color: getScoreColor(h.overallScore) }}
-                  >
+                <div key={h.id} className="rounded-xl border p-3 flex items-center gap-3"
+                  style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
+                  <div className="text-sm font-bold w-10 text-center" style={{ color: getScoreColor(h.overallScore) }}>
                     {h.overallScore}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div
-                      className="text-xs font-medium truncate"
-                      style={{ color: 'var(--theme-text-primary)' }}
-                    >
+                    <div className="text-xs font-medium truncate" style={{ color: 'var(--theme-text-primary)' }}>
                       {h.targetText}
                     </div>
-                    <div
-                      className="text-caption"
-                      style={{ color: 'var(--theme-text-muted)' }}
-                    >
+                    <div className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>
                       {h.level} • {formatDate(h.createdAt)}
                     </div>
                   </div>

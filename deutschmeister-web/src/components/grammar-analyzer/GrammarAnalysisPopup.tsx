@@ -1,19 +1,21 @@
 'use client';
+/* eslint-disable no-restricted-syntax */
 
 import { useEffect, useRef } from 'react';
+import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 import { useGrammarAnalyzerStore } from '@/stores/grammarAnalyzerStore';
 
 /** Màu cho từng vai trò ngữ pháp */
 const ROLE_COLORS: Record<string, string> = {
-  subject: '#3B82F6',
-  verb: '#EF4444',
-  object: '#22C55E',
-  adverb: '#F59E0B',
-  preposition: '#8B5CF6',
-  conjunction: '#EC4899',
-  article: '#06B6D4',
-  adjective: '#F97316',
-  pronoun: '#14B8A6',
+  subject: ACCENT.srs,
+  verb: STATUS.danger,
+  object: STATUS.success,
+  adverb: ACCENT.xp,
+  preposition: ACCENT.vocab,
+  conjunction: ACCENT.listening,
+  article: ACCENT.cyan,
+  adjective: ACCENT.games,
+  pronoun: ACCENT.teal,
   particle: '#6B7280',
   // default
   other: '#94A3B8',
@@ -84,7 +86,7 @@ export function GrammarAnalysisPopup() {
         {/* Error */}
         {error && (
           <div className="gp-body">
-            <p style={{ color: '#EF4444', fontSize: '14px' }}>{error}</p>
+            <p style={{ color: STATUS.danger, fontSize: '14px' }}>{error}</p>
           </div>
         )}
 
@@ -99,7 +101,7 @@ export function GrammarAnalysisPopup() {
               </div>
               {result.hasErrors && result.correctedSentence !== result.sentence && (
                 <div style={{ marginTop: '6px', fontSize: '13px' }}>
-                  <span style={{ color: '#22C55E' }}>✓</span>{' '}
+                  <span style={{ color: STATUS.success }}>✓</span>{' '}
                   <span className="gp-muted">Sửa: </span>
                   <span className="gp-primary" style={{ fontStyle: 'italic' }}>{result.correctedSentence}</span>
                 </div>

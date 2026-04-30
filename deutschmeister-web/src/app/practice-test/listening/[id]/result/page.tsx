@@ -1,15 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useListeningSession } from '@/hooks/useListening';
 import { ListeningQuestion } from '@/lib/api/listening';
 import { PageHeader, FixedActionBar } from '@/components/ui';
+import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 
-function IconChevronLeft({ size = 16 }: { size?: number }) {
-  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}><polyline points="15 18 9 12 15 6" /></svg>;
-}
 function IconVolume2({ size = 14, style }: { size?: number; style?: React.CSSProperties }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" /><path d="M15.54 8.46a5 5 0 0 1 0 7.07" /></svg>;
 }
@@ -22,16 +20,19 @@ function IconXMark({ size = 11 }: { size?: number }) {
 function IconLoader({ size = 24, style }: { size?: number; style?: React.CSSProperties }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="animate-spin" style={{ display: 'block', ...style }}><path d="M21 12a9 9 0 1 1-6.219-8.56" /></svg>;
 }
-
-const ACCENT = '#EC4899';
-const GRADIENT = 'linear-gradient(135deg, #EC4899, #8B5CF6)';
+function IconShare({ size = 16 }: { size?: number }) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" /><polyline points="16 6 12 2 8 6" /><line x1="12" y1="2" x2="12" y2="15" /></svg>;
+}
+function IconSparkles({ size = 16 }: { size?: number }) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" /><path d="M5 3v4" /><path d="M3 5h4" /><path d="M21 17v4" /><path d="M19 19h4" /></svg>;
+}
 
 function getGradeInfo(score: number): { emoji: string; label: string; color: string; bg: string } {
-  if (score >= 90) return { emoji: '🏆', label: 'Xuất sắc!', color: '#22C55E', bg: 'rgba(34,197,94,.15)' };
-  if (score >= 75) return { emoji: '🌟', label: 'Rất tốt! 👏', color: '#22C55E', bg: 'rgba(34,197,94,.12)' };
-  if (score >= 60) return { emoji: '👍', label: 'Khá tốt!', color: '#F59E0B', bg: 'rgba(245,158,11,.12)' };
-  if (score >= 40) return { emoji: '📖', label: 'Cần cố gắng thêm', color: '#F97316', bg: 'rgba(249,115,22,.12)' };
-  return { emoji: '💪', label: 'Hãy ôn luyện thêm', color: '#EF4444', bg: 'rgba(239,68,68,.12)' };
+  if (score >= 90) return { emoji: '🏆', label: 'Xuất sắc!',        color: STATUS.success, bg: `${STATUS.success}26` };
+  if (score >= 75) return { emoji: '🌟', label: 'Rất tốt! 👏',      color: STATUS.success, bg: `${STATUS.success}1F` };
+  if (score >= 60) return { emoji: '👍', label: 'Khá tốt!',         color: STATUS.warning, bg: `${STATUS.warning}1F` };
+  if (score >= 40) return { emoji: '📖', label: 'Cần cố gắng thêm', color: ACCENT.games,   bg: `${ACCENT.games}1F` };
+  return              { emoji: '💪', label: 'Hãy ôn luyện thêm', color: STATUS.danger,  bg: `${STATUS.danger}1F` };
 }
 
 function speakText(text: string) {
@@ -82,10 +83,10 @@ function StatGrid({ correct, total }: { correct: number; total: number }) {
   const wrong = total - correct;
   const score = total > 0 ? Math.round((correct / total) * 100) : 0;
   const stats = [
-    { icon: '✓', label: 'Đúng', value: correct, color: '#22C55E', bg: 'rgba(34,197,94,.1)' },
-    { icon: '✗', label: 'Sai', value: wrong, color: '#EF4444', bg: 'rgba(239,68,68,.1)' },
-    { icon: '★', label: 'Điểm', value: `${score}%`, color: '#F59E0B', bg: 'rgba(245,158,11,.1)' },
-    { icon: '🎧', label: 'Câu hỏi', value: total, color: ACCENT, bg: 'rgba(236,72,153,.1)' },
+    { icon: '✓', label: 'Đúng',     value: correct,    color: STATUS.success,    bg: `${STATUS.success}1A` },
+    { icon: '✗', label: 'Sai',      value: wrong,      color: STATUS.danger,     bg: `${STATUS.danger}1A` },
+    { icon: '★', label: 'Điểm',     value: `${score}%`, color: STATUS.warning,   bg: `${STATUS.warning}1A` },
+    { icon: '🎧', label: 'Câu hỏi', value: total,      color: ACCENT.listening,  bg: `${ACCENT.listening}1A` },
   ];
   return (
     <div className="grid grid-cols-2 gap-2.5 w-full">
@@ -110,12 +111,12 @@ function QuestionItem({ question, userAnswer, index }: {
 
   return (
     <div className="rounded-2xl border overflow-hidden"
-      style={{ borderColor: isCorrect ? 'rgba(34,197,94,.25)' : 'rgba(239,68,68,.25)' }}>
+      style={{ borderColor: isCorrect ? `${STATUS.success}40` : `${STATUS.danger}40` }}>
       <button onClick={() => setOpen(v => !v)}
         className="w-full flex items-center gap-3 px-4 py-3.5 text-left"
-        style={{ backgroundColor: isCorrect ? 'rgba(34,197,94,.04)' : 'rgba(239,68,68,.04)' }}>
+        style={{ backgroundColor: isCorrect ? `${STATUS.success}0A` : `${STATUS.danger}0A` }}>
         <div className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 text-white"
-          style={{ background: isCorrect ? '#22C55E' : '#EF4444' }}>
+          style={{ backgroundColor: isCorrect ? STATUS.success : STATUS.danger }}>
           {isCorrect ? <IconCheck size={11} /> : <IconXMark size={11} />}
         </div>
         <div className="flex-1 min-w-0">
@@ -123,7 +124,7 @@ function QuestionItem({ question, userAnswer, index }: {
             Câu {index + 1}: {question.questionText}
           </p>
           {!isCorrect && (
-            <p className="text-xs mt-0.5" style={{ color: '#EF4444' }}>
+            <p className="text-xs mt-0.5" style={{ color: STATUS.danger }}>
               Đáp án đúng: {question.correctAnswer}
             </p>
           )}
@@ -141,20 +142,20 @@ function QuestionItem({ question, userAnswer, index }: {
           <div className="flex gap-4 pt-3 text-xs flex-wrap">
             <div>
               <span style={{ color: 'var(--theme-text-muted)' }}>Bạn trả lời: </span>
-              <span className="font-bold" style={{ color: isCorrect ? '#22C55E' : '#EF4444' }}>
+              <span className="font-bold" style={{ color: isCorrect ? STATUS.success : STATUS.danger }}>
                 {userAnswer ?? '—'}
               </span>
             </div>
             {!isCorrect && (
               <div>
                 <span style={{ color: 'var(--theme-text-muted)' }}>Đáp án đúng: </span>
-                <span className="font-bold" style={{ color: '#22C55E' }}>{question.correctAnswer}</span>
+                <span className="font-bold" style={{ color: STATUS.success }}>{question.correctAnswer}</span>
               </div>
             )}
           </div>
           {question.explanationVi && (
-            <div className="rounded-xl p-3" style={{ backgroundColor: 'rgba(236,72,153,.07)' }}>
-              <p className="text-caption font-bold mb-1" style={{ color: ACCENT }}>Giải thích:</p>
+            <div className="rounded-xl p-3" style={{ backgroundColor: `${ACCENT.listening}12` }}>
+              <p className="text-caption font-bold mb-1" style={{ color: ACCENT.listening }}>Giải thích:</p>
               <p className="text-body" style={{ color: 'var(--theme-text-primary)' }}>{question.explanationVi}</p>
             </div>
           )}
@@ -167,6 +168,7 @@ function QuestionItem({ question, userAnswer, index }: {
 // ─── Main Page ───
 export default function ListeningResultPage() {
   const { id } = useParams<{ id: string }>();
+  const router = useRouter();
   const { data: session, isLoading } = useListeningSession(id);
   const [showTranscript, setShowTranscript] = useState(false);
   const [filter, setFilter] = useState<'all' | 'wrong' | 'correct'>('all');
@@ -175,7 +177,7 @@ export default function ListeningResultPage() {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="flex flex-col items-center gap-3">
-          <IconLoader size={32} style={{ color: ACCENT }} />
+          <IconLoader size={32} style={{ color: ACCENT.listening }} />
           <p style={{ color: 'var(--theme-text-muted)' }}>Đang tải kết quả...</p>
         </div>
       </div>
@@ -186,7 +188,7 @@ export default function ListeningResultPage() {
     return (
       <div className="py-10 text-center">
         <p className="mb-4" style={{ color: 'var(--theme-text-muted)' }}>Không tìm thấy kết quả.</p>
-        <Link href="/practice-test/listening" className="text-sm font-semibold" style={{ color: ACCENT }}>
+        <Link href="/practice-test/listening" className="text-sm font-semibold" style={{ color: ACCENT.listening }}>
           Quay lại danh sách
         </Link>
       </div>
@@ -220,13 +222,12 @@ export default function ListeningResultPage() {
         accent="listening"
         right={
           <span className="px-3 py-1 rounded-xl text-xs font-bold"
-            style={{ backgroundColor: 'rgba(236,72,153,.1)', color: ACCENT }}>
+            style={{ backgroundColor: `${ACCENT.listening}1A`, color: ACCENT.listening }}>
             {session.cefrLevel}
           </span>
         }
       />
 
-      {/* Hero Result Card */}
       <div className="rounded-2xl border mb-5 overflow-hidden"
         style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
         <div className="px-5 pt-4 pb-3 border-b text-center" style={{ borderColor: 'var(--theme-border)' }}>
@@ -248,14 +249,13 @@ export default function ListeningResultPage() {
         </div>
       </div>
 
-      {/* Transcript */}
       <div className="rounded-2xl border mb-5 overflow-hidden"
         style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
         <button onClick={() => setShowTranscript(v => !v)}
           className="w-full flex items-center justify-between p-4 text-left"
           style={{ color: 'var(--theme-text-primary)' }}>
           <div className="flex items-center gap-2">
-            <IconVolume2 size={16} style={{ color: ACCENT }} />
+            <IconVolume2 size={16} style={{ color: ACCENT.listening }} />
             <span className="text-sm font-bold">Transcript (Văn bản audio)</span>
           </div>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
@@ -268,8 +268,8 @@ export default function ListeningResultPage() {
           <div className="px-4 pb-4 border-t" style={{ borderColor: 'var(--theme-border)' }}>
             <button onClick={() => speakText(session.transcript)}
               className="flex items-center gap-1.5 text-xs font-semibold mt-3 mb-2"
-              style={{ color: ACCENT }}>
-              <IconVolume2 size={13} style={{ color: ACCENT }} /> Nghe lại
+              style={{ color: ACCENT.listening }}>
+              <IconVolume2 size={13} style={{ color: ACCENT.listening }} /> Nghe lại
             </button>
             <p className="text-body leading-relaxed whitespace-pre-wrap"
               style={{ color: 'var(--theme-text-primary)', fontFamily: 'Georgia, serif' }}>
@@ -279,20 +279,18 @@ export default function ListeningResultPage() {
         )}
       </div>
 
-      {/* Question Review */}
       <div className="space-y-3">
         <h3 className="text-body font-bold uppercase tracking-wider mb-1"
           style={{ color: 'var(--theme-text-muted)' }}>
           Xem lại từng câu
         </h3>
 
-        {/* Filter Tabs */}
         <div className="flex gap-1 p-1 rounded-xl" style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
           {TABS.map(tab => (
             <button key={tab.key} onClick={() => setFilter(tab.key)}
               className="flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all"
               style={filter === tab.key
-                ? { background: GRADIENT, color: 'white', boxShadow: '0 2px 8px rgba(236,72,153,.25)' }
+                ? { background: GRADIENT.listening, color: 'white', boxShadow: `0 2px 8px ${ACCENT.listening}40` }
                 : { color: 'var(--theme-text-muted)' }
               }>
               {tab.label}
@@ -324,28 +322,21 @@ export default function ListeningResultPage() {
         )}
       </div>
 
-      <FixedActionBar columns={3}>
-        <Link href={`/practice-test/listening/${id}`}
-          className="flex flex-col items-center gap-1 py-2 px-3 rounded-xl text-xs font-semibold transition-all hover:opacity-70"
-          style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-secondary)' }}>
-          <span className="text-base">🔄</span>
-          Nghe lại
-        </Link>
-        <Link href="/practice-test/listening/new"
-          className="flex flex-col items-center gap-1 py-2 px-3 rounded-xl text-xs font-bold text-white transition-all hover:-translate-y-0.5"
-          style={{ background: GRADIENT }}>
-          <span className="text-base">🎧</span>
-          Bài mới
-        </Link>
+      <FixedActionBar columns={2}>
         <button
-          className="flex flex-col items-center gap-1 py-2 px-3 rounded-xl text-xs font-semibold transition-all hover:opacity-70"
-          style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-secondary)' }}
+          className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl font-bold text-sm border-2 transition-all hover:bg-black/5"
+          style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)', backgroundColor: 'var(--theme-bg-card)' }}
           onClick={() => {
             const score = total > 0 ? Math.round((correct / total) * 100) : 0;
             navigator.share?.({ title: 'DeutschMeister', text: `Tôi đạt ${score}% bài nghe tiếng Đức!` }).catch(() => {});
           }}>
-          <span className="text-base">🔗</span>
-          Chia sẻ
+          <IconShare size={16} /> Chia sẻ
+        </button>
+        <button
+          className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl font-bold text-sm text-white transition-all hover:-translate-y-0.5 shadow-lg"
+          style={{ background: GRADIENT.listening, boxShadow: `0 8px 24px ${ACCENT.listening}40` }}
+          onClick={() => router.push('/practice-test/listening/new')}>
+          <IconSparkles size={16} /> Bài mới
         </button>
       </FixedActionBar>
     </div>

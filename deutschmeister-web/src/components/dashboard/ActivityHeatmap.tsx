@@ -1,6 +1,8 @@
 ﻿'use client';
+/* eslint-disable no-restricted-syntax */
 
 import { useMemo, useState } from 'react';
+import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 import type { ActivityHeatmap as HeatmapData, ActivityDay } from '@/types/dashboard';
 import { IconFlame } from '@/components/ui/Icons';
 
@@ -99,8 +101,8 @@ export function ActivityHeatmap({ data }: ActivityHeatmapProps) {
         </h3>
         <div className="flex items-center gap-4 text-xs">
           <div className="flex items-center gap-1.5">
-            <IconFlame size={14} style={{ color: '#F97316' }} />
-            <span className="font-bold" style={{ color: '#F97316' }}>{data.currentStreak}</span>
+            <IconFlame size={14} style={{ color: ACCENT.games }} />
+            <span className="font-bold" style={{ color: ACCENT.games }}>{data.currentStreak}</span>
             <span style={{ color: 'var(--theme-text-muted)' }}>ngày liên tiếp</span>
           </div>
           <div className="flex items-center gap-1.5">

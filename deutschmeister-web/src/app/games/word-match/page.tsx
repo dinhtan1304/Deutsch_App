@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
@@ -13,9 +13,10 @@ import {
   IconLink, IconRocket, IconChevronLeft, IconRefresh, IconCheck,
 } from '@/components/games/GameUI';
 import { Button } from '@/components/ui';
+import { ACCENT, STATUS } from '@/lib/tokens';
 
 const PAIRS = 6;
-const AC: Record<string, string> = { masculine: '#3B82F6', feminine: '#EC4899', neuter: '#22C55E' };
+const AC: Record<string, string> = { masculine: ACCENT.srs, feminine: ACCENT.listening, neuter: STATUS.success };
 
 type Phase = 'setup' | 'playing' | 'result';
 
@@ -41,6 +42,7 @@ export default function WordMatchPage() {
   const session = useGameSession('matching');
 
   const [phase, setPhase] = useState<Phase>('setup');
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [leftItems, setLeftItems] = useState<MatchItem[]>([]);
   const [rightItems, setRightItems] = useState<MatchItem[]>([]);
   const [matchedIds, setMatchedIds] = useState<Set<string>>(new Set());
@@ -84,9 +86,10 @@ export default function WordMatchPage() {
 
   const startGame = async () => {
     playClick();
+    setLoadError(null);
     const result = await refetch();
     const fetched = result.data?.slice(0, PAIRS);
-    if (!fetched?.length) { alert('Không có từ vựng!'); return; }
+    if (!fetched?.length) { setLoadError('Không có từ vựng! Vui lòng thêm từ hoặc seed database.'); return; }
 
     setLeftItems(shuffle(fetched.map(w => ({ id: w.id, word: w }))));
     setRightItems(shuffle(fetched.map(w => ({ id: w.id, word: w }))));
@@ -182,9 +185,9 @@ export default function WordMatchPage() {
   // ─── Setup Screen ───
   if (phase === 'setup') {
     return (
-      <GameSetupCard icon={({ size }) => <span style={{ color: 'white' }}><IconLink size={size} /></span>} iconColor="#06B6D4" title="Word Match">
+      <GameSetupCard icon={({ size }) => <span style={{ color: 'white' }}><IconLink size={size} /></span>} iconColor={ACCENT.cyan} title="Word Match" loadError={loadError}>
         <p className="text-sm mb-1" style={{ color: 'var(--theme-text-secondary)' }}>
-          Ghép <span className="font-bold" style={{ color: '#06B6D4' }}>{PAIRS} cặp</span> từ với nghĩa tương ứng
+          Ghép <span className="font-bold" style={{ color: ACCENT.cyan }}>{PAIRS} cặp</span> từ với nghĩa tương ứng
         </p>
         <p className="text-xs mb-6" style={{ color: 'var(--theme-text-muted)' }}>
           Click từ bên trái, rồi click nghĩa tương ứng bên phải
@@ -192,11 +195,11 @@ export default function WordMatchPage() {
 
         <GameInfoBox>
           <div className="flex items-center gap-2">
-            <span style={{ color: '#06B6D4' }}><IconLink size={14} /></span>
+            <span style={{ color: ACCENT.cyan }}><IconLink size={14} /></span>
             <span>10 điểm/cặp đúng · Combo tối đa x4</span>
           </div>
           <div className="flex items-center gap-2">
-            <IconCheck size={14} style={{ color: '#22C55E' }} />
+            <IconCheck size={14} style={{ color: STATUS.success }} />
             <span>Bonus tốc độ: +50 điểm nếu xong trong 60 giây</span>
           </div>
         </GameInfoBox>
@@ -221,14 +224,14 @@ export default function WordMatchPage() {
       <>
         <GameResultCard accuracy={accuracy} title="Kết quả">
           <div className="my-5">
-            <div className="text-5xl font-extrabold" style={{ color: '#06B6D4' }}>{score}</div>
+            <div className="text-5xl font-extrabold" style={{ color: ACCENT.cyan }}>{score}</div>
             <p className="text-body mt-1" style={{ color: 'var(--theme-text-muted)' }}>điểm</p>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-6">
-            <StatCard label="Đúng" value={correctCount} color="#22C55E" />
+            <StatCard label="Đúng" value={correctCount} color={STATUS.success} />
             <StatCard label="Cặp" value={PAIRS} />
-            <StatCard label="Chính xác" value={`${accuracy}%`} color="#3B82F6" />
-            <StatCard label="Best Combo" value={`x${bestCombo}`} color="#F59E0B" />
+            <StatCard label="Chính xác" value={`${accuracy}%`} color={ACCENT.srs} />
+            <StatCard label="Best Combo" value={`x${bestCombo}`} color={ACCENT.xp} />
           </div>
           <div className="text-body mb-4" style={{ color: 'var(--theme-text-muted)' }}>
             Thời gian: {formatTime(elapsedSec)}
@@ -248,9 +251,9 @@ export default function WordMatchPage() {
       <GamePlayHeader title="Word Match" streak={combo} timer={formatTime(elapsedSec)}
         onExit={() => { playClick(); router.push('/games'); }} />
       <GameStatsBar stats={[
-        { label: 'Điểm',     value: score,                       color: '#06B6D4' },
-        { label: 'Cặp',      value: `${matchedIds.size}/${PAIRS}`, color: '#22C55E', dot: true },
-        { label: 'Sai',      value: wrongRef.current,            color: '#EF4444', dot: true },
+        { label: 'Điểm',     value: score,                       color: ACCENT.cyan },
+        { label: 'Cặp',      value: `${matchedIds.size}/${PAIRS}`, color: STATUS.success, dot: true },
+        { label: 'Sai',      value: wrongRef.current,            color: STATUS.danger, dot: true },
         { label: 'Thời gian', value: formatTime(elapsedSec),     color: 'var(--theme-text-primary)' },
       ]} />
 
@@ -262,29 +265,29 @@ export default function WordMatchPage() {
             const isMatched = matchedIds.has(item.id);
             const isSelected = selectedLeft === item.id;
             const isWrongLeft = wrongFlash?.left === item.id;
-            const artColor = AC[item.word.gender] || '#3B82F6';
+            const artColor = AC[item.word.gender] || ACCENT.srs;
             return (
               <button key={item.id}
                 onClick={() => handleLeftClick(item.id)}
                 disabled={isMatched}
                 className="rounded-xl border px-3 py-3 text-left transition-all duration-200 text-sm font-semibold"
                 style={{
-                  borderColor: isMatched ? '#22C55E'
-                    : isWrongLeft ? '#EF4444'
-                    : isSelected ? '#06B6D4'
+                  borderColor: isMatched ? STATUS.success
+                    : isWrongLeft ? STATUS.danger
+                    : isSelected ? ACCENT.cyan
                     : 'var(--theme-border)',
                   backgroundColor: isMatched ? 'rgba(34,197,94,.08)'
                     : isWrongLeft ? 'rgba(239,68,68,.08)'
                     : isSelected ? 'rgba(6,182,212,.1)'
                     : 'var(--theme-bg-card)',
-                  color: isMatched ? '#22C55E'
-                    : isSelected ? '#06B6D4'
+                  color: isMatched ? STATUS.success
+                    : isSelected ? ACCENT.cyan
                     : 'var(--theme-text-primary)',
                   cursor: isMatched ? 'default' : 'pointer',
                   opacity: isMatched ? 0.6 : 1,
                 }}>
-                <span style={{ color: isMatched ? '#22C55E' : artColor }}>
-                  {GenderInfo[item.word.gender].article}
+                <span style={{ color: isMatched ? STATUS.success : artColor }}>
+                  {item.word.gender && GenderInfo[item.word.gender] ? GenderInfo[item.word.gender].article : ''}
                 </span>{' '}
                 {item.word.word}
               </button>
@@ -304,15 +307,15 @@ export default function WordMatchPage() {
                 disabled={isMatched || !selectedLeft}
                 className="rounded-xl border px-3 py-3 text-left transition-all duration-200 text-body"
                 style={{
-                  borderColor: isMatched ? '#22C55E'
-                    : isWrongRight ? '#EF4444'
-                    : selectedLeft ? '#06B6D4'
+                  borderColor: isMatched ? STATUS.success
+                    : isWrongRight ? STATUS.danger
+                    : selectedLeft ? ACCENT.cyan
                     : 'var(--theme-border)',
                   backgroundColor: isMatched ? 'rgba(34,197,94,.08)'
                     : isWrongRight ? 'rgba(239,68,68,.08)'
                     : selectedLeft ? 'rgba(6,182,212,.04)'
                     : 'var(--theme-bg-card)',
-                  color: isMatched ? '#22C55E' : 'var(--theme-text-secondary)',
+                  color: isMatched ? STATUS.success : 'var(--theme-text-secondary)',
                   cursor: isMatched || !selectedLeft ? 'default' : 'pointer',
                   opacity: isMatched ? 0.6 : 1,
                 }}>
@@ -330,7 +333,7 @@ export default function WordMatchPage() {
         </p>
       )}
       {selectedLeft && (
-        <p className="text-center text-xs mt-4 font-semibold" style={{ color: '#06B6D4' }}>
+        <p className="text-center text-xs mt-4 font-semibold" style={{ color: ACCENT.cyan }}>
           Bây giờ chọn nghĩa tương ứng bên phải →
         </p>
       )}

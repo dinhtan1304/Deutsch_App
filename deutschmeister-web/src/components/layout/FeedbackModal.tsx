@@ -1,9 +1,12 @@
 ﻿'use client';
+/* eslint-disable no-restricted-syntax */
 
 import { useState, useRef, useCallback } from 'react';
+import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 import { useMutation } from '@tanstack/react-query';
 import { feedbackApi, FeedbackType } from '@/lib/api/feedback';
 import { IconX, IconBug, IconLightbulb, IconMessageCircle, IconCheck, IconLoader } from '@/components/ui/Icons';
+import { useModalA11y } from '@/hooks/useModalA11y';
 
 interface FeedbackModalProps {
   onClose: () => void;
@@ -13,9 +16,9 @@ const MAX_IMAGES = 3;
 const MAX_SIZE_MB = 2;
 
 const TYPES: { value: FeedbackType; label: string; icon: React.ComponentType<{ size?: number; className?: string }>; color: string; bg: string }[] = [
-  { value: 'bug',        label: 'Báo cáo lỗi',  icon: IconBug,           color: '#EF4444', bg: 'rgba(239,68,68,.12)'  },
-  { value: 'suggestion', label: 'Góp ý / Đề xuất', icon: IconLightbulb,  color: '#F59E0B', bg: 'rgba(245,158,11,.12)' },
-  { value: 'other',      label: 'Khác',          icon: IconMessageCircle, color: '#6366F1', bg: 'rgba(99,102,241,.12)' },
+  { value: 'bug',        label: 'Báo cáo lỗi',  icon: IconBug,           color: STATUS.danger, bg: 'rgba(239,68,68,.12)'  },
+  { value: 'suggestion', label: 'Góp ý / Đề xuất', icon: IconLightbulb,  color: ACCENT.xp, bg: 'rgba(245,158,11,.12)' },
+  { value: 'other',      label: 'Khác',          icon: IconMessageCircle, color: ACCENT.writing, bg: 'rgba(99,102,241,.12)' },
 ];
 
 /** Compress image to JPEG, max 1200px wide, quality 0.7 → base64 data URI */
@@ -53,6 +56,7 @@ function IconCamera({ size = 16 }: { size?: number }) {
 }
 
 export function FeedbackModal({ onClose }: FeedbackModalProps) {
+  const dialogRef = useModalA11y(true, onClose);
   const [type, setType] = useState<FeedbackType>('bug');
   const [content, setContent] = useState('');
   const [images, setImages] = useState<string[]>([]);
@@ -114,17 +118,22 @@ export function FeedbackModal({ onClose }: FeedbackModalProps) {
 
       {/* Modal */}
       <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="feedback-modal-title"
         className="fixed z-50 bottom-6 right-6 w-[360px] rounded-2xl shadow-2xl border overflow-hidden"
         style={{ backgroundColor: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)', maxHeight: 'calc(100vh - 48px)', display: 'flex', flexDirection: 'column' }}
       >
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b shrink-0" style={{ borderColor: 'var(--theme-border)' }}>
           <div>
-            <p className="font-bold text-[15px]" style={{ color: 'var(--theme-text-primary)' }}>Phản hồi</p>
+            <p id="feedback-modal-title" className="font-bold text-[15px]" style={{ color: 'var(--theme-text-primary)' }}>Phản hồi</p>
             <p className="text-caption mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>Giúp chúng tôi cải thiện DeutschMeister</p>
           </div>
           <button
             onClick={onClose}
+            aria-label="Đóng"
             className="w-7 h-7 rounded-lg flex items-center justify-center transition-colors"
             style={{ color: 'var(--theme-text-muted)' }}
             onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'var(--theme-bg-secondary)')}
@@ -200,7 +209,7 @@ export function FeedbackModal({ onClose }: FeedbackModalProps) {
                 '--tw-ring-color': selected.color,
               } as React.CSSProperties}
             />
-            <p className="text-caption mt-1 text-right" style={{ color: content.trim().length < 10 ? '#EF4444' : 'var(--theme-text-muted)' }}>
+            <p className="text-caption mt-1 text-right" style={{ color: content.trim().length < 10 ? STATUS.danger : 'var(--theme-text-muted)' }}>
               {content.trim().length}/10 ký tự tối thiểu
             </p>
 
@@ -230,7 +239,7 @@ export function FeedbackModal({ onClose }: FeedbackModalProps) {
                       <button
                         onClick={() => removeImage(i)}
                         className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full flex items-center justify-center text-white text-caption font-bold opacity-0 group-hover:opacity-100 transition-opacity"
-                        style={{ backgroundColor: '#EF4444' }}
+                        style={{ backgroundColor: STATUS.danger }}
                       >
                         <IconX size={10} />
                       </button>
@@ -258,7 +267,7 @@ export function FeedbackModal({ onClose }: FeedbackModalProps) {
               )}
 
               {imgError && (
-                <p className="text-caption mt-1" style={{ color: '#EF4444' }}>{imgError}</p>
+                <p className="text-caption mt-1" style={{ color: STATUS.danger }}>{imgError}</p>
               )}
             </div>
 

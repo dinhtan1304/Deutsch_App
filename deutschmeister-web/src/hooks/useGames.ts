@@ -41,6 +41,7 @@ export function useGameHistory(limit = 20) {
     queryKey: ['games', 'history', limit],
     queryFn: () => gamesApi.getHistory(limit),
     retry: false,
+    staleTime: 60_000,
   });
 }
 
@@ -48,5 +49,6 @@ export function useLeaderboard(gameType?: string, limit = 10) {
   return useQuery({
     queryKey: ['games', 'leaderboard', gameType, limit],
     queryFn: () => gamesApi.getLeaderboard(gameType, limit),
+    staleTime: 5 * 60_000,
   });
 }

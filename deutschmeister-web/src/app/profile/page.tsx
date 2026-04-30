@@ -1,18 +1,25 @@
-﻿'use client';
+'use client';
 
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import { useAuthStore } from '@/stores/authStore';
+import { AuthGate } from '@/components/ui';
+import { GRADIENT, ACCENT, STATUS } from '@/lib/tokens';
 import { useUserStats } from '@/hooks/useUser';
 import { useXp } from '@/hooks/useXp';
 import { useGrammarLessons, useGrammarProgress } from '@/hooks/useGrammar';
 import type { GrammarProgress } from '@/types/grammar';
+import type { ActivityHeatmap as HeatmapData } from '@/types/dashboard';
 import {
-  IconUser, IconGamepad, IconBook, IconLogIn, IconArrowRight,
+  IconUser, IconGamepad, IconBook, IconArrowRight,
   IconGraduationCap, IconBookOpen, IconCheck, IconCheckCircle, IconLock, IconChevronRight,
   IconTarget, IconStar, IconBrain, IconX, IconCheckAll, IconMail, IconZap, IconPencil,
+  IconTrophy,
 } from '@/components/ui/Icons';
 import { SkillRadar } from '@/components/profile/SkillRadar';
+import { ActivityHeatmap } from '@/components/dashboard/ActivityHeatmap';
+import { ErrorPatternsWidget } from '@/components/dashboard/ErrorPatternsWidget';
+import { useActivityHeatmap } from '@/hooks/useDashboard';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -24,13 +31,26 @@ function getLessonStatus(progress: GrammarProgress | undefined): LessonStatus {
   return 'needs_review';
 }
 
+const toLocalDateStr = (date: Date): string => date.toISOString().slice(0, 10);
+const getEmptyHeatmap = (): HeatmapData => {
+  const data = [];
+  const today = new Date();
+  for (let i = 365; i >= 0; i--) {
+    const date = new Date(today);
+    date.setDate(date.getDate() - i);
+    data.push({ date: toLocalDateStr(date), count: 0, level: 0 });
+  }
+  return { data, totalActiveDays: 0, currentStreak: 0, longestStreak: 0 };
+};
+
 const LEVELS = ['A1', 'A2', 'B1'] as const;
 type Level = typeof LEVELS[number];
 
 const LEVEL_COLORS: Record<Level, string> = {
-  A1: '#22C55E',
-  A2: '#3B82F6',
-  B1: '#8B5CF6',
+  // eslint-disable-next-line no-restricted-syntax
+  A1: '#10B981',
+  A2: ACCENT.srs,
+  B1: ACCENT.vocab,
 };
 
 // ─── Stat Card ────────────────────────────────────────────────────────────────
@@ -39,22 +59,22 @@ function StatCard({
   label, value, color, icon: Icon,
 }: {
   label: string; value: string | number; color: string;
-  icon: React.FC<{ size?: number; style?: React.CSSProperties }>;
+  icon: React.FC<{ size?: number; style?: React.CSSProperties; className?: string }>;
 }) {
   return (
-    <div className="rounded-xl border p-4 text-center relative overflow-hidden transition-all duration-200 hover:-translate-y-0.5"
+    <div className="group rounded-[1.5rem] border p-5 text-center relative overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
       style={{
         borderColor: 'var(--theme-border)',
-        background: `linear-gradient(135deg, ${color}12, ${color}06)`,
+        backgroundColor: 'var(--theme-bg-card)',
+        backgroundImage: `radial-gradient(circle at 50% 0%, ${color}15, transparent 70%)`
       }}>
-      <div className="absolute -top-5 -right-5 w-14 h-14 rounded-full"
-        style={{ backgroundColor: color, opacity: 0.06 }} />
-      <div className="w-9 h-9 rounded-xl mx-auto flex items-center justify-center mb-2.5"
-        style={{ background: `linear-gradient(135deg, ${color}, ${color}cc)` }}>
-        <Icon size={17} style={{ color: 'white' }} />
+      <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+      <div className="w-11 h-11 rounded-2xl mx-auto flex items-center justify-center mb-4 transition-transform group-hover:scale-110"
+        style={{ background: `linear-gradient(135deg, ${color}, ${color}cc)`, boxShadow: `0 8px 20px ${color}33` }}>
+        <Icon size={20} className="text-white" />
       </div>
-      <div className="text-h2 font-extrabold leading-none mb-1" style={{ color }}>{value}</div>
-      <div className="text-caption font-medium" style={{ color: 'var(--theme-text-muted)' }}>{label}</div>
+      <div className="text-2xl font-black tracking-tight mb-1" style={{ color: 'var(--theme-text-primary)' }}>{value}</div>
+      <div className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40" style={{ color: 'var(--theme-text-muted)' }}>{label}</div>
     </div>
   );
 }
@@ -63,6 +83,7 @@ function StatCard({
 
 function LearningRoadmap() {
   const [selectedLevel, setSelectedLevel] = useState<Level>('A1');
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const { data: allLessons = [], isLoading: loadingLessons } = useGrammarLessons();
   const { data: progressData = [] } = useGrammarProgress();
@@ -98,77 +119,72 @@ function LearningRoadmap() {
   const notPassed = selectedLessons.filter(l => l.status !== 'passed');
 
   return (
-    <div className="rounded-2xl border mb-6 overflow-hidden"
+    <div className="rounded-[2rem] border mb-8 overflow-hidden shadow-2xl backdrop-blur-md"
       style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
 
       {/* Header */}
-      <div className="px-5 py-4 flex items-center justify-between"
-        style={{ borderBottom: '1px solid var(--theme-border)' }}>
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center"
-            style={{ background: 'linear-gradient(135deg, #3B82F6, #8B5CF6)' }}>
-            <IconGraduationCap size={16} style={{ color: 'white' }} />
+      <div className="px-6 py-5 flex items-center justify-between"
+        // eslint-disable-next-line no-restricted-syntax
+        style={{ borderBottom: '1px solid var(--theme-border)', background: 'linear-gradient(to right, var(--theme-bg-secondary) 0%, transparent 100%)' }}>
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-2xl flex items-center justify-center shadow-lg"
+            style={{ background: GRADIENT.writing }}>
+            <IconGraduationCap size={20} className="text-white" />
           </div>
           <div>
-            <h2 className="text-[15px] font-bold" style={{ color: 'var(--theme-text-primary)' }}>Lộ trình học tập</h2>
-            <p className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>Theo dõi tiến độ ngữ pháp từng trình độ</p>
+            <h2 className="text-base font-black tracking-tight" style={{ color: 'var(--theme-text-primary)' }}>Lộ trình học tập</h2>
+            <p className="text-[11px] opacity-50 font-medium" style={{ color: 'var(--theme-text-muted)' }}>Tiến độ ngữ pháp theo tiêu chuẩn CEFR</p>
           </div>
         </div>
-        <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-caption font-bold"
-          style={{ background: `${color}18`, color }}>
+        <span className="flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest"
+          style={{ background: `${color}15`, color }}>
           <IconGraduationCap size={12} />
-          Trình độ: {selectedLevel}
+          Level: {selectedLevel}
         </span>
       </div>
 
       {/* Level track */}
-      <div className="px-5 py-5" style={{ borderBottom: '1px solid var(--theme-border)' }}>
-        <div className="flex items-start justify-between gap-2 relative">
-          <div className="absolute top-5 h-px mx-10"
-            style={{ left: 0, right: 0, backgroundColor: 'var(--theme-border)', zIndex: 0 }} />
+      <div className="px-6 py-8" style={{ borderBottom: '1px solid var(--theme-border)' }}>
+        <div className="flex items-start justify-between gap-4 relative">
+          <div className="absolute top-6 h-[2px] mx-12"
+            style={{ left: 0, right: 0, backgroundColor: 'var(--theme-border)', opacity: 0.3, zIndex: 0 }} />
 
           {LEVELS.map(level => {
             const stat = levelStats.find(s => s.level === level)!;
             const isSel = level === selectedLevel;
             const lColor = LEVEL_COLORS[level];
             return (
-              <button key={level} onClick={() => setSelectedLevel(level)}
-                className="flex-1 flex flex-col items-center gap-2 relative z-10 outline-none">
-                <div className="w-10 h-10 rounded-full flex items-center justify-center text-body font-extrabold transition-all duration-200"
+              <button key={level} onClick={() => { setSelectedLevel(level); setIsExpanded(false); }}
+                className="flex-1 flex flex-col items-center gap-3 relative z-10 outline-none group">
+                <div className="w-12 h-12 rounded-full flex items-center justify-center text-sm font-black transition-all duration-300"
                   style={{
                     background: isSel ? `linear-gradient(135deg, ${lColor}, ${lColor}cc)` : 'var(--theme-bg-secondary)',
                     color: isSel ? 'white' : 'var(--theme-text-muted)',
-                    boxShadow: isSel ? `0 4px 12px ${lColor}40` : undefined,
-                    border: `2px solid ${isSel ? lColor : 'var(--theme-border)'}`,
-                    transform: isSel ? 'scale(1.1)' : undefined,
+                    boxShadow: isSel ? `0 8px 24px ${lColor}55` : undefined,
+                    border: `3px solid ${isSel ? 'white' : 'var(--theme-border)'}`,
+                    transform: isSel ? 'scale(1.2)' : 'scale(1)',
                   }}>
                   {level}
                 </div>
-                <div className="text-xs font-bold" style={{ color: stat.pct > 0 ? lColor : 'var(--theme-text-muted)' }}>
+                <div className="text-[11px] font-black" style={{ color: stat.pct > 0 ? lColor : 'var(--theme-text-muted)' }}>
                   {loadingLessons ? '—' : `${stat.pct}%`}
                 </div>
-                <div className="w-full max-w-16 h-1.5 rounded-full overflow-hidden"
-                  style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
-                  <div className="h-full rounded-full transition-all duration-700"
+                <div className="w-full max-w-[64px] h-1.5 rounded-full overflow-hidden bg-white/10">
+                  <div className="h-full rounded-full transition-all duration-1000"
                     style={{ width: `${stat.pct}%`, background: `linear-gradient(90deg, ${lColor}, ${lColor}cc)` }} />
-                </div>
-                <div className="text-[10.5px] font-medium"
-                  style={{ color: isSel ? lColor : 'var(--theme-text-muted)' }}>
-                  {stat.passed}/{stat.total} bài
                 </div>
               </button>
             );
           })}
 
           {/* B2 locked */}
-          <div className="flex-1 flex flex-col items-center gap-2 relative z-10 opacity-35">
-            <div className="w-10 h-10 rounded-full flex items-center justify-center"
-              style={{ background: 'var(--theme-bg-secondary)', border: '2px solid var(--theme-border)' }}>
-              <IconLock size={15} style={{ color: 'var(--theme-text-muted)' }} />
+          <div className="flex-1 flex flex-col items-center gap-3 relative z-10 opacity-20 grayscale">
+            <div className="w-12 h-12 rounded-full flex items-center justify-center border-3 border-dashed border-white/20"
+              style={{ background: 'var(--theme-bg-secondary)' }}>
+              <IconLock size={16} className="text-white/40" />
             </div>
-            <div className="text-xs font-bold" style={{ color: 'var(--theme-text-muted)' }}>B2</div>
-            <div className="w-full max-w-16 h-1.5 rounded-full" style={{ backgroundColor: 'var(--theme-bg-secondary)' }} />
-            <div className="text-[10.5px] font-medium" style={{ color: 'var(--theme-text-muted)' }}>Sắp ra mắt</div>
+            <div className="text-[11px] font-black text-white/20">B2</div>
+            <div className="w-full max-w-[64px] h-1.5 rounded-full bg-white/5" />
           </div>
         </div>
       </div>
@@ -200,70 +216,12 @@ function LearningRoadmap() {
           </div>
         )}
 
-        {/* Lesson list */}
-        {loadingLessons ? (
-          <div className="space-y-2 mb-4">
-            {[...Array(5)].map((_, i) => (
-              <div key={i} className="h-10 rounded-xl animate-pulse"
-                style={{ backgroundColor: 'var(--theme-bg-secondary)' }} />
-            ))}
-          </div>
-        ) : (
-          <div className="space-y-1 mb-4">
-            {selectedLessons.map((lesson, i) => {
-              const st = lesson.status;
-              const dotColor = st === 'passed' ? '#22C55E' : st === 'needs_review' ? '#F59E0B' : 'var(--theme-border)';
-              const statusLabel = st === 'passed'
-                ? `Đạt${lesson.progress?.score ? ` ${Math.round(lesson.progress.score)}%` : ''}`
-                : st === 'needs_review'
-                  ? `Cần bổ sung${lesson.progress?.score ? ` ${Math.round(lesson.progress.score)}%` : ''}`
-                  : 'chưa thi';
-              const statusColor = st === 'passed' ? '#22C55E' : st === 'needs_review' ? '#F59E0B' : 'var(--theme-text-muted)';
-
-              return (
-                <Link key={lesson.id} href={`/grammar/${lesson.slug}`}
-                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-150"
-                  style={{ backgroundColor: 'var(--theme-bg-secondary)' }}
-                  onMouseEnter={e => (e.currentTarget.style.backgroundColor = `${color}10`)}
-                  onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'var(--theme-bg-secondary)')}>
-
-                  {/* Status circle */}
-                  <div className="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all"
-                    style={{
-                      borderColor: dotColor,
-                      backgroundColor: st === 'passed' ? `${dotColor}22` : 'transparent',
-                    }}>
-                    {st === 'passed' && <IconCheck size={10} style={{ color: dotColor }} />}
-                  </div>
-
-                  {/* Number */}
-                  <span className="shrink-0 w-5 h-5 rounded-md flex items-center justify-center text-caption font-bold"
-                    style={{ backgroundColor: `${color}15`, color }}>
-                    {i + 1}
-                  </span>
-
-                  <span className="flex-1 text-body font-medium truncate"
-                    style={{ color: 'var(--theme-text-primary)' }}>
-                    {lesson.titleVi}
-                  </span>
-
-                  <span className="text-caption font-semibold shrink-0" style={{ color: statusColor }}>
-                    {statusLabel}
-                  </span>
-
-                  <IconChevronRight size={13} style={{ color: 'var(--theme-text-muted)', opacity: 0.4 }} />
-                </Link>
-              );
-            })}
-          </div>
-        )}
-
         {/* Summary row */}
         {!loadingLessons && selStats && (
           <div className="flex items-center gap-3 mb-4 px-1 flex-wrap">
             {[
-              { dot: '#22C55E', label: 'Đạt', value: selStats.passed },
-              { dot: '#F59E0B', label: 'Cần bổ sung', value: selStats.needsReview },
+              { dot: STATUS.success, label: 'Đạt', value: selStats.passed },
+              { dot: ACCENT.xp, label: 'Cần bổ sung', value: selStats.needsReview },
               { dot: 'var(--theme-border)', label: 'Chưa thi', value: selStats.total - selStats.passed - selStats.needsReview, border: true },
             ].map(s => (
               <span key={s.label} className="flex items-center gap-1.5 text-xs">
@@ -277,45 +235,123 @@ function LearningRoadmap() {
           </div>
         )}
 
-        {/* Not-passed chips */}
-        {!loadingLessons && notPassed.length > 0 && (
-          <div className="rounded-xl p-3.5 mb-4"
-            style={{ background: 'rgba(245,158,11,.06)', border: '1px solid rgba(245,158,11,.18)' }}>
-            <p className="text-[11.5px] font-semibold mb-2 flex items-center gap-1.5" style={{ color: '#F59E0B' }}>
-              <span className="w-4 h-4 rounded-full flex items-center justify-center text-white text-caption"
-                style={{ background: '#F59E0B' }}>!</span>
-              Chưa đạt ({notPassed.length} bài)
-            </p>
-            <div className="flex flex-wrap gap-1.5">
-              {notPassed.map(l => (
-                <Link key={l.id} href={`/grammar/${l.slug}`}
-                  className="px-2.5 py-1 rounded-lg text-caption font-medium hover:opacity-80 transition-opacity"
-                  style={{
-                    backgroundColor: l.status === 'needs_review' ? 'rgba(245,158,11,.15)' : 'rgba(107,114,128,.1)',
-                    color: l.status === 'needs_review' ? '#F59E0B' : 'var(--theme-text-muted)',
-                  }}>
-                  {l.titleVi}
-                </Link>
-              ))}
+        {/* Expand / Collapse toggle */}
+        {!loadingLessons && selectedLessons.length > 0 && (
+          <button
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="w-full py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all hover:opacity-80"
+            style={{ color: color, backgroundColor: `${color}10`, border: `1px solid ${color}20` }}
+          >
+            {isExpanded ? 'Thu gọn danh sách' : 'Xem chi tiết bài học'}
+            <IconChevronRight
+              size={14}
+              style={{ transform: isExpanded ? 'rotate(-90deg)' : 'rotate(90deg)', transition: 'transform 200ms' }}
+            />
+          </button>
+        )}
+
+        {/* Collapsible Content */}
+        {isExpanded && (
+          <div className="mt-4 border-t pt-4" style={{ borderColor: 'var(--theme-border)' }}>
+            {/* Lesson list */}
+            {loadingLessons ? (
+              <div className="space-y-2 mb-4">
+                {[...Array(5)].map((_, i) => (
+                  <div key={i} className="h-10 rounded-xl animate-pulse"
+                    style={{ backgroundColor: 'var(--theme-bg-secondary)' }} />
+                ))}
+              </div>
+            ) : (
+              <div className="space-y-1 mb-4">
+                {selectedLessons.map((lesson, i) => {
+                  const st = lesson.status;
+                  const dotColor = st === 'passed' ? STATUS.success : st === 'needs_review' ? ACCENT.xp : 'var(--theme-border)';
+                  const statusLabel = st === 'passed'
+                    ? `Đạt${lesson.progress?.score ? ` ${Math.round(lesson.progress.score)}%` : ''}`
+                    : st === 'needs_review'
+                      ? `Cần bổ sung${lesson.progress?.score ? ` ${Math.round(lesson.progress.score)}%` : ''}`
+                      : 'chưa thi';
+                  const statusColor = st === 'passed' ? STATUS.success : st === 'needs_review' ? ACCENT.xp : 'var(--theme-text-muted)';
+
+                  return (
+                    <Link key={lesson.id} href={`/grammar/${lesson.slug}`}
+                      className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-150"
+                      style={{ backgroundColor: 'var(--theme-bg-secondary)' }}
+                      onMouseEnter={e => (e.currentTarget.style.backgroundColor = `${color}10`)}
+                      onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'var(--theme-bg-secondary)')}>
+
+                      {/* Status circle */}
+                      <div className="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all"
+                        style={{
+                          borderColor: dotColor,
+                          backgroundColor: st === 'passed' ? `${dotColor}22` : 'transparent',
+                        }}>
+                        {st === 'passed' && <IconCheck size={10} style={{ color: dotColor }} />}
+                      </div>
+
+                      {/* Number */}
+                      <span className="shrink-0 w-5 h-5 rounded-md flex items-center justify-center text-caption font-bold"
+                        style={{ backgroundColor: `${color}15`, color }}>
+                        {i + 1}
+                      </span>
+
+                      <span className="flex-1 text-body font-medium truncate"
+                        style={{ color: 'var(--theme-text-primary)' }}>
+                        {lesson.titleVi}
+                      </span>
+
+                      <span className="text-caption font-semibold shrink-0" style={{ color: statusColor }}>
+                        {statusLabel}
+                      </span>
+
+                      <IconChevronRight size={13} style={{ color: 'var(--theme-text-muted)', opacity: 0.4 }} />
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Not-passed chips */}
+            {!loadingLessons && notPassed.length > 0 && (
+              <div className="rounded-xl p-3.5 mb-4"
+                style={{ background: `${ACCENT.xp}0F`, border: `1px solid ${ACCENT.xp}2E` }}>
+                <p className="text-[11.5px] font-semibold mb-2 flex items-center gap-1.5" style={{ color: ACCENT.xp }}>
+                  <span className="w-4 h-4 rounded-full flex items-center justify-center text-white text-caption"
+                    style={{ background: ACCENT.xp }}>!</span>
+                  Chưa đạt ({notPassed.length} bài)
+                </p>
+                <div className="flex flex-wrap gap-1.5">
+                  {notPassed.map(l => (
+                    <Link key={l.id} href={`/grammar/${l.slug}`}
+                      className="px-2.5 py-1 rounded-lg text-caption font-medium hover:opacity-80 transition-opacity"
+                      style={{
+                        backgroundColor: l.status === 'needs_review' ? `${ACCENT.xp}26` : 'var(--theme-bg-secondary)',
+                        color: l.status === 'needs_review' ? ACCENT.xp : 'var(--theme-text-muted)',
+                      }}>
+                      {l.titleVi}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Actions */}
+            <div className="flex gap-2">
+              <Link href="/grammar"
+                className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-body font-semibold text-white transition-all hover:-translate-y-0.5"
+                style={{ background: `linear-gradient(135deg, ${color}, ${color}cc)`, boxShadow: `0 4px 12px ${color}28` }}>
+                <IconBookOpen size={15} />
+                Luyện tập {selectedLevel}
+              </Link>
+              <Link href="/practice-test"
+                className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-body font-semibold transition-all hover:-translate-y-0.5"
+                style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-secondary)', border: '1px solid var(--theme-border)' }}>
+                <IconGraduationCap size={15} />
+                Đề kiểm tra
+              </Link>
             </div>
           </div>
         )}
-
-        {/* Actions */}
-        <div className="flex gap-2">
-          <Link href="/grammar"
-            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-body font-semibold text-white transition-all hover:-translate-y-0.5"
-            style={{ background: `linear-gradient(135deg, ${color}, ${color}cc)`, boxShadow: `0 4px 12px ${color}28` }}>
-            <IconBookOpen size={15} />
-            Luyện tập {selectedLevel}
-          </Link>
-          <Link href="/practice-test"
-            className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-body font-semibold transition-all hover:-translate-y-0.5"
-            style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-secondary)', border: '1px solid var(--theme-border)' }}>
-            <IconGraduationCap size={15} />
-            Đề kiểm tra
-          </Link>
-        </div>
       </div>
     </div>
   );
@@ -327,38 +363,25 @@ export default function ProfilePage() {
   const { user, isAuthenticated, _hasHydrated } = useAuthStore();
   const { data: stats, isLoading } = useUserStats(isAuthenticated);
   const { data: xpInfo } = useXp();
+  const { data: heatmapData } = useActivityHeatmap();
 
   if (!_hasHydrated) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="w-8 h-8 rounded-full border-4 border-t-transparent animate-spin"
-          style={{ borderColor: 'var(--theme-border)', borderTopColor: '#3B82F6' }} />
+          style={{ borderColor: 'var(--theme-border)', borderTopColor: ACCENT.srs }} />
       </div>
     );
   }
 
-  if (!isAuthenticated) {
-    return (
-      <div className="max-w-md mx-auto py-24 text-center">
-        <div className="w-20 h-20 rounded-3xl mx-auto flex items-center justify-center mb-5"
-          style={{ background: 'linear-gradient(135deg, #3B82F6, #6366F1)', boxShadow: '0 8px 24px rgba(59,130,246,.3)' }}>
-          <IconUser size={32} style={{ color: 'white' }} />
-        </div>
-        <h1 className="text-2xl font-bold mb-2" style={{ color: 'var(--theme-text-primary)' }}>
-          Đăng nhập để xem hồ sơ
-        </h1>
-        <p className="text-sm mb-8" style={{ color: 'var(--theme-text-muted)' }}>
-          Theo dõi tiến trình và thống kê học tập của bạn
-        </p>
-        <Link href="/auth/login"
-          className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white transition-all hover:-translate-y-0.5"
-          style={{ background: 'linear-gradient(135deg, #3B82F6, #6366F1)', boxShadow: '0 4px 16px rgba(59,130,246,.35)' }}>
-          <IconLogIn size={16} />
-          Đăng nhập
-        </Link>
-      </div>
-    );
-  }
+  if (!isAuthenticated) return (
+    <AuthGate
+      icon={<IconUser size={28} className="text-white" />}
+      gradient={GRADIENT.action}
+      title="Đăng nhập để xem hồ sơ"
+      description="Theo dõi tiến trình và thống kê học tập của bạn."
+    />
+  );
 
   const total = stats?.totalAnswers || 0;
   const correct = stats?.correctAnswers || 0;
@@ -372,46 +395,51 @@ export default function ProfilePage() {
   const points = correct;
 
   const statCards = [
-    { label: 'Trò chơi', value: stats?.gamesPlayed ?? 0, color: '#3B82F6', icon: IconGamepad },
-    { label: 'Chính xác', value: `${stats?.accuracy ?? 0}%`, color: '#22C55E', icon: IconTarget },
-    { label: 'Yêu thích', value: stats?.favorites ?? 0, color: '#F59E0B', icon: IconStar },
-    { label: 'Đã học', value: stats?.wordsLearned ?? 0, color: '#8B5CF6', icon: IconBrain },
+    { label: 'Trò chơi', value: stats?.gamesPlayed ?? 0, color: ACCENT.srs, icon: IconGamepad },
+    { label: 'Chính xác', value: `${stats?.accuracy ?? 0}%`, color: STATUS.success, icon: IconTarget },
+    { label: 'Yêu thích', value: stats?.favorites ?? 0, color: ACCENT.xp, icon: IconStar },
+    { label: 'Đã học', value: stats?.wordsLearned ?? 0, color: ACCENT.vocab, icon: IconBrain },
   ];
 
   const quickActions = [
-    { href: '/games', label: 'Chơi game', sub: 'Luyện mạo từ', icon: IconGamepad, gradient: 'linear-gradient(135deg, #3B82F6, #6366F1)', shadow: 'rgba(59,130,246,.28)' },
-    { href: '/words', label: 'Từ điển', sub: 'Học từ mới', icon: IconBook, gradient: 'linear-gradient(135deg, #22C55E, #14B8A6)', shadow: 'rgba(34,197,94,.28)' },
-    { href: '/grammar', label: 'Ngữ pháp', sub: 'Luyện bài tập', icon: IconBookOpen, gradient: 'linear-gradient(135deg, #8B5CF6, #6366F1)', shadow: 'rgba(139,92,246,.28)' },
-    { href: '/practice-test', label: 'Luyện thi', sub: 'Đề Goethe/TELC', icon: IconGraduationCap, gradient: 'linear-gradient(135deg, #F59E0B, #EF4444)', shadow: 'rgba(245,158,11,.28)' },
+    { href: '/games', label: 'Chơi game', sub: 'Luyện mạo từ', icon: IconGamepad, gradient: GRADIENT.action, shadow: `${ACCENT.srs}47` },
+    { href: '/words', label: 'Từ điển', sub: 'Học từ mới', icon: IconBook, gradient: GRADIENT.reading, shadow: `${STATUS.success}47` },
+    { href: '/grammar', label: 'Ngữ pháp', sub: 'Luyện bài tập', icon: IconBookOpen, gradient: GRADIENT.history, shadow: `${ACCENT.vocab}47` },
+    { href: '/practice-test', label: 'Luyện thi', sub: 'Đề Goethe/TELC', icon: IconGraduationCap, gradient: GRADIENT.speaking, shadow: `${ACCENT.xp}47` },
   ];
 
   return (
-    <div className="py-6 max-w-3xl mx-auto">
+    <div className="py-10 max-w-4xl mx-auto px-4 min-h-screen" style={{ backgroundColor: 'var(--theme-bg-body)', color: 'var(--theme-text-primary)', backgroundImage: 'radial-gradient(circle at 50% -20%, var(--color-accent-brand)12, transparent 70%)' }}>
 
       {/* ─── Hero Card ─── */}
-      <div className="rounded-2xl border mb-6 overflow-hidden"
+      <div className="rounded-[2.5rem] border mb-8 overflow-hidden shadow-2xl relative"
         style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
-        {/* Banner */}
-        <div className="h-20 relative"
-          style={{ background: 'linear-gradient(135deg, rgba(59,130,246,.22) 0%, rgba(139,92,246,.18) 50%, rgba(34,197,94,.14) 100%)' }}>
-          <div className="absolute top-2 left-10 w-16 h-16 rounded-full opacity-15" style={{ background: '#3B82F6' }} />
-          <div className="absolute bottom-1 right-20 w-10 h-10 rounded-full opacity-10" style={{ background: '#8B5CF6' }} />
-          <div className="absolute top-6 right-6 w-8 h-8 rounded-full opacity-10" style={{ background: '#22C55E' }} />
+        {/* Banner with mesh gradient effect */}
+        <div className="h-40 relative overflow-hidden"
+          // eslint-disable-next-line no-restricted-syntax
+          style={{ background: 'linear-gradient(135deg, #1E1B4B 0%, #312E81 50%, #1E1B4B 100%)' }}>
+          <div className="absolute top-[-50%] left-[-20%] w-[80%] h-[200%] rotate-12 opacity-30"
+               style={{ background: `radial-gradient(ellipse at center, ${ACCENT.writing} 0%, transparent 70%)` }} />
+          <div className="absolute bottom-[-50%] right-[-10%] w-[60%] h-[150%] -rotate-12 opacity-20"
+               style={{ background: `radial-gradient(ellipse at center, ${STATUS.success} 0%, transparent 70%)` }} />
+          <div className="absolute top-[20%] right-[10%] w-32 h-32 blur-[80px]" style={{ backgroundColor: ACCENT.xp, opacity: 0.2 }} />
         </div>
 
         {/* Avatar + info */}
-        <div className="px-6 pb-5">
-          <div className="-mt-12 mb-4 flex items-end justify-between gap-3">
-            {/* Avatar with gradient frame */}
-            <div className="relative shrink-0">
-              <div className="rounded-full p-[3px]"
-                style={{ background: 'linear-gradient(135deg, #3B82F6, #8B5CF6, #22C55E)' }}>
-                <div className="rounded-full p-[3px]" style={{ backgroundColor: 'var(--theme-bg-card)' }}>
-                  <div className="rounded-full flex items-center justify-center text-white text-h1 font-extrabold overflow-hidden"
+        <div className="px-8 pb-8 relative">
+          <div className="-mt-16 mb-6 flex flex-col md:flex-row md:items-end justify-between gap-6">
+            {/* Avatar with glowing ring */}
+            <div className="relative shrink-0 group">
+              <div className="rounded-full p-1 transition-all duration-500 group-hover:shadow-[0_0_30px_rgba(99,102,241,0.5)]"
+                // eslint-disable-next-line no-restricted-syntax
+                style={{ background: 'linear-gradient(135deg, #6366F1, #10B981, #F59E0B)' }}>
+                <div className="rounded-full p-1" style={{ backgroundColor: 'var(--theme-bg-card)' }}>
+                  <div className="rounded-full flex items-center justify-center text-white text-4xl font-black overflow-hidden relative"
                     style={{
-                      width: 86, height: 86,
-                      background: user?.avatar ? undefined : 'linear-gradient(135deg, #3B82F6, #8B5CF6)',
-                      boxShadow: '0 6px 20px rgba(59,130,246,.35)',
+                      width: 120, height: 120,
+                      // eslint-disable-next-line no-restricted-syntax
+                      background: user?.avatar ? undefined : 'linear-gradient(135deg, #4F46E5, #3730A3)',
+                      boxShadow: 'inset 0 0 20px rgba(0,0,0,0.2)',
                     }}>
                     {user?.avatar ? (
                       // eslint-disable-next-line @next/next/no-img-element
@@ -419,141 +447,95 @@ export default function ProfilePage() {
                     ) : (
                       user?.name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || 'U'
                     )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
                   </div>
                 </div>
               </div>
-              {/* Verify sub-badge on avatar */}
-              <div className="absolute bottom-0 right-0 w-7 h-7 rounded-full flex items-center justify-center"
-                style={{
-                  background: 'linear-gradient(135deg, #3B82F6, #0EA5E9)',
-                  border: '3px solid var(--theme-bg-card)',
-                  boxShadow: '0 2px 8px rgba(59,130,246,.4)',
-                }}>
-                <IconCheck size={12} style={{ color: 'white' }} />
+              {/* Premium Badge on avatar */}
+              <div className="absolute bottom-2 right-2 w-10 h-10 rounded-full flex items-center justify-center border-4 border-theme-bg-card shadow-2xl"
+                // eslint-disable-next-line no-restricted-syntax
+                style={{ background: 'linear-gradient(135deg, #F59E0B, #D97706)' }}>
+                <IconStar size={16} className="text-white" />
               </div>
             </div>
 
             {/* Edit + Share buttons */}
-            <div className="flex items-center gap-2 mb-1">
+            <div className="flex items-center gap-3 pb-2">
               <Link href="/profile/share"
-                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-[12.5px] font-semibold text-white transition-all hover:-translate-y-0.5"
-                style={{
-                  background: 'linear-gradient(135deg, #3B82F6, #8B5CF6)',
-                  boxShadow: '0 4px 12px rgba(99,102,241,.3)',
-                }}>
-                <IconZap size={13} />
-                Chia sẻ
+                className="group flex items-center gap-2 px-6 py-2.5 rounded-2xl text-xs font-black uppercase tracking-widest text-white transition-all hover:-translate-y-1 hover:shadow-[0_10px_25px_rgba(99,102,241,0.4)]"
+                style={{ background: GRADIENT.brand }}>
+                <IconZap size={14} className="group-hover:animate-pulse" />
+                Share
               </Link>
               <Link href="/settings"
-                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-[12.5px] font-semibold transition-all hover:-translate-y-0.5"
-                style={{
-                  backgroundColor: 'var(--theme-bg-secondary)',
-                  color: 'var(--theme-text-primary)',
-                  border: '1px solid var(--theme-border)',
-                }}>
-                <IconPencil size={13} />
-                Sửa hồ sơ
+                className="flex items-center gap-2 px-6 py-2.5 rounded-2xl text-xs font-black uppercase tracking-widest transition-all hover:-translate-y-1 hover:bg-theme-bg-tertiary"
+                style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-primary)', border: '1px solid var(--theme-border)' }}>
+                <IconPencil size={14} />
+                Edit
               </Link>
             </div>
           </div>
 
-          {/* Name + inline badges */}
-          <div className="flex items-center gap-2 flex-wrap mb-2">
-            <h1 className="text-h2 font-extrabold leading-tight" style={{ color: 'var(--theme-text-primary)' }}>
+          {/* Name + Badges Row */}
+          <div className="flex flex-wrap items-center gap-3 mb-4">
+            <h1 className="text-4xl font-black tracking-tight" style={{ color: 'var(--theme-text-primary)' }}>
               {user?.name || 'User'}
             </h1>
-            {/* Blue verify checkmark */}
-            <span className="w-5 h-5 rounded-full flex items-center justify-center shrink-0"
-              style={{
-                background: 'linear-gradient(135deg, #3B82F6, #0EA5E9)',
-                boxShadow: '0 2px 6px rgba(59,130,246,.35)',
-              }}>
-              <IconCheck size={11} style={{ color: 'white' }} />
-            </span>
-            {/* ACTIVE pill */}
-            <span className="px-2 py-0.5 rounded-full text-caption font-extrabold tracking-wider text-white"
-              style={{
-                background: 'linear-gradient(135deg, #22C55E, #14B8A6)',
-                boxShadow: '0 2px 6px rgba(34,197,94,.3)',
-              }}>
-              ACTIVE
-            </span>
+            <div className="flex items-center gap-2">
+              <div className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 flex items-center gap-1.5">
+                <IconZap size={11} className="animate-pulse" />
+                Active
+              </div>
+              {isPremium && (
+                <div className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-indigo-500 text-white shadow-lg shadow-indigo-500/30 flex items-center gap-1.5">
+                  <IconStar size={11} />
+                  Premium
+                </div>
+              )}
+            </div>
           </div>
 
-          {/* Email + join date */}
-          <div className="flex items-center gap-2 flex-wrap text-[12.5px] mb-4"
+          {/* Stats pills */}
+          <div className="flex flex-wrap items-center gap-4 text-sm font-medium opacity-60 mb-8"
             style={{ color: 'var(--theme-text-muted)' }}>
-            <span className="flex items-center gap-1.5">
-              <IconMail size={13} />
-              {user?.email}
+            <span className="flex items-center gap-2"><IconMail size={14} /> {user?.email}</span>
+            <span className="w-1 h-1 rounded-full bg-current opacity-30" />
+            <span className="flex items-center gap-2">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                <line x1="16" y1="2" x2="16" y2="6" />
+                <line x1="8" y1="2" x2="8" y2="6" />
+                <line x1="3" y1="10" x2="21" y2="10" />
+              </svg>
+              Joined {joinedDate}
             </span>
-            <span style={{ opacity: .5 }}>•</span>
-            <span>Tham gia: {joinedDate}</span>
           </div>
 
-          {/* Bottom badges */}
-          <div className="flex items-center gap-2 flex-wrap">
-            {/* Level + CEFR */}
+          {/* High-level badges grid */}
+          <div className="flex flex-wrap gap-2">
             {xpInfo && (
-              <span
-                title="Mức ước tính dựa trên XP — làm placement test để xác định chính xác"
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[11.5px] font-bold"
-                style={{
-                  background: 'linear-gradient(135deg, rgba(99,102,241,.14), rgba(139,92,246,.1))',
-                  color: '#6366F1',
-                  border: '1px solid rgba(99,102,241,.28)',
-                }}>
-                <IconGraduationCap size={12} />
-                Lv.{xpInfo.level} · ≈ {xpInfo.cefr}
-              </span>
+              <div className="px-4 py-2 rounded-2xl border flex items-center gap-2 transition-colors hover:bg-theme-bg-secondary"
+                style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-secondary)44' }}>
+                <IconTrophy size={14} className="text-indigo-500" />
+                <span className="text-[11px] font-black uppercase tracking-wider text-indigo-400">Lv.{xpInfo.level} · {xpInfo.cefr}</span>
+              </div>
             )}
-            {/* Points */}
-            <span className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[11.5px] font-bold"
-              style={{
-                background: 'linear-gradient(135deg, rgba(245,158,11,.15), rgba(234,88,12,.1))',
-                color: '#F59E0B',
-                border: '1px solid rgba(245,158,11,.28)',
-              }}>
-              <IconZap size={12} />
-              {isLoading ? '—' : points} Points
-            </span>
-            {/* Email verified */}
-            <span className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-caption font-bold tracking-wide uppercase"
-              style={{
-                background: 'rgba(34,197,94,.12)',
-                color: '#22C55E',
-                border: '1px solid rgba(34,197,94,.25)',
-              }}>
-              <IconCheckCircle size={12} />
-              Email Verified
-            </span>
-            {/* Plan */}
-            <span className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-caption font-bold tracking-wide uppercase"
-              style={{
-                background: isPremium ? 'rgba(139,92,246,.14)' : 'rgba(107,114,128,.12)',
-                color: isPremium ? '#A855F7' : 'var(--theme-text-muted)',
-                border: isPremium ? '1px solid rgba(139,92,246,.28)' : '1px solid var(--theme-border)',
-              }}>
-              <IconStar size={12} />
-              {isPremium ? 'Premium' : 'Free Plan'}
-            </span>
-            {/* Placement retake */}
-            <Link href="/placement"
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-caption font-bold transition-all hover:opacity-80"
-              style={{
-                background: 'linear-gradient(135deg, rgba(59,130,246,.12), rgba(139,92,246,.08))',
-                color: '#3B82F6',
-                border: '1px solid rgba(59,130,246,.25)',
-              }}>
-              <IconTarget size={12} />
-              Kiểm tra lại trình độ
-            </Link>
+            <div className="px-4 py-2 rounded-2xl border flex items-center gap-2 transition-colors hover:bg-theme-bg-secondary"
+              style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-secondary)44' }}>
+              <IconZap size={14} className="text-amber-500" />
+              <span className="text-[11px] font-black uppercase tracking-wider text-amber-500">{isLoading ? '—' : points} Points</span>
+            </div>
+            <div className="px-4 py-2 rounded-2xl border flex items-center gap-2 transition-colors hover:bg-theme-bg-secondary"
+              style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-secondary)44' }}>
+              <IconCheckCircle size={14} className="text-emerald-500" />
+              <span className="text-[11px] font-black uppercase tracking-wider text-emerald-500">Verified</span>
+            </div>
           </div>
         </div>
       </div>
 
       {/* ─── Stat Cards ─── */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         {statCards.map((card, i) => (
           <StatCard
             key={i}
@@ -565,9 +547,15 @@ export default function ProfilePage() {
         ))}
       </div>
 
-      {/* ─── Skill Proficiency Radar ─── */}
-      <div className="mb-6">
+      {/* ─── Skill Proficiency Radar & Error Patterns ─── */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         <SkillRadar />
+        <ErrorPatternsWidget />
+      </div>
+
+      {/* ─── Activity Heatmap ─── */}
+      <div className="mb-8">
+        <ActivityHeatmap data={heatmapData ?? getEmptyHeatmap()} />
       </div>
 
       {/* ─── Learning Roadmap ─── */}
@@ -588,16 +576,16 @@ export default function ProfilePage() {
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-1.5 text-body font-medium"
                 style={{ color: 'var(--theme-text-secondary)' }}>
-                <IconTarget size={14} style={{ color: '#22C55E' }} />
+                <IconTarget size={14} style={{ color: STATUS.success }} />
                 Tỉ lệ chính xác
               </div>
-              <span className="text-sm font-extrabold" style={{ color: '#22C55E' }}>
+              <span className="text-sm font-extrabold" style={{ color: STATUS.success }}>
                 {isLoading ? '—' : `${accuracyPct}%`}
               </span>
             </div>
             <div className="h-2 rounded-full overflow-hidden" style={{ backgroundColor: 'var(--theme-border)' }}>
               <div className="h-full rounded-full transition-all duration-700"
-                style={{ width: `${accuracyPct}%`, background: 'linear-gradient(90deg, #22C55E, #14B8A6)' }} />
+                style={{ width: `${accuracyPct}%`, background: `linear-gradient(90deg, ${STATUS.success}, ${ACCENT.teal})` }} />
             </div>
             <div className="flex justify-between mt-1.5 text-[10.5px]" style={{ color: 'var(--theme-text-muted)' }}>
               <span>{correct} đúng</span>
@@ -607,9 +595,9 @@ export default function ProfilePage() {
 
           <div className="space-y-2">
             {[
-              { label: 'Tổng câu trả lời', value: stats?.totalAnswers ?? 0, color: 'var(--theme-text-primary)', icon: IconBrain, accent: '#3B82F6' },
-              { label: 'Trả lời đúng', value: stats?.correctAnswers ?? 0, color: '#22C55E', icon: IconCheckAll, accent: '#22C55E' },
-              { label: 'Trả lời sai', value: stats?.wrongAnswers ?? 0, color: '#EF4444', icon: IconX, accent: '#EF4444' },
+              { label: 'Tổng câu trả lời', value: stats?.totalAnswers ?? 0, color: 'var(--theme-text-primary)', icon: IconBrain, accent: ACCENT.srs },
+              { label: 'Trả lời đúng', value: stats?.correctAnswers ?? 0, color: STATUS.success, icon: IconCheckAll, accent: STATUS.success },
+              { label: 'Trả lời sai', value: stats?.wrongAnswers ?? 0, color: STATUS.danger, icon: IconX, accent: STATUS.danger },
             ].map((row, i) => {
               const RowIcon = row.icon;
               return (

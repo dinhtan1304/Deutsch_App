@@ -1,9 +1,11 @@
 'use client';
+/* eslint-disable no-restricted-syntax -- custom UI gradients */
 
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/stores/authStore';
 import { useCompleteOnboarding } from '@/hooks/useOnboarding';
+import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 
 // ─── 15 Grammar Questions (5 A1 + 5 A2 + 5 B1) ──────────────────────────────
 interface Question {
@@ -136,9 +138,9 @@ const GOALS = [
 
 // ─── Level color config ──────────────────────────────────────────────────────
 const LEVEL_CONFIG: Record<string, { color: string; label: string }> = {
-  A1: { color: '#22C55E', label: 'S\u01a1 c\u1ea5p' },
-  A2: { color: '#3B82F6', label: 'S\u01a1 c\u1ea5p cao' },
-  B1: { color: '#8B5CF6', label: 'Trung c\u1ea5p' },
+  A1: { color: STATUS.success, label: 'S\u01a1 c\u1ea5p' },
+  A2: { color: ACCENT.srs, label: 'S\u01a1 c\u1ea5p cao' },
+  B1: { color: ACCENT.vocab, label: 'Trung c\u1ea5p' },
 };
 
 function determineLevel(a1: number, a2: number, b1: number): string {
@@ -256,7 +258,7 @@ export default function OnboardingPage() {
 
   const TOTAL_STEPS = 5;
   const q = QUESTIONS[qIdx];
-  const levelColors: Record<string, string> = { A1: '#22C55E', A2: '#3B82F6', B1: '#8B5CF6' };
+  const levelColors: Record<string, string> = { A1: STATUS.success, A2: ACCENT.srs, B1: ACCENT.vocab };
 
   // ─── Step renderer ─────────────────────────────────────────────────────
   const renderStep = () => {
@@ -336,7 +338,7 @@ export default function OnboardingPage() {
                     {i < arr.length - 1 && (
                       <span style={{
                         display: 'inline-block', minWidth: '80px', borderBottom: '2px solid rgba(59,130,246,0.5)',
-                        margin: '0 4px', color: selected !== null ? (selected === q.answer ? '#22C55E' : '#EF4444') : 'rgba(59,130,246,0.6)',
+                        margin: '0 4px', color: selected !== null ? (selected === q.answer ? STATUS.success : STATUS.danger) : 'rgba(59,130,246,0.6)',
                         fontWeight: 700,
                       }}>
                         {selected !== null ? q.options[selected] : '\u00a0'}
@@ -355,9 +357,9 @@ export default function OnboardingPage() {
                 let textColor = 'white';
                 if (selected !== null) {
                   if (i === q.answer) {
-                    bg = 'rgba(34,197,94,0.15)'; brd = '#22C55E'; textColor = '#22C55E';
+                    bg = 'rgba(34,197,94,0.15)'; brd = STATUS.success; textColor = STATUS.success;
                   } else if (i === selected) {
-                    bg = 'rgba(239,68,68,0.15)'; brd = '#EF4444'; textColor = '#EF4444';
+                    bg = 'rgba(239,68,68,0.15)'; brd = STATUS.danger; textColor = STATUS.danger;
                   } else {
                     textColor = 'rgba(255,255,255,0.3)';
                   }
@@ -431,9 +433,9 @@ export default function OnboardingPage() {
             {/* Per-level breakdown */}
             <div style={{ display: 'flex', gap: '10px', marginBottom: '32px' }}>
               {[
-                { lv: 'A1', score: scores.a1, color: '#22C55E' },
-                { lv: 'A2', score: scores.a2, color: '#3B82F6' },
-                { lv: 'B1', score: scores.b1, color: '#8B5CF6' },
+                { lv: 'A1', score: scores.a1, color: STATUS.success },
+                { lv: 'A2', score: scores.a2, color: ACCENT.srs },
+                { lv: 'B1', score: scores.b1, color: ACCENT.vocab },
               ].map(({ lv, score, color }) => (
                 <div key={lv} style={{
                   flex: 1, padding: '14px 8px', borderRadius: '12px', background: cardBg,
@@ -614,7 +616,7 @@ export default function OnboardingPage() {
           {Array.from({ length: TOTAL_STEPS }).map((_, i) => (
             <div key={i} style={{
               width: i === step ? '24px' : '8px', height: '8px', borderRadius: '4px',
-              background: i === step ? 'linear-gradient(135deg, #3B82F6, #8B5CF6)' : i < step ? '#3B82F6' : 'rgba(255,255,255,0.15)',
+              background: i === step ? 'linear-gradient(135deg, #3B82F6, #8B5CF6)' : i < step ? ACCENT.srs : 'rgba(255,255,255,0.15)',
               transition: 'all 0.3s ease',
             }} />
           ))}

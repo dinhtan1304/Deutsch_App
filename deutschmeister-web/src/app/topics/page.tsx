@@ -4,7 +4,7 @@ import { useState, useMemo } from 'react';
 import { TopicCard } from '@/components/topics/TopicCard';
 import { useTopics, useUserTopicsProgress, useTopicsStats } from '@/hooks/useTopics';
 import { useAuthStore } from '@/stores/authStore';
-import Link from 'next/link';
+import { GRADIENT, ACCENT, STATUS } from '@/lib/tokens';
 import {
   IconBook, IconTarget, IconBrain, IconBookOpen,
   IconLayers, IconLightbulb, IconPin, IconGamepad, IconPencil,
@@ -26,10 +26,10 @@ function getLocalProgress(topicId: string, totalWords: number): { wordsLearned: 
 
 // ─── Level colors ───
 const LEVEL_COLORS: Record<string, { color: string; gradient: string }> = {
-  A1: { color: '#22C55E', gradient: 'linear-gradient(135deg, #22C55E, #16A34A)' },
-  A2: { color: '#3B82F6', gradient: 'linear-gradient(135deg, #3B82F6, #2563EB)' },
-  B1: { color: '#F59E0B', gradient: 'linear-gradient(135deg, #F59E0B, #D97706)' },
-  B2: { color: '#EF4444', gradient: 'linear-gradient(135deg, #EF4444, #DC2626)' },
+  A1: { color: ACCENT.reading, gradient: `linear-gradient(135deg, ${ACCENT.reading}, #16A34A)` },
+  A2: { color: ACCENT.srs,     gradient: `linear-gradient(135deg, ${ACCENT.srs}, #2563EB)` },
+  B1: { color: ACCENT.xp,      gradient: `linear-gradient(135deg, ${ACCENT.xp}, #D97706)` },
+  B2: { color: STATUS.danger,  gradient: `linear-gradient(135deg, ${STATUS.danger}, #DC2626)` },
 };
 
 export default function TopicsPage() {
@@ -82,24 +82,24 @@ export default function TopicsPage() {
 
   const statItems = [
     { label: 'Chủ đề', value: stats?.totalTopics || topicsData?.total || 12,
-      icon: IconLayers, color: '#3B82F6',
-      bg: 'linear-gradient(135deg, rgba(59,130,246,.12), rgba(59,130,246,.06))' },
+      icon: IconLayers, color: ACCENT.srs,
+      bg: `linear-gradient(135deg, ${ACCENT.srs}1F, ${ACCENT.srs}0F)` },
     { label: 'Tổng từ vựng', value: stats?.totalWords || totalWords,
-      icon: IconBookOpen, color: '#22C55E',
-      bg: 'linear-gradient(135deg, rgba(34,197,94,.12), rgba(34,197,94,.06))' },
+      icon: IconBookOpen, color: ACCENT.reading,
+      bg: `linear-gradient(135deg, ${ACCENT.reading}1F, ${ACCENT.reading}0F)` },
     { label: 'Đã học', value: learnedWords,
-      icon: IconBrain, color: '#8B5CF6',
-      bg: 'linear-gradient(135deg, rgba(139,92,246,.12), rgba(139,92,246,.06))' },
+      icon: IconBrain, color: ACCENT.vocab,
+      bg: `linear-gradient(135deg, ${ACCENT.vocab}1F, ${ACCENT.vocab}0F)` },
     { label: 'Hoàn thành', value: `${completedTopics}/${topicsWithProgress?.length || 12}`,
-      icon: IconTarget, color: '#F59E0B',
-      bg: 'linear-gradient(135deg, rgba(245,158,11,.12), rgba(245,158,11,.06))' },
+      icon: IconTarget, color: ACCENT.xp,
+      bg: `linear-gradient(135deg, ${ACCENT.xp}1F, ${ACCENT.xp}0F)` },
   ];
 
   const tips = [
-    { icon: IconPin, text: 'Học theo chủ đề giúp nhớ từ theo ngữ cảnh', color: '#3B82F6' },
-    { icon: IconBrain, text: 'Ôn tập mỗi ngày với SRS để nhớ lâu', color: '#8B5CF6' },
-    { icon: IconGamepad, text: 'Chơi game Der/Die/Das để ghi nhớ giống', color: '#22C55E' },
-    { icon: IconPencil, text: 'Thêm từ mới vào Sổ từ vựng cá nhân', color: '#F59E0B' },
+    { icon: IconPin,     text: 'Học theo chủ đề giúp nhớ từ theo ngữ cảnh', color: ACCENT.srs },
+    { icon: IconBrain,   text: 'Ôn tập mỗi ngày với SRS để nhớ lâu',        color: ACCENT.vocab },
+    { icon: IconGamepad, text: 'Chơi game Der/Die/Das để ghi nhớ giống',     color: ACCENT.reading },
+    { icon: IconPencil,  text: 'Thêm từ mới vào Sổ từ vựng cá nhân',        color: ACCENT.xp },
   ];
 
   return (
@@ -107,7 +107,7 @@ export default function TopicsPage() {
         {/* Header */}
         <div className="flex items-center gap-3 mb-6">
           <div className="w-11 h-11 rounded-2xl flex items-center justify-center"
-            style={{ background: 'linear-gradient(135deg, #3B82F6, #6366F1)' }}>
+            style={{ background: GRADIENT.action }}>
             <IconBook size={22} className="text-white" />
           </div>
           <div>
@@ -148,12 +148,12 @@ export default function TopicsPage() {
             <span className="text-sm font-semibold" style={{ color: 'var(--theme-text-primary)' }}>
               Tiến độ tổng
             </span>
-            <span className="text-sm font-bold" style={{ color: '#3B82F6' }}>{overallProgress}%</span>
+            <span className="text-sm font-bold" style={{ color: ACCENT.srs }}>{overallProgress}%</span>
           </div>
           <div className="h-2.5 rounded-full overflow-hidden"
             style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
             <div className="h-full rounded-full transition-all duration-700"
-              style={{ width: `${overallProgress}%`, background: 'linear-gradient(90deg, #3B82F6, #22C55E)' }} />
+              style={{ width: `${overallProgress}%`, background: `linear-gradient(90deg, ${ACCENT.srs}, ${ACCENT.reading})` }} />
           </div>
           <div className="flex justify-between mt-1.5 text-caption" style={{ color: 'var(--theme-text-muted)' }}>
             <span>{learnedWords} từ đã học</span>
@@ -200,7 +200,7 @@ export default function TopicsPage() {
         {!isLoading && (!topicsWithProgress || topicsWithProgress.length === 0) && (
           <div className="text-center py-16">
             <div className="w-16 h-16 rounded-2xl mx-auto flex items-center justify-center mb-4"
-              style={{ background: 'linear-gradient(135deg, rgba(107,114,128,.12), rgba(107,114,128,.06))' }}>
+              style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
               <IconBook size={28} style={{ color: 'var(--theme-text-muted)' }} />
             </div>
             <h3 className="text-lg font-bold mb-2" style={{ color: 'var(--theme-text-primary)' }}>
@@ -214,12 +214,12 @@ export default function TopicsPage() {
 
         {/* Tips section */}
         <div className="mt-10 p-5 rounded-2xl border"
-          style={{ backgroundColor: 'rgba(59,130,246,.03)', borderColor: 'rgba(59,130,246,.1)' }}>
+          style={{ backgroundColor: `${ACCENT.srs}08`, borderColor: `${ACCENT.srs}1A` }}>
           <h3 className="text-[15px] font-bold mb-4 flex items-center gap-2"
             style={{ color: 'var(--theme-text-primary)' }}>
             <span className="w-7 h-7 rounded-lg flex items-center justify-center"
-              style={{ background: 'linear-gradient(135deg, rgba(245,158,11,.15), rgba(245,158,11,.08))' }}>
-              <IconLightbulb size={15} style={{ color: '#F59E0B' }} />
+              style={{ background: `linear-gradient(135deg, ${ACCENT.xp}26, ${ACCENT.xp}14)` }}>
+              <IconLightbulb size={15} style={{ color: ACCENT.xp }} />
             </span>
             Mẹo học từ vựng hiệu quả
           </h3>

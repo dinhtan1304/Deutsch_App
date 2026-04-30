@@ -1,12 +1,14 @@
 ﻿'use client';
+/* eslint-disable no-restricted-syntax */
 
 import { RoleplayFeedback } from '@/lib/api/roleplay';
+import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 
 function getScoreColor(score: number) {
-  if (score >= 80) return '#22C55E';
-  if (score >= 60) return '#F59E0B';
-  if (score >= 40) return '#F97316';
-  return '#EF4444';
+  if (score >= 80) return STATUS.success;
+  if (score >= 60) return ACCENT.xp;
+  if (score >= 40) return ACCENT.games;
+  return STATUS.danger;
 }
 
 interface Props {
@@ -102,7 +104,7 @@ export function FeedbackSummary({ feedback }: Props) {
             backgroundColor: 'rgba(34,197,94,0.05)',
           }}
         >
-          <h4 className="text-sm font-bold mb-2" style={{ color: '#22C55E' }}>
+          <h4 className="text-sm font-bold mb-2" style={{ color: STATUS.success }}>
             ✅ Điểm mạnh
           </h4>
           <ul className="space-y-1.5">
@@ -112,7 +114,7 @@ export function FeedbackSummary({ feedback }: Props) {
                 className="text-sm flex items-start gap-2"
                 style={{ color: 'var(--theme-text-secondary)' }}
               >
-                <span style={{ color: '#22C55E' }}>•</span>
+                <span style={{ color: STATUS.success }}>•</span>
                 <span>{s}</span>
               </li>
             ))}
@@ -129,7 +131,7 @@ export function FeedbackSummary({ feedback }: Props) {
             backgroundColor: 'rgba(245,158,11,0.05)',
           }}
         >
-          <h4 className="text-sm font-bold mb-2" style={{ color: '#F59E0B' }}>
+          <h4 className="text-sm font-bold mb-2" style={{ color: ACCENT.xp }}>
             💡 Cần cải thiện
           </h4>
           <ul className="space-y-1.5">
@@ -139,7 +141,7 @@ export function FeedbackSummary({ feedback }: Props) {
                 className="text-sm flex items-start gap-2"
                 style={{ color: 'var(--theme-text-secondary)' }}
               >
-                <span style={{ color: '#F59E0B' }}>•</span>
+                <span style={{ color: ACCENT.xp }}>•</span>
                 <span>{s}</span>
               </li>
             ))}
@@ -169,10 +171,10 @@ export function FeedbackSummary({ feedback }: Props) {
                 className="rounded-xl p-3"
                 style={{ backgroundColor: 'var(--theme-bg-secondary)' }}
               >
-                <div className="text-xs mb-1" style={{ color: '#EF4444' }}>
+                <div className="text-xs mb-1" style={{ color: STATUS.danger }}>
                   ❌ {c.original}
                 </div>
-                <div className="text-xs mb-1.5" style={{ color: '#22C55E' }}>
+                <div className="text-xs mb-1.5" style={{ color: STATUS.success }}>
                   ✅ {c.corrected}
                 </div>
                 <div

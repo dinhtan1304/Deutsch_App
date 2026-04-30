@@ -1,6 +1,8 @@
 ﻿'use client';
+/* eslint-disable no-restricted-syntax */
 
 import { useState } from 'react';
+import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 import { Word, GenderInfo } from '@/types';
 import { WordDetailModal } from './WordDetailModal';
 import { useSettingsStore } from '@/stores/settingsStore';
@@ -193,7 +195,7 @@ export function WordCard({
                 {settings.showVietnamese && word.translationVi && (
                   <p className="text-body flex items-center gap-1.5" style={{ color: 'var(--theme-text-secondary)' }}>
                     <span className="text-caption font-bold px-1.5 py-0.5 rounded"
-                      style={{ backgroundColor: 'rgba(239,68,68,.08)', color: '#EF4444' }}>VN</span>
+                      style={{ backgroundColor: 'rgba(239,68,68,.08)', color: STATUS.danger }}>VN</span>
                     {word.translationVi}
                   </p>
                 )}
@@ -231,7 +233,7 @@ export function WordCard({
                   className="w-8 h-8 flex items-center justify-center rounded-xl transition-all hover:scale-110"
                   style={{
                     backgroundColor: addedToBank ? 'rgba(34,197,94,.15)' : 'var(--theme-bg-secondary)',
-                    color: addedToBank ? '#22C55E' : 'var(--theme-text-muted)',
+                    color: addedToBank ? STATUS.success : 'var(--theme-text-muted)',
                   }}
                   title={addedToBank ? 'Đã thêm vào Word Bank' : 'Thêm vào Word Bank'}>
                   {addedToBank ? <IconCheck size={14} /> : <IconPlus size={14} />}

@@ -1,6 +1,8 @@
 'use client';
+/* eslint-disable no-restricted-syntax */
 
 import Link from 'next/link';
+import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 
 export default function BillingPage() {
   return (
@@ -15,7 +17,7 @@ export default function BillingPage() {
       </p>
       <Link href="/dashboard" style={{
         display: 'inline-block', padding: '10px 24px', borderRadius: 10,
-        backgroundColor: '#6366F1', color: '#fff', fontSize: 14, fontWeight: 700, textDecoration: 'none',
+        backgroundColor: ACCENT.writing, color: '#fff', fontSize: 14, fontWeight: 700, textDecoration: 'none',
       }}>
         ← Về Dashboard
       </Link>

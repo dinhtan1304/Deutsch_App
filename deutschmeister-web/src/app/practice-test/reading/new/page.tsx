@@ -1,6 +1,7 @@
 ﻿'use client';
 
 import { useState, useEffect } from 'react';
+import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useReadingTopics, useGenerateReading } from '@/hooks/useReading';
@@ -9,7 +10,7 @@ import { IconDice, IconLoader, IconRobot } from '../icons';
 import { PageHeader } from '@/components/ui';
 
 const LEVEL_COLORS: Record<string, string> = {
-  A1: '#22C55E', A2: '#3B82F6', B1: '#8B5CF6', B2: '#F97316',
+  A1: STATUS.success, A2: ACCENT.srs, B1: ACCENT.vocab, B2: ACCENT.games,
 };
 
 const QUESTION_COUNT_OPTIONS = [3, 4, 5, 6, 7, 8];
@@ -39,7 +40,7 @@ export default function NewReadingPage() {
 
   const finalTopic = customTopic.trim() || selectedTopic;
   const canGenerate = !!finalTopic && !!textType;
-  const activeColor = LEVEL_COLORS[level] || '#22C55E';
+  const activeColor = LEVEL_COLORS[level] || STATUS.success;
 
   const handleGenerate = async () => {
     if (!canGenerate) return;
@@ -234,7 +235,7 @@ export default function NewReadingPage() {
           </button>
 
           {generateMutation.isError && (
-            <p className="text-body text-center" style={{ color: '#EF4444' }}>
+            <p className="text-body text-center" style={{ color: STATUS.danger }}>
               Không thể tạo bài đọc. Vui lòng thử lại.
             </p>
           )}

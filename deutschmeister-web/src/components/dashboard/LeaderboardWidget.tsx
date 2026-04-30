@@ -1,6 +1,8 @@
 'use client';
+/* eslint-disable no-restricted-syntax */
 
 import Link from 'next/link';
+import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 import { useLeaderboard } from '@/hooks/useLeaderboard';
 import { useAuthStore } from '@/stores/authStore';
 import { IconTrophy, IconStar, IconArrowRight, IconZap } from '@/components/ui/Icons';
@@ -41,7 +43,7 @@ export function LeaderboardWidget() {
           </div>
           <h3 className="text-title font-bold m-0" style={{ color: 'var(--theme-text-primary)' }}>BXH tuần này</h3>
         </div>
-        <Link href="/leaderboard" className="text-body font-semibold flex items-center gap-0.5" style={{ color: '#F59E0B', textDecoration: 'none' }}>
+        <Link href="/leaderboard" className="text-body font-semibold flex items-center gap-0.5" style={{ color: ACCENT.xp, textDecoration: 'none' }}>
           Xem tất cả <IconArrowRight size={13} />
         </Link>
       </div>
@@ -67,7 +69,7 @@ export function LeaderboardWidget() {
                 style={{ fontWeight: isMe ? 700 : 500, color: 'var(--theme-text-primary)' }}>
                 {entry.name}
               </div>
-              <div className="flex items-center gap-1 shrink-0 text-caption font-bold" style={{ color: '#F59E0B' }}>
+              <div className="flex items-center gap-1 shrink-0 text-caption font-bold" style={{ color: ACCENT.xp }}>
                 <IconZap size={11} /> {entry.xp.toLocaleString()}
               </div>
             </div>

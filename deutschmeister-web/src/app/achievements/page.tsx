@@ -1,10 +1,13 @@
 'use client';
 
 import { useAchievements } from '@/hooks/useAchievements';
+import { Achievement } from '@/lib/api/achievements';
 import Link from 'next/link';
+import { GRADIENT, ACCENT, STATUS } from '@/lib/tokens';
+import { GridSkeleton } from '@/components/ui';
 import {
   IconTrophy, IconLock, IconChevronLeft, IconCheck,
-  IconBook, IconGamepad, IconGraduationCap, IconPenLine, IconStar, IconZap,
+  IconBook, IconGamepad, IconGraduationCap, IconPenLine, IconStar,
 } from '@/components/ui/Icons';
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -16,11 +19,19 @@ const CATEGORY_LABELS: Record<string, string> = {
 };
 
 const CATEGORY_COLORS: Record<string, string> = {
-  vocabulary: '#22C55E',
-  games: '#F59E0B',
-  exams: '#3B82F6',
-  writing: '#6366F1',
-  level: '#A855F7',
+  vocabulary: ACCENT.reading,
+  games: ACCENT.xp,
+  exams: ACCENT.srs,
+  writing: ACCENT.vocab,
+  level: ACCENT.listening,
+};
+
+const CATEGORY_GRADIENTS: Record<string, string> = {
+  vocabulary: GRADIENT.reading,
+  games: GRADIENT.xp,
+  exams: GRADIENT.action,
+  writing: GRADIENT.writing,
+  level: GRADIENT.listening,
 };
 
 const CATEGORY_ICONS: Record<string, React.ReactNode> = {
@@ -31,109 +42,129 @@ const CATEGORY_ICONS: Record<string, React.ReactNode> = {
   level: <IconStar size={14} />,
 };
 
-// Achievement key → icon component mapping
-function AchievementIcon({ achievementKey, unlocked }: { achievementKey: string; unlocked: boolean }) {
-  if (!unlocked) return <IconLock size={28} style={{ color: 'var(--theme-text-muted)' }} />;
+function AchievementIcon({ unlocked, color, gradient }: { unlocked: boolean; color: string; gradient: string }) {
+  if (!unlocked) return (
+    <div className="w-16 h-16 rounded-[1.25rem] flex items-center justify-center opacity-20 border"
+      style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)', borderColor: 'var(--theme-border)' }}>
+      <IconLock size={28} />
+    </div>
+  );
 
-  if (achievementKey.startsWith('words_') || achievementKey === 'first_word') return <IconBook size={28} />;
-  if (achievementKey.startsWith('games_') || achievementKey === 'first_game') return <IconGamepad size={28} />;
-  if (achievementKey.startsWith('exams_') || achievementKey === 'first_exam') return <IconGraduationCap size={28} />;
-  if (achievementKey === 'first_writing') return <IconPenLine size={28} />;
-  if (achievementKey === 'level_10') return <IconTrophy size={28} />;
-  if (achievementKey.startsWith('level_')) return <IconStar size={28} />;
-  if (achievementKey.startsWith('streak_')) return <IconZap size={28} />;
-  return <IconTrophy size={28} />;
+  return (
+    <div className="w-16 h-16 rounded-[1.25rem] flex items-center justify-center relative overflow-hidden group-hover:scale-110 transition-transform duration-500"
+      style={{ background: gradient, boxShadow: `0 8px 20px -5px ${color}66` }}>
+      <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+      <div className="text-white relative z-10 drop-shadow-md">
+        <IconTrophy size={32} />
+      </div>
+      {/* Shimmer sweep on hover */}
+      <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]" />
+    </div>
+  );
 }
 
 export default function AchievementsPage() {
   const { data: achievements, isLoading } = useAchievements();
 
-  const grouped = achievements?.reduce<Record<string, typeof achievements>>((acc, a) => {
+  const grouped = (achievements || []).reduce<Record<string, Achievement[]>>((acc, a) => {
     if (!acc[a.category]) acc[a.category] = [];
     acc[a.category].push(a);
     return acc;
   }, {});
 
-  const unlockedCount = achievements?.filter((a) => a.unlocked).length ?? 0;
-  const total = achievements?.length ?? 0;
-
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--theme-bg)', padding: '2rem 1rem' }}>
-      <div style={{ maxWidth: 900, margin: '0 auto' }}>
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--theme-bg-body)', color: 'var(--theme-text-primary)' }}>
+      <div className="max-w-6xl mx-auto px-4 py-10">
+
         {/* Header */}
-        <div style={{ marginBottom: '2rem' }}>
-          <Link href="/dashboard" style={{ color: 'var(--theme-text-muted)', fontSize: 14, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 4, marginBottom: 12 }}>
-            <IconChevronLeft size={16} /> Quay lại Dashboard
-          </Link>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <div style={{ width: 44, height: 44, borderRadius: 12, background: 'linear-gradient(135deg, #F59E0B, #EF4444)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <IconTrophy size={22} style={{ color: '#fff' }} />
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-2xl relative overflow-hidden"
+              style={{ background: GRADIENT.xp }}>
+              <div className="absolute inset-0 bg-white/10 animate-pulse" />
+              <IconTrophy size={28} className="text-white relative z-10" />
             </div>
             <div>
-              <h1 style={{ fontSize: 24, fontWeight: 700, color: 'var(--theme-text)', margin: 0 }}>Thành tích</h1>
-              <p style={{ color: 'var(--theme-text-muted)', fontSize: 13, margin: 0 }}>{unlockedCount}/{total} đã mở khóa</p>
+              <h1 className="text-3xl font-black tracking-tight mb-0.5">Thành tích</h1>
+              <p className="text-sm font-medium" style={{ color: 'var(--theme-text-muted)' }}>
+                Lưu giữ những cột mốc đáng nhớ
+              </p>
             </div>
           </div>
 
-          {/* Overall progress bar */}
-          <div style={{ marginTop: 14, height: 6, borderRadius: 999, background: 'var(--theme-border)', overflow: 'hidden', maxWidth: 400 }}>
-            <div style={{ height: '100%', borderRadius: 999, background: 'linear-gradient(90deg, #F59E0B, #EF4444)', width: `${total > 0 ? (unlockedCount / total) * 100 : 0}%`, transition: 'width 0.5s' }} />
-          </div>
+          <Link href="/"
+            className="flex items-center gap-2 px-6 py-3 rounded-2xl font-black text-[11px] uppercase tracking-widest border transition-all hover:bg-white/5"
+            style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)' }}>
+            <IconChevronLeft size={14} /> Quay lại
+          </Link>
         </div>
 
-        {isLoading && (
-          <div style={{ textAlign: 'center', color: 'var(--theme-text-muted)', paddingTop: 60 }}>Đang tải...</div>
-        )}
-
-        {grouped && Object.entries(grouped).map(([category, items]) => (
-          <div key={category} style={{ marginBottom: '2rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: '1rem' }}>
-              <span style={{ color: CATEGORY_COLORS[category] }}>{CATEGORY_ICONS[category]}</span>
-              <h2 style={{ fontSize: 13, fontWeight: 700, color: 'var(--theme-text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', margin: 0 }}>
-                {CATEGORY_LABELS[category] ?? category}
-              </h2>
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '1rem' }}>
-              {items.map((a) => (
-                <div key={a.key} style={{
-                  background: a.unlocked ? 'var(--theme-card)' : 'var(--theme-bg)',
-                  border: `1px solid ${a.unlocked ? CATEGORY_COLORS[a.category] + '44' : 'var(--theme-border)'}`,
-                  borderRadius: 12,
-                  padding: '1.25rem 1rem',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  gap: 8,
-                  textAlign: 'center',
-                  opacity: a.unlocked ? 1 : 0.45,
-                  transition: 'opacity 0.2s',
-                  position: 'relative',
-                }}>
-                  {a.unlocked && (
-                    <div style={{ position: 'absolute', top: 8, right: 8, width: 18, height: 18, borderRadius: '50%', background: CATEGORY_COLORS[a.category], display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <IconCheck size={10} style={{ color: '#fff' }} />
-                    </div>
-                  )}
-                  <div style={{ color: a.unlocked ? CATEGORY_COLORS[a.category] : 'var(--theme-text-muted)' }}>
-                    <AchievementIcon achievementKey={a.key} unlocked={a.unlocked} />
+        {isLoading ? (
+          <GridSkeleton cols={4} count={8} height="h-48" rounded="rounded-3xl" bordered gap="gap-6" />
+        ) : (
+          <div className="space-y-16">
+            {Object.entries(grouped).map(([category, items]) => (
+              <section key={category}>
+                <div className="flex items-center gap-4 mb-8">
+                  <div className="flex items-center gap-2.5 px-4 py-1.5 rounded-full backdrop-blur-sm shadow-sm border"
+                    style={{ borderColor: `${CATEGORY_COLORS[category]}22`, backgroundColor: 'var(--theme-bg-secondary)' }}>
+                    <span style={{ color: CATEGORY_COLORS[category] }}>{CATEGORY_ICONS[category]}</span>
+                    <h2 className="text-[11px] font-black uppercase tracking-widest" style={{ color: CATEGORY_COLORS[category] }}>
+                      {CATEGORY_LABELS[category] ?? category}
+                    </h2>
                   </div>
-                  <div style={{ fontWeight: 600, fontSize: 13, color: 'var(--theme-text)' }}>{a.nameVi}</div>
-                  <div style={{ fontSize: 12, color: 'var(--theme-text-muted)', lineHeight: 1.4 }}>{a.descriptionVi}</div>
-                  {a.xpReward > 0 && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 11, color: '#F59E0B', fontWeight: 600 }}>
-                      <IconZap size={11} /> +{a.xpReward} XP
-                    </div>
-                  )}
-                  {a.unlocked && a.unlockedAt && (
-                    <div style={{ fontSize: 10, color: 'var(--theme-text-muted)' }}>
-                      {new Date(a.unlockedAt).toLocaleDateString('vi-VN')}
-                    </div>
-                  )}
+                  <div className="flex-1 h-px" style={{ backgroundColor: 'var(--theme-border)' }} />
                 </div>
-              ))}
-            </div>
+
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                  {items.map((a) => (
+                    <div key={a.key}
+                      className={`group relative rounded-[1.5rem] p-5 border transition-all duration-500 hover:-translate-y-1.5 overflow-hidden ${a.unlocked ? 'shadow-lg' : ''}`}
+                      style={{
+                        backgroundColor: a.unlocked ? 'var(--theme-bg-card)' : 'var(--theme-bg-secondary)',
+                        borderColor: a.unlocked ? `${CATEGORY_COLORS[a.category]}33` : 'var(--theme-border)',
+                        boxShadow: a.unlocked ? `0 8px 30px -10px ${CATEGORY_COLORS[a.category]}15` : 'none',
+                      }}>
+
+                      {a.unlocked && (
+                        <div className="absolute -top-10 -right-10 w-20 h-20 rounded-full blur-2xl opacity-10 pointer-events-none"
+                          style={{ backgroundColor: CATEGORY_COLORS[a.category] }} />
+                      )}
+
+                      <div className="relative z-10 flex flex-col items-center text-center">
+                        <div className="mb-4">
+                          <AchievementIcon
+                            unlocked={a.unlocked}
+                            color={CATEGORY_COLORS[a.category]}
+                            gradient={CATEGORY_GRADIENTS[a.category] ?? GRADIENT.xp}
+                          />
+                        </div>
+
+                        <div className="text-sm font-black mb-1 transition-colors"
+                          style={{ color: 'var(--theme-text-primary)', opacity: a.unlocked ? 1 : 0.2 }}>
+                          {a.nameVi}
+                        </div>
+                        <div className="text-[11px] leading-relaxed transition-colors mb-3"
+                          style={{ opacity: a.unlocked ? 0.6 : 0.1 }}>
+                          {a.descriptionVi}
+                        </div>
+
+                        {a.unlocked ? (
+                          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest"
+                            style={{ backgroundColor: `${STATUS.success}1A`, color: STATUS.success }}>
+                            <IconCheck size={10} /> Đã nhận
+                          </div>
+                        ) : (
+                          <div className="text-[9px] font-black uppercase tracking-widest opacity-20">Chưa đạt</div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            ))}
           </div>
-        ))}
+        )}
       </div>
     </div>
   );

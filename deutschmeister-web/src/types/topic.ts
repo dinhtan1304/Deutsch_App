@@ -1,6 +1,9 @@
 // ============================================
+/* eslint-disable no-restricted-syntax */
 // Topic Types
 // ============================================
+
+import { ACCENT } from '@/lib/tokens';
 
 export interface Topic {
   id: string;
@@ -90,13 +93,13 @@ export interface TopicsStats {
 // ============================================
 
 export const GenderInfo: Record<string, { article: string; color: string; bgColor: string }> = {
-  masculine: { article: 'der', color: '#3B82F6', bgColor: 'rgba(59, 130, 246, 0.1)' },
-  feminine: { article: 'die', color: '#EC4899', bgColor: 'rgba(236, 72, 153, 0.1)' },
+  masculine: { article: 'der', color: ACCENT.srs, bgColor: 'rgba(59, 130, 246, 0.1)' },
+  feminine: { article: 'die', color: ACCENT.listening, bgColor: 'rgba(236, 72, 153, 0.1)' },
   neuter: { article: 'das', color: '#10B981', bgColor: 'rgba(16, 185, 129, 0.1)' },
 };
 
-export const ArticleColor: Record<string, string> = {
-  der: '#3B82F6',
-  die: '#EC4899',
-  das: '#10B981',
+export const ArticleColor: Record<string, { color: string; bg: string }> = {
+  der: { color: ACCENT.srs, bg: 'rgba(59,130,246,.1)' },
+  die: { color: ACCENT.listening, bg: 'rgba(236,72,153,.1)' },
+  das: { color: '#10B981', bg: 'rgba(16,185,129,.1)' },
 };

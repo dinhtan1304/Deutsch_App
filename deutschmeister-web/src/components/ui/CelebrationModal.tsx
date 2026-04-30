@@ -1,17 +1,28 @@
 'use client';
+/* eslint-disable no-restricted-syntax */
 
 import { useState, useEffect } from 'react';
+import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 import { useCelebrationStore } from '@/stores/celebrationStore';
+import { useModalA11y } from '@/hooks/useModalA11y';
 
-const CONFETTI_COLORS = ['#3B82F6', '#22C55E', '#F59E0B', '#EF4444', '#8B5CF6'];
+const CONFETTI_COLORS = [ACCENT.srs, STATUS.success, ACCENT.xp, STATUS.danger, ACCENT.vocab];
 
 export function CelebrationModal() {
   const current = useCelebrationStore((s) => s.queue[0]);
   const [visible, setVisible] = useState(false);
 
+  const handleDismiss = () => {
+    setVisible(false);
+    setTimeout(() => {
+      useCelebrationStore.getState().dismiss();
+    }, 250);
+  };
+
+  const dialogRef = useModalA11y(!!current, handleDismiss);
+
   useEffect(() => {
     if (current) {
-      // Small delay to trigger CSS transition (mount → animate in)
       const timer = setTimeout(() => setVisible(true), 20);
       return () => clearTimeout(timer);
     } else {
@@ -20,13 +31,6 @@ export function CelebrationModal() {
   }, [current]);
 
   if (!current) return null;
-
-  const handleDismiss = () => {
-    setVisible(false);
-    setTimeout(() => {
-      useCelebrationStore.getState().dismiss();
-    }, 250);
-  };
 
   return (
     <>
@@ -80,6 +84,11 @@ export function CelebrationModal() {
 
         {/* Card */}
         <div
+          ref={dialogRef}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="celebration-title"
+          aria-describedby="celebration-desc"
           onClick={(e) => e.stopPropagation()}
           style={{
             maxWidth: 360,
@@ -95,12 +104,13 @@ export function CelebrationModal() {
           }}
         >
           {/* Icon */}
-          <div style={{ fontSize: 64, lineHeight: 1, marginBottom: 16 }}>
+          <div aria-hidden="true" style={{ fontSize: 64, lineHeight: 1, marginBottom: 16 }}>
             {current.icon}
           </div>
 
           {/* Title */}
           <h2
+            id="celebration-title"
             style={{
               fontSize: 20,
               fontWeight: 700,
@@ -113,6 +123,7 @@ export function CelebrationModal() {
 
           {/* Subtitle */}
           <p
+            id="celebration-desc"
             style={{
               fontSize: 14,
               color: 'var(--theme-text-muted)',

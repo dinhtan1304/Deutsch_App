@@ -1,4 +1,5 @@
 ﻿'use client';
+/* eslint-disable no-restricted-syntax -- game pages use custom dark-theme gradients */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
@@ -14,9 +15,10 @@ import {
   IconTarget, IconCheck, IconX, IconFlame, IconRocket, IconKeyboard, IconVolume, IconRefresh, IconChevronLeft,
 } from '@/components/games/GameUI';
 import { Button } from '@/components/ui';
+import { ACCENT, STATUS } from '@/lib/tokens';
 
 // Article color map
-const AC: Record<string, string> = { masculine: '#3B82F6', feminine: '#EC4899', neuter: '#22C55E' };
+const AC: Record<string, string> = { masculine: ACCENT.srs, feminine: ACCENT.listening, neuter: STATUS.success };
 
 type Phase = 'setup' | 'playing' | 'result';
 
@@ -35,6 +37,7 @@ export default function GenderQuizPage() {
   const session = useGameSession('gender-quiz');
 
   const [phase, setPhase] = useState<Phase>('setup');
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [index, setIndex] = useState(0);
   const [score, setScore] = useState(0);
   const [combo, setCombo] = useState(0);
@@ -55,8 +58,9 @@ export default function GenderQuizPage() {
 
   const startGame = async () => {
     playClick();
+    setLoadError(null);
     const result = await refetch();
-    if (!result.data?.length) { alert('Không có từ vựng! Vui lòng seed database.'); return; }
+    if (!result.data?.length) { setLoadError('Không có từ vựng! Vui lòng seed database.'); return; }
     setIndex(0); setScore(0); setCombo(0); setBestCombo(0);
     scoreRef.current = 0; bestComboRef.current = 0;
     correctRef.current = 0; wrongRef.current = 0;
@@ -111,9 +115,9 @@ export default function GenderQuizPage() {
   // ─── Setup Screen ───
   if (phase === 'setup') {
     return (
-        <GameSetupCard icon={({ size }) => <IconTarget size={size} style={{ color: 'white' }} />} iconColor="#3B82F6" title="Gender Quiz">
+        <GameSetupCard icon={({ size }) => <IconTarget size={size} style={{ color: 'white' }} />} iconColor="#3B82F6" title="Gender Quiz" loadError={loadError}>
           <p className="text-sm mb-1" style={{ color: 'var(--theme-text-secondary)' }}>
-            Chọn mạo từ đúng cho <span className="font-bold" style={{ color: '#3B82F6' }}>{questionsCount} từ</span>
+            Chọn mạo từ đúng cho <span className="font-bold" style={{ color: ACCENT.srs }}>{questionsCount} từ</span>
           </p>
           <p className="text-xs mb-6" style={{ color: 'var(--theme-text-muted)' }}>
             (Thay đổi số câu trong Settings → Học tập)
@@ -121,15 +125,15 @@ export default function GenderQuizPage() {
 
           <GameInfoBox>
             <div className="flex items-center gap-2">
-              <IconTarget size={14} style={{ color: '#3B82F6' }} />
+              <IconTarget size={14} style={{ color: ACCENT.srs }} />
               <span>10 điểm/câu đúng · Combo tối đa x4</span>
             </div>
             <div className="flex items-center gap-2">
-              <IconKeyboard size={14} style={{ color: '#8B5CF6' }} />
+              <IconKeyboard size={14} style={{ color: ACCENT.vocab }} />
               <span>Phím: <KBD>1</KBD> der, <KBD>2</KBD> die, <KBD>3</KBD> das</span>
             </div>
             <div className="flex items-center gap-2">
-              <IconVolume size={14} style={{ color: '#22C55E' }} />
+              <IconVolume size={14} style={{ color: STATUS.success }} />
               <span>Âm thanh: {settings.soundEnabled ? 'Bật' : 'Tắt'}</span>
             </div>
           </GameInfoBox>
@@ -157,7 +161,7 @@ export default function GenderQuizPage() {
         <GameResultCard accuracy={accuracy} title="Kết quả">
           {/* Score */}
           <div className="my-5">
-            <div className="text-5xl font-extrabold" style={{ color: '#3B82F6' }}>{score}</div>
+            <div className="text-5xl font-extrabold" style={{ color: ACCENT.srs }}>{score}</div>
             <p className="text-body mt-1" style={{ color: 'var(--theme-text-muted)' }}>điểm</p>
           </div>
 
@@ -177,7 +181,7 @@ export default function GenderQuizPage() {
         <div className="max-w-2xl mx-auto px-4 sm:px-6">
           <AnswerReview
             answers={answers}
-            getCorrectArticle={a => ({ article: GenderInfo[a.word.gender].article, color: AC[a.word.gender] || '#3B82F6' })}
+            getCorrectArticle={a => ({ article: GenderInfo[a.word.gender].article, color: AC[a.word.gender] || ACCENT.srs })}
             getSelectedLabel={a => !a.isCorrect ? GenderInfo[a.selectedAnswer].article : null}
           />
         </div>
@@ -198,9 +202,9 @@ export default function GenderQuizPage() {
         onExit={() => { playClick(); router.push('/games'); }}
       />
       <GameStatsBar stats={[
-        { label: 'Điểm',  value: score,        color: '#3B82F6' },
-        { label: 'Đúng',  value: correctCount, color: '#22C55E', dot: true },
-        { label: 'Sai',   value: wrongCount,   color: '#EF4444', dot: true },
+        { label: 'Điểm',  value: score,        color: ACCENT.srs },
+        { label: 'Đúng',  value: correctCount, color: STATUS.success, dot: true },
+        { label: 'Sai',   value: wrongCount,   color: STATUS.danger, dot: true },
         { label: 'Câu',   value: `${index + 1}/${questionsCount}`, color: 'var(--theme-text-primary)' },
       ]} />
       <GameProgressBar current={index + 1} total={questionsCount} />

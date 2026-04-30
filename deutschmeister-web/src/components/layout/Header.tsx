@@ -1,43 +1,38 @@
-﻿'use client';
+'use client';
 
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/stores/authStore';
-import { IconSearch, IconGamepad, IconBrain, IconUser, IconSettings, IconLogOut, IconMessageCircle, IconStar } from '@/components/ui/Icons';
+import { IconSearch, IconUser, IconSettings, IconLogOut, IconMessageCircle, IconStar, IconZap } from '@/components/ui/Icons';
 import { useIsPremium } from '@/hooks/useSubscription';
 import { useXp } from '@/hooks/useXp';
-import { useFullDashboard } from '@/hooks/useDashboard';
+import { useDashboardStats } from '@/hooks/useDashboard';
 import { SIDEBAR_WIDTH, SIDEBAR_COLLAPSED_WIDTH } from './Sidebar';
 import { FeedbackModal } from './FeedbackModal';
 import { NotificationDrawer } from './NotificationDrawer';
 import { useUnreadCount, notifKeys } from '@/hooks/useNotifications';
-import { useAutoTranslate } from '@/hooks/useAutoTranslate';
-import { type TranslateLang } from '@/lib/api/translation';
+import { STATUS, ACCENT, GRADIENT } from '@/lib/tokens';
 
 interface HeaderProps {
   sidebarCollapsed: boolean;
+  onOpenPalette: () => void;
 }
 
-export function Header({ sidebarCollapsed }: HeaderProps) {
+export function Header({ sidebarCollapsed, onOpenPalette }: HeaderProps) {
   const router = useRouter();
   const { user, isAuthenticated, logout } = useAuthStore();
   const isPremium = useIsPremium();
-  const [searchQuery, setSearchQuery] = useState('');
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
   const [showNotifs, setShowNotifs] = useState(false);
-  const [searchFocused, setSearchFocused] = useState(false);
-  const [langOverride, setLangOverride] = useState<TranslateLang | undefined>(undefined);
-  const searchContainerRef = useRef<HTMLDivElement>(null);
-  const [dropdownRect, setDropdownRect] = useState<{ top: number; left: number; width: number } | null>(null);
   const qc = useQueryClient();
   const { data: unreadData } = useUnreadCount();
   const unreadCount = unreadData?.count ?? 0;
   const { data: xpInfo } = useXp();
-  const { data: dashData } = useFullDashboard();
-  const streak = dashData?.stats?.streak ?? 0;
+  const { data: stats } = useDashboardStats();
+  const streak = stats?.streak ?? 0;
 
   const toggleNotifs = useCallback(() => {
     setShowNotifs(prev => {
@@ -46,36 +41,15 @@ export function Header({ sidebarCollapsed }: HeaderProps) {
     });
   }, [qc]);
 
-  const { data: translated, isLoading: isTranslating, isPhrase, from: tlFrom, to: tlTo } =
-    useAutoTranslate(searchQuery, langOverride);
-
-  const showTranslationDropdown = searchFocused && isPhrase;
-
+  // Close user menu on Escape key
   useEffect(() => {
-    if (showTranslationDropdown && searchContainerRef.current) {
-      const r = searchContainerRef.current.getBoundingClientRect();
-      setDropdownRect({ top: r.bottom + 6, left: r.left, width: r.width });
-    }
-  }, [showTranslationDropdown]);
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      setSearchFocused(false);
-      router.push(`/words?search=${encodeURIComponent(searchQuery.trim())}`);
-    }
-  };
-
-  const copyTranslation = () => {
-    if (translated) navigator.clipboard.writeText(translated);
-  };
-
-  const speakTranslation = () => {
-    if (!translated) return;
-    const utter = new SpeechSynthesisUtterance(translated);
-    utter.lang = tlTo === 'de' ? 'de-DE' : 'vi-VN';
-    speechSynthesis.speak(utter);
-  };
+    if (!showUserMenu) return;
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setShowUserMenu(false);
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [showUserMenu]);
 
   return (
     <>
@@ -87,42 +61,27 @@ export function Header({ sidebarCollapsed }: HeaderProps) {
         borderColor: 'var(--theme-border)',
       } as React.CSSProperties}
     >
-      {/* Search */}
-      <div ref={searchContainerRef} className="flex-1 max-w-md relative">
-        <form onSubmit={handleSearch}>
-          <div className="relative group">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 transition-colors"
-              style={{ color: 'var(--theme-text-muted)' }}>
-              <IconSearch size={16} />
-            </span>
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={e => { setSearchQuery(e.target.value); setLangOverride(undefined); }}
-              onFocus={() => setSearchFocused(true)}
-              onBlur={() => setTimeout(() => setSearchFocused(false), 150)}
-              placeholder="Tìm từ vựng hoặc dịch câu..."
-              className="w-full pl-10 pr-10 py-2 rounded-xl text-sm border
-                focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500/50
-                transition-all duration-200"
-              style={{
-                backgroundColor: 'var(--theme-bg-secondary)',
-                borderColor: 'var(--theme-border)',
-                color: 'var(--theme-text-primary)',
-              }}
-            />
-            <button
-              type="submit"
-              className="absolute right-2 top-1/2 -translate-y-1/2 px-1.5 py-0.5 rounded-md
-                text-caption font-medium transition-colors"
-              style={{ color: 'var(--theme-text-muted)', backgroundColor: 'var(--theme-bg-tertiary)' }}
-            >
-              ↵
-            </button>
-          </div>
-        </form>
-
-      </div>
+      {/* Search trigger — opens command palette (Ctrl/Cmd+K) */}
+      <button
+        type="button"
+        onClick={onOpenPalette}
+        className="flex-1 max-w-md flex items-center gap-2 pl-3 pr-2 py-2 rounded-md border text-left transition-colors"
+        style={{
+          backgroundColor: 'var(--theme-bg-secondary)',
+          borderColor: 'var(--theme-border)',
+          color: 'var(--theme-text-muted)',
+        }}
+        aria-label="Mở command palette"
+      >
+        <IconSearch size={16} />
+        <span className="flex-1 text-body">Tìm kiếm, điều hướng, dịch câu...</span>
+        <kbd
+          className="shrink-0 rounded-sm px-1.5 py-0.5 text-caption font-semibold"
+          style={{ backgroundColor: 'var(--theme-bg-tertiary)', color: 'var(--theme-text-muted)' }}
+        >
+          Ctrl+K
+        </kbd>
+      </button>
 
       {/* Right side */}
       <div className="flex items-center gap-3">
@@ -131,46 +90,15 @@ export function Header({ sidebarCollapsed }: HeaderProps) {
         {isAuthenticated && streak > 0 && (
           <div
             className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-body font-bold select-none"
-            style={{ background: 'rgba(249,115,22,0.12)', color: '#F97316' }}
+            style={{ background: `${ACCENT.games}1F`, color: ACCENT.games }}
             title={`Streak: ${streak} ngày liên tiếp`}
           >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="#F97316" stroke="none">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill={ACCENT.games} stroke="none">
               <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" />
             </svg>
             {streak}
           </div>
         )}
-
-        {/* XP pill */}
-        {isAuthenticated && xpInfo && (
-          <div
-            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-body font-bold select-none"
-            style={{ background: 'rgba(34,197,94,0.1)', color: '#22C55E' }}
-            title={`${xpInfo.xp} XP · Lv.${xpInfo.level} ${xpInfo.nameVi}`}
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="3" /><line x1="12" y1="2" x2="12" y2="5" /><line x1="12" y1="19" x2="12" y2="22" />
-              <line x1="4.22" y1="4.22" x2="6.34" y2="6.34" /><line x1="17.66" y1="17.66" x2="19.78" y2="19.78" />
-              <line x1="2" y1="12" x2="5" y2="12" /><line x1="19" y1="12" x2="22" y2="12" />
-              <line x1="4.22" y1="19.78" x2="6.34" y2="17.66" /><line x1="17.66" y1="6.34" x2="19.78" y2="4.22" />
-            </svg>
-            {xpInfo.xp.toLocaleString('vi-VN')} XP
-          </div>
-        )}
-
-        {/* Feedback button */}
-        <button
-          onClick={() => setShowFeedback(true)}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-body font-medium transition-all duration-200"
-          style={{ color: 'var(--theme-text-muted)' }}
-          onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'var(--theme-bg-secondary)'; e.currentTarget.style.color = '#6366F1'; }}
-          onMouseLeave={e => { e.currentTarget.style.backgroundColor = ''; e.currentTarget.style.color = 'var(--theme-text-muted)'; }}
-          title="Phản hồi & Báo lỗi"
-          aria-label="Phản hồi & Báo lỗi"
-        >
-          <IconMessageCircle size={16} aria-hidden="true" />
-          <span className="hidden md:inline">Phản hồi</span>
-        </button>
 
         {/* Notification bell */}
         {isAuthenticated && (
@@ -178,7 +106,7 @@ export function Header({ sidebarCollapsed }: HeaderProps) {
             onClick={toggleNotifs}
             className="relative flex items-center justify-center w-9 h-9 rounded-xl transition-all duration-200"
             style={{ color: 'var(--theme-text-muted)' }}
-            onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'var(--theme-bg-secondary)'; e.currentTarget.style.color = '#3B82F6'; }}
+            onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'var(--theme-bg-secondary)'; e.currentTarget.style.color = STATUS.info; }}
             onMouseLeave={e => { e.currentTarget.style.backgroundColor = ''; e.currentTarget.style.color = 'var(--theme-text-muted)'; }}
             title="Thông báo"
             aria-label="Thông báo"
@@ -191,11 +119,11 @@ export function Header({ sidebarCollapsed }: HeaderProps) {
               <span
                 className="absolute -top-0.5 -right-0.5 flex items-center justify-center rounded-full text-[9px] font-bold text-white"
                 style={{
-                  background: '#EF4444',
+                  background: STATUS.danger,
                   minWidth: 16,
                   height: 16,
                   padding: '0 4px',
-                  boxShadow: '0 2px 6px rgba(239,68,68,.4)',
+                  boxShadow: `0 2px 6px ${STATUS.danger}66`,
                 }}
               >
                 {unreadCount > 99 ? '99+' : unreadCount}
@@ -204,42 +132,18 @@ export function Header({ sidebarCollapsed }: HeaderProps) {
           </button>
         )}
 
-        {/* Quick actions */}
-        <div className="hidden md:flex items-center gap-1.5">
-          <Link
-            href="/games"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-body font-medium transition-all duration-200"
-            style={{ color: 'var(--theme-text-secondary)' }}
-            onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'var(--theme-bg-secondary)')}
-            onMouseLeave={e => (e.currentTarget.style.backgroundColor = '')}
-          >
-            <IconGamepad size={16} />
-            Chơi game
-          </Link>
-          <Link
-            href="/review"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-body font-medium
-              transition-all duration-200"
-            style={{
-              background: 'linear-gradient(135deg, rgba(16,185,129,.1), rgba(52,211,153,.06))',
-              color: '#10B981',
-            }}
-          >
-            <IconBrain size={16} />
-            Ôn tập
-          </Link>
-        </div>
-
         {/* User menu */}
         {isAuthenticated ? (
           <div className="relative">
             <button
-              onClick={() => setShowUserMenu(!showUserMenu)}
+              onClick={() => setShowUserMenu(v => !v)}
+              aria-expanded={showUserMenu}
+              aria-haspopup="menu"
               className="flex items-center gap-2.5 px-2 py-1.5 rounded-xl
                 hover:bg-(--theme-bg-secondary) transition-all duration-200"
             >
               <div className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-body"
-                style={{ background: 'linear-gradient(135deg, #3B82F6, #8B5CF6)' }}>
+                style={{ background: GRADIENT.writing }}>
                 {user?.name?.charAt(0).toUpperCase() || '?'}
               </div>
               {!sidebarCollapsed && (
@@ -253,6 +157,7 @@ export function Header({ sidebarCollapsed }: HeaderProps) {
               <>
                 <div className="fixed inset-0 z-40" onClick={() => setShowUserMenu(false)} />
                 <div
+                  role="menu"
                   className="absolute right-0 top-full mt-2 w-52 rounded-xl shadow-xl border py-1.5 z-50"
                   style={{ backgroundColor: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}
                 >
@@ -265,6 +170,23 @@ export function Header({ sidebarCollapsed }: HeaderProps) {
                     </p>
                   </div>
 
+                  {/* XP row */}
+                  {xpInfo && (
+                    <div
+                      className="flex items-center gap-2.5 px-4 py-2 text-body"
+                      style={{ color: 'var(--theme-text-secondary)' }}
+                      title={`${xpInfo.xp} XP · Lv.${xpInfo.level} ${xpInfo.nameVi}`}
+                    >
+                      <IconZap size={15} />
+                      <span className="font-semibold">{xpInfo.xp.toLocaleString('vi-VN')} XP</span>
+                      <span className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>
+                        · Lv.{xpInfo.level} {xpInfo.nameVi}
+                      </span>
+                    </div>
+                  )}
+
+                  <div className="my-1" style={{ borderTop: '1px solid var(--theme-border)' }} />
+
                   {[
                     { href: '/profile', icon: IconUser, label: 'Hồ sơ' },
                     { href: '/settings', icon: IconSettings, label: 'Cài đặt' },
@@ -274,6 +196,7 @@ export function Header({ sidebarCollapsed }: HeaderProps) {
                       <Link
                         key={item.href}
                         href={item.href}
+                        role="menuitem"
                         className="flex items-center gap-2.5 px-4 py-2 text-body transition-colors"
                         style={{ color: 'var(--theme-text-secondary)' }}
                         onClick={() => setShowUserMenu(false)}
@@ -286,13 +209,27 @@ export function Header({ sidebarCollapsed }: HeaderProps) {
                     );
                   })}
 
+                  {/* Feedback */}
+                  <button
+                    role="menuitem"
+                    onClick={() => { setShowUserMenu(false); setShowFeedback(true); }}
+                    className="flex items-center gap-2.5 px-4 py-2 text-body w-full text-left transition-colors"
+                    style={{ color: 'var(--theme-text-secondary)' }}
+                    onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'var(--theme-bg-secondary)')}
+                    onMouseLeave={e => (e.currentTarget.style.backgroundColor = '')}
+                  >
+                    <IconMessageCircle size={15} />
+                    Phản hồi & Báo lỗi
+                  </button>
+
                   {!isPremium && (
                     <Link
                       href="/pricing"
+                      role="menuitem"
                       className="flex items-center gap-2.5 px-4 py-2 text-body font-semibold transition-colors"
-                      style={{ color: '#F59E0B' }}
+                      style={{ color: ACCENT.xp }}
                       onClick={() => setShowUserMenu(false)}
-                      onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'rgba(245,158,11,.08)')}
+                      onMouseEnter={e => (e.currentTarget.style.backgroundColor = `${ACCENT.xp}14`)}
                       onMouseLeave={e => (e.currentTarget.style.backgroundColor = '')}
                     >
                       <IconStar size={15} />
@@ -303,10 +240,11 @@ export function Header({ sidebarCollapsed }: HeaderProps) {
                   <div className="my-1" style={{ borderTop: '1px solid var(--theme-border)' }} />
 
                   <button
+                    role="menuitem"
                     onClick={() => { logout(); setShowUserMenu(false); router.push('/'); }}
                     className="flex items-center gap-2.5 px-4 py-2 text-body w-full text-left transition-colors"
-                    style={{ color: '#EF4444' }}
-                    onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'rgba(239,68,68,.08)')}
+                    style={{ color: STATUS.danger }}
+                    onMouseEnter={e => (e.currentTarget.style.backgroundColor = `${STATUS.danger}14`)}
                     onMouseLeave={e => (e.currentTarget.style.backgroundColor = '')}
                   >
                     <IconLogOut size={15} />
@@ -330,7 +268,7 @@ export function Header({ sidebarCollapsed }: HeaderProps) {
               href="/auth/register"
               className="px-4 py-2 rounded-xl text-body font-semibold text-white transition-all
                 hover:shadow-md hover:-translate-y-0.5"
-              style={{ background: 'linear-gradient(135deg, #3B82F6, #6366F1)' }}
+              style={{ background: GRADIENT.brand }}
             >
               Đăng ký
             </Link>
@@ -341,73 +279,6 @@ export function Header({ sidebarCollapsed }: HeaderProps) {
 
     {showFeedback && <FeedbackModal onClose={() => setShowFeedback(false)} />}
     <NotificationDrawer open={showNotifs} onClose={() => setShowNotifs(false)} />
-
-    {/* Translation dropdown — rendered outside <header> to avoid clip */}
-    {showTranslationDropdown && dropdownRect && (
-      <div
-        className="rounded-xl border shadow-2xl p-3"
-        style={{
-          position: 'fixed',
-          top: dropdownRect.top,
-          left: dropdownRect.left,
-          width: dropdownRect.width,
-          zIndex: 9999,
-          backgroundColor: 'var(--theme-bg-card)',
-          borderColor: 'var(--theme-border)',
-          borderLeft: '3px solid #3B82F6',
-        }}
-      >
-        {/* Direction row */}
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-caption font-semibold flex items-center gap-1.5" style={{ color: 'var(--theme-text-muted)' }}>
-            {tlFrom === 'vi' ? '🇻🇳 VI' : '🇩🇪 DE'}
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
-            {tlTo === 'de' ? '🇩🇪 DE' : '🇻🇳 VI'}
-          </span>
-          <button
-            onMouseDown={e => { e.preventDefault(); setLangOverride(prev => (prev ?? tlFrom) === 'vi' ? 'de' : 'vi'); }}
-            className="text-caption font-bold px-2 py-0.5 rounded-md transition-all"
-            style={{ backgroundColor: 'rgba(59,130,246,.1)', color: '#3B82F6' }}
-          >
-            ⇄ Đổi chiều
-          </button>
-        </div>
-
-        {/* Result */}
-        {isTranslating ? (
-          <div className="flex items-center gap-2">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" strokeWidth="2" strokeLinecap="round" className="animate-spin"><path d="M21 12a9 9 0 1 1-6.219-8.56" /></svg>
-            <span className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>Đang dịch...</span>
-          </div>
-        ) : translated ? (
-          <div>
-            <p className="text-body font-semibold leading-snug mb-2" style={{ color: 'var(--theme-text-primary)' }}>
-              {translated}
-            </p>
-            <div className="flex items-center gap-1.5">
-              <button onMouseDown={e => { e.preventDefault(); copyTranslation(); }}
-                className="flex items-center gap-1 px-2 py-1 rounded-lg text-caption font-semibold"
-                style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-secondary)', border: '1px solid var(--theme-border)' }}>
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-                Copy
-              </button>
-              <button onMouseDown={e => { e.preventDefault(); speakTranslation(); }}
-                className="flex items-center gap-1 px-2 py-1 rounded-lg text-caption font-semibold"
-                style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-secondary)', border: '1px solid var(--theme-border)' }}>
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
-                Phát âm
-              </button>
-            </div>
-          </div>
-        ) : (
-          <p className="text-caption" style={{ color: '#EF4444' }}>Không dịch được. Thử lại sau.</p>
-        )}
-
-        <p className="text-caption mt-2" style={{ color: 'var(--theme-text-muted)' }}>
-          Nhấn ↵ để tìm trong từ điển
-        </p>
-      </div>
-    )}
     </>
   );
 }

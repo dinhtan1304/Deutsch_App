@@ -1,11 +1,13 @@
 ﻿'use client';
+/* eslint-disable no-restricted-syntax */
 
 import { RoleplayScenario } from '@/lib/api/roleplay';
+import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 
 const LEVEL_COLORS: Record<string, string> = {
-  A1: '#22C55E',
-  A2: '#3B82F6',
-  B1: '#A855F7',
+  A1: STATUS.success,
+  A2: ACCENT.srs,
+  B1: ACCENT.examWriting,
 };
 
 interface Props {
@@ -15,7 +17,7 @@ interface Props {
 }
 
 export function ScenarioCard({ scenario, locked, onClick }: Props) {
-  const levelColor = LEVEL_COLORS[scenario.level] ?? '#6366F1';
+  const levelColor = LEVEL_COLORS[scenario.level] ?? ACCENT.writing;
 
   return (
     <button

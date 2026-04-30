@@ -58,7 +58,9 @@ export const useAuthStore = create<AuthState>()(
         set({ isLoading: true });
         try {
           await authApi.logout();
-        } catch {} finally {
+        } catch {
+          // Ignore: clear local state even if server logout fails (offline, expired token)
+        } finally {
           clearTokens();
           set({ user: null, isAuthenticated: false, isLoading: false });
         }

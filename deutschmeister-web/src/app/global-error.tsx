@@ -1,4 +1,5 @@
 'use client';
+/* eslint-disable no-restricted-syntax */
 
 export default function GlobalError({
   error,

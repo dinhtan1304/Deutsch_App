@@ -1,4 +1,5 @@
-﻿'use client';
+'use client';
+/* eslint-disable no-restricted-syntax -- game pages use custom dark-theme gradients that don't map to design tokens */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
@@ -14,6 +15,7 @@ import {
   IconRefresh, IconChevronLeft, IconZap,
 } from '@/components/games/GameUI';
 import { Button } from '@/components/ui';
+import { ACCENT, STATUS } from '@/lib/tokens';
 
 // Batch size per API call. Small enough to keep initial load fast (<100ms),
 // large enough that a typical 60-second session never exhausts the buffer.
@@ -31,6 +33,7 @@ export default function TimedChallengePage() {
   const session = useGameSession('timed-challenge');
 
   const [phase, setPhase] = useState<Phase>('setup');
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [index, setIndex] = useState(0);
   const [timeLeft, setTimeLeft] = useState(60);
   const [score, setScore] = useState(0);
@@ -95,7 +98,7 @@ export default function TimedChallengePage() {
   }, [index, words.length, phase, fetchBatch]);
 
   const startGame = async () => {
-    playClick(); setStarting(true); clearTimers();
+    playClick(); setStarting(true); setLoadError(null); clearTimers();
     try {
       // Reset state
       setIndex(0); setTimeLeft(duration); setScore(0); setCombo(0); setBestCombo(0);
@@ -108,7 +111,7 @@ export default function TimedChallengePage() {
       const firstBatch = await wordsApi.getGameWords(BATCH_SIZE, {});
       isFetchingRef.current = false;
 
-      if (!firstBatch.length) { alert('Không có từ vựng!'); setStarting(false); return; }
+      if (!firstBatch.length) { setLoadError('Không có từ vựng! Vui lòng thêm từ hoặc seed database.'); setStarting(false); return; }
       setWords(firstBatch);
       setPhase('countdown');
       session.start(BATCH_SIZE);
@@ -127,7 +130,7 @@ export default function TimedChallengePage() {
           }, 1000);
         }
       }, 1000);
-    } catch { alert('Lỗi tải từ vựng!'); isFetchingRef.current = false; }
+    } catch { setLoadError('Lỗi tải từ vựng! Vui lòng thử lại.'); isFetchingRef.current = false; }
     finally { setStarting(false); }
   };
 
@@ -172,18 +175,18 @@ export default function TimedChallengePage() {
   // ─── Setup ───
   if (phase === 'setup') {
     return (
-        <GameSetupCard icon={({ size }) => <IconClock size={size} style={{ color: 'white' }} />} iconColor="#EF4444" title="Timed Challenge">
+        <GameSetupCard icon={({ size }) => <IconClock size={size} style={{ color: 'white' }} />} iconColor={STATUS.danger} title="Timed Challenge" loadError={loadError}>
           <p className="text-sm mb-1" style={{ color: 'var(--theme-text-secondary)' }}>
-            Trả lời nhanh trong <span className="font-bold" style={{ color: '#EF4444' }}>{duration} giây</span>!
+            Trả lời nhanh trong <span className="font-bold" style={{ color: STATUS.danger }}>{duration} giây</span>!
           </p>
           <p className="text-xs mb-6" style={{ color: 'var(--theme-text-muted)' }}>(Thay đổi trong Settings → Học tập)</p>
           <GameInfoBox>
-            <div className="flex items-center gap-2"><IconTarget size={14} style={{ color: '#EF4444' }} /><span>10 điểm/câu đúng · Combo tối đa x4 · Sai = mất combo</span></div>
-            <div className="flex items-center gap-2"><IconKeyboard size={14} style={{ color: '#8B5CF6' }} /><span>Phím: <KBD>1</KBD> der, <KBD>2</KBD> die, <KBD>3</KBD> das</span></div>
-            <div className="flex items-center gap-2"><IconVolume size={14} style={{ color: '#22C55E' }} /><span>Âm thanh: {settings.soundEnabled ? 'Bật' : 'Tắt'}</span></div>
+            <div className="flex items-center gap-2"><IconTarget size={14} style={{ color: STATUS.danger }} /><span>10 điểm/câu đúng · Combo tối đa x4 · Sai = mất combo</span></div>
+            <div className="flex items-center gap-2"><IconKeyboard size={14} style={{ color: ACCENT.vocab }} /><span>Phím: <KBD>1</KBD> der, <KBD>2</KBD> die, <KBD>3</KBD> das</span></div>
+            <div className="flex items-center gap-2"><IconVolume size={14} style={{ color: STATUS.success }} /><span>Âm thanh: {settings.soundEnabled ? 'Bật' : 'Tắt'}</span></div>
           </GameInfoBox>
           <div className="flex gap-3 justify-center mt-6">
-            <Button variant="game" accent="gamesAlt" onClick={startGame} isLoading={starting}><IconRocket size={16} /> Bắt đầu</Button>
+            <Button variant="game" accent="games" onClick={startGame} isLoading={starting}><IconRocket size={16} /> Bắt đầu</Button>
             <Button variant="outline" onClick={() => router.push('/games')}><IconChevronLeft size={16} /> Quay lại</Button>
           </div>
         </GameSetupCard>
@@ -193,13 +196,13 @@ export default function TimedChallengePage() {
   // ─── Countdown ───
   if (phase === 'countdown') {
     return (
-        <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="flex items-center justify-center py-20">
           <div className="text-center">
-            <div className="w-32 h-32 rounded-full mx-auto flex items-center justify-center mb-4"
+            <div className="w-24 h-24 rounded-full mx-auto flex items-center justify-center mb-4"
               style={{ background: 'linear-gradient(135deg, rgba(239,68,68,.12), rgba(239,68,68,.04))' }}>
-              <span className="text-7xl font-extrabold" style={{ color: '#EF4444' }}>{countdown}</span>
+              <span className="text-6xl font-extrabold" style={{ color: STATUS.danger }}>{countdown}</span>
             </div>
-            <p className="text-xl font-semibold" style={{ color: 'var(--theme-text-muted)' }}>Chuẩn bị!</p>
+            <p className="text-lg font-semibold" style={{ color: 'var(--theme-text-muted)' }}>Chuẩn bị!</p>
           </div>
         </div>
     );
@@ -214,21 +217,21 @@ export default function TimedChallengePage() {
     return (
         <GameResultCard accuracy={acc} title="Hết giờ!">
           <div className="my-5">
-            <div className="text-5xl font-extrabold" style={{ color: '#3B82F6' }}>{score}</div>
+            <div className="text-5xl font-extrabold" style={{ color: ACCENT.srs }}>{score}</div>
             <p className="text-body mt-1" style={{ color: 'var(--theme-text-muted)' }}>điểm</p>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">
-            <StatCard label="Đúng" value={correct} color="#22C55E" />
+            <StatCard label="Đúng" value={correct} color={STATUS.success} />
             <StatCard label="Sai" value={wrong} />
-            <StatCard label="Chính xác" value={`${acc}%`} color="#3B82F6" />
-            <StatCard label="Best Combo" value={`x${bestCombo}`} color="#F59E0B" />
+            <StatCard label="Chính xác" value={`${acc}%`} color={ACCENT.srs} />
+            <StatCard label="Best Combo" value={`x${bestCombo}`} color={ACCENT.xp} />
           </div>
           <div className="flex items-center justify-center gap-1.5 mb-6 text-sm font-semibold"
             style={{ color: 'var(--theme-text-secondary)' }}>
-            <IconZap size={16} style={{ color: '#F59E0B' }} /> Tốc độ: {wpm} từ/phút
+            <IconZap size={16} style={{ color: ACCENT.xp }} /> Tốc độ: {wpm} từ/phút
           </div>
           <div className="flex gap-3 justify-center">
-            <Button variant="game" accent="gamesAlt" onClick={startGame}><IconRefresh size={16} /> Chơi lại</Button>
+            <Button variant="game" accent="games" onClick={startGame}><IconRefresh size={16} /> Chơi lại</Button>
             <Button variant="outline" onClick={() => router.push('/games')}><IconChevronLeft size={16} /> Quay lại</Button>
           </div>
         </GameResultCard>
@@ -237,7 +240,7 @@ export default function TimedChallengePage() {
 
   // ─── Playing ───
   const timerPct = (timeLeft / duration) * 100;
-  const timerColor = timeLeft <= 10 ? '#EF4444' : '#3B82F6';
+  const timerColor = timeLeft <= 10 ? STATUS.danger : ACCENT.srs;
 
   return (
       <div className="max-w-2xl mx-auto px-4 sm:px-6 py-5">
@@ -252,7 +255,7 @@ export default function TimedChallengePage() {
               {timeLeft}<span className="text-sm font-medium" style={{ color: 'var(--theme-text-muted)' }}>s</span>
             </span>
           </div>
-          <div className="text-2xl font-extrabold" style={{ color: '#3B82F6' }}>{score}</div>
+          <div className="text-2xl font-extrabold" style={{ color: ACCENT.srs }}>{score}</div>
         </div>
 
         {/* Timer bar */}
@@ -270,10 +273,10 @@ export default function TimedChallengePage() {
             </span>
           ) : <span />}
           <div className="flex gap-4">
-            <span className="flex items-center gap-1 text-sm font-bold" style={{ color: '#22C55E' }}>
+            <span className="flex items-center gap-1 text-sm font-bold" style={{ color: STATUS.success }}>
               <IconCheck size={14} /> {correct}
             </span>
-            <span className="flex items-center gap-1 text-sm font-bold" style={{ color: '#EF4444' }}>
+            <span className="flex items-center gap-1 text-sm font-bold" style={{ color: STATUS.danger }}>
               <IconX size={14} /> {wrong}
             </span>
           </div>
@@ -289,11 +292,11 @@ export default function TimedChallengePage() {
                 ? 'linear-gradient(135deg, #450a0a 0%, #991b1b 100%)'
                 : 'linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%)',
             }}>
-            <div className="px-8 py-10 text-center" style={{ minHeight: 160 }}>
-              <h2 className="text-4xl md:text-5xl font-extrabold mb-3 text-white">
+            <div className="px-6 py-8 text-center" style={{ minHeight: 140 }}>
+              <h2 className="text-3xl md:text-4xl font-extrabold mb-2 text-white">
                 {currentWord.word}
               </h2>
-              <p className="text-base" style={{ color: 'rgba(255,255,255,0.65)' }}>
+              <p className="text-sm opacity-60 text-white">
                 {currentWord.translationVi || currentWord.translationEn}
               </p>
             </div>

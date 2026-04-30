@@ -2,12 +2,16 @@
 
 import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import { useRouter, usePathname } from 'next/navigation';
+import { useAuthStore } from '@/stores/authStore';
 import { WordCard } from '@/components/words/WordCard';
 import { useInfiniteWords } from '@/hooks/useWords';
 import { useFavorites, useToggleFavorite } from '@/hooks/useFavorites';
 import { Gender, CEFRLevel, CATEGORIES, LEVELS } from '@/types';
 import { useAutoTranslate } from '@/hooks/useAutoTranslate';
 import { type TranslateLang } from '@/lib/api/translation';
+import { GRADIENT, ACCENT, STATUS } from '@/lib/tokens';
+import { GridSkeleton } from '@/components/ui';
 import {
   IconBook, IconSearch, IconLightbulb, IconStar, IconHistory, IconX,
 } from '@/components/ui/Icons';
@@ -30,9 +34,9 @@ const CATEGORY_VI: Record<string, string> = {
 
 // ─── Gender pill config ───
 const GENDERS: { value: Gender; article: string; color: string; bg: string; gradient: string }[] = [
-  { value: 'masculine', article: 'der', color: '#3B82F6', bg: 'rgba(59,130,246,.1)', gradient: 'linear-gradient(135deg,#3B82F6,#1D4ED8)' },
-  { value: 'feminine',  article: 'die', color: '#EC4899', bg: 'rgba(236,72,153,.1)', gradient: 'linear-gradient(135deg,#EC4899,#BE185D)' },
-  { value: 'neuter',    article: 'das', color: '#22C55E', bg: 'rgba(34,197,94,.1)',  gradient: 'linear-gradient(135deg,#22C55E,#15803D)' },
+  { value: 'masculine', article: 'der', color: ACCENT.srs,       bg: `${ACCENT.srs}1A`,       gradient: `linear-gradient(135deg,${ACCENT.srs},#1D4ED8)` },
+  { value: 'feminine',  article: 'die', color: ACCENT.listening, bg: `${ACCENT.listening}1A`, gradient: `linear-gradient(135deg,${ACCENT.listening},#BE185D)` },
+  { value: 'neuter',    article: 'das', color: ACCENT.reading,   bg: `${ACCENT.reading}1A`,   gradient: `linear-gradient(135deg,${ACCENT.reading},#15803D)` },
 ];
 
 function CopyBtn({ text }: { text: string }) {
@@ -45,7 +49,7 @@ function CopyBtn({ text }: { text: string }) {
   return (
     <button onClick={copy}
       className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all"
-      style={{ backgroundColor: copied ? 'rgba(34,197,94,.15)' : 'var(--theme-bg-secondary)', color: copied ? '#22C55E' : 'var(--theme-text-secondary)', border: '1px solid var(--theme-border)' }}>
+      style={{ backgroundColor: copied ? `${STATUS.success}26` : 'var(--theme-bg-secondary)', color: copied ? STATUS.success : 'var(--theme-text-secondary)', border: '1px solid var(--theme-border)' }}>
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
       {copied ? 'Đã copy' : 'Copy'}
     </button>
@@ -100,10 +104,17 @@ export default function WordsPage() {
   const allWords = useMemo(() => data?.pages.flatMap(p => p.data) ?? [], [data]);
   const totalCount = data?.pages[0]?.total ?? 0;
 
+  const { isAuthenticated } = useAuthStore();
+  const router = useRouter();
+  const pathname = usePathname();
   const { data: favorites } = useFavorites();
   const { toggle: toggleFavorite } = useToggleFavorite();
   const favoriteIds = useMemo(() => new Set(favorites?.map(f => f.wordId) || []), [favorites]);
   const handleFavoriteToggle = async (wordId: string) => {
+    if (!isAuthenticated) {
+      router.push(`/auth/login?returnTo=${pathname}`);
+      return;
+    }
     try { await toggleFavorite(wordId, favoriteIds.has(wordId)); } catch { /* ignore */ }
   };
 
@@ -148,7 +159,7 @@ export default function WordsPage() {
       <div className="flex items-start justify-between mb-6 gap-4 flex-wrap">
         <div className="flex items-center gap-3">
           <div className="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0"
-            style={{ background: 'linear-gradient(135deg, #3B82F6, #6366F1)' }}>
+            style={{ background: GRADIENT.action }}>
             <IconBook size={22} className="text-white" />
           </div>
           <div>
@@ -165,17 +176,17 @@ export default function WordsPage() {
         <div className="flex items-center gap-2 flex-wrap">
           <Link href="/tips"
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[12.5px] font-semibold transition-all hover:-translate-y-0.5"
-            style={{ background: 'rgba(245,158,11,.1)', color: '#F59E0B', border: '1px solid rgba(245,158,11,.2)' }}>
+            style={{ background: `${ACCENT.xp}1A`, color: ACCENT.xp, border: `1px solid ${ACCENT.xp}33` }}>
             <IconLightbulb size={14} /> Mẹo nhớ
           </Link>
           <Link href="/favorites"
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[12.5px] font-semibold transition-all hover:-translate-y-0.5"
-            style={{ background: 'rgba(236,72,153,.1)', color: '#EC4899', border: '1px solid rgba(236,72,153,.2)' }}>
+            style={{ background: `${ACCENT.listening}1A`, color: ACCENT.listening, border: `1px solid ${ACCENT.listening}33` }}>
             <IconStar size={14} /> Yêu thích
           </Link>
           <Link href="/history"
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[12.5px] font-semibold transition-all hover:-translate-y-0.5"
-            style={{ background: 'rgba(139,92,246,.1)', color: '#8B5CF6', border: '1px solid rgba(139,92,246,.2)' }}>
+            style={{ background: `${ACCENT.vocab}1A`, color: ACCENT.vocab, border: `1px solid ${ACCENT.vocab}33` }}>
             <IconHistory size={14} /> Lịch sử
           </Link>
 
@@ -215,9 +226,9 @@ export default function WordsPage() {
             className="w-full pl-10 pr-4 py-2.5 rounded-xl text-sm border focus:outline-none transition-all duration-200"
             style={{
               backgroundColor: 'var(--theme-bg-secondary)',
-              borderColor: searchInput ? '#3B82F6' : 'var(--theme-border)',
+              borderColor: searchInput ? ACCENT.srs : 'var(--theme-border)',
               color: 'var(--theme-text-primary)',
-              boxShadow: searchInput ? '0 0 0 3px rgba(59,130,246,.12)' : 'none',
+              boxShadow: searchInput ? `0 0 0 3px ${ACCENT.srs}1F` : 'none',
             }}
           />
           {searchInput && (
@@ -260,8 +271,8 @@ export default function WordsPage() {
             className="px-3 py-1.5 rounded-lg text-body border focus:outline-none transition-all"
             style={{
               backgroundColor: 'var(--theme-bg-secondary)',
-              borderColor: category ? '#8B5CF6' : 'var(--theme-border)',
-              color: category ? '#8B5CF6' : 'var(--theme-text-secondary)',
+              borderColor: category ? ACCENT.vocab : 'var(--theme-border)',
+              color: category ? ACCENT.vocab : 'var(--theme-text-secondary)',
             }}>
             <option value="">Chủ đề</option>
             {CATEGORIES.map(cat => <option key={cat} value={cat}>{CATEGORY_VI[cat] || cat}</option>)}
@@ -272,8 +283,8 @@ export default function WordsPage() {
             className="px-3 py-1.5 rounded-lg text-body border focus:outline-none transition-all"
             style={{
               backgroundColor: 'var(--theme-bg-secondary)',
-              borderColor: level ? '#F59E0B' : 'var(--theme-border)',
-              color: level ? '#F59E0B' : 'var(--theme-text-secondary)',
+              borderColor: level ? ACCENT.xp : 'var(--theme-border)',
+              color: level ? ACCENT.xp : 'var(--theme-text-secondary)',
             }}>
             <option value="">Cấp độ</option>
             {LEVELS.map(l => <option key={l} value={l}>{l}</option>)}
@@ -283,7 +294,7 @@ export default function WordsPage() {
           {hasFilters && (
             <button onClick={clearFilters}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12.5px] font-semibold transition-all hover:bg-red-500/10"
-              style={{ color: '#EF4444' }}>
+              style={{ color: STATUS.danger }}>
               <IconX size={12} /> Xóa bộ lọc
             </button>
           )}
@@ -297,20 +308,20 @@ export default function WordsPage() {
           style={{
             backgroundColor: 'var(--theme-bg-card)',
             border: '1px solid var(--theme-border)',
-            borderLeft: '3px solid #3B82F6',
+            borderLeft: `3px solid ${ACCENT.srs}`,
           }}
         >
           {/* Header row */}
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2 text-body font-semibold" style={{ color: 'var(--theme-text-secondary)' }}>
               <span>{tlFrom === 'vi' ? '🇻🇳 Tiếng Việt' : '🇩🇪 Tiếng Đức'}</span>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{ color: '#3B82F6' }}><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{ color: ACCENT.srs }}><path d="M5 12h14M12 5l7 7-7 7" /></svg>
               <span>{tlTo === 'de' ? '🇩🇪 Tiếng Đức' : '🇻🇳 Tiếng Việt'}</span>
             </div>
             <button
               onClick={swapLang}
               className="px-2.5 py-1 rounded-lg text-caption font-bold transition-all hover:scale-105"
-              style={{ backgroundColor: 'rgba(59,130,246,.1)', color: '#3B82F6' }}
+              style={{ backgroundColor: `${ACCENT.srs}1A`, color: ACCENT.srs }}
               title="Đổi chiều dịch"
             >
               ⇄ Đổi chiều
@@ -325,7 +336,7 @@ export default function WordsPage() {
           {/* Result */}
           {isTranslating ? (
             <div className="flex items-center gap-2 py-2">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" strokeWidth="2" strokeLinecap="round" className="animate-spin"><path d="M21 12a9 9 0 1 1-6.219-8.56" /></svg>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={ACCENT.srs} strokeWidth="2" strokeLinecap="round" className="animate-spin"><path d="M21 12a9 9 0 1 1-6.219-8.56" /></svg>
               <span className="text-body" style={{ color: 'var(--theme-text-muted)' }}>Đang dịch...</span>
             </div>
           ) : translated ? (
@@ -339,7 +350,7 @@ export default function WordsPage() {
               </div>
             </div>
           ) : (
-            <div className="py-1 text-xs" style={{ color: '#EF4444' }}>
+            <div className="py-1 text-xs" style={{ color: STATUS.danger }}>
               Không dịch được. Thử lại hoặc kiểm tra kết nối.
             </div>
           )}
@@ -351,21 +362,14 @@ export default function WordsPage() {
       )}
 
       {/* ─── Loading skeleton (initial) ─── */}
-      {isLoading && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {[...Array(6)].map((_, i) => (
-            <div key={i} className="rounded-2xl h-40 animate-pulse"
-              style={{ backgroundColor: 'var(--theme-bg-secondary)' }} />
-          ))}
-        </div>
-      )}
+      {isLoading && <GridSkeleton cols={3} count={6} rounded="rounded-2xl" gap="gap-4" />}
 
       {/* ─── Error ─── */}
       {error && (
         <div className="text-center py-16">
           <div className="w-14 h-14 rounded-2xl mx-auto flex items-center justify-center mb-4"
-            style={{ background: 'linear-gradient(135deg,rgba(239,68,68,.12),rgba(239,68,68,.06))' }}>
-            <IconBook size={26} style={{ color: '#EF4444' }} />
+            style={{ background: `linear-gradient(135deg,${STATUS.danger}1F,${STATUS.danger}0F)` }}>
+            <IconBook size={26} style={{ color: STATUS.danger }} />
           </div>
           <p className="text-[15px] font-semibold" style={{ color: 'var(--theme-text-secondary)' }}>
             Không thể tải từ vựng
@@ -399,7 +403,7 @@ export default function WordsPage() {
               <div className="flex items-center gap-2 px-4 py-2 rounded-xl"
                 style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
                 <div className="w-4 h-4 border-2 rounded-full animate-spin"
-                  style={{ borderColor: 'var(--theme-border)', borderTopColor: '#3B82F6' }} />
+                  style={{ borderColor: 'var(--theme-border)', borderTopColor: ACCENT.srs }} />
                 <span className="text-body font-medium" style={{ color: 'var(--theme-text-muted)' }}>
                   Đang tải thêm...
                 </span>
@@ -422,7 +426,7 @@ export default function WordsPage() {
       {!isLoading && allWords.length === 0 && !error && (
         <div className="text-center py-16">
           <div className="w-14 h-14 rounded-2xl mx-auto flex items-center justify-center mb-4"
-            style={{ background: 'linear-gradient(135deg,rgba(107,114,128,.12),rgba(107,114,128,.06))' }}>
+            style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
             <IconSearch size={26} style={{ color: 'var(--theme-text-muted)' }} />
           </div>
           <p className="text-base font-semibold mb-1" style={{ color: 'var(--theme-text-secondary)' }}>
@@ -433,7 +437,7 @@ export default function WordsPage() {
           </p>
           <button onClick={clearFilters}
             className="inline-flex items-center gap-2 px-5 py-2 rounded-xl text-body font-semibold text-white transition-all hover:shadow-md hover:-translate-y-0.5"
-            style={{ background: 'linear-gradient(135deg, #3B82F6, #6366F1)' }}>
+            style={{ background: GRADIENT.action }}>
             <IconX size={13} /> Xóa bộ lọc
           </button>
         </div>

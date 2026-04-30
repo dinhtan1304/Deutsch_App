@@ -40,7 +40,7 @@ export interface User {
   createdAt: string;
   onboardingCompleted?: boolean;
   subscription?: {
-    plan: 'free' | 'premium';
+    plan: 'free' | 'premium' | 'lifetime';
     status: string;
     expiresAt: string | null;
   };

@@ -7,7 +7,7 @@ const keys = {
   session: (id: string) => ['exam-speaking', 'session', id] as const,
 };
 
-export function useExamSpeakingHistory(params?: { page?: number; limit?: number; status?: string }) {
+export function useExamSpeakingHistory(params?: { page?: number; limit?: number; status?: string; cefrLevel?: string }) {
   return useQuery({
     queryKey: keys.history(params),
     queryFn: () => examSpeakingApi.getHistory(params),

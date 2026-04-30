@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { Exercise, SubmitResult } from '@/types/grammar';
 import { HighlightedText } from '@/components/word-highlight/HighlightedText';
 import { usePronunciation } from '@/hooks/usePronunciation';
+import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 import {
     IconCheck, IconX, IconArrowRight, IconRefresh,
     IconTrophy, IconLightbulb, IconLoader,
@@ -18,20 +19,21 @@ interface ExerciseListProps {
 }
 
 const TYPE_META: Record<string, { label: string; color: string; icon: string }> = {
-    mcq:          { label: 'Trắc nghiệm', color: '#3B82F6', icon: '🎯' },
-    fill_blank:   { label: 'Điền từ',     color: '#8B5CF6', icon: '✏️' },
-    reorder:      { label: 'Sắp xếp',     color: '#F59E0B', icon: '🔀' },
-    translate:    { label: 'Dịch',        color: '#10B981', icon: '🌐' },
-    error_correct:{ label: 'Sửa lỗi',    color: '#EF4444', icon: '🔧' },
+    mcq:          { label: 'Trắc nghiệm', color: ACCENT.srs,     icon: '🎯' },
+    fill_blank:   { label: 'Điền từ',     color: ACCENT.vocab,   icon: '✏️' },
+    reorder:      { label: 'Sắp xếp',     color: ACCENT.xp,      icon: '🔀' },
+    // eslint-disable-next-line no-restricted-syntax
+    translate:    { label: 'Dịch',        color: '#10B981',      icon: '🌐' },
+    error_correct:{ label: 'Sửa lỗi',     color: STATUS.danger,  icon: '🔧' },
 };
 
 function difficultyFromPoints(pts: number): { label: string; color: string } {
-    if (pts <= 1) return { label: 'Dễ',        color: '#22C55E' };
-    if (pts <= 2) return { label: 'Trung bình', color: '#F59E0B' };
-    return            { label: 'Khó',       color: '#EF4444' };
+    if (pts <= 1) return { label: 'Dễ',        color: STATUS.success };
+    if (pts <= 2) return { label: 'Trung bình', color: ACCENT.xp };
+    return            { label: 'Khó',       color: STATUS.danger };
 }
 
-const OPTION_COLORS = ['#3B82F6', '#8B5CF6', '#22C55E', '#F59E0B'];
+const OPTION_COLORS = [ACCENT.srs, ACCENT.vocab, ACCENT.reading, ACCENT.xp];
 
 // ─── Dot progress bar ───────────────────────────────────────────────────
 
@@ -49,9 +51,9 @@ function DotProgress({ total, current, skipped }: { total: number; current: numb
                         style={{
                             width:  isCurrent ? 26 : 10,
                             height: 10,
-                            background: isCurrent  ? '#3B82F6'
-                                : isPast    ? '#22C55E'
-                                : isSkipped ? '#EF4444'
+                            background: isCurrent  ? ACCENT.srs
+                                : isPast    ? STATUS.success
+                                : isSkipped ? STATUS.danger
                                 : 'var(--theme-bg-tertiary)',
                             opacity: i > current && !isSkipped ? 0.45 : 1,
                         }}
@@ -143,7 +145,7 @@ function TextInput({ value, onChange, disabled, placeholder, multiline, onEnter,
     };
 
     const sharedStyle: React.CSSProperties = {
-        borderColor: disabled ? 'var(--theme-border)' : '#8B5CF6',
+        borderColor: disabled ? 'var(--theme-border)' : ACCENT.vocab,
         backgroundColor: 'var(--theme-bg-secondary)',
         color: 'var(--theme-text-primary)',
     };
@@ -165,7 +167,7 @@ function TextInput({ value, onChange, disabled, placeholder, multiline, onEnter,
                     {SPECIAL_CHARS.map(ch => (
                         <button key={ch} type="button" onClick={() => insertSpecial(ch)}
                             className="w-9 h-9 rounded-lg text-sm font-bold border transition-all hover:scale-105 active:scale-95"
-                            style={{ borderColor: '#8B5CF6', color: '#8B5CF6', backgroundColor: 'rgba(139,92,246,.06)' }}>
+                            style={{ borderColor: ACCENT.vocab, color: ACCENT.vocab, backgroundColor: `${ACCENT.vocab}0F` }}>
                             {ch}
                         </button>
                     ))}
@@ -189,12 +191,12 @@ function ReorderInput({ words, value, onChange, disabled }: {
     return (
         <div className="space-y-4">
             <div className="min-h-14 p-3 rounded-xl border-2 border-dashed flex flex-wrap gap-2 items-center"
-                style={{ borderColor: value.length > 0 ? '#8B5CF6' : 'var(--theme-border)', backgroundColor: 'rgba(139,92,246,.03)' }}>
+                style={{ borderColor: value.length > 0 ? ACCENT.vocab : 'var(--theme-border)', backgroundColor: `${ACCENT.vocab}08` }}>
                 {value.length === 0 && <span className="text-body italic" style={{ color: 'var(--theme-text-muted)' }}>Nhấn vào từ bên dưới để sắp xếp...</span>}
                 {value.map((w, i) => (
                     <button key={i} onClick={() => { if (!disabled) { const n=[...value]; n.splice(i,1); onChange(n); } }} disabled={disabled}
                         className="px-3.5 py-2 rounded-lg text-sm font-semibold transition-all hover:scale-105"
-                        style={{ background: 'linear-gradient(135deg, #8B5CF6, #6366F1)', color: 'white', boxShadow: '0 2px 8px rgba(139,92,246,.25)' }}>
+                        style={{ background: GRADIENT.history, color: 'white', boxShadow: `0 2px 8px ${ACCENT.vocab}40` }}>
                         {w} <span className="ml-1 opacity-60 text-xs">×</span>
                     </button>
                 ))}
@@ -221,7 +223,8 @@ function ReorderInput({ words, value, onChange, disabled }: {
 
 function ResultScreen({ result, exercises, onRetry }: { result: SubmitResult; exercises: Exercise[]; onRetry: () => void }) {
     const accuracy = result.totalQuestions > 0 ? Math.round((result.correctCount / result.totalQuestions) * 100) : 0;
-    const gradient = result.passed ? 'linear-gradient(135deg, #F59E0B, #D97706)' : accuracy >= 50 ? 'linear-gradient(135deg, #3B82F6, #2563EB)' : 'linear-gradient(135deg, #8B5CF6, #7C3AED)';
+    // eslint-disable-next-line no-restricted-syntax
+    const gradient = result.passed ? 'linear-gradient(135deg, #F59E0B, #D97706)' : accuracy >= 50 ? GRADIENT.action : GRADIENT.vocab;
 
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -237,9 +240,9 @@ function ResultScreen({ result, exercises, onRetry }: { result: SubmitResult; ex
                 </p>
                 <div className="grid grid-cols-3 gap-3 mb-6">
                     {[
-                        { value: result.score, label: 'Điểm', color: '#8B5CF6', bg: 'rgba(139,92,246,' },
-                        { value: `${result.correctCount}/${result.totalQuestions}`, label: 'Đúng', color: '#22C55E', bg: 'rgba(34,197,94,' },
-                        { value: `${accuracy}%`, label: 'Chính xác', color: '#3B82F6', bg: 'rgba(59,130,246,' },
+                        { value: result.score, label: 'Điểm', color: ACCENT.vocab, bg: 'rgba(139,92,246,' },
+                        { value: `${result.correctCount}/${result.totalQuestions}`, label: 'Đúng', color: STATUS.success, bg: 'rgba(34,197,94,' },
+                        { value: `${accuracy}%`, label: 'Chính xác', color: ACCENT.srs, bg: 'rgba(59,130,246,' },
                     ].map((s, i) => (
                         <div key={i} className="rounded-xl p-3" style={{ background: `linear-gradient(135deg, ${s.bg}.1), ${s.bg}.05))` }}>
                             <div className="text-2xl font-extrabold" style={{ color: s.color }}>{s.value}</div>
@@ -249,27 +252,27 @@ function ResultScreen({ result, exercises, onRetry }: { result: SubmitResult; ex
                 </div>
                 <button onClick={onRetry}
                     className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white transition-all hover:-translate-y-0.5"
-                    style={{ background: 'linear-gradient(135deg, #8B5CF6, #6366F1)', boxShadow: '0 4px 12px rgba(139,92,246,.25)' }}>
+                    style={{ background: GRADIENT.history, boxShadow: `0 4px 12px ${ACCENT.vocab}40` }}>
                     <IconRefresh size={16} style={{ color: 'white' }} /> Làm lại
                 </button>
             </div>
 
             <div className="rounded-2xl border overflow-hidden" style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
                 <div className="px-5 py-4 border-b flex items-center gap-2" style={{ borderColor: 'var(--theme-border)' }}>
-                    <IconLightbulb size={16} style={{ color: '#F59E0B' }} />
+                    <IconLightbulb size={16} style={{ color: ACCENT.xp }} />
                     <h3 className="text-[15px] font-bold" style={{ color: 'var(--theme-text-primary)' }}>Chi tiết câu trả lời</h3>
                 </div>
                 <div className="divide-y" style={{ borderColor: 'var(--theme-border)' }}>
                     {exercises.map((ex, i) => {
                         const fb = result.feedback.find(f => f.exerciseId === ex.id);
                         if (!fb) return null;
-                        const t = TYPE_META[ex.exerciseType] || { label: ex.exerciseType, color: '#6B7280', icon: '' };
+                        const t = TYPE_META[ex.exerciseType] || { label: ex.exerciseType, color: 'var(--theme-text-muted)', icon: '' };
                         return (
                             <div key={i} className="px-5 py-3 flex items-start gap-3"
                                 style={{ background: fb.correct ? 'rgba(34,197,94,.03)' : 'rgba(239,68,68,.03)' }}>
                                 <span className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5"
                                     style={{ background: fb.correct ? 'rgba(34,197,94,.12)' : 'rgba(239,68,68,.12)' }}>
-                                    {fb.correct ? <IconCheck size={12} style={{ color: '#22C55E' }} /> : <IconX size={12} style={{ color: '#EF4444' }} />}
+                                    {fb.correct ? <IconCheck size={12} style={{ color: STATUS.success }} /> : <IconX size={12} style={{ color: STATUS.danger }} />}
                                 </span>
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2 mb-0.5">
@@ -279,7 +282,7 @@ function ResultScreen({ result, exercises, onRetry }: { result: SubmitResult; ex
                                         <span className="text-body font-medium truncate" style={{ color: 'var(--theme-text-primary)' }}>{ex.questionVi}</span>
                                     </div>
                                     {fb.explanation && (
-                                        <p className="text-xs mt-1" style={{ color: fb.correct ? '#22C55E' : '#EF4444' }}>
+                                        <p className="text-xs mt-1" style={{ color: fb.correct ? STATUS.success : STATUS.danger }}>
                                             {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                                             💡 {(fb.explanation as any)?.vi || (fb.explanation as any)?.en || ''}
                                         </p>
@@ -310,7 +313,7 @@ export const ExerciseList = ({ exercises, onSubmit, onBackToTheory }: ExerciseLi
 
     const exercise  = exercises[index];
     const isLast    = index === exercises.length - 1;
-    const typeMeta  = exercise ? TYPE_META[exercise.exerciseType] || { label: exercise.exerciseType, color: '#6B7280', icon: '' } : null;
+    const typeMeta  = exercise ? TYPE_META[exercise.exerciseType] || { label: exercise.exerciseType, color: 'var(--theme-text-muted)', icon: '' } : null;
     const difficulty = exercise ? difficultyFromPoints(exercise.points) : null;
 
     const shuffledMap = useMemo(() => {
@@ -418,7 +421,7 @@ export const ExerciseList = ({ exercises, onSubmit, onBackToTheory }: ExerciseLi
                     </span>
                     {combo >= 2 && (
                         <span className="flex items-center gap-1 font-bold px-2.5 py-1 rounded-lg text-caption"
-                            style={{ background: 'rgba(249,115,22,.12)', color: '#F97316' }}>
+                            style={{ background: `${ACCENT.games}1F`, color: ACCENT.games }}>
                             🔥 Combo x{combo}
                         </span>
                     )}
@@ -440,7 +443,7 @@ export const ExerciseList = ({ exercises, onSubmit, onBackToTheory }: ExerciseLi
                         {/* Question number */}
                         <div
                             className="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-extrabold text-white shrink-0"
-                            style={{ background: 'linear-gradient(135deg, #3B82F6, #6366F1)' }}
+                            style={{ background: GRADIENT.action }}
                         >
                             {index + 1}
                         </div>
@@ -457,7 +460,7 @@ export const ExerciseList = ({ exercises, onSubmit, onBackToTheory }: ExerciseLi
                     </div>
                     {/* Points */}
                     <span className="flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-lg shrink-0"
-                        style={{ background: 'rgba(245,158,11,.12)', color: '#F59E0B' }}>
+                        style={{ background: `${ACCENT.xp}1F`, color: ACCENT.xp }}>
                         ⭐ {exercise.points} điểm
                     </span>
                 </div>
@@ -472,7 +475,7 @@ export const ExerciseList = ({ exercises, onSubmit, onBackToTheory }: ExerciseLi
                             <button
                                 onClick={() => speak(exercise.questionDe!)}
                                 className="shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-all hover:scale-110 mt-0.5"
-                                style={{ background: 'rgba(59,130,246,.1)', color: '#3B82F6' }}
+                                style={{ background: `${ACCENT.srs}1A`, color: ACCENT.srs }}
                                 title="Phát âm câu hỏi"
                             >
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -521,14 +524,14 @@ export const ExerciseList = ({ exercises, onSubmit, onBackToTheory }: ExerciseLi
                 {/* Hint panel */}
                 {showHint && (
                     <div className="mx-5 mb-4 rounded-xl overflow-hidden"
-                        style={{ border: '1.5px solid rgba(245,158,11,.35)' }}>
+                        style={{ border: `1.5px solid ${ACCENT.xp}59` }}>
                         <div className="px-3.5 py-2 flex items-center gap-2"
-                            style={{ background: 'linear-gradient(135deg, #F59E0B, #F97316)' }}>
+                            style={{ background: GRADIENT.xp }}>
                             <IconLightbulb size={14} style={{ color: 'white' }} />
                             <span className="text-xs font-bold text-white tracking-wide">Gợi ý</span>
                         </div>
                         <div className="px-4 py-3 flex items-start gap-2.5"
-                            style={{ background: 'rgba(245,158,11,.06)' }}>
+                            style={{ background: `${ACCENT.xp}0F` }}>
                             <p className="text-[13.5px] leading-relaxed" style={{ color: 'var(--theme-text-primary)' }}>
                                 {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                                 {(exercise as any).hint || (exercise as any).hintVi || 'Xem lại phần lý thuyết để tìm câu trả lời.'}
@@ -540,9 +543,9 @@ export const ExerciseList = ({ exercises, onSubmit, onBackToTheory }: ExerciseLi
                 {/* Error banner */}
                 {submitError && (
                     <div className="mx-5 mb-4 px-4 py-3 rounded-xl flex items-start gap-2.5"
-                        style={{ background: 'rgba(239,68,68,.08)', border: '1px solid rgba(239,68,68,.2)' }}>
-                        <IconX size={15} style={{ color: '#EF4444', marginTop: 1, flexShrink: 0 }} />
-                        <p className="text-body" style={{ color: '#EF4444' }}>{submitError}</p>
+                        style={{ background: `${STATUS.danger}14`, border: `1px solid ${STATUS.danger}33` }}>
+                        <IconX size={15} style={{ color: STATUS.danger, marginTop: 1, flexShrink: 0 }} />
+                        <p className="text-body" style={{ color: STATUS.danger }}>{submitError}</p>
                     </div>
                 )}
 
@@ -555,8 +558,8 @@ export const ExerciseList = ({ exercises, onSubmit, onBackToTheory }: ExerciseLi
                             onClick={() => setShowHint(h => !h)}
                             className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold transition-all"
                             style={showHint
-                                ? { background: 'linear-gradient(135deg, #F59E0B, #F97316)', color: 'white' }
-                                : { background: 'rgba(245,158,11,.1)', color: '#F59E0B', border: '1px solid rgba(245,158,11,.25)' }}
+                                ? { background: GRADIENT.xp, color: 'white' }
+                                : { background: `${ACCENT.xp}1A`, color: ACCENT.xp, border: `1px solid ${ACCENT.xp}40` }}
                         >
                             <IconLightbulb size={13} /> Gợi ý
                         </button>
@@ -564,7 +567,7 @@ export const ExerciseList = ({ exercises, onSubmit, onBackToTheory }: ExerciseLi
                             <button
                                 onClick={handleSkip}
                                 className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold transition-all"
-                                style={{ background: 'rgba(239,68,68,.08)', color: '#EF4444', border: '1px solid rgba(239,68,68,.2)' }}
+                                style={{ background: `${STATUS.danger}14`, color: STATUS.danger, border: `1px solid ${STATUS.danger}33` }}
                             >
                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polygon points="5 4 15 12 5 20 5 4" /><line x1="19" y1="5" x2="19" y2="19" /></svg>
                                 Bỏ qua
@@ -574,7 +577,7 @@ export const ExerciseList = ({ exercises, onSubmit, onBackToTheory }: ExerciseLi
                             <button
                                 onClick={onBackToTheory}
                                 className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold transition-all"
-                                style={{ background: 'rgba(99,102,241,.08)', color: '#6366F1', border: '1px solid rgba(99,102,241,.2)' }}
+                                style={{ background: `${ACCENT.writing}14`, color: ACCENT.writing, border: `1px solid ${ACCENT.writing}33` }}
                             >
                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
                                 Xem lý thuyết
@@ -588,9 +591,9 @@ export const ExerciseList = ({ exercises, onSubmit, onBackToTheory }: ExerciseLi
                         disabled={!hasAnswer() || isSubmitting}
                         className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-body font-bold transition-all hover:-translate-y-0.5 disabled:opacity-40 disabled:cursor-not-allowed disabled:transform-none"
                         style={{
-                            background: hasAnswer() ? 'linear-gradient(135deg, #3B82F6, #6366F1)' : 'var(--theme-bg-tertiary)',
+                            background: hasAnswer() ? GRADIENT.action : 'var(--theme-bg-tertiary)',
                             color: hasAnswer() ? 'white' : 'var(--theme-text-muted)',
-                            boxShadow: hasAnswer() ? '0 4px 12px rgba(59,130,246,.3)' : 'none',
+                            boxShadow: hasAnswer() ? `0 4px 12px ${ACCENT.srs}4D` : 'none',
                         }}
                     >
                         {isSubmitting ? (

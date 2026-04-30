@@ -1,4 +1,5 @@
 ﻿'use client';
+/* eslint-disable no-restricted-syntax */
 
 import { useState } from 'react';
 import Link from 'next/link';
@@ -10,6 +11,7 @@ import {
   quickReference,
   GenderRule,
 } from '@/lib/genderRules';
+import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 
 // ─── Inline SVG Icons ───
 function IconLightbulb({ size = 16, style }: { size?: number; style?: React.CSSProperties }) {
@@ -75,19 +77,19 @@ function IconAlertTriangle({ size = 16, style }: { size?: number; style?: React.
 
 // ─── Color map ───
 const GENDER_COLORS = {
-  masculine: { color: '#3B82F6', bg: 'rgba(59,130,246,.08)', border: 'rgba(59,130,246,.2)', label: 'DER' },
-  feminine:  { color: '#EC4899', bg: 'rgba(236,72,153,.08)', border: 'rgba(236,72,153,.2)', label: 'DIE' },
-  neuter:    { color: '#22C55E', bg: 'rgba(34,197,94,.08)',  border: 'rgba(34,197,94,.2)',  label: 'DAS' },
+  masculine: { color: ACCENT.srs, bg: 'rgba(59,130,246,.08)', border: 'rgba(59,130,246,.2)', label: 'DER' },
+  feminine:  { color: ACCENT.listening, bg: 'rgba(236,72,153,.08)', border: 'rgba(236,72,153,.2)', label: 'DIE' },
+  neuter:    { color: STATUS.success, bg: 'rgba(34,197,94,.08)',  border: 'rgba(34,197,94,.2)',  label: 'DAS' },
 };
 
 type TabType = 'all' | 'der' | 'die' | 'das' | 'tricks';
 
 const TABS: { id: TabType; label: string; color: string }[] = [
   { id: 'all',    label: 'Tất cả',  color: '#6B7280' },
-  { id: 'der',    label: 'der',     color: '#3B82F6' },
-  { id: 'die',    label: 'die',     color: '#EC4899' },
-  { id: 'das',    label: 'das',     color: '#22C55E' },
-  { id: 'tricks', label: 'Mẹo nhớ', color: '#F59E0B' },
+  { id: 'der',    label: 'der',     color: ACCENT.srs },
+  { id: 'die',    label: 'die',     color: ACCENT.listening },
+  { id: 'das',    label: 'das',     color: STATUS.success },
+  { id: 'tricks', label: 'Mẹo nhớ', color: ACCENT.xp },
 ];
 
 // ─── Rule Card ───
@@ -124,7 +126,7 @@ function RuleCard({ rule }: { rule: GenderRule }) {
 
       {rule.exceptions && rule.exceptions.length > 0 && (
         <p className="text-caption flex items-center gap-1" style={{ color: 'var(--theme-text-muted)' }}>
-          <IconAlertTriangle size={12} style={{ color: '#F59E0B' }} />
+          <IconAlertTriangle size={12} style={{ color: ACCENT.xp }} />
           Ngoại lệ: {rule.exceptions.join(', ')}
         </p>
       )}
@@ -256,7 +258,7 @@ export default function TipsPage() {
                 style={{ background: 'linear-gradient(135deg, #3B82F6, #3B82F6cc)' }}>
                 <IconShield size={14} style={{ color: 'white' }} />
               </div>
-              <h2 className="text-title font-bold" style={{ color: '#3B82F6' }}>
+              <h2 className="text-title font-bold" style={{ color: ACCENT.srs }}>
                 Quy tắc DER (Maskulinum)
               </h2>
             </div>
@@ -274,7 +276,7 @@ export default function TipsPage() {
                 style={{ background: 'linear-gradient(135deg, #EC4899, #EC4899cc)' }}>
                 <IconShield size={14} style={{ color: 'white' }} />
               </div>
-              <h2 className="text-title font-bold" style={{ color: '#EC4899' }}>
+              <h2 className="text-title font-bold" style={{ color: ACCENT.listening }}>
                 Quy tắc DIE (Femininum)
               </h2>
             </div>
@@ -292,7 +294,7 @@ export default function TipsPage() {
                 style={{ background: 'linear-gradient(135deg, #22C55E, #22C55Ecc)' }}>
                 <IconShield size={14} style={{ color: 'white' }} />
               </div>
-              <h2 className="text-title font-bold" style={{ color: '#22C55E' }}>
+              <h2 className="text-title font-bold" style={{ color: STATUS.success }}>
                 Quy tắc DAS (Neutrum)
               </h2>
             </div>

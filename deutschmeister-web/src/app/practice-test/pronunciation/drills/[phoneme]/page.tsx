@@ -5,13 +5,14 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { usePhonemeDrill, useScorePronunciation } from '@/hooks/usePronunciationScoring';
 import type { WordScore } from '@/lib/api/pronunciation';
+import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 
 const MAX_RECORD_SECS = 30;
 
 function getWordColor(score: number) {
-  if (score >= 80) return '#22C55E';
-  if (score >= 50) return '#F59E0B';
-  return '#EF4444';
+  if (score >= 80) return STATUS.success;
+  if (score >= 50) return STATUS.warning;
+  return STATUS.danger;
 }
 
 type RecState = 'idle' | 'recording' | 'done' | 'scoring';
@@ -38,13 +39,19 @@ export default function PhonemeDrillPage() {
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
 
+  const stopRecording = useCallback(() => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    timerRef.current = null;
+    recorderRef.current?.stop();
+  }, []);
+
   useEffect(() => {
     if (recState === 'recording' && elapsed >= MAX_RECORD_SECS) stopRecording();
-  }, [elapsed, recState]);
+  }, [elapsed, recState, stopRecording]);
 
   useEffect(() => {
     return () => {
-      timerRef.current && clearInterval(timerRef.current);
+      if (timerRef.current) clearInterval(timerRef.current);
       streamRef.current?.getTracks().forEach(t => t.stop());
     };
   }, []);
@@ -75,12 +82,6 @@ export default function PhonemeDrillPage() {
     }
   }, []);
 
-  const stopRecording = useCallback(() => {
-    timerRef.current && clearInterval(timerRef.current);
-    timerRef.current = null;
-    recorderRef.current?.stop();
-  }, []);
-
   const handleScore = async () => {
     if (!blobRef.current || !selectedText) return;
     setRecState('scoring');
@@ -97,8 +98,8 @@ export default function PhonemeDrillPage() {
       });
       setResult(res);
       setRecState('done');
-    } catch (err: any) {
-      setError(err?.message || 'Chấm điểm thất bại');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Chấm điểm thất bại');
       setRecState('done');
     }
   };
@@ -127,17 +128,17 @@ export default function PhonemeDrillPage() {
       </Link>
 
       <div className="flex items-center gap-3 mb-6">
-        <div className="text-4xl font-extrabold" style={{ color: '#A855F7' }}>{drill.label}</div>
+        <div className="text-4xl font-extrabold" style={{ color: ACCENT.examWriting }}>{drill.label}</div>
         <div>
           <h1 className="text-xl font-bold" style={{ color: 'var(--theme-text-primary)' }}>{drill.labelVi}</h1>
-          <p className="text-xs font-mono" style={{ color: '#A855F7' }}>{drill.ipa}</p>
+          <p className="text-xs font-mono" style={{ color: ACCENT.examWriting }}>{drill.ipa}</p>
           <p className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>{drill.description}</p>
         </div>
       </div>
 
       {/* Minimal pairs */}
       <section className="mb-6">
-        <h2 className="text-body font-bold uppercase tracking-wider mb-2" style={{ color: '#EC4899' }}>
+        <h2 className="text-body font-bold uppercase tracking-wider mb-2" style={{ color: ACCENT.listening }}>
           Cặp tối thiểu (Minimal Pairs)
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -147,7 +148,7 @@ export default function PhonemeDrillPage() {
               <div className="flex items-center gap-2 flex-1 min-w-0">
                 <span className="font-bold text-sm" style={{ color: 'var(--theme-text-primary)' }}>{pair.wordA}</span>
                 <span style={{ color: 'var(--theme-text-muted)' }}>↔</span>
-                <span className="font-bold text-sm" style={{ color: '#A855F7' }}>{pair.wordB}</span>
+                <span className="font-bold text-sm" style={{ color: ACCENT.examWriting }}>{pair.wordB}</span>
               </div>
               <span className="text-caption shrink-0" style={{ color: 'var(--theme-text-muted)' }}>{pair.noteVi}</span>
             </div>
@@ -157,7 +158,7 @@ export default function PhonemeDrillPage() {
 
       {/* Practice words — clickable to select */}
       <section className="mb-6">
-        <h2 className="text-body font-bold uppercase tracking-wider mb-2" style={{ color: '#6366F1' }}>
+        <h2 className="text-body font-bold uppercase tracking-wider mb-2" style={{ color: ACCENT.writing }}>
           Từ luyện tập — chọn để đọc
         </h2>
         <div className="flex flex-wrap gap-2">
@@ -165,9 +166,9 @@ export default function PhonemeDrillPage() {
             <button key={w} onClick={() => { setSelectedText(w); handleRetry(); }}
               className="px-3 py-1.5 rounded-lg text-body font-medium transition-all"
               style={{
-                backgroundColor: selectedText === w ? '#A855F7' : 'var(--theme-bg-card)',
+                backgroundColor: selectedText === w ? ACCENT.examWriting : 'var(--theme-bg-card)',
                 color: selectedText === w ? 'white' : 'var(--theme-text-primary)',
-                border: `1px solid ${selectedText === w ? '#A855F7' : 'var(--theme-border)'}`,
+                border: `1px solid ${selectedText === w ? ACCENT.examWriting : 'var(--theme-border)'}`,
               }}>
               {w}
             </button>
@@ -177,7 +178,7 @@ export default function PhonemeDrillPage() {
 
       {/* Practice sentences — clickable */}
       <section className="mb-6">
-        <h2 className="text-body font-bold uppercase tracking-wider mb-2" style={{ color: '#22C55E' }}>
+        <h2 className="text-body font-bold uppercase tracking-wider mb-2" style={{ color: STATUS.success }}>
           Câu luyện tập — chọn để đọc
         </h2>
         <div className="space-y-1.5">
@@ -185,8 +186,8 @@ export default function PhonemeDrillPage() {
             <button key={s} onClick={() => { setSelectedText(s); handleRetry(); }}
               className="w-full text-left rounded-xl border p-3 text-body font-medium transition-all"
               style={{
-                backgroundColor: selectedText === s ? 'rgba(168,85,247,.08)' : 'var(--theme-bg-card)',
-                borderColor: selectedText === s ? '#A855F7' : 'var(--theme-border)',
+                backgroundColor: selectedText === s ? `${ACCENT.examWriting}14` : 'var(--theme-bg-card)',
+                borderColor: selectedText === s ? ACCENT.examWriting : 'var(--theme-border)',
                 color: 'var(--theme-text-primary)',
               }}>
               {s}
@@ -198,7 +199,7 @@ export default function PhonemeDrillPage() {
       {/* Selected text + recorder */}
       {selectedText && (
         <div className="rounded-2xl border p-6 mb-6"
-          style={{ borderColor: '#A855F7', backgroundColor: 'var(--theme-bg-card)' }}>
+          style={{ borderColor: ACCENT.examWriting, backgroundColor: 'var(--theme-bg-card)' }}>
           <p className="text-center text-lg font-bold mb-4" style={{ color: 'var(--theme-text-primary)' }}>
             {selectedText}
           </p>
@@ -207,8 +208,8 @@ export default function PhonemeDrillPage() {
           {recState === 'recording' && (
             <div className="text-center mb-4">
               <div className="flex items-center justify-center gap-2">
-                <span className="w-3 h-3 rounded-full animate-pulse" style={{ backgroundColor: '#EF4444' }} />
-                <span className="text-sm font-mono" style={{ color: '#EF4444' }}>
+                <span className="w-3 h-3 rounded-full animate-pulse" style={{ backgroundColor: STATUS.danger }} />
+                <span className="text-sm font-mono" style={{ color: STATUS.danger }}>
                   {String(Math.floor(elapsed / 60)).padStart(2, '0')}:{String(elapsed % 60).padStart(2, '0')}
                 </span>
               </div>
@@ -220,14 +221,14 @@ export default function PhonemeDrillPage() {
             {recState === 'idle' && (
               <button onClick={startRecording}
                 className="px-6 py-3 rounded-xl text-white font-bold text-sm transition-all hover:-translate-y-0.5"
-                style={{ background: 'linear-gradient(135deg, #EC4899, #A855F7)', boxShadow: '0 4px 12px rgba(168,85,247,.3)' }}>
+                style={{ background: GRADIENT.pronunciation, boxShadow: `0 4px 12px ${ACCENT.examWriting}4D` }}>
                 🎙️ Ghi âm
               </button>
             )}
             {recState === 'recording' && (
               <button onClick={stopRecording}
                 className="px-6 py-3 rounded-xl text-white font-bold text-sm"
-                style={{ backgroundColor: '#EF4444' }}>
+                style={{ backgroundColor: STATUS.danger }}>
                 ⏹ Dừng
               </button>
             )}
@@ -240,7 +241,7 @@ export default function PhonemeDrillPage() {
                 </button>
                 <button onClick={handleScore}
                   className="px-6 py-2.5 rounded-xl text-white font-bold text-sm"
-                  style={{ background: 'linear-gradient(135deg, #6366F1, #8B5CF6)' }}>
+                  style={{ background: GRADIENT.writing }}>
                   Chấm điểm
                 </button>
               </div>
@@ -256,7 +257,7 @@ export default function PhonemeDrillPage() {
           </div>
 
           {error && (
-            <p className="text-center text-xs mt-3" style={{ color: '#EF4444' }}>{error}</p>
+            <p className="text-center text-xs mt-3" style={{ color: STATUS.danger }}>{error}</p>
           )}
 
           {/* Result */}
@@ -279,7 +280,7 @@ export default function PhonemeDrillPage() {
                     </div>
                     <div className="text-caption" style={{ color: getWordColor(ws.score) }}>{ws.score}</div>
                     {ws.issue && (
-                      <div className="text-caption max-w-24" style={{ color: '#EF4444' }}>{ws.issue}</div>
+                      <div className="text-caption max-w-24" style={{ color: STATUS.danger }}>{ws.issue}</div>
                     )}
                   </div>
                 ))}
@@ -287,12 +288,12 @@ export default function PhonemeDrillPage() {
 
               {/* Suggestions */}
               {result.suggestions.length > 0 && (
-                <div className="rounded-xl p-3" style={{ backgroundColor: 'rgba(168,85,247,.06)' }}>
-                  <p className="text-caption font-bold uppercase mb-1" style={{ color: '#A855F7' }}>Gợi ý</p>
+                <div className="rounded-xl p-3" style={{ backgroundColor: `${ACCENT.examWriting}0F` }}>
+                  <p className="text-caption font-bold uppercase mb-1" style={{ color: ACCENT.examWriting }}>Gợi ý</p>
                   <ul className="space-y-1">
                     {result.suggestions.map((s, i) => (
                       <li key={i} className="text-xs flex items-start gap-1.5" style={{ color: 'var(--theme-text-secondary)' }}>
-                        <span style={{ color: '#A855F7' }}>•</span>{s}
+                        <span style={{ color: ACCENT.examWriting }}>•</span>{s}
                       </li>
                     ))}
                   </ul>
@@ -302,7 +303,7 @@ export default function PhonemeDrillPage() {
               <div className="flex justify-center">
                 <button onClick={handleRetry}
                   className="px-5 py-2 rounded-xl font-semibold text-body transition-all"
-                  style={{ color: '#A855F7', backgroundColor: 'rgba(168,85,247,.08)' }}>
+                  style={{ color: ACCENT.examWriting, backgroundColor: `${ACCENT.examWriting}14` }}>
                   Thử lại
                 </button>
               </div>

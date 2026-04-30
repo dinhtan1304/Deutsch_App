@@ -3,6 +3,9 @@
 import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
+import { useAuthStore } from '@/stores/authStore';
+import { AuthGate } from '@/components/ui';
+import { GRADIENT, ACCENT, STATUS } from '@/lib/tokens';
 import { useSRSDue, useSRSStats, useReviewWord, useWeakWords, SRSRating } from '@/hooks/usePersonalWords';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
 import { PersonalWord, getSRSStatus, getIntervalText, SRSStatusInfo, WordTypeInfo, GenderInfo } from '@/types/personalWord';
@@ -36,14 +39,14 @@ function SRSStatsCard() {
   if (!stats) return null;
 
   const items = [
-    { label: 'Cần ôn', value: stats.due, icon: IconFlame, color: '#EF4444',
-      gradient: 'linear-gradient(135deg, rgba(239,68,68,.12), rgba(239,68,68,.06))' },
-    { label: 'Mới', value: stats.new, icon: IconBookOpen, color: '#3B82F6',
-      gradient: 'linear-gradient(135deg, rgba(59,130,246,.12), rgba(59,130,246,.06))' },
-    { label: 'Đang học', value: stats.learning, icon: IconBrain, color: '#F59E0B',
-      gradient: 'linear-gradient(135deg, rgba(245,158,11,.12), rgba(245,158,11,.06))' },
-    { label: 'Thuộc lòng', value: stats.mature, icon: IconTarget, color: '#22C55E',
-      gradient: 'linear-gradient(135deg, rgba(34,197,94,.12), rgba(34,197,94,.06))' },
+    { label: 'Cần ôn', value: stats.due, icon: IconFlame, color: STATUS.danger,
+      gradient: `linear-gradient(135deg, ${STATUS.danger}1F, ${STATUS.danger}0F)` },
+    { label: 'Mới', value: stats.new, icon: IconBookOpen, color: ACCENT.srs,
+      gradient: `linear-gradient(135deg, ${ACCENT.srs}1F, ${ACCENT.srs}0F)` },
+    { label: 'Đang học', value: stats.learning, icon: IconBrain, color: ACCENT.xp,
+      gradient: `linear-gradient(135deg, ${ACCENT.xp}1F, ${ACCENT.xp}0F)` },
+    { label: 'Thuộc lòng', value: stats.mature, icon: IconTarget, color: STATUS.success,
+      gradient: `linear-gradient(135deg, ${STATUS.success}1F, ${STATUS.success}0F)` },
   ];
 
   return (
@@ -83,8 +86,8 @@ function ReviewCard({ word, isFlipped, onFlip }: ReviewCardProps) {
   const statusInfo = SRSStatusInfo[status];
   const typeInfo = WordTypeInfo[word.wordType];
   const genderColor = word.wordType === 'nomen' && word.nomenData
-    ? GenderInfo[word.nomenData.gender]?.color || '#3B82F6'
-    : '#3B82F6';
+    ? GenderInfo[word.nomenData.gender]?.color || ACCENT.srs
+    : ACCENT.srs;
 
   return (
     <div className="relative w-full max-w-lg mx-auto h-80 cursor-pointer"
@@ -200,12 +203,14 @@ function RatingButtons({ word, onRate, isLoading }: RatingButtonsProps) {
     return Math.round(interval * newEF);
   };
 
+  /* eslint-disable no-restricted-syntax */
   const ratings: { rating: SRSRating; label: string; color: string; gradient: string; hotkey: string }[] = [
-    { rating: 'again', label: 'Quên', color: '#EF4444', gradient: 'linear-gradient(135deg, #EF4444, #DC2626)', hotkey: '1' },
-    { rating: 'hard', label: 'Khó', color: '#F59E0B', gradient: 'linear-gradient(135deg, #F59E0B, #D97706)', hotkey: '2' },
-    { rating: 'good', label: 'Tốt', color: '#22C55E', gradient: 'linear-gradient(135deg, #22C55E, #16A34A)', hotkey: '3' },
-    { rating: 'easy', label: 'Dễ', color: '#3B82F6', gradient: 'linear-gradient(135deg, #3B82F6, #2563EB)', hotkey: '4' },
+    { rating: 'again', label: 'Quên', color: STATUS.danger, gradient: 'linear-gradient(135deg, #EF4444, #DC2626)', hotkey: '1' },
+    { rating: 'hard', label: 'Khó', color: ACCENT.xp,      gradient: 'linear-gradient(135deg, #F59E0B, #D97706)', hotkey: '2' },
+    { rating: 'good', label: 'Tốt', color: STATUS.success, gradient: 'linear-gradient(135deg, #22C55E, #16A34A)', hotkey: '3' },
+    { rating: 'easy', label: 'Dễ',  color: ACCENT.srs,     gradient: 'linear-gradient(135deg, #3B82F6, #2563EB)', hotkey: '4' },
   ];
+  /* eslint-enable no-restricted-syntax */
 
   return (
     <div className="grid grid-cols-4 gap-2 sm:gap-3 mt-6 max-w-lg mx-auto">
@@ -237,18 +242,19 @@ function SessionComplete({ session, onRestart }: { session: ReviewSession; onRes
 
   const resultItems = [
     { label: 'Đã ôn', value: session.reviewed, color: 'var(--theme-text-primary)',
-      gradient: 'linear-gradient(135deg, rgba(107,114,128,.1), rgba(107,114,128,.05))' },
-    { label: 'Đúng', value: session.correct, color: '#22C55E',
-      gradient: 'linear-gradient(135deg, rgba(34,197,94,.12), rgba(34,197,94,.06))' },
-    { label: 'Chính xác', value: `${accuracy}%`, color: '#3B82F6',
-      gradient: 'linear-gradient(135deg, rgba(59,130,246,.12), rgba(59,130,246,.06))' },
+      // eslint-disable-next-line no-restricted-syntax
+      gradient: 'linear-gradient(135deg, var(--theme-bg-secondary), var(--theme-bg-tertiary))' },
+    { label: 'Đúng', value: session.correct, color: STATUS.success,
+      gradient: `linear-gradient(135deg, ${STATUS.success}1F, ${STATUS.success}0F)` },
+    { label: 'Chính xác', value: `${accuracy}%`, color: ACCENT.srs,
+      gradient: `linear-gradient(135deg, ${ACCENT.srs}1F, ${ACCENT.srs}0F)` },
   ];
 
   return (
     <div className="text-center py-12">
       <div className="w-20 h-20 rounded-3xl mx-auto flex items-center justify-center mb-4"
-        style={{ background: 'linear-gradient(135deg, rgba(34,197,94,.15), rgba(52,211,153,.1))' }}>
-        <IconTrophy size={36} style={{ color: '#22C55E' }} />
+        style={{ background: `linear-gradient(135deg, ${STATUS.success}26, ${STATUS.success}1A)` }}>
+        <IconTrophy size={36} style={{ color: STATUS.success }} />
       </div>
       <h2 className="text-2xl font-bold mb-2" style={{ color: 'var(--theme-text-primary)' }}>
         Hoàn thành!
@@ -270,7 +276,7 @@ function SessionComplete({ session, onRestart }: { session: ReviewSession; onRes
         <button onClick={onRestart}
           className="flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm text-white
             transition-all hover:shadow-md hover:-translate-y-0.5"
-          style={{ background: 'linear-gradient(135deg, #3B82F6, #6366F1)' }}>
+          style={{ background: GRADIENT.action }}>
           <IconRefresh size={16} /> Ôn tiếp
         </button>
         <Link href="/word-bank"
@@ -303,8 +309,8 @@ function EmptyState({ mode = 'srs' }: { mode?: 'srs' | 'weak' }) {
   return (
     <div className="text-center py-16">
       <div className="w-20 h-20 rounded-3xl mx-auto flex items-center justify-center mb-4"
-        style={{ background: 'linear-gradient(135deg, rgba(139,92,246,.15), rgba(168,85,247,.1))' }}>
-        <IconBrain size={36} style={{ color: '#8B5CF6' }} />
+        style={{ background: `linear-gradient(135deg, ${ACCENT.vocab}26, ${ACCENT.examWriting}1A)` }}>
+        <IconBrain size={36} style={{ color: ACCENT.vocab }} />
       </div>
       <h2 className="text-2xl font-bold mb-2" style={{ color: 'var(--theme-text-primary)' }}>
         {title}
@@ -317,7 +323,7 @@ function EmptyState({ mode = 'srs' }: { mode?: 'srs' | 'weak' }) {
         <Link href="/word-bank"
           className="flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm text-white
             transition-all hover:shadow-md hover:-translate-y-0.5"
-          style={{ background: 'linear-gradient(135deg, #3B82F6, #6366F1)' }}>
+          style={{ background: GRADIENT.action }}>
           Đi đến Word Bank
         </Link>
         <Link href="/words"
@@ -335,6 +341,7 @@ function EmptyState({ mode = 'srs' }: { mode?: 'srs' | 'weak' }) {
 // Main Review Page
 // ============================================
 export default function WordBankReviewPage() {
+  const { isAuthenticated } = useAuthStore();
   const searchParams = useSearchParams();
   const mode = searchParams.get('mode') === 'weak' ? 'weak' : 'srs';
 
@@ -434,6 +441,15 @@ export default function WordBankReviewPage() {
 
   const handleRestart = useCallback(() => { setSession(null); refetch(); }, [refetch]);
 
+  if (!isAuthenticated) return (
+    <AuthGate
+      icon={<IconRefresh size={28} className="text-white" />}
+      gradient={GRADIENT.vocab}
+      title="Đăng nhập để ôn tập SRS"
+      description="Ôn tập từ vựng theo thuật toán ghi nhớ thông minh."
+    />
+  );
+
   return (
       <div className="max-w-4xl mx-auto py-6">
         {/* Header */}
@@ -441,8 +457,8 @@ export default function WordBankReviewPage() {
           <div className="flex items-center gap-3">
             <div className="w-11 h-11 rounded-2xl flex items-center justify-center"
               style={{ background: mode === 'weak'
-                ? 'linear-gradient(135deg, #EF4444, #F59E0B)'
-                : 'linear-gradient(135deg, #8B5CF6, #6366F1)' }}>
+                ? `linear-gradient(135deg, ${STATUS.danger}, ${ACCENT.xp})`
+                : GRADIENT.history }}>
               <IconBrain size={22} className="text-white" />
             </div>
             <div>
@@ -458,7 +474,7 @@ export default function WordBankReviewPage() {
           </div>
           <Link href="/word-bank"
             className="flex items-center gap-1.5 text-body font-medium transition-all hover:opacity-70"
-            style={{ color: '#3B82F6' }}>
+            style={{ color: ACCENT.srs }}>
             <IconChevronLeft size={16} /> Word Bank
           </Link>
         </div>
@@ -470,7 +486,7 @@ export default function WordBankReviewPage() {
         {isLoading && (
           <div className="flex items-center justify-center py-20">
             <div className="w-12 h-12 rounded-2xl flex items-center justify-center animate-pulse"
-              style={{ background: 'linear-gradient(135deg, #8B5CF6, #6366F1)' }}>
+              style={{ background: GRADIENT.history }}>
               <IconBrain size={24} className="text-white" />
             </div>
           </div>
@@ -494,7 +510,7 @@ export default function WordBankReviewPage() {
                 <div className="h-full rounded-full transition-all duration-500"
                   style={{
                     width: `${progress}%`,
-                    background: 'linear-gradient(90deg, #3B82F6, #22C55E)',
+                    background: `linear-gradient(90deg, ${ACCENT.srs}, ${STATUS.success})`,
                   }} />
               </div>
             </div>
@@ -525,14 +541,14 @@ export default function WordBankReviewPage() {
         {/* Keyboard tips */}
         <div className="mt-8 p-4 rounded-2xl border"
           style={{
-            backgroundColor: 'rgba(139,92,246,.04)',
-            borderColor: 'rgba(139,92,246,.15)',
+            backgroundColor: `${ACCENT.vocab}0A`,
+            borderColor: `${ACCENT.vocab}26`,
           }}>
           <h3 className="font-bold text-sm mb-3 flex items-center gap-2"
-            style={{ color: '#8B5CF6' }}>
+            style={{ color: ACCENT.vocab }}>
             <span className="w-7 h-7 rounded-lg flex items-center justify-center"
-              style={{ background: 'linear-gradient(135deg, rgba(139,92,246,.15), rgba(139,92,246,.08))' }}>
-              <IconKeyboard size={15} style={{ color: '#8B5CF6' }} />
+              style={{ background: `linear-gradient(135deg, ${ACCENT.vocab}26, ${ACCENT.vocab}14)` }}>
+              <IconKeyboard size={15} style={{ color: ACCENT.vocab }} />
             </span>
             Phím tắt
           </h3>
@@ -546,7 +562,7 @@ export default function WordBankReviewPage() {
             ].map(item => (
               <div key={item.key} className="flex items-center gap-2">
                 <kbd className="px-2 py-0.5 rounded-md font-semibold text-caption"
-                  style={{ backgroundColor: 'rgba(139,92,246,.1)', color: '#8B5CF6' }}>
+                  style={{ backgroundColor: `${ACCENT.vocab}1A`, color: ACCENT.vocab }}>
                   {item.key}
                 </kbd>
                 <span style={{ color: 'var(--theme-text-muted)' }}>{item.action}</span>

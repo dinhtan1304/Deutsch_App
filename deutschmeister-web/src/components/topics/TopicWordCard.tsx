@@ -1,6 +1,8 @@
 ﻿'use client';
+/* eslint-disable no-restricted-syntax */
 
 import { useState, useCallback } from 'react';
+import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 import type { TopicWord } from '@/types/topic';
 import { ArticleColor } from '@/types/topic';
 import { useQuickAddWithCollection } from '@/hooks/useQuickAddWithCollection';
@@ -52,9 +54,9 @@ function IconLightbulb({ size = 16, ...props }: { size?: number, [key: string]: 
 
 // ─── Color helpers ───
 const AC_STYLES: Record<string, { color: string; bg: string; gradient: string }> = {
-  der: { color: '#3B82F6', bg: 'rgba(59,130,246,.08)', gradient: 'linear-gradient(135deg, #3B82F6, #1D4ED8)' },
-  die: { color: '#EC4899', bg: 'rgba(236,72,153,.08)', gradient: 'linear-gradient(135deg, #EC4899, #BE185D)' },
-  das: { color: '#22C55E', bg: 'rgba(34,197,94,.08)', gradient: 'linear-gradient(135deg, #22C55E, #15803D)' },
+  der: { color: ACCENT.srs, bg: 'rgba(59,130,246,.08)', gradient: 'linear-gradient(135deg, #3B82F6, #1D4ED8)' },
+  die: { color: ACCENT.listening, bg: 'rgba(236,72,153,.08)', gradient: 'linear-gradient(135deg, #EC4899, #BE185D)' },
+  das: { color: STATUS.success, bg: 'rgba(34,197,94,.08)', gradient: 'linear-gradient(135deg, #22C55E, #15803D)' },
 };
 const DEFAULT_AC = { color: '#6B7280', bg: 'rgba(107,114,128,.08)', gradient: 'linear-gradient(135deg, #6B7280, #4B5563)' };
 
@@ -140,14 +142,14 @@ export function TopicWordCard({
               <span className="text-body flex items-center gap-1"
                 style={{ color: 'var(--theme-text-secondary)' }}>
                 <span className="text-caption px-1 py-0.5 rounded font-bold"
-                  style={{ background: 'rgba(59,130,246,.08)', color: '#3B82F6' }}>EN</span>
+                  style={{ background: 'rgba(59,130,246,.08)', color: ACCENT.srs }}>EN</span>
                 {word.translationEn}
               </span>
               {word.translationVi && (
                 <span className="text-body flex items-center gap-1"
                   style={{ color: 'var(--theme-text-muted)' }}>
                   <span className="text-caption px-1 py-0.5 rounded font-bold"
-                    style={{ background: 'rgba(239,68,68,.08)', color: '#EF4444' }}>VN</span>
+                    style={{ background: 'rgba(239,68,68,.08)', color: STATUS.danger }}>VN</span>
                   {word.translationVi}
                 </span>
               )}
@@ -171,7 +173,7 @@ export function TopicWordCard({
                 disabled={isAdding}
                 className="w-8 h-8 rounded-lg flex items-center justify-center border transition-all duration-200 hover:scale-110"
                 style={(isAdded && !pendingWordId)
-                  ? { backgroundColor: 'rgba(34,197,94,.1)', borderColor: '#22C55E', color: '#22C55E' }
+                  ? { backgroundColor: 'rgba(34,197,94,.1)', borderColor: STATUS.success, color: STATUS.success }
                   : { backgroundColor: 'transparent', borderColor: 'var(--theme-border)', color: 'var(--theme-text-muted)' }
                 }
                 title={isAdded ? 'Đã thêm vào Word Bank' : 'Thêm vào Word Bank'}>
@@ -234,7 +236,7 @@ export function TopicWordCard({
                 style={{ color: 'var(--theme-text-muted)' }}>
                 <span className="w-5 h-5 rounded-md flex items-center justify-center"
                   style={{ background: 'rgba(245,158,11,.1)' }}>
-                  <IconLightbulb size={11} style={{ color: '#F59E0B' }} />
+                  <IconLightbulb size={11} style={{ color: ACCENT.xp }} />
                 </span>
                 Mẹo nhớ
               </p>

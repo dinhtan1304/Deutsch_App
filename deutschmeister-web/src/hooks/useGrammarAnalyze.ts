@@ -18,8 +18,8 @@ export function useGrammarAnalyze() {
     try {
       const result = await grammarAnalyzeApi.analyze(selectedSentence);
       setResult(result);
-    } catch (err: any) {
-      const msg = err?.message || 'Không thể phân tích. Vui lòng thử lại.';
+    } catch (err) {
+      const msg = (err as Error | undefined)?.message || 'Không thể phân tích. Vui lòng thử lại.';
       setError(typeof msg === 'string' ? msg : JSON.stringify(msg));
     }
   }, [selectedSentence, startAnalysis, setResult, setError]);

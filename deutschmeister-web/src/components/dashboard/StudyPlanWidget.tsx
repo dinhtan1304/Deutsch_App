@@ -1,52 +1,48 @@
-﻿'use client';
+'use client';
+/* eslint-disable no-restricted-syntax */
 
 import Link from 'next/link';
+import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 import { useStudyPlan } from '@/hooks/useStudyPlan';
+import { IconRocket, IconCalendar } from '@/app/study-plan/icons';
 
 export function StudyPlanWidget() {
   const { data, isLoading } = useStudyPlan();
 
-  if (isLoading) return null;
+  if (isLoading) return (
+    <div className="h-24 rounded-2xl animate-pulse bg-gray-100" />
+  );
 
   // No plan — show CTA
   if (!data) {
     return (
       <Link
         href="/study-plan/setup"
-        className="flex items-center gap-3 p-3 rounded-xl border transition-all group hover:-translate-y-0.5 relative overflow-hidden"
+        className="flex items-center gap-4 p-4 rounded-2xl border-2 transition-all group hover:-translate-y-1 relative overflow-hidden active:scale-95 shadow-sm"
         style={{
-          borderColor: 'rgba(99,102,241,0.15)',
-          background: 'linear-gradient(135deg, rgba(59,130,246,0.06), rgba(139,92,246,0.04))',
+          borderColor: 'rgba(99,102,241,0.1)',
+          background: 'linear-gradient(135deg, rgba(59,130,246,0.03), rgba(139,92,246,0.05))',
         }}
       >
-        {/* Decorative cap illustration in background */}
-        <svg className="absolute right-3 top-1/2 -translate-y-1/2 opacity-[0.06] pointer-events-none" width="52" height="52" viewBox="0 0 24 24" fill="#6366F1" stroke="none">
-          <path d="M22 9L12 4 2 9l10 5 10-5z" />
-          <path d="M6 11.5v4.5c0 1.5 2.7 3 6 3s6-1.5 6-3v-4.5" />
-          <line x1="22" y1="9" x2="22" y2="15" strokeWidth="2" stroke="#6366F1" />
-        </svg>
         <div
-          className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
-          style={{ background: 'linear-gradient(135deg, #6366F1, #8B5CF6)' }}
+          className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0 shadow-md transition-transform group-hover:scale-110"
+          style={{ background: 'linear-gradient(135deg, #3B82F6, #8B5CF6)' }}
         >
-          {/* Graduation cap icon */}
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M22 9L12 4 2 9l10 5 10-5z" />
-            <path d="M6 11.5v4.5c0 1.5 2.7 3 6 3s6-1.5 6-3v-4.5" />
-            <line x1="22" y1="9" x2="22" y2="15" />
-          </svg>
+          <IconRocket size={22} style={{ color: 'white' }} />
         </div>
         <div className="flex-1 min-w-0">
-          <div className="text-body font-bold truncate" style={{ color: 'var(--theme-text-primary)' }}>
-            Tạo lịch học cá nhân
+          <div className="text-sm font-black tracking-tight" style={{ color: 'var(--theme-text-primary)' }}>
+            Lên lịch học cá nhân
           </div>
-          <div className="text-caption truncate" style={{ color: 'var(--theme-text-muted)' }}>
-            Goethe / TELC · lịch trình riêng
+          <div className="text-[11px] font-medium opacity-60 truncate" style={{ color: 'var(--theme-text-muted)' }}>
+            Tự động tạo lộ trình Goethe / TELC
           </div>
         </div>
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="shrink-0 opacity-40 group-hover:opacity-80 transition-opacity" style={{ color: 'var(--theme-text-muted)' }}>
-          <path d="M9 18l6-6-6-6" />
-        </svg>
+        <div className="w-8 h-8 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all transform translate-x-2 group-hover:translate-x-0">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" className="text-blue-600">
+            <path d="M9 18l6-6-6-6" />
+          </svg>
+        </div>
       </Link>
     );
   }
@@ -59,19 +55,21 @@ export function StudyPlanWidget() {
     return (
       <Link
         href="/study-plan"
-        className="flex items-center gap-3 p-3 rounded-xl border transition-all hover:-translate-y-0.5"
+        className="flex items-center gap-4 p-4 rounded-2xl border-2 transition-all hover:bg-orange-50/30"
         style={{
           borderColor: 'rgba(249,115,22,.15)',
-          background: 'rgba(249,115,22,.04)',
+          background: 'rgba(249,115,22,.02)',
         }}
       >
-        <div className="text-xl shrink-0">&#x23F8;&#xFE0F;</div>
+        <div className="w-11 h-11 rounded-xl flex items-center justify-center bg-orange-100 text-orange-500 shrink-0">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+        </div>
         <div className="flex-1 min-w-0">
-          <div className="text-body font-bold truncate" style={{ color: '#F97316' }}>
-            Lịch học tạm dừng
+          <div className="text-sm font-black tracking-tight" style={{ color: ACCENT.games }}>
+            Lộ trình đang tạm nghỉ
           </div>
-          <div className="text-caption truncate" style={{ color: 'var(--theme-text-muted)' }}>
-            {plan.examFormat} {plan.targetLevel}
+          <div className="text-[11px] font-medium opacity-60 truncate" style={{ color: 'var(--theme-text-muted)' }}>
+            {plan.examFormat} {plan.targetLevel} · Tiếp tục ngay
           </div>
         </div>
       </Link>
@@ -81,53 +79,60 @@ export function StudyPlanWidget() {
   return (
     <Link
       href="/study-plan"
-      className="flex flex-col gap-2 p-3 rounded-xl border transition-all group hover:-translate-y-0.5 relative overflow-hidden"
+      className="flex flex-col gap-3 p-4 rounded-2xl border-2 transition-all group hover:-translate-y-1 relative overflow-hidden shadow-sm active:scale-95"
       style={{
-        borderColor: `${currentPhase.color}25`,
+        borderColor: `${currentPhase.color}15`,
         backgroundColor: 'var(--theme-bg-card)',
       }}
     >
       {/* Decorative level badge watermark */}
       <div
-        className="absolute right-2 top-1/2 -translate-y-1/2 text-[32px] font-black opacity-[0.04] pointer-events-none select-none leading-none"
+        className="absolute -right-2 -bottom-2 text-5xl font-black opacity-[0.03] pointer-events-none select-none leading-none"
         style={{ color: currentPhase.color }}
       >
         {plan.targetLevel}
       </div>
-      <div className="flex items-center gap-2.5">
+      
+      <div className="flex items-center gap-3 relative z-10">
         <div
-          className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 text-base"
-          style={{ background: `${currentPhase.color}20`, border: `1px solid ${currentPhase.color}30` }}
+          className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-sm"
+          style={{ background: `${currentPhase.color}12`, border: `1px solid ${currentPhase.color}20`, color: currentPhase.color }}
         >
-          {currentPhase.icon}
+          <span className="text-lg">{currentPhase.icon}</span>
         </div>
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-1.5 min-w-0">
-            <div className="text-body font-bold truncate" style={{ color: 'var(--theme-text-primary)' }}>
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="text-sm font-black tracking-tight truncate" style={{ color: 'var(--theme-text-primary)' }}>
               {plan.examFormat} {plan.targetLevel}
             </div>
-            <span
-              className="shrink-0 text-[9px] font-bold px-1.5 py-0.5 rounded-md"
-              style={{ background: `${currentPhase.color}18`, color: currentPhase.color }}
+            <div
+              className="shrink-0 text-[9px] font-black px-1.5 py-0.5 rounded-md uppercase tracking-wider"
+              style={{ background: `${currentPhase.color}12`, color: currentPhase.color, border: `1px solid ${currentPhase.color}20` }}
             >
-              Tuần {currentWeek}/{plan.totalWeeks}
-            </span>
+              W{currentWeek}/{plan.totalWeeks}
+            </div>
           </div>
-          <div className="text-caption truncate" style={{ color: 'var(--theme-text-muted)' }}>
-            Còn {daysUntilExam} ngày
+          <div className="text-[11px] font-medium mt-0.5 opacity-60 flex items-center gap-1.5" style={{ color: 'var(--theme-text-muted)' }}>
+            <IconCalendar size={10} />
+            <span>Còn {daysUntilExam} ngày</span>
             {totalToday > 0 && (
-              <span style={{ color: completedToday === totalToday ? '#22C55E' : 'var(--theme-text-muted)' }}>
-                {' '}· {completedToday}/{totalToday} nhiệm vụ
-              </span>
+              <>
+                <span className="opacity-30">•</span>
+                <span style={{ color: completedToday === totalToday ? STATUS.success : 'inherit', fontWeight: completedToday === totalToday ? 800 : 500 }}>
+                  {completedToday}/{totalToday} Tasks
+                </span>
+              </>
             )}
           </div>
         </div>
       </div>
-      <div className="h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
+      
+      <div className="h-1.5 rounded-full overflow-hidden relative" style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
         <div
-          className="h-full rounded-full transition-all duration-700"
+          className="h-full rounded-full transition-all duration-1000 ease-out"
           style={{ width: `${overallProgress}%`, background: currentPhase.color }}
         />
+        <div className="absolute inset-0 bg-white/10 animate-[pulse_2s_infinite] pointer-events-none" />
       </div>
     </Link>
   );

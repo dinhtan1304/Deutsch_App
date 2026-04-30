@@ -1,6 +1,8 @@
 ﻿'use client';
+/* eslint-disable no-restricted-syntax */
 
 import { useState, useCallback, useEffect, useRef } from 'react';
+import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 import { usePronunciation } from '@/hooks/usePronunciation';
 import { HighlightedText } from '@/components/word-highlight/HighlightedText';
 import { IconVolume } from '@/components/ui/Icons';
@@ -99,14 +101,14 @@ const LETTER_TIPS: Record<string, string> = {
 };
 
 const CARD_PALETTE = [
-  { accent: '#3B82F6', border: 'rgba(59,130,246,.25)', bg: 'rgba(59,130,246,.05)', hoverBorder: 'rgba(59,130,246,.6)' },
-  { accent: '#8B5CF6', border: 'rgba(139,92,246,.25)', bg: 'rgba(139,92,246,.05)', hoverBorder: 'rgba(139,92,246,.6)' },
+  { accent: ACCENT.srs, border: 'rgba(59,130,246,.25)', bg: 'rgba(59,130,246,.05)', hoverBorder: 'rgba(59,130,246,.6)' },
+  { accent: ACCENT.vocab, border: 'rgba(139,92,246,.25)', bg: 'rgba(139,92,246,.05)', hoverBorder: 'rgba(139,92,246,.6)' },
   { accent: '#10B981', border: 'rgba(16,185,129,.25)', bg: 'rgba(16,185,129,.05)', hoverBorder: 'rgba(16,185,129,.6)' },
-  { accent: '#F59E0B', border: 'rgba(245,158,11,.25)', bg: 'rgba(245,158,11,.05)', hoverBorder: 'rgba(245,158,11,.6)' },
-  { accent: '#EC4899', border: 'rgba(236,72,153,.25)', bg: 'rgba(236,72,153,.05)', hoverBorder: 'rgba(236,72,153,.6)' },
-  { accent: '#06B6D4', border: 'rgba(6,182,212,.25)',  bg: 'rgba(6,182,212,.05)',  hoverBorder: 'rgba(6,182,212,.6)'  },
+  { accent: ACCENT.xp, border: 'rgba(245,158,11,.25)', bg: 'rgba(245,158,11,.05)', hoverBorder: 'rgba(245,158,11,.6)' },
+  { accent: ACCENT.listening, border: 'rgba(236,72,153,.25)', bg: 'rgba(236,72,153,.05)', hoverBorder: 'rgba(236,72,153,.6)' },
+  { accent: ACCENT.cyan, border: 'rgba(6,182,212,.25)',  bg: 'rgba(6,182,212,.05)',  hoverBorder: 'rgba(6,182,212,.6)'  },
 ];
-const SPECIAL_PALETTE = { accent: '#F59E0B', border: 'rgba(245,158,11,.35)', bg: 'rgba(245,158,11,.06)', hoverBorder: 'rgba(245,158,11,.7)' };
+const SPECIAL_PALETTE = { accent: ACCENT.xp, border: 'rgba(245,158,11,.35)', bg: 'rgba(245,158,11,.06)', hoverBorder: 'rgba(245,158,11,.7)' };
 
 // ─── AlphabetCardGrid ──────────────────────────────────────────────────
 
@@ -232,7 +234,7 @@ function AlphabetCardGrid({ rows, onSpeak }: {
                 >
                   {special && (
                     <div className="px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-wider text-center"
-                      style={{ background: 'rgba(245,158,11,.18)', color: '#F59E0B' }}>
+                      style={{ background: 'rgba(245,158,11,.18)', color: ACCENT.xp }}>
                       Đặc biệt
                     </div>
                   )}
@@ -266,7 +268,7 @@ function AlphabetCardGrid({ rows, onSpeak }: {
                       className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-semibold transition-all"
                       style={{
                         background: ns === 'listening' ? 'rgba(34,197,94,.1)' : ns === 'correct' ? 'rgba(34,197,94,.15)' : ns === 'wrong' ? 'rgba(239,68,68,.1)' : 'transparent',
-                        color: ns === 'idle' ? 'var(--theme-text-muted)' : ns === 'listening' ? '#22C55E' : ns === 'correct' ? '#22C55E' : '#EF4444',
+                        color: ns === 'idle' ? 'var(--theme-text-muted)' : ns === 'listening' ? STATUS.success : ns === 'correct' ? STATUS.success : STATUS.danger,
                       }}
                     >
                       {ns === 'idle'      && <><MicIcon /> Nói</>}
@@ -397,7 +399,7 @@ export const TheorySection = ({ content }: TheorySectionProps) => {
                 className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all hover:scale-[1.03]"
                 style={readingAll === sIdx ? {
                   background: 'rgba(139,92,246,.15)',
-                  color: '#8B5CF6',
+                  color: ACCENT.vocab,
                 } : {
                   background: 'var(--theme-bg-secondary)',
                   color: 'var(--theme-text-muted)',

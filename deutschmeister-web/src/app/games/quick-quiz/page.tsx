@@ -1,4 +1,5 @@
-﻿'use client';
+'use client';
+/* eslint-disable no-restricted-syntax -- game pages use custom dark-theme gradients */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
@@ -17,8 +18,9 @@ import {
   IconRefresh, IconChevronLeft,
 } from '@/components/games/GameUI';
 import { Button } from '@/components/ui';
+import { ACCENT, STATUS } from '@/lib/tokens';
 
-const AC: Record<string, string> = { masculine: '#3B82F6', feminine: '#EC4899', neuter: '#22C55E' };
+const AC: Record<string, string> = { masculine: ACCENT.srs, feminine: ACCENT.listening, neuter: STATUS.success };
 // BUG FIX 2: Removed hardcoded TOTAL_QUESTIONS = 20, now reads from settings
 type GamePhase = 'setup' | 'playing' | 'result';
 
@@ -32,6 +34,7 @@ export default function QuickQuizPage() {
   const TOTAL_QUESTIONS = isLoaded ? settings.questionsPerGame : 20;
 
   const [phase, setPhase] = useState<GamePhase>('setup');
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [score, setScore] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<Gender | null>(null);
@@ -49,8 +52,9 @@ export default function QuickQuizPage() {
   useEffect(() => { loadSettings(); }, [loadSettings]);
 
   const handleStartGame = async () => {
+    setLoadError(null);
     const result = await refetch();
-    if (!result.data?.length) { alert('Không có từ vựng!'); return; }
+    if (!result.data?.length) { setLoadError('Không có từ vựng! Vui lòng thêm từ hoặc seed database.'); return; }
 
     // Reset state
     setPhase('playing'); setCurrentIndex(0); setScore(0); setAnswers([]);
@@ -111,16 +115,16 @@ export default function QuickQuizPage() {
   // ─── Setup ───
   if (phase === 'setup') {
     return (
-        <GameSetupCard icon={({ size }) => <IconZap size={size} style={{ color: 'white' }} />} iconColor="#F59E0B" title="Quick Quiz">
+        <GameSetupCard icon={({ size }) => <IconZap size={size} style={{ color: 'white' }} />} iconColor="#F59E0B" title="Quick Quiz" loadError={loadError}>
           <p className="text-sm mb-6" style={{ color: 'var(--theme-text-secondary)' }}>
-            Chọn mạo từ đúng cho <span className="font-bold" style={{ color: '#F59E0B' }}>{TOTAL_QUESTIONS} từ</span> tiếng Đức
+            Chọn mạo từ đúng cho <span className="font-bold" style={{ color: ACCENT.xp }}>{TOTAL_QUESTIONS} từ</span> tiếng Đức
           </p>
           <p className="text-xs mb-6" style={{ color: 'var(--theme-text-muted)' }}>(Thay đổi số câu trong Settings → Học tập)
           </p>
           <GameInfoBox>
-            <div className="flex items-center gap-2"><IconTarget size={14} style={{ color: '#F59E0B' }} /><span>Click hoặc dùng phím tắt để trả lời</span></div>
-            <div className="flex items-center gap-2"><IconKeyboard size={14} style={{ color: '#8B5CF6' }} /><span>Phím: <KBD>1</KBD> der, <KBD>2</KBD> die, <KBD>3</KBD> das</span></div>
-            <div className="flex items-center gap-2"><IconVolume size={14} style={{ color: '#3B82F6' }} /><span>Phản hồi tức thì sau mỗi câu</span></div>
+            <div className="flex items-center gap-2"><IconTarget size={14} style={{ color: ACCENT.xp }} /><span>Click hoặc dùng phím tắt để trả lời</span></div>
+            <div className="flex items-center gap-2"><IconKeyboard size={14} style={{ color: ACCENT.vocab }} /><span>Phím: <KBD>1</KBD> der, <KBD>2</KBD> die, <KBD>3</KBD> das</span></div>
+            <div className="flex items-center gap-2"><IconVolume size={14} style={{ color: ACCENT.srs }} /><span>Phản hồi tức thì sau mỗi câu</span></div>
           </GameInfoBox>
           <div className="flex gap-3 justify-center mt-6">
             <Button variant="game" accent="xp" onClick={handleStartGame} isLoading={isLoading}><IconRocket size={16} /> Bắt đầu</Button>
@@ -154,8 +158,11 @@ export default function QuickQuizPage() {
         <div className="max-w-2xl mx-auto px-4 sm:px-6">
           <AnswerReview
             answers={answers}
-            getCorrectArticle={a => ({ article: GenderInfo[a.word.gender].article, color: AC[a.word.gender] || '#3B82F6' })}
-            getSelectedLabel={a => !a.isCorrect ? GenderInfo[a.selected].article : null}
+            getCorrectArticle={a => ({ 
+              article: a.word.gender && GenderInfo[a.word.gender] ? GenderInfo[a.word.gender].article : '', 
+              color: AC[a.word.gender] || ACCENT.srs 
+            })}
+            getSelectedLabel={a => !a.isCorrect && a.selected && GenderInfo[a.selected] ? GenderInfo[a.selected].article : null}
           />
         </div>
         <AddWrongWordsToBank wrongWords={answers.filter(a => !a.isCorrect).map(a => a.word)} />
@@ -174,9 +181,9 @@ export default function QuickQuizPage() {
         onExit={() => router.push('/games')}
       />
       <GameStatsBar stats={[
-        { label: 'Điểm',  value: score,        color: '#F59E0B' },
-        { label: 'Đúng',  value: correctCount, color: '#22C55E', dot: true },
-        { label: 'Sai',   value: currentIndex - correctCount, color: '#EF4444', dot: true },
+        { label: 'Điểm',  value: score,        color: ACCENT.xp },
+        { label: 'Đúng',  value: correctCount, color: STATUS.success, dot: true },
+        { label: 'Sai',   value: currentIndex - correctCount, color: STATUS.danger, dot: true },
         { label: 'Câu',   value: `${currentIndex + 1}/${TOTAL_QUESTIONS}`, color: 'var(--theme-text-primary)' },
       ]} />
       <GameProgressBar current={currentIndex + 1} total={TOTAL_QUESTIONS} />
@@ -199,7 +206,7 @@ export default function QuickQuizPage() {
             <p className="text-body mt-4 font-bold" style={{ color: 'rgba(255,255,255,0.8)' }}>
               {selectedAnswer === currentWord.gender
                 ? '✓ Chính xác!'
-                : `✗ Đáp án: ${GenderInfo[currentWord.gender].article}`}
+                : `✗ Đáp án: ${currentWord.gender && GenderInfo[currentWord.gender] ? GenderInfo[currentWord.gender].article : ''}`}
             </p>
           )}
         </GameWordCard>

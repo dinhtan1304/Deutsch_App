@@ -1,40 +1,32 @@
-﻿'use client';
+'use client';
 
 import { useState } from 'react';
 import Link from 'next/link';
 import { useExamWritingHistory, useExamWritingStats, useDeleteExamWriting } from '@/hooks/useExamWriting';
 import { ExamWritingHistoryItem } from '@/lib/api/examWriting';
 import { PageHeader } from '@/components/ui';
+import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 
 // ─── Inline icons ─────────────────────────────────────────────────────────────
-function IconPencil({ size = 16, style }: { size?: number; style?: React.CSSProperties }) {
-  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>;
-}
 function IconPlus({ size = 16, style }: { size?: number; style?: React.CSSProperties }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>;
 }
 function IconTrash({ size = 14, style }: { size?: number; style?: React.CSSProperties }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}><polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" /></svg>;
 }
-function IconChevronLeft({ size = 16, style }: { size?: number; style?: React.CSSProperties }) {
-  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}><polyline points="15 18 9 12 15 6" /></svg>;
-}
 function IconLoader({ size = 16, style }: { size?: number; style?: React.CSSProperties }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="animate-spin" style={{ display: 'block', ...style }}><path d="M21 12a9 9 0 1 1-6.219-8.56" /></svg>;
 }
 
-const ACCENT = '#A855F7';
-const GRADIENT = 'linear-gradient(135deg, #A855F7, #6366F1)';
-
 function getScoreColor(s: number) {
-  if (s >= 80) return '#22C55E';
-  if (s >= 60) return '#F59E0B';
-  if (s >= 40) return '#F97316';
-  return '#EF4444';
+  if (s >= 80) return STATUS.success;
+  if (s >= 60) return STATUS.warning;
+  if (s >= 40) return ACCENT.games;
+  return STATUS.danger;
 }
 
 function ExamBadge({ examType, cefrLevel }: { examType: string; cefrLevel: string }) {
-  const color = examType === 'GOETHE' ? '#3B82F6' : '#8B5CF6';
+  const color = examType === 'GOETHE' ? ACCENT.srs : ACCENT.vocab;
   return (
     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-caption font-bold"
       style={{ backgroundColor: `${color}18`, color }}>
@@ -45,10 +37,10 @@ function ExamBadge({ examType, cefrLevel }: { examType: string; cefrLevel: strin
 
 function StatusBadge({ status }: { status: string }) {
   const map: Record<string, { label: string; color: string; bg: string }> = {
-    DRAFT:   { label: 'Chưa nộp',  color: '#6366F1', bg: 'rgba(99,102,241,.1)' },
-    GRADING: { label: 'Đang chấm', color: '#F59E0B', bg: 'rgba(245,158,11,.1)' },
-    GRADED:  { label: 'Đã chấm',   color: '#22C55E', bg: 'rgba(34,197,94,.1)' },
-    ERROR:   { label: 'Lỗi',       color: '#EF4444', bg: 'rgba(239,68,68,.1)' },
+    DRAFT:   { label: 'Chưa nộp',  color: ACCENT.writing, bg: `${ACCENT.writing}1A` },
+    GRADING: { label: 'Đang chấm', color: STATUS.warning,  bg: `${STATUS.warning}1A` },
+    GRADED:  { label: 'Đã chấm',   color: STATUS.success,  bg: `${STATUS.success}1A` },
+    ERROR:   { label: 'Lỗi',       color: STATUS.danger,   bg: `${STATUS.danger}1A` },
   };
   const s = map[status] ?? map.DRAFT;
   return (
@@ -90,7 +82,7 @@ function HistoryCard({ item, onDelete }: { item: ExamWritingHistoryItem; onDelet
           )}
           <button onClick={(e) => { e.preventDefault(); onDelete(); }}
             className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-all hover:scale-110"
-            style={{ backgroundColor: 'rgba(239,68,68,.1)', color: '#EF4444' }}>
+            style={{ backgroundColor: `${STATUS.danger}1A`, color: STATUS.danger }}>
             <IconTrash size={13} />
           </button>
         </div>
@@ -104,23 +96,32 @@ export default function ExamWritingListPage() {
 }
 
 function ExamWritingListContent() {
-  const [filter, setFilter] = useState<string>('all');
   const [page, setPage] = useState(1);
+  const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [filterLevel, setFilterLevel] = useState<string>('all');
 
-  const params = {
+  const { data: history, isLoading } = useExamWritingHistory({
     page,
     limit: 10,
-    status: filter === 'all' ? undefined : filter,
-  };
-  const { data: history, isLoading } = useExamWritingHistory(params);
+    status: filterStatus === 'all' ? undefined : filterStatus,
+    cefrLevel: filterLevel === 'all' ? undefined : filterLevel
+  });
   const { data: stats } = useExamWritingStats();
   const deleteMut = useDeleteExamWriting();
 
-  const filters = [
-    { key: 'all',    label: 'Tất cả' },
-    { key: 'DRAFT',  label: 'Chưa nộp' },
+  const filtersStatus = [
+    { key: 'all', label: 'Tất cả trạng thái' },
+    { key: 'DRAFT', label: 'Chưa nộp' },
     { key: 'GRADED', label: 'Đã chấm' },
-    { key: 'ERROR',  label: 'Lỗi' },
+    { key: 'ERROR', label: 'Lỗi' },
+  ];
+
+  const filtersLevel = [
+    { key: 'all', label: 'Tất cả trình độ' },
+    { key: 'A1', label: 'A1' },
+    { key: 'A2', label: 'A2' },
+    { key: 'B1', label: 'B1' },
+    { key: 'B2', label: 'B2' },
   ];
 
   return (
@@ -129,57 +130,80 @@ function ExamWritingListContent() {
         backHref="/practice-test/writing"
         title="Luyện Viết Theo Đề Chuẩn"
         subtitle="Goethe & TELC · A1 / A2 / B1 · AI chấm bài"
-        accent="writingExam"
+        accent="writing"
         right={
           <Link href="/practice-test/writing/exam/new"
             className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-body font-bold text-white transition-all hover:-translate-y-0.5"
-            style={{ background: GRADIENT, boxShadow: '0 4px 12px rgba(168,85,247,.25)' }}>
+            style={{ background: GRADIENT.examWriting, boxShadow: `0 4px 12px ${ACCENT.examWriting}40` }}>
             <IconPlus size={14} /> Làm bài mới
           </Link>
         }
       />
 
-      {/* Stats */}
+      {/* Stats Banner */}
       {stats && (
-        <div className="grid grid-cols-3 gap-3 mb-6">
+        <div className="flex items-center gap-3 mb-5 overflow-x-auto no-scrollbar">
           {[
-            { label: 'Tổng bài', value: stats.total, color: '#A855F7' },
-            { label: 'TB điểm',  value: stats.graded > 0 ? `${Math.round(stats.avgScore)}%` : '—', color: getScoreColor(stats.avgScore) },
-            { label: 'Cao nhất', value: stats.graded > 0 ? `${Math.round(stats.bestScore)}%` : '—', color: '#22C55E' },
-          ].map((c, i) => (
-            <div key={i} className="rounded-xl p-3 text-center"
-              style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
-              <div className="text-h2 font-extrabold" style={{ color: c.color }}>{c.value}</div>
-              <div className="text-caption mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>{c.label}</div>
+            { label: 'Tổng bài', value: stats.total, color: ACCENT.examWriting },
+            { label: 'TB điểm', value: stats.graded > 0 ? `${Math.round(stats.avgScore)}%` : '—', color: getScoreColor(stats.avgScore) },
+            { label: 'Cao nhất', value: stats.graded > 0 ? `${Math.round(stats.bestScore)}%` : '—', color: STATUS.success },
+          ].map((s, i) => (
+            <div key={i} className="flex items-center gap-2 px-3 py-2 rounded-xl shrink-0"
+              style={{ backgroundColor: `${s.color}1A` }}>
+              <span className="text-base font-extrabold" style={{ color: s.color }}>{s.value}</span>
+              <span className="text-[10px] font-medium" style={{ color: 'var(--theme-text-muted)' }}>{s.label}</span>
             </div>
           ))}
         </div>
       )}
 
       {/* Filters */}
-      <div className="flex gap-2 mb-4">
-        {filters.map(f => (
-          <button key={f.key} onClick={() => { setFilter(f.key); setPage(1); }}
-            className="px-3 py-1.5 rounded-xl text-xs font-semibold transition-all"
-            style={filter === f.key
-              ? { background: GRADIENT, color: 'white' }
-              : { backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }}>
-            {f.label}
-          </button>
-        ))}
+      <div className="flex flex-col gap-3 mb-6">
+        <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
+          {filtersLevel.map(f => {
+            const isActive = filterLevel === f.key;
+            return (
+              <button key={f.key}
+                onClick={() => { setFilterLevel(f.key); setPage(1); }}
+                className="px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all duration-200"
+                style={isActive
+                  ? { background: GRADIENT.examWriting, color: 'white', boxShadow: `0 4px 12px ${ACCENT.examWriting}30` }
+                  : { backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }
+                }>
+                {f.label}
+              </button>
+            );
+          })}
+        </div>
+        <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
+          {filtersStatus.map(f => {
+            const isActive = filterStatus === f.key;
+            return (
+              <button key={f.key}
+                onClick={() => { setFilterStatus(f.key); setPage(1); }}
+                className="px-4 py-2 rounded-xl text-body font-semibold whitespace-nowrap transition-all duration-200"
+                style={isActive
+                  ? { background: `linear-gradient(135deg, ${ACCENT.examWriting}, ${ACCENT.examWriting}cc)`, color: 'white' }
+                  : { backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }
+                }>
+                {f.label}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* List */}
       {isLoading ? (
         <div className="flex justify-center py-10">
-          <IconLoader size={28} style={{ color: ACCENT }} />
+          <IconLoader size={28} style={{ color: ACCENT.examWriting }} />
         </div>
       ) : !history?.items.length ? (
         <div className="text-center py-12">
           <p className="text-sm mb-4" style={{ color: 'var(--theme-text-muted)' }}>Chưa có bài thi nào.</p>
           <Link href="/practice-test/writing/exam/new"
             className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl font-bold text-sm text-white"
-            style={{ background: GRADIENT }}>
+            style={{ background: GRADIENT.examWriting }}>
             <IconPlus size={14} /> Làm bài đầu tiên
           </Link>
         </div>
@@ -198,7 +222,7 @@ function ExamWritingListContent() {
             <button key={p} onClick={() => setPage(p)}
               className="w-8 h-8 rounded-xl text-body font-bold transition-all"
               style={page === p
-                ? { background: GRADIENT, color: 'white' }
+                ? { background: GRADIENT.examWriting, color: 'white' }
                 : { backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }}>
               {p}
             </button>

@@ -1,127 +1,21 @@
-﻿'use client';
+'use client';
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import {
-  IconHome, IconBook, IconNotebook, IconLayers, IconGamepad,
-  IconPenLine, IconGraduationCap, IconRefresh, IconSettings,
-  IconZap, IconCards, IconTimer, IconPencil, IconList, IconBrain, IconTarget,
-  IconChevronRight, IconChevronLeft, IconBookOpen,
-  IconHeadphones, IconSpellCheck, IconLink, IconMic,
-} from '@/components/ui/Icons';
+import { IconChevronRight, IconChevronLeft } from '@/components/ui/Icons';
 import { useXp } from '@/hooks/useXp';
 import { useAuthStore } from '@/stores/authStore';
 import { useSRSStats } from '@/hooks/usePersonalWords';
 import { useProgressStats } from '@/hooks/useProgress';
 import { PremiumLockIcon } from '@/components/subscription/UpsellTrigger';
-
-// Routes that require Premium (or BETA_OPEN). Crown icon is shown in sidebar
-// next to these for free users to signal the upsell.
-const PREMIUM_ROUTES = new Set<string>([
-  '/practice-test/reading/exam',
-  '/practice-test/listening/exam',
-  '/practice-test/writing/exam',
-  '/practice-test/speaking/exam',
-]);
-
-// ============================================
-// Navigation Data
-// ============================================
-interface NavItem {
-  label: string;
-  labelVi: string;
-  icon: React.ComponentType<{ size?: number; className?: string }>;
-  href: string;
-  children?: NavItem[];
-}
-
-interface NavSection {
-  label?: string;
-  items: NavItem[];
-}
-
-const navSections: NavSection[] = [
-  {
-    items: [
-      { label: 'Home', labelVi: 'Trang chủ', icon: IconHome, href: '/dashboard' },
-    ],
-  },
-  {
-    label: 'Từ vựng',
-    items: [
-      { label: 'Dictionary', labelVi: 'Từ điển', icon: IconBook, href: '/words' },
-      {
-        label: 'Word Bank', labelVi: 'Sổ từ vựng', icon: IconNotebook, href: '/word-bank',
-        children: [
-          { label: 'All Words', labelVi: 'Tất cả từ', icon: IconList, href: '/word-bank' },
-          { label: 'SRS Review', labelVi: 'Ôn tập SRS', icon: IconBrain, href: '/word-bank/review' },
-        ],
-      },
-      { label: 'Topics', labelVi: 'Chủ đề', icon: IconLayers, href: '/topics' },
-    ],
-  },
-  {
-    label: 'Trò chơi',
-    items: [
-      {
-        label: 'Games', labelVi: 'Trò chơi', icon: IconGamepad, href: '/games',
-        children: [
-          { label: 'Quick Quiz', labelVi: 'Trắc nghiệm', icon: IconZap, href: '/games/quick-quiz' },
-          { label: 'Gender Quiz', labelVi: 'Der/Die/Das', icon: IconTarget, href: '/games/gender-quiz' },
-          { label: 'Flashcards', labelVi: 'Thẻ ghi nhớ', icon: IconCards, href: '/games/flashcards' },
-          { label: 'Fill Blank', labelVi: 'Điền từ', icon: IconPencil, href: '/games/fill-blank' },
-          { label: 'Timed Challenge', labelVi: 'Thử thách', icon: IconTimer, href: '/games/timed-challenge' },
-          { label: 'Word Match', labelVi: 'Ghép từ', icon: IconLink, href: '/games/word-match' },
-          { label: 'Listening', labelVi: 'Nghe từ', icon: IconHeadphones, href: '/games/listening' },
-          { label: 'Spelling Bee', labelVi: 'Chính tả', icon: IconSpellCheck, href: '/games/spelling' },
-        ],
-      },
-    ],
-  },
-  {
-    label: 'Luyện thi',
-    items: [
-      { label: 'Study Plan', labelVi: 'Lịch học', icon: IconTarget, href: '/study-plan' },
-      { label: 'Grammar', labelVi: 'Ngữ pháp', icon: IconBookOpen, href: '/grammar' },
-      {
-        label: 'Test', labelVi: 'Luyện thi', icon: IconGraduationCap, href: '/practice-test',
-        children: [
-          { label: 'Reading', labelVi: 'Đọc', icon: IconBookOpen, href: '/practice-test/reading' },
-          { label: 'Listening', labelVi: 'Nghe', icon: IconHeadphones, href: '/practice-test/listening' },
-          { label: 'Writing', labelVi: 'Viết', icon: IconPenLine, href: '/practice-test/writing' },
-          { label: 'Speaking', labelVi: 'Nói', icon: IconMic, href: '/practice-test/speaking' },
-        ],
-      },
-      { label: 'Review', labelVi: 'Ôn tập SM-2', icon: IconRefresh, href: '/review' },
-    ],
-  },
-  {
-    label: 'Cộng đồng',
-    items: [
-      { label: 'Achievements', labelVi: 'Thành tích', icon: IconTarget, href: '/achievements' },
-      { label: 'Leaderboard', labelVi: 'Bảng xếp hạng', icon: IconZap, href: '/leaderboard' },
-      { label: 'Challenges', labelVi: 'Thử thách', icon: IconBrain, href: '/challenges' },
-      { label: 'Resources', labelVi: 'Tài nguyên Đức', icon: IconLink, href: '/resources' },
-    ],
-  },
-  {
-    items: [
-      { label: 'Settings', labelVi: 'Cài đặt', icon: IconSettings, href: '/settings' },
-    ],
-  },
-];
-
-// Flat list for auto-expand logic
-const allNavItems = navSections.flatMap(s => s.items);
+import { PRIMARY_NAV, PREMIUM_HREFS, AUTH_HREFS, NAV_FLAT, type NavItem } from '@/config/navigation';
+import { STATUS, ACCENT, GRADIENT } from '@/lib/tokens';
 
 // Widths (px) — exported for MainLayout & Header
 export const SIDEBAR_WIDTH = 260;
 export const SIDEBAR_COLLAPSED_WIDTH = 72;
 
-// ============================================
-// Sidebar Component
-// ============================================
 interface SidebarProps {
   isCollapsed: boolean;
   onToggle: () => void;
@@ -130,19 +24,19 @@ interface SidebarProps {
 export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
   const pathname = usePathname();
   const { data: xpInfo } = useXp();
-  const { user } = useAuthStore();
+  const { user, isAuthenticated } = useAuthStore();
   const { data: srsStats } = useSRSStats();
   const { data: progressStats } = useProgressStats();
   const srsDue = srsStats?.due ?? 0;
   const builtInDue = progressStats?.due ?? 0;
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
-  const [tooltip, setTooltip] = useState<{ href: string; top: number } | null>(null);
+  const [tooltip, setTooltip] = useState<{ key: string; top: number } | null>(null);
 
   // Auto-expand parent of active child on route change
   useEffect(() => {
-    allNavItems.forEach(item => {
+    NAV_FLAT.forEach(item => {
       if (item.children?.some(child => pathname.startsWith(child.href))) {
-        setExpandedItems(prev => new Set(prev).add(item.href));
+        setExpandedItems(prev => new Set(prev).add(item.key));
       }
     });
   }, [pathname]);
@@ -161,10 +55,10 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
     return () => window.removeEventListener('keydown', handleKey);
   }, [onToggle]);
 
-  const toggleExpand = useCallback((href: string) => {
+  const toggleExpand = useCallback((key: string) => {
     setExpandedItems(prev => {
       const next = new Set(prev);
-      if (next.has(href)) next.delete(href); else next.add(href);
+      if (next.has(key)) next.delete(key); else next.add(key);
       return next;
     });
   }, []);
@@ -173,51 +67,67 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
     return pathname === href || pathname.startsWith(href + '/');
   }, [pathname]);
 
-  const showTooltip = useCallback((href: string, el: HTMLElement) => {
+  // A parent is visually active if its href matches, OR if any child href matches
+  const isItemActive = useCallback((item: NavItem) => {
+    if (isActive(item.href)) return true;
+    return item.children?.some(c => isActive(c.href)) ?? false;
+  }, [isActive]);
+
+  const showTooltip = useCallback((key: string, el: HTMLElement) => {
     if (!isCollapsed) return;
     const rect = el.getBoundingClientRect();
-    setTooltip({ href, top: rect.top + rect.height / 2 });
+    setTooltip({ key, top: rect.top + rect.height / 2 });
   }, [isCollapsed]);
 
   const hideTooltip = useCallback(() => setTooltip(null), []);
+
+  // Badge counts by nav badge key
+  const badgeCount = (badge?: NavItem['badge']): number => {
+    if (badge === 'srs-due') return srsDue;
+    if (badge === 'builtin-due') return builtInDue;
+    return 0;
+  };
 
   const w = isCollapsed ? SIDEBAR_COLLAPSED_WIDTH : SIDEBAR_WIDTH;
 
   // ─── Render a single nav item (parent or leaf) ───
   const renderNavItem = (item: NavItem) => {
     const Icon = item.icon;
-    const active = isActive(item.href);
-    const expanded = effectiveExpandedItems.has(item.href);
+    const active = isItemActive(item);
+    const expanded = effectiveExpandedItems.has(item.key);
+    const badge = badgeCount(item.badge);
+
+    const hasChildren = Boolean(item.children?.length);
 
     return (
-      <li key={item.href} className="relative">
-        {item.children ? (
+      <li key={item.key} className="relative">
+        {hasChildren ? (
           <>
             {isCollapsed ? (
               <Link
                 href={item.href}
                 className="group relative flex items-center justify-center py-2.5 rounded-xl"
                 style={{
-                  color: active ? '#3B82F6' : 'var(--theme-text-secondary)',
-                  backgroundColor: active ? 'rgba(59,130,246,.08)' : undefined,
+                  color: active ? ACCENT.srs : 'var(--theme-text-secondary)',
+                  backgroundColor: active ? `${ACCENT.srs}14` : undefined,
                   transition: 'background-color .2s, color .2s',
                 }}
-                onMouseEnter={e => { if (!active) e.currentTarget.style.backgroundColor = 'var(--theme-bg-secondary)'; showTooltip(item.href, e.currentTarget); }}
+                onMouseEnter={e => { if (!active) e.currentTarget.style.backgroundColor = 'var(--theme-bg-secondary)'; showTooltip(item.key, e.currentTarget); }}
                 onMouseLeave={e => { if (!active) e.currentTarget.style.backgroundColor = ''; hideTooltip(); }}
               >
                 {active && <ActiveBar />}
                 <IconWrap active={active}><Icon size={20} /></IconWrap>
-                {item.href === '/word-bank' && srsDue > 0 && (
-                  <span className="absolute top-1.5 right-2 w-2 h-2 rounded-full" style={{ background: '#EF4444' }} />
+                {hasChildAnyBadge(item, badgeCount) && (
+                  <span className="absolute top-1.5 right-2 w-2 h-2 rounded-full" style={{ background: STATUS.danger }} />
                 )}
               </Link>
             ) : (
               <button
-                onClick={() => toggleExpand(item.href)}
+                onClick={() => toggleExpand(item.key)}
                 className="group relative w-full flex items-center gap-3 px-3 py-2.5 rounded-xl outline-none"
                 style={{
-                  color: active ? '#3B82F6' : 'var(--theme-text-secondary)',
-                  backgroundColor: active ? 'rgba(59,130,246,.08)' : undefined,
+                  color: active ? ACCENT.srs : 'var(--theme-text-secondary)',
+                  backgroundColor: active ? `${ACCENT.srs}14` : undefined,
                   transition: 'background-color .2s, color .2s',
                 }}
                 onMouseEnter={e => !active && (e.currentTarget.style.backgroundColor = 'var(--theme-bg-secondary)')}
@@ -225,7 +135,7 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
               >
                 {active && <ActiveBar />}
                 <IconWrap active={active}><Icon size={20} /></IconWrap>
-                <span className="flex-1 text-left text-[13.5px] font-medium whitespace-nowrap">{item.labelVi}</span>
+                <span className="flex-1 text-left text-[13.5px] font-medium whitespace-nowrap">{item.label}</span>
                 <span
                   className="shrink-0 w-3.5 h-3.5 flex items-center justify-center"
                   style={{ transform: expanded ? 'rotate(90deg)' : 'rotate(0)', transition: 'transform .25s cubic-bezier(.4,0,.2,1)' }}
@@ -236,7 +146,7 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
             )}
 
             {/* Tooltip — collapsed hover (parent with children) */}
-            {tooltip?.href === item.href && (
+            {tooltip?.key === item.key && (
               <div
                 className="fixed z-50 px-3 py-2 rounded-xl shadow-lg text-body font-medium whitespace-nowrap pointer-events-none"
                 style={{
@@ -250,10 +160,10 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                   animation: 'tooltipIn .15s ease-out forwards',
                 }}
               >
-                {item.labelVi}
+                {item.label}
                 <div className="mt-1.5 pt-1.5 space-y-0.5" style={{ borderTop: '1px solid var(--theme-border)' }}>
-                  {item.children.map(c => (
-                    <div key={c.href} className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>{c.labelVi}</div>
+                  {item.children!.map(c => (
+                    <div key={c.key} className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>{c.label}</div>
                   ))}
                 </div>
               </div>
@@ -269,30 +179,33 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
               }}
             >
               <ul className="mt-0.5 ml-5 pl-3 space-y-0.5" style={{ borderLeft: '1.5px solid var(--theme-border)' }}>
-                {item.children.map(child => {
+                {item.children!.map(child => {
                   const ChildIcon = child.icon;
                   const childActive = isActive(child.href);
+                  const childBadge = badgeCount(child.badge);
                   return (
-                    <li key={child.href}>
+                    <li key={child.key}>
                       <Link
                         href={child.href}
+                        aria-current={childActive ? 'page' : undefined}
                         className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-body"
                         style={{
-                          color: childActive ? '#3B82F6' : 'var(--theme-text-muted)',
+                          color: childActive ? ACCENT.srs : 'var(--theme-text-muted)',
                           fontWeight: childActive ? 600 : 400,
-                          backgroundColor: childActive ? 'rgba(59,130,246,.08)' : undefined,
+                          backgroundColor: childActive ? `${ACCENT.srs}14` : undefined,
                           transition: 'background-color .2s, color .15s',
                         }}
                         onMouseEnter={e => !childActive && (e.currentTarget.style.backgroundColor = 'var(--theme-bg-secondary)')}
                         onMouseLeave={e => !childActive && (e.currentTarget.style.backgroundColor = '')}
                       >
                         <span className="shrink-0 w-4 h-4 flex items-center justify-center"><ChildIcon size={16} /></span>
-                        <span className="min-w-0 truncate flex-1">{child.labelVi}</span>
-                        {PREMIUM_ROUTES.has(child.href) && <PremiumLockIcon size={12} />}
-                        {child.href === '/word-bank/review' && srsDue > 0 && (
-                          <span className="shrink-0 text-caption font-bold px-1.5 py-0.5 rounded-full leading-none"
-                            style={{ background: '#EF4444', color: 'white', minWidth: 18, textAlign: 'center' }}>
-                            {srsDue > 99 ? '99+' : srsDue}
+                        <span className="min-w-0 truncate flex-1">{child.label}</span>
+                        {AUTH_HREFS.has(child.href) && !isAuthenticated && <LockIcon />}
+                        {!AUTH_HREFS.has(child.href) && PREMIUM_HREFS.has(child.href) && <PremiumLockIcon size={12} />}
+                        {childBadge > 0 && (
+                          <span className="shrink-0 text-caption font-bold px-1.5 py-0.5 rounded-full leading-none text-white text-center"
+                            style={{ background: STATUS.danger, minWidth: 18 }}>
+                            {childBadge > 99 ? '99+' : childBadge}
                           </span>
                         )}
                       </Link>
@@ -306,34 +219,37 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
           <>
             <Link
               href={item.href}
+              aria-current={active ? 'page' : undefined}
+              aria-label={isCollapsed ? item.label : undefined}
               className={`group relative flex items-center ${isCollapsed ? 'justify-center' : 'gap-3 px-3'} py-2.5 rounded-xl`}
               style={{
-                color: active ? '#3B82F6' : 'var(--theme-text-secondary)',
-                backgroundColor: active ? 'rgba(59,130,246,.08)' : undefined,
+                color: active ? ACCENT.srs : 'var(--theme-text-secondary)',
+                backgroundColor: active ? `${ACCENT.srs}14` : undefined,
                 transition: 'background-color .2s, color .2s',
               }}
-              onMouseEnter={e => { if (!active) e.currentTarget.style.backgroundColor = 'var(--theme-bg-secondary)'; showTooltip(item.href, e.currentTarget); }}
+              onMouseEnter={e => { if (!active) e.currentTarget.style.backgroundColor = 'var(--theme-bg-secondary)'; showTooltip(item.key, e.currentTarget); }}
               onMouseLeave={e => { if (!active) e.currentTarget.style.backgroundColor = ''; hideTooltip(); }}
             >
               {active && <ActiveBar />}
               <IconWrap active={active}><Icon size={20} /></IconWrap>
               {!isCollapsed && (
-                <span className="flex-1 text-[13.5px] font-medium whitespace-nowrap">{item.labelVi}</span>
+                <span className="flex-1 text-[13.5px] font-medium whitespace-nowrap">{item.label}</span>
               )}
-              {item.href === '/review' && builtInDue > 0 && (
+              {!isCollapsed && AUTH_HREFS.has(item.href) && !isAuthenticated && <LockIcon />}
+              {badge > 0 && (
                 isCollapsed ? (
-                  <span className="absolute top-1.5 right-2 w-2 h-2 rounded-full" style={{ background: '#EF4444' }} />
+                  <span className="absolute top-1.5 right-2 w-2 h-2 rounded-full" style={{ background: STATUS.danger }} />
                 ) : (
-                  <span className="shrink-0 text-caption font-bold px-1.5 py-0.5 rounded-full leading-none"
-                    style={{ background: '#EF4444', color: 'white', minWidth: 18, textAlign: 'center' }}>
-                    {builtInDue > 99 ? '99+' : builtInDue}
+                  <span className="shrink-0 text-caption font-bold px-1.5 py-0.5 rounded-full leading-none text-white text-center"
+                    style={{ background: STATUS.danger, minWidth: 18 }}>
+                    {badge > 99 ? '99+' : badge}
                   </span>
                 )
               )}
             </Link>
 
             {/* Tooltip — collapsed hover (single) */}
-            {tooltip?.href === item.href && (
+            {tooltip?.key === item.key && (
               <div
                 className="fixed z-60 px-3 py-1.5 rounded-lg shadow-lg text-body font-medium whitespace-nowrap pointer-events-none"
                 style={{
@@ -347,7 +263,7 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                   animation: 'tooltipIn .15s ease-out forwards',
                 }}
               >
-                {item.labelVi}
+                {item.label}
               </div>
             )}
           </>
@@ -420,31 +336,9 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
 
       {/* ─── Navigation ─── */}
       <nav className="sidebar-nav flex-1 py-2 px-3" style={{ overflowY: 'auto', overflowX: 'hidden' }}>
-        {navSections.map((section, sectionIdx) => (
-          <div key={sectionIdx}>
-            {/* Section divider / label */}
-            {section.label && (
-              isCollapsed ? (
-                /* Collapsed: thin horizontal line */
-                sectionIdx > 0 && (
-                  <div className="mx-2 my-2" style={{ borderTop: '1px solid var(--theme-border)' }} />
-                )
-              ) : (
-                /* Expanded: labelled section header */
-                <div
-                  className="px-3 pt-4 pb-1.5 text-[10.5px] font-semibold uppercase tracking-widest select-none"
-                  style={{ color: 'var(--theme-text-muted)', letterSpacing: '0.08em' }}
-                >
-                  {section.label}
-                </div>
-              )
-            )}
-
-            <ul className="space-y-0.5 mb-1">
-              {section.items.map(item => renderNavItem(item))}
-            </ul>
-          </div>
-        ))}
+        <ul className="space-y-0.5">
+          {PRIMARY_NAV.map(item => renderNavItem(item))}
+        </ul>
       </nav>
 
       {/* ─── Premium CTA ─── */}
@@ -454,10 +348,10 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
             <Link
               href="/profile/subscription"
               className="flex items-center justify-center gap-2 py-2 rounded-xl text-xs font-bold transition-colors"
-              style={{ color: '#8B5CF6', backgroundColor: 'rgba(139,92,246,0.08)' }}
+              style={{ color: ACCENT.premium, backgroundColor: `${ACCENT.premium}14` }}
             >
               {!isCollapsed && <span>Premium</span>}
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8B5CF6" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={ACCENT.premium} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
               </svg>
             </Link>
@@ -465,7 +359,7 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
             <Link
               href="/pricing"
               className="flex items-center justify-center gap-2 py-2 rounded-xl text-xs font-bold text-white transition-transform hover:scale-[1.02]"
-              style={{ background: 'linear-gradient(135deg, #6366F1, #8B5CF6)' }}
+              style={{ background: GRADIENT.writing }}
             >
               {!isCollapsed && <span>Nâng cấp Premium</span>}
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -479,38 +373,48 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
       {/* ─── XP Bar + Footer ─── */}
       <div className="px-3 py-3 shrink-0" style={{ borderTop: '1px solid var(--theme-border)' }}>
         {xpInfo && !isCollapsed && (
-          <div style={{ marginBottom: 10 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-              <span style={{ fontSize: 11, fontWeight: 700, color: '#F59E0B' }}>Lv.{xpInfo.level} {xpInfo.nameVi}</span>
-              <span style={{ fontSize: 10, color: 'var(--theme-text-muted)' }}>{xpInfo.xp} / {xpInfo.nextLevelXp} XP</span>
+          <div className="mb-2.5">
+            <div className="flex justify-between items-center mb-1">
+              <span className="text-[11px] font-bold" style={{ color: ACCENT.xp }}>
+                Lv.{xpInfo.level} {xpInfo.nameVi}
+              </span>
+              <span className="text-[10px]" style={{ color: 'var(--theme-text-muted)' }}>
+                {xpInfo.xp} / {xpInfo.nextLevelXp} XP
+              </span>
             </div>
             {xpInfo.cefr && (
               <div
+                className="text-[10px] font-semibold mb-1"
                 title="Mức ước tính dựa trên XP — thi placement test để xác định chính xác"
-                style={{ fontSize: 10, color: 'var(--theme-text-muted)', marginBottom: 4, fontWeight: 600 }}
+                style={{ color: 'var(--theme-text-muted)' }}
               >
                 ≈ {xpInfo.cefrLabel}
               </div>
             )}
-            <div style={{ position: 'relative', height: 7, borderRadius: 999, background: 'var(--theme-border)', overflow: 'hidden' }}>
-              <div style={{
-                height: '100%', borderRadius: 999,
-                background: 'linear-gradient(90deg, #F59E0B, #EF4444)',
-                width: `${xpInfo.progress}%`,
-                transition: 'width 0.6s cubic-bezier(.4,0,.2,1)',
-                boxShadow: '0 0 6px rgba(245,158,11,0.55)',
-              }} />
+            <div className="relative h-1.75 rounded-full overflow-hidden" style={{ background: 'var(--theme-border)' }}>
+              <div
+                className="h-full rounded-full transition-[width] duration-700"
+                style={{
+                  width: `${xpInfo.progress}%`,
+                  background: `linear-gradient(90deg, ${ACCENT.xp}, ${STATUS.danger})`,
+                  boxShadow: `0 0 6px ${ACCENT.xp}8C`,
+                }}
+              />
             </div>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 2 }}>
-              <span style={{ fontSize: 9.5, color: 'var(--theme-text-muted)', fontWeight: 500 }}>
+            <div className="flex justify-end mt-0.5">
+              <span className="text-[9.5px] font-medium" style={{ color: 'var(--theme-text-muted)' }}>
                 {Math.round(xpInfo.progress)}%
               </span>
             </div>
           </div>
         )}
         {xpInfo && isCollapsed && (
-          <div style={{ display: 'flex', justifyContent: 'center' }}>
-            <div title={`Lv.${xpInfo.level} · ${xpInfo.xp} XP`} style={{ width: 32, height: 32, borderRadius: '50%', background: 'linear-gradient(135deg, #F59E0B, #EF4444)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 800, color: '#fff' }}>
+          <div className="flex justify-center">
+            <div
+              title={`Lv.${xpInfo.level} · ${xpInfo.xp} XP`}
+              className="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-extrabold text-white"
+              style={{ background: `linear-gradient(135deg, ${ACCENT.xp}, ${STATUS.danger})` }}
+            >
               {xpInfo.level}
             </div>
           </div>
@@ -525,15 +429,27 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
   );
 }
 
-// ============================================
-// Sub-components
-// ============================================
+// ─── Helpers ───
+function hasChildAnyBadge(item: NavItem, count: (b?: NavItem['badge']) => number): boolean {
+  return item.children?.some(c => count(c.badge) > 0) ?? false;
+}
+
 function ActiveBar() {
   return (
     <span
       className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 rounded-r-full"
-      style={{ background: 'linear-gradient(180deg, #3B82F6, #8B5CF6)' }}
+      style={{ background: `linear-gradient(180deg, ${ACCENT.srs}, ${ACCENT.vocab})` }}
     />
+  );
+}
+
+function LockIcon() {
+  return (
+    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden
+      style={{ color: 'var(--theme-text-muted)', opacity: 0.6, flexShrink: 0 }}>
+      <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+    </svg>
   );
 }
 

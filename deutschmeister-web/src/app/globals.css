@@ -8,24 +8,21 @@
    ============================================ */
 
 @theme {
-  /* Feature accents */
+  /* Brand primary — default interactive, premium highlights */
+  --color-accent-brand: #4F46E5;
+
+  /* Core skill accents */
   --color-accent-reading: #22C55E;
-  --color-accent-reading-alt: #14B8A6;
-  --color-accent-listening: #EC4899;
-  --color-accent-listening-alt: #8B5CF6;
   --color-accent-writing: #6366F1;
-  --color-accent-writing-alt: #8B5CF6;
-  --color-accent-writing-exam: #A855F7;
-  --color-accent-speaking: #EC4899;
-  --color-accent-speaking-alt: #F43F5E;
+  --color-accent-listening: #EC4899;
+  --color-accent-speaking: #F43F5E;
+  --color-accent-vocab: #8B5CF6;
+
+  /* Secondary contexts */
   --color-accent-games: #F97316;
-  --color-accent-games-alt: #EF4444;
   --color-accent-srs: #3B82F6;
-  --color-accent-srs-alt: #6366F1;
   --color-accent-xp: #F59E0B;
-  --color-accent-xp-alt: #EF4444;
   --color-accent-premium: #8B5CF6;
-  --color-accent-premium-alt: #A855F7;
 
   /* Semantic status */
   --color-status-success: #22C55E;
@@ -44,24 +41,32 @@
   --color-theme-border: var(--theme-border);
   --color-theme-border-dark: var(--theme-border-dark);
 
-  /* Radius */
-  --radius-xs: 4px;
-  --radius-sm: 8px;
+  /* Radius — canonical 4 levels */
+  --radius-sm: 6px;
   --radius-md: 12px;
-  --radius-card: 16px;
-  --radius-xl: 20px;
+  --radius-lg: 16px;
   --radius-pill: 9999px;
+  /* Legacy aliases — deprecated, migrate to canonical in Phase 3 */
+  --radius-xs: 4px;          /* -> use sm */
+  --radius-card: 16px;       /* -> use lg */
+  --radius-xl: 20px;         /* -> use lg */
 
-  /* Shadow */
-  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.06);
-  --shadow-hero: 0 12px 32px rgba(0, 0, 0, 0.12);
+  /* Shadow — canonical 3 levels */
+  --shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --shadow-lifted: 0 12px 32px rgba(0, 0, 0, 0.12);
+  /* Legacy aliases — deprecated, migrate in Phase 3 */
+  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.06);   /* -> soft */
+  --shadow-hero: 0 12px 32px rgba(0, 0, 0, 0.12); /* -> lifted */
 
-  /* Typography (WCAG-safe floor = 11px) — text-xs/sm/base/lg from Tailwind cover 12/14/16/18 */
-  --text-caption: 11px;
-  --text-body: 13px;
-  --text-title: 18px;
+  /* Typography — canonical 6 sizes */
+  --text-caption: 12px;
+  --text-body: 14px;
+  --text-lead: 16px;
+  --text-h3: 18px;
   --text-h2: 22px;
   --text-h1: 28px;
+  /* Legacy alias — deprecated, migrate to h3 in Phase 3 */
+  --text-title: 18px;
 }
 
 /*
@@ -106,6 +111,71 @@ html.dark {
   --theme-border-dark: #4b5563;     /* gray-600 */
   --theme-overlay-soft: rgba(255, 255, 255, 0.06);
   --theme-overlay-strong: rgba(255, 255, 255, 0.10);
+}
+
+/* ============================================
+   MARKETING SURFACE — landing & auth gradient aesthetic
+   Used by FormLayout variant="marketing" and landing page
+   ============================================ */
+:root {
+  --marketing-bg: #0a0f1e;
+  --marketing-panel: rgba(255, 255, 255, 0.04);
+  --marketing-border: rgba(255, 255, 255, 0.08);
+  --marketing-text: rgba(255, 255, 255, 0.9);
+  --marketing-muted: rgba(255, 255, 255, 0.55);
+  --marketing-dim: rgba(255, 255, 255, 0.35);
+  --marketing-input-bg: rgba(255, 255, 255, 0.05);
+  --marketing-input-bg-focus: rgba(99, 102, 241, 0.08);
+  --marketing-input-border: rgba(255, 255, 255, 0.1);
+  --marketing-input-border-focus: rgba(99, 102, 241, 0.6);
+  --marketing-input-ring: rgba(99, 102, 241, 0.15);
+  --marketing-orb-1: radial-gradient(circle, rgba(99, 102, 241, 0.18) 0%, transparent 70%);
+  --marketing-orb-2: radial-gradient(circle, rgba(59, 130, 246, 0.14) 0%, transparent 70%);
+  --marketing-orb-3: radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, transparent 70%);
+  --marketing-grid: linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  --marketing-brand-text: linear-gradient(135deg, #60A5FA, #A78BFA);
+  --marketing-submit: linear-gradient(135deg, #3B82F6, #6366F1);
+  --marketing-submit-shadow: 0 8px 24px rgba(99, 102, 241, 0.35);
+  --marketing-link: #818CF8;
+  --marketing-error: #FCA5A5;
+}
+
+@keyframes marketingFloat1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(40px, -50px) scale(1.08); }
+}
+@keyframes marketingFloat2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-30px, 40px) scale(1.05); }
+}
+@keyframes marketingFloat3 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(20px, 30px) scale(1.06); }
+}
+@keyframes marketingFadeUp {
+  from { opacity: 0; transform: translateY(28px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes marketingFadeLeft {
+  from { opacity: 0; transform: translateX(-28px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes marketingPulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.08); opacity: 0.85; }
+}
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes bounceIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes shimmer {
+  0% { background-position: -200% -200%; }
+  100% { background-position: 200% 200%; }
 }
 
 /* Accessibility: respect user's motion preference */

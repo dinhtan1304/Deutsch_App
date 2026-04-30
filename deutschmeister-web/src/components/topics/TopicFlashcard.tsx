@@ -1,6 +1,8 @@
 ﻿'use client';
+/* eslint-disable no-restricted-syntax */
 
 import { useState, useCallback, useEffect } from 'react';
+import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 import type { TopicWord } from '@/types/topic';
 
 // ─── Icons ───
@@ -65,7 +67,7 @@ function IconShuffle({ size = 16 }: { size?: number }) {
 }
 
 const ArticleColor: Record<string, string> = {
-  der: '#3B82F6', die: '#EC4899', das: '#22C55E',
+  der: ACCENT.srs, die: ACCENT.listening, das: STATUS.success,
 };
 
 function shuffle<T>(arr: T[]): T[] {
@@ -170,11 +172,11 @@ export function TopicFlashcard({ words, topicColor, onMarkLearned }: Props) {
         </h3>
         <div className="flex justify-center gap-6 mb-6">
           <div className="text-center">
-            <div className="text-2xl font-bold" style={{ color: '#22C55E' }}>{known.size}</div>
+            <div className="text-2xl font-bold" style={{ color: STATUS.success }}>{known.size}</div>
             <div className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>Đã biết</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-bold" style={{ color: '#EF4444' }}>{unknown.size}</div>
+            <div className="text-2xl font-bold" style={{ color: STATUS.danger }}>{unknown.size}</div>
             <div className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>Cần ôn</div>
           </div>
           <div className="text-center">
@@ -186,7 +188,7 @@ export function TopicFlashcard({ words, topicColor, onMarkLearned }: Props) {
           {unknown.size > 0 && (
             <button onClick={() => restart(true)}
               className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-body font-semibold transition-all hover:-translate-y-0.5"
-              style={{ background: 'rgba(239,68,68,.1)', color: '#EF4444' }}>
+              style={{ background: 'rgba(239,68,68,.1)', color: STATUS.danger }}>
               <IconRotateCcw size={15} /> Ôn {unknown.size} từ chưa biết
             </button>
           )}
@@ -210,8 +212,8 @@ export function TopicFlashcard({ words, topicColor, onMarkLearned }: Props) {
           {currentIndex + 1} / {total}
         </span>
         <div className="flex items-center gap-3 text-xs">
-          <span style={{ color: '#22C55E' }}>✓ {known.size}</span>
-          <span style={{ color: '#EF4444' }}>✗ {unknown.size}</span>
+          <span style={{ color: STATUS.success }}>✓ {known.size}</span>
+          <span style={{ color: STATUS.danger }}>✗ {unknown.size}</span>
         </div>
       </div>
       <div className="h-1.5 rounded-full overflow-hidden mb-6"
@@ -305,12 +307,12 @@ export function TopicFlashcard({ words, topicColor, onMarkLearned }: Props) {
       <div className="flex justify-center gap-4">
         <button onClick={handleUnknown}
           className="flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold transition-all hover:-translate-y-0.5 hover:shadow-md"
-          style={{ background: 'rgba(239,68,68,.1)', color: '#EF4444', border: '1px solid rgba(239,68,68,.2)' }}>
+          style={{ background: 'rgba(239,68,68,.1)', color: STATUS.danger, border: '1px solid rgba(239,68,68,.2)' }}>
           <IconX size={18} /> Chưa biết · ←
         </button>
         <button onClick={handleKnown}
           className="flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold transition-all hover:-translate-y-0.5 hover:shadow-md"
-          style={{ background: 'rgba(34,197,94,.1)', color: '#22C55E', border: '1px solid rgba(34,197,94,.2)' }}>
+          style={{ background: 'rgba(34,197,94,.1)', color: STATUS.success, border: '1px solid rgba(34,197,94,.2)' }}>
           <IconCheck size={18} /> Đã biết · →
         </button>
       </div>

@@ -17,7 +17,7 @@ export function useFavorites() {
       if (error instanceof ApiError && error.status === 401) return false;
       return failureCount < 2;
     },
-    staleTime: 30_000, // Cache 30s to reduce refetches
+    staleTime: 5 * 60_000, // 5 min — favorites change infrequently, mutations invalidate immediately
   });
 }
 
@@ -54,6 +54,7 @@ export function useCheckFavorite(wordId: string) {
       if (error instanceof ApiError && error.status === 401) return false;
       return failureCount < 2;
     },
+    staleTime: 5 * 60_000,
   });
 }
 

@@ -7,6 +7,7 @@ import { useExamWritingSession } from '@/hooks/useExamWriting';
 import { ExamWritingTeil, TeilGrading } from '@/lib/api/examWriting';
 import { CriterionRadar } from '@/components/writing/CriterionRadar';
 import { PageHeader, FixedActionBar } from '@/components/ui';
+import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 
 function IconLoader({ size = 24, style }: { size?: number; style?: React.CSSProperties }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="animate-spin" style={{ display: 'block', ...style }}><path d="M21 12a9 9 0 1 1-6.219-8.56" /></svg>;
@@ -20,9 +21,12 @@ function IconChevronUp({ size = 16 }: { size?: number }) {
 function IconStar({ size = 16, filled = false, color }: { size?: number; filled?: boolean; color?: string }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill={filled ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', color }}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>;
 }
-
-const ACCENT = '#A855F7';
-const GRADIENT = 'linear-gradient(135deg, #A855F7, #6366F1)';
+function IconShare({ size = 16 }: { size?: number }) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" /><polyline points="16 6 12 2 8 6" /><line x1="12" y1="2" x2="12" y2="15" /></svg>;
+}
+function IconSparkles({ size = 16 }: { size?: number }) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" /><path d="M5 3v4" /><path d="M3 5h4" /><path d="M21 17v4" /><path d="M19 19h4" /></svg>;
+}
 
 function taskTypeLabel(type: string) {
   const map: Record<string, string> = {
@@ -33,10 +37,10 @@ function taskTypeLabel(type: string) {
 }
 
 function getScoreColor(s: number) {
-  if (s >= 80) return '#22C55E';
-  if (s >= 60) return '#F59E0B';
-  if (s >= 40) return '#F97316';
-  return '#EF4444';
+  if (s >= 80) return STATUS.success;
+  if (s >= 60) return STATUS.warning;
+  if (s >= 40) return ACCENT.games;
+  return STATUS.danger;
 }
 
 // ─── Score Ring ───
@@ -45,7 +49,7 @@ function ScoreRing({ score, size = 128 }: { score: number; size?: number }) {
   const c = 2 * Math.PI * r;
   const pct = Math.max(0, Math.min(100, score));
   const passed = pct >= 60;
-  const color = pct >= 80 ? '#22C55E' : pct >= 60 ? '#F59E0B' : '#EF4444';
+  const color = pct >= 80 ? STATUS.success : pct >= 60 ? STATUS.warning : STATUS.danger;
   return (
     <div style={{ position: 'relative', width: size, height: size }}>
       <svg width={size} height={size} style={{ transform: 'rotate(-90deg)' }}>
@@ -56,7 +60,7 @@ function ScoreRing({ score, size = 128 }: { score: number; size?: number }) {
       </svg>
       <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
         <span style={{ fontSize: 26, fontWeight: 800, color, lineHeight: 1 }}>{Math.round(pct)}%</span>
-        <span style={{ fontSize: 11, color: passed ? '#22C55E' : '#EF4444', fontWeight: 700, marginTop: 2 }}>
+        <span style={{ fontSize: 11, color: passed ? STATUS.success : STATUS.danger, fontWeight: 700, marginTop: 2 }}>
           {passed ? 'Bestanden' : 'Nicht b.'}
         </span>
       </div>
@@ -78,7 +82,7 @@ function TeilGradingCard({
       style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
       <button className="w-full flex items-center gap-3 p-4 transition-opacity hover:opacity-80" onClick={onToggle}>
         <span className="w-8 h-8 rounded-xl flex items-center justify-center text-xs font-extrabold text-white shrink-0"
-          style={{ background: GRADIENT }}>{teil.number}</span>
+          style={{ background: GRADIENT.examWriting }}>{teil.number}</span>
         <div className="flex-1 text-left">
           <p className="text-sm font-bold" style={{ color: 'var(--theme-text-primary)' }}>
             {taskTypeLabel(teil.taskType)}
@@ -106,7 +110,7 @@ function TeilGradingCard({
           )}
           {grading.feedback && (
             <div className="pt-3">
-              <p className="text-caption font-bold uppercase tracking-wide mb-1.5" style={{ color: ACCENT }}>Bewertung</p>
+              <p className="text-caption font-bold uppercase tracking-wide mb-1.5" style={{ color: ACCENT.examWriting }}>Bewertung</p>
               <p className="text-body leading-relaxed" style={{ color: 'var(--theme-text-primary)' }}>
                 {grading.feedback}
               </p>
@@ -114,11 +118,11 @@ function TeilGradingCard({
           )}
           {grading.strengths?.length > 0 && (
             <div>
-              <p className="text-caption font-bold uppercase tracking-wide mb-1.5" style={{ color: '#22C55E' }}>Stärken</p>
+              <p className="text-caption font-bold uppercase tracking-wide mb-1.5" style={{ color: STATUS.success }}>Stärken</p>
               <ul className="space-y-1">
                 {grading.strengths.map((s, i) => (
                   <li key={i} className="flex items-start gap-2 text-xs" style={{ color: 'var(--theme-text-secondary)' }}>
-                    <IconStar size={13} filled color="#22C55E" />{s}
+                    <IconStar size={13} filled color={STATUS.success} />{s}
                   </li>
                 ))}
               </ul>
@@ -126,11 +130,11 @@ function TeilGradingCard({
           )}
           {grading.improvements?.length > 0 && (
             <div>
-              <p className="text-caption font-bold uppercase tracking-wide mb-1.5" style={{ color: '#F59E0B' }}>Verbesserungen</p>
+              <p className="text-caption font-bold uppercase tracking-wide mb-1.5" style={{ color: STATUS.warning }}>Verbesserungen</p>
               <ul className="space-y-1">
                 {grading.improvements.map((imp, i) => (
                   <li key={i} className="flex items-start gap-2 text-xs" style={{ color: 'var(--theme-text-secondary)' }}>
-                    <span className="shrink-0 mt-1 w-1.5 h-1.5 rounded-full" style={{ backgroundColor: '#F59E0B' }} />{imp}
+                    <span className="shrink-0 mt-1 w-1.5 h-1.5 rounded-full" style={{ backgroundColor: STATUS.warning }} />{imp}
                   </li>
                 ))}
               </ul>
@@ -138,15 +142,15 @@ function TeilGradingCard({
           )}
           {grading.corrections?.length > 0 && (
             <div>
-              <p className="text-caption font-bold uppercase tracking-wide mb-2" style={{ color: '#EF4444' }}>Korrekturen</p>
+              <p className="text-caption font-bold uppercase tracking-wide mb-2" style={{ color: STATUS.danger }}>Korrekturen</p>
               <div className="space-y-2">
                 {grading.corrections.map((corr, i) => (
                   <div key={i} className="rounded-xl border p-3 space-y-1.5"
-                    style={{ borderColor: 'rgba(239,68,68,.2)', backgroundColor: 'rgba(239,68,68,.04)' }}>
+                    style={{ borderColor: `${STATUS.danger}33`, backgroundColor: `${STATUS.danger}0A` }}>
                     <div className="flex items-start gap-2 text-xs">
-                      <span className="line-through shrink-0 font-medium" style={{ color: '#EF4444' }}>{corr.original}</span>
+                      <span className="line-through shrink-0 font-medium" style={{ color: STATUS.danger }}>{corr.original}</span>
                       <span style={{ color: 'var(--theme-text-muted)' }}>→</span>
-                      <span className="font-semibold shrink-0" style={{ color: '#22C55E' }}>{corr.corrected}</span>
+                      <span className="font-semibold shrink-0" style={{ color: STATUS.success }}>{corr.corrected}</span>
                     </div>
                     {corr.explanationVi && (
                       <p className="text-caption leading-relaxed" style={{ color: 'var(--theme-text-secondary)' }}>
@@ -195,7 +199,7 @@ function GradingInProgress() {
     <div className="flex items-center justify-center min-h-[60vh]">
       <div className="text-center space-y-4 px-8">
         <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto"
-          style={{ background: GRADIENT }}>
+          style={{ background: GRADIENT.examWriting }}>
           <IconLoader size={28} />
         </div>
         <h2 className="text-title font-bold" style={{ color: 'var(--theme-text-primary)' }}>
@@ -207,7 +211,7 @@ function GradingInProgress() {
         <div className="flex justify-center gap-1.5 mt-4">
           {[0, 1, 2].map(i => (
             <div key={i} className="w-2 h-2 rounded-full animate-pulse"
-              style={{ backgroundColor: ACCENT, animationDelay: `${i * 0.2}s` }} />
+              style={{ backgroundColor: ACCENT.examWriting, animationDelay: `${i * 0.2}s` }} />
           ))}
         </div>
       </div>
@@ -224,7 +228,7 @@ export default function ExamWritingResultPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <IconLoader size={28} style={{ color: ACCENT }} />
+        <IconLoader size={28} style={{ color: ACCENT.examWriting }} />
       </div>
     );
   }
@@ -243,13 +247,13 @@ export default function ExamWritingResultPage() {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center space-y-3 px-8">
-          <p className="text-title font-bold" style={{ color: '#EF4444' }}>Lỗi chấm bài</p>
+          <p className="text-title font-bold" style={{ color: STATUS.danger }}>Lỗi chấm bài</p>
           <p className="text-body" style={{ color: 'var(--theme-text-muted)' }}>
             AI gặp sự cố khi chấm bài. Vui lòng thử lại.
           </p>
           <Link href={`/practice-test/writing/exam/${id}`}
             className="inline-block mt-3 px-4 py-2 rounded-xl text-body font-bold text-white"
-            style={{ background: GRADIENT }}>
+            style={{ background: GRADIENT.examWriting }}>
             Quay lại bài viết
           </Link>
         </div>
@@ -267,48 +271,48 @@ export default function ExamWritingResultPage() {
       <PageHeader
         backHref="/practice-test/writing/exam"
         title="Kết quả bài viết theo đề"
-        accent="writingExam"
+        accent="writing"
         right={
           <span className="px-3 py-1 rounded-xl text-xs font-bold"
-            style={{ backgroundColor: 'rgba(168,85,247,.1)', color: ACCENT }}>
+            style={{ backgroundColor: `${ACCENT.examWriting}1A`, color: ACCENT.examWriting }}>
             {session.examType} {session.cefrLevel}
           </span>
         }
       />
 
       {/* Hero Score Card */}
-      <div className="rounded-2xl border mb-5 overflow-hidden"
-        style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
-        <div className="px-5 pt-4 pb-3 border-b text-center" style={{ borderColor: 'var(--theme-border)' }}>
-          <p className="text-xs font-medium mb-0.5" style={{ color: 'var(--theme-text-muted)' }}>
-            {session.examType} · Deutsch {session.cefrLevel} · Schreiben
+      <div className="rounded-3xl border mb-6 overflow-hidden shadow-xl"
+        style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)', backdropFilter: 'blur(10px)' }}>
+        <div className="px-6 pt-5 pb-4 border-b text-center" style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-secondary)' }}>
+          <p className="text-xs font-black uppercase tracking-widest opacity-60 mb-1" style={{ color: 'var(--theme-text-primary)' }}>
+            {session.examType} · {session.cefrLevel} · SCHREIBEN
           </p>
-          {session.gradedAt && (
-            <p className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>
-              AI chấm: {new Date(session.gradedAt).toLocaleString('vi-VN')}
-            </p>
-          )}
+          <p className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>
+            {session.gradedAt ? new Date(session.gradedAt).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Gerade eben'}
+          </p>
         </div>
 
-        <div className="flex flex-col sm:flex-row">
-          <div className="sm:w-1/2 flex items-center justify-center border-b sm:border-b-0 sm:border-r py-6"
-            style={{ borderColor: 'var(--theme-border)' }}>
-            <ScoreRing score={score} size={128} />
+        <div className="flex flex-col sm:flex-row divide-y sm:divide-y-0 sm:divide-x" style={{ borderColor: 'var(--theme-border)' }}>
+          <div className="sm:w-1/2 flex items-center justify-center py-6">
+            <ScoreRing score={score} size={144} />
           </div>
-          <div className="sm:w-1/2 flex flex-col justify-center p-5 gap-3">
-            <div className="flex items-center gap-2">
-              <span className="text-h2">{passed ? '✓' : '✗'}</span>
-              <h2 className="text-title font-extrabold" style={{ color: passed ? '#22C55E' : '#EF4444' }}>
+          <div className="sm:w-1/2 flex flex-col justify-center p-6 gap-3">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full flex items-center justify-center shadow-inner"
+                style={{ backgroundColor: passed ? `${STATUS.success}26` : `${STATUS.danger}26`, color: passed ? STATUS.success : STATUS.danger }}>
+                <span className="text-xl font-bold">{passed ? '✓' : '✗'}</span>
+              </div>
+              <h2 className="text-h2 font-black tracking-tight" style={{ color: passed ? STATUS.success : STATUS.danger }}>
                 {passed ? 'Bestanden!' : 'Nicht bestanden'}
               </h2>
             </div>
-            <p className="text-body" style={{ color: 'var(--theme-text-secondary)' }}>
-              Gesamtergebnis: <strong style={{ color: 'var(--theme-text-primary)' }}>{Math.round(score)}%</strong>
+            <p className="text-body font-medium" style={{ color: 'var(--theme-text-secondary)' }}>
+              Gesamtergebnis: <strong className="text-h3" style={{ color: 'var(--theme-text-primary)' }}>{Math.round(score)}%</strong>
             </p>
-            <p className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>
+            <p className="text-xs leading-relaxed" style={{ color: 'var(--theme-text-muted)' }}>
               {passed
-                ? 'Xem lại nhận xét từ AI để cải thiện thêm.'
-                : 'Đọc kỹ phần Korrekturen và Verbesserungen để cải thiện.'}
+                ? 'Herzlichen Glückwunsch! Du hast die Prüfung bestanden. Schau dir die Details an.'
+                : 'Leider hat es diesmal không đủ điểm. Đọc kỹ phần Korrekturen để cải thiện.'}
             </p>
           </div>
         </div>
@@ -328,7 +332,7 @@ export default function ExamWritingResultPage() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <span className="w-6 h-6 rounded-lg flex items-center justify-center text-caption font-extrabold text-white"
-                        style={{ background: GRADIENT }}>{teil.number}</span>
+                        style={{ background: GRADIENT.examWriting }}>{teil.number}</span>
                       <span className="text-body font-semibold" style={{ color: 'var(--theme-text-primary)' }}>
                         {taskTypeLabel(teil.taskType)}
                       </span>
@@ -371,27 +375,20 @@ export default function ExamWritingResultPage() {
         </div>
       </div>
 
-      <FixedActionBar columns={3}>
-        <Link href="/practice-test/writing/exam"
-          className="flex flex-col items-center gap-1 py-2 px-3 rounded-xl text-xs font-semibold transition-all hover:opacity-70"
-          style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-secondary)' }}>
-          <span className="text-base">📋</span>
-          Danh sách
-        </Link>
-        <Link href="/practice-test/writing/exam/new"
-          className="flex flex-col items-center gap-1 py-2 px-3 rounded-xl text-xs font-bold text-white transition-all hover:-translate-y-0.5"
-          style={{ background: GRADIENT }}>
-          <span className="text-base">✍️</span>
-          Bài mới
-        </Link>
+      <FixedActionBar columns={2}>
         <button
-          className="flex flex-col items-center gap-1 py-2 px-3 rounded-xl text-xs font-semibold transition-all hover:opacity-70"
-          style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-secondary)' }}
+          className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl font-bold text-sm border-2 transition-all hover:bg-black/5"
+          style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)', backgroundColor: 'var(--theme-bg-card)' }}
           onClick={() => {
             navigator.share?.({ title: 'DeutschMeister', text: `Tôi đạt ${Math.round(score)}% bài viết ${session.examType} ${session.cefrLevel}!` }).catch(() => {});
           }}>
-          <span className="text-base">🔗</span>
-          Chia sẻ
+          <IconShare size={16} /> Chia sẻ
+        </button>
+        <button
+          className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl font-bold text-sm text-white transition-all hover:-translate-y-0.5 shadow-lg"
+          style={{ background: GRADIENT.examWriting, boxShadow: `0 8px 24px ${ACCENT.examWriting}40` }}
+          onClick={() => window.location.href = '/practice-test/writing/exam/new'}>
+          <IconSparkles size={16} /> Bài mới
         </button>
       </FixedActionBar>
     </div>

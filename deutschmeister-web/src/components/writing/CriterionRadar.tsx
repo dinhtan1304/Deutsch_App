@@ -1,6 +1,8 @@
 'use client';
+/* eslint-disable no-restricted-syntax */
 
 import type { CriterionScores } from '@/lib/api/writing';
+import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 
 interface CriterionRadarProps {
   scores: CriterionScores;
@@ -8,10 +10,10 @@ interface CriterionRadarProps {
 }
 
 const AXES = [
-  { key: 'aufgabenerfuellung' as const, label: 'Đáp ứng\nyêu cầu', color: '#A855F7' },
-  { key: 'grammatik' as const,          label: 'Ngữ pháp',         color: '#6366F1' },
-  { key: 'wortschatz' as const,         label: 'Từ vựng',          color: '#22C55E' },
-  { key: 'kohaerenz' as const,          label: 'Mạch lạc',         color: '#F59E0B' },
+  { key: 'aufgabenerfuellung' as const, label: 'Đáp ứng\nyêu cầu', color: ACCENT.examWriting },
+  { key: 'grammatik' as const,          label: 'Ngữ pháp',         color: ACCENT.writing },
+  { key: 'wortschatz' as const,         label: 'Từ vựng',          color: STATUS.success },
+  { key: 'kohaerenz' as const,          label: 'Mạch lạc',         color: ACCENT.xp },
 ];
 
 const CRITERION_LABELS_VI: Record<keyof CriterionScores, string> = {

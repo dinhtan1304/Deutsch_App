@@ -1,10 +1,13 @@
 'use client';
+/* eslint-disable no-restricted-syntax */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { Suspense } from 'react';
 import { authApi } from '@/lib/api/auth';
+import { MarketingAuthShell } from '@/components/ui/MarketingAuthShell';
+import { IconMail, IconClock, IconInbox, IconLoader } from '@/components/ui/Icons';
+import { GRADIENT, ACCENT, STATUS } from '@/lib/tokens';
 
 function ResendButton({ email }: { email: string }) {
   const [resending, setResending] = useState(false);
@@ -31,26 +34,27 @@ function ResendButton({ email }: { email: string }) {
   const disabled = cooldown > 0 || resending || !email;
 
   return (
-    <div style={{ marginBottom: '12px' }}>
+    <div className="mb-3">
       {sent && cooldown > 0 && (
-        <p style={{ color: '#4ADE80', fontSize: '13px', marginBottom: '8px' }}>
+        <p className="mb-2 text-caption font-medium" style={{ color: '#4ADE80' }}>
           Email đã được gửi lại!
         </p>
       )}
       <button
         onClick={handleResend}
         disabled={disabled}
+        className="inline-flex items-center justify-center gap-2 rounded-md px-8 py-3 text-body font-bold text-white transition-all hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
         style={{
-          display: 'inline-block', padding: '13px 32px', borderRadius: '12px',
-          background: disabled ? 'rgba(34,197,94,0.3)' : 'linear-gradient(135deg, #22C55E, #14B8A6)',
-          color: 'white', fontWeight: 700, fontSize: '14px', border: 'none',
-          cursor: disabled ? 'not-allowed' : 'pointer',
-          boxShadow: disabled ? 'none' : '0 8px 24px rgba(34,197,94,0.3)',
-          opacity: disabled ? 0.6 : 1,
-          transition: 'all 0.2s',
+          background: disabled ? `${ACCENT.reading}4D` : GRADIENT.reading,
+          boxShadow: disabled ? 'none' : `0 8px 24px ${ACCENT.reading}4D`,
         }}
       >
-        {resending ? 'Đang gửi...' : cooldown > 0 ? `Gửi lại sau ${cooldown}s` : 'Gửi lại email xác nhận'}
+        {resending && <IconLoader size={16} />}
+        {resending
+          ? 'Đang gửi...'
+          : cooldown > 0
+            ? `Gửi lại sau ${cooldown}s`
+            : 'Gửi lại email xác nhận'}
       </button>
     </div>
   );
@@ -61,66 +65,92 @@ function VerifyEmailContent() {
   const email = params.get('email') || '';
 
   return (
-    <>
-      <style>{`
-        @keyframes float1 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(40px,-50px) scale(1.08)} }
-        @keyframes float2 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(-30px,40px) scale(1.05)} }
-        @keyframes fadeUp { from{opacity:0;transform:translateY(28px)} to{opacity:1;transform:translateY(0)} }
-        @keyframes pulse { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.08);opacity:0.85} }
-      `}</style>
-
-      <div style={{ position: 'fixed', inset: 0, background: '#0a0f1e', zIndex: 0 }}>
-        <div style={{ position: 'absolute', top: '-15%', right: '-5%', width: '600px', height: '600px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(34,197,94,0.14) 0%, transparent 70%)', animation: 'float1 9s ease-in-out infinite' }} />
-        <div style={{ position: 'absolute', bottom: '-20%', left: '-8%', width: '500px', height: '500px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(20,184,166,0.12) 0%, transparent 70%)', animation: 'float2 11s ease-in-out infinite' }} />
-        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px)', backgroundSize: '60px 60px', maskImage: 'radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 100%)' }} />
+    <MarketingAuthShell orbAccent="green">
+      <div
+        className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-3xl text-white"
+        style={{
+          background: GRADIENT.reading,
+          boxShadow: `0 12px 40px ${ACCENT.reading}59`,
+          animation: 'marketingPulse 3s ease-in-out infinite',
+        }}
+      >
+        <IconMail size={36} aria-label="Email" />
       </div>
 
-      <div style={{ position: 'relative', zIndex: 1, minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '32px 24px' }}>
-        <div style={{ width: '100%', maxWidth: '480px', animation: 'fadeUp 0.5s ease-out', textAlign: 'center' }}>
+      <h1
+        className="mb-3 text-h1 font-bold"
+        style={{ color: 'var(--marketing-text)' }}
+      >
+        Kiểm tra email của bạn!
+      </h1>
 
-          {/* Icon */}
-          <div style={{ width: '80px', height: '80px', borderRadius: '24px', background: 'linear-gradient(135deg, #22C55E, #14B8A6)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px', fontSize: '40px', boxShadow: '0 12px 40px rgba(34,197,94,0.35)', animation: 'pulse 3s ease-in-out infinite' }}>
-            ✉️
-          </div>
+      <p className="mb-2 text-body" style={{ color: 'var(--marketing-muted)' }}>
+        Chúng tôi đã gửi link xác nhận đến
+      </p>
+      {email && (
+        <p
+          className="mb-6 break-all text-body font-bold"
+          style={{ color: STATUS.success }}
+        >
+          {email}
+        </p>
+      )}
 
-          <h1 style={{ color: 'white', fontSize: '26px', fontWeight: 700, margin: '0 0 12px' }}>
-            Kiểm tra email của bạn!
-          </h1>
-
-          <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '15px', lineHeight: 1.7, margin: '0 0 8px' }}>
-            Chúng tôi đã gửi link xác nhận đến
-          </p>
-          {email && (
-            <p style={{ color: '#4ADE80', fontWeight: 700, fontSize: '15px', margin: '0 0 24px', wordBreak: 'break-all' }}>
-              {email}
-            </p>
-          )}
-
-          <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px', padding: '20px 24px', marginBottom: '28px', textAlign: 'left' }}>
-            <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '14px', lineHeight: 1.7, margin: 0 }}>
-              📬 Nhấn link trong email để kích hoạt tài khoản.<br />
-              ⏱ Link có hiệu lực trong <strong style={{ color: 'white' }}>24 giờ</strong>.<br />
-              📁 Kiểm tra cả thư mục <strong style={{ color: 'white' }}>Spam / Junk</strong> nếu không thấy.
-            </p>
-          </div>
-
-          <ResendButton email={email} />
-
-          <Link
-            href="/auth/login"
-            style={{ display: 'inline-block', padding: '13px 32px', borderRadius: '12px', background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.7)', fontWeight: 600, fontSize: '14px', textDecoration: 'none', marginTop: '12px' }}
-          >
-            Quay lại đăng nhập
-          </Link>
-        </div>
+      <div
+        className="mb-7 rounded-2xl border px-6 py-5 text-left"
+        style={{
+          background: 'var(--marketing-panel)',
+          borderColor: 'var(--marketing-border)',
+        }}
+      >
+        <ul className="flex flex-col gap-2.5 text-body" style={{ color: 'var(--marketing-muted)' }}>
+          <li className="flex items-start gap-2.5">
+            <IconInbox size={18} aria-hidden className="mt-0.5 shrink-0" />
+            <span>
+              Nhấn link trong email để kích hoạt tài khoản.
+            </span>
+          </li>
+          <li className="flex items-start gap-2.5">
+            <IconClock size={18} aria-hidden className="mt-0.5 shrink-0" />
+            <span>
+              Link có hiệu lực trong{' '}
+              <strong style={{ color: 'var(--marketing-text)' }}>24 giờ</strong>.
+            </span>
+          </li>
+          <li className="flex items-start gap-2.5">
+            <IconMail size={18} aria-hidden className="mt-0.5 shrink-0" />
+            <span>
+              Kiểm tra cả thư mục{' '}
+              <strong style={{ color: 'var(--marketing-text)' }}>Spam / Junk</strong> nếu
+              không thấy.
+            </span>
+          </li>
+        </ul>
       </div>
-    </>
+
+      <ResendButton email={email} />
+
+      <Link
+        href="/auth/login"
+        className="mt-3 inline-block rounded-md px-8 py-3 text-body font-semibold transition-colors hover:opacity-80"
+        style={{
+          background: 'var(--marketing-panel)',
+          color: 'var(--marketing-muted)',
+        }}
+      >
+        Quay lại đăng nhập
+      </Link>
+    </MarketingAuthShell>
   );
 }
 
 export default function VerifyEmailPage() {
   return (
-    <Suspense fallback={<div style={{ minHeight: '100vh', background: '#0a0f1e' }} />}>
+    <Suspense
+      fallback={
+        <div className="min-h-screen" style={{ backgroundColor: 'var(--marketing-bg)' }} />
+      }
+    >
       <VerifyEmailContent />
     </Suspense>
   );

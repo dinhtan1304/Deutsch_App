@@ -1,6 +1,8 @@
 ﻿'use client';
+/* eslint-disable no-restricted-syntax */
 
 import { useEffect, useCallback, useState } from 'react';
+import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 import { Word, GenderInfo } from '@/types';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { GenderTip } from './GenderTip';
@@ -20,19 +22,19 @@ const GENDER_STYLES = {
   masculine: {
     gradient: 'linear-gradient(135deg,#3B82F6,#1D4ED8)',
     bg: 'rgba(59,130,246,.1)',
-    text: '#3B82F6',
+    text: ACCENT.srs,
     light: 'rgba(59,130,246,.06)',
   },
   feminine: {
     gradient: 'linear-gradient(135deg,#EC4899,#BE185D)',
     bg: 'rgba(236,72,153,.1)',
-    text: '#EC4899',
+    text: ACCENT.listening,
     light: 'rgba(236,72,153,.06)',
   },
   neuter: {
     gradient: 'linear-gradient(135deg,#22C55E,#15803D)',
     bg: 'rgba(34,197,94,.1)',
-    text: '#22C55E',
+    text: STATUS.success,
     light: 'rgba(34,197,94,.06)',
   },
 };
@@ -109,6 +111,9 @@ export function WordDetailModal({
 
       {/* Modal */}
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-label={`Chi tiết từ vựng: ${word?.word ?? ''}`}
         className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-3xl shadow-2xl"
         style={{ backgroundColor: 'var(--theme-bg-card)', animation: 'modalIn 0.3s ease-out' }}
         onClick={e => e.stopPropagation()}
@@ -206,7 +211,7 @@ export function WordDetailModal({
                 <div className="flex items-center gap-3 p-3 rounded-xl"
                   style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
                   <span className="text-caption font-bold px-2 py-0.5 rounded-md shrink-0"
-                    style={{ backgroundColor: 'rgba(239,68,68,.08)', color: '#EF4444' }}>VN</span>
+                    style={{ backgroundColor: 'rgba(239,68,68,.08)', color: STATUS.danger }}>VN</span>
                   <span className="text-[15px]" style={{ color: 'var(--theme-text-primary)' }}>
                     {word.translationVi}
                   </span>

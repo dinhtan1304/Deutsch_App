@@ -1,6 +1,8 @@
-﻿'use client';
+'use client';
+/* eslint-disable no-restricted-syntax */
 
 import { useState, useEffect, useRef } from 'react';
+import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 import { PersonalWord, WordTypeInfo, GenderInfo, Gender, WordCollection } from '@/types/personalWord';
 import { IconVolume, IconStar, IconLightbulb, IconCheck } from '@/components/ui/Icons';
 import { useWordCollections, useAddToCollection, useRemoveFromCollection } from '@/hooks/usePersonalWords';
@@ -85,9 +87,10 @@ interface WordBankCardProps {
   onToggleFavorite: (id: string) => void;
   onSpeak?: (text: string) => void;
   collections?: WordCollection[];
+  onClick?: () => void;
 }
 
-export function WordBankCard({ word, onToggleFavorite, onSpeak, collections = [] }: WordBankCardProps) {
+export function WordBankCard({ word, onToggleFavorite, onSpeak, collections = [], onClick }: WordBankCardProps) {
   const [showCollPopover, setShowCollPopover] = useState(false);
   const typeInfo = WordTypeInfo[word.wordType] ?? WordTypeInfo['andere'];
 
@@ -117,9 +120,9 @@ export function WordBankCard({ word, onToggleFavorite, onSpeak, collections = []
       case 'verb':
         return (
           <div className="flex flex-wrap gap-1">
-            {word.verbData?.partizipII && <span className="px-1.5 py-0.5 rounded text-caption" style={chipStyle('rgba(239,68,68,.1)', '#EF4444')}>{word.verbData.partizipII}</span>}
+            {word.verbData?.partizipII && <span className="px-1.5 py-0.5 rounded text-caption" style={chipStyle('rgba(239,68,68,.1)', STATUS.danger)}>{word.verbData.partizipII}</span>}
             {word.verbData?.hilfsverb && <span className="px-1.5 py-0.5 rounded text-caption" style={chipStyle('var(--theme-bg-secondary)', 'var(--theme-text-muted)')}>+{word.verbData.hilfsverb}</span>}
-            {word.verbData?.trennbar && <span className="px-1.5 py-0.5 rounded text-caption" style={chipStyle('rgba(139,92,246,.1)', '#8B5CF6')}>trennbar</span>}
+            {word.verbData?.trennbar && <span className="px-1.5 py-0.5 rounded text-caption" style={chipStyle('rgba(139,92,246,.1)', ACCENT.vocab)}>trennbar</span>}
           </div>
         );
       case 'adjektiv':
@@ -132,7 +135,7 @@ export function WordBankCard({ word, onToggleFavorite, onSpeak, collections = []
       case 'praposition':
         return word.prapositionData?.kasus ? (
           <div className="flex flex-wrap gap-1">
-            {word.prapositionData.kasus.map(k => <span key={k} className="px-1.5 py-0.5 rounded text-caption" style={chipStyle('rgba(236,72,153,.1)', '#EC4899')}>+{k}</span>)}
+            {word.prapositionData.kasus.map(k => <span key={k} className="px-1.5 py-0.5 rounded text-caption" style={chipStyle('rgba(236,72,153,.1)', ACCENT.listening)}>+{k}</span>)}
           </div>
         ) : null;
       default:
@@ -146,97 +149,126 @@ export function WordBankCard({ word, onToggleFavorite, onSpeak, collections = []
   };
 
   return (
-    <div className="group p-4 rounded-xl border transition-all duration-200 hover:-translate-y-0.5"
-      style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)', borderLeft: `4px solid ${typeInfo.color}` }}>
-      <div className="flex items-start justify-between gap-2">
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap mb-1.5">
-            <span className="px-2 py-0.5 rounded-full text-caption font-bold text-white" style={{ backgroundColor: typeInfo.color }}>
-              {typeInfo.icon} {typeInfo.labelDe}
-            </span>
-            <span className="px-1.5 py-0.5 rounded text-caption font-medium"
-              style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }}>
-              {word.level}
-            </span>
-            {word.category && (
-              <span className="px-1.5 py-0.5 rounded text-caption"
-                style={{ backgroundColor: 'rgba(59,130,246,.08)', color: '#3B82F6' }}>
-                {word.category}
-              </span>
-            )}
-          </div>
-          <div className="text-xl">{displayWord()}</div>
-          <div className="mt-1">{renderDetails()}</div>
-        </div>
-        <div className="relative flex items-center gap-0.5 shrink-0">
-          <button onClick={handleSpeak}
-            className="w-8 h-8 flex items-center justify-center rounded-lg transition-all opacity-50 hover:opacity-100"
-            style={{ color: 'var(--theme-text-muted)' }}
+    <tr onClick={onClick} className="group transition-colors hover:bg-black/5 dark:hover:bg-white/5 border-b border-black/5 dark:border-white/5 last:border-0 relative cursor-pointer">
+      
+      {/* TỪ VỰNG */}
+      <td className="px-4 py-3 align-middle" style={{ borderLeft: `4px solid ${typeInfo.color}` }}>
+        <div className="flex items-center gap-3">
+          <button onClick={(e) => { e.stopPropagation(); handleSpeak(); }}
+            className="w-8 h-8 rounded-full flex items-center justify-center transition-all hover:scale-110 shrink-0"
+            style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-secondary)' }}
             title="Phát âm">
-            <IconVolume size={16} />
+            <IconVolume size={14} />
           </button>
-          <button onClick={() => onToggleFavorite(word.id)}
-            className="w-8 h-8 flex items-center justify-center rounded-lg transition-all"
-            title="Yêu thích">
-            <IconStar size={16} style={word.isFavorite
-              ? { fill: '#F59E0B', color: '#F59E0B' }
-              : { color: 'var(--theme-text-muted)', opacity: 0.5 }} />
-          </button>
-          {/* Add to collection */}
-          <button
-            onClick={() => setShowCollPopover(v => !v)}
-            className="w-8 h-8 flex items-center justify-center rounded-lg transition-all text-base"
-            title="Thêm vào thư mục"
-            style={{ opacity: showCollPopover ? 1 : 0.45 }}>
-            <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" /></svg>
-          </button>
-          {showCollPopover && (
-            <CollectionPopover
-              wordId={word.id}
-              collections={collections}
-              onClose={() => setShowCollPopover(false)}
-            />
+          <div className="flex flex-col min-w-0">
+            <span className="text-base font-bold truncate" style={{ color: 'var(--theme-text-primary)' }}>
+              {displayWord()}
+            </span>
+            <div className="flex items-center gap-1.5 mt-0.5">
+              <span className="px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider"
+                style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }}>
+                {word.level}
+              </span>
+              {word.category && (
+                <span className="px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider truncate max-w-[100px]"
+                  style={{ backgroundColor: 'rgba(59,130,246,.08)', color: ACCENT.srs }}>
+                  {word.category}
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+      </td>
+
+      {/* NGHĨA */}
+      <td className="px-4 py-3 align-middle min-w-[120px]">
+        <div className="flex flex-col gap-1 text-sm">
+          {word.translationVi && (
+            <span className="font-medium whitespace-normal line-clamp-2" style={{ color: 'var(--theme-text-primary)' }}>
+              {word.translationVi}
+            </span>
+          )}
+          {word.translationEn && (
+            <span className="text-xs whitespace-normal line-clamp-1" style={{ color: 'var(--theme-text-secondary)' }}>
+              {word.translationEn}
+            </span>
           )}
         </div>
-      </div>
+      </td>
 
-      <div className="flex gap-3 text-xs mt-2">
-        <span className="flex items-center gap-1.5" style={{ color: 'var(--theme-text-muted)' }}>
-          <span className="text-caption font-bold px-1.5 py-0.5 rounded"
-            style={{ backgroundColor: 'rgba(59,130,246,.1)', color: '#3B82F6' }}>EN</span>
-          {word.translationEn}
+      {/* PHÂN LOẠI */}
+      <td className="px-4 py-3 align-middle">
+        <span className="px-2 py-1 rounded-lg text-xs font-bold whitespace-nowrap" style={{ backgroundColor: typeInfo.color + '15', color: typeInfo.color }}>
+          {typeInfo.icon} {typeInfo.labelDe}
         </span>
-        <span className="flex items-center gap-1.5" style={{ color: 'var(--theme-text-muted)' }}>
-          <span className="text-caption font-bold px-1.5 py-0.5 rounded"
-            style={{ backgroundColor: 'rgba(239,68,68,.08)', color: '#EF4444' }}>VN</span>
-          {word.translationVi}
-        </span>
-      </div>
+      </td>
 
-      {word.examples?.length > 0 && (
-        <div className="flex items-center gap-1.5 mt-2 text-caption italic truncate" style={{ color: 'var(--theme-text-muted)' }}>
-          <IconVolume size={12} style={{ opacity: 0.5, flexShrink: 0 }} />
-          {word.examples[0]}
+      {/* ĐẶC TÍNH */}
+      <td className="px-4 py-3 align-middle min-w-[120px]">
+        <div className="flex flex-col gap-1">
+          {renderDetails()}
+          {word.tags && word.tags.length > 0 && (
+            <div className="flex flex-wrap gap-1 mt-0.5">
+              {word.tags.map((t, i) => (
+                <span key={i} className="px-1.5 py-0.5 rounded text-[10px]"
+                  style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }}>
+                  #{t}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
-      )}
+      </td>
 
-      {word.tags && word.tags.length > 0 && (
-        <div className="flex flex-wrap gap-1 mt-2">
-          {word.tags.map((t, i) => (
-            <span key={i} className="px-1.5 py-0.5 rounded text-caption"
-              style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }}>
-              #{t}
+      {/* VÍ DỤ */}
+      <td className="px-4 py-3 align-middle max-w-[200px]">
+        <div className="flex flex-col gap-1">
+          {word.examples?.length > 0 ? (
+            <span className="text-xs italic whitespace-normal line-clamp-2" style={{ color: 'var(--theme-text-secondary)' }}>
+              "{word.examples[0]}"
             </span>
-          ))}
+          ) : (
+            <span className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>—</span>
+          )}
+          {word.notes && (
+            <div className="flex items-start gap-1 text-[11px] mt-0.5" style={{ color: ACCENT.xp }}>
+              <IconLightbulb size={12} className="shrink-0 mt-0.5" />
+              <span className="whitespace-normal line-clamp-2">{word.notes}</span>
+            </div>
+          )}
         </div>
-      )}
+      </td>
 
-      {word.notes && (
-        <div className="flex items-center gap-1.5 mt-2 text-caption" style={{ color: 'var(--theme-text-muted)' }}>
-          <IconLightbulb size={12} style={{ opacity: 0.5, flexShrink: 0 }} />
-          {word.notes}
+      {/* THAO TÁC */}
+      <td className="px-4 py-3 align-middle text-right w-[100px]">
+        <div className="flex items-center justify-end gap-1 relative">
+          <button onClick={(e) => { e.stopPropagation(); onToggleFavorite(word.id); }}
+            className="w-8 h-8 flex items-center justify-center rounded-lg transition-all hover:scale-110"
+            title="Yêu thích">
+            <IconStar size={16} style={word.isFavorite
+              ? { fill: ACCENT.xp, color: ACCENT.xp }
+              : { color: 'var(--theme-text-muted)', opacity: 0.5 }} />
+          </button>
+          <div className="relative">
+            <button
+              onClick={(e) => { e.stopPropagation(); setShowCollPopover(v => !v); }}
+              className="w-8 h-8 flex items-center justify-center rounded-lg transition-all text-base hover:bg-black/5 dark:hover:bg-white/5"
+              title="Thêm vào thư mục"
+              style={{ opacity: showCollPopover ? 1 : 0.6, color: 'var(--theme-text-secondary)' }}>
+              <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" /></svg>
+            </button>
+            {showCollPopover && (
+              <div className="absolute right-0 top-full mt-1 z-50">
+                <CollectionPopover
+                  wordId={word.id}
+                  collections={collections}
+                  onClose={() => setShowCollPopover(false)}
+                />
+              </div>
+            )}
+          </div>
         </div>
-      )}
-    </div>
+      </td>
+    </tr>
   );
 }

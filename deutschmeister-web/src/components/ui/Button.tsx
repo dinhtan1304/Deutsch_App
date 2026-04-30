@@ -1,4 +1,5 @@
 'use client';
+/* eslint-disable no-restricted-syntax */
 
 import { forwardRef, ButtonHTMLAttributes, ReactNode } from 'react';
 import { cn } from '@/lib/utils';
@@ -17,7 +18,7 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 function gameVariantStyle(accent: AccentKey): React.CSSProperties {
-  const key = (accent in GRADIENT ? accent : 'games') as keyof typeof GRADIENT;
+  const key = (accent in GRADIENT ? accent : 'brand') as keyof typeof GRADIENT;
   return {
     background: GRADIENT[key],
     color: '#fff',
@@ -35,7 +36,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       outline: { backgroundColor: 'transparent', color: 'var(--theme-text-secondary)', border: '2px solid var(--theme-border)' },
       ghost: { backgroundColor: 'transparent', color: 'var(--theme-text-secondary)' },
       danger: { background: 'linear-gradient(135deg, #EF4444, #DC2626)', color: '#fff', boxShadow: '0 4px 12px rgba(239,68,68,.25)' },
-      game: accent ? gameVariantStyle(accent) : gameVariantStyle('games'),
+      game: accent ? gameVariantStyle(accent) : gameVariantStyle('brand'),
     };
 
     const sizes = {

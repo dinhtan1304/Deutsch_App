@@ -1,4 +1,6 @@
 import { ImageResponse } from 'next/og';
+/* eslint-disable no-restricted-syntax */
+import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 
 export const runtime = 'edge';
 export const alt = 'Deutschmeister — Học tiếng Đức cùng AI';
@@ -90,10 +92,10 @@ export default function OGImage() {
         {/* Feature pills */}
         <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
           {[
-            { text: '5000+ Từ vựng', color: '#22C55E', bg: 'rgba(34,197,94,0.12)' },
-            { text: '8 Mini-games', color: '#8B5CF6', bg: 'rgba(139,92,246,0.12)' },
-            { text: 'AI chấm Writing & Speaking', color: '#F59E0B', bg: 'rgba(245,158,11,0.12)' },
-            { text: 'Đề thi A1 · A2 · B1', color: '#EC4899', bg: 'rgba(236,72,153,0.12)' },
+            { text: '5000+ Từ vựng', color: STATUS.success, bg: 'rgba(34,197,94,0.12)' },
+            { text: '8 Mini-games', color: ACCENT.vocab, bg: 'rgba(139,92,246,0.12)' },
+            { text: 'AI chấm Writing & Speaking', color: ACCENT.xp, bg: 'rgba(245,158,11,0.12)' },
+            { text: 'Đề thi A1 · A2 · B1', color: ACCENT.listening, bg: 'rgba(236,72,153,0.12)' },
           ].map((pill) => (
             <div
               key={pill.text}

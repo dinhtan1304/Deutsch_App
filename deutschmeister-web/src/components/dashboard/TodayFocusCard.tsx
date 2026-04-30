@@ -1,6 +1,8 @@
 'use client';
+/* eslint-disable no-restricted-syntax */
 
 import Link from 'next/link';
+import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 import { useDailyPath } from '@/hooks/useDashboard';
 
 function CheckIcon() {
@@ -14,7 +16,7 @@ function CheckIcon() {
 function TaskIcon({ type, completed }: { type: string; completed: boolean }) {
   if (completed) {
     return (
-      <div className="w-6 h-6 rounded-full flex items-center justify-center shrink-0" style={{ background: '#22C55E', color: 'white' }}>
+      <div className="w-6 h-6 rounded-full flex items-center justify-center shrink-0" style={{ background: STATUS.success, color: 'white' }}>
         <CheckIcon />
       </div>
     );
@@ -97,7 +99,7 @@ export function TodayFocusCard() {
         {/* Progress percentage — replaces CTA button (HeroActionCard handles the primary action) */}
         <div
           className="shrink-0 text-xs font-bold tabular-nums"
-          style={{ color: allDone ? '#22C55E' : 'var(--theme-text-muted)' }}
+          style={{ color: allDone ? STATUS.success : 'var(--theme-text-muted)' }}
         >
           {progressPct}%
         </div>

@@ -5,6 +5,8 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useListeningSession, useSubmitListening } from '@/hooks/useListening';
 import { ListeningQuestion } from '@/lib/api/listening';
+import { PageHeader, FixedActionBar } from '@/components/ui';
+import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 
 function IconHeadphones({ size = 20, style }: { size?: number; style?: React.CSSProperties }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}><path d="M3 18v-6a9 9 0 0 1 18 0v6" /><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z" /></svg>;
@@ -18,17 +20,12 @@ function IconSquare({ size = 20, style }: { size?: number; style?: React.CSSProp
 function IconLoader({ size = 20, style }: { size?: number; style?: React.CSSProperties }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="animate-spin" style={{ display: 'block', ...style }}><path d="M21 12a9 9 0 1 1-6.219-8.56" /></svg>;
 }
-function IconChevronLeft({ size = 16 }: { size?: number }) {
-  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}><polyline points="15 18 9 12 15 6" /></svg>;
-}
-
-const ACCENT = '#EC4899';
-const GRADIENT = 'linear-gradient(135deg, #EC4899, #8B5CF6)';
 
 // ─── TTS Player ───────────────────────────────────────────────────────────────
-function TTSPlayer({ text, speed = 1.0 }: { text: string; speed?: number }) {
+function TTSPlayer({ text }: { text: string }) {
   const [playing, setPlaying] = useState(false);
   const [playCount, setPlayCount] = useState(0);
+  const [speed, setSpeed] = useState(1.0);
   const utterRef = useRef<SpeechSynthesisUtterance | null>(null);
 
   const stop = useCallback(() => {
@@ -53,48 +50,70 @@ function TTSPlayer({ text, speed = 1.0 }: { text: string; speed?: number }) {
   useEffect(() => () => { if (typeof window !== 'undefined') window.speechSynthesis.cancel(); }, []);
 
   return (
-    <div className="rounded-2xl border p-5 mb-5" style={{ borderColor: `rgba(236,72,153,.3)`, backgroundColor: 'rgba(236,72,153,.04)' }}>
-      <div className="flex items-center gap-2 mb-3">
-        <IconHeadphones size={16} style={{ color: ACCENT }} />
-        <p className="text-xs font-bold uppercase tracking-wide" style={{ color: ACCENT }}>Audio · de-DE</p>
-        {playCount > 0 && (
-          <span className="ml-auto text-caption font-medium px-2 py-0.5 rounded-full"
-            style={{ backgroundColor: 'rgba(236,72,153,.1)', color: ACCENT }}>
-            Đã nghe {playCount} lần
-          </span>
-        )}
-      </div>
-
-      <div className="flex items-center gap-3">
+    <div className="rounded-3xl border p-6 transition-all duration-300"
+      style={{
+        borderColor: 'var(--theme-border)',
+        backgroundColor: 'var(--theme-bg-card)',
+        boxShadow: playing ? `0 12px 32px ${ACCENT.listening}1F` : '0 4px 12px rgba(0,0,0,.03)'
+      }}>
+      <div className="flex flex-col items-center text-center gap-6">
         <button onClick={playing ? stop : play}
-          className="w-12 h-12 rounded-xl flex items-center justify-center text-white transition-all hover:scale-110 shrink-0"
-          style={{ background: GRADIENT }}>
-          {playing ? <IconSquare size={16} style={{ color: 'white' }} /> : <IconPlay size={16} style={{ color: 'white' }} />}
+          className="w-24 h-24 rounded-full flex items-center justify-center text-white transition-all hover:scale-105 active:scale-95 shrink-0 shadow-2xl relative group"
+          style={{ background: GRADIENT.listening }}>
+          <div className="absolute inset-0 rounded-full bg-white opacity-0 group-hover:opacity-10 transition-opacity" />
+          {playing ? <IconSquare size={32} style={{ color: 'white' }} /> : <IconPlay size={36} style={{ color: 'white', marginLeft: 6 }} />}
         </button>
-        <div className="flex-1">
-          <p className="text-body font-semibold mb-1" style={{ color: 'var(--theme-text-primary)' }}>
-            {playing ? '🎵 Đang phát...' : playCount > 0 ? 'Nhấn để nghe lại' : 'Nhấn để nghe'}
+
+        <div className="w-full">
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <IconHeadphones size={14} style={{ color: ACCENT.listening }} />
+            <p className="text-xs font-black uppercase tracking-widest" style={{ color: ACCENT.listening }}>Audio · de-DE</p>
+          </div>
+          <h3 className="text-title font-black mb-1" style={{ color: 'var(--theme-text-primary)' }}>
+            {playing ? '🎧 Đang phát...' : 'Deutsch Listening'}
+          </h3>
+          <p className="text-caption font-medium opacity-60" style={{ color: 'var(--theme-text-primary)' }}>
+            {playCount > 0 ? `Đã nghe ${playCount} lần` : 'Sẵn sàng để luyện nghe'}
           </p>
-          <p className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>
-            Tốc độ: {speed}x · Tiếng Đức (de-DE)
-          </p>
-        </div>
-        {/* Speed hint */}
-        <div className="flex gap-1">
-          {[0.75, 1.0].map(s => (
-            <span key={s} className="text-caption font-bold px-2 py-1 rounded-lg border"
-              style={s === speed
-                ? { borderColor: ACCENT, backgroundColor: 'rgba(236,72,153,.1)', color: ACCENT }
-                : { borderColor: 'var(--theme-border)', color: 'var(--theme-text-muted)' }}>
-              {s}x
-            </span>
-          ))}
+
+          <div className="mt-6 space-y-2">
+            <div className="h-1.5 w-full rounded-full bg-border/10 overflow-hidden relative">
+              <div className="absolute inset-0 opacity-20" style={{ background: GRADIENT.listening }} />
+              <div className="h-full transition-all duration-300"
+                style={{
+                  width: playing ? '100%' : '0%',
+                  background: GRADIENT.listening,
+                  transitionTimingFunction: 'linear',
+                  transitionDuration: playing ? '60s' : '0.3s'
+                }} />
+            </div>
+            <div className="flex justify-between text-[10px] font-bold opacity-40 uppercase tracking-tighter">
+              <span>0:00</span>
+              <span>LIVE</span>
+            </div>
+          </div>
         </div>
       </div>
 
-      <p className="text-caption mt-3 italic" style={{ color: 'var(--theme-text-muted)' }}>
-        * Transcript sẽ được hiển thị sau khi nộp bài
-      </p>
+      <div className="mt-8 pt-6 border-t flex flex-col gap-4" style={{ borderColor: 'var(--theme-border)' }}>
+        <div className="flex items-center justify-between">
+          <p className="text-[10px] font-bold uppercase tracking-widest opacity-40">Tốc độ phát</p>
+          <div className="flex gap-1.5">
+            {[0.75, 1.0].map(s => (
+              <button key={s} onClick={() => setSpeed(s)}
+                className="px-3 py-1 rounded-lg text-xs font-black border-2 transition-all"
+                style={s === speed
+                  ? { borderColor: ACCENT.listening, backgroundColor: `${ACCENT.listening}1A`, color: ACCENT.listening }
+                  : { borderColor: 'var(--theme-border)', color: 'var(--theme-text-muted)' }}>
+                {s}x
+              </button>
+            ))}
+          </div>
+        </div>
+        <p className="text-[10px] italic leading-relaxed" style={{ color: 'var(--theme-text-muted)' }}>
+          * Gợi ý: Hãy nghe ít nhất 2 lần trước khi chọn đáp án cuối cùng. Transcript sẽ hiện ở trang kết quả.
+        </p>
+      </div>
     </div>
   );
 }
@@ -103,20 +122,32 @@ function TTSPlayer({ text, speed = 1.0 }: { text: string; speed?: number }) {
 function QuestionItem({ q, idx, answer, onAnswer }: {
   q: ListeningQuestion; idx: number; answer: string; onAnswer: (val: string) => void;
 }) {
+  const isAnswered = !!answer;
+
   if (q.type === 'richtig_falsch') {
     return (
-      <div className="rounded-xl border p-3" style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
-        <p className="text-body font-semibold mb-2.5" style={{ color: 'var(--theme-text-primary)' }}>
-          {idx + 1}. {q.questionText}
-        </p>
-        <div className="flex gap-2">
+      <div className="rounded-2xl border p-5 transition-all duration-300"
+        style={{
+          borderColor: isAnswered ? `${STATUS.success}4D` : 'var(--theme-border)',
+          backgroundColor: 'var(--theme-bg-card)'
+        }}>
+        <div className="flex items-start gap-3 mb-4">
+          <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-black shrink-0"
+            style={{ background: isAnswered ? GRADIENT.reading : 'var(--theme-bg-secondary)', color: isAnswered ? 'white' : 'var(--theme-text-muted)' }}>
+            {idx + 1}
+          </div>
+          <p className="text-[15px] font-bold leading-snug pt-0.5" style={{ color: 'var(--theme-text-primary)' }}>
+            {q.questionText}
+          </p>
+        </div>
+        <div className="flex gap-2.5">
           {[{ id: 'richtig', label: 'Richtig ✓' }, { id: 'falsch', label: 'Falsch ✗' }].map(opt => {
             const sel = answer === opt.id;
             return (
               <button key={opt.id} onClick={() => onAnswer(opt.id)}
-                className="flex-1 py-2 rounded-xl text-body font-semibold border-2 transition-all"
+                className="flex-1 py-3 rounded-xl text-body font-bold border-2 transition-all hover:scale-[1.02] active:scale-[0.98]"
                 style={sel
-                  ? { borderColor: opt.id === 'richtig' ? '#22C55E' : '#EF4444', backgroundColor: opt.id === 'richtig' ? 'rgba(34,197,94,.1)' : 'rgba(239,68,68,.1)', color: opt.id === 'richtig' ? '#22C55E' : '#EF4444' }
+                  ? { borderColor: opt.id === 'richtig' ? STATUS.success : STATUS.danger, backgroundColor: opt.id === 'richtig' ? `${STATUS.success}1A` : `${STATUS.danger}1A`, color: opt.id === 'richtig' ? STATUS.success : STATUS.danger }
                   : { borderColor: 'var(--theme-border)', backgroundColor: 'transparent', color: 'var(--theme-text-secondary)' }}>
                 {opt.label}
               </button>
@@ -128,21 +159,34 @@ function QuestionItem({ q, idx, answer, onAnswer }: {
   }
 
   return (
-    <div>
-      <p className="text-body font-semibold mb-2" style={{ color: 'var(--theme-text-primary)' }}>
-        {idx + 1}. {q.questionText}
-      </p>
-      <div className="space-y-1.5">
+    <div className="rounded-2xl border p-5 transition-all duration-300"
+      style={{
+        borderColor: isAnswered ? `${STATUS.success}4D` : 'var(--theme-border)',
+        backgroundColor: 'var(--theme-bg-card)'
+      }}>
+      <div className="flex items-start gap-3 mb-4">
+        <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-black shrink-0"
+          style={{ background: isAnswered ? GRADIENT.reading : 'var(--theme-bg-secondary)', color: isAnswered ? 'white' : 'var(--theme-text-muted)' }}>
+          {idx + 1}
+        </div>
+        <p className="text-[15px] font-bold leading-snug pt-0.5" style={{ color: 'var(--theme-text-primary)' }}>
+          {q.questionText}
+        </p>
+      </div>
+      <div className="space-y-2">
         {(q.options || []).map(opt => {
           const sel = answer === opt.id;
           return (
             <button key={opt.id} onClick={() => onAnswer(opt.id)}
-              className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl border-2 text-body text-left transition-all"
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl border-2 text-[15px] text-left transition-all hover:scale-[1.01] active:scale-[0.99]"
               style={sel
-                ? { borderColor: ACCENT, backgroundColor: 'rgba(236,72,153,.08)', color: ACCENT }
-                : { borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)', color: 'var(--theme-text-secondary)' }}>
-              <span className="font-bold shrink-0 w-5 text-center">{opt.id.toUpperCase()}.</span>
-              <span className="flex-1">{opt.text}</span>
+                ? { borderColor: ACCENT.listening, backgroundColor: `${ACCENT.listening}14`, color: ACCENT.listening }
+                : { borderColor: 'var(--theme-border)', backgroundColor: 'transparent', color: 'var(--theme-text-secondary)' }}>
+              <div className="w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 text-[10px] font-black"
+                style={{ borderColor: sel ? ACCENT.listening : 'var(--theme-border)', backgroundColor: sel ? ACCENT.listening : 'transparent', color: sel ? 'white' : 'var(--theme-text-muted)' }}>
+                {opt.id.toUpperCase()}
+              </div>
+              <span className="font-medium">{opt.text}</span>
             </button>
           );
         })}
@@ -159,9 +203,7 @@ export default function ListeningSessionPage() {
   const submitMut = useSubmitListening();
 
   const [userAnswers, setUserAnswers] = useState<Record<string, string>>({});
-  const [speed, setSpeed] = useState(1.0);
   const [error, setError] = useState('');
-  const [confirmSubmit, setConfirmSubmit] = useState(false);
 
   const handleAnswer = useCallback((qid: string, val: string) => {
     setUserAnswers(prev => ({ ...prev, [qid]: val }));
@@ -177,7 +219,7 @@ export default function ListeningSessionPage() {
     return (
       <div className="py-6 flex items-center justify-center min-h-[60vh]">
         <div className="flex flex-col items-center gap-3">
-          <IconLoader size={32} style={{ color: ACCENT }} />
+          <IconLoader size={32} style={{ color: ACCENT.listening }} />
           <p style={{ color: 'var(--theme-text-muted)' }}>Đang tải bài nghe...</p>
         </div>
       </div>
@@ -188,7 +230,7 @@ export default function ListeningSessionPage() {
     return (
       <div className="py-6 text-center">
         <p className="mb-4" style={{ color: 'var(--theme-text-muted)' }}>Không tìm thấy bài nghe.</p>
-        <Link href="/practice-test/listening" className="text-sm font-semibold" style={{ color: ACCENT }}>Quay lại</Link>
+        <Link href="/practice-test/listening" className="text-sm font-semibold" style={{ color: ACCENT.listening }}>Quay lại</Link>
       </div>
     );
   }
@@ -199,7 +241,6 @@ export default function ListeningSessionPage() {
   const allAnswered = answered >= total;
 
   const handleSubmit = async () => {
-    setConfirmSubmit(false);
     setError('');
     try {
       await submitMut.mutateAsync({ id, userAnswers });
@@ -210,80 +251,76 @@ export default function ListeningSessionPage() {
   };
 
   return (
-    <div className="py-6 max-w-2xl mx-auto">
-      {/* Header */}
-      <div className="flex items-center gap-3 mb-5">
-        <Link href="/practice-test/listening" className="p-2 rounded-xl transition-all hover:scale-110"
-          style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }}>
-          <IconChevronLeft size={18} />
-        </Link>
-        <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: GRADIENT }}>
-          <IconHeadphones size={18} style={{ color: 'white' }} />
-        </div>
+    <div className="py-6 pb-28">
+      <PageHeader
+        backHref="/practice-test/listening"
+        title="Luyện Nghe"
+        accent="listening"
+        right={
+          <span className="px-2.5 py-0.5 rounded-lg text-xs font-black text-white"
+            style={{ backgroundColor: ACCENT.listening }}>{session.cefrLevel}</span>
+        }
+      />
+
+      <div className="flex items-start justify-between gap-3 mb-6">
         <div className="flex-1 min-w-0">
-          <h1 className="text-[15px] font-bold truncate" style={{ color: 'var(--theme-text-primary)' }}>
+          <h1 className="text-h2 font-black tracking-tight mb-1" style={{ color: 'var(--theme-text-primary)' }}>
             {session.title}
           </h1>
-          <p className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>
-            {session.cefrLevel} · {answered}/{total} câu đã trả lời
-          </p>
+          <div className="flex items-center gap-2 text-xs font-bold" style={{ color: 'var(--theme-text-muted)' }}>
+            <span className="px-1.5 py-0.5 rounded text-[10px] uppercase tracking-widest"
+              style={{ backgroundColor: `${ACCENT.listening}1A`, color: ACCENT.listening }}>{session.cefrLevel}</span>
+            <span className="opacity-40">·</span>
+            <span>{answered}/{total} câu hoàn thành</span>
+          </div>
         </div>
-        {/* Speed toggle */}
-        <div className="flex gap-1 shrink-0">
-          {[0.75, 1.0].map(s => (
-            <button key={s} onClick={() => setSpeed(s)}
-              className="px-2.5 py-1.5 rounded-xl text-xs font-bold border-2 transition-all"
-              style={s === speed
-                ? { borderColor: ACCENT, backgroundColor: 'rgba(236,72,153,.1)', color: ACCENT }
-                : { borderColor: 'var(--theme-border)', color: 'var(--theme-text-muted)' }}>
-              {s}x
-            </button>
+      </div>
+
+      <div className="flex flex-col lg:flex-row gap-8">
+        <div className="lg:w-1/2 shrink-0 lg:sticky lg:top-20 lg:self-start space-y-6">
+          <TTSPlayer text={session.transcript} />
+        </div>
+
+        <div className="lg:w-1/2 min-w-0 space-y-4">
+          <h2 className="text-title font-bold px-1" style={{ color: 'var(--theme-text-primary)' }}>
+            Câu hỏi ({total})
+          </h2>
+          {questions.map((q, i) => (
+            <QuestionItem key={q.id} q={q} idx={i} answer={userAnswers[q.id] || ''} onAnswer={val => handleAnswer(q.id, val)} />
           ))}
         </div>
       </div>
 
-      {/* Progress bar */}
-      <div className="h-1 rounded-full mb-5 overflow-hidden" style={{ backgroundColor: 'var(--theme-border)' }}>
-        <div className="h-full rounded-full transition-all duration-500" style={{ width: `${(answered / total) * 100}%`, background: GRADIENT }} />
-      </div>
-
-      {/* TTS Player */}
-      <TTSPlayer text={session.transcript} speed={speed} />
-
-      {/* Questions */}
-      <div className="space-y-4 mb-6">
-        {questions.map((q, i) => (
-          <QuestionItem key={q.id} q={q} idx={i} answer={userAnswers[q.id] || ''} onAnswer={val => handleAnswer(q.id, val)} />
-        ))}
-      </div>
-
-      {/* Submit */}
-      {error && <p className="text-body mb-3 text-center" style={{ color: '#EF4444' }}>{error}</p>}
-
-      {!confirmSubmit ? (
-        <button onClick={() => setConfirmSubmit(true)} disabled={!allAnswered || submitMut.isPending}
-          className="w-full py-3.5 rounded-2xl text-[15px] font-bold text-white transition-all hover:scale-[1.02] disabled:opacity-40 disabled:scale-100"
-          style={{ background: GRADIENT }}>
-          {allAnswered ? 'Nộp Bài & Xem Kết Quả' : `Trả lời thêm ${total - answered} câu nữa`}
-        </button>
-      ) : (
-        <div className="rounded-2xl border p-4 text-center" style={{ borderColor: 'rgba(236,72,153,.3)', backgroundColor: 'rgba(236,72,153,.04)' }}>
-          <p className="text-sm font-semibold mb-3" style={{ color: 'var(--theme-text-primary)' }}>
-            Xác nhận nộp bài?
-          </p>
-          <div className="flex gap-3">
-            <button onClick={() => setConfirmSubmit(false)}
-              className="flex-1 py-2.5 rounded-xl border text-body font-semibold"
-              style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)' }}>
-              Kiểm tra lại
-            </button>
-            <button onClick={handleSubmit} disabled={submitMut.isPending}
-              className="flex-1 py-2.5 rounded-xl text-body font-bold text-white flex items-center justify-center gap-2"
-              style={{ background: GRADIENT }}>
-              {submitMut.isPending ? <><IconLoader size={16} style={{ color: 'white' }} /> Đang xử lý...</> : 'Nộp Bài'}
-            </button>
+      <FixedActionBar columns={1}>
+        <div className="flex items-center gap-4 w-full">
+          <div className="flex-1 flex gap-1.5 overflow-x-auto py-1 no-scrollbar">
+            {questions.map((q, i) => {
+              const hasAns = !!userAnswers[q.id];
+              return (
+                <div key={q.id} className="w-2 h-2 rounded-full shrink-0 transition-all"
+                  style={{ backgroundColor: hasAns ? STATUS.success : 'var(--theme-border)' }}
+                  title={`Câu ${i + 1}`} />
+              );
+            })}
           </div>
+
+          <div className="shrink-0 h-8 w-px bg-border/40 mx-1" />
+
+          <button
+            onClick={() => allAnswered && handleSubmit()}
+            disabled={!allAnswered || submitMut.isPending}
+            className="flex items-center gap-2 px-8 py-3 rounded-2xl text-sm font-black text-white transition-all hover:scale-[1.02] disabled:opacity-40 disabled:cursor-not-allowed shrink-0 shadow-lg"
+            style={{ background: GRADIENT.listening, boxShadow: allAnswered ? `0 8px 24px ${ACCENT.listening}4D` : 'none' }}>
+            {submitMut.isPending ? <IconLoader size={16} /> : <><IconHeadphones size={16} /> Nộp bài</>}
+          </button>
         </div>
+      </FixedActionBar>
+
+      {error && (
+        <p className="fixed bottom-24 left-1/2 -translate-x-1/2 text-xs font-bold px-4 py-2 rounded-full shadow-sm z-50"
+          style={{ color: STATUS.danger, backgroundColor: `${STATUS.danger}14`, border: `1px solid ${STATUS.danger}26` }}>
+          {error}
+        </p>
       )}
     </div>
   );

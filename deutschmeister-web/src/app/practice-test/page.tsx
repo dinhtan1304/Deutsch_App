@@ -1,4 +1,5 @@
 ﻿'use client';
+/* eslint-disable no-restricted-syntax -- custom UI gradients */
 
 import { useState } from 'react';
 import Link from 'next/link';
@@ -8,6 +9,7 @@ import {
 } from '@/components/ui/Icons';
 import { useIsExamUnlocked } from '@/hooks/useSubscription';
 import { UpgradeModal } from '@/components/subscription/UpgradeModal';
+import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 
 // ─── Data ──────────────────────────────────────────────────────────────────────
 type CardDef = {
@@ -21,37 +23,37 @@ const freeCards: CardDef[] = [
     title: 'Luyện Đọc', titleDe: 'Leseübung',
     description: 'Tạo bài đọc tiếng Đức, hỏi và kiểm tra hiểu bài',
     icon: IconBookOpen, href: '/practice-test/reading',
-    gradient: 'linear-gradient(135deg, #22C55E, #14B8A6)', color: '#22C55E',
+    gradient: 'linear-gradient(135deg, #22C55E, #14B8A6)', color: STATUS.success,
   },
   {
     title: 'Luyện Nghe', titleDe: 'Hörübung',
     description: 'Tạo audio tiếng Đức, nghe và trả lời câu hỏi',
     icon: IconHeadphones, href: '/practice-test/listening',
-    gradient: 'linear-gradient(135deg, #EC4899, #8B5CF6)', color: '#EC4899',
+    gradient: 'linear-gradient(135deg, #EC4899, #8B5CF6)', color: ACCENT.listening,
   },
   {
     title: 'Luyện Viết', titleDe: 'Schreibübung',
     description: 'Tạo đề bài tiếng Đức, chấm và sửa lỗi chi tiết',
     icon: IconPenLine, href: '/practice-test/writing',
-    gradient: 'linear-gradient(135deg, #6366F1, #8B5CF6)', color: '#6366F1',
+    gradient: 'linear-gradient(135deg, #6366F1, #8B5CF6)', color: ACCENT.writing,
   },
   {
     title: 'Luyện Nói', titleDe: 'Sprechübung',
     description: 'Tạo prompt tiếng Đức, ghi âm trả lời, Gemini chấm điểm chi tiết',
     icon: IconMic, href: '/practice-test/speaking',
-    gradient: 'linear-gradient(135deg, #F59E0B, #EF4444)', color: '#F59E0B',
+    gradient: 'linear-gradient(135deg, #F59E0B, #EF4444)', color: ACCENT.xp,
   },
   {
     title: 'Roleplay AI', titleDe: 'Rollenspiel',
     description: 'Luyện hội thoại thực tế với AI (bác sĩ, phỏng vấn, thuê nhà...)',
     icon: IconZap, href: '/practice-test/roleplay',
-    gradient: 'linear-gradient(135deg, #6366F1, #A855F7)', color: '#A855F7',
+    gradient: 'linear-gradient(135deg, #6366F1, #A855F7)', color: ACCENT.examWriting,
   },
   {
     title: 'Phát Âm AI', titleDe: 'Aussprachetraining',
     description: 'Ghi âm và nhận đánh giá phát âm từng từ bằng AI',
     icon: IconMic, href: '/practice-test/pronunciation',
-    gradient: 'linear-gradient(135deg, #EC4899, #A855F7)', color: '#EC4899',
+    gradient: 'linear-gradient(135deg, #EC4899, #A855F7)', color: ACCENT.listening,
   },
 ];
 
@@ -60,25 +62,25 @@ const examCards: CardDef[] = [
     title: 'Đọc Theo Đề', titleDe: 'Prüfungslesen',
     description: 'Goethe & TELC · A1/A2/B1 · Đầy đủ tất cả Teile như đề thi thật',
     icon: IconBookOpen, href: '/practice-test/reading/exam',
-    gradient: 'linear-gradient(135deg, #22C55E, #0EA5E9)', color: '#22C55E',
+    gradient: 'linear-gradient(135deg, #22C55E, #0EA5E9)', color: STATUS.success,
   },
   {
     title: 'Nghe Theo Đề', titleDe: 'Prüfungshören',
     description: 'Goethe & TELC · A1/A2/B1 · Đầy đủ tất cả Teile Hören như đề thi thật',
     icon: IconHeadphones, href: '/practice-test/listening/exam',
-    gradient: 'linear-gradient(135deg, #EC4899, #A855F7)', color: '#EC4899',
+    gradient: 'linear-gradient(135deg, #EC4899, #A855F7)', color: ACCENT.listening,
   },
   {
     title: 'Viết Theo Đề', titleDe: 'Prüfungsschreiben',
     description: 'Goethe & TELC · A1/A2/B1 · Chấm theo tiêu chí chính thức',
     icon: IconPenLine, href: '/practice-test/writing/exam',
-    gradient: 'linear-gradient(135deg, #A855F7, #6366F1)', color: '#A855F7',
+    gradient: 'linear-gradient(135deg, #A855F7, #6366F1)', color: ACCENT.examWriting,
   },
   {
     title: 'Nói Theo Đề', titleDe: 'Prüfungssprechen',
     description: 'Goethe & TELC · A1/A2/B1 · Đầy đủ tất cả Teile Sprechen như đề thi thật',
     icon: IconMic, href: '/practice-test/speaking/exam',
-    gradient: 'linear-gradient(135deg, #F59E0B, #EF4444)', color: '#F59E0B',
+    gradient: 'linear-gradient(135deg, #F59E0B, #EF4444)', color: ACCENT.xp,
   },
 ];
 

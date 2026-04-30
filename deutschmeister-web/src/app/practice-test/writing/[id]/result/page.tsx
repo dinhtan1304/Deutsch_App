@@ -8,37 +8,41 @@ import { useAuthStore } from '@/stores/authStore';
 import type { WritingError, GrammarAnalysis } from '@/lib/api/writing';
 import { CriterionRadar } from '@/components/writing/CriterionRadar';
 import { getErrorTip } from '@/data/error-tips';
-import { IconChevronDown, IconDice, IconList } from '../../icons';
+import { IconChevronDown, IconPenLine, IconShare, IconSparkles } from '../../icons';
 import { PageHeader, FixedActionBar } from '@/components/ui';
+import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+
+const WRITING_TYPE_LABELS: Record<string, string> = {
+  email: 'E-Mail', brief: 'Formeller Brief', beschreibung: 'Beschreibung',
+  tagebuch: 'Tagebuch', dialog: 'Dialog', aufsatz: 'Aufsatz',
+  einladung: 'Einladung', beschwerde: 'Beschwerde', bewerbung: 'Bewerbung', formular: 'Formular',
+};
 
 // ─── Helpers ───
 function getScoreGrade(score: number) {
-  if (score >= 90) return { label: 'Ausgezeichnet!', labelVi: 'Xuất sắc!', color: '#22C55E', bg: 'rgba(34,197,94,.15)' };
-  if (score >= 80) return { label: 'Sehr gut!', labelVi: 'Rất tốt!', color: '#22C55E', bg: 'rgba(34,197,94,.12)' };
-  if (score >= 70) return { label: 'Gut!', labelVi: 'Tốt!', color: '#3B82F6', bg: 'rgba(59,130,246,.12)' };
-  if (score >= 60) return { label: 'Befriedigend', labelVi: 'Khá', color: '#F59E0B', bg: 'rgba(245,158,11,.12)' };
-  if (score >= 40) return { label: 'Ausreichend', labelVi: 'Đạt', color: '#F97316', bg: 'rgba(249,115,22,.12)' };
-  return { label: 'Weiter üben!', labelVi: 'Cần cố gắng thêm!', color: '#EF4444', bg: 'rgba(239,68,68,.12)' };
+  if (score >= 90) return { label: 'Ausgezeichnet!', labelVi: 'Xuất sắc!', color: STATUS.success, bg: 'rgba(34,197,94,.15)' };
+  if (score >= 80) return { label: 'Sehr gut!', labelVi: 'Rất tốt!', color: STATUS.success, bg: 'rgba(34,197,94,.12)' };
+  if (score >= 70) return { label: 'Gut!', labelVi: 'Tốt!', color: STATUS.info, bg: 'rgba(59,130,246,.12)' };
+  if (score >= 60) return { label: 'Befriedigend', labelVi: 'Khá', color: STATUS.warning, bg: 'rgba(245,158,11,.12)' };
+  if (score >= 40) return { label: 'Ausreichend', labelVi: 'Đạt', color: ACCENT.games, bg: 'rgba(249,115,22,.12)' };
+  return { label: 'Weiter üben!', labelVi: 'Cần cố gắng thêm!', color: STATUS.danger, bg: 'rgba(239,68,68,.12)' };
 }
 
 const ERROR_TYPE_INFO: Record<string, { labelVi: string; color: string }> = {
-  article:     { labelVi: 'Mạo từ',       color: '#EF4444' },
-  grammar:     { labelVi: 'Ngữ pháp',     color: '#8B5CF6' },
-  word_order:  { labelVi: 'Trật tự từ',   color: '#3B82F6' },
-  conjugation: { labelVi: 'Chia động từ', color: '#14B8A6' },
-  case:        { labelVi: 'Cách',         color: '#6366F1' },
-  spelling:    { labelVi: 'Chính tả',     color: '#F97316' },
-  vocabulary:  { labelVi: 'Từ vựng',      color: '#22C55E' },
+  article:     { labelVi: 'Mạo từ',       color: STATUS.danger },
+  grammar:     { labelVi: 'Ngữ pháp',     color: ACCENT.vocab },
+  word_order:  { labelVi: 'Trật tự từ',   color: STATUS.info },
+  conjugation: { labelVi: 'Chia động từ', color: ACCENT.teal },
+  case:        { labelVi: 'Cách',         color: ACCENT.writing },
+  spelling:    { labelVi: 'Chính tả',     color: ACCENT.games },
+  vocabulary:  { labelVi: 'Từ vựng',      color: STATUS.success },
 };
 
 const SEVERITY_CONFIG: Record<string, { label: string; color: string }> = {
-  error:      { label: 'Lỗi',      color: '#EF4444' },
-  warning:    { label: 'Cảnh báo', color: '#F59E0B' },
-  suggestion: { label: 'Gợi ý',    color: '#3B82F6' },
+  error:      { label: 'Lỗi',      color: STATUS.danger },
+  warning:    { label: 'Cảnh báo', color: STATUS.warning },
+  suggestion: { label: 'Gợi ý',    color: STATUS.info },
 };
-
-const ACCENT = '#6366F1';
-const GRADIENT = 'linear-gradient(135deg, #6366F1, #8B5CF6)';
 
 // ─── Score Ring ───
 function ScoreRing({ score }: { score: number }) {
@@ -78,7 +82,7 @@ function AnalysisPanel({ analysis }: { analysis: GrammarAnalysis }) {
   return (
     <div className="mt-3 space-y-3 border-t pt-3" style={{ borderColor: 'rgba(139,92,246,0.2)' }}>
       <div>
-        <span className="text-caption font-bold uppercase" style={{ color: '#8B5CF6' }}>Phân tích ngữ pháp</span>
+        <span className="text-caption font-bold uppercase" style={{ color: ACCENT.vocab }}>Phân tích ngữ pháp</span>
         <div className="mt-1.5 flex flex-wrap gap-1.5">
           {analysis.components.map((c, i) => (
             <span key={i} className="px-2 py-1 rounded-lg text-caption" style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
@@ -95,7 +99,7 @@ function AnalysisPanel({ analysis }: { analysis: GrammarAnalysis }) {
       {analysis.hasErrors && (
         <div>
           <span className="text-caption font-bold uppercase" style={{ color: 'var(--theme-text-muted)' }}>Câu đúng</span>
-          <p className="text-body mt-0.5 font-medium" style={{ color: '#22C55E' }}>{analysis.correctedSentence}</p>
+          <p className="text-body mt-0.5 font-medium" style={{ color: STATUS.success }}>{analysis.correctedSentence}</p>
         </div>
       )}
       {analysis.grammarRules.length > 0 && (
@@ -115,7 +119,7 @@ function AnalysisPanel({ analysis }: { analysis: GrammarAnalysis }) {
         <p className="text-xs mt-0.5 leading-relaxed" style={{ color: 'var(--theme-text-secondary)' }}>{analysis.explanationVi}</p>
       </div>
       <div className="rounded-lg p-2.5" style={{ backgroundColor: 'rgba(139,92,246,0.06)' }}>
-        <p className="text-xs" style={{ color: '#8B5CF6' }}>
+        <p className="text-xs" style={{ color: ACCENT.vocab }}>
           <span className="font-bold">Mẹo: </span>{analysis.tipVi}
         </p>
       </div>
@@ -130,7 +134,7 @@ function ErrorCard({ error, sessionId }: { error: WritingError; sessionId: strin
   const explainMut = useExplainError();
   const { user } = useAuthStore();
   const isPremium = user?.subscription?.plan === 'premium' && user?.subscription?.status === 'active';
-  const typeInfo = ERROR_TYPE_INFO[error.errorType] || { labelVi: error.errorType, color: '#6B7280' };
+  const typeInfo = ERROR_TYPE_INFO[error.errorType] || { labelVi: error.errorType, color: 'var(--theme-text-muted)' };
   const severity = SEVERITY_CONFIG[error.severity] || SEVERITY_CONFIG.error;
 
   const handleExplain = async (e: React.MouseEvent) => {
@@ -155,9 +159,9 @@ function ErrorCard({ error, sessionId }: { error: WritingError; sessionId: strin
             <span className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>{severity.label}</span>
           </div>
           <div className="flex items-center gap-2 text-body flex-wrap">
-            <span className="line-through font-medium" style={{ color: '#EF4444' }}>{error.originalText}</span>
+            <span className="line-through font-medium" style={{ color: STATUS.danger }}>{error.originalText}</span>
             <span style={{ color: 'var(--theme-text-muted)' }}>→</span>
-            <span className="font-medium" style={{ color: '#22C55E' }}>{error.correctedText}</span>
+            <span className="font-medium" style={{ color: STATUS.success }}>{error.correctedText}</span>
           </div>
           {expanded && (
             <div className="mt-3 space-y-2 border-t pt-3" style={{ borderColor: 'var(--theme-border)' }}>
@@ -204,7 +208,7 @@ function ErrorCard({ error, sessionId }: { error: WritingError; sessionId: strin
                   disabled={explainMut.isPending}
                   className="mt-2 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors"
                   style={{
-                    color: isPremium ? '#8B5CF6' : 'var(--theme-text-muted)',
+                    color: isPremium ? ACCENT.vocab : 'var(--theme-text-muted)',
                     backgroundColor: isPremium ? 'rgba(139,92,246,0.08)' : 'var(--theme-bg-secondary)',
                   }}>
                   {explainMut.isPending ? (
@@ -255,13 +259,13 @@ export default function WritingResultPage() {
     return (
       <div className="py-20 text-center">
         <div className="w-16 h-16 rounded-2xl mx-auto flex items-center justify-center mb-4"
-          style={{ background: GRADIENT }}>
-          <IconList size={28} style={{ color: 'white' }} />
+          style={{ background: GRADIENT.writing }}>
+          <IconPenLine size={28} style={{ color: 'white' }} />
         </div>
         <p className="text-sm mb-4" style={{ color: 'var(--theme-text-muted)' }}>
           {session?.status === 'GRADING' ? 'Bài viết đang được chấm... Vui lòng đợi.' : 'Không tìm thấy kết quả'}
         </p>
-        <Link href="/practice-test/writing" className="text-body font-medium" style={{ color: ACCENT }}>
+        <Link href="/practice-test/writing" className="text-body font-medium" style={{ color: ACCENT.writing }}>
           ← Quay lại danh sách
         </Link>
       </div>
@@ -282,35 +286,34 @@ export default function WritingResultPage() {
         accent="writing"
         right={
           <span className="px-3 py-1 rounded-xl text-xs font-bold"
-            style={{ backgroundColor: 'rgba(99,102,241,.1)', color: ACCENT }}>
+            style={{ backgroundColor: `${ACCENT.writing}1A`, color: ACCENT.writing }}>
             {session.cefrLevel}
           </span>
         }
       />
 
       {/* Hero Result Card */}
-      <div className="rounded-2xl border mb-5 overflow-hidden"
-        style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
-        <div className="px-5 pt-4 pb-3 border-b text-center" style={{ borderColor: 'var(--theme-border)' }}>
-          <p className="text-xs font-medium mb-0.5" style={{ color: 'var(--theme-text-muted)' }}>
+      <div className="rounded-3xl border mb-6 overflow-hidden shadow-xl"
+        style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)', backdropFilter: 'blur(10px)' }}>
+        <div className="px-6 pt-5 pb-4 border-b text-center" style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-secondary)' }}>
+          <p className="text-xs font-black uppercase tracking-widest opacity-60 mb-1" style={{ color: 'var(--theme-text-primary)' }}>
+            {WRITING_TYPE_LABELS[session.writingType] || session.writingType}
+          </p>
+          <h2 className="text-body font-bold" style={{ color: 'var(--theme-text-primary)' }}>
             {session.topic}
-          </p>
-          <p className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>
-            {session.cefrLevel} · {new Date(session.gradedAt!).toLocaleDateString('vi-VN')}
-          </p>
+          </h2>
         </div>
-        <div className="flex flex-col sm:flex-row">
-          <div className="sm:w-1/2 flex items-center justify-center border-b sm:border-b-0 sm:border-r"
-            style={{ borderColor: 'var(--theme-border)' }}>
+        <div className="flex flex-col sm:flex-row divide-y sm:divide-y-0 sm:divide-x" style={{ borderColor: 'var(--theme-border)' }}>
+          <div className="sm:w-1/2 flex items-center justify-center py-4">
             <ScoreRing score={overallScore} />
           </div>
           {session.criterionScores ? (
-            <div className="sm:w-1/2 flex items-center justify-center p-4">
+            <div className="sm:w-1/2 flex items-center justify-center p-6">
               <CriterionRadar scores={session.criterionScores} size={220} />
             </div>
           ) : (
-            <div className="sm:w-1/2 flex items-center justify-center p-6">
-              <p className="text-body" style={{ color: 'var(--theme-text-muted)' }}>Kết quả chấm bài</p>
+            <div className="sm:w-1/2 flex items-center justify-center p-8">
+              <p className="text-body italic" style={{ color: 'var(--theme-text-muted)' }}>Keine detaillierten Kriterien</p>
             </div>
           )}
         </div>
@@ -318,26 +321,26 @@ export default function WritingResultPage() {
 
       {/* Strengths & Improvements */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5">
-        <div className="rounded-xl border p-4" style={{ borderColor: 'rgba(34,197,94,.2)', backgroundColor: 'rgba(34,197,94,.04)' }}>
-          <h3 className="text-xs font-bold uppercase tracking-wider mb-2" style={{ color: '#22C55E' }}>
+        <div className="rounded-xl border p-4" style={{ borderColor: `${STATUS.success}33`, backgroundColor: `${STATUS.success}0A` }}>
+          <h3 className="text-xs font-bold uppercase tracking-wider mb-2" style={{ color: STATUS.success }}>
             Stärken / Điểm mạnh
           </h3>
           <ul className="space-y-1.5">
             {(session.strengths as string[] || []).map((s, i) => (
               <li key={i} className="text-xs flex items-start gap-1.5" style={{ color: 'var(--theme-text-secondary)' }}>
-                <span style={{ color: '#22C55E' }}>•</span>{s}
+                <span style={{ color: STATUS.success }}>•</span>{s}
               </li>
             ))}
           </ul>
         </div>
-        <div className="rounded-xl border p-4" style={{ borderColor: 'rgba(245,158,11,.2)', backgroundColor: 'rgba(245,158,11,.04)' }}>
-          <h3 className="text-xs font-bold uppercase tracking-wider mb-2" style={{ color: '#F59E0B' }}>
+        <div className="rounded-xl border p-4" style={{ borderColor: `${STATUS.warning}33`, backgroundColor: `${STATUS.warning}0A` }}>
+          <h3 className="text-xs font-bold uppercase tracking-wider mb-2" style={{ color: STATUS.warning }}>
             Verbesserungen / Cần cải thiện
           </h3>
           <ul className="space-y-1.5">
             {(session.improvements as string[] || []).map((s, i) => (
               <li key={i} className="text-xs flex items-start gap-1.5" style={{ color: 'var(--theme-text-secondary)' }}>
-                <span style={{ color: '#F59E0B' }}>•</span>{s}
+                <span style={{ color: STATUS.warning }}>•</span>{s}
               </li>
             ))}
           </ul>
@@ -400,7 +403,7 @@ export default function WritingResultPage() {
               <button onClick={() => setFilterType('')}
                 className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
                 style={!filterType
-                  ? { background: GRADIENT, color: 'white' }
+                  ? { background: GRADIENT.writing, color: 'white' }
                   : { backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }
                 }>
                 Tất cả ({errors.length})
@@ -411,7 +414,7 @@ export default function WritingResultPage() {
                   <button key={type} onClick={() => setFilterType(type === filterType ? '' : type)}
                     className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
                     style={filterType === type
-                      ? { background: `linear-gradient(135deg, ${info?.color || '#6B7280'}, ${info?.color || '#6B7280'}cc)`, color: 'white' }
+                      ? { background: `linear-gradient(135deg, ${info?.color || 'var(--theme-text-muted)'}, ${info?.color || 'var(--theme-text-muted)'}cc)`, color: 'white' }
                       : { backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }
                     }>
                     {info?.labelVi || type} ({count})
@@ -433,27 +436,20 @@ export default function WritingResultPage() {
         </div>
       </div>
 
-      <FixedActionBar columns={3}>
-        <Link href="/practice-test/writing"
-          className="flex flex-col items-center gap-1 py-2 px-3 rounded-xl text-xs font-semibold transition-all hover:opacity-70"
-          style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-secondary)' }}>
-          <IconList size={16} />
-          Lịch sử
-        </Link>
-        <Link href="/practice-test/writing/new"
-          className="flex flex-col items-center gap-1 py-2 px-3 rounded-xl text-xs font-bold text-white transition-all hover:-translate-y-0.5"
-          style={{ background: GRADIENT }}>
-          <IconDice size={16} />
-          Bài mới
-        </Link>
+      <FixedActionBar columns={2}>
         <button
-          className="flex flex-col items-center gap-1 py-2 px-3 rounded-xl text-xs font-semibold transition-all hover:opacity-70"
-          style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-secondary)' }}
+          className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl font-bold text-sm border-2 transition-all hover:bg-black/5"
+          style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)', backgroundColor: 'var(--theme-bg-card)' }}
           onClick={() => {
             navigator.share?.({ title: 'DeutschMeister', text: `Tôi đạt ${Math.round(overallScore)}/100 bài viết tiếng Đức!` }).catch(() => {});
           }}>
-          <span className="text-base">🔗</span>
-          Chia sẻ
+          <IconShare size={16} /> Chia sẻ
+        </button>
+        <button
+          className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl font-bold text-sm text-white transition-all hover:-translate-y-0.5 shadow-lg"
+          style={{ background: GRADIENT.writing, boxShadow: `0 8px 24px ${ACCENT.writing}40` }}
+          onClick={() => window.location.href = '/practice-test/writing/new'}>
+          <IconSparkles size={16} /> Bài mới
         </button>
       </FixedActionBar>
     </div>

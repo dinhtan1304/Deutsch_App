@@ -13,6 +13,32 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
   ]),
+  // Design system enforcement — see .claude/skills/web-design-system/SKILL.md
+  // Warn severity while legacy pages are being migrated; flip to error in Phase 3.
+  // Exempt token source files + existing legacy pages until their migration phase.
+  {
+    files: ["src/**/*.{ts,tsx}"],
+    ignores: [
+      "src/lib/tokens.ts",
+      "src/lib/gradients.ts",
+      "src/app/page.tsx",              // landing — frozen, not migrating (user decision)
+    ],
+    rules: {
+      "no-restricted-syntax": [
+        "warn",
+        {
+          selector: "Literal[value=/^#[0-9a-fA-F]{3,8}$/]",
+          message:
+            "Avoid hex color literals. Use ACCENT/GRADIENT from @/lib/tokens or var(--color-accent-*) from globals.css.",
+        },
+        {
+          selector: "Literal[value=/linear-gradient\\(/]",
+          message:
+            "Avoid inline linear-gradient strings. Use GRADIENT from @/lib/tokens.",
+        },
+      ],
+    },
+  },
 ]);
 
 export default eslintConfig;

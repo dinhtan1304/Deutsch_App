@@ -1,8 +1,10 @@
 ﻿'use client';
 
 import { useState } from 'react';
+import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 import Link from 'next/link';
 import { useNotifications, useMarkRead, useMarkAllRead } from '@/hooks/useNotifications';
+import { useModalA11y } from '@/hooks/useModalA11y';
 import type { Notification } from '@/lib/api/notifications';
 
 interface Props {
@@ -32,6 +34,7 @@ function timeAgo(dateStr: string): string {
 }
 
 export function NotificationDrawer({ open, onClose }: Props) {
+  const drawerRef = useModalA11y(open, onClose);
   const [page] = useState(1);
   const { data, isLoading, isError, refetch } = useNotifications(page);
   const markRead = useMarkRead();
@@ -50,6 +53,10 @@ export function NotificationDrawer({ open, onClose }: Props) {
 
       {/* Drawer */}
       <div
+        ref={drawerRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="notif-drawer-title"
         className="fixed right-4 top-16 z-50 w-96 max-h-[70vh] rounded-2xl border shadow-2xl flex flex-col overflow-hidden"
         style={{
           backgroundColor: 'var(--theme-bg-card)',
@@ -70,6 +77,7 @@ export function NotificationDrawer({ open, onClose }: Props) {
           style={{ borderBottom: '1px solid var(--theme-border)' }}
         >
           <h3
+            id="notif-drawer-title"
             className="font-bold text-[15px]"
             style={{ color: 'var(--theme-text-primary)' }}
           >
@@ -80,7 +88,7 @@ export function NotificationDrawer({ open, onClose }: Props) {
               <button
                 onClick={() => markAllRead.mutate()}
                 className="text-xs font-medium px-2 py-1 rounded-lg transition-colors"
-                style={{ color: '#3B82F6' }}
+                style={{ color: ACCENT.srs }}
                 onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'rgba(59,130,246,.08)')}
                 onMouseLeave={e => (e.currentTarget.style.backgroundColor = '')}
               >
@@ -108,7 +116,7 @@ export function NotificationDrawer({ open, onClose }: Props) {
             <div className="p-8 text-center">
               <div
                 className="w-6 h-6 rounded-full border-2 border-t-transparent animate-spin mx-auto"
-                style={{ borderColor: 'var(--theme-border)', borderTopColor: '#3B82F6' }}
+                style={{ borderColor: 'var(--theme-border)', borderTopColor: ACCENT.srs }}
               />
             </div>
           ) : isError ? (
@@ -124,7 +132,7 @@ export function NotificationDrawer({ open, onClose }: Props) {
               <button
                 onClick={() => refetch()}
                 className="text-xs font-medium px-3 py-1.5 rounded-lg border transition-colors"
-                style={{ color: '#3B82F6', borderColor: 'rgba(59,130,246,.3)' }}
+                style={{ color: ACCENT.srs, borderColor: 'rgba(59,130,246,.3)' }}
               >
                 Thử lại
               </button>
@@ -166,7 +174,7 @@ export function NotificationDrawer({ open, onClose }: Props) {
                       {!notif.read && (
                         <span
                           className="w-2 h-2 rounded-full shrink-0"
-                          style={{ background: '#3B82F6' }}
+                          style={{ background: ACCENT.srs }}
                         />
                       )}
                     </div>

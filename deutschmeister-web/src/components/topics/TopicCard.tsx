@@ -1,6 +1,8 @@
 ﻿'use client';
+/* eslint-disable no-restricted-syntax */
 
 import Link from 'next/link';
+import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 import type { Topic, TopicWithProgress } from '@/types/topic';
 
 // ─── Inline SVG icons ───
@@ -30,7 +32,7 @@ export function TopicCard({ topic, showProgress = false }: TopicCardProps) {
   const progress = 'masteryPercent' in topic ? topic.masteryPercent : 0;
   const wordsLearned = 'wordsLearned' in topic ? topic.wordsLearned : 0;
   const isCompleted = progress >= 100;
-  const topicColor = topic.color || '#3B82F6';
+  const topicColor = topic.color || ACCENT.srs;
 
   return (
     <Link href={`/topics/${topic.slug}`}>

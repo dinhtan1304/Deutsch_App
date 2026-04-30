@@ -1,17 +1,22 @@
-﻿'use client';
+'use client';
+/* eslint-disable no-restricted-syntax */
 
 import { useState } from 'react';
-import Link from 'next/link';
+import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import { useRouter } from 'next/navigation';
 import { usePlans, useLifetimeRemaining } from '@/hooks/useSubscription';
 import { useAuthStore } from '@/stores/authStore';
 import { UpgradeModal } from '@/components/subscription/UpgradeModal';
+import { PlanCard } from '@/components/ui/PlanCard';
 import type { BillingPeriod } from '@/lib/api/subscriptions';
+import { IconChevronLeft, IconCheck, IconZap, IconStar, IconMessageCircle, IconSettings } from '@/components/ui/Icons';
+import Link from 'next/link';
 
-const CHECK = (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
-);
-const CROSS = (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.25 }}><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+// Simple X icon for comparison
+const IconX = ({ size = 16 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.2 }}>
+    <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+  </svg>
 );
 
 const FREE_FEATURES = [
@@ -25,38 +30,31 @@ const FREE_FEATURES = [
 
 const PREMIUM_EXTRA = [
   'Luyện tập không giới hạn',
-  'Thi thử Goethe/TELC chuẩn (A1–B1)',
+  'Thi thử Goethe/TELC chuẩn',
   'AI chấm điểm Writing',
   'AI chấm điểm Speaking',
   'Luyện nghe theo đề thi',
-  'Giải thích lỗi bằng tiếng Việt',
+  'Giải thích lỗi tiếng Việt',
 ];
 
 const LIFETIME_EXTRA = [
   'Tất cả tính năng Premium',
-  'Trọn đời — không cần gia hạn',
+  'Trọn đời — không gia hạn',
   'Early Backer badge',
   'Ưu tiên tính năng AI mới',
-  'Ưu tiên hỗ trợ & custom tính năng',
+  'Hỗ trợ khách hàng ưu tiên',
 ];
 
 type Val = boolean | string;
 const COMPARISON: { feature: string; free: Val; premium: Val; lifetime: Val }[] = [
   { feature: 'Từ vựng & mini-games', free: true, premium: true, lifetime: true },
   { feature: 'Ngữ pháp & chủ đề', free: true, premium: true, lifetime: true },
-  { feature: 'Dictionary click-to-lookup', free: true, premium: true, lifetime: true },
   { feature: 'Streak & Leaderboard', free: true, premium: true, lifetime: true },
-  { feature: 'Luyện viết / đọc / nghe / nói', free: '3 lần/tuần', premium: 'Không giới hạn', lifetime: 'Không giới hạn' },
-  { feature: 'Roleplay AI (hội thoại)', free: '3 lần/tuần', premium: 'Không giới hạn', lifetime: 'Không giới hạn' },
-  { feature: 'Phát âm AI', free: '3 lần/tuần', premium: 'Không giới hạn', lifetime: 'Không giới hạn' },
-  { feature: 'Đề thi Goethe/TELC (Reading)', free: false, premium: true, lifetime: true },
-  { feature: 'Đề thi Goethe/TELC (Writing)', free: false, premium: true, lifetime: true },
-  { feature: 'Đề thi Goethe/TELC (Listening)', free: false, premium: true, lifetime: true },
-  { feature: 'Đề thi Goethe/TELC (Speaking)', free: false, premium: true, lifetime: true },
-  { feature: 'AI chấm điểm Writing', free: false, premium: true, lifetime: true },
-  { feature: 'AI chấm điểm Speaking', free: false, premium: true, lifetime: true },
-  { feature: 'AI giải thích lỗi tiếng Việt', free: false, premium: true, lifetime: true },
-  { feature: 'Thời hạn sử dụng', free: '∞', premium: 'Theo gói', lifetime: '∞ (Trọn đời)' },
+  { feature: 'Luyện viết / nói (AI)', free: '3 lần/tuần', premium: 'Không giới hạn', lifetime: 'Không giới hạn' },
+  { feature: 'Roleplay hội thoại AI', free: '3 lần/tuần', premium: 'Không giới hạn', lifetime: 'Không giới hạn' },
+  { feature: 'Đề thi Goethe/TELC (A1-B2)', free: false, premium: true, lifetime: true },
+  { feature: 'AI chấm điểm & giải thích', free: false, premium: true, lifetime: true },
+  { feature: 'Thời hạn sử dụng', free: '∞', premium: 'Gói đăng ký', lifetime: 'Mãi mãi' },
   { feature: 'Early Backer badge', free: false, premium: false, lifetime: true },
 ];
 
@@ -67,6 +65,7 @@ function formatVND(n: number) {
 type PremiumPeriod = 'monthly' | 'quarterly' | 'yearly';
 
 export default function PricingPage() {
+  const router = useRouter();
   const { isAuthenticated, user } = useAuthStore();
   const { data: plans } = usePlans();
   const { data: lifetimeInfo } = useLifetimeRemaining();
@@ -74,11 +73,8 @@ export default function PricingPage() {
   const [defaultPeriod, setDefaultPeriod] = useState<BillingPeriod>('yearly');
   const [activePeriod, setActivePeriod] = useState<PremiumPeriod>('yearly');
 
-  const isPremium =
-    (user?.subscription?.plan === 'premium' ||
-      (user?.subscription?.plan as string) === 'lifetime') &&
-    user?.subscription?.status === 'active';
-  const isLifetime = (user?.subscription?.plan as string) === 'lifetime';
+  const isPremium = (user?.subscription?.plan === 'premium' || user?.subscription?.plan === 'lifetime') && user?.subscription?.status === 'active';
+  const isLifetime = user?.subscription?.plan === 'lifetime';
 
   const premiumPlan = plans?.find((p) => p.code === 'premium');
   const lifetimePlan = plans?.find((p) => p.code === 'lifetime');
@@ -86,34 +82,14 @@ export default function PricingPage() {
   const quarterlyPrice = premiumPlan?.quarterlyPrice ?? 249000;
   const yearlyPrice = premiumPlan?.yearlyPrice ?? 990000;
   const lifetimePrice = lifetimePlan?.price ?? 1490000;
+
   const savePctYearly = Math.round((1 - yearlyPrice / (monthlyPrice * 12)) * 100);
   const savePctQuarterly = Math.round((1 - quarterlyPrice / (monthlyPrice * 3)) * 100);
   const lifetimeSoldOut = lifetimeInfo ? lifetimeInfo.remaining <= 0 : false;
 
-  const currentPrice =
-    activePeriod === 'monthly' ? monthlyPrice :
-    activePeriod === 'quarterly' ? quarterlyPrice :
-    yearlyPrice;
-
-  const perMonthPrice =
-    activePeriod === 'monthly' ? null :
-    activePeriod === 'quarterly' ? Math.round(quarterlyPrice / 3) :
-    Math.round(yearlyPrice / 12);
-
-  const periodLabel =
-    activePeriod === 'monthly' ? '/tháng' :
-    activePeriod === 'quarterly' ? '/3 tháng' :
-    '/năm';
-
-  const ctaLabel =
-    activePeriod === 'monthly' ? 'Đăng ký tháng' :
-    activePeriod === 'quarterly' ? 'Đăng ký 3 tháng' :
-    `Đăng ký năm — Tiết kiệm ${savePctYearly}%`;
-
-  const openUpgrade = (period: BillingPeriod) => {
-    setDefaultPeriod(period);
-    setUpgradeOpen(true);
-  };
+  const currentPrice = activePeriod === 'monthly' ? monthlyPrice : activePeriod === 'quarterly' ? quarterlyPrice : yearlyPrice;
+  const perMonthPrice = activePeriod === 'monthly' ? null : activePeriod === 'quarterly' ? Math.round(quarterlyPrice / 3) : Math.round(yearlyPrice / 12);
+  const periodLabel = activePeriod === 'monthly' ? '/tháng' : activePeriod === 'quarterly' ? '/3 tháng' : '/năm';
 
   const PERIOD_OPTIONS: { key: PremiumPeriod; label: string; savePct?: number }[] = [
     { key: 'monthly', label: '1 Tháng' },
@@ -121,53 +97,49 @@ export default function PricingPage() {
     { key: 'yearly', label: '1 Năm', savePct: savePctYearly },
   ];
 
-  return (
-    <div className="min-h-screen py-12 px-4" style={{ backgroundColor: 'var(--theme-bg-primary)' }}>
-      <div className="max-w-4xl mx-auto">
+  const openUpgrade = (period: BillingPeriod) => {
+    setDefaultPeriod(period);
+    setUpgradeOpen(true);
+  };
 
-        {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-extrabold mb-3" style={{ color: 'var(--theme-text-primary)' }}>
-            Nâng cấp lên Premium
+  return (
+    <div className="min-h-screen py-10 px-4" style={{ backgroundColor: 'var(--theme-bg-body)', color: 'var(--theme-text-primary)', backgroundImage: 'radial-gradient(circle at 50% -20%, var(--color-accent-brand)15, transparent 70%)' }}>
+      <div className="max-w-5xl mx-auto">
+        
+        {/* Header Section */}
+        <div className="text-center mb-12 animate-[slideUp_0.4s_ease-out_both]">
+          <div className="flex flex-col items-center mb-8">
+            <img src="/logo.png" width={48} height={48} alt="Logo" className="rounded-2xl shadow-2xl mb-3" />
+            <span className="text-[10px] font-black uppercase tracking-[0.3em] opacity-40">DeutschMeister</span>
+          </div>
+          
+          <h1 className="text-4xl md:text-5xl font-black tracking-tight mb-6 flex flex-col md:flex-row items-center justify-center gap-x-3">
+            <span style={{ color: 'var(--theme-text-primary)' }}>Nâng tầm trình độ</span>
+            <span className="text-indigo-500">Deutsch</span>
           </h1>
-          <p className="text-[15px] max-w-xl mx-auto" style={{ color: 'var(--theme-text-muted)' }}>
-            Luyện thi Goethe/TELC không giới hạn. AI chấm bài, mô phỏng đề thi chuẩn, giải thích lỗi bằng tiếng Việt.
+          
+          <p className="text-sm md:text-base opacity-50 max-w-2xl mx-auto font-medium leading-relaxed mb-8">
+            Mở khóa toàn bộ sức mạnh AI, luyện thi Goethe/TELC không giới hạn và nhận lộ trình học tập tối ưu nhất.
           </p>
+
+          <Link href="/" className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-theme-bg-secondary border border-theme-border text-[10px] font-black uppercase tracking-widest opacity-60 hover:opacity-100 transition-all hover:bg-theme-bg-tertiary">
+            <IconChevronLeft size={12} /> Trở về Dashboard
+          </Link>
         </div>
 
-        {/* Period Toggle */}
-        <div className="flex justify-center mb-10">
-          <div
-            className="inline-flex items-center gap-1 p-1 rounded-2xl"
-            style={{ backgroundColor: 'var(--theme-bg-secondary)', border: '1px solid var(--theme-border)' }}
-          >
+        {/* Pricing Toggle */}
+        <div className="flex justify-center mb-12 animate-[slideUp_0.5s_ease-out_0.1s_both]">
+          <div className="inline-flex p-1.5 rounded-[1.25rem] bg-white/5 border border-white/10 backdrop-blur-xl shadow-inner"
+            style={{ backgroundColor: 'var(--theme-bg-secondary)', borderColor: 'var(--theme-border)' }}>
             {PERIOD_OPTIONS.map(({ key, label, savePct }) => {
               const isActive = activePeriod === key;
               return (
-                <button
-                  key={key}
-                  onClick={() => setActivePeriod(key)}
-                  className="relative flex items-center gap-2 px-4 py-2 rounded-xl text-body font-semibold transition-all"
-                  style={isActive ? {
-                    backgroundColor: 'var(--theme-bg-card)',
-                    color: 'var(--theme-text-primary)',
-                    boxShadow: '0 1px 4px rgba(0,0,0,0.12)',
-                    border: '1.5px solid var(--theme-border)',
-                  } : {
-                    color: 'var(--theme-text-muted)',
-                    border: '1.5px solid transparent',
-                  }}
-                >
+                <button key={key} onClick={() => setActivePeriod(key)}
+                  className={`relative flex items-center gap-2 px-6 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all duration-300 ${isActive ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/30' : 'text-theme-muted hover:text-theme-text'}`}>
                   {label}
                   {savePct != null && savePct > 0 && (
-                    <span
-                      className="px-1.5 py-0.5 rounded-md text-caption font-bold"
-                      style={{
-                        backgroundColor: isActive ? 'rgba(34,197,94,0.12)' : 'rgba(34,197,94,0.08)',
-                        color: '#22C55E',
-                      }}
-                    >
-                      Tiết kiệm {savePct}%
+                    <span className="px-1.5 py-0.5 rounded-md text-[9px] font-black" style={{ backgroundColor: isActive ? 'rgba(255,255,255,0.2)' : 'rgba(34,197,94,0.1)', color: isActive ? 'white' : STATUS.success }}>
+                      -{savePct}%
                     </span>
                   )}
                 </button>
@@ -176,220 +148,127 @@ export default function PricingPage() {
           </div>
         </div>
 
-        {/* Plan Cards — always 3 */}
-        <div className="grid md:grid-cols-3 gap-5 mb-14">
-
-          {/* Free */}
-          <div
-            className="rounded-2xl border p-6 flex flex-col"
-            style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}
-          >
-            <div className="mb-5">
-              <div className="text-body font-semibold uppercase tracking-wide mb-1" style={{ color: 'var(--theme-text-muted)' }}>Free</div>
-              <div className="text-3xl font-extrabold" style={{ color: 'var(--theme-text-primary)' }}>0đ</div>
-              <div className="text-body mt-1" style={{ color: 'var(--theme-text-muted)' }}>Mãi mãi miễn phí</div>
+        {/* Plan Cards */}
+        <div className="grid md:grid-cols-3 gap-6 mb-20 animate-[slideUp_0.6s_ease-out_0.2s_both] items-stretch">
+          {/* Free Plan */}
+          <div className="group relative flex flex-col p-8 rounded-[2rem] border bg-theme-bg-card transition-all duration-500 hover:-translate-y-1" style={{ borderColor: 'var(--theme-border)' }}>
+            <div className="mb-8">
+              <div className="text-[11px] font-black uppercase tracking-widest opacity-40 mb-2">Essential</div>
+              <div className="text-3xl font-black mb-1">Miễn phí</div>
+              <div className="text-xs opacity-40 font-medium">Cơ bản & ôn tập nhẹ nhàng</div>
             </div>
-            <ul className="space-y-2.5 flex-1 mb-6">
-              {FREE_FEATURES.map((f) => (
-                <li key={f} className="flex items-start gap-2 text-body" style={{ color: 'var(--theme-text-secondary)' }}>
-                  {CHECK}<span>{f}</span>
+            <ul className="space-y-4 mb-8 flex-1">
+              {FREE_FEATURES.map((f, i) => (
+                <li key={i} className="flex items-start gap-3 text-[13px] font-medium opacity-70">
+                  <IconCheck size={16} style={{ color: 'var(--theme-text-muted)', marginTop: '2px' }} />
+                  {f}
                 </li>
               ))}
-              <li className="flex items-start gap-2 text-body" style={{ color: 'var(--theme-text-muted)' }}>
-                {CHECK}<span>Luyện viết/đọc/nghe/nói/roleplay/phát âm — 3 lần/tuần</span>
+              <li className="flex items-start gap-3 text-[13px] font-medium opacity-70">
+                <IconCheck size={16} style={{ color: 'var(--theme-text-muted)', marginTop: '2px' }} />
+                AI — 3 lượt/tuần
               </li>
             </ul>
-            {isAuthenticated ? (
-              isPremium ? (
-                <div className="text-center text-body font-medium py-2.5 rounded-lg" style={{ color: 'var(--theme-text-muted)', backgroundColor: 'var(--theme-bg-secondary)' }}>
-                  Gói hiện tại: Premium
-                </div>
-              ) : (
-                <div className="text-center text-body font-medium py-2.5 rounded-lg" style={{ color: 'var(--theme-text-muted)', backgroundColor: 'var(--theme-bg-secondary)' }}>
-                  Gói hiện tại
-                </div>
-              )
-            ) : (
-              <Link
-                href="/login"
-                className="text-center text-body font-bold py-2.5 rounded-lg transition-colors block"
-                style={{ color: 'var(--theme-text-primary)', backgroundColor: 'var(--theme-bg-secondary)' }}
-              >
-                Đăng ký miễn phí
-              </Link>
-            )}
+            <button disabled={!isAuthenticated || isPremium}
+              className={`w-full py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all ${isPremium ? 'opacity-20 cursor-not-allowed' : 'bg-theme-bg-secondary hover:bg-theme-border opacity-60'}`}>
+              {isPremium ? 'Gói hiện tại: Premium' : 'Gói hiện tại'}
+            </button>
           </div>
 
-          {/* Premium — dynamic by period */}
-          <div
-            className="rounded-2xl border-2 p-6 flex flex-col relative"
-            style={{ borderColor: '#8B5CF6', backgroundColor: 'var(--theme-bg-card)' }}
-          >
-            {activePeriod !== 'monthly' && (
-              <div
-                className="absolute -top-3 left-1/2 -translate-x-1/2 text-caption font-bold px-3 py-0.5 rounded-full text-white whitespace-nowrap"
-                style={{ background: 'linear-gradient(135deg, #6366F1, #8B5CF6)' }}
-              >
-                Tiết kiệm {activePeriod === 'quarterly' ? savePctQuarterly : savePctYearly}%
-              </div>
-            )}
-            <div className="mb-5">
-              <div className="text-body font-semibold uppercase tracking-wide mb-1" style={{ color: '#8B5CF6' }}>Premium</div>
-              <div className="flex items-baseline gap-1">
-                <span className="text-3xl font-extrabold" style={{ color: 'var(--theme-text-primary)' }}>
-                  {formatVND(currentPrice)}
-                </span>
-                <span className="text-body" style={{ color: 'var(--theme-text-muted)' }}>{periodLabel}</span>
-              </div>
-              <div className="text-body mt-1" style={{ color: 'var(--theme-text-muted)' }}>
-                {perMonthPrice != null
-                  ? `Chỉ ${formatVND(perMonthPrice)}/tháng`
-                  : 'Huỷ bất kỳ lúc nào'}
-              </div>
+          {/* Premium Plan - Featured */}
+          <div className="group relative flex flex-col p-8 rounded-[2rem] border bg-theme-bg-card transition-all duration-500 hover:-translate-y-2 scale-105 z-10"
+            style={{ borderColor: ACCENT.writing, boxShadow: '0 20px 50px -12px rgba(99,102,241,0.15)' }}>
+            <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full bg-indigo-500 text-white text-[10px] font-black uppercase tracking-widest shadow-lg">
+              Phổ biến nhất
             </div>
-            <ul className="space-y-2.5 flex-1 mb-6">
-              {FREE_FEATURES.slice(0, 2).map((f) => (
-                <li key={f} className="flex items-start gap-2 text-body" style={{ color: 'var(--theme-text-secondary)' }}>
-                  {CHECK}<span>{f}</span>
+            <div className="mb-8">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="text-[11px] font-black uppercase tracking-widest text-indigo-500">Professional</div>
+                {activePeriod !== 'monthly' && (
+                  <span className="px-2 py-0.5 rounded-md bg-indigo-500/10 text-indigo-500 text-[9px] font-black">TIẾT KIỆM {activePeriod === 'quarterly' ? savePctQuarterly : savePctYearly}%</span>
+                )}
+              </div>
+              <div className="flex items-baseline gap-1">
+                <div className="text-4xl font-black text-indigo-500">{formatVND(currentPrice)}</div>
+                <div className="text-xs opacity-40 font-medium">{periodLabel}</div>
+              </div>
+              {perMonthPrice && <div className="text-[11px] opacity-40 font-medium mt-1">Chỉ {formatVND(perMonthPrice)}/tháng</div>}
+            </div>
+            <ul className="space-y-4 mb-8 flex-1">
+              {PREMIUM_EXTRA.map((f, i) => (
+                <li key={i} className="flex items-start gap-3 text-[13px] font-bold">
+                  <IconZap size={16} className="text-indigo-500" style={{ marginTop: '2px' }} />
+                  {f}
                 </li>
               ))}
-              {PREMIUM_EXTRA.map((f) => (
-                <li key={f} className="flex items-start gap-2 text-body" style={{ color: 'var(--theme-text-secondary)' }}>
-                  {CHECK}<span className="font-medium">{f}</span>
+              <li className="flex items-start gap-3 text-[13px] font-bold opacity-40">
+                <IconCheck size={16} style={{ marginTop: '2px' }} />
+                Bao gồm mọi tính năng Free
+              </li>
+            </ul>
+            <button onClick={() => openUpgrade(activePeriod)}
+              className="w-full py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all text-white shadow-xl shadow-indigo-500/20 hover:scale-[1.02] active:scale-95"
+              style={{ background: 'linear-gradient(135deg, #6366F1, #4F46E5)' }}>
+              {isPremium ? 'Gói của bạn' : 'Nâng cấp ngay'}
+            </button>
+          </div>
+
+          {/* Lifetime Plan */}
+          <div className="group relative flex flex-col p-8 rounded-[2rem] border bg-theme-bg-card transition-all duration-500 hover:-translate-y-1" 
+            style={{ borderColor: '#EC489933' }}>
+            <div className="mb-8">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="text-[11px] font-black uppercase tracking-widest text-pink-500">Elite</div>
+                {lifetimeInfo && !lifetimeSoldOut && (
+                  <span className="px-2 py-0.5 rounded-md bg-pink-500/10 text-pink-500 text-[9px] font-black">CÒN {lifetimeInfo.remaining} SUẤT</span>
+                )}
+              </div>
+              <div className="text-3xl font-black text-pink-500">{formatVND(lifetimePrice)}</div>
+              <div className="text-xs opacity-40 font-medium">Mua một lần - Dùng mãi mãi</div>
+            </div>
+            <ul className="space-y-4 mb-8 flex-1">
+              {LIFETIME_EXTRA.map((f, i) => (
+                <li key={i} className="flex items-start gap-3 text-[13px] font-medium text-pink-500/80">
+                  <IconStar size={16} className="text-pink-500" style={{ marginTop: '2px' }} />
+                  {f}
                 </li>
               ))}
             </ul>
-            {isPremium ? (
-              <div className="text-center text-body font-medium py-2.5 rounded-lg" style={{ color: '#22C55E', backgroundColor: 'rgba(34,197,94,0.1)' }}>
-                Đang sử dụng
-              </div>
-            ) : (
-              <button
-                onClick={() => openUpgrade(activePeriod)}
-                className="w-full py-2.5 rounded-lg text-sm font-bold text-white transition-transform hover:scale-[1.02]"
-                style={{ background: 'linear-gradient(135deg, #6366F1, #8B5CF6)' }}
-              >
-                {ctaLabel}
-              </button>
-            )}
-          </div>
-
-          {/* Lifetime */}
-          <div
-            className="rounded-2xl border-2 p-6 flex flex-col relative"
-            style={{
-              borderColor: '#EC4899',
-              background: 'linear-gradient(180deg, var(--theme-bg-card), rgba(236,72,153,0.05))',
-            }}
-          >
-            <div
-              className="absolute -top-3 left-1/2 -translate-x-1/2 text-caption font-bold px-3 py-0.5 rounded-full text-white whitespace-nowrap"
-              style={{ background: 'linear-gradient(135deg, #EC4899, #F59E0B)' }}
-            >
-              🔥 Early Bird — Limited
-            </div>
-            <div className="mb-5">
-              <div className="text-body font-semibold uppercase tracking-wide mb-1" style={{ color: '#EC4899' }}>Lifetime</div>
-              <div className="flex items-baseline gap-1">
-                <span className="text-3xl font-extrabold" style={{ color: 'var(--theme-text-primary)' }}>{formatVND(lifetimePrice)}</span>
-              </div>
-              <div className="text-body mt-1" style={{ color: 'var(--theme-text-muted)' }}>
-                Trả 1 lần — dùng trọn đời
-              </div>
-              {lifetimeInfo && !lifetimeSoldOut && (
-                <div className="text-xs mt-2 font-semibold" style={{ color: '#EC4899' }}>
-                  🔥 Còn {lifetimeInfo.remaining}/{lifetimeInfo.max} suất
-                </div>
-              )}
-            </div>
-            <ul className="space-y-2.5 flex-1 mb-6">
-              {LIFETIME_EXTRA.map((f) => (
-                <li key={f} className="flex items-start gap-2 text-body" style={{ color: 'var(--theme-text-secondary)' }}>
-                  {CHECK}<span className="font-medium">{f}</span>
-                </li>
-              ))}
-            </ul>
-            {isLifetime ? (
-              <div className="text-center text-body font-medium py-2.5 rounded-lg" style={{ color: '#22C55E', backgroundColor: 'rgba(34,197,94,0.1)' }}>
-                Đang sử dụng
-              </div>
-            ) : lifetimeSoldOut ? (
-              <div className="text-center text-body font-medium py-2.5 rounded-lg" style={{ color: 'var(--theme-text-muted)', backgroundColor: 'var(--theme-bg-secondary)' }}>
-                Hết suất
-              </div>
-            ) : (
-              <button
-                onClick={() => openUpgrade('lifetime')}
-                className="w-full py-2.5 rounded-lg text-sm font-bold text-white transition-transform hover:scale-[1.02]"
-                style={{ background: 'linear-gradient(135deg, #EC4899, #F59E0B)' }}
-              >
-                Mua trọn đời
-              </button>
-            )}
+            <button onClick={() => openUpgrade('lifetime')} disabled={lifetimeSoldOut}
+              className={`w-full py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all shadow-lg ${lifetimeSoldOut ? 'bg-theme-bg-secondary opacity-40 cursor-not-allowed' : 'bg-pink-500/10 text-pink-500 border border-pink-500/20 hover:bg-pink-500/20 hover:scale-[1.02]'}`}>
+              {isLifetime ? 'Đã kích hoạt' : lifetimeSoldOut ? 'Hết suất ưu đãi' : 'Mua trọn đời'}
+            </button>
           </div>
         </div>
 
-        {/* Payment Guide */}
-        <div className="rounded-2xl border p-6 mb-14" style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
-          <h2 className="text-[15px] font-bold mb-5" style={{ color: 'var(--theme-text-primary)' }}>
-            Cách thanh toán — 3 bước đơn giản
-          </h2>
-          <div className="grid sm:grid-cols-3 gap-4">
-            {[
-              { step: '1', title: 'Chọn gói & nhấn đăng ký', desc: 'Chọn Premium (tháng/quý/năm) hoặc Lifetime. Nhập mã giảm giá nếu có, xem số tiền cuối cùng.' },
-              { step: '2', title: 'Chuyển khoản ngân hàng', desc: 'Chuyển đúng số tiền và nội dung chuyển khoản hiển thị trong modal (dạng "NANGCAP XXXXXXXX"). Quét mã VietQR cho nhanh.' },
-              { step: '3', title: 'Kích hoạt trong vài giờ', desc: 'Admin xác nhận giao dịch — thường trong 1-4 giờ, tối đa 24 giờ. Bạn nhận email thông báo khi Premium đã active.' },
-            ].map(({ step, title, desc }) => (
-              <div key={step} className="flex gap-3">
-                <div className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-body font-black text-white" style={{ background: 'linear-gradient(135deg, #6366F1, #8B5CF6)' }}>
-                  {step}
-                </div>
-                <div>
-                  <div className="text-body font-semibold mb-1" style={{ color: 'var(--theme-text-primary)' }}>{title}</div>
-                  <div className="text-xs leading-relaxed" style={{ color: 'var(--theme-text-muted)' }}>{desc}</div>
-                </div>
-              </div>
-            ))}
+        {/* Comparison Table Section */}
+        <div className="mb-24 animate-[slideUp_0.6s_ease-out_0.3s_both]">
+          <div className="text-center mb-10">
+            <h2 className="text-2xl font-black mb-2">So sánh chi tiết</h2>
+            <p className="text-xs opacity-40 font-medium uppercase tracking-widest">Lựa chọn thông minh cho lộ trình của bạn</p>
           </div>
-          <div className="mt-4 pt-4 flex items-center gap-2 text-xs" style={{ borderTop: '1px solid var(--theme-border)', color: 'var(--theme-text-muted)' }}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4m0-4h.01"/></svg>
-            Hỗ trợ qua email nếu có vấn đề thanh toán · Hoàn tiền trong 7 ngày nếu chưa hài lòng
-          </div>
-        </div>
-
-        {/* Comparison Table */}
-        <div className="mb-14">
-          <h2 className="text-xl font-bold text-center mb-6" style={{ color: 'var(--theme-text-primary)' }}>
-            So sánh chi tiết
-          </h2>
-          <div className="rounded-2xl border overflow-hidden" style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
-            <table className="w-full text-body">
+          <div className="rounded-[2rem] border overflow-hidden backdrop-blur-xl bg-theme-bg-card/50" style={{ borderColor: 'var(--theme-border)' }}>
+            <table className="w-full">
               <thead>
-                <tr style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
-                  <th className="text-left py-3 px-4 font-semibold" style={{ color: 'var(--theme-text-primary)' }}>Tính năng</th>
-                  <th className="text-center py-3 px-4 font-semibold w-24" style={{ color: 'var(--theme-text-muted)' }}>Free</th>
-                  <th className="text-center py-3 px-4 font-semibold w-24" style={{ color: '#8B5CF6' }}>Premium</th>
-                  <th className="text-center py-3 px-4 font-semibold w-24" style={{ color: '#EC4899' }}>Lifetime</th>
+                <tr className="bg-theme-bg-secondary/50">
+                  <th className="text-left py-6 px-8 text-[11px] font-black uppercase tracking-widest opacity-40">Tính năng</th>
+                  <th className="text-center py-6 px-6 text-[11px] font-black uppercase tracking-widest opacity-40 w-28">Free</th>
+                  <th className="text-center py-6 px-6 text-[11px] font-black uppercase tracking-widest text-indigo-500 w-28">Premium</th>
+                  <th className="text-center py-6 px-6 text-[11px] font-black uppercase tracking-widest text-pink-500 w-28">Lifetime</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-white/[0.03]">
                 {COMPARISON.map((row) => (
-                  <tr key={row.feature} style={{ borderTop: '1px solid var(--theme-border)' }}>
-                    <td className="py-2.5 px-4" style={{ color: 'var(--theme-text-secondary)' }}>{row.feature}</td>
-                    <td className="text-center py-2.5 px-4">
-                      {row.free === true ? CHECK : row.free === false ? CROSS : (
-                        <span className="text-xs font-medium" style={{ color: 'var(--theme-text-muted)' }}>{row.free}</span>
-                      )}
+                  <tr key={row.feature} className="hover:bg-white/[0.01] transition-colors">
+                    <td className="py-4 px-8 text-[13px] font-bold opacity-80">{row.feature}</td>
+                    <td className="text-center py-4 px-6">
+                      {row.free === true ? <div className="flex justify-center"><IconCheck size={16} className="opacity-30" /></div> : row.free === false ? <div className="flex justify-center"><IconX size={16} /></div> : <span className="text-[10px] font-black opacity-30">{row.free}</span>}
                     </td>
-                    <td className="text-center py-2.5 px-4">
-                      {row.premium === true ? CHECK : row.premium === false ? CROSS : (
-                        <span className="text-xs font-medium" style={{ color: '#8B5CF6' }}>{row.premium}</span>
-                      )}
+                    <td className="text-center py-4 px-6">
+                      {row.premium === true ? <div className="flex justify-center"><IconZap size={16} className="text-indigo-500" /></div> : row.premium === false ? <div className="flex justify-center"><IconX size={16} /></div> : <span className="text-[10px] font-black text-indigo-500">{row.premium}</span>}
                     </td>
-                    <td className="text-center py-2.5 px-4">
-                      {row.lifetime === true ? CHECK : row.lifetime === false ? CROSS : (
-                        <span className="text-xs font-medium" style={{ color: '#EC4899' }}>{row.lifetime}</span>
-                      )}
+                    <td className="text-center py-4 px-6">
+                      {row.lifetime === true ? <div className="flex justify-center"><IconStar size={16} className="text-pink-500" /></div> : row.lifetime === false ? <div className="flex justify-center"><IconX size={16} /></div> : <span className="text-[10px] font-black text-pink-500">{row.lifetime}</span>}
                     </td>
                   </tr>
                 ))}
@@ -398,57 +277,50 @@ export default function PricingPage() {
           </div>
         </div>
 
-        {/* FAQ */}
-        <div className="max-w-2xl mx-auto mb-10">
-          <h2 className="text-xl font-bold text-center mb-6" style={{ color: 'var(--theme-text-primary)' }}>
-            Câu hỏi thường gặp
-          </h2>
-          <div className="space-y-3">
+        {/* FAQ Section */}
+        <div className="max-w-3xl mx-auto mb-16 animate-[slideUp_0.6s_ease-out_0.4s_both]">
+          <div className="flex items-center gap-3 mb-10 justify-center">
+             <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-500">
+               <IconMessageCircle size={20} />
+             </div>
+             <h2 className="text-2xl font-black">Giải đáp thắc mắc</h2>
+          </div>
+          <div className="grid gap-4">
             {[
-              { q: 'Làm sao để thanh toán?', a: 'Chuyển khoản ngân hàng hoặc quét mã VietQR. Sau khi chuyển, admin sẽ xác nhận trong 24 giờ.' },
-              { q: 'Bao lâu thì Premium được kích hoạt?', a: 'Sau khi admin xác nhận thanh toán — thường trong vòng vài giờ, tối đa 24 giờ.' },
-              { q: 'Có được hoàn tiền không?', a: 'Trong 7 ngày đầu, nếu chưa hài lòng hãy liên hệ email support để được hoàn tiền.' },
-              { q: 'Free hết lượt thì sao?', a: 'Bạn vẫn dùng được từ vựng, games, ngữ pháp, dictionary. Lượt luyện tập AI reset vào thứ Hai hàng tuần (00:00 UTC+7).' },
-              { q: 'Gói Lifetime là gì?', a: 'Trả 1 lần, dùng mãi mãi. Early bird deal giới hạn 500 slot đầu tiên — khi hết là không mở lại. Bạn sẽ nhận Early Backer badge và được ưu tiên tính năng AI mới.' },
-              { q: 'Tôi có mã giảm giá, dùng ở đâu?', a: 'Khi bấm nút đăng ký, modal thanh toán sẽ có ô "Mã giảm giá". Nhập mã và bấm "Áp dụng" để thấy giá sau giảm trước khi chuyển khoản.' },
+              { q: 'Làm sao để kích hoạt Premium?', a: 'Sau khi chuyển khoản ngân hàng hoặc quét mã VietQR, admin sẽ xác nhận giao dịch của bạn. Thông thường quá trình này mất 1-4 giờ, tối đa 24 giờ.' },
+              { q: 'Quyền lợi của gói Lifetime là gì?', a: 'Bạn chỉ cần thanh toán một lần duy nhất và sở hữu trọn đời mọi tính năng Premium hiện tại và tương lai. Ngoài ra, bạn còn nhận được danh hiệu Early Backer độc quyền.' },
+              { q: 'Chính sách hoàn tiền như thế nào?', a: 'Chúng tôi cam kết hoàn tiền 100% trong vòng 7 ngày đầu tiên nếu bạn không hài lòng với dịch vụ và chưa sử dụng quá 10 lượt luyện tập AI.' },
+              { q: 'Nếu dùng hết lượt AI ở bản Free?', a: 'Bạn vẫn có thể học từ vựng, ngữ pháp và chơi mini-games bình thường. Các lượt luyện tập AI sẽ được làm mới vào mỗi thứ Hai hàng tuần.' },
             ].map(({ q, a }) => (
-              <details key={q} className="group rounded-xl border p-4" style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
-                <summary className="text-sm font-semibold cursor-pointer list-none flex items-center justify-between" style={{ color: 'var(--theme-text-primary)' }}>
+              <details key={q} className="group rounded-[1.5rem] border border-theme-border bg-theme-bg-card p-6 transition-all hover:bg-white/[0.02]">
+                <summary className="text-sm font-bold cursor-pointer list-none flex items-center justify-between opacity-80 group-open:opacity-100 group-open:mb-4">
                   {q}
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="shrink-0 transition-transform group-open:rotate-180" style={{ color: 'var(--theme-text-muted)' }}>
-                    <path d="M6 9l6 6 6-6" />
-                  </svg>
+                  <div className="w-6 h-6 rounded-lg bg-theme-bg-secondary flex items-center justify-center transition-transform group-open:rotate-180">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><path d="m6 9 6 6 6-6" /></svg>
+                  </div>
                 </summary>
-                <p className="mt-2 text-body leading-relaxed" style={{ color: 'var(--theme-text-muted)' }}>
+                <div className="text-[13px] leading-relaxed opacity-50 font-medium">
                   {a}
-                </p>
+                </div>
               </details>
             ))}
           </div>
         </div>
 
-        {/* Bottom CTA */}
-        {!isPremium && (
-          <div className="text-center">
-            <button
-              onClick={() => openUpgrade('yearly')}
-              className="px-8 py-3 rounded-xl text-[15px] font-bold text-white transition-transform hover:scale-[1.02]"
-              style={{ background: 'linear-gradient(135deg, #6366F1, #8B5CF6)' }}
-            >
-              Bắt đầu với Premium
-            </button>
-            <p className="text-xs mt-2" style={{ color: 'var(--theme-text-muted)' }}>
-              Chỉ từ {formatVND(Math.round(yearlyPrice / 12))}/tháng khi đăng ký năm
-            </p>
-          </div>
-        )}
+        {/* Footer Info */}
+        <div className="text-center py-10 opacity-30 text-[10px] font-black uppercase tracking-[0.2em]">
+          Bảo mật thanh toán · Hỗ trợ 24/7 · DeutschMeister Team
+        </div>
       </div>
 
-      <UpgradeModal
-        open={upgradeOpen}
-        onClose={() => setUpgradeOpen(false)}
-        defaultPeriod={defaultPeriod}
-      />
+      <UpgradeModal open={upgradeOpen} onClose={() => setUpgradeOpen(false)} defaultPeriod={defaultPeriod} />
+
+      <style jsx global>{`
+        @keyframes slideUp {
+          from { opacity: 0; transform: translateY(30px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
     </div>
   );
 }

@@ -1,24 +1,19 @@
-﻿'use client';
+'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { useGenerateExamWriting } from '@/hooks/useExamWriting';
 import { PageHeader } from '@/components/ui';
 import { EXAM_WRITING_DISPLAY } from '@/lib/examConfig';
+import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 
 function IconLoader({ size = 18 }: { size?: number }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="animate-spin" style={{ display: 'block' }}><path d="M21 12a9 9 0 1 1-6.219-8.56" /></svg>;
 }
-function IconChevronLeft({ size = 16 }: { size?: number }) {
-  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}><polyline points="15 18 9 12 15 6" /></svg>;
-}
-
-const GRADIENT = 'linear-gradient(135deg, #A855F7, #6366F1)';
 
 const EXAM_TYPES = [
-  { id: 'GOETHE', label: 'Goethe-Zertifikat', color: '#3B82F6', desc: 'Chứng chỉ Goethe-Institut' },
-  { id: 'TELC', label: 'TELC Deutsch', color: '#8B5CF6', desc: 'The European Language Certificates' },
+  { id: 'GOETHE', label: 'Goethe-Zertifikat', color: ACCENT.srs, desc: 'Chứng chỉ Goethe-Institut' },
+  { id: 'TELC', label: 'TELC Deutsch', color: ACCENT.vocab, desc: 'The European Language Certificates' },
 ];
 
 const LEVELS = ['A1', 'A2', 'B1'];
@@ -51,7 +46,7 @@ export default function ExamWritingNewPage() {
         backHref="/practice-test/writing/exam"
         title="Tạo đề Luyện Viết"
         subtitle="Chọn loại đề và trình độ để AI tạo bài thi đầy đủ các Teil"
-        accent="writingExam"
+        accent="writing"
       />
 
       {/* Step 1: Exam type */}
@@ -64,7 +59,7 @@ export default function ExamWritingNewPage() {
             <button key={et.id} onClick={() => setExamType(et.id)}
               className="p-4 rounded-2xl border-2 text-left transition-all"
               style={examType === et.id
-                ? { borderColor: et.color, backgroundColor: `${et.color}10` }
+                ? { borderColor: et.color, backgroundColor: `${et.color}1A` }
                 : { borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
               <div className="text-[15px] font-bold"
                 style={{ color: examType === et.id ? et.color : 'var(--theme-text-primary)' }}>
@@ -89,7 +84,7 @@ export default function ExamWritingNewPage() {
                 disabled={unsupported}
                 className="flex-1 py-3 rounded-2xl border-2 font-bold text-[15px] transition-all"
                 style={cefrLevel === lvl && !unsupported
-                  ? { borderColor: '#A855F7', backgroundColor: 'rgba(168,85,247,.1)', color: '#A855F7' }
+                  ? { borderColor: ACCENT.examWriting, backgroundColor: `${ACCENT.examWriting}1A`, color: ACCENT.examWriting }
                   : unsupported
                     ? { borderColor: 'var(--theme-border)', color: 'var(--theme-text-muted)', opacity: 0.4, cursor: 'not-allowed', backgroundColor: 'transparent' }
                     : { borderColor: 'var(--theme-border)', color: 'var(--theme-text-primary)', backgroundColor: 'transparent' }}>
@@ -104,8 +99,8 @@ export default function ExamWritingNewPage() {
       {/* Summary card */}
       {examInfo && !isTelcA1 && (
         <div className="rounded-2xl border p-4 mb-6"
-          style={{ borderColor: 'rgba(168,85,247,.3)', backgroundColor: 'rgba(168,85,247,.04)' }}>
-          <p className="text-body font-bold mb-2" style={{ color: '#A855F7' }}>
+          style={{ borderColor: `${ACCENT.examWriting}4D`, backgroundColor: `${ACCENT.examWriting}0A` }}>
+          <p className="text-body font-bold mb-2" style={{ color: ACCENT.examWriting }}>
             {examType} {cefrLevel} — Schreiben
           </p>
           <div className="grid grid-cols-3 gap-2 text-center">
@@ -135,7 +130,7 @@ export default function ExamWritingNewPage() {
 
       {errorMsg && (
         <div className="p-3 rounded-xl text-body mb-4"
-          style={{ backgroundColor: 'rgba(239,68,68,.08)', color: '#EF4444' }}>
+          style={{ backgroundColor: `${STATUS.danger}14`, color: STATUS.danger }}>
           {errorMsg}
         </div>
       )}
@@ -143,7 +138,7 @@ export default function ExamWritingNewPage() {
       <button onClick={handleGenerate}
         disabled={generateMut.isPending || isTelcA1}
         className="w-full py-3.5 rounded-2xl font-bold text-[15px] text-white flex items-center justify-center gap-2 transition-all hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-        style={{ background: GRADIENT, boxShadow: '0 4px 12px rgba(168,85,247,.3)' }}>
+        style={{ background: GRADIENT.examWriting, boxShadow: `0 4px 12px ${ACCENT.examWriting}4D` }}>
         {generateMut.isPending ? (
           <><IconLoader size={18} /> Đang tạo đề thi...</>
         ) : (

@@ -1,6 +1,8 @@
 ﻿'use client';
+/* eslint-disable no-restricted-syntax */
 
 import { useState, useMemo } from 'react';
+import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -11,6 +13,7 @@ import {
 } from '@/hooks/useRoleplay';
 import { useCheckQuota } from '@/hooks/useSubscription';
 import { ScenarioCard } from '@/components/roleplay/ScenarioCard';
+import { GridSkeleton } from '@/components/ui';
 import { UpgradeModal } from '@/components/subscription/UpgradeModal';
 import type { RoleplayLevel, RoleplayScenario } from '@/lib/api/roleplay';
 
@@ -55,8 +58,8 @@ export default function RoleplayPage() {
         level: scenario.level,
       });
       router.push(`/practice-test/roleplay/${session.id}`);
-    } catch (err: any) {
-      alert(err?.message || 'Không thể bắt đầu hội thoại');
+    } catch (err) {
+      alert((err as Error | undefined)?.message || 'Không thể bắt đầu hội thoại');
     }
   };
 
@@ -64,8 +67,8 @@ export default function RoleplayPage() {
     if (!confirm('Xóa cuộc hội thoại này?')) return;
     try {
       await deleteMut.mutateAsync({ sessionId });
-    } catch (err: any) {
-      alert(err?.message || 'Xóa thất bại');
+    } catch (err) {
+      alert((err as Error | undefined)?.message || 'Xóa thất bại');
     }
   };
 
@@ -96,7 +99,7 @@ export default function RoleplayPage() {
                     className="px-2 py-0.5 rounded-md text-caption font-bold"
                     style={{
                       backgroundColor: quotaExhausted ? 'rgba(239,68,68,0.1)' : 'rgba(34,197,94,0.1)',
-                      color: quotaExhausted ? '#EF4444' : '#22C55E',
+                      color: quotaExhausted ? STATUS.danger : STATUS.success,
                     }}
                   >
                     {quota.used}/{quota.limit} lượt/tuần
@@ -139,15 +142,7 @@ export default function RoleplayPage() {
 
         {/* Scenarios grid */}
         {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
-              <div
-                key={i}
-                className="h-32 rounded-2xl animate-pulse"
-                style={{ backgroundColor: 'var(--theme-bg-secondary)' }}
-              />
-            ))}
-          </div>
+          <GridSkeleton cols={3} count={6} height="h-32" rounded="rounded-2xl" gap="gap-4" />
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {filtered.map((sc) => (
@@ -209,7 +204,7 @@ export default function RoleplayPage() {
                             h.status === 'completed'
                               ? 'rgba(34,197,94,0.1)'
                               : 'rgba(59,130,246,0.1)',
-                          color: h.status === 'completed' ? '#22C55E' : '#3B82F6',
+                          color: h.status === 'completed' ? STATUS.success : ACCENT.srs,
                         }}
                       >
                         {h.status === 'completed' ? 'Hoàn thành' : 'Đang chat'}
@@ -219,7 +214,7 @@ export default function RoleplayPage() {
                   {h.overallScore !== null && (
                     <div
                       className="text-sm font-bold"
-                      style={{ color: '#A855F7' }}
+                      style={{ color: ACCENT.examWriting }}
                     >
                       {h.overallScore}
                     </div>

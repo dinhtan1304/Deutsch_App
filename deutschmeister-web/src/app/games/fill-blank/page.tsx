@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
@@ -15,8 +15,9 @@ import {
   IconRefresh, IconChevronLeft, IconLightbulb,
 } from '@/components/games/GameUI';
 import { Button } from '@/components/ui';
+import { ACCENT, STATUS } from '@/lib/tokens';
 
-const AC: Record<string, string> = { masculine: '#3B82F6', feminine: '#EC4899', neuter: '#22C55E' };
+const AC: Record<string, string> = { masculine: ACCENT.srs, feminine: ACCENT.listening, neuter: STATUS.success };
 
 type Phase = 'setup' | 'playing' | 'result';
 
@@ -39,6 +40,7 @@ export default function FillBlankPage() {
   const wrongRef = useRef(0);
 
   const [phase, setPhase] = useState<Phase>('setup');
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [index, setIndex] = useState(0);
   const [score, setScore] = useState(0);
   const [combo, setCombo] = useState(0);
@@ -61,8 +63,9 @@ export default function FillBlankPage() {
 
   const startGame = async () => {
     playClick();
+    setLoadError(null);
     const result = await refetch();
-    if (!result.data?.length) { alert('Không có từ vựng!'); return; }
+    if (!result.data?.length) { setLoadError('Không có từ vựng! Vui lòng thêm từ hoặc seed database.'); return; }
     setIndex(0); setScore(0); setCombo(0); setBestCombo(0);
     scoreRef.current = 0; bestComboRef.current = 0;
     correctRef.current = 0; wrongRef.current = 0;
@@ -134,15 +137,15 @@ export default function FillBlankPage() {
   // ─── Setup ───
   if (phase === 'setup') {
     return (
-        <GameSetupCard icon={({ size }) => <IconPenTool size={size} style={{ color: 'white' }} />} iconColor="#8B5CF6" title="Fill in the Blank">
+        <GameSetupCard icon={({ size }) => <IconPenTool size={size} style={{ color: 'white' }} />} iconColor={ACCENT.vocab} title="Fill in the Blank" loadError={loadError}>
           <p className="text-sm mb-1" style={{ color: 'var(--theme-text-secondary)' }}>
-            Điền mạo từ đúng cho <span className="font-bold" style={{ color: '#8B5CF6' }}>{questionsCount} từ</span>
+            Điền mạo từ đúng cho <span className="font-bold" style={{ color: ACCENT.vocab }}>{questionsCount} từ</span>
           </p>
           <p className="text-xs mb-6" style={{ color: 'var(--theme-text-muted)' }}>(Thay đổi số câu trong Settings → Học tập)</p>
           <GameInfoBox>
-            <div className="flex items-center gap-2"><IconTarget size={14} style={{ color: '#8B5CF6' }} /><span>Gõ hoặc click nút để điền mạo từ</span></div>
-            <div className="flex items-center gap-2"><IconKeyboard size={14} style={{ color: '#3B82F6' }} /><span>Nhấn <KBD>Enter</KBD> để xác nhận</span></div>
-            <div className="flex items-center gap-2"><IconVolume size={14} style={{ color: '#22C55E' }} /><span>Âm thanh: {settings.soundEnabled ? 'Bật' : 'Tắt'}</span></div>
+            <div className="flex items-center gap-2"><IconTarget size={14} style={{ color: ACCENT.vocab }} /><span>Gõ hoặc click nút để điền mạo từ</span></div>
+            <div className="flex items-center gap-2"><IconKeyboard size={14} style={{ color: ACCENT.srs }} /><span>Nhấn <KBD>Enter</KBD> để xác nhận</span></div>
+            <div className="flex items-center gap-2"><IconVolume size={14} style={{ color: STATUS.success }} /><span>Âm thanh: {settings.soundEnabled ? 'Bật' : 'Tắt'}</span></div>
           </GameInfoBox>
           <div className="flex gap-3 justify-center mt-6">
             <Button variant="game" accent="premium" onClick={startGame} isLoading={isLoading}><IconRocket size={16} /> Bắt đầu</Button>
@@ -162,14 +165,14 @@ export default function FillBlankPage() {
       <>
         <GameResultCard accuracy={accuracy} title="Kết quả">
           <div className="my-5">
-            <div className="text-5xl font-extrabold" style={{ color: '#8B5CF6' }}>{score}</div>
+            <div className="text-5xl font-extrabold" style={{ color: ACCENT.vocab }}>{score}</div>
             <p className="text-body mt-1" style={{ color: 'var(--theme-text-muted)' }}>điểm</p>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-6">
-            <StatCard label="Đúng" value={correctCount} color="#22C55E" />
-            <StatCard label="Sai" value={wrongCount} color="#EF4444" />
-            <StatCard label="Chính xác" value={`${accuracy}%`} color="#3B82F6" />
-            <StatCard label="Best Combo" value={`x${bestCombo}`} color="#F59E0B" />
+            <StatCard label="Đúng" value={correctCount} color={STATUS.success} />
+            <StatCard label="Sai" value={wrongCount} color={STATUS.danger} />
+            <StatCard label="Chính xác" value={`${accuracy}%`} color={ACCENT.srs} />
+            <StatCard label="Best Combo" value={`x${bestCombo}`} color={ACCENT.xp} />
           </div>
           <div className="flex gap-3 justify-center">
             <Button variant="game" accent="premium" onClick={startGame}><IconRefresh size={16} /> Chơi lại</Button>
@@ -180,7 +183,7 @@ export default function FillBlankPage() {
         <div className="max-w-2xl mx-auto px-4 sm:px-6">
           <AnswerReview
             answers={answers}
-            getCorrectArticle={a => ({ article: a.correctAnswer, color: AC[a.word.gender] || '#8B5CF6' })}
+            getCorrectArticle={a => ({ article: a.correctAnswer, color: AC[a.word.gender] || ACCENT.vocab })}
             getSelectedLabel={a => !a.isCorrect ? (a.userInput || '(trống)') : null}
           />
         </div>
@@ -191,7 +194,7 @@ export default function FillBlankPage() {
   }
 
   // ─── Playing ───
-  const genderColor = currentWord ? (AC[currentWord.gender] || '#8B5CF6') : '#8B5CF6';
+  const genderColor = currentWord ? (AC[currentWord.gender] || ACCENT.vocab) : ACCENT.vocab;
   const correctCount = answers.filter(a => a.isCorrect).length;
 
   return (
@@ -199,9 +202,9 @@ export default function FillBlankPage() {
       <GamePlayHeader title="Fill in the Blank" streak={combo} timer={timer}
         onExit={() => { playClick(); router.push('/games'); }} />
       <GameStatsBar stats={[
-        { label: 'Điểm',  value: score,        color: '#8B5CF6' },
-        { label: 'Đúng',  value: correctCount, color: '#22C55E', dot: true },
-        { label: 'Sai',   value: index - correctCount, color: '#EF4444', dot: true },
+        { label: 'Điểm',  value: score,        color: ACCENT.vocab },
+        { label: 'Đúng',  value: correctCount, color: STATUS.success, dot: true },
+        { label: 'Sai',   value: index - correctCount, color: STATUS.danger, dot: true },
         { label: 'Câu',   value: `${index + 1}/${questionsCount}`, color: 'var(--theme-text-primary)' },
       ]} />
         <GameProgressBar current={index + 1} total={questionsCount} />
@@ -210,18 +213,21 @@ export default function FillBlankPage() {
         <div className="rounded-3xl overflow-hidden mb-5 transition-all duration-300"
           style={{
             background: answered
+              // eslint-disable-next-line no-restricted-syntax
               ? (isCorrect ? 'linear-gradient(135deg, #052e16 0%, #166534 100%)' : 'linear-gradient(135deg, #450a0a 0%, #991b1b 100%)')
+              // eslint-disable-next-line no-restricted-syntax
               : 'linear-gradient(135deg, #1a1040 0%, #5b21b6 100%)',
           }}>
-          <div className="flex flex-col items-center justify-center px-6 py-8 text-center" style={{ minHeight: 180 }}>
-            <div className="text-3xl md:text-4xl font-extrabold mb-4 text-white">
-              <span className="inline-block min-w-20 border-b-4 mx-2 pb-1 transition-colors duration-300"
-                style={{ borderColor: answered ? 'rgba(255,255,255,.5)' : '#A78BFA', color: 'white' }}>
-                {answered ? currentWord.article : '______'}
+          <div className="flex flex-col items-center justify-center px-6 py-6 text-center" style={{ minHeight: 150 }}>
+            <div className="text-2xl md:text-3xl font-extrabold mb-3 text-white">
+              <span className="inline-block min-w-16 border-b-2 mx-1.5 pb-0.5 transition-colors duration-300"
+                // eslint-disable-next-line no-restricted-syntax
+                style={{ borderColor: answered ? 'rgba(255,255,255,.3)' : '#A78BFA', color: 'white' }}>
+                {answered ? currentWord.article : '____'}
               </span>
               <span className="text-white">{currentWord.word}</span>
             </div>
-            <p className="text-[15px]" style={{ color: 'rgba(255,255,255,0.65)' }}>{currentWord.translationEn}</p>
+            <p className="text-sm opacity-60 text-white">{currentWord.translationEn}</p>
             {settings.showVietnamese && currentWord.translationVi && (
               <p className="text-body mt-1" style={{ color: 'rgba(255,255,255,0.45)' }}>{currentWord.translationVi}</p>
             )}
@@ -230,7 +236,7 @@ export default function FillBlankPage() {
                 className="mt-4 text-xs font-semibold flex items-center gap-1 mx-auto transition-opacity hover:opacity-80"
                 style={{ color: 'rgba(255,255,255,0.5)' }}>
                 <IconLightbulb size={13} />
-                {showHint ? GenderInfo[currentWord.gender].label : 'Xem gợi ý'}
+                {showHint ? (currentWord.gender && GenderInfo[currentWord.gender] ? GenderInfo[currentWord.gender].label : '???') : 'Xem gợi ý'}
               </button>
             )}
             {answered && (
@@ -250,15 +256,17 @@ export default function FillBlankPage() {
               placeholder="Gõ der, die hoặc das..."
               autoComplete="off" autoCapitalize="off"
               className="flex-1 px-4 py-3 rounded-xl border-2 text-center text-title font-semibold focus:outline-none transition-all duration-200"
-              style={{ backgroundColor: 'var(--theme-bg-card)', borderColor: '#8B5CF6', color: 'var(--theme-text-primary)' }} />
+              style={{ backgroundColor: 'var(--theme-bg-card)', borderColor: ACCENT.vocab, color: 'var(--theme-text-primary)' }} />
             <Button variant="game" accent="premium" onClick={checkAnswer} disabled={!userInput.trim()}>Kiểm tra</Button>
           </div>
           <div className="grid grid-cols-3 gap-2.5">
+            {/* eslint-disable no-restricted-syntax */}
             {([
-              { article: 'der', bg: 'linear-gradient(160deg, #0a1628, #1e3a8a)', border: 'rgba(59,130,246,.45)', color: '#93C5FD' },
-              { article: 'die', bg: 'linear-gradient(160deg, #2a0a1e, #9d174d)', border: 'rgba(236,72,153,.45)',  color: '#F9A8D4' },
-              { article: 'das', bg: 'linear-gradient(160deg, #0a2218, #065f46)', border: 'rgba(20,184,166,.45)',  color: '#5EEAD4' },
+              { article: 'der', bg: 'linear-gradient(160deg, #0a1628, #1e3a8a)', border: `${ACCENT.srs}73`,       color: '#93C5FD' },
+              { article: 'die', bg: 'linear-gradient(160deg, #2a0a1e, #9d174d)', border: `${ACCENT.listening}73`, color: '#F9A8D4' },
+              { article: 'das', bg: 'linear-gradient(160deg, #0a2218, #065f46)', border: `${ACCENT.teal}73`,      color: '#5EEAD4' },
             ]).map(btn => (
+            /* eslint-enable no-restricted-syntax */
               <button key={btn.article} onClick={() => handleQuickAnswer(btn.article)}
                 className="py-5 rounded-2xl font-extrabold text-2xl transition-all duration-200 hover:-translate-y-1 hover:shadow-xl active:scale-95"
                 style={{ background: btn.bg, border: `1.5px solid ${btn.border}`, color: btn.color }}>

@@ -1,6 +1,6 @@
-﻿'use client';
+'use client';
 
-import { useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { WordCard } from '@/components/words/WordCard';
 import { useHistory, useClearHistory } from '@/hooks/useHistory';
@@ -8,64 +8,11 @@ import { useFavorites, useToggleFavorite } from '@/hooks/useFavorites';
 import { useAuthStore } from '@/stores/authStore';
 import { ApiError } from '@/lib/api/client';
 import { formatTimeAgo } from '@/lib/utils';
-
-// ─── Inline SVG Icons ───
-function IconClock({ size = 16, style }: { size?: number; style?: React.CSSProperties }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
-      strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}>
-      <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
-    </svg>
-  );
-}
-function IconTrash({ size = 16, style }: { size?: number; style?: React.CSSProperties }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
-      strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}>
-      <path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-    </svg>
-  );
-}
-function IconBook({ size = 16, style }: { size?: number; style?: React.CSSProperties }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
-      strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}>
-      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
-    </svg>
-  );
-}
-function IconLogIn({ size = 16, style }: { size?: number; style?: React.CSSProperties }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
-      strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}>
-      <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" /><polyline points="10 17 15 12 10 7" /><line x1="15" y1="12" x2="3" y2="12" />
-    </svg>
-  );
-}
-function IconLoader({ size = 16, style }: { size?: number; style?: React.CSSProperties }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
-      strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="animate-spin" style={{ display: 'block', ...style }}>
-      <path d="M21 12a9 9 0 1 1-6.219-8.56" />
-    </svg>
-  );
-}
-function IconRefresh({ size = 16, style }: { size?: number; style?: React.CSSProperties }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
-      strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}>
-      <polyline points="23 4 23 10 17 10" /><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
-    </svg>
-  );
-}
-function IconChevronLeft({ size = 16, style }: { size?: number; style?: React.CSSProperties }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
-      strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}>
-      <polyline points="15 18 9 12 15 6" />
-    </svg>
-  );
-}
+import { GRADIENT, STATUS } from '@/lib/tokens';
+import { AuthGate, GridSkeleton } from '@/components/ui';
+import {
+  IconClock, IconTrash, IconBook, IconLogIn, IconLoader, IconRefresh, IconChevronLeft, IconX,
+} from '@/components/ui/Icons';
 
 export default function HistoryPage() {
   const { isAuthenticated, logout } = useAuthStore();
@@ -73,6 +20,7 @@ export default function HistoryPage() {
   const { data: favorites } = useFavorites();
   const { toggle: toggleFavorite } = useToggleFavorite();
   const clearHistory = useClearHistory();
+  const [confirmClear, setConfirmClear] = useState(false);
 
   const favoriteIds = useMemo(() => new Set(favorites?.map(f => f.wordId) || []), [favorites]);
   const handleFavoriteToggle = async (wordId: string) => {
@@ -82,171 +30,175 @@ export default function HistoryPage() {
   };
 
   const handleClearHistory = async () => {
-    if (confirm('Bạn có chắc muốn xóa toàn bộ lịch sử?')) await clearHistory.mutateAsync();
+    await clearHistory.mutateAsync();
+    setConfirmClear(false);
   };
 
   const isAuthError = error instanceof ApiError && error.status === 401;
 
-  if (!isAuthenticated) {
-    return (
-        <div className="max-w-md mx-auto py-20 text-center">
-          <div className="w-16 h-16 rounded-2xl mx-auto flex items-center justify-center mb-4"
-            style={{ background: 'linear-gradient(135deg, #8B5CF6, #6366F1)' }}>
-            <IconClock size={28} style={{ color: 'white' }} />
-          </div>
-          <h1 className="text-xl font-bold mb-2" style={{ color: 'var(--theme-text-primary)' }}>Đăng nhập để xem lịch sử</h1>
-          <p className="text-body mb-6" style={{ color: 'var(--theme-text-muted)' }}>Tạo tài khoản để theo dõi lịch sử học tập</p>
-          <Link href="/auth/login"
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white"
-            style={{ background: 'linear-gradient(135deg, #3B82F6, #6366F1)' }}>
-            <IconLogIn size={16} /> Đăng nhập
-          </Link>
-        </div>
-    );
-  }
+  if (!isAuthenticated) return (
+    <AuthGate
+      icon={<IconClock size={28} className="text-white" />}
+      gradient={GRADIENT.history}
+      title="Đăng nhập để xem lịch sử"
+      description="Tạo tài khoản để theo dõi lịch sử học tập."
+    />
+  );
 
   return (
-      <div className="py-6">
-        {/* Header */}
-        <div className="flex items-start justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <div
-              className="w-11 h-11 rounded-2xl flex items-center justify-center"
-              style={{ background: "linear-gradient(135deg, #8B5CF6, #6366F1)" }}
-            >
-              <IconClock size={22} style={{ color: "white" }} />
-            </div>
-            <div>
-              <h1
-                className="text-2xl font-bold"
-                style={{ color: "var(--theme-text-primary)" }}
-              >
-                Lịch sử xem
-              </h1>
-              <p
-                className="text-body mt-0.5"
-                style={{ color: "var(--theme-text-muted)" }}
-              >
-                Các từ bạn đã xem gần đây ({history?.length || 0} từ)
-              </p>
-            </div>
+    <div className="py-6">
+      {/* Header */}
+      <div className="flex items-start justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <div className="w-11 h-11 rounded-2xl flex items-center justify-center"
+            style={{ background: GRADIENT.history }}>
+            <IconClock size={22} className="text-white" />
           </div>
-
-          {/* RIGHT */}
-          <div className="flex items-center gap-2">
-            {history && history.length > 0 && (
-              <button
-                onClick={handleClearHistory}
-                disabled={clearHistory.isPending}
-                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-body font-semibold
-                          transition-all duration-200 hover:-translate-y-0.5 disabled:opacity-50"
-                style={{
-                  backgroundColor: "rgba(239,68,68,.08)",
-                  color: "#EF4444",
-                  border: "1px solid rgba(239,68,68,.2)",
-                }}
-              >
-                {clearHistory.isPending ? (
-                  <IconLoader size={14} />
-                ) : (
-                  <IconTrash size={14} />
-                )}
-                Xóa lịch sử
-              </button>
-            )}
-
-            <Link
-              href="/words"
-              className="flex items-center gap-1 px-3 py-2 rounded-xl text-body font-semibold
-                        transition-all duration-200 hover:-translate-y-0.5"
-              style={{
-                backgroundColor: "var(--theme-bg-secondary)",
-                color: "var(--theme-text-muted)",
-              }}
-            >
-              <IconChevronLeft size={14} />
-              Từ điển
-            </Link>
+          <div>
+            <h1 className="text-2xl font-bold" style={{ color: 'var(--theme-text-primary)' }}>
+              Lịch sử xem
+            </h1>
+            <p className="text-body mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>
+              Các từ bạn đã xem gần đây ({history?.length || 0} từ)
+            </p>
           </div>
         </div>
 
-        {/* Loading */}
-        {isLoading && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-            {[1, 2, 3, 4, 5, 6].map(i => (
-              <div key={i} className="h-40 rounded-xl animate-pulse" style={{ backgroundColor: 'var(--theme-bg-secondary)' }} />
-            ))}
-          </div>
-        )}
+        <div className="flex items-center gap-2">
+          {history && history.length > 0 && (
+            <button
+              onClick={() => setConfirmClear(true)}
+              disabled={clearHistory.isPending}
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-body font-semibold
+                        transition-all duration-200 hover:-translate-y-0.5 disabled:opacity-50"
+              style={{
+                backgroundColor: `${STATUS.danger}14`,
+                color: STATUS.danger,
+                border: `1px solid ${STATUS.danger}33`,
+              }}>
+              {clearHistory.isPending ? <IconLoader size={14} /> : <IconTrash size={14} />}
+              Xóa lịch sử
+            </button>
+          )}
 
-        {/* Error — Auth expired */}
-        {error && isAuthError && (
-          <div className="text-center py-16 rounded-2xl border-2 border-dashed" style={{ borderColor: 'rgba(239,68,68,.2)' }}>
-            <div className="w-14 h-14 rounded-2xl mx-auto flex items-center justify-center mb-4"
-              style={{ background: 'rgba(239,68,68,.08)' }}>
-              <IconLogIn size={24} style={{ color: '#EF4444' }} />
-            </div>
-            <h2 className="text-base font-bold mb-2" style={{ color: 'var(--theme-text-primary)' }}>Phiên đăng nhập hết hạn</h2>
-            <p className="text-body mb-5" style={{ color: 'var(--theme-text-muted)' }}>Vui lòng đăng nhập lại để xem lịch sử</p>
-            <Link href="/auth/login"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white"
-              style={{ background: 'linear-gradient(135deg, #3B82F6, #6366F1)' }}
-              onClick={() => logout()}>
-              <IconLogIn size={16} /> Đăng nhập lại
-            </Link>
-          </div>
-        )}
+          <Link href="/words"
+            className="flex items-center gap-1 px-3 py-2 rounded-xl text-body font-semibold
+                      transition-all duration-200 hover:-translate-y-0.5"
+            style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }}>
+            <IconChevronLeft size={14} /> Từ điển
+          </Link>
+        </div>
+      </div>
 
-        {/* Error — Network/Server */}
-        {error && !isAuthError && (
-          <div className="text-center py-16 rounded-2xl border-2 border-dashed" style={{ borderColor: 'rgba(239,68,68,.2)' }}>
-            <div className="w-14 h-14 rounded-2xl mx-auto flex items-center justify-center mb-4"
-              style={{ background: 'rgba(239,68,68,.08)' }}>
-              <IconRefresh size={24} style={{ color: '#EF4444' }} />
-            </div>
-            <h2 className="text-base font-bold mb-2" style={{ color: 'var(--theme-text-primary)' }}>Lỗi tải dữ liệu</h2>
-            <p className="text-body mb-5" style={{ color: 'var(--theme-text-muted)' }}>
-              {error instanceof ApiError ? error.message : 'Không thể kết nối đến máy chủ'}
+      {/* Inline confirmation dialog */}
+      {confirmClear && (
+        <div className="mb-6 rounded-2xl border-2 p-5 flex items-center justify-between gap-4 flex-wrap"
+          style={{ borderColor: `${STATUS.danger}40`, backgroundColor: `${STATUS.danger}08` }}
+          role="alert">
+          <div>
+            <p className="text-sm font-bold mb-0.5" style={{ color: 'var(--theme-text-primary)' }}>
+              Xóa toàn bộ lịch sử?
             </p>
-            <button onClick={() => refetch()}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all hover:-translate-y-0.5"
-              style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-primary)', border: '1px solid var(--theme-border)' }}>
-              <IconRefresh size={16} /> Thử lại
+            <p className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>
+              Hành động này không thể hoàn tác.
+            </p>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={() => setConfirmClear(false)}
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-body font-semibold transition-all hover:-translate-y-0.5"
+              style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }}>
+              <IconX size={13} /> Hủy
+            </button>
+            <button
+              onClick={handleClearHistory}
+              disabled={clearHistory.isPending}
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-body font-semibold text-white
+                        transition-all hover:-translate-y-0.5 disabled:opacity-50"
+              style={{ background: STATUS.danger }}>
+              {clearHistory.isPending ? <IconLoader size={14} /> : <IconTrash size={14} />}
+              Xác nhận xóa
             </button>
           </div>
-        )}
+        </div>
+      )}
 
-        {/* Grid */}
-        {history && history.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-            {history.map(item => (
-              <div key={item.id} className="relative">
-                <div className="absolute -top-2 right-2 z-10 px-2 py-0.5 rounded-md text-caption font-medium"
-                  style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)', border: '1px solid var(--theme-border)' }}>
-                  {formatTimeAgo(item.viewedAt)}
-                </div>
-                <WordCard word={item.word} isFavorite={favoriteIds.has(item.wordId)} onFavoriteToggle={handleFavoriteToggle} />
+      {/* Loading */}
+      {isLoading && (
+        <GridSkeleton cols={3} count={6} />
+
+      )}
+
+      {/* Error — Auth expired */}
+      {error && isAuthError && (
+        <div className="text-center py-16 rounded-2xl border-2 border-dashed"
+          style={{ borderColor: `${STATUS.danger}33` }}>
+          <div className="w-14 h-14 rounded-2xl mx-auto flex items-center justify-center mb-4"
+            style={{ background: `${STATUS.danger}14` }}>
+            <IconLogIn size={24} style={{ color: STATUS.danger }} />
+          </div>
+          <h2 className="text-base font-bold mb-2" style={{ color: 'var(--theme-text-primary)' }}>Phiên đăng nhập hết hạn</h2>
+          <p className="text-body mb-5" style={{ color: 'var(--theme-text-muted)' }}>Vui lòng đăng nhập lại để xem lịch sử</p>
+          <Link href="/auth/login?returnTo=/history"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white"
+            style={{ background: GRADIENT.action }}
+            onClick={() => logout()}>
+            <IconLogIn size={16} /> Đăng nhập lại
+          </Link>
+        </div>
+      )}
+
+      {/* Error — Network/Server */}
+      {error && !isAuthError && (
+        <div className="text-center py-16 rounded-2xl border-2 border-dashed"
+          style={{ borderColor: `${STATUS.danger}33` }}>
+          <div className="w-14 h-14 rounded-2xl mx-auto flex items-center justify-center mb-4"
+            style={{ background: `${STATUS.danger}14` }}>
+            <IconRefresh size={24} style={{ color: STATUS.danger }} />
+          </div>
+          <h2 className="text-base font-bold mb-2" style={{ color: 'var(--theme-text-primary)' }}>Lỗi tải dữ liệu</h2>
+          <p className="text-body mb-5" style={{ color: 'var(--theme-text-muted)' }}>
+            {error instanceof ApiError ? error.message : 'Không thể kết nối đến máy chủ'}
+          </p>
+          <button onClick={() => refetch()}
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all hover:-translate-y-0.5"
+            style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-primary)', border: '1px solid var(--theme-border)' }}>
+            <IconRefresh size={16} /> Thử lại
+          </button>
+        </div>
+      )}
+
+      {/* Grid */}
+      {history && history.length > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+          {history.map(item => (
+            <div key={item.id} className="relative">
+              <div className="absolute -top-2 right-2 z-10 px-2 py-0.5 rounded-md text-caption font-medium"
+                style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)', border: '1px solid var(--theme-border)' }}>
+                {formatTimeAgo(item.viewedAt)}
               </div>
-            ))}
-          </div>
-        )}
-
-        {/* Empty */}
-        {!isLoading && !error && history && history.length === 0 && (
-          <div className="text-center py-16 rounded-2xl border-2 border-dashed" style={{ borderColor: 'var(--theme-border)' }}>
-            <div className="w-16 h-16 rounded-2xl mx-auto flex items-center justify-center mb-4"
-              style={{ background: 'linear-gradient(135deg, #8B5CF6, #6366F1)' }}>
-              <IconClock size={28} style={{ color: 'white' }} />
+              <WordCard word={item.word} isFavorite={favoriteIds.has(item.wordId)} onFavoriteToggle={handleFavoriteToggle} />
             </div>
-            <h2 className="text-base font-bold mb-2" style={{ color: 'var(--theme-text-primary)' }}>Chưa có lịch sử</h2>
-            <p className="text-body mb-5" style={{ color: 'var(--theme-text-muted)' }}>Các từ bạn xem sẽ xuất hiện ở đây</p>
-            <Link href="/words"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white"
-              style={{ background: 'linear-gradient(135deg, #3B82F6, #6366F1)' }}>
-              <IconBook size={16} /> Xem từ điển
-            </Link>
+          ))}
+        </div>
+      )}
+
+      {/* Empty */}
+      {!isLoading && !error && history && history.length === 0 && (
+        <div className="text-center py-16 rounded-2xl border-2 border-dashed" style={{ borderColor: 'var(--theme-border)' }}>
+          <div className="w-16 h-16 rounded-2xl mx-auto flex items-center justify-center mb-4"
+            style={{ background: GRADIENT.history }}>
+            <IconClock size={28} className="text-white" />
           </div>
-        )}
-      </div>
+          <h2 className="text-base font-bold mb-2" style={{ color: 'var(--theme-text-primary)' }}>Chưa có lịch sử</h2>
+          <p className="text-body mb-5" style={{ color: 'var(--theme-text-muted)' }}>Các từ bạn xem sẽ xuất hiện ở đây</p>
+          <Link href="/words"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white"
+            style={{ background: GRADIENT.action }}>
+            <IconBook size={16} /> Xem từ điển
+          </Link>
+        </div>
+      )}
+    </div>
   );
 }

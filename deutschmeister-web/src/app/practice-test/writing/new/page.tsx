@@ -1,15 +1,19 @@
-﻿'use client';
+'use client';
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { useWritingTopics, useGeneratePrompt } from '@/hooks/useWriting';
 import { QuotaPaywall } from '@/components/subscription/QuotaPaywall';
 import { IconDice, IconLoader, IconRobot } from '../icons';
 import { PageHeader } from '@/components/ui';
+import { ACCENT, STATUS } from '@/lib/tokens';
 
-// ─── Level colors ───
-const LEVEL_COLORS: Record<string, string> = { A1: '#22C55E', A2: '#3B82F6', B1: '#8B5CF6', B2: '#F97316' };
+const LEVEL_COLORS: Record<string, string> = {
+  A1: STATUS.success,
+  A2: ACCENT.srs,
+  B1: ACCENT.vocab,
+  B2: ACCENT.games,
+};
 
 export default function NewWritingPage() {
   const router = useRouter();
@@ -37,10 +41,12 @@ export default function NewWritingPage() {
         wordCountMin: wordCount.min, wordCountMax: wordCount.max,
       });
       router.push(`/practice-test/writing/${session.id}`);
-    } catch { /* handled */ }
+    } catch {
+      // Mutation error already shown via global handleGlobalError toast
+    }
   };
 
-  const activeColor = LEVEL_COLORS[level] || '#3B82F6';
+  const activeColor = LEVEL_COLORS[level] || ACCENT.srs;
 
   return (
     <QuotaPaywall feature="writing">
@@ -215,7 +221,7 @@ export default function NewWritingPage() {
             </button>
 
             {generateMutation.isError && (
-              <p className="text-body text-center mt-3" style={{ color: '#EF4444' }}>
+              <p className="text-body text-center mt-3" style={{ color: STATUS.danger }}>
                 Không thể tạo đề bài. Vui lòng thử lại.
               </p>
             )}

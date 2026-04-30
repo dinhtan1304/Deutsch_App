@@ -1,38 +1,39 @@
-﻿'use client';
+'use client';
 
 import { useState } from 'react';
 import Link from 'next/link';
 import { useReadingHistory, useReadingStats, useDeleteReading } from '@/hooks/useReading';
+import { ACCENT, STATUS, GRADIENT } from '@/lib/tokens';
 import {
-  IconBookOpen, IconDice, IconStar, IconTrash,
-  IconChevronLeft, IconChevronRight, IconList,
+  IconBookOpen, IconDice, IconTrash,
+  IconChevronLeft, IconChevronRight,
 } from './icons';
-import { PageHeader } from '@/components/ui';
-
-// ─── Helpers ───
-
-const ACCENT = '#22C55E';
-const GRADIENT = 'linear-gradient(135deg, #22C55E, #14B8A6)';
+import { PageHeader, GridSkeleton } from '@/components/ui';
 
 const TEXT_TYPE_LABELS: Record<string, { de: string; vi: string }> = {
-  anzeige:      { de: 'Anzeige',      vi: 'Thông báo' },
+  anzeige:       { de: 'Anzeige',      vi: 'Thông báo' },
   kurznachricht: { de: 'Kurznachricht', vi: 'Tin nhắn' },
-  brief:        { de: 'Brief/E-Mail', vi: 'Thư/Email' },
-  artikel:      { de: 'Artikel',      vi: 'Bài báo' },
-  dialog:       { de: 'Dialog',       vi: 'Hội thoại' },
+  brief:         { de: 'Brief/E-Mail', vi: 'Thư/Email' },
+  artikel:       { de: 'Artikel',      vi: 'Bài báo' },
+  dialog:        { de: 'Dialog',       vi: 'Hội thoại' },
 };
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
-  DRAFT:   { label: 'Chưa làm', color: '#6B7280', bg: 'rgba(107,114,128,.1)' },
-  GRADED:  { label: 'Đã chấm',  color: '#22C55E', bg: 'rgba(34,197,94,.1)' },
+  DRAFT:  { label: 'Chưa làm', color: 'var(--theme-text-muted)', bg: 'var(--theme-bg-secondary)' },
+  GRADED: { label: 'Đã chấm',  color: STATUS.success, bg: `${STATUS.success}1A` },
+};
+
+const STATUS_BUTTON_STYLES: Record<string, { background: string; shadow: string }> = {
+  DRAFT:  { background: `linear-gradient(135deg, #6B7280, #4B5563)`, shadow: `0 4px 12px #6B728030` },
+  GRADED: { background: `linear-gradient(135deg, ${STATUS.success}, ${STATUS.success}cc)`, shadow: `0 4px 12px ${STATUS.success}30` },
 };
 
 function getScoreColor(score: number | null) {
   if (score === null) return 'var(--theme-text-muted)';
-  if (score >= 80) return '#22C55E';
-  if (score >= 60) return '#F59E0B';
-  if (score >= 40) return '#F97316';
-  return '#EF4444';
+  if (score >= 80) return STATUS.success;
+  if (score >= 60) return STATUS.warning;
+  if (score >= 40) return ACCENT.games;
+  return STATUS.danger;
 }
 
 function formatDate(dateStr: string) {
@@ -42,70 +43,52 @@ function formatDate(dateStr: string) {
   });
 }
 
-// ─── Stats Overview ───
-function StatsOverview() {
+function StatsBanner() {
   const { data: stats, isLoading } = useReadingStats();
+  if (isLoading || !stats || stats.totalSessions === 0) return null;
 
-  if (isLoading) {
-    return (
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
-        {[1, 2, 3].map(i => (
-          <div key={i} className="h-20 rounded-xl animate-pulse"
-            style={{ backgroundColor: 'var(--theme-bg-secondary)' }} />
-        ))}
-      </div>
-    );
-  }
-  if (!stats || stats.totalSessions === 0) return null;
-
-  const cards = [
-    { label: 'Tổng bài đọc', value: stats.totalSessions, color: ACCENT, icon: IconList },
-    { label: 'Điểm trung bình', value: stats.averageScore ? `${stats.averageScore}%` : '—', color: '#F59E0B', icon: IconStar },
-    { label: 'Điểm cao nhất', value: stats.bestScore ? `${stats.bestScore}%` : '—', color: '#3B82F6', icon: IconStar },
+  const items = [
+    { label: 'Bài đọc', value: stats.totalSessions,                              color: ACCENT.reading },
+    { label: 'TB điểm', value: stats.averageScore ? `${stats.averageScore}%` : '—', color: ACCENT.xp },
+    { label: 'Cao nhất', value: stats.bestScore    ? `${stats.bestScore}%`    : '—', color: ACCENT.srs },
   ];
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
-      {cards.map((card, i) => {
-        const Ic = card.icon;
-        return (
-          <div key={i} className="rounded-xl border p-4 transition-all duration-200 hover:-translate-y-0.5"
-            style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
-            <div className="flex items-center gap-2 mb-1.5">
-              <div className="w-6 h-6 rounded-md flex items-center justify-center"
-                style={{ background: `linear-gradient(135deg, ${card.color}, ${card.color}cc)` }}>
-                <Ic size={12} style={{ color: 'white' }} />
-              </div>
-              <span className="text-caption font-medium" style={{ color: 'var(--theme-text-muted)' }}>{card.label}</span>
-            </div>
-            <div className="text-title font-extrabold" style={{ color: 'var(--theme-text-primary)' }}>
-              {card.value}
-            </div>
-          </div>
-        );
-      })}
+    <div className="flex items-center gap-3 mb-5 overflow-x-auto">
+      {items.map((s, i) => (
+        <div key={i} className="flex items-center gap-2 px-3 py-2 rounded-xl shrink-0"
+          style={{ backgroundColor: `${s.color}1A` }}>
+          <span className="text-base font-extrabold" style={{ color: s.color }}>{s.value}</span>
+          <span className="text-[10px] font-medium" style={{ color: 'var(--theme-text-muted)' }}>{s.label}</span>
+        </div>
+      ))}
     </div>
   );
 }
 
-// ─── Main Page ───
 export default function ReadingListPage() {
   const [page, setPage] = useState(1);
   const [filterStatus, setFilterStatus] = useState<string>('');
+  const [filterLevel, setFilterLevel] = useState<string>('');
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+
   const { data: history, isLoading } = useReadingHistory({
-    page, limit: 10, status: filterStatus || undefined,
+    page, limit: 10,
+    status: filterStatus || undefined,
+    cefrLevel: filterLevel || undefined,
   });
   const deleteMutation = useDeleteReading();
 
-  const handleDelete = async (id: string, e: React.MouseEvent) => {
+  const handleDelete = (id: string, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (!confirm('Bạn có chắc muốn xóa bài đọc này?')) return;
-    try {
-      await deleteMutation.mutateAsync(id);
-    } catch (e) {
-      /* delete error handled by React Query's onError */
-    }
+    setConfirmDeleteId(id);
+  };
+
+  const confirmDelete = async () => {
+    if (!confirmDeleteId) return;
+    try { await deleteMutation.mutateAsync(confirmDeleteId); } catch { /* handled */ }
+    setConfirmDeleteId(null);
   };
 
   return (
@@ -120,61 +103,97 @@ export default function ReadingListPage() {
           <div className="flex items-center gap-2">
             <Link href="/practice-test/reading/exam"
               className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-body font-semibold border transition-all hover:-translate-y-0.5"
-              style={{ borderColor: 'rgba(34,197,94,.4)', color: '#22C55E', backgroundColor: 'rgba(34,197,94,.06)' }}>
+              style={{ borderColor: `${ACCENT.reading}66`, color: ACCENT.reading, backgroundColor: `${ACCENT.reading}0F` }}>
               Theo đề chuẩn →
             </Link>
             <Link href="/practice-test/reading/new"
               className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white transition-all duration-200 hover:-translate-y-0.5"
-              style={{ background: GRADIENT, boxShadow: '0 4px 12px rgba(34,197,94,.3)' }}>
+              style={{ background: GRADIENT.reading, boxShadow: `0 4px 12px ${ACCENT.reading}4D` }}>
               <IconDice size={16} /> Bài đọc mới
             </Link>
           </div>
         }
       />
 
-      {/* ─── Stats ─── */}
-      <StatsOverview />
+      <StatsBanner />
+
+      {/* Inline delete confirm */}
+      {confirmDeleteId && (
+        <div className="mb-5 rounded-2xl border-2 p-4 flex items-center justify-between gap-3 flex-wrap"
+          role="alert"
+          style={{ borderColor: `${STATUS.danger}40`, backgroundColor: `${STATUS.danger}08` }}>
+          <div>
+            <p className="text-sm font-bold" style={{ color: 'var(--theme-text-primary)' }}>Xóa bài đọc này?</p>
+            <p className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>Không thể hoàn tác.</p>
+          </div>
+          <div className="flex gap-2 shrink-0">
+            <button onClick={() => setConfirmDeleteId(null)}
+              className="px-3 py-1.5 rounded-xl text-xs font-semibold border"
+              style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)' }}>
+              Hủy
+            </button>
+            <button onClick={confirmDelete}
+              className="px-3 py-1.5 rounded-xl text-xs font-semibold text-white"
+              style={{ backgroundColor: STATUS.danger }}>
+              Xóa
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* ─── Filter ─── */}
-      <div className="flex gap-1.5 mb-5 overflow-x-auto pb-1">
-        {['', 'DRAFT', 'GRADED'].map(status => {
-          const isActive = filterStatus === status;
-          const cfg = status ? STATUS_CONFIG[status] : null;
-          const label = status === '' ? 'Tất cả' : cfg?.label || status;
-          const color = cfg?.color || ACCENT;
-          return (
-            <button key={status}
-              onClick={() => { setFilterStatus(status); setPage(1); }}
-              className="px-4 py-2 rounded-xl text-body font-semibold whitespace-nowrap transition-all duration-200 hover:-translate-y-0.5"
-              style={isActive
-                ? { background: `linear-gradient(135deg, ${color}, ${color}cc)`, color: 'white', boxShadow: `0 4px 12px ${color}30` }
-                : { backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }
-              }>
-              {label}
-            </button>
-          );
-        })}
+      <div className="flex flex-col gap-3 mb-6">
+        <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
+          {['', 'A1', 'A2', 'B1', 'B2', 'C1'].map(lvl => {
+            const isActive = filterLevel === lvl;
+            return (
+              <button key={lvl}
+                onClick={() => { setFilterLevel(lvl); setPage(1); }}
+                className="px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all duration-200"
+                style={isActive
+                  ? { background: GRADIENT.reading, color: 'white', boxShadow: `0 4px 12px ${ACCENT.reading}4D` }
+                  : { backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }
+                }>
+                {lvl || 'TẤT CẢ TRÌNH ĐỘ'}
+              </button>
+            );
+          })}
+        </div>
+        <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
+          {['', 'DRAFT', 'GRADED'].map(status => {
+            const isActive = filterStatus === status;
+            const activeStyle = status === ''
+              ? { background: GRADIENT.reading, boxShadow: `0 4px 12px ${ACCENT.reading}30` }
+              : STATUS_BUTTON_STYLES[status] ?? {};
+            return (
+              <button key={status}
+                onClick={() => { setFilterStatus(status); setPage(1); }}
+                className="px-4 py-2 rounded-xl text-body font-semibold whitespace-nowrap transition-all duration-200 hover:-translate-y-0.5"
+                style={isActive
+                  ? { ...activeStyle, color: 'white' }
+                  : { backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }
+                }>
+                {status === '' ? 'Tất cả trạng thái' : STATUS_CONFIG[status]?.label || status}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* ─── History List ─── */}
       {isLoading ? (
-        <div className="space-y-3">
-          {[1, 2, 3].map(i => (
-            <div key={i} className="h-20 rounded-xl animate-pulse"
-              style={{ backgroundColor: 'var(--theme-bg-secondary)' }} />
-          ))}
-        </div>
+        <GridSkeleton cols={1} count={3} height="h-20" gap="gap-3" />
       ) : !history?.data.length ? (
         <div className="text-center py-16 rounded-2xl border-2 border-dashed"
           style={{ borderColor: 'var(--theme-border)' }}>
           <div className="w-16 h-16 rounded-2xl mx-auto flex items-center justify-center mb-4"
-            style={{ background: GRADIENT }}>
+            style={{ background: GRADIENT.reading }}>
             <IconBookOpen size={28} style={{ color: 'white' }} />
           </div>
           <p className="text-sm mb-4" style={{ color: 'var(--theme-text-muted)' }}>Bạn chưa có bài đọc nào</p>
           <Link href="/practice-test/reading/new"
             className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white"
-            style={{ background: GRADIENT }}>
+            style={{ background: GRADIENT.reading }}>
             <IconDice size={16} /> Bắt đầu bài đọc đầu tiên
           </Link>
         </div>
@@ -192,20 +211,18 @@ export default function ReadingListPage() {
                 className="flex items-center gap-4 p-4 rounded-card border shadow-card transition-all duration-200 hover:-translate-y-0.5 group"
                 style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
 
-                {/* Icon */}
                 <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0"
-                  style={{ background: 'rgba(34,197,94,.08)' }}>
-                  <IconBookOpen size={18} style={{ color: ACCENT }} />
+                  style={{ backgroundColor: `${ACCENT.reading}14` }}>
+                  <IconBookOpen size={18} style={{ color: ACCENT.reading }} />
                 </div>
 
-                {/* Info */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-0.5 flex-wrap">
                     <span className="text-sm font-semibold truncate" style={{ color: 'var(--theme-text-primary)' }}>
                       {item.title || item.topic}
                     </span>
                     <span className="px-2 py-0.5 rounded-md text-caption font-bold shrink-0"
-                      style={{ backgroundColor: 'rgba(34,197,94,.1)', color: ACCENT }}>
+                      style={{ backgroundColor: `${ACCENT.reading}1A`, color: ACCENT.reading }}>
                       {item.cefrLevel}
                     </span>
                     <span className="px-2 py-0.5 rounded-md text-caption font-bold shrink-0"
@@ -225,7 +242,6 @@ export default function ReadingListPage() {
                   </div>
                 </div>
 
-                {/* Score */}
                 {item.score !== null && item.score !== undefined && (
                   <div className="text-right shrink-0">
                     <div className="text-h2 font-extrabold" style={{ color: getScoreColor(item.score) }}>
@@ -234,7 +250,6 @@ export default function ReadingListPage() {
                   </div>
                 )}
 
-                {/* Delete */}
                 <button onClick={(e) => handleDelete(item.id, e)}
                   className="p-2 rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-200 hover:scale-110"
                   style={{ color: 'var(--theme-text-muted)' }}

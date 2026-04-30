@@ -1,5 +1,7 @@
 ﻿'use client';
 
+import { ACCENT } from '@/lib/tokens';
+
 interface LoadingProps {
   size?: 'sm' | 'md' | 'lg';
   text?: string;
@@ -17,7 +19,7 @@ export function Loading({ size = 'md', text, fullScreen = false }: LoadingProps)
     <div className="flex flex-col items-center justify-center gap-3">
       <div
         className={`${sizeClasses[size]} rounded-full animate-spin`}
-        style={{ borderColor: 'var(--theme-border)', borderTopColor: '#3B82F6' }}
+        style={{ borderColor: 'var(--theme-border)', borderTopColor: ACCENT.srs }}
       />
       {text && (
         <p className="text-body" style={{ color: 'var(--theme-text-muted)' }}>{text}</p>
@@ -66,6 +68,42 @@ export function StatsSkeleton() {
           <LoadingSkeleton className="w-16 h-8 mb-2" />
           <LoadingSkeleton className="w-24 h-4" />
         </div>
+      ))}
+    </div>
+  );
+}
+
+interface GridSkeletonProps {
+  cols?: 1 | 2 | 3 | 4;
+  count?: number;
+  height?: string;
+  rounded?: string;
+  bordered?: boolean;
+  gap?: string;
+}
+
+export function GridSkeleton({
+  cols = 3,
+  count = 6,
+  height = 'h-40',
+  rounded = 'rounded-xl',
+  bordered = false,
+  gap = 'gap-3',
+}: GridSkeletonProps) {
+  const colsClass = {
+    1: '',
+    2: 'md:grid-cols-2',
+    3: 'md:grid-cols-2 lg:grid-cols-3',
+    4: 'sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4',
+  }[cols];
+  const cardStyle = bordered
+    ? { backgroundColor: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }
+    : { backgroundColor: 'var(--theme-bg-secondary)' };
+  return (
+    <div className={`grid grid-cols-1 ${colsClass} ${gap}`}>
+      {Array.from({ length: count }).map((_, i) => (
+        <div key={i} className={`${height} ${rounded} animate-pulse ${bordered ? 'border' : ''}`}
+          style={cardStyle} />
       ))}
     </div>
   );

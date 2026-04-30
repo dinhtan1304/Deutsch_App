@@ -4,6 +4,7 @@ import { useState, useRef } from 'react';
 import * as XLSX from 'xlsx';
 import { ImportRow, ImportResult, ImportValidationError, WordType, WordTypeInfo } from '@/types/personalWord';
 import { IconDownload, IconX, IconLoader, IconCheck, IconUpload } from '@/components/ui/Icons';
+import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 
 // ============================================
 // Validation
@@ -182,8 +183,8 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
       const result = await onImport(parsedRows);
       setImportResult(result);
       setStep('result');
-    } catch (err: any) {
-      setImportError(err?.message || 'Import thất bại.');
+    } catch (err) {
+      setImportError((err as Error | undefined)?.message || 'Import thất bại.');
       setStep('preview');
     }
   };
@@ -215,7 +216,11 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => { reset(); onClose(); }}>
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
-      <div className="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl"
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Import từ vựng từ file Excel"
+        className="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl"
         style={{ backgroundColor: 'var(--theme-bg-card, #ffffff)' }}
         onClick={e => e.stopPropagation()}>
 
@@ -224,6 +229,7 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
           style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl flex items-center justify-center"
+              // eslint-disable-next-line no-restricted-syntax
               style={{ background: 'linear-gradient(135deg, #10B981, #059669)' }}>
               <IconDownload size={17} className="text-white" />
             </div>
@@ -252,24 +258,25 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
                     </tr>
                   </thead>
                   <tbody style={{ color: 'var(--theme-text-muted)' }}>
-                    <tr><td className="p-1.5 font-mono">word</td><td>Từ gốc</td><td style={{ color: '#EF4444', fontWeight: 'bold' }}>✱</td></tr>
-                    <tr><td className="p-1.5 font-mono">wordType</td><td>nomen / verb / adjektiv / ...</td><td style={{ color: '#EF4444', fontWeight: 'bold' }}>✱</td></tr>
-                    <tr><td className="p-1.5 font-mono">article</td><td>der / die / das</td><td style={{ color: '#EF4444' }}>✱ nomen</td></tr>
-                    <tr><td className="p-1.5 font-mono">translationEn</td><td>Nghĩa tiếng Anh</td><td style={{ color: '#EF4444', fontWeight: 'bold' }}>✱</td></tr>
-                    <tr><td className="p-1.5 font-mono">translationVi</td><td>Nghĩa tiếng Việt</td><td style={{ color: '#EF4444', fontWeight: 'bold' }}>✱</td></tr>
+                    <tr><td className="p-1.5 font-mono">word</td><td>Từ gốc</td><td style={{ color: STATUS.danger, fontWeight: 'bold' }}>✱</td></tr>
+                    <tr><td className="p-1.5 font-mono">wordType</td><td>nomen / verb / adjektiv / ...</td><td style={{ color: STATUS.danger, fontWeight: 'bold' }}>✱</td></tr>
+                    <tr><td className="p-1.5 font-mono">article</td><td>der / die / das</td><td style={{ color: STATUS.danger }}>✱ nomen</td></tr>
+                    <tr><td className="p-1.5 font-mono">translationEn</td><td>Nghĩa tiếng Anh</td><td style={{ color: STATUS.danger, fontWeight: 'bold' }}>✱</td></tr>
+                    <tr><td className="p-1.5 font-mono">translationVi</td><td>Nghĩa tiếng Việt</td><td style={{ color: STATUS.danger, fontWeight: 'bold' }}>✱</td></tr>
                     <tr><td className="p-1.5 font-mono">level</td><td>A1 / A2 / B1 / B2 / C1</td><td></td></tr>
                   </tbody>
                 </table>
                 <button onClick={downloadTemplate}
                   className="mt-3 flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-white transition-all hover:-translate-y-0.5 hover:shadow-md"
-                  style={{ background: 'linear-gradient(135deg, #10B981, #059669)' }}>
+                  // eslint-disable-next-line no-restricted-syntax
+              style={{ background: 'linear-gradient(135deg, #10B981, #059669)' }}>
                   <IconDownload size={14} /> Tải file mẫu Excel
                 </button>
               </div>
 
               {importError && (
-                <div className="p-3 rounded-xl border" style={{ backgroundColor: 'rgba(239,68,68,.06)', borderColor: 'rgba(239,68,68,.2)' }}>
-                  <p className="text-sm" style={{ color: '#EF4444' }}>{importError}</p>
+                <div className="p-3 rounded-xl border" style={{ backgroundColor: `${STATUS.danger}0F`, borderColor: `${STATUS.danger}33` }}>
+                  <p className="text-sm" style={{ color: STATUS.danger }}>{importError}</p>
                 </div>
               )}
 
@@ -289,17 +296,17 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
                   Xem trước: {parsedRows.length} từ
                   <span className="text-sm font-normal ml-2" style={{ color: 'var(--theme-text-muted)' }}>({fileName})</span>
                 </h3>
-                <button onClick={reset} className="text-sm transition-all hover:opacity-70" style={{ color: '#3B82F6' }}>← Chọn file khác</button>
+                <button onClick={reset} className="text-sm transition-all hover:opacity-70" style={{ color: ACCENT.srs }}>← Chọn file khác</button>
               </div>
 
-              {importError && <div className="p-3 rounded-xl border" style={{ backgroundColor: 'rgba(239,68,68,.06)', borderColor: 'rgba(239,68,68,.2)' }}><p className="text-sm" style={{ color: '#EF4444' }}>{importError}</p></div>}
+              {importError && <div className="p-3 rounded-xl border" style={{ backgroundColor: `${STATUS.danger}0F`, borderColor: `${STATUS.danger}33` }}><p className="text-sm" style={{ color: STATUS.danger }}>{importError}</p></div>}
 
               {previewErrors.length > 0 && (
-                <div className="p-3 rounded-xl border" style={{ backgroundColor: 'rgba(245,158,11,.06)', borderColor: 'rgba(245,158,11,.2)' }}>
-                  <p className="font-medium mb-2" style={{ color: '#D97706' }}>{previewErrors.length} cảnh báo</p>
+                <div className="p-3 rounded-xl border" style={{ backgroundColor: `${ACCENT.xp}0F`, borderColor: `${ACCENT.xp}33` }}>
+                  <p className="font-medium mb-2" style={{ color: ACCENT.xp }}>{previewErrors.length} cảnh báo</p>
                   <div className="max-h-28 overflow-y-auto space-y-1">
                     {previewErrors.slice(0, 20).map((err, i) => (
-                      <p key={i} className="text-xs" style={{ color: '#D97706' }}>Dòng {err.row}: [{err.field}] {err.message}</p>
+                      <p key={i} className="text-xs" style={{ color: ACCENT.xp }}>Dòng {err.row}: [{err.field}] {err.message}</p>
                     ))}
                   </div>
                 </div>
@@ -322,11 +329,11 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
                       const info = WordTypeInfo[row.wordType] || WordTypeInfo.andere;
                       const hasCritical = previewErrors.some(e => e.row === i + 1 && ['word', 'translationEn', 'translationVi', 'wordType', 'article'].includes(e.field));
                       return (
-                        <tr key={i} className="border-t" style={{ borderColor: 'var(--theme-border)', backgroundColor: hasCritical ? 'rgba(239,68,68,0.08)' : undefined }}>
+                        <tr key={i} className="border-t" style={{ borderColor: 'var(--theme-border)', backgroundColor: hasCritical ? `${STATUS.danger}14` : undefined }}>
                           <td className="p-2 text-xs" style={{ color: 'var(--theme-text-muted)' }}>{i + 1}</td>
                           <td className="p-2 font-medium" style={{ color: 'var(--theme-text-primary)' }}>
                             {row.article && <span className="text-sm" style={{ color: 'var(--theme-text-muted)' }}>{row.article} </span>}{row.word}
-                            {hasCritical && <span className="ml-1" style={{ color: '#EF4444' }}>⚠</span>}
+                            {hasCritical && <span className="ml-1" style={{ color: STATUS.danger }}>⚠</span>}
                           </td>
                           <td className="p-2"><span className="px-2 py-0.5 rounded-full text-xs text-white" style={{ backgroundColor: info.color }}>{info.icon} {info.labelDe}</span></td>
                           <td className="p-2 text-sm max-w-40 truncate" style={{ color: 'var(--theme-text-muted)' }}>{row.translationEn}</td>
@@ -342,7 +349,8 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
 
               <button onClick={handleImport}
                 className="w-full py-3 rounded-xl font-medium text-white flex items-center justify-center gap-2 transition-all hover:shadow-md hover:-translate-y-0.5"
-                style={{ background: 'linear-gradient(135deg, #10B981, #059669)' }}>
+                // eslint-disable-next-line no-restricted-syntax
+              style={{ background: 'linear-gradient(135deg, #10B981, #059669)' }}>
                 <IconUpload size={15} /> Import {parsedRows.length} từ
               </button>
             </div>
@@ -352,8 +360,8 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
           {step === 'importing' && (
             <div className="text-center py-16">
               <div className="w-16 h-16 rounded-2xl mx-auto flex items-center justify-center mb-4"
-                style={{ background: 'linear-gradient(135deg, rgba(16,185,129,.15), rgba(5,150,105,.1))' }}>
-                <IconLoader size={32} style={{ color: '#10B981' }} />
+                style={{ background: `linear-gradient(135deg, ${STATUS.success}26, ${STATUS.success}1A)` }}>
+                <IconLoader size={32} style={{ color: STATUS.success }} />
               </div>
               <p className="text-lg font-medium" style={{ color: 'var(--theme-text-primary)' }}>Đang import {parsedRows.length} từ...</p>
             </div>
@@ -365,34 +373,34 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
               <div className="text-center">
                 <div className="w-16 h-16 rounded-2xl mx-auto flex items-center justify-center mb-4"
                   style={{ background: importResult.added > 0
-                    ? 'linear-gradient(135deg, rgba(34,197,94,.15), rgba(16,185,129,.1))'
-                    : 'linear-gradient(135deg, rgba(107,114,128,.1), rgba(107,114,128,.06))' }}>
-                  <IconCheck size={32} style={{ color: importResult.added > 0 ? '#22C55E' : '#6B7280' }} />
+                    ? `linear-gradient(135deg, ${STATUS.success}26, ${STATUS.success}1A)`
+                    : `linear-gradient(135deg, var(--theme-bg-secondary), var(--theme-bg-tertiary))` }}>
+                  <IconCheck size={32} style={{ color: importResult.added > 0 ? STATUS.success : 'var(--theme-text-muted)' }} />
                 </div>
                 <h3 className="text-2xl font-bold" style={{ color: 'var(--theme-text-primary)' }}>Kết quả Import</h3>
               </div>
 
               <div className="grid grid-cols-3 gap-3">
-                <div className="p-4 rounded-xl text-center" style={{ backgroundColor: 'rgba(34,197,94,0.1)' }}>
-                  <div className="text-3xl font-bold" style={{ color: '#22C55E' }}>{importResult.added}</div>
-                  <div className="text-sm font-medium" style={{ color: '#22C55E' }}>Đã thêm</div>
+                <div className="p-4 rounded-xl text-center" style={{ backgroundColor: `${STATUS.success}1A` }}>
+                  <div className="text-3xl font-bold" style={{ color: STATUS.success }}>{importResult.added}</div>
+                  <div className="text-sm font-medium" style={{ color: STATUS.success }}>Đã thêm</div>
                 </div>
-                <div className="p-4 rounded-xl text-center" style={{ backgroundColor: 'rgba(234,179,8,0.1)' }}>
-                  <div className="text-3xl font-bold" style={{ color: '#D97706' }}>{importResult.skipped}</div>
-                  <div className="text-sm font-medium" style={{ color: '#D97706' }}>Đã có</div>
+                <div className="p-4 rounded-xl text-center" style={{ backgroundColor: `${ACCENT.xp}1A` }}>
+                  <div className="text-3xl font-bold" style={{ color: ACCENT.xp }}>{importResult.skipped}</div>
+                  <div className="text-sm font-medium" style={{ color: ACCENT.xp }}>Đã có</div>
                 </div>
-                <div className="p-4 rounded-xl text-center" style={{ backgroundColor: 'rgba(239,68,68,0.1)' }}>
-                  <div className="text-3xl font-bold" style={{ color: '#EF4444' }}>{importResult.failed}</div>
-                  <div className="text-sm font-medium" style={{ color: '#EF4444' }}>Lỗi</div>
+                <div className="p-4 rounded-xl text-center" style={{ backgroundColor: `${STATUS.danger}1A` }}>
+                  <div className="text-3xl font-bold" style={{ color: STATUS.danger }}>{importResult.failed}</div>
+                  <div className="text-sm font-medium" style={{ color: STATUS.danger }}>Lỗi</div>
                 </div>
               </div>
 
               {importResult.skippedWords && importResult.skippedWords.length > 0 && (
                 <div className="p-3 rounded-xl border" style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-secondary)' }}>
-                  <p className="text-sm font-medium mb-2" style={{ color: '#D97706' }}>Từ đã có (bỏ qua):</p>
+                  <p className="text-sm font-medium mb-2" style={{ color: ACCENT.xp }}>Từ đã có (bỏ qua):</p>
                   <div className="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto">
                     {importResult.skippedWords.slice(0, 30).map((w, i) => (
-                      <span key={i} className="px-2 py-1 rounded-lg text-xs font-medium" style={{ backgroundColor: 'rgba(245,158,11,.1)', color: '#D97706' }}>{w}</span>
+                      <span key={i} className="px-2 py-1 rounded-lg text-xs font-medium" style={{ backgroundColor: `${ACCENT.xp}1A`, color: ACCENT.xp }}>{w}</span>
                     ))}
                   </div>
                 </div>
@@ -400,7 +408,7 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
 
               <button onClick={() => { reset(); onClose(); }}
                 className="w-full py-3 rounded-xl font-medium text-white transition-all hover:shadow-md hover:-translate-y-0.5"
-                style={{ background: 'linear-gradient(135deg, #3B82F6, #6366F1)' }}>
+                style={{ background: GRADIENT.action }}>
                 Đóng
               </button>
             </div>

@@ -1,23 +1,31 @@
-﻿'use client';
+'use client';
+/* eslint-disable no-restricted-syntax */
 
 import { useState } from 'react';
+import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useStudyPlan, useStudyPlanWeek, usePauseStudyPlan, useResumeStudyPlan, useDeleteStudyPlan } from '@/hooks/useStudyPlan';
 import type { PhaseInfo, WeeklyTask } from '@/lib/api/studyPlan';
 
+import { 
+  IconVocab, IconGrammar, IconReading, IconWriting, 
+  IconListening, IconSpeaking, IconReview, IconGame, 
+  IconExam, IconRocket, IconCalendar 
+} from './icons';
+
 const DAY_NAMES = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
 
-const TASK_ICONS: Record<string, string> = {
-  vocab: '\uD83D\uDCD6',
-  grammar: '\uD83D\uDCDD',
-  reading: '\uD83D\uDCD6',
-  writing: '\u270D\uFE0F',
-  listening: '\uD83C\uDFA7',
-  speaking: '\uD83C\uDF99\uFE0F',
-  review: '\uD83D\uDD01',
-  game: '\uD83C\uDFAE',
-  exam: '\uD83C\uDFC6',
+const TASK_ICONS: Record<string, any> = {
+  vocab: <IconVocab size={18} />,
+  grammar: <IconGrammar size={18} />,
+  reading: <IconReading size={18} />,
+  writing: <IconWriting size={18} />,
+  listening: <IconListening size={18} />,
+  speaking: <IconSpeaking size={18} />,
+  review: <IconReview size={18} />,
+  game: <IconGame size={18} />,
+  exam: <IconExam size={18} />,
 };
 
 function StudyPlanSkeleton() {
@@ -83,28 +91,39 @@ export default function StudyPlanPage() {
     <div className="max-w-5xl mx-auto px-4 py-5 space-y-5">
 
       {/* ── Header ── */}
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <div>
-          <h1 className="text-xl font-bold" style={{ color: 'var(--theme-text-primary)' }}>
-            {plan.examFormat} {plan.targetLevel}
-          </h1>
-          <p className="text-body mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>
-            Tuần {currentWeek}/{plan.totalWeeks} — Còn {daysUntilExam} ngày đến ngày thi
-          </p>
+      <div className="flex items-center justify-between flex-wrap gap-4 pb-2">
+        <div className="flex items-center gap-4">
+          <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-white shadow-lg"
+            style={{ background: 'linear-gradient(135deg, #3B82F6, #8B5CF6)' }}>
+            <IconRocket size={28} />
+          </div>
+          <div>
+            <h1 className="text-2xl font-black tracking-tight" style={{ color: 'var(--theme-text-primary)' }}>
+              {plan.examFormat} {plan.targetLevel}
+            </h1>
+            <div className="flex items-center gap-2 mt-1 text-sm font-medium" style={{ color: 'var(--theme-text-muted)' }}>
+              <IconCalendar size={14} />
+              <span>Tuần {currentWeek}/{plan.totalWeeks}</span>
+              <span className="opacity-30">•</span>
+              <span style={{ color: daysUntilExam < 14 ? STATUS.danger : 'inherit' }}>
+                Còn {daysUntilExam} ngày đến kỳ thi
+              </span>
+            </div>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           {isPaused ? (
             <button
               onClick={() => resumeMut.mutate()}
-              className="px-4 py-2 rounded-xl text-sm font-semibold text-white"
+              className="px-5 py-2.5 rounded-xl text-sm font-bold text-white shadow-lg transition-transform hover:scale-105"
               style={{ background: 'linear-gradient(135deg, #22C55E, #14B8A6)' }}
             >
-              Tiếp tục
+              Tiếp tục học
             </button>
           ) : (
             <button
               onClick={() => pauseMut.mutate()}
-              className="px-4 py-2 rounded-xl text-sm font-semibold border"
+              className="px-5 py-2.5 rounded-xl text-sm font-bold border-2 transition-all hover:bg-black/5"
               style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)' }}
             >
               Tạm dừng
@@ -112,10 +131,10 @@ export default function StudyPlanPage() {
           )}
           <button
             onClick={() => setShowDelete(true)}
-            className="px-3 py-2 rounded-xl text-sm"
-            style={{ color: '#EF4444' }}
+            className="w-10 h-10 rounded-xl flex items-center justify-center transition-colors hover:bg-red-50"
+            style={{ color: STATUS.danger }}
           >
-            Xóa
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /></svg>
           </button>
         </div>
       </div>
@@ -123,99 +142,139 @@ export default function StudyPlanPage() {
       {isPaused && (
         <div
           className="p-4 rounded-xl border text-sm font-medium"
-          style={{ borderColor: 'rgba(249,115,22,.3)', background: 'rgba(249,115,22,.06)', color: '#F97316' }}
+          style={{ borderColor: 'rgba(249,115,22,.3)', background: 'rgba(249,115,22,.06)', color: ACCENT.games }}
         >
           Lịch học đang tạm dừng. Nhấn &quot;Tiếp tục&quot; để học lại.
         </div>
       )}
 
-      {/* ── Overall Progress ── */}
+      {/* ── Overall Progress & Journey ── */}
       <div
-        className="p-5 rounded-2xl border"
+        className="p-6 rounded-3xl border shadow-sm relative overflow-hidden"
         style={{ backgroundColor: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}
       >
-        <div className="flex items-center justify-between mb-3">
-          <span className="text-sm font-semibold" style={{ color: 'var(--theme-text-primary)' }}>
-            Tiến độ tổng thể
-          </span>
-          <span className="text-sm font-bold" style={{ color: '#3B82F6' }}>
-            {overallProgress}%
-          </span>
-        </div>
-        <div className="h-2.5 rounded-full overflow-hidden" style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
-          <div
-            className="h-full rounded-full transition-all duration-700"
-            style={{ width: `${overallProgress}%`, background: 'linear-gradient(90deg, #3B82F6, #8B5CF6)' }}
-          />
-        </div>
+        <div className="relative z-10">
+          <div className="flex items-end justify-between mb-4">
+            <div>
+              <span className="text-xs font-black uppercase tracking-[0.2em] opacity-50 mb-1 block" style={{ color: 'var(--theme-text-primary)' }}>
+                Progress
+              </span>
+              <span className="text-2xl font-black" style={{ color: 'var(--theme-text-primary)' }}>
+                {overallProgress}% <span className="text-sm font-medium opacity-50 ml-1">hoàn thành</span>
+              </span>
+            </div>
+            <div className="text-right">
+              <span className="text-xs font-bold px-3 py-1 rounded-full bg-blue-50 text-blue-600 border border-blue-100">
+                Lộ trình {plan.totalWeeks} tuần
+              </span>
+            </div>
+          </div>
+          
+          <div className="h-4 rounded-2xl overflow-hidden relative" style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
+            <div
+              className="h-full rounded-2xl transition-all duration-1000 ease-out relative"
+              style={{ width: `${overallProgress}%`, background: 'linear-gradient(90deg, #3B82F6, #8B5CF6, #EC4899)' }}
+            >
+              <div className="absolute inset-0 bg-white/20 animate-[pulse_2s_infinite]" />
+            </div>
+          </div>
 
-        {/* Phase Timeline */}
-        <div className="flex mt-4 gap-1">
-          {phases.map((phase: PhaseInfo, i: number) => {
-            const widthPct = ((phase.weekEnd - phase.weekStart + 1) / plan.totalWeeks) * 100;
-            const isCurrent = currentWeek >= phase.weekStart && currentWeek <= phase.weekEnd;
-            return (
-              <div key={i} className="relative" style={{ width: `${widthPct}%` }}>
-                <div
-                  className="h-8 rounded-lg flex items-center justify-center text-caption font-bold text-white transition-all"
-                  style={{
-                    background: phase.color,
-                    opacity: isCurrent ? 1 : 0.4,
-                    border: isCurrent ? '2px solid #fff' : 'none',
-                    boxShadow: isCurrent ? `0 0 0 2px ${phase.color}` : 'none',
-                  }}
-                >
-                  {phase.icon} {phase.name}
+          {/* Phase Journey Map */}
+          <div className="flex mt-8 gap-2 relative">
+            {/* Connecting line background */}
+            <div className="absolute top-4 left-0 right-0 h-0.5 bg-gray-100 -z-1" />
+            
+            {phases.map((phase: PhaseInfo, i: number) => {
+              const widthPct = ((phase.weekEnd - phase.weekStart + 1) / plan.totalWeeks) * 100;
+              const isCurrent = currentWeek >= phase.weekStart && currentWeek <= phase.weekEnd;
+              const isPast = currentWeek > phase.weekEnd;
+              
+              return (
+                <div key={i} className="relative group" style={{ width: `${widthPct}%` }}>
+                  <div
+                    className={`h-9 rounded-2xl flex items-center justify-center text-xs font-black text-white transition-all duration-500 transform ${isCurrent ? 'scale-105 shadow-lg' : 'opacity-40 hover:opacity-70'}`}
+                    style={{
+                      background: isCurrent || isPast ? phase.color : 'var(--theme-bg-secondary)',
+                      color: isCurrent || isPast ? 'white' : 'var(--theme-text-muted)',
+                      boxShadow: isCurrent ? `0 8px 20px ${phase.color}40` : 'none',
+                    }}
+                  >
+                    <span className="mr-1.5">{phase.icon}</span>
+                    <span className="hidden sm:inline">{phase.name}</span>
+                  </div>
+                  <div className="text-[10px] font-bold text-center mt-2.5 uppercase tracking-wider" 
+                    style={{ color: isCurrent ? phase.color : 'var(--theme-text-muted)' }}>
+                    W{phase.weekStart}-{phase.weekEnd}
+                  </div>
+                  {isCurrent && (
+                    <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-white animate-ping" />
+                  )}
                 </div>
-                <div className="text-caption text-center mt-1" style={{ color: 'var(--theme-text-muted)' }}>
-                  T{phase.weekStart}-{phase.weekEnd}
-                </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
+        
+        {/* Background Decorative Element */}
+        <div className="absolute -right-8 -bottom-8 w-48 h-48 rounded-full opacity-[0.03] pointer-events-none" 
+          style={{ background: 'linear-gradient(135deg, #3B82F6, #8B5CF6)' }} />
       </div>
 
       {/* ── Main Content ── */}
       <div className="grid gap-5" style={{ gridTemplateColumns: 'minmax(0, 200px) minmax(0, 1fr)' }}>
 
-        {/* Week Selector */}
+        {/* Week Selector Sidebar */}
         <div
-          className="rounded-2xl border p-3 overflow-y-auto"
+          className="rounded-3xl border p-4 overflow-y-auto backdrop-blur-md"
           style={{
             backgroundColor: 'var(--theme-bg-card)',
             borderColor: 'var(--theme-border)',
-            maxHeight: 480,
+            maxHeight: 600,
+            boxShadow: '0 4px 20px rgba(0,0,0,0.03)'
           }}
         >
-          <div className="text-caption font-semibold uppercase tracking-wider mb-2 px-2" style={{ color: 'var(--theme-text-muted)' }}>
-            Các tuần
+          <div className="text-[11px] font-black uppercase tracking-[0.15em] mb-4 px-2 opacity-50" style={{ color: 'var(--theme-text-primary)' }}>
+            Lộ trình học
           </div>
-          <div className="space-y-0.5">
+          <div className="space-y-1.5">
             {Array.from({ length: plan.totalWeeks }, (_, i) => {
               const w = i + 1;
               const isSelected = activeWeek === w;
               const isPast = w < currentWeek;
+              const isCurrent = w === currentWeek;
               const phase = phases.find((p: PhaseInfo) => w >= p.weekStart && w <= p.weekEnd);
+              
               return (
                 <button
                   key={w}
                   onClick={() => setSelectedWeek(w)}
-                  className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-left transition-all text-body"
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-left transition-all relative group ${isSelected ? 'shadow-sm' : 'hover:bg-gray-50'}`}
                   style={{
-                    backgroundColor: isSelected ? `${phase?.color || '#3B82F6'}12` : undefined,
-                    color: isSelected ? phase?.color || '#3B82F6' : isPast ? 'var(--theme-text-muted)' : 'var(--theme-text-secondary)',
-                    fontWeight: isSelected ? 700 : 400,
+                    backgroundColor: isSelected ? `${phase?.color || ACCENT.srs}12` : undefined,
+                    color: isSelected ? phase?.color || ACCENT.srs : isPast ? 'var(--theme-text-muted)' : 'var(--theme-text-secondary)',
                   }}
                 >
-                  {isPast ? (
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="3" strokeLinecap="round"><polyline points="20 6 9 17 4 12" /></svg>
-                  ) : w === currentWeek ? (
-                    <span className="w-3.5 h-3.5 rounded-full" style={{ background: phase?.color || '#3B82F6', boxShadow: `0 0 6px ${phase?.color || '#3B82F6'}60` }} />
-                  ) : (
-                    <span className="w-3.5 h-3.5 rounded-full border" style={{ borderColor: 'var(--theme-border)' }} />
+                  <div className="relative shrink-0">
+                    {isPast ? (
+                      <div className="w-5 h-5 rounded-full bg-green-100 flex items-center justify-center">
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="4" strokeLinecap="round"><polyline points="20 6 9 17 4 12" /></svg>
+                      </div>
+                    ) : (
+                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${isSelected ? 'border-current' : 'border-gray-200'}`}>
+                        {isCurrent && <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: phase?.color }} />}
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className={`text-sm ${isSelected ? 'font-black' : 'font-bold'}`}>Tuần {w}</div>
+                    {isSelected && (
+                      <div className="text-[10px] font-medium opacity-70 truncate">{phase?.name}</div>
+                    )}
+                  </div>
+                  
+                  {isSelected && (
+                    <div className="absolute left-0 top-3 bottom-3 w-1 rounded-r-full" style={{ background: phase?.color }} />
                   )}
-                  <span>Tuần {w}</span>
                 </button>
               );
             })}
@@ -248,19 +307,22 @@ export default function StudyPlanPage() {
           {/* Today's tasks highlight */}
           {activeWeek === currentWeek && todayTasks.length > 0 && (
             <div
-              className="p-4 rounded-2xl border"
-              style={{ borderColor: 'rgba(59,130,246,.2)', background: 'rgba(59,130,246,.04)' }}
+              className="p-6 rounded-3xl border relative overflow-hidden shadow-sm"
+              style={{ borderColor: 'rgba(59,130,246,.2)', background: 'rgba(59,130,246,.02)' }}
             >
-              <div className="flex items-center justify-between mb-3">
-                <div className="text-xs font-bold uppercase tracking-wider" style={{ color: '#3B82F6' }}>
-                  Hôm nay — {DAY_NAMES[today]}
+              <div className="flex items-center justify-between mb-5 relative z-10">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
+                  <div className="text-xs font-black uppercase tracking-widest text-blue-600">
+                    Nhiệm vụ hôm nay · {DAY_NAMES[today]}
+                  </div>
                 </div>
                 {todayTasks.length > 0 && (
-                  <span className="text-xs font-semibold px-2 py-0.5 rounded-full" style={{
-                    backgroundColor: todayTasks.filter((t: WeeklyTask) => t.completed).length === todayTasks.length ? 'rgba(34,197,94,.1)' : 'var(--theme-bg-secondary)',
-                    color: todayTasks.filter((t: WeeklyTask) => t.completed).length === todayTasks.length ? '#22C55E' : 'var(--theme-text-muted)',
+                  <span className="text-[10px] font-black px-2.5 py-1 rounded-lg uppercase tracking-wider" style={{
+                    backgroundColor: todayTasks.filter((t: WeeklyTask) => t.completed).length === todayTasks.length ? 'rgba(34,197,94,.1)' : 'rgba(59,130,246,.1)',
+                    color: todayTasks.filter((t: WeeklyTask) => t.completed).length === todayTasks.length ? STATUS.success : ACCENT.srs,
                   }}>
-                    {todayTasks.filter((t: WeeklyTask) => t.completed).length}/{todayTasks.length} nhiệm vụ
+                    {todayTasks.filter((t: WeeklyTask) => t.completed).length}/{todayTasks.length} Done
                   </span>
                 )}
               </div>
@@ -285,7 +347,7 @@ export default function StudyPlanPage() {
                       <span className="text-lg">{TASK_ICONS[task.type] || '\uD83D\uDCCC'}</span>
                     )}
                     <div className="flex-1 min-w-0">
-                      <div className="text-sm font-semibold" style={{ color: task.completed ? '#22C55E' : 'var(--theme-text-primary)', textDecoration: task.completed ? 'line-through' : 'none' }}>
+                      <div className="text-sm font-semibold" style={{ color: task.completed ? STATUS.success : 'var(--theme-text-primary)', textDecoration: task.completed ? 'line-through' : 'none' }}>
                         {task.title}
                       </div>
                       <div className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>
@@ -305,13 +367,16 @@ export default function StudyPlanPage() {
 
           {/* Full week grid */}
           <div
-            className="rounded-2xl border overflow-hidden"
+            className="rounded-3xl border overflow-hidden shadow-sm"
             style={{ backgroundColor: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}
           >
-            <div className="px-4 py-3 border-b" style={{ borderColor: 'var(--theme-border)' }}>
-              <span className="text-sm font-bold" style={{ color: 'var(--theme-text-primary)' }}>
-                Lịch tuần {activeWeek}
+            <div className="px-6 py-4 border-b flex items-center justify-between" style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-secondary)' }}>
+              <span className="text-sm font-black tracking-tight uppercase opacity-60" style={{ color: 'var(--theme-text-primary)' }}>
+                Chi tiết tuần {activeWeek}
               </span>
+              <div className="flex gap-1">
+                {[0, 1, 2].map(i => <div key={i} className="w-1 h-1 rounded-full bg-gray-300" />)}
+              </div>
             </div>
             <div className="divide-y" style={{ borderColor: 'var(--theme-border)' }}>
               {displayTasks.map((task: WeeklyTask, i: number) => {
@@ -320,29 +385,32 @@ export default function StudyPlanPage() {
                   <Link
                     key={i}
                     href={task.href}
-                    className="flex items-center gap-4 px-4 py-3.5 transition-colors group"
-                    style={{
-                      backgroundColor: isToday ? 'rgba(59,130,246,.04)' : undefined,
-                    }}
+                    className="flex items-center gap-5 px-6 py-4.5 transition-all group relative hover:bg-gray-50/50"
                   >
-                    <span
-                      className="text-xs font-bold w-8 text-center shrink-0"
-                      style={{ color: isToday ? '#3B82F6' : 'var(--theme-text-muted)' }}
-                    >
-                      {DAY_NAMES[task.day] || 'ALL'}
-                    </span>
-                    <span className="text-base shrink-0">{TASK_ICONS[task.type] || '\uD83D\uDCCC'}</span>
+                    <div className="w-10 text-center shrink-0">
+                      <div className={`text-[10px] font-black uppercase tracking-widest ${isToday ? 'text-blue-600' : 'opacity-40'}`}>
+                        {DAY_NAMES[task.day] || 'ALL'}
+                      </div>
+                    </div>
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-110 ${isToday ? 'bg-blue-50 text-blue-600' : 'bg-gray-50 text-gray-400'}`}
+                      style={{ border: isToday ? '1px solid rgba(59,130,246,0.1)' : '1px solid transparent' }}>
+                      {TASK_ICONS[task.type] || <IconRocket size={18} />}
+                    </div>
                     <div className="flex-1 min-w-0">
-                      <div className="text-body font-medium" style={{ color: 'var(--theme-text-primary)' }}>
+                      <div className={`text-[15px] font-bold ${isToday ? 'text-blue-600' : 'var(--theme-text-primary)'}`}>
                         {task.title}
                       </div>
-                      <div className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>
+                      <div className="text-xs font-medium mt-0.5 opacity-60 truncate" style={{ color: 'var(--theme-text-muted)' }}>
                         {task.description}
                       </div>
                     </div>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="shrink-0 opacity-0 group-hover:opacity-50 transition-opacity" style={{ color: 'var(--theme-text-muted)' }}>
-                      <path d="M9 18l6-6-6-6" />
-                    </svg>
+                    <div className="shrink-0 opacity-0 group-hover:opacity-100 transition-all transform translate-x-2 group-hover:translate-x-0">
+                      <div className="w-8 h-8 rounded-full flex items-center justify-center bg-white border shadow-sm">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{ color: 'var(--theme-text-muted)' }}>
+                          <path d="M9 18l6-6-6-6" />
+                        </svg>
+                      </div>
+                    </div>
                   </Link>
                 );
               })}
@@ -377,7 +445,7 @@ export default function StudyPlanPage() {
                 onClick={handleDelete}
                 disabled={deleteMut.isPending}
                 className="flex-1 py-2.5 rounded-xl text-sm font-bold text-white"
-                style={{ background: '#EF4444' }}
+                style={{ background: STATUS.danger }}
               >
                 {deleteMut.isPending ? 'Đang xóa...' : 'Xóa'}
               </button>

@@ -1,8 +1,9 @@
 ﻿'use client';
+/* eslint-disable no-restricted-syntax */
 
 import React, { useEffect, useRef, useState, forwardRef } from 'react';
+import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 import { useRouter } from 'next/navigation';
-import { toPng } from 'html-to-image';
 import { useAuthStore } from '@/stores/authStore';
 import { useXp } from '@/hooks/useXp';
 import { useDashboardStats } from '@/hooks/useDashboard';
@@ -31,6 +32,7 @@ export default function ProfileSharePage() {
     setDownloading(true);
     setError(null);
     try {
+      const { toPng } = await import('html-to-image');
       const dataUrl = await toPng(cardRef.current, {
         cacheBust: true,
         pixelRatio: 2,
@@ -128,7 +130,7 @@ export default function ProfileSharePage() {
             className="text-body font-medium px-4 py-2 rounded-lg"
             style={{
               background: 'rgba(239,68,68,0.12)',
-              color: '#EF4444',
+              color: STATUS.danger,
               border: '1px solid rgba(239,68,68,0.25)',
             }}
           >

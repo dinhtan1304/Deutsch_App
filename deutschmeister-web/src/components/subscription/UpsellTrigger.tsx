@@ -1,6 +1,8 @@
 ﻿'use client';
+/* eslint-disable no-restricted-syntax */
 
 import Link from 'next/link';
+import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 import { useIsPremium, useBetaOpen } from '@/hooks/useSubscription';
 
 interface Props {
@@ -147,7 +149,7 @@ export function UpsellTrigger({
   );
 }
 
-function CrownIcon({ size = 18, color = '#8B5CF6' }: { size?: number; color?: string }) {
+function CrownIcon({ size = 18, color = ACCENT.vocab }: { size?: number; color?: string }) {
   return (
     <svg
       width={size}
@@ -178,7 +180,7 @@ export function PremiumLockIcon({ size = 12 }: { size?: number }) {
     <span
       className="shrink-0 inline-flex items-center justify-center"
       title="Premium only"
-      style={{ color: '#8B5CF6' }}
+      style={{ color: ACCENT.vocab }}
     >
       <CrownIcon size={size} color="#8B5CF6" />
     </span>
