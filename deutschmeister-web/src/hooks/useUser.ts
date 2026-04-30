@@ -8,6 +8,7 @@ export function useProfile() {
   return useQuery({
     queryKey: ['users', 'profile'],
     queryFn: () => usersApi.getProfile(),
+    staleTime: 5 * 60 * 1000,
     retry: false,
   });
 }
@@ -40,6 +41,7 @@ export function useSettings() {
   return useQuery({
     queryKey: ['users', 'settings'],
     queryFn: () => usersApi.getSettings(),
+    staleTime: 10 * 60 * 1000,
     retry: false,
   });
 }
@@ -59,6 +61,7 @@ export function useUserStats(enabled = true) {
   return useQuery({
     queryKey: ['users', 'stats'],
     queryFn: () => usersApi.getStats(),
+    staleTime: 2 * 60 * 1000,
     retry: false,
     enabled,
   });

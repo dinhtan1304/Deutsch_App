@@ -82,7 +82,7 @@ export const dictionaryLookupApi = {
           w.word.toLowerCase() === lower.replace(/^(der|die|das)\s+/i, '')
       );
 
-      return mapWordToResult(exactMatch || result.data[0]);
+      return mapWordToResult(exactMatch ?? result.data[0]!);
     } catch (err) {
       if (process.env.NODE_ENV === 'development') {
         console.error('[DictPopup] Lookup error:', err);

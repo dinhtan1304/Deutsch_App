@@ -11,7 +11,7 @@ export async function translateText(text: string, from: TranslateLang, to: Trans
   const data = await res.json();
   const parts: string[] = (data[0] as Array<string[]>)
     .filter(Boolean)
-    .map(chunk => chunk[0])
+    .map(chunk => chunk[0] ?? '')
     .filter(Boolean);
   const result = parts.join('').trim();
   if (!result) throw new Error('Empty translation');

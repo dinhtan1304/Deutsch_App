@@ -44,13 +44,14 @@ export function useFullDashboard() {
 }
 
 /**
- * Hook lấy stats
+ * Hook lấy stats — streak/totalWords are daily metrics, 10min staleTime is appropriate.
+ * Header uses this just for streak display; mutations invalidate when needed.
  */
 export function useDashboardStats() {
   return useQuery({
     queryKey: dashboardKeys.stats(),
     queryFn: getDashboardStats,
-    staleTime: 2 * 60 * 1000,
+    staleTime: 10 * 60 * 1000,
   });
 }
 

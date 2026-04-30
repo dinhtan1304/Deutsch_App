@@ -30,6 +30,7 @@ export function useWord(id: string) {
   return useQuery({
     queryKey: ['words', id],
     queryFn: () => wordsApi.getById(id),
+    staleTime: 30 * 60 * 1000,
     enabled: !!id,
   });
 }

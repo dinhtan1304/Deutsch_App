@@ -5,9 +5,21 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:analyze": "ANALYZE=true next build",
     "start": "next start",
     "lint": "eslint",
-    "lint:strict": "eslint --max-warnings 0"
+    "lint:strict": "eslint --max-warnings 0",
+    "lhci": "lhci autorun"
+  },
+  "bundlewatch": {
+    "files": [
+      { "path": ".next/static/chunks/framework-*.js", "maxSize": "50kB" },
+      { "path": ".next/static/chunks/main-*.js", "maxSize": "50kB" },
+      { "path": ".next/static/chunks/*.js", "maxSize": "200kB", "compression": "gzip" }
+    ],
+    "ci": {
+      "trackBranches": ["main"]
+    }
   },
   "dependencies": {
     "@tanstack/react-query": "^5.90.20",
@@ -24,6 +36,7 @@
     "zustand": "^5.0.10"
   },
   "devDependencies": {
+    "@lhci/cli": "^0.14.0",
     "@tailwindcss/postcss": "^4",
     "@tanstack/react-query-devtools": "^5.91.2",
     "@types/node": "^20",

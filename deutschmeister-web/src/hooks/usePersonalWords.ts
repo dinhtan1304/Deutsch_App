@@ -69,6 +69,7 @@ export function usePersonalWord(id: string) {
   return useQuery({
     queryKey: personalWordsKeys.detail(id),
     queryFn: () => personalWordsApi.getById(id),
+    staleTime: 30 * 60 * 1000,
     enabled: !!id,
   });
 }

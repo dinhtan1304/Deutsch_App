@@ -42,20 +42,20 @@ export function CriterionRadar({ scores, size = 260 }: CriterionRadarProps) {
   const angles = [-Math.PI / 2, 0, Math.PI / 2, Math.PI];
 
   const axisEnd = (i: number, r: number) => ({
-    x: cx + Math.cos(angles[i]) * r,
-    y: cy + Math.sin(angles[i]) * r,
+    x: cx + Math.cos(angles[i]!) * r,
+    y: cy + Math.sin(angles[i]!) * r,
   });
 
   const scoreValues = AXES.map((a) => scores[a.key]);
   const polygonPoints = AXES.map((_, i) => {
-    const r = (scoreValues[i] / 100) * radius;
+    const r = (scoreValues[i]! / 100) * radius;
     const p = axisEnd(i, r);
     return `${p.x},${p.y}`;
   }).join(' ');
 
   // Find weakest axis for highlighting
   const weakestIdx = scoreValues.indexOf(Math.min(...scoreValues));
-  const weakest = AXES[weakestIdx];
+  const weakest = AXES[weakestIdx]!;
 
   return (
     <div className="flex flex-col items-center gap-3">
@@ -112,7 +112,7 @@ export function CriterionRadar({ scores, size = 260 }: CriterionRadarProps) {
 
         {/* Dots + score bubbles at each axis */}
         {AXES.map((axis, i) => {
-          const r = (scoreValues[i] / 100) * radius;
+          const r = (scoreValues[i]! / 100) * radius;
           const p = axisEnd(i, r);
           return (
             <circle key={i} cx={p.x} cy={p.y} r={4} fill={axis.color} stroke="white" strokeWidth={1.5} />
@@ -148,7 +148,7 @@ export function CriterionRadar({ scores, size = 260 }: CriterionRadarProps) {
                 fontWeight={800}
                 fill="var(--theme-text-primary)"
               >
-                {Math.round(scoreValues[i])}
+                {Math.round(scoreValues[i]!)}
               </text>
             </g>
           );
@@ -165,7 +165,7 @@ export function CriterionRadar({ scores, size = 260 }: CriterionRadarProps) {
         }}
       >
         <div className="font-bold mb-1" style={{ color: weakest.color }}>
-          Cần cải thiện nhất: {CRITERION_LABELS_VI[weakest.key]} ({Math.round(scoreValues[weakestIdx])}/100)
+          Cần cải thiện nhất: {CRITERION_LABELS_VI[weakest.key]} ({Math.round(scoreValues[weakestIdx]!)}/100)
         </div>
         <div>{CRITERION_HINTS[weakest.key]}</div>
       </div>

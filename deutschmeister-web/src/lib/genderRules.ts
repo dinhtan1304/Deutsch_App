@@ -423,7 +423,7 @@ export function detectRules(word: string, gender: Gender): GenderRule[] {
  */
 export function getBestRule(word: string, gender: Gender): GenderRule | null {
   const rules = detectRules(word, gender);
-  return rules.length > 0 ? rules[0] : null;
+  return rules.length > 0 ? (rules[0] ?? null) : null;
 }
 
 /**

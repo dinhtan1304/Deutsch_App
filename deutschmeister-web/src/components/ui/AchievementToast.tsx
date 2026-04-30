@@ -86,5 +86,5 @@ export const useAchievementToastStore = create<ToastStore>((set) => ({
 export function AchievementToastProvider() {
   const { queue, remove } = useAchievementToastStore();
   if (queue.length === 0) return null;
-  return <AchievementToast achievement={queue[0]} onDismiss={remove} />;
+  return <AchievementToast achievement={queue[0]!} onDismiss={remove} />;
 }
