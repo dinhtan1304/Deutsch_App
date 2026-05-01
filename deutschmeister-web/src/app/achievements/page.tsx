@@ -68,7 +68,7 @@ export default function AchievementsPage() {
 
   const grouped = (achievements || []).reduce<Record<string, Achievement[]>>((acc, a) => {
     if (!acc[a.category]) acc[a.category] = [];
-    acc[a.category].push(a);
+    acc[a.category]!.push(a);
     return acc;
   }, {});
 
@@ -135,7 +135,7 @@ export default function AchievementsPage() {
                         <div className="mb-4">
                           <AchievementIcon
                             unlocked={a.unlocked}
-                            color={CATEGORY_COLORS[a.category]}
+                            color={CATEGORY_COLORS[a.category] ?? '#6B7280'}
                             gradient={CATEGORY_GRADIENTS[a.category] ?? GRADIENT.xp}
                           />
                         </div>

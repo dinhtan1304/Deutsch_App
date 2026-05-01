@@ -36,13 +36,13 @@ function ExamBadge({ examType, cefrLevel }: { examType: string; cefrLevel: strin
 }
 
 function StatusBadge({ status }: { status: string }) {
-  const map: Record<string, { label: string; color: string; bg: string }> = {
+  const map = {
     DRAFT:   { label: 'Chưa nộp',  color: ACCENT.writing, bg: `${ACCENT.writing}1A` },
     GRADING: { label: 'Đang chấm', color: STATUS.warning,  bg: `${STATUS.warning}1A` },
     GRADED:  { label: 'Đã chấm',   color: STATUS.success,  bg: `${STATUS.success}1A` },
     ERROR:   { label: 'Lỗi',       color: STATUS.danger,   bg: `${STATUS.danger}1A` },
   };
-  const s = map[status] ?? map.DRAFT;
+  const s = (map as unknown as Record<string, typeof map.DRAFT>)[status] ?? map.DRAFT;
   return (
     <span className="inline-flex items-center px-2 py-0.5 rounded-lg text-caption font-medium"
       style={{ backgroundColor: s.bg, color: s.color }}>{s.label}</span>

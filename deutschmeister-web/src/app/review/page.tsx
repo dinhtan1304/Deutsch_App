@@ -7,8 +7,7 @@ import { useSettingsStore } from '@/stores/settingsStore';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
 import { usePronunciation } from '@/hooks/usePronunciation';
 import { useRandomWords } from '@/hooks/useWords';
-import { useDueCards, useReviewCard, useAddWordsToSRS, useProgressStats } from '@/hooks/useProgress';
-import { previewIntervals } from '@/lib/srs';
+import { useDueCards, useReviewCard, useAddWordsToSRS, useProgressStats, useProgressIntervalPreview } from '@/hooks/useProgress';
 import { ReviewRating, Progress } from '@/types';
 import { IconBrain, IconX } from '@/components/ui/Icons';
 import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
@@ -19,12 +18,6 @@ import { RatingButtons } from './_components/RatingButtons';
 
 type QuizMode = 'gender' | 'de-vi' | 'vi-de' | 'mixed';
 type Phase = 'loading' | 'empty' | 'setup' | 'reviewing' | 'complete';
-
-const GENDER_HEX: Record<string, { color: string; gradient: string }> = {
-  blue:  { color: ACCENT.srs,       gradient: 'linear-gradient(135deg, #3B82F6, #1D4ED8)' },
-  pink:  { color: ACCENT.listening, gradient: 'linear-gradient(135deg, #EC4899, #BE185D)' },
-  green: { color: STATUS.success,   gradient: 'linear-gradient(135deg, #22C55E, #15803D)' },
-};
 
 const ARTIKEL_STYLE: Record<string, { gradient: string; chipBg: string; chipColor: string }> = {
   der: { gradient: 'linear-gradient(135deg, #0a1628 0%, #1e3a8a 100%)', chipBg: `${ACCENT.srs}4D`,       chipColor: '#93C5FD' },
@@ -42,7 +35,7 @@ export default function SRSReviewPage() {
   const { data: stats } = useProgressStats();
   const reviewMutation = useReviewCard();
   const addWordsMutation = useAddWordsToSRS();
-  const { data: randomWords, refetch: refetchRandom } = useRandomWords(20, {});
+  const { refetch: refetchRandom } = useRandomWords(20, {});
 
   const [phase, setPhase] = useState<Phase>('loading');
   const [quizMode, setQuizMode] = useState<QuizMode>('mixed');
@@ -53,13 +46,18 @@ export default function SRSReviewPage() {
   const [cardModes, setCardModes] = useState<Record<number, Exclude<QuizMode, 'mixed'>>>({});
   const [sessionSeconds, setSessionSeconds] = useState(0);
   const [showExampleTrans, setShowExampleTrans] = useState(false);
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+  const [queueNewAtStart, setQueueNewAtStart] = useState(0);
   const { speak } = usePronunciation();
 
-  const reviewMutateRef = useRef(reviewMutation.mutate);
-  useEffect(() => { reviewMutateRef.current = reviewMutation.mutate; }, [reviewMutation.mutate]);
+  const reviewMutateRef = useRef(reviewMutation.mutateAsync);
+  useEffect(() => { reviewMutateRef.current = reviewMutation.mutateAsync; }, [reviewMutation.mutateAsync]);
 
   const nextCardTimerRef = useRef<NodeJS.Timeout | null>(null);
   const streakRef = useRef(0);
+  const reviewSubmittingRef = useRef(false);
+  const currentIndexRef = useRef(0);
+  const reviewQueueLengthRef = useRef(0);
 
   useEffect(() => () => {
     if (nextCardTimerRef.current) clearTimeout(nextCardTimerRef.current);
@@ -75,6 +73,13 @@ export default function SRSReviewPage() {
 
   useEffect(() => { setShowExampleTrans(false); }, [currentIndex]);
 
+  const flipCard = useCallback(() => {
+    if (!isFlipped) {
+      playClick();
+      setIsFlipped(true);
+    }
+  }, [isFlipped, playClick]);
+
   useEffect(() => {
     if (dueLoading) { setPhase('loading'); return; }
     if (!stats) return;
@@ -88,7 +93,7 @@ export default function SRSReviewPage() {
     const modes: Exclude<QuizMode, 'mixed'>[] = ['de-vi'];
     if (card.word?.gender) modes.push('gender');
     if (card.word?.translationVi || card.word?.translationEn) modes.push('vi-de');
-    return modes[Math.floor(Math.random() * modes.length)];
+    return modes[Math.floor(Math.random() * modes.length)]!;
   }, [quizMode]);
 
   const startReview = useCallback(() => {
@@ -97,7 +102,12 @@ export default function SRSReviewPage() {
     const queue = shuffled.slice(0, settings.questionsPerGame);
     setReviewQueue(queue);
     setCurrentIndex(0);
+    currentIndexRef.current = 0;
+    reviewQueueLengthRef.current = queue.length;
+    setQueueNewAtStart(queue.filter(c => (c.repetitions ?? 0) === 0).length);
     setIsFlipped(false);
+    reviewSubmittingRef.current = false;
+    setIsSubmittingReview(false);
     setSessionStats({ correct: 0, wrong: 0, streak: 0, bestStreak: 0 });
     streakRef.current = 0;
     const modes: Record<number, Exclude<QuizMode, 'mixed'>> = {};
@@ -107,34 +117,55 @@ export default function SRSReviewPage() {
     playClick();
   }, [dueCards, settings.questionsPerGame, playClick, getCardQuizMode]);
 
-  const handleReview = useCallback((rating: ReviewRating) => {
-    if (!currentCard) return;
-    reviewMutateRef.current({ wordId: currentCard.wordId, rating });
-    const isCorrect = rating !== 'again';
-    if (isCorrect) {
-      playCorrect();
-      const newStreak = streakRef.current + 1;
-      streakRef.current = newStreak;
-      if (newStreak === 5 || newStreak === 10) setTimeout(() => playCombo(), 200);
-      setSessionStats(prev => ({
-        ...prev, correct: prev.correct + 1, streak: newStreak, bestStreak: Math.max(prev.bestStreak, newStreak),
-      }));
-    } else {
-      playWrong();
-      streakRef.current = 0;
-      setSessionStats(prev => ({ ...prev, wrong: prev.wrong + 1, streak: 0 }));
+  const currentCard = reviewQueue[currentIndex] ?? null;
+  const currentWord = currentCard?.word ?? null;
+
+  // Keep refs in sync so the setTimeout callback always reads the latest values
+  // without needing currentIndex/reviewQueue.length in the dependency array.
+  useEffect(() => { currentIndexRef.current = currentIndex; }, [currentIndex]);
+
+  const handleReview = useCallback(async (rating: ReviewRating) => {
+    if (!currentCard || reviewSubmittingRef.current) return;
+    reviewSubmittingRef.current = true;
+    setIsSubmittingReview(true);
+    try {
+      await reviewMutateRef.current({ wordId: currentCard.wordId, rating });
+      const isCorrect = rating !== 'again';
+      if (isCorrect) {
+        playCorrect();
+        const newStreak = streakRef.current + 1;
+        streakRef.current = newStreak;
+        if (newStreak === 5 || newStreak === 10) setTimeout(() => playCombo(), 200);
+        setSessionStats(prev => ({
+          ...prev, correct: prev.correct + 1, streak: newStreak, bestStreak: Math.max(prev.bestStreak, newStreak),
+        }));
+      } else {
+        playWrong();
+        streakRef.current = 0;
+        setSessionStats(prev => ({ ...prev, wrong: prev.wrong + 1, streak: 0 }));
+      }
+      if (nextCardTimerRef.current) clearTimeout(nextCardTimerRef.current);
+      nextCardTimerRef.current = setTimeout(() => {
+        nextCardTimerRef.current = null;
+        if (currentIndexRef.current + 1 >= reviewQueueLengthRef.current) {
+          playLevelUp(); setPhase('complete'); refetchDue();
+        } else {
+          setCurrentIndex(i => i + 1); setIsFlipped(false);
+        }
+        reviewSubmittingRef.current = false;
+        setIsSubmittingReview(false);
+      }, 300);
+    } catch (error) {
+      if (process.env.NODE_ENV === 'development') console.error('Review failed:', error);
+      reviewSubmittingRef.current = false;
+      setIsSubmittingReview(false);
     }
-    if (nextCardTimerRef.current) clearTimeout(nextCardTimerRef.current);
-    nextCardTimerRef.current = setTimeout(() => {
-      nextCardTimerRef.current = null;
-      if (currentIndex + 1 >= reviewQueue.length) { playLevelUp(); setPhase('complete'); refetchDue(); }
-      else { setCurrentIndex(i => i + 1); setIsFlipped(false); }
-    }, 300);
-  }, [currentCard, currentIndex, reviewQueue.length, playCorrect, playWrong, playCombo, playLevelUp, refetchDue]);
+  }, [currentCard, playCorrect, playWrong, playCombo, playLevelUp, refetchDue]);
 
   useEffect(() => {
     const handle = (e: KeyboardEvent) => {
       if (phase !== 'reviewing') return;
+      if (reviewSubmittingRef.current) return;
       if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); if (!isFlipped) flipCard(); }
       else if (isFlipped) {
         if (e.key === '1') handleReview('again');
@@ -145,7 +176,7 @@ export default function SRSReviewPage() {
     };
     window.addEventListener('keydown', handle);
     return () => window.removeEventListener('keydown', handle);
-  }, [phase, isFlipped, handleReview]);
+  }, [phase, isFlipped, handleReview, flipCard]);
 
   const addRandomWords = async () => {
     try {
@@ -159,17 +190,14 @@ export default function SRSReviewPage() {
     } catch { /* silently ignore – non-critical */ }
   };
 
-  const currentCard = reviewQueue[currentIndex] ?? null;
-  const currentWord = currentCard?.word ?? null;
+  const { data: intervals, isLoading: intervalsLoading } = useProgressIntervalPreview(currentCard?.wordId);
   const currentMode = cardModes[currentIndex] ?? 'de-vi';
-  const intervals = currentCard ? previewIntervals(currentCard) : null;
   const artikelKey = currentWord?.article?.toLowerCase() ?? '';
   const artikelStyle = ARTIKEL_STYLE[artikelKey] ?? { gradient: DEFAULT_CARD_GRADIENT, chipBg: 'rgba(255,255,255,.15)', chipColor: 'rgba(255,255,255,.8)' };
   const cardGradient = currentMode !== 'vi-de' ? artikelStyle.gradient : DEFAULT_CARD_GRADIENT;
 
-  const queueNew = reviewQueue.filter(c => (c.repetitions ?? 0) === 0).length;
+  const queueNew = queueNewAtStart;
   const timerText = `${String(Math.floor(sessionSeconds / 60)).padStart(2, '0')}:${String(sessionSeconds % 60).padStart(2, '0')}`;
-  const flipCard = () => { if (!isFlipped) { playClick(); setIsFlipped(true); } };
 
   // ─── LOADING ───
   if (phase === 'loading') {
@@ -338,10 +366,16 @@ export default function SRSReviewPage() {
 
       {/* ── Rating or flip CTA ── */}
       {isFlipped && intervals ? (
-        <RatingButtons intervals={intervals} onReview={handleReview} />
+        <RatingButtons intervals={intervals} onReview={handleReview} disabled={isSubmittingReview || intervalsLoading} />
+      ) : isFlipped ? (
+        <div className="w-full py-4 rounded-2xl text-center text-sm font-semibold"
+          style={{ backgroundColor: 'var(--theme-bg-card)', border: '1px solid var(--theme-border)', color: 'var(--theme-text-muted)' }}>
+          Dang tinh lich on...
+        </div>
       ) : (
         <button
           onClick={flipCard}
+          disabled={isSubmittingReview}
           className="w-full py-4 rounded-2xl font-semibold text-sm transition-all hover:-translate-y-0.5"
           style={{ backgroundColor: 'var(--theme-bg-card)', border: '1.5px dashed var(--theme-border)', color: 'var(--theme-text-secondary)' }}
         >

@@ -1,12 +1,17 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import Script from 'next/script';
 import './globals.css';
 import { MainLayout } from '@/components/layout';
 import { Providers } from './providers';
 import { GA_ID } from '@/lib/analytics';
+import { PwaRegistrar } from '@/components/pwa/PwaRegistrar';
 
 const inter = Inter({ subsets: ['latin', 'vietnamese'] });
+
+export const viewport: Viewport = {
+  themeColor: '#6366F1',
+};
 
 export const metadata: Metadata = {
   title: {
@@ -45,6 +50,12 @@ export const metadata: Metadata = {
     googleBot: { index: true, follow: true, 'max-video-preview': -1, 'max-image-preview': 'large', 'max-snippet': -1 },
   },
   alternates: { canonical: '/' },
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'Deutschmeister',
+  },
 };
 
 export default function RootLayout({
@@ -68,6 +79,7 @@ export default function RootLayout({
         <Providers>
           <MainLayout>{children}</MainLayout>
         </Providers>
+        <PwaRegistrar />
       </body>
     </html>
   );

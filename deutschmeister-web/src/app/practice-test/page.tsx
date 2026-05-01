@@ -55,6 +55,12 @@ const freeCards: CardDef[] = [
     icon: IconMic, href: '/practice-test/pronunciation',
     gradient: 'linear-gradient(135deg, #EC4899, #A855F7)', color: ACCENT.listening,
   },
+  {
+    title: 'Chép Chính Tả', titleDe: 'Diktat',
+    description: 'Nghe video YouTube tiếng Đức, điền từ còn thiếu theo câu',
+    icon: IconHeadphones, href: '/practice-test/dictation',
+    gradient: 'linear-gradient(135deg, #06B6D4, #3B82F6)', color: ACCENT.dictation,
+  },
 ];
 
 const examCards: CardDef[] = [

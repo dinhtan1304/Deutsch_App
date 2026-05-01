@@ -23,7 +23,7 @@ const EXAM_OPTIONS = [
   },
 ];
 
-const LEVEL_INFO: Record<string, { label: string; desc: string }> = {
+const LEVEL_INFO = {
   A1: { label: 'A1 — Beginner', desc: 'Giao tiếp cơ bản: chào hỏi, giới thiệu bản thân' },
   A2: { label: 'A2 — Elementary', desc: 'Hiểu và trao đổi thông tin quen thuộc' },
   B1: { label: 'B1 — Intermediate', desc: 'Giao tiếp trong công việc, du lịch, học tập' },
@@ -157,7 +157,7 @@ export default function StudyPlanSetup() {
 
             <div className="grid gap-4">
               {selectedExam.levels.map((level) => {
-                const info = LEVEL_INFO[level];
+                const info = (LEVEL_INFO as unknown as Record<string, typeof LEVEL_INFO.A1>)[level] ?? LEVEL_INFO.A1;
                 const isSelected = targetLevel === level;
                 return (
                   <button

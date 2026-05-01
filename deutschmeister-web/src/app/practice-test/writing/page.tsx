@@ -21,7 +21,7 @@ const WRITING_TYPE_LABELS: Record<string, { de: string; vi: string; color: strin
   formular:      { de: 'Formular',      vi: 'Mẫu đơn',   color: 'var(--theme-text-muted)' },
 };
 
-const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
+const STATUS_CONFIG = {
   DRAFT:     { label: 'Nháp',        color: 'var(--theme-text-muted)', bg: 'rgba(107,114,128,.1)' },
   SUBMITTED: { label: 'Đã nộp',     color: STATUS.info,               bg: `${STATUS.info}1A` },
   GRADING:   { label: 'Đang chấm…', color: STATUS.warning,            bg: `${STATUS.warning}1A` },
@@ -177,7 +177,7 @@ export default function WritingListPage() {
           <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
             {['', 'DRAFT', 'GRADED', 'ERROR'].map(status => {
               const isActive = filterStatus === status;
-              const cfg = status ? STATUS_CONFIG[status] : null;
+              const cfg = status ? (STATUS_CONFIG as unknown as Record<string, typeof STATUS_CONFIG.DRAFT>)[status] : null;
               const label = status === '' ? 'Tất cả trạng thái' : cfg?.label || status;
               const color = cfg?.color || 'var(--theme-text-muted)';
               return (
@@ -216,7 +216,7 @@ export default function WritingListPage() {
           <div className="space-y-2">
             {history.data.map(item => {
               const typeInfo = WRITING_TYPE_LABELS[item.writingType] || { de: item.writingType, vi: item.writingType, color: 'var(--theme-text-muted)' };
-              const statusCfg = STATUS_CONFIG[item.status] || STATUS_CONFIG.DRAFT;
+              const statusCfg = (STATUS_CONFIG as unknown as Record<string, typeof STATUS_CONFIG.DRAFT>)[item.status] ?? STATUS_CONFIG.DRAFT;
 
               return (
                 <Link key={item.id}

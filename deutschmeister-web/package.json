@@ -13,12 +13,24 @@
   },
   "bundlewatch": {
     "files": [
-      { "path": ".next/static/chunks/framework-*.js", "maxSize": "50kB" },
-      { "path": ".next/static/chunks/main-*.js", "maxSize": "50kB" },
-      { "path": ".next/static/chunks/*.js", "maxSize": "200kB", "compression": "gzip" }
+      {
+        "path": ".next/static/chunks/framework-*.js",
+        "maxSize": "50kB"
+      },
+      {
+        "path": ".next/static/chunks/main-*.js",
+        "maxSize": "50kB"
+      },
+      {
+        "path": ".next/static/chunks/*.js",
+        "maxSize": "200kB",
+        "compression": "gzip"
+      }
     ],
     "ci": {
-      "trackBranches": ["main"]
+      "trackBranches": [
+        "main"
+      ]
     }
   },
   "dependencies": {
@@ -30,6 +42,7 @@
     "react-dom": "19.2.3",
     "react-google-recaptcha-v3": "^1.11.0",
     "react-hook-form": "^7.71.1",
+    "react-youtube": "^10.1.0",
     "tailwind-merge": "^3.4.0",
     "xlsx": "^0.18.5",
     "zod": "^4.3.6",

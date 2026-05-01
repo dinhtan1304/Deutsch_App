@@ -61,8 +61,8 @@ const cardConfigs: StatCardConfig[] = [
     },
     getSubValue: s => {
       // Parse YYYY-MM-DD safely (avoid UTC timezone shift with new Date())
-      const [y, m, d] = s.startedAt.split('-').map(Number);
-      return `Từ ${new Date(y, m - 1, d).toLocaleDateString('vi-VN')}`;
+      const parts = s.startedAt.split('-').map(Number);
+      return `Từ ${new Date(parts[0]!, parts[1]! - 1, parts[2]!).toLocaleDateString('vi-VN')}`;
     },
     gradient: 'linear-gradient(135deg, rgba(139,92,246,.12), rgba(168,85,247,.08))',
     iconBg: 'linear-gradient(135deg, #8B5CF6, #A855F7)',

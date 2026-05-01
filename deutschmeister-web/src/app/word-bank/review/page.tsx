@@ -6,10 +6,12 @@ import { useSearchParams } from 'next/navigation';
 import { useAuthStore } from '@/stores/authStore';
 import { AuthGate } from '@/components/ui';
 import { GRADIENT, ACCENT, STATUS } from '@/lib/tokens';
-import { useSRSDue, useSRSStats, useReviewWord, useWeakWords, SRSRating } from '@/hooks/usePersonalWords';
+import { useSRSDue, useSRSStats, useReviewWord, useWeakWords, useIntervalPreview, SRSRating } from '@/hooks/usePersonalWords';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
+import { usePronunciation } from '@/hooks/usePronunciation';
 import { PersonalWord, getSRSStatus, getIntervalText, SRSStatusInfo, WordTypeInfo, GenderInfo } from '@/types/personalWord';
 import { IconRefresh, IconChevronLeft, IconBrain, IconTarget, IconFlame, IconBookOpen, IconTrophy, IconKeyboard } from '@/components/ui/Icons';
+import { getDelayText } from '@/lib/srs';
 
 // ─── Types ───
 interface ReviewSession {
@@ -79,9 +81,10 @@ interface ReviewCardProps {
   word: PersonalWord;
   isFlipped: boolean;
   onFlip: () => void;
+  onSpeak: (text: string) => void;
 }
 
-function ReviewCard({ word, isFlipped, onFlip }: ReviewCardProps) {
+function ReviewCard({ word, isFlipped, onFlip, onSpeak }: ReviewCardProps) {
   const status = getSRSStatus(word);
   const statusInfo = SRSStatusInfo[status];
   const typeInfo = WordTypeInfo[word.wordType];
@@ -144,6 +147,22 @@ function ReviewCard({ word, isFlipped, onFlip }: ReviewCardProps) {
             </div>
           )}
 
+          <button
+            onClick={e => {
+              e.stopPropagation();
+              const text = word.wordType === 'nomen' && word.nomenData
+                ? `${word.nomenData.article} ${word.word}`
+                : word.word;
+              onSpeak(text);
+            }}
+            className="mt-3 w-11 h-11 rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-95"
+            style={{ backgroundColor: `${genderColor}1A`, color: genderColor }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+              <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+            </svg>
+          </button>
+
           <div className="absolute bottom-4 text-body" style={{ color: 'var(--theme-text-muted)' }}>
             Nhấn để xem nghĩa
           </div>
@@ -168,7 +187,7 @@ function ReviewCard({ word, isFlipped, onFlip }: ReviewCardProps) {
           {word.examples && word.examples.length > 0 && (
             <div className="relative mt-6 p-4 bg-white/10 rounded-xl max-w-full backdrop-blur-sm">
               <div className="text-xs text-white/60 mb-1">Ví dụ:</div>
-              <div className="text-white/90 italic text-sm">„{word.examples[0]}"</div>
+              <div className="text-white/90 italic text-sm">&quot;{word.examples[0]}&quot;</div>
             </div>
           )}
 
@@ -191,17 +210,7 @@ interface RatingButtonsProps {
 }
 
 function RatingButtons({ word, onRate, isLoading }: RatingButtonsProps) {
-  const calculatePreviewInterval = (rating: SRSRating): number => {
-    if (rating === 'again') return 1;
-    const quality = { again: 0, hard: 3, good: 4, easy: 5 }[rating];
-    let { easeFactor, interval, repetitions } = word;
-    if (quality < 3) return 1;
-    let newEF = easeFactor + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02));
-    newEF = Math.max(1.3, newEF);
-    if (repetitions === 0) return 1;
-    if (repetitions === 1) return 6;
-    return Math.round(interval * newEF);
-  };
+  const { data: intervals, isLoading: intervalsLoading } = useIntervalPreview(word.id);
 
   /* eslint-disable no-restricted-syntax */
   const ratings: { rating: SRSRating; label: string; color: string; gradient: string; hotkey: string }[] = [
@@ -215,13 +224,13 @@ function RatingButtons({ word, onRate, isLoading }: RatingButtonsProps) {
   return (
     <div className="grid grid-cols-4 gap-2 sm:gap-3 mt-6 max-w-lg mx-auto">
       {ratings.map(({ rating, label, color, hotkey }) => (
-        <button key={rating} onClick={() => onRate(rating)} disabled={isLoading}
+        <button key={rating} onClick={() => onRate(rating)} disabled={isLoading || intervalsLoading || !intervals}
           className="flex flex-col items-center p-3 sm:p-4 rounded-2xl transition-all duration-200
             hover:-translate-y-1 hover:shadow-lg active:translate-y-0 disabled:opacity-40"
           style={{ background: `${color}12`, border: `2px solid ${color}30` }}>
           <span className="font-bold text-sm" style={{ color }}>{label}</span>
           <span className="text-caption mt-1" style={{ color: 'var(--theme-text-muted)' }}>
-            {getIntervalText(calculatePreviewInterval(rating))}
+            {intervals && !intervalsLoading ? getDelayText(intervals[rating].delayMinutes) : '...'}
           </span>
           <kbd className="mt-1.5 px-2 py-0.5 rounded-md text-caption font-semibold"
             style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }}>
@@ -367,12 +376,14 @@ export default function WordBankReviewPage() {
 
   const reviewMutation = useReviewWord();
   const { playCorrect, playWrong } = useSoundEffects();
+  const { speak } = usePronunciation();
 
   // Stable ref for mutation.mutateAsync: avoids adding the entire mutation object
   // to useCallback deps (mutation identity changes on every API state transition
   // idle→pending→success→idle, which would thrash the keydown listener).
   const reviewMutateRef = useRef(reviewMutation.mutateAsync);
   useEffect(() => { reviewMutateRef.current = reviewMutation.mutateAsync; }, [reviewMutation.mutateAsync]);
+  const ratingInFlightRef = useRef(false);
 
   // Refs so keydown handler can read current values without being in its dep array.
   const sessionRef = useRef(session);
@@ -396,10 +407,12 @@ export default function WordBankReviewPage() {
   // Stable: reads current values from refs instead of closing over
   // session/currentWord/reviewMutation — none of them appear in deps.
   const handleRate = useCallback(async (rating: SRSRating) => {
+    if (ratingInFlightRef.current) return;
     const currentSession = sessionRef.current;
     if (!currentSession) return;
     const word = currentSession.words[currentSession.currentIndex];
     if (!word) return;
+    ratingInFlightRef.current = true;
     try {
       await reviewMutateRef.current({ wordId: word.id, rating });
       if (rating === 'again') playWrong(); else playCorrect();
@@ -415,6 +428,8 @@ export default function WordBankReviewPage() {
       setIsFlipped(false);
     } catch (error) {
       if (process.env.NODE_ENV === 'development') console.error('Review failed:', error);
+    } finally {
+      ratingInFlightRef.current = false;
     }
   }, [playCorrect, playWrong]);
 
@@ -424,6 +439,7 @@ export default function WordBankReviewPage() {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!sessionRef.current) return;
+      if (ratingInFlightRef.current) return;
       const word = sessionRef.current.words[sessionRef.current.currentIndex];
       if (!word) return;
       if (e.key === ' ' || e.key === 'Enter') {
@@ -432,7 +448,8 @@ export default function WordBankReviewPage() {
       }
       if (isFlippedRef.current) {
         const ratingMap: Record<string, SRSRating> = { '1': 'again', '2': 'hard', '3': 'good', '4': 'easy' };
-        if (ratingMap[e.key]) { e.preventDefault(); handleRate(ratingMap[e.key]); }
+        const rating = ratingMap[e.key];
+        if (rating) { e.preventDefault(); handleRate(rating); }
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -516,7 +533,7 @@ export default function WordBankReviewPage() {
             </div>
 
             {/* Card */}
-            <ReviewCard word={currentWord} isFlipped={isFlipped} onFlip={handleFlip} />
+            <ReviewCard word={currentWord} isFlipped={isFlipped} onFlip={handleFlip} onSpeak={speak} />
 
             {/* Rating buttons */}
             {isFlipped && (

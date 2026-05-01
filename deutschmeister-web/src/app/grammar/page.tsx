@@ -11,7 +11,7 @@ import {
 
 const LEVELS = ['ALL', 'A1', 'A2', 'B1'] as const;
 
-const LEVEL_COLORS: Record<string, { color: string; gradient: string }> = {
+const LEVEL_COLORS = {
   A1: { color: ACCENT.reading, gradient: `linear-gradient(135deg, ${ACCENT.reading}, #16A34A)` },
   A2: { color: ACCENT.srs,     gradient: `linear-gradient(135deg, ${ACCENT.srs}, #2563EB)` },
   B1: { color: ACCENT.xp,      gradient: `linear-gradient(135deg, ${ACCENT.xp}, #D97706)` },
@@ -33,7 +33,7 @@ export default function GrammarDashboardPage() {
     const map: Record<string, typeof lessons> = { A1: [], A2: [], B1: [] };
     for (const l of filteredLessons) {
       if (!map[l.level]) map[l.level] = [];
-      map[l.level].push(l);
+      map[l.level]!.push(l);
     }
     return map;
   }, [filteredLessons]);

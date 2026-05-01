@@ -18,7 +18,7 @@ const TEXT_TYPE_LABELS: Record<string, { de: string; vi: string }> = {
   dialog:        { de: 'Dialog',       vi: 'Hội thoại' },
 };
 
-const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
+const STATUS_CONFIG = {
   DRAFT:  { label: 'Chưa làm', color: 'var(--theme-text-muted)', bg: 'var(--theme-bg-secondary)' },
   GRADED: { label: 'Đã chấm',  color: STATUS.success, bg: `${STATUS.success}1A` },
 };
@@ -173,7 +173,7 @@ export default function ReadingListPage() {
                   ? { ...activeStyle, color: 'white' }
                   : { backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }
                 }>
-                {status === '' ? 'Tất cả trạng thái' : STATUS_CONFIG[status]?.label || status}
+                {status === '' ? 'Tất cả trạng thái' : (STATUS_CONFIG as unknown as Record<string, typeof STATUS_CONFIG.DRAFT>)[status]?.label || status}
               </button>
             );
           })}
@@ -201,7 +201,7 @@ export default function ReadingListPage() {
         <div className="space-y-2">
           {history.data.map(item => {
             const typeInfo = TEXT_TYPE_LABELS[item.textType] || { de: item.textType, vi: item.textType };
-            const statusCfg = STATUS_CONFIG[item.status] || STATUS_CONFIG.DRAFT;
+            const statusCfg = (STATUS_CONFIG as unknown as Record<string, typeof STATUS_CONFIG.DRAFT>)[item.status] ?? STATUS_CONFIG.DRAFT;
             const targetHref = item.status === 'GRADED'
               ? `/practice-test/reading/${item.id}/result`
               : `/practice-test/reading/${item.id}`;

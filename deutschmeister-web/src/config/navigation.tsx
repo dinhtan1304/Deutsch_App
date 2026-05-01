@@ -74,8 +74,9 @@ export const PRIMARY_NAV: NavItem[] = [
       { key: 'reading',     label: 'Đọc',         href: '/practice-test/reading',  icon: IconBookOpen, premium: true },
       { key: 'listening',   label: 'Nghe',        href: '/practice-test/listening', icon: IconHeadphones, premium: true },
       { key: 'writing',     label: 'Viết',        href: '/practice-test/writing',  icon: IconPenLine, premium: true },
-      { key: 'speaking',    label: 'Nói',         href: '/practice-test/speaking', icon: IconMic, premium: true },
-      { key: 'study-plan',  label: 'Kế hoạch',    href: '/study-plan',             icon: IconTarget },
+      { key: 'speaking',    label: 'Nói',         href: '/practice-test/speaking',   icon: IconMic, premium: true },
+      { key: 'dictation',   label: 'Chép chính tả', href: '/practice-test/dictation', icon: IconHeadphones },
+      { key: 'study-plan',  label: 'Kế hoạch',    href: '/study-plan',               icon: IconTarget },
     ],
   },
   {

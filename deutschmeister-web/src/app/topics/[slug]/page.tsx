@@ -563,7 +563,7 @@ export default function TopicDetailPage() {
                   <IconLightbulb size={16} style={{ color: topicColor }} />
                 </div>
                 <span className="text-sm font-semibold" style={{ color: 'var(--theme-text-primary)' }}>
-                  {LEVEL_TIPS[topic.level].title}
+                  {LEVEL_TIPS[topic.level]!.title}
                 </span>
               </div>
               <svg
@@ -576,7 +576,7 @@ export default function TopicDetailPage() {
             </button>
             {showTips && (
               <div className="px-5 py-4 space-y-3">
-                {LEVEL_TIPS[topic.level].tips.map((tip, i) => (
+                {LEVEL_TIPS[topic.level]!.tips.map((tip, i) => (
                   <div key={i} className="flex gap-3">
                     <div className="w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5 text-caption font-bold"
                       style={{ background: `${topicColor}15`, color: topicColor }}>

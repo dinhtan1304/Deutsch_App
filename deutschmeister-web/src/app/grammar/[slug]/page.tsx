@@ -10,7 +10,7 @@ import { IconArrowLeft, IconBookOpen, IconPenLine, IconSearch, IconCheck } from 
 import { usePronunciation } from '@/hooks/usePronunciation';
 import Link from 'next/link';
 
-const LEVEL_STYLE: Record<string, { bg: string; color: string; gradient: string; glow: string }> = {
+const LEVEL_STYLE = {
   A1: { bg: `${ACCENT.reading}12`, color: ACCENT.reading, gradient: `linear-gradient(135deg, ${ACCENT.reading}, #16A34A)`, glow: `${ACCENT.reading}33` },
   A2: { bg: `${ACCENT.srs}12`,     color: ACCENT.srs,     gradient: `linear-gradient(135deg, ${ACCENT.srs}, #2563EB)`,     glow: `${ACCENT.srs}33` },
   B1: { bg: `${ACCENT.xp}12`,      color: ACCENT.xp,      gradient: `linear-gradient(135deg, ${ACCENT.xp}, #D97706)`,      glow: `${ACCENT.xp}33` },
@@ -88,7 +88,7 @@ export default function GrammarLessonPage() {
     );
   }
 
-  const ls = LEVEL_STYLE[lesson.level] || LEVEL_STYLE.A1;
+  const ls = LEVEL_STYLE[lesson.level as keyof typeof LEVEL_STYLE] ?? LEVEL_STYLE.A1;
   const lessonProgress = progressList?.find(p => p.lessonSlug === slug);
   const isCompleted = lessonProgress?.status === 'completed';
   const correctCount = lessonProgress?.correctCount ?? 0;

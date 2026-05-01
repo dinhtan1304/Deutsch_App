@@ -1,5 +1,6 @@
 import { apiGet, apiPost } from './client';
 import { Progress, ReviewRating } from '@/types';
+import type { SRSPreviewResponse } from '@/lib/srs';
 
 export const progressApi = {
   getDue: async (limit = 20): Promise<Progress[]> => {
@@ -16,6 +17,10 @@ export const progressApi = {
 
   addWords: async (wordIds: string[]): Promise<{ added: number }> => {
     return apiPost<{ added: number }>('/progress/add', { wordIds });
+  },
+
+  getIntervalPreview: async (wordId: string): Promise<SRSPreviewResponse> => {
+    return apiGet<SRSPreviewResponse>(`/progress/preview/${wordId}`);
   },
 
   getStats: async (): Promise<{

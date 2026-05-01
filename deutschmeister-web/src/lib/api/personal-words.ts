@@ -6,8 +6,9 @@
 import { apiGet, apiPost, apiPut, apiDelete, api } from './client';
 import {
   PersonalWord, WordType, Level, Gender,
-  ImportResult, WordBankFilters, WordCollection, WordCollectionRef,
+  ImportResult, WordCollection, WordCollectionRef,
 } from '@/types/personalWord';
+import type { SRSPreviewResponse } from '@/lib/srs';
 
 // ============================================
 // Request/Response Types
@@ -198,8 +199,8 @@ export const personalWordsApi = {
   },
 
   // GET /api/personal-words/srs/preview/:id — Preview intervals
-  getIntervalPreview: async (id: string): Promise<IntervalPreview> => {
-    return apiGet<IntervalPreview>(`/personal-words/srs/preview/${id}`);
+  getIntervalPreview: async (id: string): Promise<SRSPreviewResponse> => {
+    return apiGet<SRSPreviewResponse>(`/personal-words/srs/preview/${id}`);
   },
 
   // POST /api/personal-words/srs/reset/:id — Reset SRS for a word
@@ -269,12 +270,7 @@ export interface BatchReviewResult {
   }>;
 }
 
-export interface IntervalPreview {
-  again: number;
-  hard: number;
-  good: number;
-  easy: number;
-}
+export type IntervalPreview = SRSPreviewResponse;
 
 // ── Collections ──────────────────────────────────────────────────────────────
 

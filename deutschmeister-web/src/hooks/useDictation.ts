@@ -1,0 +1,120 @@
+'use client';
+
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import {
+  dictationApi,
+  DictationSession,
+  DictationHistoryResponse,
+  DictationLibraryResponse,
+  DictationStats,
+  DictationVideo,
+} from '@/lib/api/dictation';
+
+// ─── Query keys ───────────────────────────────────────────────────────────────
+
+export const dictationKeys = {
+  all: ['dictation'] as const,
+  library: (params?: Record<string, any>) => [...dictationKeys.all, 'library', params] as const,
+  random: (params?: Record<string, any>) => [...dictationKeys.all, 'random', params] as const,
+  session: (id: string) => [...dictationKeys.all, 'session', id] as const,
+  history: (params?: Record<string, any>) => [...dictationKeys.all, 'history', params] as const,
+  stats: () => [...dictationKeys.all, 'stats'] as const,
+};
+
+// ─── Queries ─────────────────────────────────────────────────────────────────
+
+export function useDictationLibrary(params?: {
+  page?: number; limit?: number; cefrLevel?: string; topic?: string;
+}) {
+  return useQuery<DictationLibraryResponse>({
+    queryKey: dictationKeys.library(params),
+    queryFn: () => dictationApi.getLibrary(params),
+  });
+}
+
+export function useDictationRandom(params?: { cefrLevel?: string; topic?: string }) {
+  return useQuery<DictationVideo>({
+    queryKey: dictationKeys.random(params),
+    queryFn: () => dictationApi.getRandom(params),
+    enabled: false, // only fetch on demand via refetch()
+  });
+}
+
+export function useDictationSession(id: string) {
+  return useQuery<DictationSession>({
+    queryKey: dictationKeys.session(id),
+    queryFn: () => dictationApi.getSession(id),
+    enabled: !!id,
+  });
+}
+
+export function useDictationHistory(params?: {
+  page?: number; limit?: number; status?: string; cefrLevel?: string;
+}) {
+  return useQuery<DictationHistoryResponse>({
+    queryKey: dictationKeys.history(params),
+    queryFn: () => dictationApi.getHistory(params),
+  });
+}
+
+export function useDictationStats() {
+  return useQuery<DictationStats>({
+    queryKey: dictationKeys.stats(),
+    queryFn: () => dictationApi.getStats(),
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
+// ─── Mutations ────────────────────────────────────────────────────────────────
+
+export function useStartDictation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { videoId: string }) => dictationApi.startSession(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: dictationKeys.history() });
+    },
+  });
+}
+
+export function useStartDictationFromUrl() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { youtubeUrl: string; cefrLevel?: string }) =>
+      dictationApi.startFromUrl(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: dictationKeys.history() });
+    },
+  });
+}
+
+export function useAutosaveDictation() {
+  return useMutation({
+    mutationFn: ({ id, userAnswers }: { id: string; userAnswers: Record<string, string> }) =>
+      dictationApi.saveDraft(id, userAnswers),
+  });
+}
+
+export function useSubmitDictation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, userAnswers }: { id: string; userAnswers: Record<string, string> }) =>
+      dictationApi.submitSession(id, userAnswers),
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({ queryKey: dictationKeys.session(id) });
+      queryClient.invalidateQueries({ queryKey: dictationKeys.history() });
+      queryClient.invalidateQueries({ queryKey: dictationKeys.stats() });
+    },
+  });
+}
+
+export function useDeleteDictation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => dictationApi.deleteSession(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: dictationKeys.history() });
+      queryClient.invalidateQueries({ queryKey: dictationKeys.stats() });
+    },
+  });
+}

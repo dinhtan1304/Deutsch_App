@@ -221,7 +221,7 @@ export default function ExamWritingPage() {
     const el = promptRef.current;
     if (!el) return;
     const observer = new IntersectionObserver(
-      ([entry]) => setShowStickyPrompt(!entry.isIntersecting),
+      ([entry]) => setShowStickyPrompt(!entry!.isIntersecting),
       { threshold: 0, rootMargin: '-160px 0px 0px 0px' }
     );
     observer.observe(el);

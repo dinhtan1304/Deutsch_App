@@ -311,7 +311,7 @@ export const ExerciseList = ({ exercises, onSubmit, onBackToTheory }: ExerciseLi
     const [skipped, setSkipped]           = useState<Set<number>>(new Set());
     const { speak } = usePronunciation();
 
-    const exercise  = exercises[index];
+    const exercise  = exercises[index]!;
     const isLast    = index === exercises.length - 1;
     const typeMeta  = exercise ? TYPE_META[exercise.exerciseType] || { label: exercise.exerciseType, color: 'var(--theme-text-muted)', icon: '' } : null;
     const difficulty = exercise ? difficultyFromPoints(exercise.points) : null;
@@ -323,7 +323,7 @@ export const ExerciseList = ({ exercises, onSubmit, onBackToTheory }: ExerciseLi
                 const words = [...(ex.answerData.correctOrder as string[])];
                 for (let j = words.length - 1; j > 0; j--) {
                     const k = Math.floor(Math.random() * (j + 1));
-                    [words[j], words[k]] = [words[k], words[j]];
+                    const tmp = words[j]!; words[j] = words[k]!; words[k] = tmp;
                 }
                 map[i] = words;
             }

@@ -44,7 +44,9 @@ export function LandingDemoQuiz() {
 
   const handleAnswer = (article: string) => {
     if (selected) return;
-    const correct = words[idx].article.toLowerCase();
+    const w0 = words[idx];
+    if (!w0) return;
+    const correct = w0.article.toLowerCase();
     const isCorrect = article === correct;
     if (isCorrect) setScore((s) => s + 1);
     setSelected(article);
@@ -90,6 +92,7 @@ export function LandingDemoQuiz() {
 
   if (phase === 'playing') {
     const w = words[idx];
+    if (!w) return null;
     const correct = w.article.toLowerCase();
 
     return (
@@ -129,7 +132,7 @@ export function LandingDemoQuiz() {
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
           {(['der', 'die', 'das'] as const).map((art) => {
-            const color = ARTICLE_COLORS[art];
+            const color = ARTICLE_COLORS[art]!;
             let bg = `rgba(${hexToRgb(color)}, .1)`;
             let border = `1px solid rgba(${hexToRgb(color)}, .25)`;
             let textColor = color;

@@ -22,7 +22,7 @@ function TaskIcon({ type, completed }: { type: string; completed: boolean }) {
     );
   }
 
-  const iconMap: Record<string, { bg: string; svg: React.ReactNode }> = {
+  const iconMap = {
     learn_words: {
       bg: 'linear-gradient(135deg, #3B82F6, #6366F1)',
       svg: <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" /></svg>,
@@ -41,7 +41,7 @@ function TaskIcon({ type, completed }: { type: string; completed: boolean }) {
     },
   };
 
-  const icon = iconMap[type] || iconMap.learn_words;
+  const icon = (iconMap as unknown as Record<string, typeof iconMap.learn_words>)[type] ?? iconMap.learn_words;
 
   return (
     <div className="w-6 h-6 rounded-full flex items-center justify-center shrink-0" style={{ background: icon.bg }}>

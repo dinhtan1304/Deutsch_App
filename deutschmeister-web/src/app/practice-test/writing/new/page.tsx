@@ -27,7 +27,7 @@ export default function NewWritingPage() {
   const generateMutation = useGeneratePrompt();
 
   useEffect(() => { setSelectedTopic(''); setCustomTopic(''); setWritingType(''); setWordCountIdx(0); }, [level]);
-  useEffect(() => { if (suggestions?.writingTypes.length && !writingType) setWritingType(suggestions.writingTypes[0].value); }, [suggestions, writingType]);
+  useEffect(() => { if (suggestions?.writingTypes.length && !writingType) setWritingType(suggestions.writingTypes[0]!.value); }, [suggestions, writingType]);
 
   const finalTopic = customTopic.trim() || selectedTopic;
   const wordCount = suggestions?.wordCountSuggestions[wordCountIdx];

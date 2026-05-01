@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePhonemeDrills, usePhonemeDrillStats } from '@/hooks/usePronunciationScoring';
 import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 
-const DIFFICULTY_COLORS: Record<string, { bg: string; text: string; label: string }> = {
+const DIFFICULTY_COLORS = {
   high:   { bg: 'rgba(239,68,68,.1)',  text: STATUS.danger,  label: 'Khó' },
   medium: { bg: 'rgba(245,158,11,.1)', text: STATUS.warning, label: 'Trung bình' },
   low:    { bg: 'rgba(34,197,94,.1)',   text: STATUS.success, label: 'Dễ' },

@@ -1,22 +1,23 @@
 ﻿'use client';
 /* eslint-disable no-restricted-syntax */
 
-import { useState, useMemo } from 'react';
-import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import { useState } from 'react';
+import { ACCENT, STATUS } from '@/lib/tokens';
 import Link from 'next/link';
-import { useDueCards, useReviewCard, useProgressStats } from '@/hooks/useProgress';
-import { ReviewRating } from '@/types';
+import { useDueCards, useReviewCard, useProgressStats, useProgressIntervalPreview } from '@/hooks/useProgress';
+import { getDelayText } from '@/lib/srs';
+import { Progress, ReviewRating } from '@/types';
 
 // Compact inline SRS review — 5 cards max, surfaced directly on the dashboard
 // so the user never has to navigate elsewhere to clear their daily queue.
 // The full review experience lives at /review; this widget is the 1-click entry.
 const QUICK_LIMIT = 5;
 
-const RATING_BUTTONS: { rating: ReviewRating; label: string; color: string; hint: string }[] = [
-  { rating: 'again', label: 'Quên', color: STATUS.danger, hint: '<1m' },
-  { rating: 'hard', label: 'Khó', color: ACCENT.xp, hint: '~6m' },
-  { rating: 'good', label: 'Được', color: STATUS.success, hint: '+1d' },
-  { rating: 'easy', label: 'Dễ', color: ACCENT.srs, hint: '+4d' },
+const RATING_BUTTONS: { rating: ReviewRating; label: string; color: string }[] = [
+  { rating: 'again', label: 'Quên', color: STATUS.danger },
+  { rating: 'hard', label: 'Khó', color: ACCENT.xp },
+  { rating: 'good', label: 'Được', color: STATUS.success },
+  { rating: 'easy', label: 'Dễ', color: ACCENT.srs },
 ];
 
 export function QuickReviewWidget() {
@@ -27,11 +28,14 @@ export function QuickReviewWidget() {
   const [index, setIndex] = useState(0);
   const [revealed, setRevealed] = useState(false);
   const [completed, setCompleted] = useState(0);
+  const [error, setError] = useState<string | null>(null);
+  const [sessionCards, setSessionCards] = useState<Progress[] | null>(null);
 
-  // Snapshot the first 5 due cards so rating one doesn't shift the list
-  // under the user (useDueCards re-runs after each mutation).
-  const cards = useMemo(() => allDue.slice(0, QUICK_LIMIT), [allDue]);
+  // Lock the first 5 cards once the user starts rating so query invalidation
+  // cannot shift the active list under the session.
+  const cards = sessionCards ?? allDue.slice(0, QUICK_LIMIT);
   const current = cards[index];
+  const { data: intervals } = useProgressIntervalPreview(current?.wordId);
   const dueTotal = stats?.due ?? 0;
 
   // Nothing due — hide the widget entirely. Don't render empty state; the
@@ -90,15 +94,20 @@ export function QuickReviewWidget() {
     );
   }
 
-  const handleRate = (rating: ReviewRating) => {
-    if (!current) return;
-    // Fire-and-forget: let the mutation run in the background while we
-    // advance the UI. The SRS queue just needs the rating logged; the
-    // user doesn't need to wait for the server round-trip.
-    reviewMutation.mutate({ wordId: current.wordId, rating });
-    setCompleted((c) => c + 1);
-    setIndex((i) => i + 1);
-    setRevealed(false);
+  const handleRate = async (rating: ReviewRating) => {
+    const activeCards = sessionCards ?? allDue.slice(0, QUICK_LIMIT);
+    const activeCurrent = activeCards[index];
+    if (!activeCurrent) return;
+    if (!sessionCards) setSessionCards(activeCards);
+    setError(null);
+    try {
+      await reviewMutation.mutateAsync({ wordId: activeCurrent.wordId, rating });
+      setCompleted((c) => c + 1);
+      setIndex((i) => i + 1);
+      setRevealed(false);
+    } catch {
+      setError('Khong the luu ket qua on. Thu lai.');
+    }
   };
 
   const progressPct = (index / cards.length) * 100;
@@ -175,7 +184,7 @@ export function QuickReviewWidget() {
                 key={btn.rating}
                 type="button"
                 onClick={() => handleRate(btn.rating)}
-                disabled={!revealed}
+                disabled={!revealed || reviewMutation.isPending}
                 className="py-2 rounded-lg text-caption font-bold transition-all disabled:opacity-40"
                 style={{
                   backgroundColor: revealed ? `${btn.color}18` : 'var(--theme-bg-secondary)',
@@ -183,10 +192,17 @@ export function QuickReviewWidget() {
                   border: `1px solid ${revealed ? `${btn.color}40` : 'var(--theme-border)'}`,
                 }}>
                 <div>{btn.label}</div>
-                <div className="text-[9px] font-normal opacity-70">{btn.hint}</div>
+                <div className="text-[9px] font-normal opacity-70">
+                  {intervals ? getDelayText(intervals[btn.rating].delayMinutes) : '...'}
+                </div>
               </button>
             ))}
           </div>
+          {error && (
+            <p className="mt-2 text-caption font-medium" style={{ color: STATUS.danger }}>
+              {error}
+            </p>
+          )}
         </>
       )}
     </div>

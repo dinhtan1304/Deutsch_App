@@ -34,7 +34,7 @@ export default function NewReadingPage() {
 
   useEffect(() => {
     if (suggestions?.textTypes.length && !textType) {
-      setTextType(suggestions.textTypes[0].value);
+      setTextType(suggestions.textTypes[0]!.value);
     }
   }, [suggestions, textType]);
 

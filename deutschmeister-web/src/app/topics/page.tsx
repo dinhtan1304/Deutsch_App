@@ -25,7 +25,7 @@ function getLocalProgress(topicId: string, totalWords: number): { wordsLearned: 
 }
 
 // ─── Level colors ───
-const LEVEL_COLORS: Record<string, { color: string; gradient: string }> = {
+const LEVEL_COLORS = {
   A1: { color: ACCENT.reading, gradient: `linear-gradient(135deg, ${ACCENT.reading}, #16A34A)` },
   A2: { color: ACCENT.srs,     gradient: `linear-gradient(135deg, ${ACCENT.srs}, #2563EB)` },
   B1: { color: ACCENT.xp,      gradient: `linear-gradient(135deg, ${ACCENT.xp}, #D97706)` },
@@ -165,7 +165,7 @@ export default function TopicsPage() {
         <div className="flex items-center gap-2 mb-6">
           <span className="text-body font-medium" style={{ color: 'var(--theme-text-muted)' }}>Cấp độ:</span>
           {['A1', 'A2', 'B1', 'B2'].map(level => {
-            const lc = LEVEL_COLORS[level] || LEVEL_COLORS.A1;
+            const lc = (LEVEL_COLORS as unknown as Record<string, typeof LEVEL_COLORS.A1>)[level] ?? LEVEL_COLORS.A1;
             const isActive = selectedLevel === level;
             return (
               <button key={level} onClick={() => setSelectedLevel(level)}

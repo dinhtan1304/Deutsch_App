@@ -21,6 +21,7 @@ export const progressKeys = {
   due: (limit?: number) => [...progressKeys.all, 'due', limit] as const,
   list: () => [...progressKeys.all, 'list'] as const,
   stats: () => [...progressKeys.all, 'stats'] as const,
+  preview: (wordId?: string) => [...progressKeys.all, 'preview', wordId] as const,
 };
 
 // ============================================
@@ -54,6 +55,16 @@ export function useProgressStats() {
   });
 }
 
+/** Preview backend-owned SRS intervals for one built-in card */
+export function useProgressIntervalPreview(wordId?: string) {
+  return useQuery({
+    queryKey: progressKeys.preview(wordId),
+    queryFn: () => progressApi.getIntervalPreview(wordId as string),
+    enabled: !!wordId,
+    staleTime: 30 * 1000,
+  });
+}
+
 // ============================================
 // Mutations
 // ============================================
@@ -65,9 +76,17 @@ export function useReviewCard() {
   return useMutation({
     mutationFn: ({ wordId, rating }: { wordId: string; rating: ReviewRating }) =>
       progressApi.review(wordId, rating),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: progressKeys.all });
-      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+    onSuccess: (updatedCard) => {
+      // Optimistically update only the reviewed card in the due-cards cache
+      // to avoid a full refetch during an active review session.
+      // Stats and dashboard are marked stale but not immediately refetched.
+      queryClient.setQueryData(
+        progressKeys.due(100),
+        (old: Progress[] | undefined) =>
+          old?.map(c => c.wordId === updatedCard.wordId ? updatedCard : c) ?? old,
+      );
+      queryClient.invalidateQueries({ queryKey: progressKeys.stats(), refetchType: 'none' });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'], refetchType: 'none' });
     },
   });
 }

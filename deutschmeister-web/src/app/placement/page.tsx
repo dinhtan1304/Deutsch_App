@@ -85,7 +85,7 @@ export default function PlacementRetakePage() {
   const handleAnswer = useCallback((optIdx: number) => {
     if (selected !== null) return;
     setSelected(optIdx);
-    const correct = optIdx === QUESTIONS[qIdx].answer;
+    const correct = optIdx === QUESTIONS[qIdx]!.answer;
     setAnswers(prev => [...prev, correct]);
 
     timer.current = setTimeout(() => {
@@ -108,7 +108,7 @@ export default function PlacementRetakePage() {
     }
   };
 
-  const q = QUESTIONS[qIdx];
+  const q = QUESTIONS[qIdx]!;
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-10"

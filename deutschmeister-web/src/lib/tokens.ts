@@ -26,6 +26,7 @@ export const ACCENT = {
   premium: '#8B5CF6',      // violet-500 — same hue as vocab (intentional)
   teal: '#14B8A6',         // teal-500 — reading gradient endpoint, dialogue type
   cyan: '#06B6D4',         // cyan-500 — aussprache/pronunciation criterion
+  dictation: '#06B6D4',    // cyan-500 — dictation feature accent
 } as const;
 
 export const STATUS = {
@@ -49,6 +50,7 @@ export const GRADIENT = {
   action: 'linear-gradient(135deg, #3B82F6, #6366F1)',   // blue → indigo, general CTAs
   history: 'linear-gradient(135deg, #8B5CF6, #6366F1)',  // violet → indigo, history
   speaking: 'linear-gradient(135deg, #F59E0B, #EF4444)', // amber → red, speaking/free-speech
+  dictation: 'linear-gradient(135deg, #06B6D4, #3B82F6)', // cyan → blue, dictation
 } as const;
 
 export const RADIUS = {

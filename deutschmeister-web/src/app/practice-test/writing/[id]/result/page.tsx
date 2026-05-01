@@ -38,7 +38,7 @@ const ERROR_TYPE_INFO: Record<string, { labelVi: string; color: string }> = {
   vocabulary:  { labelVi: 'Từ vựng',      color: STATUS.success },
 };
 
-const SEVERITY_CONFIG: Record<string, { label: string; color: string }> = {
+const SEVERITY_CONFIG = {
   error:      { label: 'Lỗi',      color: STATUS.danger },
   warning:    { label: 'Cảnh báo', color: STATUS.warning },
   suggestion: { label: 'Gợi ý',    color: STATUS.info },
@@ -135,7 +135,7 @@ function ErrorCard({ error, sessionId }: { error: WritingError; sessionId: strin
   const { user } = useAuthStore();
   const isPremium = user?.subscription?.plan === 'premium' && user?.subscription?.status === 'active';
   const typeInfo = ERROR_TYPE_INFO[error.errorType] || { labelVi: error.errorType, color: 'var(--theme-text-muted)' };
-  const severity = SEVERITY_CONFIG[error.severity] || SEVERITY_CONFIG.error;
+  const severity = (SEVERITY_CONFIG as unknown as Record<string, typeof SEVERITY_CONFIG.error>)[error.severity] ?? SEVERITY_CONFIG.error;
 
   const handleExplain = async (e: React.MouseEvent) => {
     e.stopPropagation();

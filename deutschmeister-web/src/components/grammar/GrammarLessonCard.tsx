@@ -15,7 +15,7 @@ interface GrammarLessonCardProps {
   lockedReason?: string;
 }
 
-const LEVEL_STYLE: Record<string, { bg: string; color: string; gradient: string; glow: string }> = {
+const LEVEL_STYLE = {
   A1: { bg: `${ACCENT.reading}1A`, color: ACCENT.reading, gradient: `linear-gradient(135deg, ${ACCENT.reading}, #16A34A)`, glow: `${ACCENT.reading}40` },
   A2: { bg: `${ACCENT.srs}1A`,     color: ACCENT.srs,     gradient: `linear-gradient(135deg, ${ACCENT.srs}, #2563EB)`,     glow: `${ACCENT.srs}40` },
   B1: { bg: `${ACCENT.xp}1A`,      color: ACCENT.xp,      gradient: `linear-gradient(135deg, ${ACCENT.xp}, #D97706)`,      glow: `${ACCENT.xp}40` },
@@ -26,7 +26,7 @@ export const GrammarLessonCard = ({ lesson, progress, locked, lockedReason }: Gr
   const isLocked = locked || lesson.isActive === false;
   const isCompleted = progress?.status === 'completed';
   const isInProgress = progress?.status === 'in_progress';
-  const ls = LEVEL_STYLE[lesson.level] || LEVEL_STYLE.A1;
+  const ls = (LEVEL_STYLE as unknown as Record<string, typeof LEVEL_STYLE.A1>)[lesson.level] ?? LEVEL_STYLE.A1;
 
   const exerciseDone = progress?.score ?? 0;
   const exerciseTotal = lesson.exerciseCount ?? 0;

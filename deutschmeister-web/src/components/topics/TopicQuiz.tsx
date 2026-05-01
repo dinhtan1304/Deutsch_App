@@ -31,7 +31,9 @@ function shuffle<T>(arr: T[]): T[] {
   const a = [...arr];
   for (let i = a.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
+    const temp = a[i]!;
+    a[i] = a[j]!;
+    a[j] = temp;
   }
   return a;
 }
@@ -56,7 +58,7 @@ function generateQuestions(words: TopicWord[], count: number): Question[] {
     // Random mode
     const modes: QuizMode[] = ['de-to-vi', 'vi-to-de'];
     if (word.article) modes.push('article');
-    const mode = modes[Math.floor(Math.random() * modes.length)];
+    const mode = modes[Math.floor(Math.random() * modes.length)]!;
 
     let correct: string;
     let distractorPool: string[];
@@ -136,7 +138,7 @@ export function TopicQuiz({ words, topicColor, onMarkLearned }: Props) {
   const total = questions.length;
 
   const handleSelect = useCallback((optionIndex: number) => {
-    if (isAnswered) return;
+    if (isAnswered || !current) return;
     setSelectedOption(optionIndex);
     setIsAnswered(true);
     if (optionIndex === current.correctIndex) {

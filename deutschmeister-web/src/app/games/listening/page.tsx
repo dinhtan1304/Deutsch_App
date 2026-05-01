@@ -84,7 +84,7 @@ export default function ListeningQuizPage() {
     const shuffled = shuffle(pool);
     // Each question uses 1 correct answer; distractors drawn from remaining pool
     return Array.from({ length: count }, (_, i) => {
-      const correct = shuffled[i % shuffled.length];
+      const correct = shuffled[i % shuffled.length]!;
       const distractors = shuffled
         .filter(w => w.id !== correct.id)
         .slice(0, OPTIONS_PER_Q - 1);
@@ -123,7 +123,7 @@ export default function ListeningQuizPage() {
     session.start(questionsCount);
 
     // Auto-play first word after state settles
-    setTimeout(() => playCurrentWord(qs[0].correct), 300);
+    setTimeout(() => playCurrentWord(qs[0]!.correct), 300);
   };
 
   const handleReplay = useCallback(() => {
@@ -193,7 +193,7 @@ export default function ListeningQuizPage() {
         replayCountRef.current = 0;
         setReplayCount(0);
         // Auto-play next word
-        setTimeout(() => playCurrentWord(questions[nextIndex].correct), 200);
+        setTimeout(() => playCurrentWord(questions[nextIndex]!.correct), 200);
       }
     }, 1200);
   }, [answered, questions, index, answers, questionsCount, playCorrect, playWrong, playCombo, playLevelUp, playGameOver, playCurrentWord, session]);

@@ -27,14 +27,14 @@ export function ActivityHeatmap({ data }: ActivityHeatmapProps) {
 
   // Parse a YYYY-MM-DD string as local date (avoid UTC midnight → wrong day in GMT+7)
   const parseLocalDate = (dateStr: string) => {
-    const [y, m, d] = dateStr.split('-').map(Number);
-    return new Date(y, m - 1, d);
+    const parts = dateStr.split('-').map(Number);
+    return new Date(parts[0]!, parts[1]! - 1, parts[2]!);
   };
 
   const weeks = useMemo(() => {
     const result: ActivityDay[][] = []
     let currentWeek: ActivityDay[] = []
-    const firstDate = parseLocalDate(data.data[0]?.date)
+    const firstDate = parseLocalDate(data.data[0]?.date ?? '')
     const firstDayOfWeek = firstDate.getDay()
 
     for (let i = 0; i < firstDayOfWeek; i++) {
@@ -61,7 +61,7 @@ export function ActivityHeatmap({ data }: ActivityHeatmapProps) {
       if (firstValidDay) {
         const month = parseLocalDate(firstValidDay.date).getMonth()
         if (month !== lastMonth) {
-          labels.push({ month: MONTHS[month], position: weekIndex })
+          labels.push({ month: MONTHS[month]!, position: weekIndex })
           lastMonth = month
         }
       }
@@ -78,8 +78,8 @@ export function ActivityHeatmap({ data }: ActivityHeatmapProps) {
   };
 
   const formatDate = (dateStr: string) => {
-    const [y, m, d] = dateStr.split('-').map(Number);
-    return new Date(y, m - 1, d).toLocaleDateString('vi-VN', {
+    const parts = dateStr.split('-').map(Number);
+    return new Date(parts[0]!, parts[1]! - 1, parts[2]!).toLocaleDateString('vi-VN', {
       weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
     });
   };
@@ -125,7 +125,7 @@ export function ActivityHeatmap({ data }: ActivityHeatmapProps) {
                   position: 'relative',
                   left: `${label.position * 14}px`,
                   marginRight: i < monthLabels.length - 1
-                    ? `${(monthLabels[i + 1]?.position - label.position - 3) * 14}px` : 0,
+                    ? `${(monthLabels[i + 1]!.position - label.position - 3) * 14}px` : 0,
                 }}
               >
                 {label.month}

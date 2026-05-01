@@ -32,14 +32,14 @@ function isIPAorMeta(text: string): boolean {
 
 function extractGerman(text: string): string {
   const cleaned = text.replace(/\s*\([^)]*\)\s*/g, '').trim();
-  if (cleaned.includes('/') && !cleaned.includes(' ')) return cleaned.split('/')[0];
+  if (cleaned.includes('/') && !cleaned.includes(' ')) return cleaned.split('/')[0] ?? cleaned;
   return cleaned;
 }
 
 function getAudioColumnIndex(headers: string[], rows: string[][]): number {
   const len = headers.length;
   if (len >= 3) return len - 1;
-  if (len === 2 && rows.length > 0 && !isIPAorMeta(rows[0][1])) return 1;
+  if (len === 2 && rows.length > 0 && !isIPAorMeta(rows[0]![1]!)) return 1;
   return -1;
 }
 
@@ -62,7 +62,7 @@ function isSpecialLetter(letter: string): boolean {
 function parseExample(raw: string): { de: string; vi: string } | null {
   const m = raw.match(/^(.+?)\s*\(([^)]+)\)\s*$/);
   if (!m) return null;
-  return { de: m[1].trim(), vi: m[2].trim() };
+  return { de: m[1]!.trim(), vi: m[2]!.trim() };
 }
 
 // ─── Alphabet card data ────────────────────────────────────────────────
@@ -206,7 +206,7 @@ function AlphabetCardGrid({ rows, onSpeak }: {
           const special = isSpecialLetter(letter);
           const ns      = noiState[idx] ?? 'idle';
           const isNghe  = speakingIdx === idx;
-          const palette = special ? SPECIAL_PALETTE : CARD_PALETTE[idx % CARD_PALETTE.length];
+          const palette = special ? SPECIAL_PALETTE : CARD_PALETTE[idx % CARD_PALETTE.length]!;
           const tip     = LETTER_TIPS[letter] ?? `Luyện phát âm "${name}" nhiều lần để quen.`;
           const isFlipped = flippedIdx === idx;
 
@@ -312,8 +312,8 @@ function levenshtein(a: string, b: string): number {
   const m = a.length, n = b.length;
   const dp = Array.from({ length: m + 1 }, (_, i) => Array.from({ length: n + 1 }, (_, j) => (i === 0 ? j : j === 0 ? i : 0)));
   for (let i = 1; i <= m; i++) for (let j = 1; j <= n; j++)
-    dp[i][j] = a[i-1] === b[j-1] ? dp[i-1][j-1] : 1 + Math.min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]);
-  return dp[m][n];
+    dp[i]![j] = a[i-1] === b[j-1] ? dp[i-1]![j-1]! : 1 + Math.min(dp[i-1]![j]!, dp[i]![j-1]!, dp[i-1]![j-1]!);
+  return dp[m]![n]!;
 }
 
 // ─── Main TheorySection ────────────────────────────────────────────────
@@ -348,7 +348,7 @@ export const TheorySection = ({ content }: TheorySectionProps) => {
     let i = 0;
     const next = () => {
       if (i >= texts.length) { setReadingAll(null); return; }
-      speak(texts[i++]);
+      speak(texts[i++]!);
       speakTimerRef.current = setTimeout(next, 2000);
     };
     next();
@@ -448,8 +448,8 @@ export const TheorySection = ({ content }: TheorySectionProps) => {
                   {section.table.rows.map((row, rIdx) => {
                     const cellKey  = `${sIdx}-${rIdx}`;
                     const isPlaying = playingCell === cellKey;
-                    const audioText = audioCol >= 0 ? row[audioCol] : '';
-                    const palette  = CARD_PALETTE[rIdx % CARD_PALETTE.length];
+                    const audioText = audioCol >= 0 ? (row[audioCol] ?? '') : '';
+                    const palette  = CARD_PALETTE[rIdx % CARD_PALETTE.length]!;
 
                     return (
                       <div

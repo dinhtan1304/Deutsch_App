@@ -139,7 +139,7 @@ export default function WordsPage() {
   const sentinelRef = useRef<HTMLDivElement>(null);
 
   const handleIntersect = useCallback(([entry]: IntersectionObserverEntry[]) => {
-    if (entry.isIntersecting && hasNextPage && !isFetchingNextPage) {
+    if (entry?.isIntersecting && hasNextPage && !isFetchingNextPage) {
       fetchNextPage();
     }
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);

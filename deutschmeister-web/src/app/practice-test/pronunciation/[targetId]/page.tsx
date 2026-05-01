@@ -155,7 +155,7 @@ export default function PronunciationPracticePage() {
 
   const handleNext = () => {
     if (currentIndex >= 0 && currentIndex < allTargets.length - 1) {
-      const next = allTargets[currentIndex + 1];
+      const next = allTargets[currentIndex + 1]!;
       router.push(`/practice-test/pronunciation/${next.id}`);
       setResult(null);
       setRecState('idle');

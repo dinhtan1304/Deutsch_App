@@ -75,7 +75,7 @@ function Waveform({ active }: { active: boolean }) {
 function blobToBase64(blob: Blob): Promise<string> {
   return new Promise(resolve => {
     const reader = new FileReader();
-    reader.onload = () => resolve((reader.result as string).split(',')[1]);
+    reader.onload = () => resolve((reader.result as string).split(',')[1]!);
     reader.readAsDataURL(blob);
   });
 }
@@ -147,9 +147,9 @@ export default function ExamSpeakingSessionPage() {
   }
 
   const teile = session.teile as ExamSpeakingTeil[];
-  const currentTeil = teile[currentTeilIdx];
+  const currentTeil = teile[currentTeilIdx]!;
   const isLastTeil = currentTeilIdx === teile.length - 1;
-  const allDone = teile.every((_, i) => blobMap[teile[i].number] !== undefined);
+  const allDone = teile.every((_, i) => blobMap[teile[i]!.number] !== undefined);
 
   // ─── Handlers ──────────────────────────────────────────────────────────────
 

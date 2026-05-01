@@ -57,7 +57,7 @@ const getEmptyWeeklyProgress = (): WeeklyProgress[] => {
   return Array.from({ length: 7 }, (_, i) => {
     const date = new Date();
     date.setDate(date.getDate() - (6 - i));
-    return { day: dayNames[date.getDay()], date: toLocalDateStr(date), wordsLearned: 0, gamesPlayed: 0, minutes: 0 };
+    return { day: dayNames[date.getDay()]!, date: toLocalDateStr(date), wordsLearned: 0, gamesPlayed: 0, minutes: 0 };
   });
 };
 

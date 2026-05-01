@@ -72,7 +72,7 @@ type RecordState = 'idle' | 'recording' | 'done';
 function blobToBase64(blob: Blob): Promise<string> {
   return new Promise(res => {
     const r = new FileReader();
-    r.onload = () => res((r.result as string).split(',')[1]);
+    r.onload = () => res((r.result as string).split(',')[1]!);
     r.readAsDataURL(blob);
   });
 }

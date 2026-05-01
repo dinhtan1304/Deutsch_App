@@ -6,7 +6,7 @@ import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 import { useGrammarAnalyzerStore } from '@/stores/grammarAnalyzerStore';
 
 /** Màu cho từng vai trò ngữ pháp */
-const ROLE_COLORS: Record<string, string> = {
+const ROLE_COLORS = {
   subject: ACCENT.srs,
   verb: STATUS.danger,
   object: STATUS.success,

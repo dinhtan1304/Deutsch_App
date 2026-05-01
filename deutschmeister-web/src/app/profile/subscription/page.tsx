@@ -21,7 +21,7 @@ function daysUntil(dateStr: string): number {
   return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
 }
 
-const STATUS_LABELS: Record<string, { text: string; color: string; bg: string }> = {
+const STATUS_LABELS = {
   pending: { text: 'Chờ xác nhận', color: ACCENT.xp, bg: 'rgba(245,158,11,0.1)' },
   confirmed: { text: 'Đã xác nhận', color: STATUS.success, bg: 'rgba(34,197,94,0.1)' },
   rejected: { text: 'Từ chối', color: STATUS.danger, bg: 'rgba(239,68,68,0.1)' },
@@ -153,7 +153,7 @@ export default function SubscriptionPage() {
           </h2>
           <div className="space-y-2">
             {data.payments.map((p) => {
-              const s = STATUS_LABELS[p.status] || STATUS_LABELS.pending;
+              const s = (STATUS_LABELS as unknown as Record<string, typeof STATUS_LABELS.pending>)[p.status] ?? STATUS_LABELS.pending;
               return (
                 <div
                   key={p.id}

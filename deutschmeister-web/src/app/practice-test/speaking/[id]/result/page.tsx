@@ -34,7 +34,7 @@ function IconVolume({ size = 13, style }: { size?: number; style?: React.CSSProp
 }
 
 // ─── Constants ────────────────────────────────────────────────────────────────
-const CRITERIA_CONFIG: Record<string, { label: string; icon: string; color: string; bg: string }> = {
+const CRITERIA_CONFIG = {
   aufgabe:    { label: 'Aufgabe',    icon: '🎯', color: STATUS.success, bg: 'rgba(34,197,94,.08)'  },
   grammatik:  { label: 'Grammatik',  icon: '📐', color: ACCENT.xp,      bg: 'rgba(245,158,11,.08)' },
   aussprache: { label: 'Aussprache', icon: '🔊', color: ACCENT.cyan,    bg: 'rgba(6,182,212,.08)'  },

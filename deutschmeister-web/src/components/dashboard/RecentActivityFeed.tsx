@@ -11,12 +11,7 @@ interface RecentActivityFeedProps {
   initialCount?: number;
 }
 
-const TYPE_CONFIG: Record<string, {
-  icon: React.ComponentType<{ size?: number; className?: string }>;
-  gradient: string;
-  accent: string;
-  label: string;
-}> = {
+const TYPE_CONFIG = {
   game:           { icon: IconGamepad,       gradient: GRADIENT.action,                                                  accent: ACCENT.srs,         label: 'Game' },
   // eslint-disable-next-line no-restricted-syntax
   word:           { icon: IconPencil,        gradient: 'linear-gradient(135deg, #10B981, #34D399)',                      accent: ACCENT.reading,     label: 'Từ vựng' },
@@ -111,7 +106,7 @@ export function RecentActivityFeed({ data, initialCount = 2 }: RecentActivityFee
         <>
           <div className="space-y-2">
             {visibleData.map((activity, i) => {
-              const config = TYPE_CONFIG[activity.type] || TYPE_CONFIG.word;
+              const config = (TYPE_CONFIG as unknown as Record<string, typeof TYPE_CONFIG.word>)[activity.type] ?? TYPE_CONFIG.word;
               const Icon = config.icon;
 
               return (

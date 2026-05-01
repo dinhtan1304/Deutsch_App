@@ -356,7 +356,7 @@ export default function ExamListeningPage() {
   if (session.status === 'GRADED') return null;
 
   const teile = session.teile as ExamListeningTeil[];
-  const teil = teile[currentTeil];
+  const teil = teile[currentTeil]!;
   const teilKey = `teil_${teil.number}`;
   const teilAnswers = userAnswers[teilKey] || {};
   const teilTotalQ = teil.questions.length;

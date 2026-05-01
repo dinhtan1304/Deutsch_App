@@ -41,7 +41,7 @@ function IconSparkles({ size = 16 }: { size?: number }) {
 }
 
 // ─── Constants ────────────────────────────────────────────────────────────────
-const CRITERIA_CONFIG: Record<string, { label: string; icon: string; color: string }> = {
+const CRITERIA_CONFIG = {
   aufgabe:    { label: 'Aufgabe',    icon: '🎯', color: STATUS.success },
   grammatik:  { label: 'Grammatik',  icon: '📐', color: ACCENT.xp      },
   aussprache: { label: 'Aussprache', icon: '🔊', color: ACCENT.cyan    },

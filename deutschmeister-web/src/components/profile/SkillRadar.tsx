@@ -125,16 +125,16 @@ function RadarChart({ data }: { data: SkillScores }) {
       {/* Data dots */}
       {values.map((v, i) => {
         const [x, y] = polarToXY(i * step, (v / 100) * R);
-        const sk = data[SKILLS[i].key] as SkillScore;
+        const sk = data[SKILLS[i]!.key] as SkillScore;
         if (sk.score === null) return null;
         return (
           <g key={i} className="transition-all duration-500">
-            <circle cx={x} cy={y} r={6} fill={SKILLS[i].color} opacity={0.2} />
+            <circle cx={x} cy={y} r={6} fill={SKILLS[i]!.color} opacity={0.2} />
             <circle
               cx={x}
               cy={y}
               r={3.5}
-              fill={SKILLS[i].color}
+              fill={SKILLS[i]!.color}
               stroke="white"
               strokeWidth={2}
             />
