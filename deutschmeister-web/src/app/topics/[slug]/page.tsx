@@ -121,12 +121,12 @@ export default function TopicDetailPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps -- lsKey only depends on user?.id which is already listed
   }, [topic, user?.id]);
 
-  const syncProgressToServer = (newLearnedCount: number) => {
+  const syncProgressToServer = (newLearnedCount: number, wordIds: string[]) => {
     if (!isAuthenticated || !topic) return;
     if (syncDebounceRef.current) clearTimeout(syncDebounceRef.current);
     syncDebounceRef.current = setTimeout(() => {
       syncDebounceRef.current = null;
-      updateProgressMutation.mutate({ topicId: topic.id, wordsLearned: newLearnedCount });
+      updateProgressMutation.mutate({ topicId: topic.id, wordsLearned: newLearnedCount, wordIds });
     }, 600);
   };
 
@@ -134,7 +134,7 @@ export default function TopicDetailPage() {
     if (topic) {
       const key = lsKey(topic.id);
       if (key) localStorage.setItem(key, JSON.stringify([...newSet]));
-      syncProgressToServer(newSet.size);
+      syncProgressToServer(newSet.size, Array.from(newSet));
     }
   };
 

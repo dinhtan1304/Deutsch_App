@@ -94,10 +94,10 @@ function getBankBin(bankName: string): string {
   return bankName;
 }
 
-const MONTHLY_PRICE = 99000;
-const QUARTERLY_PRICE = 249000;
-const YEARLY_PRICE = 990000;
-const LIFETIME_PRICE = 1490000;
+const MONTHLY_PRICE = 50000;
+const QUARTERLY_PRICE = 119000;
+const YEARLY_PRICE = 369000;
+const LIFETIME_PRICE = 1499000;
 
 function priceForPeriod(p: BillingPeriod): number {
   if (p === 'lifetime') return LIFETIME_PRICE;

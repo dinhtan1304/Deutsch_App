@@ -6,17 +6,73 @@ import { useGrammarLessons, useGrammarProgress } from '@/hooks/useGrammar';
 import { GrammarProgress } from '@/types/grammar';
 import GrammarLessonCard from '@/components/grammar/GrammarLessonCard';
 import { GRADIENT, ACCENT, STATUS } from '@/lib/tokens';
-import {
-  IconBook, IconList,
-} from '@/components/ui/Icons';
 
 const LEVELS = ['ALL', 'A1', 'A2', 'B1'] as const;
 
 const LEVEL_COLORS = {
-  A1: { color: ACCENT.reading, gradient: `linear-gradient(135deg, ${ACCENT.reading}, #16A34A)`, glow: `${ACCENT.reading}40` },
-  A2: { color: ACCENT.srs,     gradient: `linear-gradient(135deg, ${ACCENT.srs}, #2563EB)`, glow: `${ACCENT.srs}40` },
-  B1: { color: ACCENT.xp,      gradient: `linear-gradient(135deg, ${ACCENT.xp}, #D97706)`, glow: `${ACCENT.xp}40` },
+  A1: { color: ACCENT.reading, gradient: `linear-gradient(135deg, ${ACCENT.reading}, #16A34A)`, shadow: 'rgba(34,197,94,0.3)' },
+  A2: { color: ACCENT.srs,     gradient: `linear-gradient(135deg, ${ACCENT.srs}, #2563EB)`,     shadow: 'rgba(59,130,246,0.3)' },
+  B1: { color: ACCENT.xp,      gradient: `linear-gradient(135deg, ${ACCENT.xp}, #D97706)`,      shadow: 'rgba(245,158,11,0.3)' },
 };
+
+const LEVEL_DESCS: Record<string, string> = {
+  A1: 'Nền tảng — Alphabet, động từ sein/haben, mạo từ, câu đơn',
+  A2: 'Sơ cấp trên — Perfekt, Präteritum, câu phụ với weil/dass',
+  B1: 'Trung cấp — Konjunktiv, Passiv, Nebensätze phức tạp',
+};
+
+function IconBook({ size = 22 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}>
+      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+      <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+    </svg>
+  );
+}
+function IconList({ size = 13 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}>
+      <line x1="8" y1="6" x2="21" y2="6" /><line x1="8" y1="12" x2="21" y2="12" />
+      <line x1="8" y1="18" x2="21" y2="18" />
+      <line x1="3" y1="6" x2="3.01" y2="6" /><line x1="3" y1="12" x2="3.01" y2="12" />
+      <line x1="3" y1="18" x2="3.01" y2="18" />
+    </svg>
+  );
+}
+function IconArrowRight({ size = 16 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}>
+      <path d="M5 12h14M12 5l7 7-7 7" />
+    </svg>
+  );
+}
+function IconCheck({ size = 28 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}>
+      <polyline points="20 6 9 17 4 12" />
+    </svg>
+  );
+}
+function IconFlame({ size = 28 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}>
+      <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" />
+    </svg>
+  );
+}
+function IconTarget({ size = 28 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}>
+      <circle cx="12" cy="12" r="10" /><circle cx="12" cy="12" r="6" /><circle cx="12" cy="12" r="2" />
+    </svg>
+  );
+}
 
 export default function GrammarDashboardPage() {
   const [filterLevel, setFilterLevel] = useState<string>('ALL');
@@ -25,16 +81,13 @@ export default function GrammarDashboardPage() {
   const { data: progress = [] } = useGrammarProgress();
 
   const filteredLessons = useMemo(() => {
-    return (
-      filterLevel === 'ALL' ? lessons : lessons.filter(l => l.level === filterLevel)
-    ).sort((a, b) => a.lessonNumber - b.lessonNumber);
+    return (filterLevel === 'ALL' ? lessons : lessons.filter(l => l.level === filterLevel))
+      .sort((a, b) => a.lessonNumber - b.lessonNumber);
   }, [lessons, filterLevel]);
 
   const progressMap = useMemo(() => {
     const map: Record<string, GrammarProgress> = {};
-    for (const p of progress) {
-      map[p.lessonId] = p;
-    }
+    for (const p of progress) map[p.lessonId] = p;
     return map;
   }, [progress]);
 
@@ -47,25 +100,15 @@ export default function GrammarDashboardPage() {
     return map;
   }, [filteredLessons]);
 
-  const levelDescriptions: Record<string, string> = {
-    A1: 'Nền tảng — Alphabet, động từ sein/haben, mạo từ, câu đơn',
-    A2: 'Sơ cấp trên — Perfekt, Präteritum, câu phụ với weil/dass',
-    B1: 'Trung cấp — Konjunktiv, Passiv, Nebensätze phức tạp',
-  };
-
   const lockInfo = useMemo(() => {
     const passedSet = new Set(
       progress.filter(p => p.status === 'completed' && (p.score ?? 0) >= 80).map(p => p.lessonId)
     );
     const lessonMap = new Map(lessons.map(l => [l.id, l]));
     const map: Record<string, { locked: boolean; reason: string }> = {};
-    
     for (const lesson of lessons) {
       const prereqs = lesson.prerequisiteIds ?? [];
-      if (prereqs.length === 0) {
-        map[lesson.id] = { locked: false, reason: '' };
-        continue;
-      }
+      if (prereqs.length === 0) { map[lesson.id] = { locked: false, reason: '' }; continue; }
       const unmet = prereqs.filter(id => !passedSet.has(id));
       if (unmet.length === 0) {
         map[lesson.id] = { locked: false, reason: '' };
@@ -73,9 +116,7 @@ export default function GrammarDashboardPage() {
         const names = unmet.map(id => lessonMap.get(id)?.titleVi).filter(Boolean);
         map[lesson.id] = {
           locked: true,
-          reason: names.length > 0
-            ? `Hoàn thành "${names.join(', ')}" trước (≥80%)`
-            : 'Hoàn thành bài tiên quyết trước (≥80%)',
+          reason: names.length > 0 ? `Hoàn thành "${names.join(', ')}" trước (≥80%)` : 'Hoàn thành bài tiên quyết trước (≥80%)',
         };
       }
     }
@@ -87,133 +128,145 @@ export default function GrammarDashboardPage() {
   const overallPct = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
   const inProgressCount = progress.filter(p => p.status === 'in_progress').length;
 
+  // CTA: find resume lesson or first available
+  const resumeLesson = useMemo(() => {
+    const inProg = progress.find(p => p.status === 'in_progress');
+    if (inProg) return lessons.find(l => l.id === inProg.lessonId) ?? null;
+    return null;
+  }, [progress, lessons]);
+  const firstUnlocked = useMemo(
+    () => lessons.find(l => !lockInfo[l.id]?.locked && progressMap[l.id]?.status !== 'completed') ?? null,
+    [lessons, lockInfo, progressMap]
+  );
+  const ctaLesson = resumeLesson ?? firstUnlocked;
+
   if (lessonsLoading) {
     return (
-      <div className="max-w-7xl mx-auto px-4 py-6">
+      <div className="max-w-5xl mx-auto px-4 py-8">
         <div className="animate-pulse space-y-6">
-          <div className="h-28 rounded-2xl" style={{ backgroundColor: 'var(--theme-bg-secondary)' }} />
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[...Array(6)].map((_, i) => (
-              <div key={i} className="h-52 rounded-2xl" style={{ backgroundColor: 'var(--theme-bg-secondary)' }} />
+          <div className="h-32 rounded-[2.5rem]" style={{ backgroundColor: 'var(--theme-bg-secondary)' }} />
+          <div className="grid grid-cols-3 gap-6">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="h-32 rounded-[2.5rem]" style={{ backgroundColor: 'var(--theme-bg-secondary)' }} />
             ))}
           </div>
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="h-28 rounded-[2.5rem]" style={{ backgroundColor: 'var(--theme-bg-secondary)' }} />
+          ))}
         </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-6">
+    <div className="max-w-5xl mx-auto px-4 py-8 pb-24">
 
       {/* ─── Hero Banner ─── */}
-      <div
-        className="mb-6 p-5 rounded-2xl border overflow-hidden relative"
+      <div className="relative overflow-hidden rounded-[2.5rem] p-8 mb-10 border"
         style={{
-          borderColor: `${ACCENT.vocab}33`,
-          background: `linear-gradient(135deg, ${ACCENT.vocab}14 0%, ${ACCENT.writing}0A 100%)`,
-        }}
-      >
-        {/* Decorative blobs */}
-        <div className="absolute -top-10 -right-10 w-36 h-36 rounded-full pointer-events-none"
-          style={{ background: `radial-gradient(circle, ${ACCENT.vocab}26, transparent 70%)` }} />
-        <div className="absolute -bottom-8 left-20 w-24 h-24 rounded-full pointer-events-none"
-          style={{ background: `radial-gradient(circle, ${ACCENT.writing}1A, transparent 70%)` }} />
+          backgroundColor: 'var(--theme-bg-card)',
+          borderColor: 'var(--theme-border)',
+          boxShadow: '0 20px 40px rgba(0,0,0,0.04)',
+        }}>
+        <div className="absolute -right-8 -top-8 w-40 h-40 blur-3xl opacity-15 pointer-events-none"
+          style={{ backgroundColor: ACCENT.vocab }} />
 
-        <div className="relative flex flex-wrap items-center justify-between gap-4">
-          {/* Left: icon + title */}
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0"
-              style={{ background: GRADIENT.writing }}>
-              <IconBook size={22} className="text-white" />
+        <div className="relative z-10 flex flex-wrap items-center justify-between gap-6">
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 shadow-inner"
+              style={{ background: GRADIENT.writing, color: 'white' }}>
+              <IconBook size={24} />
             </div>
             <div>
-              <h1 className="text-xl font-bold" style={{ color: 'var(--theme-text-primary)' }}>
+              <h1 className="text-2xl font-black tracking-tight" style={{ color: 'var(--theme-text-primary)' }}>
                 Ngữ pháp tiếng Đức
               </h1>
-              <p className="text-xs mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>
-                Lộ trình từ A1 đến B1 — {completedCount}/{totalCount} bài hoàn thành
+              <p className="text-[11px] font-bold uppercase tracking-widest mt-0.5"
+                style={{ color: 'var(--theme-text-muted)', opacity: 0.6 }}>
+                Lộ trình A1 → B1 · {completedCount}/{totalCount} bài hoàn thành
               </p>
             </div>
           </div>
 
-          {/* Center: mini stats */}
-          {totalCount > 0 && (
-            <div className="flex items-center gap-4">
-              {[
-                { label: 'Hoàn thành', value: completedCount,    color: STATUS.success, bg: `${STATUS.success}1F` },
-                { label: 'Đang học',   value: inProgressCount,   color: ACCENT.srs,     bg: `${ACCENT.srs}1F` },
-                { label: 'Tiến độ',    value: `${overallPct}%`,  color: ACCENT.vocab,   bg: `${ACCENT.vocab}1F` },
-              ].map((s, i) => (
-                <div key={i} className="hidden sm:flex flex-col items-center px-3 py-1.5 rounded-xl"
-                  style={{ backgroundColor: s.bg }}>
-                  <span className="text-lg font-extrabold leading-none" style={{ color: s.color }}>{s.value}</span>
-                  <span className="text-[10px] font-medium mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>{s.label}</span>
-                </div>
-              ))}
-
-              {/* Compact progress bar */}
-              {totalCount > 0 && (
-                <div className="hidden md:block w-32">
-                  <div className="h-2 rounded-full overflow-hidden" style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
-                    <div
-                      className="h-full rounded-full transition-all duration-700"
-                      style={{ width: `${overallPct}%`, background: GRADIENT.writing }}
-                    />
-                  </div>
-                  <p className="text-[10px] mt-1 text-center" style={{ color: 'var(--theme-text-muted)' }}>Tổng tiến độ</p>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Right: actions */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <Link href="/grammar/cheatsheet"
-              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all hover:scale-105"
-              style={{
-                background: `linear-gradient(135deg,${ACCENT.vocab}1F,${ACCENT.vocab}0F)`,
-                color: ACCENT.vocab,
-                border: `1px solid ${ACCENT.vocab}33`,
-              }}>
-              <IconList size={13} /> Cheatsheet
+              className="px-5 py-3 rounded-xl text-xs font-black border transition-all hover:bg-black/3 dark:hover:bg-white/5"
+              style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-primary)' }}>
+              <span className="flex items-center gap-1.5"><IconList size={13} /> Cheatsheet</span>
             </Link>
+            {ctaLesson && (
+              <Link href={`/grammar/${ctaLesson.slug}`}
+                className="flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-black text-white transition-all hover:scale-[1.02] active:scale-95 shadow-xl"
+                style={{ background: GRADIENT.writing, boxShadow: '0 10px 25px rgba(99,102,241,0.35)' }}>
+                {resumeLesson ? 'Tiếp tục học' : 'Bắt đầu ngay'}
+                <IconArrowRight size={16} />
+              </Link>
+            )}
           </div>
         </div>
       </div>
 
-      {/* ─── Level filter (Segmented Control) ─── */}
-      <div className="flex items-center gap-2 mb-6">
-        <div className="relative flex gap-1 p-1 rounded-xl" style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
-          {LEVELS.map(level => {
-            const isActive = filterLevel === level;
-            const lc = level !== 'ALL' ? LEVEL_COLORS[level] : null;
-            return (
-              <button key={level} onClick={() => setFilterLevel(level)}
-                className="relative px-4 py-1.5 rounded-lg text-sm font-semibold transition-all duration-200 z-10"
-                style={isActive ? {
-                  background: lc ? lc.gradient : GRADIENT.writing,
-                  color: 'white',
-                  boxShadow: `0 2px 8px ${lc ? lc.color : ACCENT.vocab}40`,
-                } : {
-                  color: 'var(--theme-text-muted)',
-                  backgroundColor: 'transparent',
-                }}>
-                {level === 'ALL' ? 'Tất cả' : level}
-              </button>
-            );
-          })}
+      {/* ─── Stats (practice style) ─── */}
+      {totalCount > 0 && (
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
+          {[
+            { label: 'Hoàn thành', value: completedCount, color: STATUS.success,  icon: <IconCheck size={26} /> },
+            { label: 'Đang học',   value: inProgressCount, color: ACCENT.srs,     icon: <IconFlame size={26} /> },
+            { label: 'Tổng tiến độ', value: `${overallPct}%`, color: ACCENT.vocab, icon: <IconTarget size={26} /> },
+          ].map((s, i) => (
+            <div key={i}
+              className="relative overflow-hidden rounded-[2.5rem] p-7 border transition-all duration-300 hover:-translate-y-1.5"
+              style={{
+                backgroundColor: 'var(--theme-bg-card)',
+                borderColor: 'var(--theme-border)',
+                boxShadow: '0 20px 40px rgba(0,0,0,0.04)',
+              }}>
+              <div className="absolute -right-6 -bottom-6 w-28 h-28 blur-3xl opacity-20" style={{ backgroundColor: s.color }} />
+              <div className="relative z-10">
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="w-11 h-11 rounded-2xl flex items-center justify-center shadow-inner"
+                    style={{ backgroundColor: `${s.color}18`, color: s.color }}>
+                    {s.icon}
+                  </div>
+                  <div className="text-[11px] font-black uppercase tracking-widest opacity-40"
+                    style={{ color: 'var(--theme-text-primary)' }}>
+                    {s.label}
+                  </div>
+                </div>
+                <div className="text-4xl font-black tracking-tighter" style={{ color: 'var(--theme-text-primary)' }}>
+                  {s.value}
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
+      )}
 
-        {filterLevel !== 'ALL' && (
-          <p className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>
-            {levelDescriptions[filterLevel]}
-          </p>
-        )}
+      {/* ─── Level filter (practice style) ─── */}
+      <div className="flex gap-3 overflow-x-auto no-scrollbar pb-1 mb-10">
+        {LEVELS.map(level => {
+          const isActive = filterLevel === level;
+          const lc = level !== 'ALL' ? LEVEL_COLORS[level] : null;
+          return (
+            <button key={level} onClick={() => setFilterLevel(level)}
+              className="px-5 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all duration-300 whitespace-nowrap"
+              style={isActive ? {
+                background: lc ? lc.gradient : GRADIENT.writing,
+                color: 'white',
+                boxShadow: lc ? `0 10px 20px ${lc.shadow}` : '0 10px 20px rgba(99,102,241,0.3)',
+              } : {
+                backgroundColor: 'var(--theme-bg-secondary)',
+                color: 'var(--theme-text-muted)',
+              }}>
+              {level === 'ALL' ? 'Tất cả' : level}
+            </button>
+          );
+        })}
       </div>
 
-      {/* ─── Learning Path — grouped by level ─── */}
-      <div className="space-y-10">
-        {(['A1', 'A2', 'B1'] as const).map((lvl, lvlIdx) => {
+      {/* ─── Lesson cards grouped by level ─── */}
+      <div className="space-y-12">
+        {(['A1', 'A2', 'B1'] as const).map(lvl => {
           const levelLessons = lessonsByLevel[lvl] ?? [];
           if (levelLessons.length === 0) return null;
 
@@ -222,80 +275,44 @@ export default function GrammarDashboardPage() {
           const lvlPct = levelLessons.length > 0 ? Math.round((lvlCompleted / levelLessons.length) * 100) : 0;
 
           return (
-            <section key={lvl} className="relative">
-              {/* Connector */}
-              {lvlIdx > 0 && (
-                <div className="flex justify-center -mt-6 mb-6" aria-hidden>
-                  <div className="flex flex-col items-center">
-                    <div className="w-0.5 h-5" style={{ backgroundColor: 'var(--theme-border)' }} />
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                      strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-                      style={{ color: 'var(--theme-text-muted)' }}>
-                      <polyline points="6 9 12 15 18 9" />
-                    </svg>
-                  </div>
-                </div>
-              )}
-
+            <section key={lvl}>
               {/* Level header */}
               <div className="flex items-center gap-3 mb-5">
-                <div
-                  className="shrink-0 w-11 h-11 rounded-2xl flex items-center justify-center text-white font-extrabold text-sm"
-                  style={{ background: lc.gradient, boxShadow: `0 4px 12px ${lc.color}40` }}>
+                <div className="shrink-0 w-11 h-11 rounded-2xl flex items-center justify-center text-white font-black text-sm shadow-lg"
+                  style={{ background: lc.gradient, boxShadow: `0 4px 12px ${lc.shadow}` }}>
                   {lvl}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-baseline gap-2 flex-wrap">
-                    <h2 className="text-base font-bold" style={{ color: 'var(--theme-text-primary)' }}>
+                    <h2 className="text-base font-black" style={{ color: 'var(--theme-text-primary)' }}>
                       Chặng {lvl}
                     </h2>
-                    <span className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>
+                    <span className="text-xs font-bold" style={{ color: 'var(--theme-text-muted)' }}>
                       {lvlCompleted}/{levelLessons.length} bài
                     </span>
                   </div>
-                  <p className="text-xs leading-snug mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>
-                    {levelDescriptions[lvl]}
+                  <p className="text-[11px] leading-snug mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>
+                    {LEVEL_DESCS[lvl]}
                   </p>
                   <div className="mt-2 h-1 rounded-full overflow-hidden" style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
-                    <div
-                      className="h-full rounded-full transition-all duration-700"
-                      style={{ width: `${lvlPct}%`, background: lc.gradient }}
-                    />
+                    <div className="h-full rounded-full transition-all duration-700"
+                      style={{ width: `${lvlPct}%`, background: lc.gradient }} />
                   </div>
                 </div>
-                <span className="text-sm font-bold shrink-0" style={{ color: lc.color }}>{lvlPct}%</span>
+                <span className="text-sm font-black shrink-0" style={{ color: lc.color }}>{lvlPct}%</span>
               </div>
 
-              {/* Gamified Journey Path */}
-              <div className="relative flex flex-col items-center py-10 mt-4 overflow-hidden">
-                {/* Center Path Line (Background) */}
-                <div className="absolute top-0 bottom-0 w-3 rounded-full"
-                  style={{ backgroundColor: 'var(--theme-bg-secondary)' }} />
-                
-                {/* Active Path Line Overlay */}
-                <div className="absolute top-0 w-3 rounded-full transition-all duration-1000 z-0"
-                  style={{ background: lc.gradient, height: `${lvlPct}%`, boxShadow: `0 0 15px ${lc.glow}` }} />
-
-                {levelLessons.map((lesson, idx) => {
-                  // Create a snaking pattern: center, right, right-far, right, center, left, left-far, left
-                  // We'll use a simpler sine-wave pattern for better visual flow: 0, 50, 0, -50
-                  const translateX = Math.sin((idx * Math.PI) / 2) * 60;
-
-                  return (
-                    <div
-                      key={lesson.id}
-                      className="relative z-10 my-4 sm:my-6 transition-transform hover:z-20"
-                      style={{ transform: `translateX(${translateX}px)` }}
-                    >
-                      <GrammarLessonCard
-                        lesson={lesson}
-                        progress={progressMap[lesson.id]}
-                        locked={lockInfo[lesson.id]?.locked}
-                        lockedReason={lockInfo[lesson.id]?.reason}
-                      />
-                    </div>
-                  );
-                })}
+              {/* Card grid */}
+              <div className="grid grid-cols-1 gap-4">
+                {levelLessons.map(lesson => (
+                  <GrammarLessonCard
+                    key={lesson.id}
+                    lesson={lesson}
+                    progress={progressMap[lesson.id]}
+                    locked={lockInfo[lesson.id]?.locked}
+                    lockedReason={lockInfo[lesson.id]?.reason}
+                  />
+                ))}
               </div>
             </section>
           );
@@ -304,15 +321,16 @@ export default function GrammarDashboardPage() {
 
       {/* Empty state */}
       {filteredLessons.length === 0 && (
-        <div className="text-center py-20">
-          <div className="w-14 h-14 rounded-2xl mx-auto flex items-center justify-center mb-4"
-            style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
-            <IconBook size={26} style={{ color: ACCENT.vocab }} />
+        <div className="text-center py-28 rounded-[3.5rem] border-2 border-dashed" style={{ borderColor: 'var(--theme-border)' }}>
+          <div className="w-24 h-24 rounded-4xl mx-auto flex items-center justify-center mb-8 shadow-2xl text-white"
+            style={{ background: GRADIENT.writing }}>
+            <IconBook size={40} />
           </div>
-          <p className="text-base font-semibold mb-1" style={{ color: 'var(--theme-text-secondary)' }}>
+          <h3 className="text-2xl font-black mb-3" style={{ color: 'var(--theme-text-primary)' }}>
             Chưa có bài học nào
-          </p>
-          <p className="text-sm" style={{ color: 'var(--theme-text-muted)' }}>
+          </h3>
+          <p className="text-base mb-10 max-w-xs mx-auto font-medium"
+            style={{ color: 'var(--theme-text-muted)', opacity: 0.6 }}>
             Chọn cấp độ khác hoặc quay lại sau
           </p>
         </div>

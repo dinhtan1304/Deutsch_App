@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useParams } from 'next/navigation';
-import { useGrammarLesson, useGrammarProgress, useSubmitGrammarExercises } from '@/hooks/useGrammar';
+import { useGrammarLesson, useGrammarLessons, useGrammarProgress, useSubmitGrammarExercises } from '@/hooks/useGrammar';
 import { TheorySection } from '@/components/grammar/TheorySection';
 import { ExerciseList } from '@/components/grammar/ExerciseList';
 import { ACCENT, STATUS } from '@/lib/tokens';
@@ -52,8 +52,27 @@ export default function GrammarLessonPage() {
   const { speak } = usePronunciation();
 
   const { data: lesson, isLoading: loading } = useGrammarLesson(slug);
+  const { data: allLessons = [] } = useGrammarLessons();
   const { data: progressList } = useGrammarProgress();
   const submitMutation = useSubmitGrammarExercises();
+
+  const nextLesson = useMemo(() => {
+    if (!lesson) return null;
+    const levelOrder = ['A1', 'A2', 'B1'];
+    // Same level, higher lessonNumber
+    const sameLevel = allLessons
+      .filter(l => l.level === lesson.level && l.lessonNumber > lesson.lessonNumber && l.isActive)
+      .sort((a, b) => a.lessonNumber - b.lessonNumber);
+    if (sameLevel.length > 0) return sameLevel[0]!;
+    // Next level's first lesson
+    const nextLevelIdx = levelOrder.indexOf(lesson.level) + 1;
+    if (nextLevelIdx < levelOrder.length) {
+      return allLessons
+        .filter(l => l.level === levelOrder[nextLevelIdx] && l.isActive)
+        .sort((a, b) => a.lessonNumber - b.lessonNumber)[0] ?? null;
+    }
+    return null;
+  }, [lesson, allLessons]);
 
   const handleSubmitExercises = async (answers: Record<number, string | string[]>) => {
     if (!lesson) throw new Error('No lesson loaded');
@@ -223,6 +242,7 @@ export default function GrammarLessonPage() {
             exercises={lesson.exercises}
             onSubmit={handleSubmitExercises}
             onBackToTheory={() => setActiveTab('theory')}
+            nextLesson={nextLesson}
           />
         )}
       </div>

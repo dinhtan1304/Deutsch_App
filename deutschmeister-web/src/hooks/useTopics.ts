@@ -98,8 +98,8 @@ export function useUpdateTopicProgress() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ topicId, wordsLearned }: { topicId: string; wordsLearned: number }) =>
-      updateTopicProgress(topicId, wordsLearned),
+    mutationFn: ({ topicId, wordsLearned, wordIds }: { topicId: string; wordsLearned: number; wordIds?: string[] }) =>
+      updateTopicProgress(topicId, wordsLearned, wordIds),
     onSuccess: () => {
       // Invalidate topics progress
       queryClient.invalidateQueries({ queryKey: topicsKeys.progress() });

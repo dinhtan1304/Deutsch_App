@@ -6,7 +6,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/stores/authStore';
-import { IconSearch, IconUser, IconSettings, IconLogOut, IconMessageCircle, IconStar, IconZap } from '@/components/ui/Icons';
+import { IconSearch, IconUser, IconSettings, IconLogOut, IconMessageCircle, IconStar, IconZap, IconDiscord } from '@/components/ui/Icons';
 import { useIsPremium } from '@/hooks/useSubscription';
 import { useXp } from '@/hooks/useXp';
 import { useDashboardStats } from '@/hooks/useDashboard';
@@ -239,6 +239,7 @@ export function Header({ sidebarCollapsed, onOpenPalette }: HeaderProps) {
                       {[
                         { href: '/profile', icon: IconUser, label: 'Hồ sơ cá nhân', color: ACCENT.writing },
                         { href: '/settings', icon: IconSettings, label: 'Thiết lập tài khoản', color: ACCENT.vocab },
+                        { href: 'https://discord.gg/NfztBxtxh', icon: IconDiscord, label: 'Tham gia Discord', color: '#5865F2' },
                         { action: 'feedback', icon: IconMessageCircle, label: 'Phản hồi & Báo lỗi', color: ACCENT.emerald },
                       ].map((item, idx) => {
                         const ItemIcon = item.icon;
@@ -264,8 +265,16 @@ export function Header({ sidebarCollapsed, onOpenPalette }: HeaderProps) {
                           );
                         }
 
+                        const isExternal = (item.href as string).startsWith('http');
+
                         return (
-                          <Link key={idx} href={item.href as string} onClick={() => setShowUserMenu(false)}>
+                          <Link
+                            key={idx}
+                            href={item.href as string}
+                            onClick={() => setShowUserMenu(false)}
+                            target={isExternal ? '_blank' : undefined}
+                            rel={isExternal ? 'noopener noreferrer' : undefined}
+                          >
                             {content}
                           </Link>
                         );

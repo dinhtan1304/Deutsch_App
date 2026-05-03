@@ -2,8 +2,7 @@
 
 import { GrammarLesson } from '@/types/grammar';
 import Link from 'next/link';
-import { ACCENT, STATUS } from '@/lib/tokens';
-import { IconCheck, IconLock } from '@/components/ui/Icons';
+import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 
 interface GrammarLessonCardProps {
   lesson: GrammarLesson;
@@ -15,90 +14,179 @@ interface GrammarLessonCardProps {
   lockedReason?: string;
 }
 
-const LEVEL_STYLE = {
-  A1: { bg: `${ACCENT.reading}1A`, color: ACCENT.reading, gradient: `linear-gradient(135deg, ${ACCENT.reading}, #16A34A)`, glow: `${ACCENT.reading}40` },
-  A2: { bg: `${ACCENT.srs}1A`,     color: ACCENT.srs,     gradient: `linear-gradient(135deg, ${ACCENT.srs}, #2563EB)`,     glow: `${ACCENT.srs}40` },
-  B1: { bg: `${ACCENT.xp}1A`,      color: ACCENT.xp,      gradient: `linear-gradient(135deg, ${ACCENT.xp}, #D97706)`,      glow: `${ACCENT.xp}40` },
-  B2: { bg: `${ACCENT.vocab}1A`,   color: ACCENT.vocab,   gradient: `linear-gradient(135deg, ${ACCENT.vocab}, #7C3AED)`,   glow: `${ACCENT.vocab}40` },
+const LEVEL_COLOR: Record<string, string> = {
+  A1: ACCENT.reading,
+  A2: ACCENT.srs,
+  B1: ACCENT.xp,
+  B2: ACCENT.vocab,
 };
+
+function getScoreColor(s: number) {
+  if (s >= 80) return STATUS.success;
+  if (s >= 60) return STATUS.warning;
+  return STATUS.danger;
+}
+
+function IconCheck({ size = 28 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}>
+      <polyline points="20 6 9 17 4 12" />
+    </svg>
+  );
+}
+function IconLock({ size = 28 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}>
+      <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+    </svg>
+  );
+}
+function IconChevronRight({ size = 18 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}>
+      <polyline points="9 18 15 12 9 6" />
+    </svg>
+  );
+}
 
 const GrammarLessonCard = ({ lesson, progress, locked, lockedReason }: GrammarLessonCardProps) => {
   const isLocked = locked || lesson.isActive === false;
   const isCompleted = progress?.status === 'completed';
   const isInProgress = progress?.status === 'in_progress';
-  const ls = (LEVEL_STYLE as unknown as Record<string, typeof LEVEL_STYLE.A1>)[lesson.level] ?? LEVEL_STYLE.A1;
+  const levelColor = LEVEL_COLOR[lesson.level] ?? ACCENT.vocab;
 
-  const exerciseDone = progress?.score ?? 0;
-  const exerciseTotal = lesson.exerciseCount ?? 0;
-  const exercisePct = exerciseTotal > 0 ? Math.round((exerciseDone / exerciseTotal) * 100) : 0;
+  const exercisePct = (() => {
+    if (!isInProgress || !progress?.score) return 0;
+    return Math.min(Math.round(progress.score), 100);
+  })();
 
-  // The circular node design
-  const nodeContent = (
-    <div className={`relative flex flex-col items-center group transition-all duration-300 ${isLocked ? 'opacity-60 grayscale' : 'hover:-translate-y-2'}`}>
-      
-      {/* Outer Ring (Progress or Glow) */}
-      <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-full p-2"
-        style={{
-          background: isCompleted ? STATUS.success : isInProgress ? `conic-gradient(${ls.color} ${exercisePct}%, var(--theme-bg-secondary) 0)` : 'var(--theme-bg-secondary)',
-          boxShadow: !isLocked ? `0 10px 30px ${ls.glow}` : 'none'
-        }}>
-        
-        {/* Inner Node */}
-        <div className="w-full h-full rounded-full flex items-center justify-center relative overflow-hidden bg-white dark:bg-black border-4"
-          style={{ borderColor: 'var(--theme-bg-card)' }}>
-          <div className="absolute inset-0 opacity-20" style={{ background: ls.gradient }} />
-          
-          <div className="relative z-10">
-            {isLocked ? (
-              <IconLock size={28} style={{ color: 'var(--theme-text-muted)' }} />
-            ) : isCompleted ? (
-              <IconCheck size={36} style={{ color: STATUS.success }} />
-            ) : (
-              <span className="text-xl font-black" style={{ color: ls.color }}>{lesson.lessonNumber}</span>
+  // Status badge config
+  const statusConfig = (() => {
+    if (isLocked)      return { label: 'Khóa',      bg: `${STATUS.danger}15`,   color: STATUS.danger };
+    if (isCompleted)   return { label: 'Hoàn thành', bg: `${STATUS.success}15`, color: STATUS.success };
+    if (isInProgress)  return { label: 'Đang học',   bg: `${ACCENT.srs}15`,     color: ACCENT.srs };
+    return               { label: 'Chưa học',   bg: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' };
+  })();
+
+  const cardContent = (
+    <div
+      className={`group relative overflow-hidden rounded-[2.5rem] p-6 transition-all duration-500 border border-transparent
+        ${isLocked ? 'opacity-70 cursor-not-allowed' : 'hover:-translate-y-1.5 hover:shadow-2xl hover:border-violet-500/20'}`}
+      style={{
+        backgroundColor: 'var(--theme-bg-card)',
+        boxShadow: '0 15px 35px rgba(0,0,0,0.05), inset 0 0 0 1px rgba(255,255,255,0.05)',
+      }}
+    >
+      {/* Hover aura */}
+      {!isLocked && (
+        <div className="absolute inset-0 opacity-0 group-hover:opacity-[0.03] transition-opacity duration-700 pointer-events-none"
+          style={{ background: GRADIENT.writing }} />
+      )}
+
+      <div className="relative z-10 flex items-center gap-6">
+        {/* Icon badge */}
+        <div
+          className="w-16 h-16 rounded-2xl flex items-center justify-center shrink-0 shadow-lg transition-all duration-500 group-hover:scale-110 group-hover:rotate-3"
+          style={{
+            background: isCompleted ? GRADIENT.writing : isLocked ? 'var(--theme-bg-secondary)' : `${levelColor}18`,
+            color: isCompleted ? 'white' : isLocked ? 'var(--theme-text-muted)' : levelColor,
+            boxShadow: isCompleted ? '0 10px 20px rgba(99,102,241,0.25)' : 'none',
+          }}
+        >
+          {isLocked
+            ? <IconLock size={28} />
+            : isCompleted
+              ? <IconCheck size={28} />
+              : <span className="text-2xl font-black">{lesson.lessonNumber}</span>
+          }
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 min-w-0">
+          {/* Badges */}
+          <div className="flex items-center gap-2 mb-2.5 flex-wrap">
+            <span
+              className="text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg text-white shadow-sm"
+              style={{ backgroundColor: levelColor }}
+            >
+              {lesson.level}
+            </span>
+            <span
+              className="text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg"
+              style={{ backgroundColor: statusConfig.bg, color: statusConfig.color }}
+            >
+              {statusConfig.label}
+            </span>
+            {lesson.estimatedMinutes && (
+              <span
+                className="text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg border"
+                style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-muted)' }}
+              >
+                ~{lesson.estimatedMinutes}ph
+              </span>
             )}
           </div>
-        </div>
 
-        {/* Floating badge for score/status */}
-        {(!isLocked && (isCompleted || isInProgress)) && (
-          <div className="absolute -bottom-2 -right-2 bg-white dark:bg-black rounded-full px-2 py-1 text-[10px] font-black border-2 shadow-lg"
-            style={{ borderColor: 'var(--theme-bg-card)', color: isCompleted ? STATUS.success : ls.color }}>
-            {isCompleted && progress?.score !== undefined ? `${progress.score}đ` : `${exercisePct}%`}
+          {/* Title */}
+          <p className="text-xl font-black tracking-tight mb-1 truncate" style={{ color: 'var(--theme-text-primary)' }}>
+            {lesson.titleVi}
+          </p>
+
+          {/* German subtitle + exercise count */}
+          <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest"
+            style={{ color: 'var(--theme-text-primary)', opacity: 0.4 }}>
+            <span className="italic normal-case">{lesson.titleDe}</span>
+            {lesson.exerciseCount != null && lesson.exerciseCount > 0 && (
+              <>
+                <span className="w-1 h-1 rounded-full bg-current shrink-0" />
+                <span>{lesson.exerciseCount} bài tập</span>
+              </>
+            )}
           </div>
-        )}
-      </div>
 
-      {/* Label (Title) */}
-      <div className="mt-4 text-center max-w-35 sm:max-w-40">
-        <h3 className="text-sm sm:text-base font-bold leading-tight mb-1" style={{ color: 'var(--theme-text-primary)' }}>
-          {lesson.titleVi}
-        </h3>
-        <p className="text-[10px] sm:text-xs font-medium italic opacity-70" style={{ color: ls.color }}>
-          {lesson.titleDe}
-        </p>
-      </div>
-      
-      {/* Tooltip for locked reason (visible on hover) */}
-      {isLocked && lockedReason && (
-        <div className="absolute top-full mt-2 w-48 p-2 rounded-xl text-xs text-center font-medium opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 shadow-lg"
-          style={{ backgroundColor: 'var(--theme-bg-card)', color: 'var(--theme-text-primary)', border: '1px solid var(--theme-border)' }}>
-          <IconLock size={12} className="inline mr-1" /> {lockedReason}
+          {/* Lock reason — always visible, no hover needed */}
+          {isLocked && lockedReason && (
+            <p className="text-xs mt-2 font-semibold" style={{ color: STATUS.danger }}>
+              🔒 {lockedReason}
+            </p>
+          )}
+
+          {/* Progress bar if in_progress */}
+          {isInProgress && exercisePct > 0 && (
+            <div className="mt-3 h-1 rounded-full overflow-hidden" style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
+              <div className="h-full rounded-full transition-all duration-700"
+                style={{ width: `${exercisePct}%`, background: GRADIENT.writing }} />
+            </div>
+          )}
         </div>
-      )}
+
+        {/* Score or chevron */}
+        {isCompleted && progress?.score !== undefined ? (
+          <div className="text-right shrink-0">
+            <div className="text-4xl font-black tracking-tighter" style={{ color: getScoreColor(progress.score) }}>
+              {Math.round(progress.score)}<span className="text-sm ml-0.5">đ</span>
+            </div>
+          </div>
+        ) : !isLocked ? (
+          <div className="shrink-0" style={{ color: 'var(--theme-text-muted)' }}>
+            <IconChevronRight size={18} />
+          </div>
+        ) : null}
+      </div>
     </div>
   );
 
   if (isLocked) {
-    return (
-      <div className="cursor-not-allowed">
-        {nodeContent}
-      </div>
-    );
+    return <div>{cardContent}</div>;
   }
 
   return (
     <Link href={`/grammar/${lesson.slug}`} className="block outline-none">
-      {nodeContent}
+      {cardContent}
     </Link>
   );
 };

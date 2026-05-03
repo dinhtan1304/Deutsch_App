@@ -104,6 +104,18 @@ export function LandingFooter() {
         </div>
 
         <div>
+          <h4 style={colHeading}>Cộng đồng</h4>
+          <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 11 }}>
+            <li>
+              <a href="https://discord.gg/NfztBxtxh" target="_blank" rel="noopener noreferrer" style={linkStyle}
+                onMouseEnter={e => linkHover(e, true)} onMouseLeave={e => linkHover(e, false)}>
+                Discord Deutschmeister
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <div>
           <h4 style={colHeading}>Tài khoản</h4>
           <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 11, marginBottom: 24 }}>
             {ACCOUNT_LINKS.map(([label, href]) => (

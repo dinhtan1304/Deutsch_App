@@ -76,10 +76,10 @@ export default function PricingPage() {
 
   const premiumPlan = plans?.find((p) => p.code === 'premium');
   const lifetimePlan = plans?.find((p) => p.code === 'lifetime');
-  const monthlyPrice = premiumPlan?.monthlyPrice ?? 99000;
-  const quarterlyPrice = premiumPlan?.quarterlyPrice ?? 249000;
-  const yearlyPrice = premiumPlan?.yearlyPrice ?? 990000;
-  const lifetimePrice = lifetimePlan?.price ?? 1490000;
+  const monthlyPrice = premiumPlan?.monthlyPrice ?? 50000;
+  const quarterlyPrice = premiumPlan?.quarterlyPrice ?? 119000;
+  const yearlyPrice = premiumPlan?.yearlyPrice ?? 369000;
+  const lifetimePrice = lifetimePlan?.price ?? 1499000;
 
   const savePctYearly = Math.round((1 - yearlyPrice / (monthlyPrice * 12)) * 100);
   const savePctQuarterly = Math.round((1 - quarterlyPrice / (monthlyPrice * 3)) * 100);

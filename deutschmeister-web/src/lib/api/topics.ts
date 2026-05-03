@@ -62,8 +62,9 @@ export async function getUserTopicsProgress(): Promise<TopicWithProgress[]> {
 export async function updateTopicProgress(
   topicId: string,
   wordsLearned: number,
+  wordIds: string[] = [],
 ): Promise<TopicProgress> {
-  return apiPut<TopicProgress>(`${BASE_URL}/${topicId}/progress`, { wordsLearned });
+  return apiPut<TopicProgress>(`${BASE_URL}/${topicId}/progress`, { wordsLearned, wordIds });
 }
 
 // ============================================

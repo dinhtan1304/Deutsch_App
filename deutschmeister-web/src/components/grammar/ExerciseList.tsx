@@ -1,7 +1,8 @@
-﻿'use client';
+'use client';
 
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
-import { Exercise, SubmitResult } from '@/types/grammar';
+import Link from 'next/link';
+import { Exercise, SubmitResult, GrammarLesson } from '@/types/grammar';
 import { HighlightedText } from '@/components/word-highlight/HighlightedText';
 import { usePronunciation } from '@/hooks/usePronunciation';
 import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
@@ -12,19 +13,26 @@ import {
 
 const SPECIAL_CHARS = ['ä', 'ö', 'ü', 'Ä', 'Ö', 'Ü', 'ß'];
 
+interface NextLesson {
+    slug: string;
+    titleVi: string;
+    level: GrammarLesson['level'];
+}
+
 interface ExerciseListProps {
     exercises: Exercise[];
     onSubmit: (answers: Record<number, string | string[]>) => Promise<SubmitResult>;
-    onBackToTheory?: () => void; // kept for API compat, not rendered
+    onBackToTheory?: () => void;
+    nextLesson?: NextLesson | null;
 }
 
 const TYPE_META: Record<string, { label: string; color: string; icon: string }> = {
-    mcq:          { label: 'Trắc nghiệm', color: ACCENT.srs,     icon: '🎯' },
-    fill_blank:   { label: 'Điền từ',     color: ACCENT.vocab,   icon: '✏️' },
-    reorder:      { label: 'Sắp xếp',     color: ACCENT.xp,      icon: '🔀' },
+    mcq:           { label: 'Trắc nghiệm', color: ACCENT.srs,    icon: '🎯' },
+    fill_blank:    { label: 'Điền từ',     color: ACCENT.vocab,  icon: '✏️' },
+    reorder:       { label: 'Sắp xếp',     color: ACCENT.xp,     icon: '🔀' },
     // eslint-disable-next-line no-restricted-syntax
-    translate:    { label: 'Dịch',        color: '#10B981',      icon: '🌐' },
-    error_correct:{ label: 'Sửa lỗi',     color: STATUS.danger,  icon: '🔧' },
+    translate:     { label: 'Dịch',        color: '#10B981',     icon: '🌐' },
+    error_correct: { label: 'Sửa lỗi',     color: STATUS.danger, icon: '🔧' },
 };
 
 function difficultyFromPoints(pts: number): { label: string; color: string } {
@@ -34,28 +42,83 @@ function difficultyFromPoints(pts: number): { label: string; color: string } {
 }
 
 const OPTION_COLORS = [ACCENT.srs, ACCENT.vocab, ACCENT.reading, ACCENT.xp];
+const OPTION_LABELS = ['A', 'B', 'C', 'D', 'E', 'F'];
 
-// ─── Dot progress bar ───────────────────────────────────────────────────
+// ─── Client-side answer validation ──────────────────────────────────────────
 
-function DotProgress({ total, current, skipped }: { total: number; current: number; skipped: Set<number> }) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function checkClientSide(exercise: Exercise, answer: string | string[]): boolean {
+    const ad = exercise.answerData as Record<string, unknown>;
+    switch (exercise.exerciseType) {
+        case 'mcq':
+            return answer === String(ad.correctIndex);
+        case 'fill_blank': {
+            const u = (answer as string).trim().toLowerCase();
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const b = (ad.blanks as any[])[0] as { answer: string; alternatives?: string[] };
+            return u === b.answer.trim().toLowerCase() ||
+                (b.alternatives ?? []).some((a: string) => u === a.trim().toLowerCase());
+        }
+        case 'reorder':
+            return JSON.stringify(answer) === JSON.stringify(ad.correctOrder);
+        case 'translate': {
+            const u = (answer as string).toLowerCase().replace(/[.!?]/g, '').trim();
+            return (ad.acceptedAnswers as string[]).some(
+                (a: string) => a.toLowerCase().replace(/[.!?]/g, '').trim() === u
+            );
+        }
+        case 'error_correct':
+            return (answer as string).trim().toLowerCase() ===
+                (ad.correctedText as string).trim().toLowerCase();
+        default:
+            return false;
+    }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function getCorrectAnswerLabel(exercise: Exercise): string {
+    const ad = exercise.answerData as Record<string, unknown>;
+    switch (exercise.exerciseType) {
+        case 'mcq': {
+            const opts = ad.options as string[];
+            const idx = ad.correctIndex as number;
+            return opts[idx] ?? '';
+        }
+        case 'fill_blank':
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            return ((ad.blanks as any[])[0] as { answer: string }).answer;
+        case 'reorder':
+            return (ad.correctOrder as string[]).join(' ');
+        case 'translate':
+            return (ad.acceptedAnswers as string[])[0] ?? '';
+        case 'error_correct':
+            return ad.correctedText as string;
+        default:
+            return '';
+    }
+}
+
+// ─── Dot progress bar ───────────────────────────────────────────────────────
+
+function DotProgress({ total, current, results }: {
+    total: number; current: number; results: (boolean | null)[];
+}) {
     return (
         <div className="flex gap-1 flex-wrap">
             {Array.from({ length: total }, (_, i) => {
-                const isPast    = i < current && !skipped.has(i);
-                const isSkipped = skipped.has(i);
+                const isDone    = i < current;
+                const correct   = results[i];
                 const isCurrent = i === current;
                 return (
-                    <div
-                        key={i}
-                        className="rounded-full transition-all duration-300"
+                    <div key={i} className="rounded-full transition-all duration-300"
                         style={{
                             width:  isCurrent ? 26 : 10,
                             height: 10,
                             background: isCurrent  ? ACCENT.srs
-                                : isPast    ? STATUS.success
-                                : isSkipped ? STATUS.danger
-                                : 'var(--theme-bg-tertiary)',
-                            opacity: i > current && !isSkipped ? 0.45 : 1,
+                                : !isDone   ? 'var(--theme-bg-tertiary)'
+                                : correct   ? STATUS.success
+                                : STATUS.danger,
+                            opacity: i > current ? 0.45 : 1,
                         }}
                     />
                 );
@@ -64,47 +127,48 @@ function DotProgress({ total, current, skipped }: { total: number; current: numb
     );
 }
 
-// ─── MCQ with numbered options + keyboard ────────────────────────────────
+// ─── MCQ ────────────────────────────────────────────────────────────────────
 
-const OPTION_LABELS = ['A', 'B', 'C', 'D', 'E', 'F'];
-
-function MCQInput({ options, value, onChange, disabled }: {
-    options: string[]; value?: string; onChange: (v: string) => void; disabled: boolean;
+function MCQInput({ options, value, onChange, disabled, revealed, correctIndex }: {
+    options: string[]; value?: string; onChange: (v: string) => void;
+    disabled: boolean; revealed: boolean; correctIndex?: number;
 }) {
     useEffect(() => {
         const handle = (e: KeyboardEvent) => {
-            if (disabled) return;
+            if (disabled || revealed) return;
             const n = parseInt(e.key);
             if (n >= 1 && n <= options.length) onChange(String(n - 1));
         };
         window.addEventListener('keydown', handle);
         return () => window.removeEventListener('keydown', handle);
-    }, [options.length, onChange, disabled]);
+    }, [options.length, onChange, disabled, revealed]);
 
     return (
         <div className="space-y-2.5">
             {options.map((opt, idx) => {
                 const isSelected = value === String(idx);
-                const color = OPTION_COLORS[idx % OPTION_COLORS.length];
+                const isCorrect  = correctIndex !== undefined && idx === correctIndex;
+                const isWrong    = revealed && isSelected && !isCorrect;
+
+                const color = revealed
+                    ? isCorrect ? STATUS.success : isWrong ? STATUS.danger : OPTION_COLORS[idx % OPTION_COLORS.length]
+                    : OPTION_COLORS[idx % OPTION_COLORS.length];
+
+                const bg = revealed
+                    ? isCorrect ? `${STATUS.success}18` : isWrong ? `${STATUS.danger}12` : `${color}08`
+                    : isSelected ? `${color}12` : 'var(--theme-bg-secondary)';
+
+                const border = revealed
+                    ? isCorrect ? STATUS.success : isWrong ? STATUS.danger : 'var(--theme-border)'
+                    : isSelected ? color : 'var(--theme-border)';
+
                 return (
-                    <button
-                        key={idx}
-                        onClick={() => !disabled && onChange(String(idx))}
-                        disabled={disabled}
-                        className="w-full flex items-center gap-3.5 px-4 py-3.5 rounded-xl border-2 text-left transition-all duration-150 hover:-translate-y-0.5"
-                        style={{
-                            borderColor: isSelected ? color : 'var(--theme-border)',
-                            backgroundColor: isSelected ? `${color}12` : 'var(--theme-bg-secondary)',
-                            cursor: disabled ? 'default' : 'pointer',
-                        }}
-                    >
-                        <div
-                            className="w-8 h-8 rounded-lg flex items-center justify-center text-body font-extrabold shrink-0 transition-all"
-                            style={{
-                                background: isSelected ? color : `${color}18`,
-                                color: isSelected ? 'white' : color,
-                            }}
-                        >
+                    <button key={idx} onClick={() => !disabled && !revealed && onChange(String(idx))}
+                        disabled={disabled || revealed}
+                        className="w-full flex items-center gap-3.5 px-4 py-3.5 rounded-xl border-2 text-left transition-all duration-150"
+                        style={{ borderColor: border, backgroundColor: bg, cursor: disabled || revealed ? 'default' : 'pointer' }}>
+                        <div className="w-8 h-8 rounded-lg flex items-center justify-center text-body font-extrabold shrink-0 transition-all"
+                            style={{ background: isSelected || (revealed && isCorrect) ? color : `${color}18`, color: isSelected || (revealed && isCorrect) ? 'white' : color }}>
                             {OPTION_LABELS[idx]}
                         </div>
                         <div className="flex-1 min-w-0">
@@ -112,9 +176,14 @@ function MCQInput({ options, value, onChange, disabled }: {
                                 <HighlightedText text={opt} />
                             </div>
                         </div>
-                        {isSelected && (
-                            <div className="w-5 h-5 rounded-full flex items-center justify-center shrink-0" style={{ background: color }}>
+                        {revealed && isCorrect && (
+                            <div className="w-5 h-5 rounded-full flex items-center justify-center shrink-0" style={{ background: STATUS.success }}>
                                 <IconCheck size={11} style={{ color: 'white' }} />
+                            </div>
+                        )}
+                        {revealed && isWrong && (
+                            <div className="w-5 h-5 rounded-full flex items-center justify-center shrink-0" style={{ background: STATUS.danger }}>
+                                <IconX size={11} style={{ color: 'white' }} />
                             </div>
                         )}
                     </button>
@@ -124,7 +193,7 @@ function MCQInput({ options, value, onChange, disabled }: {
     );
 }
 
-// ─── Text Input ──────────────────────────────────────────────────────────
+// ─── Text Input ──────────────────────────────────────────────────────────────
 
 function TextInput({ value, onChange, disabled, placeholder, multiline, onEnter, showSpecialChars }: {
     value: string; onChange: (v: string) => void; disabled: boolean;
@@ -177,7 +246,7 @@ function TextInput({ value, onChange, disabled, placeholder, multiline, onEnter,
     );
 }
 
-// ─── Reorder ──────────────────────────────────────────────────────────────
+// ─── Reorder ──────────────────────────────────────────────────────────────────
 
 function ReorderInput({ words, value, onChange, disabled }: {
     words: string[]; value: string[]; onChange: (v: string[]) => void; disabled: boolean;
@@ -219,12 +288,53 @@ function ReorderInput({ words, value, onChange, disabled }: {
     );
 }
 
-// ─── Result Screen ────────────────────────────────────────────────────────
+// ─── Feedback panel (shown after "Kiểm tra") ────────────────────────────────
 
-function ResultScreen({ result, exercises, onRetry }: { result: SubmitResult; exercises: Exercise[]; onRetry: () => void }) {
+function FeedbackPanel({ correct, correctAnswer, explanation }: {
+    correct: boolean; correctAnswer?: string; explanation?: string;
+}) {
+    return (
+        <div className="mx-5 mb-4 rounded-xl overflow-hidden border"
+            style={{ borderColor: correct ? `${STATUS.success}40` : `${STATUS.danger}40` }}>
+            {/* Header */}
+            <div className="px-4 py-2.5 flex items-center gap-2"
+                style={{ background: correct ? `${STATUS.success}15` : `${STATUS.danger}15` }}>
+                <div className="w-5 h-5 rounded-full flex items-center justify-center shrink-0"
+                    style={{ background: correct ? STATUS.success : STATUS.danger }}>
+                    {correct
+                        ? <IconCheck size={11} style={{ color: 'white' }} />
+                        : <IconX size={11} style={{ color: 'white' }} />}
+                </div>
+                <span className="text-sm font-bold" style={{ color: correct ? STATUS.success : STATUS.danger }}>
+                    {correct ? 'Chính xác!' : 'Chưa đúng'}
+                </span>
+            </div>
+            {/* Body */}
+            <div className="px-4 py-3 space-y-2" style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
+                {!correct && correctAnswer && (
+                    <p className="text-sm font-medium" style={{ color: 'var(--theme-text-primary)' }}>
+                        <span style={{ color: 'var(--theme-text-muted)' }}>Đáp án đúng: </span>
+                        <span className="font-bold" style={{ color: STATUS.success }}>{correctAnswer}</span>
+                    </p>
+                )}
+                {explanation && (
+                    <p className="text-xs leading-relaxed" style={{ color: 'var(--theme-text-secondary)' }}>
+                        💡 {explanation}
+                    </p>
+                )}
+            </div>
+        </div>
+    );
+}
+
+// ─── Result Screen ────────────────────────────────────────────────────────────
+
+function ResultScreen({ result, exercises, onRetry, nextLesson }: {
+    result: SubmitResult; exercises: Exercise[]; onRetry: () => void; nextLesson?: NextLesson | null;
+}) {
     const accuracy = result.totalQuestions > 0 ? Math.round((result.correctCount / result.totalQuestions) * 100) : 0;
     // eslint-disable-next-line no-restricted-syntax
-    const gradient = result.passed ? 'linear-gradient(135deg, #F59E0B, #D97706)' : accuracy >= 50 ? GRADIENT.action : GRADIENT.vocab;
+    const gradient = result.passed ? GRADIENT.writing : accuracy >= 50 ? GRADIENT.action : GRADIENT.vocab;
 
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -240,9 +350,9 @@ function ResultScreen({ result, exercises, onRetry }: { result: SubmitResult; ex
                 </p>
                 <div className="grid grid-cols-3 gap-3 mb-6">
                     {[
-                        { value: result.score, label: 'Điểm', color: ACCENT.vocab, bg: 'rgba(139,92,246,' },
-                        { value: `${result.correctCount}/${result.totalQuestions}`, label: 'Đúng', color: STATUS.success, bg: 'rgba(34,197,94,' },
-                        { value: `${accuracy}%`, label: 'Chính xác', color: ACCENT.srs, bg: 'rgba(59,130,246,' },
+                        { value: result.score,                                label: 'Điểm',     color: ACCENT.vocab,   bg: 'rgba(139,92,246,' },
+                        { value: `${result.correctCount}/${result.totalQuestions}`, label: 'Đúng',  color: STATUS.success, bg: 'rgba(34,197,94,' },
+                        { value: `${accuracy}%`,                              label: 'Chính xác', color: ACCENT.srs,     bg: 'rgba(59,130,246,' },
                     ].map((s, i) => (
                         <div key={i} className="rounded-xl p-3" style={{ background: `linear-gradient(135deg, ${s.bg}.1), ${s.bg}.05))` }}>
                             <div className="text-2xl font-extrabold" style={{ color: s.color }}>{s.value}</div>
@@ -250,11 +360,23 @@ function ResultScreen({ result, exercises, onRetry }: { result: SubmitResult; ex
                         </div>
                     ))}
                 </div>
-                <button onClick={onRetry}
-                    className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white transition-all hover:-translate-y-0.5"
-                    style={{ background: GRADIENT.history, boxShadow: `0 4px 12px ${ACCENT.vocab}40` }}>
-                    <IconRefresh size={16} style={{ color: 'white' }} /> Làm lại
-                </button>
+
+                <div className="flex items-center justify-center gap-3 flex-wrap">
+                    <button onClick={onRetry}
+                        className="inline-flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-semibold text-white transition-all hover:-translate-y-0.5"
+                        style={{ background: GRADIENT.history, boxShadow: `0 4px 12px ${ACCENT.vocab}40` }}>
+                        <IconRefresh size={16} style={{ color: 'white' }} /> Làm lại
+                    </button>
+
+                    {result.passed && nextLesson && (
+                        <Link href={`/grammar/${nextLesson.slug}`}
+                            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold text-white transition-all hover:-translate-y-0.5 hover:scale-[1.02] shadow-xl"
+                            style={{ background: GRADIENT.writing, boxShadow: '0 8px 20px rgba(99,102,241,0.35)' }}>
+                            Bài tiếp theo: {nextLesson.titleVi}
+                            <IconArrowRight size={14} style={{ color: 'white' }} />
+                        </Link>
+                    )}
+                </div>
             </div>
 
             <div className="rounded-2xl border overflow-hidden" style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
@@ -297,18 +419,21 @@ function ResultScreen({ result, exercises, onRetry }: { result: SubmitResult; ex
     );
 }
 
-// ─── Main ────────────────────────────────────────────────────────────────
+// ─── Main ────────────────────────────────────────────────────────────────────
 
-export const ExerciseList = ({ exercises, onSubmit, onBackToTheory }: ExerciseListProps) => {
-    const [index, setIndex]               = useState(0);
-    const [answers, setAnswers]           = useState<Record<number, string | string[]>>({});
-    const [currentAnswer, setCurrentAnswer] = useState<string | string[]>('');
-    const [result, setResult]             = useState<SubmitResult | null>(null);
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [submitError, setSubmitError]   = useState<string | null>(null);
-    const [combo, setCombo]               = useState(0);
-    const [showHint, setShowHint]         = useState(false);
-    const [skipped, setSkipped]           = useState<Set<number>>(new Set());
+export const ExerciseList = ({ exercises, onSubmit, nextLesson }: ExerciseListProps) => {
+    const [index, setIndex]                   = useState(0);
+    const [answers, setAnswers]               = useState<Record<number, string | string[]>>({});
+    const [currentAnswer, setCurrentAnswer]   = useState<string | string[]>('');
+    const [result, setResult]                 = useState<SubmitResult | null>(null);
+    const [isSubmitting, setIsSubmitting]     = useState(false);
+    const [submitError, setSubmitError]       = useState<string | null>(null);
+    const [combo, setCombo]                   = useState(0);
+    const [showHint, setShowHint]             = useState(false);
+    // Immediate feedback state
+    const [revealed, setRevealed]             = useState(false);
+    const [questionCorrect, setQuestionCorrect] = useState<boolean | null>(null);
+    const [questionResults, setQuestionResults] = useState<(boolean | null)[]>([]);
     const { speak } = usePronunciation();
 
     const exercise  = exercises[index]!;
@@ -336,22 +461,32 @@ export const ExerciseList = ({ exercises, onSubmit, onBackToTheory }: ExerciseLi
         return Array.isArray(currentAnswer) && currentAnswer.length > 0;
     }, [currentAnswer]);
 
+    // "Kiểm tra" — reveal feedback for current question
+    const handleCheck = useCallback(() => {
+        const correct = checkClientSide(exercise, currentAnswer);
+        setQuestionCorrect(correct);
+        setRevealed(true);
+        setQuestionResults(prev => {
+            const next = [...prev];
+            next[index] = correct;
+            return next;
+        });
+        if (correct) {
+            setCombo(c => c + 1);
+        } else {
+            setCombo(0);
+        }
+    }, [exercise, currentAnswer, index]);
+
+    // "Tiếp tục" — advance to next after reveal
     const handleNext = useCallback(() => {
         setAnswers(prev => ({ ...prev, [exercise.order]: currentAnswer }));
         setCurrentAnswer('');
         setShowHint(false);
-        setCombo(c => c + 1);
+        setRevealed(false);
+        setQuestionCorrect(null);
         setIndex(i => i + 1);
     }, [exercise, currentAnswer]);
-
-    const handleSkip = useCallback(() => {
-        setSkipped(prev => new Set(prev).add(index));
-        setAnswers(prev => ({ ...prev, [exercise.order]: '' }));
-        setCurrentAnswer('');
-        setShowHint(false);
-        setCombo(0);
-        setIndex(i => i + 1);
-    }, [index, exercise]);
 
     const handleSubmit = useCallback(async () => {
         const final = { ...answers, [exercise.order]: currentAnswer };
@@ -369,23 +504,32 @@ export const ExerciseList = ({ exercises, onSubmit, onBackToTheory }: ExerciseLi
         }
     }, [answers, exercise, currentAnswer, onSubmit]);
 
+    // Last question after reveal: submit
+    const handleNextOrSubmit = useCallback(() => {
+        if (isLast) handleSubmit(); else handleNext();
+    }, [isLast, handleNext, handleSubmit]);
+
     const handleRetry = () => {
         setIndex(0); setAnswers({}); setCurrentAnswer(''); setResult(null);
-        setIsSubmitting(false); setSubmitError(null); setCombo(0); setSkipped(new Set());
+        setIsSubmitting(false); setSubmitError(null); setCombo(0);
+        setRevealed(false); setQuestionCorrect(null); setQuestionResults([]);
     };
 
-    // Keyboard: Enter = next/submit
+    // Keyboard: Enter = check (if not revealed) or next/submit (if revealed)
     useEffect(() => {
         const handle = (e: KeyboardEvent) => {
-            if (e.key !== 'Enter' || e.shiftKey || result || !hasAnswer()) return;
-            if (exercise?.exerciseType === 'mcq') {
+            if (e.key !== 'Enter' || e.shiftKey || result) return;
+            if (!revealed && hasAnswer() && exercise?.exerciseType === 'mcq') {
                 e.preventDefault();
-                if (isLast) handleSubmit(); else handleNext();
+                handleCheck();
+            } else if (revealed) {
+                e.preventDefault();
+                handleNextOrSubmit();
             }
         };
         window.addEventListener('keydown', handle);
         return () => window.removeEventListener('keydown', handle);
-    }, [result, hasAnswer, exercise, isLast, handleSubmit, handleNext]);
+    }, [result, hasAnswer, exercise, revealed, handleCheck, handleNextOrSubmit]);
 
     // Space = speak question
     useEffect(() => {
@@ -402,12 +546,16 @@ export const ExerciseList = ({ exercises, onSubmit, onBackToTheory }: ExerciseLi
     if (result) {
         return (
             <div className="max-w-2xl mx-auto">
-                <ResultScreen result={result} exercises={exercises} onRetry={handleRetry} />
+                <ResultScreen result={result} exercises={exercises} onRetry={handleRetry} nextLesson={nextLesson} />
             </div>
         );
     }
 
     if (!exercise || !typeMeta || !difficulty) return null;
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const explanationText = (exercise as any).explanation?.vi || (exercise as any).explanation?.en || '';
+    const correctAnswerLabel = getCorrectAnswerLabel(exercise);
 
     return (
         <div className="max-w-2xl mx-auto space-y-4">
@@ -426,39 +574,30 @@ export const ExerciseList = ({ exercises, onSubmit, onBackToTheory }: ExerciseLi
                         </span>
                     )}
                 </div>
-                {/* Dot track */}
-                <DotProgress total={exercises.length} current={index} skipped={skipped} />
+                <DotProgress total={exercises.length} current={index} results={questionResults} />
             </div>
 
             {/* ── Question card ── */}
-            <div
-                className="rounded-2xl border overflow-hidden"
-                key={index}
-                style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}
-            >
+            <div className="rounded-2xl border overflow-hidden" key={index}
+                style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
+
                 {/* Card header */}
                 <div className="px-5 py-4 border-b flex items-center justify-between gap-3"
                     style={{ borderColor: 'var(--theme-border)' }}>
                     <div className="flex items-center gap-2.5">
-                        {/* Question number */}
-                        <div
-                            className="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-extrabold text-white shrink-0"
-                            style={{ background: GRADIENT.action }}
-                        >
+                        <div className="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-extrabold text-white shrink-0"
+                            style={{ background: GRADIENT.action }}>
                             {index + 1}
                         </div>
-                        {/* Type badge */}
                         <span className="flex items-center gap-1 text-caption font-bold px-2.5 py-1 rounded-lg"
                             style={{ backgroundColor: `${typeMeta.color}14`, color: typeMeta.color }}>
                             {typeMeta.icon} {typeMeta.label}
                         </span>
-                        {/* Difficulty */}
                         <span className="flex items-center gap-1 text-caption font-semibold px-2 py-1 rounded-lg"
                             style={{ backgroundColor: `${difficulty.color}12`, color: difficulty.color }}>
                             ● {difficulty.label}
                         </span>
                     </div>
-                    {/* Points */}
                     <span className="flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-lg shrink-0"
                         style={{ background: `${ACCENT.xp}1F`, color: ACCENT.xp }}>
                         ⭐ {exercise.points} điểm
@@ -472,12 +611,10 @@ export const ExerciseList = ({ exercises, onSubmit, onBackToTheory }: ExerciseLi
                             {exercise.questionVi}
                         </h3>
                         {exercise.questionDe && (
-                            <button
-                                onClick={() => speak(exercise.questionDe!)}
+                            <button onClick={() => speak(exercise.questionDe!)}
                                 className="shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-all hover:scale-110 mt-0.5"
                                 style={{ background: `${ACCENT.srs}1A`, color: ACCENT.srs }}
-                                title="Phát âm câu hỏi"
-                            >
+                                title="Phát âm câu hỏi">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                                     <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
                                     <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
@@ -500,38 +637,49 @@ export const ExerciseList = ({ exercises, onSubmit, onBackToTheory }: ExerciseLi
                             value={typeof currentAnswer === 'string' ? currentAnswer : undefined}
                             onChange={v => setCurrentAnswer(v)}
                             disabled={false}
+                            revealed={revealed}
+                            correctIndex={exercise.answerData.correctIndex as number}
                         />
                     )}
                     {exercise.exerciseType === 'fill_blank' && (
                         <TextInput value={typeof currentAnswer === 'string' ? currentAnswer : ''} onChange={v => setCurrentAnswer(v)}
-                            disabled={false} placeholder="Điền câu trả lời..." onEnter={isLast ? handleSubmit : handleNext} showSpecialChars />
+                            disabled={revealed} placeholder="Điền câu trả lời..."
+                            onEnter={revealed ? handleNextOrSubmit : handleCheck} showSpecialChars />
                     )}
                     {exercise.exerciseType === 'translate' && (
                         <TextInput value={typeof currentAnswer === 'string' ? currentAnswer : ''} onChange={v => setCurrentAnswer(v)}
-                            disabled={false} multiline placeholder="Nhập bản dịch..." onEnter={isLast ? handleSubmit : handleNext} showSpecialChars />
+                            disabled={revealed} multiline placeholder="Nhập bản dịch..."
+                            onEnter={revealed ? handleNextOrSubmit : handleCheck} showSpecialChars />
                     )}
                     {exercise.exerciseType === 'error_correct' && (
                         <TextInput value={typeof currentAnswer === 'string' ? currentAnswer : ''} onChange={v => setCurrentAnswer(v)}
-                            disabled={false} multiline placeholder="Nhập câu đã sửa..." onEnter={isLast ? handleSubmit : handleNext} showSpecialChars />
+                            disabled={revealed} multiline placeholder="Nhập câu đã sửa..."
+                            onEnter={revealed ? handleNextOrSubmit : handleCheck} showSpecialChars />
                     )}
                     {exercise.exerciseType === 'reorder' && (
                         <ReorderInput words={shuffledMap[index] || exercise.answerData.correctOrder}
                             value={Array.isArray(currentAnswer) ? currentAnswer : []}
-                            onChange={v => setCurrentAnswer(v)} disabled={false} />
+                            onChange={v => setCurrentAnswer(v)} disabled={revealed} />
                     )}
                 </div>
 
-                {/* Hint panel */}
-                {showHint && (
-                    <div className="mx-5 mb-4 rounded-xl overflow-hidden"
-                        style={{ border: `1.5px solid ${ACCENT.xp}59` }}>
-                        <div className="px-3.5 py-2 flex items-center gap-2"
-                            style={{ background: GRADIENT.xp }}>
+                {/* Feedback panel (after check) */}
+                {revealed && (
+                    <FeedbackPanel
+                        correct={questionCorrect === true}
+                        correctAnswer={questionCorrect ? undefined : correctAnswerLabel}
+                        explanation={explanationText}
+                    />
+                )}
+
+                {/* Hint panel (only when not revealed) */}
+                {showHint && !revealed && (
+                    <div className="mx-5 mb-4 rounded-xl overflow-hidden" style={{ border: `1.5px solid ${ACCENT.xp}59` }}>
+                        <div className="px-3.5 py-2 flex items-center gap-2" style={{ background: GRADIENT.xp }}>
                             <IconLightbulb size={14} style={{ color: 'white' }} />
                             <span className="text-xs font-bold text-white tracking-wide">Gợi ý</span>
                         </div>
-                        <div className="px-4 py-3 flex items-start gap-2.5"
-                            style={{ background: `${ACCENT.xp}0F` }}>
+                        <div className="px-4 py-3" style={{ background: `${ACCENT.xp}0F` }}>
                             <p className="text-[13.5px] leading-relaxed" style={{ color: 'var(--theme-text-primary)' }}>
                                 {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                                 {(exercise as any).hint || (exercise as any).hintVi || 'Xem lại phần lý thuyết để tìm câu trả lời.'}
@@ -552,83 +700,72 @@ export const ExerciseList = ({ exercises, onSubmit, onBackToTheory }: ExerciseLi
                 {/* Footer action bar */}
                 <div className="px-5 py-4 border-t flex items-center justify-between gap-3"
                     style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-secondary)' }}>
-                    {/* Left: secondary actions */}
+                    {/* Left: secondary actions (hide when revealed) */}
                     <div className="flex items-center gap-1.5">
-                        <button
-                            onClick={() => setShowHint(h => !h)}
-                            className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold transition-all"
-                            style={showHint
-                                ? { background: GRADIENT.xp, color: 'white' }
-                                : { background: `${ACCENT.xp}1A`, color: ACCENT.xp, border: `1px solid ${ACCENT.xp}40` }}
-                        >
-                            <IconLightbulb size={13} /> Gợi ý
-                        </button>
-                        {!isLast && (
-                            <button
-                                onClick={handleSkip}
+                        {!revealed && (
+                            <button onClick={() => setShowHint(h => !h)}
                                 className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold transition-all"
-                                style={{ background: `${STATUS.danger}14`, color: STATUS.danger, border: `1px solid ${STATUS.danger}33` }}
-                            >
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polygon points="5 4 15 12 5 20 5 4" /><line x1="19" y1="5" x2="19" y2="19" /></svg>
-                                Bỏ qua
-                            </button>
-                        )}
-                        {onBackToTheory && (
-                            <button
-                                onClick={onBackToTheory}
-                                className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold transition-all"
-                                style={{ background: `${ACCENT.writing}14`, color: ACCENT.writing, border: `1px solid ${ACCENT.writing}33` }}
-                            >
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
-                                Xem lý thuyết
+                                style={showHint
+                                    ? { background: GRADIENT.xp, color: 'white' }
+                                    : { background: `${ACCENT.xp}1A`, color: ACCENT.xp, border: `1px solid ${ACCENT.xp}40` }}>
+                                <IconLightbulb size={13} /> Gợi ý
                             </button>
                         )}
                     </div>
 
                     {/* Right: primary CTA */}
-                    <button
-                        onClick={isLast ? handleSubmit : handleNext}
-                        disabled={!hasAnswer() || isSubmitting}
-                        className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-body font-bold transition-all hover:-translate-y-0.5 disabled:opacity-40 disabled:cursor-not-allowed disabled:transform-none"
-                        style={{
-                            background: hasAnswer() ? GRADIENT.action : 'var(--theme-bg-tertiary)',
-                            color: hasAnswer() ? 'white' : 'var(--theme-text-muted)',
-                            boxShadow: hasAnswer() ? `0 4px 12px ${ACCENT.srs}4D` : 'none',
-                        }}
-                    >
-                        {isSubmitting ? (
-                            <><IconLoader size={14} /> Đang chấm...</>
-                        ) : isLast ? (
-                            <><IconCheck size={14} /> Nộp bài</>
-                        ) : !hasAnswer() ? (
-                            'Chọn đáp án'
-                        ) : (
-                            <>Tiếp tục <IconArrowRight size={14} /></>
-                        )}
-                    </button>
+                    {!revealed ? (
+                        <button onClick={handleCheck} disabled={!hasAnswer()}
+                            className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-body font-bold transition-all hover:-translate-y-0.5 disabled:opacity-40 disabled:cursor-not-allowed disabled:transform-none"
+                            style={{
+                                background: hasAnswer() ? GRADIENT.action : 'var(--theme-bg-tertiary)',
+                                color: hasAnswer() ? 'white' : 'var(--theme-text-muted)',
+                                boxShadow: hasAnswer() ? `0 4px 12px ${ACCENT.srs}4D` : 'none',
+                            }}>
+                            {!hasAnswer() ? 'Chọn đáp án' : <><IconCheck size={14} /> Kiểm tra</>}
+                        </button>
+                    ) : (
+                        <button onClick={handleNextOrSubmit} disabled={isSubmitting}
+                            className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-body font-bold transition-all hover:-translate-y-0.5 disabled:opacity-40"
+                            style={{
+                                background: isLast ? GRADIENT.writing : GRADIENT.action,
+                                color: 'white',
+                                boxShadow: `0 4px 12px ${ACCENT.srs}4D`,
+                            }}>
+                            {isSubmitting ? (
+                                <><IconLoader size={14} /> Đang chấm...</>
+                            ) : isLast ? (
+                                <><IconCheck size={14} /> Nộp bài</>
+                            ) : (
+                                <>Tiếp tục <IconArrowRight size={14} /></>
+                            )}
+                        </button>
+                    )}
                 </div>
             </div>
 
             {/* ── Keyboard shortcuts hint ── */}
-            <div className="text-center text-caption space-x-2" style={{ color: 'var(--theme-text-muted)' }}>
-                <span>Phím tắt:</span>
-                {exercise.exerciseType === 'mcq' && (
+            {!revealed && (
+                <div className="text-center text-caption space-x-2" style={{ color: 'var(--theme-text-muted)' }}>
+                    <span>Phím tắt:</span>
+                    {exercise.exerciseType === 'mcq' && (
+                        <span>
+                            <kbd className="px-1.5 py-0.5 rounded text-caption font-bold" style={{ background: 'var(--theme-bg-secondary)', border: '1px solid var(--theme-border)' }}>
+                                1–{exercise.answerData.options?.length ?? 4}
+                            </kbd>
+                            {' '}chọn ·
+                        </span>
+                    )}
                     <span>
-                        <kbd className="px-1.5 py-0.5 rounded text-caption font-bold" style={{ background: 'var(--theme-bg-secondary)', border: '1px solid var(--theme-border)' }}>
-                            1–{exercise.answerData.options?.length ?? 4}
-                        </kbd>
-                        {' '}chọn ·
+                        <kbd className="px-1.5 py-0.5 rounded text-caption font-bold" style={{ background: 'var(--theme-bg-secondary)', border: '1px solid var(--theme-border)' }}>Enter</kbd>
+                        {' '}kiểm tra ·
                     </span>
-                )}
-                <span>
-                    <kbd className="px-1.5 py-0.5 rounded text-caption font-bold" style={{ background: 'var(--theme-bg-secondary)', border: '1px solid var(--theme-border)' }}>Enter</kbd>
-                    {' '}tiếp tục ·
-                </span>
-                <span>
-                    <kbd className="px-1.5 py-0.5 rounded text-caption font-bold" style={{ background: 'var(--theme-bg-secondary)', border: '1px solid var(--theme-border)' }}>Space</kbd>
-                    {' '}phát âm
-                </span>
-            </div>
+                    <span>
+                        <kbd className="px-1.5 py-0.5 rounded text-caption font-bold" style={{ background: 'var(--theme-bg-secondary)', border: '1px solid var(--theme-border)' }}>Space</kbd>
+                        {' '}phát âm
+                    </span>
+                </div>
+            )}
         </div>
     );
 };
