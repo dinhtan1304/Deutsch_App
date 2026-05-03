@@ -61,11 +61,10 @@ export function NotificationDrawer({ open, onClose }: Props) {
         aria-labelledby="notif-drawer-title"
         className="fixed right-4 top-16 z-50 w-100 max-h-[85vh] rounded-[2.5rem] border shadow-2xl flex flex-col overflow-hidden backdrop-blur-3xl"
         style={{
-          backgroundColor: 'var(--theme-bg-card)',
-          background: 'rgba(255, 255, 255, 0.96)',
-          borderColor: 'rgba(255, 255, 255, 0.1)',
+          background: 'color-mix(in srgb, var(--theme-bg-card) 96%, transparent)',
+          borderColor: 'var(--theme-border)',
           animation: 'drawerIn .3s cubic-bezier(0.16, 1, 0.3, 1)',
-          boxShadow: '0 40px 80px rgba(0,0,0,0.15), inset 0 0 0 1px rgba(255,255,255,0.2)',
+          boxShadow: '0 40px 80px rgba(0,0,0,0.15)',
         }}
       >
         {/* UI REFRESH TRIGGER: 1.0.1 */}
