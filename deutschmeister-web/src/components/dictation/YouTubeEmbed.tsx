@@ -14,9 +14,31 @@ interface Props {
   onTimeUpdate?: (currentSec: number) => void;
 }
 
+interface YTPlayer {
+  seekTo(seconds: number, allowSeekAhead: boolean): void;
+  playVideo(): void;
+  pauseVideo(): void;
+  destroy(): void;
+  getCurrentTime?(): number;
+  setPlaybackRate(rate: number): void;
+}
+
+interface YTPlayerStateEvent {
+  data: number;
+}
+
 declare global {
   interface Window {
-    YT: any;
+    YT: {
+      Player: new (container: HTMLElement, options: {
+        videoId: string;
+        playerVars?: Record<string, number>;
+        events?: {
+          onError?: () => void;
+          onStateChange?: (e: YTPlayerStateEvent) => void;
+        };
+      }) => YTPlayer;
+    };
     onYouTubeIframeAPIReady: (() => void) | undefined;
   }
 }
@@ -45,7 +67,7 @@ export const YouTubeEmbed = forwardRef<YouTubeEmbedRef, Props>(function YouTubeE
   ref,
 ) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const playerRef = useRef<any>(null);
+  const playerRef = useRef<YTPlayer | null>(null);
   const segmentTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const timeUpdateTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const onTimeUpdateRef = useRef(onTimeUpdate);
@@ -93,7 +115,7 @@ export const YouTubeEmbed = forwardRef<YouTubeEmbedRef, Props>(function YouTubeE
         playerVars: { rel: 0, modestbranding: 1 },
         events: {
           onError: () => onError?.(),
-          onStateChange: (e: any) => {
+          onStateChange: (e: YTPlayerStateEvent) => {
             // YT.PlayerState.PLAYING = 1
             if (e.data === 1) {
               if (!timeUpdateTimerRef.current) {

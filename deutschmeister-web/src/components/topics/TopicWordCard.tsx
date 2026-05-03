@@ -2,14 +2,16 @@
 /* eslint-disable no-restricted-syntax */
 
 import { useState, useCallback } from 'react';
-import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import { ACCENT, STATUS } from '@/lib/tokens';
 import type { TopicWord } from '@/types/topic';
-import { ArticleColor } from '@/types/topic';
 import { useQuickAddWithCollection } from '@/hooks/useQuickAddWithCollection';
 import { AddToCollectionPicker } from '@/components/word-bank/AddToCollectionPicker';
+import Image from 'next/image' 
+
+type SvgIconProps = { size?: number } & Omit<React.SVGAttributes<SVGSVGElement>, 'width' | 'height'>;
 
 // ─── Inline SVG icons ───
-function IconVolume({ size = 16, ...props }: { size?: number, [key: string]: any }) {
+function IconVolume({ size = 16, ...props }: SvgIconProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
       strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }} {...props}>
@@ -42,7 +44,7 @@ function IconStar({ size = 16 }: { size?: number }) {
     </svg>
   );
 }
-function IconLightbulb({ size = 16, ...props }: { size?: number, [key: string]: any }) {
+function IconLightbulb({ size = 16, ...props }: SvgIconProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
       strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }} {...props}>
@@ -223,7 +225,7 @@ export function TopicWordCard({
                 {word.examples.map((ex, i) => (
                   <li key={i} className="text-body italic pl-3 border-l-2"
                     style={{ borderColor: ac.color, color: 'var(--theme-text-secondary)' }}>
-                    „{ex}"
+                    „{ex}&quot;
                   </li>
                 ))}
               </ul>
@@ -253,9 +255,11 @@ export function TopicWordCard({
 
           {word.imageUrl && (
             <div className="mt-2">
-              <img src={word.imageUrl} alt={word.word}
+              <Image src={word.imageUrl} alt={word.word}
                 className="w-full max-w-50 h-auto rounded-xl border"
-                style={{ borderColor: 'var(--theme-border)' }} />
+                style={{ borderColor: 'var(--theme-border)' }}
+                width={300}
+                height={200} />
             </div>
           )}
         </div>

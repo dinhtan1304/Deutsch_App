@@ -1,8 +1,8 @@
 'use client';
 /* eslint-disable no-restricted-syntax */
 
-import { useState, useEffect } from 'react';
-import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import { useReducer, useEffect } from 'react';
+import { ACCENT, STATUS } from '@/lib/tokens';
 import { useCelebrationStore } from '@/stores/celebrationStore';
 import { useModalA11y } from '@/hooks/useModalA11y';
 
@@ -10,10 +10,13 @@ const CONFETTI_COLORS = [ACCENT.srs, STATUS.success, ACCENT.xp, STATUS.danger, A
 
 export function CelebrationModal() {
   const current = useCelebrationStore((s) => s.queue[0]);
-  const [visible, setVisible] = useState(false);
+  const [visible, dispatch] = useReducer(
+    (_state: boolean, action: 'show' | 'hide') => action === 'show',
+    false,
+  );
 
   const handleDismiss = () => {
-    setVisible(false);
+    dispatch('hide');
     setTimeout(() => {
       useCelebrationStore.getState().dismiss();
     }, 250);
@@ -23,10 +26,10 @@ export function CelebrationModal() {
 
   useEffect(() => {
     if (current) {
-      const timer = setTimeout(() => setVisible(true), 20);
+      const timer = setTimeout(() => dispatch('show'), 20);
       return () => clearTimeout(timer);
     } else {
-      setVisible(false);
+      dispatch('hide');
     }
   }, [current]);
 

@@ -1,8 +1,11 @@
 ﻿'use client';
-/* eslint-disable no-restricted-syntax */
 
 import Link from 'next/link';
-import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import { ACCENT, GRADIENT } from '@/lib/tokens';
+
+const monoGradientSoftBg = (color: string) => `linear-gradient(135deg, ${color}08, ${color}03)`;
+const monoGradientBg = (color: string) => `linear-gradient(135deg, ${color}20, ${color}10)`;
+const monoGradientH = (color: string) => `linear-gradient(90deg, ${color}, ${color}cc)`;
 import type { Topic, TopicWithProgress } from '@/types/topic';
 
 // ─── Inline SVG icons ───
@@ -44,7 +47,7 @@ export function TopicCard({ topic, showProgress = false }: TopicCardProps) {
         }}>
         {/* Hover gradient overlay */}
         <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-          style={{ background: `linear-gradient(135deg, ${topicColor}08, ${topicColor}03)` }} />
+          style={{ background: monoGradientSoftBg(topicColor) }} />
 
         {/* Decorative circle */}
         <div className="absolute -top-6 -right-6 w-20 h-20 rounded-full transition-transform duration-300 group-hover:scale-110"
@@ -53,7 +56,7 @@ export function TopicCard({ topic, showProgress = false }: TopicCardProps) {
         {/* Completed badge */}
         {isCompleted && (
           <div className="absolute top-3 right-3 flex items-center gap-1 px-2 py-0.5 rounded-lg text-caption font-bold"
-            style={{ background: 'linear-gradient(135deg, #22C55E, #16A34A)', color: 'white' }}>
+            style={{ background: GRADIENT.readingGreen, color: 'white' }}>
             <IconCheck size={10} /> Hoàn thành
           </div>
         )}
@@ -61,7 +64,7 @@ export function TopicCard({ topic, showProgress = false }: TopicCardProps) {
         {/* Icon */}
         <div className="relative w-12 h-12 rounded-xl flex items-center justify-center text-2xl mb-3
           transition-transform duration-300 group-hover:scale-110"
-          style={{ background: `linear-gradient(135deg, ${topicColor}20, ${topicColor}10)` }}>
+          style={{ background: monoGradientBg(topicColor) }}>
           {topic.icon || '📚'}
         </div>
 
@@ -104,8 +107,8 @@ export function TopicCard({ topic, showProgress = false }: TopicCardProps) {
                 style={{
                   width: `${progress}%`,
                   background: isCompleted
-                    ? 'linear-gradient(90deg, #22C55E, #16A34A)'
-                    : `linear-gradient(90deg, ${topicColor}, ${topicColor}cc)`,
+                    ? GRADIENT.readingGreenH
+                    : monoGradientH(topicColor),
                 }} />
             </div>
           </div>

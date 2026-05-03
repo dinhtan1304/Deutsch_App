@@ -2,7 +2,7 @@
 /* eslint-disable no-restricted-syntax */
 
 import Link from 'next/link';
-import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import { ACCENT, STATUS } from '@/lib/tokens';
 import { useDailyPath } from '@/hooks/useDashboard';
 
 function IconStar({ size = 14 }: { size?: number }) {
@@ -23,12 +23,12 @@ export function DailyPath() {
   const progressPct = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
   const nextTask = tasks.find((t) => !t.completed);
 
-  const Wrapper = allDone ? 'div' : Link;
+  const Wrapper = (allDone ? 'div' : Link) as React.ElementType;
   const wrapperProps = allDone ? {} : { href: nextTask?.href || '/topics' };
 
   return (
     <Wrapper
-      {...wrapperProps as any}
+      {...wrapperProps}
       className="flex flex-col gap-2 p-3 rounded-xl border overflow-hidden transition-all group hover:-translate-y-0.5"
       style={{
         borderColor: 'var(--theme-border)',

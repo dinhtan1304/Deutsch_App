@@ -3,8 +3,8 @@
 
 import Link from 'next/link';
 import { useFullDashboard } from '@/hooks/useDashboard';
-import { useAuthStore } from '@/stores/authStore';
-import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import { useSettingsStore } from '@/stores/settingsStore';
+import { ACCENT, STATUS } from '@/lib/tokens';
 
 interface JourneyStep {
   title: string;
@@ -35,7 +35,7 @@ const STEPS: JourneyStep[] = [
 ];
 
 export function FirstDayJourney() {
-  const { user } = useAuthStore();
+  const { settings } = useSettingsStore();
   const { data } = useFullDashboard();
   const stats = data?.stats;
 
@@ -48,8 +48,7 @@ export function FirstDayJourney() {
   const nextStep = STEPS.find((s) => !s.checkFn(stats));
   const progressPct = (completedCount / STEPS.length) * 100;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const level = (user as any)?.preferredLevel as string || 'A1';
+  const level = settings.preferredLevel;
 
   return (
     <Link

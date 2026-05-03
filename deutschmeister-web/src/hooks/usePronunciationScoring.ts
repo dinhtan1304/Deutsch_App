@@ -20,7 +20,7 @@ export const pronunciationKeys = {
     [...pronunciationKeys.all, 'targets', level ?? 'all'] as const,
   categories: (level?: PronunciationLevel) =>
     [...pronunciationKeys.all, 'categories', level ?? 'all'] as const,
-  history: (params?: any) =>
+  history: (params?: unknown) =>
     [...pronunciationKeys.all, 'history', params ?? {}] as const,
   stats: () => [...pronunciationKeys.all, 'stats'] as const,
 };

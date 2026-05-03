@@ -2,7 +2,7 @@
 /* eslint-disable no-restricted-syntax */
 
 import Link from 'next/link';
-import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import { ACCENT, STATUS } from '@/lib/tokens';
 import { useErrorPatterns } from '@/hooks/useErrorPatterns';
 
 const ERROR_LABELS: Record<string, string> = {

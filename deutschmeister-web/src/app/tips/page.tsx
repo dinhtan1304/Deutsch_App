@@ -11,7 +11,7 @@ import {
   quickReference,
   GenderRule,
 } from '@/lib/genderRules';
-import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import { ACCENT, STATUS } from '@/lib/tokens';
 
 // ─── Inline SVG Icons ───
 function IconLightbulb({ size = 16, style }: { size?: number; style?: React.CSSProperties }) {

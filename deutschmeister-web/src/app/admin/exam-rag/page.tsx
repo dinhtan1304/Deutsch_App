@@ -207,7 +207,7 @@ function DocumentRow({
   onToggle: () => void;
   onDelete: () => void;
 }) {
-  const skillStyle = SKILL_COLORS[item.skill] ?? SKILL_COLORS.reading;
+  const skillStyle = SKILL_COLORS[item.skill] ?? { bg: 'rgba(34,197,94,0.12)', color: '#4ADE80', border: 'rgba(34,197,94,0.25)' };
   const date = new Date(item.createdAt);
 
   return (
@@ -295,7 +295,7 @@ function ExpandedChunks({ documentId }: { documentId: string }) {
               }}>
                 <div style={{ display: 'flex', gap: 8, marginBottom: 6, flexWrap: 'wrap', alignItems: 'center' }}>
                   {(() => {
-                    const cs = SKILL_COLORS[chunk.skill] ?? SKILL_COLORS.general;
+                    const cs = SKILL_COLORS[chunk.skill] ?? SKILL_COLORS.general!;
                     return (
                       <span style={{
                         fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 12,

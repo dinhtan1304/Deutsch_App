@@ -2,7 +2,7 @@
 /* eslint-disable no-restricted-syntax */
 
 import { useState, useRef, useCallback } from 'react';
-import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import { ACCENT, STATUS } from '@/lib/tokens';
 import { useMutation } from '@tanstack/react-query';
 import { feedbackApi, FeedbackType } from '@/lib/api/feedback';
 import { IconX, IconBug, IconLightbulb, IconMessageCircle, IconCheck, IconLoader } from '@/components/ui/Icons';
@@ -122,7 +122,7 @@ export function FeedbackModal({ onClose }: FeedbackModalProps) {
         role="dialog"
         aria-modal="true"
         aria-labelledby="feedback-modal-title"
-        className="fixed z-50 bottom-6 right-6 w-[360px] rounded-2xl shadow-2xl border overflow-hidden"
+        className="fixed z-50 bottom-6 right-6 w-90 rounded-2xl shadow-2xl border overflow-hidden"
         style={{ backgroundColor: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)', maxHeight: 'calc(100vh - 48px)', display: 'flex', flexDirection: 'column' }}
       >
         {/* Header */}

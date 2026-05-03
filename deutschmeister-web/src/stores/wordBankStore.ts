@@ -6,7 +6,7 @@
  */
 
 import { create } from 'zustand';
-import { WordType, Level, Gender, WordBankFilters } from '@/types/personalWord';
+import { WordBankFilters } from '@/types/personalWord';
 
 // ============================================
 // Store
@@ -23,7 +23,7 @@ interface WordBankUIState {
   setLimit: (limit: number) => void;
 
   // Computed → API params
-  getApiParams: () => Record<string, any>;
+  getApiParams: () => Record<string, unknown>;
 }
 
 const defaultFilters: WordBankFilters = {
@@ -59,7 +59,7 @@ export const useWordBankUI = create<WordBankUIState>((set, get) => ({
   // Chuyển filters → API params
   getApiParams: () => {
     const { filters, page, limit } = get();
-    const params: Record<string, any> = { page, limit };
+    const params: Record<string, unknown> = { page, limit };
 
     if (filters.search) params.search = filters.search;
     if (filters.wordType !== 'all') params.wordType = filters.wordType;

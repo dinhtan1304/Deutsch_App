@@ -1,7 +1,5 @@
 'use client';
-/* eslint-disable no-restricted-syntax */
-
-import { ACCENT } from '@/lib/tokens';
+import { ACCENT, GRADIENT } from '@/lib/tokens';
 import { GenderInfo, Progress } from '@/types';
 import type { Word } from '@/types';
 
@@ -125,12 +123,12 @@ export function ReviewCard({
             backfaceVisibility: 'hidden',
             WebkitBackfaceVisibility: 'hidden',
             transform: 'rotateY(180deg)',
-            background: 'linear-gradient(135deg, #0f2a1a 0%, #064e3b 60%, #065f46 100%)',
+            background: GRADIENT.cardBack,
           }}
         >
           <div className="absolute inset-0 flex flex-col items-center justify-center px-6 text-center gap-2">
             <div className="px-3 py-1 rounded-full text-caption font-bold mb-1"
-              style={{ backgroundColor: 'rgba(52,211,153,.2)', color: '#34D399' }}>
+              style={{ backgroundColor: 'rgba(52,211,153,.2)', color: ACCENT.emeraldLight }}>
               🇻🇳 VN Nghĩa
             </div>
             <h2 className="text-3xl md:text-4xl font-extrabold text-white leading-tight">
@@ -148,7 +146,7 @@ export function ReviewCard({
               <div className="mt-1 max-w-sm w-full px-4 py-3 rounded-2xl text-left"
                 style={{ backgroundColor: 'rgba(255,255,255,0.08)' }}>
                 <p className="text-[13.5px] italic leading-relaxed" style={{ color: 'rgba(255,255,255,0.85)' }}>
-                  „<HighlightExample sentence={currentWord.examples[0]} word={currentWord.word} />"
+                  „<HighlightExample sentence={currentWord.examples[0]} word={currentWord.word} />&quot;
                 </p>
                 {showExampleTrans && currentWord.examples[1] && (
                   <p className="text-xs mt-1.5" style={{ color: 'rgba(255,255,255,0.5)' }}>→ {currentWord.examples[1]}</p>

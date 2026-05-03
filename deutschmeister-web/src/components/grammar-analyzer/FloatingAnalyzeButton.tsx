@@ -16,7 +16,7 @@ export function FloatingAnalyzeButton() {
   // Tính vị trí (tránh tràn viewport)
   const scrollY = typeof window !== 'undefined' ? window.scrollY : 0;
   let x = buttonPosition.x;
-  let y = buttonPosition.y + scrollY + 8;
+  const y = buttonPosition.y + scrollY + 8;
 
   if (typeof window !== 'undefined') {
     if (x + 200 > window.innerWidth) x = window.innerWidth - 216;

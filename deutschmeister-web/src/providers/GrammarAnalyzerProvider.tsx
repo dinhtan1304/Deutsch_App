@@ -31,7 +31,7 @@ function looksLikeGerman(text: string): boolean {
 }
 
 export function GrammarAnalyzerProvider({ children }: { children: ReactNode }) {
-  const { showAnalyzeButton, hideButton, showPopup, closePopup } =
+  const { showAnalyzeButton, hideButton, closePopup } =
     useGrammarAnalyzerStore();
 
   const handleSelectionChange = useCallback(() => {

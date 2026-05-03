@@ -16,7 +16,7 @@ import {
 } from '@/data/authentic-resources';
 import {
   IconChevronLeft, IconGlobe, IconFileText, IconVideo, IconMicrophone,
-  IconExternalLink, IconSearch, IconLock, IconBook, IconZap, IconStar, IconShieldCheck
+  IconExternalLink, IconSearch, IconBook, IconZap, IconShieldCheck
 } from '@/components/ui/Icons';
 
 const LEVEL_COLORS: Record<ResourceLevel, string> = {
@@ -67,7 +67,7 @@ export default function ResourcesPage() {
           </Link>
           
           <h1 className="text-4xl md:text-5xl font-black tracking-tight mb-4" style={{ color: 'var(--theme-text-primary)' }}>
-            Tài nguyên <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 via-emerald-500 to-amber-500">Bản xứ</span>
+            Tài nguyên <span className="text-transparent bg-clip-text bg-linear-to-r from-indigo-500 via-emerald-500 to-amber-500">Bản xứ</span>
           </h1>
           
           <p className="max-w-2xl mx-auto text-body font-medium leading-relaxed opacity-70" style={{ color: 'var(--theme-text-muted)' }}>
@@ -76,7 +76,7 @@ export default function ResourcesPage() {
         </div>
 
         {/* Disclaimer / Notice */}
-        <div className="max-w-3xl mx-auto mb-10 p-5 rounded-[1.5rem] border flex items-start gap-4 transition-all hover:shadow-lg"
+        <div className="max-w-3xl mx-auto mb-10 p-5 rounded-3xl border flex items-start gap-4 transition-all hover:shadow-lg"
           style={{ backgroundColor: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)', backgroundImage: 'linear-gradient(135deg, rgba(245,158,11,0.05) 0%, transparent 100%)' }}>
           <div className="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0" style={{ background: 'rgba(245,158,11,0.15)' }}>
             <IconShieldCheck size={20} className="text-amber-500" />
@@ -90,7 +90,7 @@ export default function ResourcesPage() {
         </div>
 
         {/* Filters Panel */}
-        <div className="mb-10 p-6 rounded-[2rem] border shadow-xl backdrop-blur-md"
+        <div className="mb-10 p-6 rounded-4xl border shadow-xl backdrop-blur-md"
           style={{ backgroundColor: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}>
           <div className="grid md:grid-cols-2 gap-8">
             
@@ -156,16 +156,16 @@ export default function ResourcesPage() {
 
         {/* Results Count */}
         <div className="flex items-center gap-3 mb-6 px-4">
-          <div className="h-px flex-1 bg-gradient-to-r from-transparent via-theme-border to-transparent opacity-30" />
+          <div className="h-px flex-1 bg-linear-to-r from-transparent via-theme-border to-transparent opacity-30" />
           <span className="text-[11px] font-black uppercase tracking-[0.3em] opacity-40" style={{ color: 'var(--theme-text-muted)' }}>
             {filtered.length} Tài nguyên tìm thấy
           </span>
-          <div className="h-px flex-1 bg-gradient-to-r from-theme-border via-theme-border to-transparent opacity-30" />
+          <div className="h-px flex-1 bg-linear-to-r from-theme-border via-theme-border to-transparent opacity-30" />
         </div>
 
         {/* Results Grid */}
         {filtered.length === 0 ? (
-          <div className="rounded-[2rem] p-16 text-center border-2 border-dashed"
+          <div className="rounded-4xl p-16 text-center border-2 border-dashed"
             style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)44' }}>
             <div className="w-16 h-16 rounded-full bg-theme-bg-secondary flex items-center justify-center mx-auto mb-4 opacity-50">
               <IconSearch size={32} />
@@ -195,65 +195,69 @@ function ResourceCard({ resource }: { resource: AuthenticResource }) {
       href={resource.url}
       target="_blank"
       rel="noopener noreferrer"
-      className="group block rounded-[2rem] border p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl relative overflow-hidden"
+      className="group block rounded-3xl border p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl relative overflow-hidden"
       style={{
         borderColor: 'var(--theme-border)',
         backgroundColor: 'var(--theme-bg-card)',
-        backgroundImage: `radial-gradient(circle at 100% 100%, ${color}08, transparent 70%)`
       }}
     >
-      {/* Decorative background glow */}
-      <div className="absolute -bottom-10 -right-10 w-32 h-32 blur-[60px] transition-all group-hover:opacity-40" 
-           style={{ backgroundColor: color, opacity: 0.1 }} />
+      {/* Subtle corner glow */}
+      <div className="absolute top-0 right-0 w-24 h-24 blur-2xl opacity-[0.03] transition-opacity group-hover:opacity-[0.08]" 
+           style={{ backgroundColor: color }} />
 
-      <div className="flex items-start justify-between gap-4 mb-4">
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center shadow-lg transition-transform group-hover:scale-110"
+      <div className="flex items-start justify-between gap-4 mb-5">
+        <div className="flex flex-wrap items-center gap-2.5">
+          <div className="w-10 h-10 rounded-2xl flex items-center justify-center shadow-lg transition-transform group-hover:scale-110"
                style={{ background: `linear-gradient(135deg, ${color}, ${color}cc)`, boxShadow: `0 8px 15px ${color}33` }}>
-            <TypeIcon size={18} className="text-white" />
+            <TypeIcon size={20} className="text-white" />
           </div>
           
-          <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest"
-            style={{ backgroundColor: `${color}15`, color, border: `1px solid ${color}30` }}>
-            {resource.level}
-          </span>
-          
-          <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-white/5 opacity-50"
-            style={{ color: 'var(--theme-text-muted)' }}>
-            {TYPE_LABELS[resource.type]}
-          </span>
+          <div className="flex flex-col">
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-lg text-white"
+                style={{ backgroundColor: color }}>
+                {resource.level}
+              </span>
+              <span className="text-[10px] font-black uppercase tracking-widest opacity-40" style={{ color: 'var(--theme-text-primary)' }}>
+                {TYPE_LABELS[resource.type]}
+              </span>
+            </div>
+          </div>
+        </div>
 
+        <div className="flex items-center gap-3">
           {!resource.free && (
-            <div className="flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-amber-500/10 text-amber-500 border border-amber-500/20">
-              <IconLock size={10} />
-              Paid
+            <div className="px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest bg-amber-500/10 text-amber-500 border border-amber-500/20">
+              Premium
             </div>
           )}
-        </div>
-        <div className="w-8 h-8 rounded-full flex items-center justify-center transition-all group-hover:bg-white/5" style={{ color: 'var(--theme-text-muted)' }}>
-          <IconExternalLink size={16} />
+          <div className="w-8 h-8 rounded-full flex items-center justify-center transition-all group-hover:bg-white/5" style={{ color: 'var(--theme-text-muted)' }}>
+            <IconExternalLink size={16} />
+          </div>
         </div>
       </div>
 
-      <h3 className="text-lg font-black leading-tight mb-2 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r transition-all"
-          style={{ color: 'var(--theme-text-primary)', backgroundImage: `linear-gradient(to right, white, ${color})` }}>
-        {resource.titleVi}
-      </h3>
+      <div className="relative pl-4 border-l-2 mb-3" style={{ borderColor: `${color}44` }}>
+        <h3 className="text-xl font-black leading-tight transition-colors group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-linear-to-r"
+            style={{ 
+              color: 'var(--theme-text-primary)', 
+              backgroundImage: `linear-gradient(to right, ${color}, ${color}cc)` 
+            }}>
+          {resource.titleVi}
+        </h3>
+      </div>
       
-      <div className="flex items-center gap-2 mb-4">
-        <div className="h-px w-4" style={{ backgroundColor: color, opacity: 0.5 }} />
-        <p className="text-[11px] font-bold uppercase tracking-widest truncate" style={{ color }}>
-          {resource.title} · {resource.source}
-        </p>
-      </div>
+      <p className="text-[11px] font-bold uppercase tracking-widest mb-4 opacity-50" style={{ color: 'var(--theme-text-muted)' }}>
+        {resource.title} · <span style={{ color }}>{resource.source}</span>
+      </p>
 
-      <p className="text-sm font-medium leading-relaxed opacity-60 line-clamp-3" style={{ color: 'var(--theme-text-secondary)' }}>
+      <p className="text-sm font-medium leading-relaxed opacity-60 line-clamp-2" style={{ color: 'var(--theme-text-secondary)' }}>
         {resource.descriptionVi}
       </p>
       
-      {/* Bottom accent bar */}
-      <div className="absolute bottom-0 left-6 right-6 h-1 rounded-t-full transition-all scale-x-0 group-hover:scale-x-100"
-           style={{ backgroundColor: color, opacity: 0.5 }} />
+      {/* Hover accent line */}
+      <div className="absolute bottom-0 left-0 right-0 h-1 transition-all scale-x-0 group-hover:scale-x-100"
+           style={{ background: GRADIENT.brand }} />
     </a>
   );
 }

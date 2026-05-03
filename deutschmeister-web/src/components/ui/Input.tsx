@@ -1,7 +1,7 @@
 'use client';
 
 import { forwardRef, InputHTMLAttributes, useId } from 'react';
-import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import { STATUS } from '@/lib/tokens';
 import { cn } from '@/lib/utils';
 
 export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {

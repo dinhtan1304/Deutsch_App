@@ -18,6 +18,7 @@ export interface MySubscription {
   plan: 'free' | 'premium' | 'lifetime';
   status: string;
   expiresAt: string | null;
+  updatedAt?: string | null;
   payments: Payment[];
 }
 

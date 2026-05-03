@@ -1,7 +1,7 @@
-﻿'use client';
+'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import { useReducer, useEffect, useCallback, useRef } from 'react';
+import { ACCENT, STATUS } from '@/lib/tokens';
 import type { TopicWord } from '@/types/topic';
 
 function IconRotateCcw({ size = 16 }: { size?: number }) {
@@ -44,7 +44,99 @@ interface MatchItem {
   color?: string;
 }
 
-const ROUND_SIZE = 6; // 6 pairs per round
+const ROUND_SIZE = 6;
+
+// ─── State management ───
+
+type MatchState = {
+  leftItems: MatchItem[];
+  rightItems: MatchItem[];
+  selectedLeft: string | null;
+  selectedRight: string | null;
+  matched: Set<string>;
+  wrongPair: { left: string; right: string } | null;
+  attempts: number;
+  isFinished: boolean;
+  startTime: number;
+  elapsed: number;
+  roundWords: TopicWord[];
+};
+
+type MatchAction =
+  | { type: 'start'; roundWords: TopicWord[]; left: MatchItem[]; right: MatchItem[]; startTime: number }
+  | { type: 'select_left'; id: string | null }
+  | { type: 'select_right'; id: string | null }
+  | { type: 'correct'; wordId: string }
+  | { type: 'wrong'; left: string; right: string }
+  | { type: 'clear_wrong' }
+  | { type: 'finish' }
+  | { type: 'tick'; elapsed: number };
+
+function matchReducer(state: MatchState, action: MatchAction): MatchState {
+  switch (action.type) {
+    case 'start':
+      return {
+        leftItems: action.left,
+        rightItems: action.right,
+        selectedLeft: null,
+        selectedRight: null,
+        matched: new Set(),
+        wrongPair: null,
+        attempts: 0,
+        isFinished: false,
+        startTime: action.startTime,
+        elapsed: 0,
+        roundWords: action.roundWords,
+      };
+    case 'select_left':
+      return { ...state, selectedLeft: action.id };
+    case 'select_right':
+      return { ...state, selectedRight: action.id };
+    case 'correct': {
+      const matched = new Set(state.matched);
+      matched.add(action.wordId);
+      return { ...state, matched, selectedLeft: null, selectedRight: null, attempts: state.attempts + 1 };
+    }
+    case 'wrong':
+      return { ...state, wrongPair: { left: action.left, right: action.right }, attempts: state.attempts + 1 };
+    case 'clear_wrong':
+      return { ...state, selectedLeft: null, selectedRight: null, wrongPair: null };
+    case 'finish':
+      return { ...state, isFinished: true };
+    case 'tick':
+      return { ...state, elapsed: action.elapsed };
+    default:
+      return state;
+  }
+}
+
+const EMPTY_STATE: MatchState = {
+  leftItems: [], rightItems: [],
+  selectedLeft: null, selectedRight: null,
+  matched: new Set(), wrongPair: null,
+  attempts: 0, isFinished: false,
+  startTime: 0, elapsed: 0, roundWords: [],
+};
+
+function buildRound(pool: TopicWord[]): { roundWords: TopicWord[]; left: MatchItem[]; right: MatchItem[] } {
+  const roundWords = shuffle(pool).slice(0, Math.min(ROUND_SIZE, pool.length));
+  const left: MatchItem[] = shuffle(roundWords.map(w => ({
+    id: `l-${w.id}`,
+    wordId: w.id,
+    text: w.article ? `${w.article} ${w.word}` : w.word,
+    side: 'left' as const,
+    color: ArticleColor[w.article] || undefined,
+  })));
+  const right: MatchItem[] = shuffle(roundWords.map(w => ({
+    id: `r-${w.id}`,
+    wordId: w.id,
+    text: w.translationVi || w.translationEn,
+    side: 'right' as const,
+  })));
+  return { roundWords, left, right };
+}
+
+// ─── Component ───
 
 interface Props {
   words: TopicWord[];
@@ -53,110 +145,70 @@ interface Props {
 }
 
 export function TopicMatching({ words, topicColor, onMarkLearned }: Props) {
-  const [leftItems, setLeftItems] = useState<MatchItem[]>([]);
-  const [rightItems, setRightItems] = useState<MatchItem[]>([]);
-  const [selectedLeft, setSelectedLeft] = useState<string | null>(null);
-  const [selectedRight, setSelectedRight] = useState<string | null>(null);
-  const [matched, setMatched] = useState<Set<string>>(new Set()); // matched wordIds
-  const [wrongPair, setWrongPair] = useState<{ left: string; right: string } | null>(null);
-  const [attempts, setAttempts] = useState(0);
-  const [isFinished, setIsFinished] = useState(false);
-  const [startTime, setStartTime] = useState<number>(0);
-  const [elapsed, setElapsed] = useState(0);
-  const [roundWords, setRoundWords] = useState<TopicWord[]>([]);
+  const [state, dispatch] = useReducer(matchReducer, EMPTY_STATE);
+  const { leftItems, rightItems, selectedLeft, selectedRight, matched, wrongPair, attempts, isFinished, startTime, elapsed, roundWords } = state;
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const startRound = useCallback((wordSet?: TopicWord[]) => {
-    const pool = wordSet || words;
-    const selected = shuffle(pool).slice(0, Math.min(ROUND_SIZE, pool.length));
-    setRoundWords(selected);
-
-    const left: MatchItem[] = shuffle(selected.map(w => ({
-      id: `l-${w.id}`,
-      wordId: w.id,
-      text: w.article ? `${w.article} ${w.word}` : w.word,
-      side: 'left' as const,
-      color: ArticleColor[w.article] || undefined,
-    })));
-
-    const right: MatchItem[] = shuffle(selected.map(w => ({
-      id: `r-${w.id}`,
-      wordId: w.id,
-      text: w.translationVi || w.translationEn,
-      side: 'right' as const,
-    })));
-
-    setLeftItems(left);
-    setRightItems(right);
-    setSelectedLeft(null);
-    setSelectedRight(null);
-    setMatched(new Set());
-    setWrongPair(null);
-    setAttempts(0);
-    setIsFinished(false);
-    setStartTime(Date.now());
-    setElapsed(0);
-  }, [words]);
-
+  // Init / re-init when words change
   useEffect(() => {
-    if (words.length >= 3) startRound();
-  }, [words, startRound]);
+    if (words.length >= 3) {
+      const round = buildRound(words);
+      dispatch({ type: 'start', ...round, startTime: Date.now() });
+    }
+  }, [words]);
 
   // Timer
   useEffect(() => {
     if (startTime && !isFinished) {
       timerRef.current = setInterval(() => {
-        setElapsed(Math.floor((Date.now() - startTime) / 1000));
+        dispatch({ type: 'tick', elapsed: Math.floor((Date.now() - startTime) / 1000) });
       }, 1000);
     }
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
   }, [startTime, isFinished]);
 
-  // Check match when both selected
-  useEffect(() => {
-    if (!selectedLeft || !selectedRight) return;
+  const startRound = useCallback((pool?: TopicWord[]) => {
+    const round = buildRound(pool ?? words);
+    dispatch({ type: 'start', ...round, startTime: Date.now() });
+  }, [words]);
 
-    const leftItem = leftItems.find(i => i.id === selectedLeft);
-    const rightItem = rightItems.find(i => i.id === selectedRight);
-
-    if (!leftItem || !rightItem) return;
-
-    setAttempts(a => a + 1);
-
-    if (leftItem.wordId === rightItem.wordId) {
-      // Correct match
-      const newMatched = new Set(matched).add(leftItem.wordId);
-      setMatched(newMatched);
-      setSelectedLeft(null);
-      setSelectedRight(null);
-      onMarkLearned?.(leftItem.wordId);
-
-      // Check if round complete
-      if (newMatched.size === roundWords.length) {
-        setTimeout(() => setIsFinished(true), 400);
+  // Match logic runs in click handlers — no effect needed
+  const runMatch = useCallback((leftId: string, rightId: string, leftWordId: string, rightWordId: string) => {
+    if (leftWordId === rightWordId) {
+      dispatch({ type: 'correct', wordId: leftWordId });
+      onMarkLearned?.(leftWordId);
+      if (matched.size + 1 === roundWords.length) {
+        setTimeout(() => dispatch({ type: 'finish' }), 400);
       }
     } else {
-      // Wrong match
-      setWrongPair({ left: selectedLeft, right: selectedRight });
-      setTimeout(() => {
-        setSelectedLeft(null);
-        setSelectedRight(null);
-        setWrongPair(null);
-      }, 600);
+      dispatch({ type: 'wrong', left: leftId, right: rightId });
+      setTimeout(() => dispatch({ type: 'clear_wrong' }), 600);
     }
-  }, [selectedLeft, selectedRight, leftItems, rightItems, matched, roundWords, onMarkLearned]);
+  }, [matched, roundWords, onMarkLearned]);
 
-  const handleLeftClick = (itemId: string) => {
+  const handleLeftClick = useCallback((itemId: string) => {
     const item = leftItems.find(i => i.id === itemId);
     if (!item || matched.has(item.wordId)) return;
-    setSelectedLeft(itemId === selectedLeft ? null : itemId);
-  };
 
-  const handleRightClick = (itemId: string) => {
+    if (selectedRight) {
+      const rightItem = rightItems.find(i => i.id === selectedRight);
+      if (rightItem) runMatch(itemId, selectedRight, item.wordId, rightItem.wordId);
+    } else {
+      dispatch({ type: 'select_left', id: itemId === selectedLeft ? null : itemId });
+    }
+  }, [leftItems, rightItems, selectedLeft, selectedRight, matched, runMatch]);
+
+  const handleRightClick = useCallback((itemId: string) => {
     const item = rightItems.find(i => i.id === itemId);
     if (!item || matched.has(item.wordId)) return;
-    setSelectedRight(itemId === selectedRight ? null : itemId);
-  };
+
+    if (selectedLeft) {
+      const leftItem = leftItems.find(i => i.id === selectedLeft);
+      if (leftItem) runMatch(selectedLeft, itemId, leftItem.wordId, item.wordId);
+    } else {
+      dispatch({ type: 'select_right', id: itemId === selectedRight ? null : itemId });
+    }
+  }, [leftItems, rightItems, selectedLeft, selectedRight, matched, runMatch]);
 
   const formatTime = (secs: number) => {
     const m = Math.floor(secs / 60);

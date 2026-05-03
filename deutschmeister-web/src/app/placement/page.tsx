@@ -2,7 +2,7 @@
 /* eslint-disable no-restricted-syntax */
 
 import { useState, useMemo, useRef, useCallback, useEffect } from 'react';
-import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import { ACCENT, STATUS } from '@/lib/tokens';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { usersApi } from '@/lib/api/users';
@@ -42,7 +42,7 @@ function determineLevel(a1: number, a2: number, b1: number): string {
   return 'A1';
 }
 
-function determineSublevel(a1: number, a2: number, b1: number): { level: string; sublabel: string } {
+function determineSublevel(a1: number, a2: number, b1: number): { level: 'A1' | 'A2' | 'B1'; sublabel: string } {
   const base = determineLevel(a1, a2, b1);
   if (base === 'A1') {
     return a1 >= 4
@@ -101,7 +101,7 @@ export default function PlacementRetakePage() {
   const handleSave = async () => {
     setSaving(true);
     try {
-      await usersApi.updateSettings({ preferredLevel: level as any });
+      await usersApi.updateSettings({ preferredLevel: level });
       router.push('/profile');
     } catch {
       setSaving(false);

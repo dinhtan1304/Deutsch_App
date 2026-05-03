@@ -1,12 +1,11 @@
 ﻿'use client';
 
-import { useState, useEffect } from 'react';
-import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import { useState } from 'react';
+import { ACCENT, STATUS } from '@/lib/tokens';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { useReadingTopics, useGenerateReading } from '@/hooks/useReading';
 import { QuotaPaywall } from '@/components/subscription/QuotaPaywall';
-import { IconDice, IconLoader, IconRobot } from '../icons';
+import { IconLoader, IconRobot } from '../icons';
 import { PageHeader } from '@/components/ui';
 
 const LEVEL_COLORS: Record<string, string> = {
@@ -26,20 +25,10 @@ export default function NewReadingPage() {
   const { data: suggestions, isLoading } = useReadingTopics(level);
   const generateMutation = useGenerateReading();
 
-  useEffect(() => {
-    setSelectedTopic('');
-    setCustomTopic('');
-    setTextType('');
-  }, [level]);
-
-  useEffect(() => {
-    if (suggestions?.textTypes.length && !textType) {
-      setTextType(suggestions.textTypes[0]!.value);
-    }
-  }, [suggestions, textType]);
+  const effectiveTextType = textType || suggestions?.textTypes[0]?.value || '';
 
   const finalTopic = customTopic.trim() || selectedTopic;
-  const canGenerate = !!finalTopic && !!textType;
+  const canGenerate = !!finalTopic && !!effectiveTextType;
   const activeColor = LEVEL_COLORS[level] || STATUS.success;
 
   const handleGenerate = async () => {
@@ -48,7 +37,7 @@ export default function NewReadingPage() {
       const session = await generateMutation.mutateAsync({
         cefrLevel: level,
         topic: finalTopic,
-        textType,
+        textType: effectiveTextType,
         questionCount,
       });
       router.push(`/practice-test/reading/${session.id}`);
@@ -80,7 +69,7 @@ export default function NewReadingPage() {
                 const isActive = level === l;
                 const c = LEVEL_COLORS[l];
                 return (
-                  <button key={l} onClick={() => setLevel(l)}
+                  <button key={l} onClick={() => { setLevel(l); setSelectedTopic(''); setCustomTopic(''); setTextType(''); }}
                     className="px-5 py-2.5 rounded-xl text-body font-bold border-2 transition-all duration-200 hover:-translate-y-0.5"
                     style={isActive
                       ? { background: `linear-gradient(135deg, ${c}, ${c}cc)`, color: 'white', borderColor: c, boxShadow: `0 4px 12px ${c}30` }
@@ -154,7 +143,7 @@ export default function NewReadingPage() {
               style={{ color: 'var(--theme-text-muted)' }}>3. Loại văn bản</h2>
             <div className="grid grid-cols-2 gap-2">
               {suggestions?.textTypes.map(t => {
-                const isActive = textType === t.value;
+                const isActive = effectiveTextType === t.value;
                 return (
                   <button key={t.value} onClick={() => setTextType(t.value)}
                     className="p-3 rounded-xl border-2 text-left transition-all duration-200 hover:-translate-y-0.5"
@@ -214,7 +203,7 @@ export default function NewReadingPage() {
               </span>
               <span style={{ color: 'var(--theme-text-muted)' }}>Loại văn bản:</span>
               <span className="font-semibold" style={{ color: 'var(--theme-text-primary)' }}>
-                {suggestions?.textTypes.find(t => t.value === textType)?.labelVi || 'Chưa chọn'}
+                {suggestions?.textTypes.find(t => t.value === effectiveTextType)?.labelVi || 'Chưa chọn'}
               </span>
               <span style={{ color: 'var(--theme-text-muted)' }}>Số câu hỏi:</span>
               <span className="font-semibold" style={{ color: 'var(--theme-text-primary)' }}>{questionCount} câu</span>

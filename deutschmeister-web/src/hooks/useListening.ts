@@ -5,7 +5,7 @@ import { listeningApi, ListeningSession, ListeningHistoryResponse, ListeningStat
 
 export const listeningKeys = {
   all: ['listening'] as const,
-  history: (params?: Record<string, any>) => [...listeningKeys.all, 'history', params] as const,
+  history: (params?: Record<string, unknown>) => [...listeningKeys.all, 'history', params] as const,
   stats: () => [...listeningKeys.all, 'stats'] as const,
   session: (id: string) => [...listeningKeys.all, 'session', id] as const,
 };

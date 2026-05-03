@@ -2,7 +2,7 @@
 /* eslint-disable no-restricted-syntax */
 
 import { useMemo, useState } from 'react';
-import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import { ACCENT } from '@/lib/tokens';
 import type { ActivityHeatmap as HeatmapData, ActivityDay } from '@/types/dashboard';
 import { IconFlame } from '@/components/ui/Icons';
 

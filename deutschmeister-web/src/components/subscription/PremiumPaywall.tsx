@@ -1,7 +1,7 @@
 ﻿'use client';
-/* eslint-disable no-restricted-syntax */
 
 import { useState } from 'react';
+import { ACCENT, GRADIENT } from '@/lib/tokens';
 import { useIsExamUnlocked } from '@/hooks/useSubscription';
 import { UpgradeModal } from './UpgradeModal';
 
@@ -43,7 +43,7 @@ export function PremiumPaywall({
           <div
             className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5"
             style={{
-              background: 'linear-gradient(135deg, rgba(139,92,246,0.18), rgba(99,102,241,0.12))',
+              background: GRADIENT.vocabDeepBg,
             }}
           >
             <svg
@@ -51,7 +51,7 @@ export function PremiumPaywall({
               height="28"
               viewBox="0 0 24 24"
               fill="none"
-              stroke="#8B5CF6"
+              stroke={ACCENT.vocab}
               strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -63,7 +63,7 @@ export function PremiumPaywall({
 
           <div
             className="inline-block px-2.5 py-1 rounded-full text-caption font-extrabold text-white mb-3"
-            style={{ background: 'linear-gradient(135deg, #F59E0B, #EF4444)' }}
+            style={{ background: GRADIENT.speaking }}
           >
             PREMIUM
           </div>
@@ -85,7 +85,7 @@ export function PremiumPaywall({
             type="button"
             onClick={() => setUpgradeOpen(true)}
             className="w-full py-3 rounded-xl text-sm font-bold text-white mb-3 transition-transform hover:scale-[1.01]"
-            style={{ background: 'linear-gradient(135deg, #6366F1, #8B5CF6)' }}
+            style={{ background: GRADIENT.writing }}
           >
             Nâng cấp Premium
           </button>

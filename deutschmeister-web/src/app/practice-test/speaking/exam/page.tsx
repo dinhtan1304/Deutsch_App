@@ -4,17 +4,30 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useExamSpeakingHistory, useExamSpeakingStats, useDeleteExamSpeaking } from '@/hooks/useExamSpeaking';
 import { ExamSpeakingHistoryItem } from '@/lib/api/examSpeaking';
-import { PageHeader } from '@/components/ui';
+import { PageHeader, GridSkeleton } from '@/components/ui';
 import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 
+// ─── Local Icons ─────────────────────────────────────────────────────────────
+function IconMic({ size = 22, style }: { size?: number; style?: React.CSSProperties }) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z" /><path d="M19 10v2a7 7 0 0 1-14 0v-2" /><line x1="12" y1="19" x2="12" y2="22" /><line x1="8" y1="22" x2="16" y2="22" /></svg>;
+}
+function IconDice({ size = 16, style }: { size?: number; style?: React.CSSProperties }) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}><rect width="12" height="12" x="2" y="10" rx="2" ry="2" /><path d="m17.92 14 3.5-3.5a2.24 2.24 0 0 0 0-3l-5-4.92a2.24 2.24 0 0 0-3 0L10 6" /><path d="M6 18h.01" /><path d="M10 14h.01" /><path d="M15 6h.01" /><path d="M15 6h.01" /><path d="M18 9h.01" /></svg>;
+}
+function IconCheck({ size = 16, style }: { size?: number; style?: React.CSSProperties }) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}><polyline points="20 6 9 17 4 12" /></svg>;
+}
 function IconPlus({ size = 16, style }: { size?: number; style?: React.CSSProperties }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>;
 }
 function IconTrash({ size = 14, style }: { size?: number; style?: React.CSSProperties }) {
-  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}><polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" /></svg>;
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}><polyline points="3 6 5 6 21 6" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /></svg>;
 }
-function IconLoader({ size = 16, style }: { size?: number; style?: React.CSSProperties }) {
-  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="animate-spin" style={{ display: 'block', ...style }}><path d="M21 12a9 9 0 1 1-6.219-8.56" /></svg>;
+function IconChevronLeft({ size = 14, style }: { size?: number; style?: React.CSSProperties }) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}><polyline points="15 18 9 12 15 6" /></svg>;
+}
+function IconChevronRight({ size = 14, style }: { size?: number; style?: React.CSSProperties }) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}><polyline points="9 18 15 12 9 6" /></svg>;
 }
 
 function getScoreColor(s: number) {
@@ -41,13 +54,20 @@ function HistoryCard({ item, onDelete }: { item: ExamSpeakingHistoryItem; onDele
 
   return (
     <Link href={(isGraded || isGrading) ? `/practice-test/speaking/exam/${item.id}/result` : `/practice-test/speaking/exam/${item.id}`}
-      className="group block rounded-2xl border p-4 transition-all hover:-translate-y-0.5"
-      style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)', boxShadow: '0 2px 8px rgba(0,0,0,.04)' }}>
-      <div className="flex items-start justify-between gap-3">
+      className="group block rounded-3xl p-5 transition-all duration-500 hover:-translate-y-1.5 hover:shadow-2xl relative overflow-hidden"
+      style={{ 
+        backgroundColor: 'var(--theme-bg-card)', 
+        boxShadow: 'inset 0 0 0 1px rgba(255, 255, 255, 0.05), 0 4px 12px rgba(0, 0, 0, 0.1)' 
+      }}>
+      
+      <div className="absolute inset-0 opacity-0 group-hover:opacity-[0.03] transition-opacity duration-500 pointer-events-none" 
+        style={{ background: GRADIENT.speaking }} />
+
+      <div className="relative z-10 flex items-start justify-between gap-4">
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap mb-1.5">
+          <div className="flex items-center gap-2 flex-wrap mb-2">
             <ExamBadge examType={item.examType} cefrLevel={item.cefrLevel} />
-            <span className="text-caption px-2 py-0.5 rounded-lg font-medium"
+            <span className="text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-lg"
               style={{
                 backgroundColor: isGraded ? `${STATUS.success}1A` : isGrading ? `${ACCENT.xp}1A` : `${ACCENT.writing}1A`,
                 color: isGraded ? STATUS.success : isGrading ? ACCENT.xp : ACCENT.writing,
@@ -55,23 +75,26 @@ function HistoryCard({ item, onDelete }: { item: ExamSpeakingHistoryItem; onDele
               {isGraded ? 'Đã chấm' : isGrading ? 'Đang chấm...' : 'Chưa nộp'}
             </span>
           </div>
-          <p className="text-body font-semibold" style={{ color: 'var(--theme-text-primary)' }}>
-            Luyện Nói Theo Đề
+          <p className="text-lg font-bold tracking-tight mb-1" style={{ color: 'var(--theme-text-primary)' }}>
+            Luyện Nói Theo Đề Chuẩn
           </p>
-          <p className="text-xs mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>
-            {new Date(item.createdAt).toLocaleDateString('vi-VN')}
-          </p>
+          <div className="flex items-center gap-2 text-xs font-medium" style={{ color: 'var(--theme-text-muted)' }}>
+            <span>{new Date(item.createdAt).toLocaleDateString('vi-VN')}</span>
+          </div>
         </div>
-        <div className="flex flex-col items-end gap-2">
+
+        <div className="flex items-center gap-4 shrink-0">
           {isGraded && score !== null && (
-            <span className="text-title font-extrabold" style={{ color: getScoreColor(score) }}>
-              {Math.round(score)}%
-            </span>
+            <div className="text-right">
+              <div className="text-3xl font-black tracking-tighter" style={{ color: getScoreColor(score) }}>
+                {Math.round(score)}<span className="text-sm ml-0.5">%</span>
+              </div>
+            </div>
           )}
           <button onClick={(e) => { e.preventDefault(); onDelete(); }}
-            className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-all hover:scale-110"
-            style={{ backgroundColor: `${STATUS.danger}1A`, color: STATUS.danger }}>
-            <IconTrash size={13} />
+            className="w-10 h-10 rounded-xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-red-500/10 hover:text-red-500"
+            style={{ color: 'var(--theme-text-muted)' }}>
+            <IconTrash size={18} />
           </button>
         </div>
       </div>
@@ -80,17 +103,12 @@ function HistoryCard({ item, onDelete }: { item: ExamSpeakingHistoryItem; onDele
 }
 
 export default function ExamSpeakingListPage() {
-  return <ExamSpeakingListContent />;
-}
-
-function ExamSpeakingListContent() {
   const [page, setPage] = useState(1);
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [filterLevel, setFilterLevel] = useState<string>('all');
 
   const { data: history, isLoading } = useExamSpeakingHistory({
-    page,
-    limit: 10,
+    page, limit: 10,
     status: filterStatus === 'all' ? undefined : filterStatus,
     cefrLevel: filterLevel === 'all' ? undefined : filterLevel
   });
@@ -105,10 +123,7 @@ function ExamSpeakingListContent() {
 
   const filtersLevel = [
     { key: 'all', label: 'Tất cả trình độ' },
-    { key: 'A1', label: 'A1' },
-    { key: 'A2', label: 'A2' },
-    { key: 'B1', label: 'B1' },
-    { key: 'B2', label: 'B2' },
+    { key: 'A1', label: 'A1' }, { key: 'A2', label: 'A2' }, { key: 'B1', label: 'B1' }, { key: 'B2', label: 'B2' },
   ];
 
   return (
@@ -129,16 +144,25 @@ function ExamSpeakingListContent() {
 
       {/* Stats Banner */}
       {stats && (
-        <div className="flex items-center gap-3 mb-5 overflow-x-auto no-scrollbar">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
           {[
-            { label: 'Tổng bài', value: stats.total, color: ACCENT.vocab },
-            { label: 'TB điểm', value: stats.graded > 0 ? `${Math.round(stats.avgScore)}%` : '—', color: getScoreColor(stats.avgScore) },
-            { label: 'Cao nhất', value: stats.graded > 0 ? `${Math.round(stats.bestScore)}%` : '—', color: STATUS.success },
+            { label: 'Tổng bài thi', value: stats.total, color: ACCENT.vocab, icon: <IconMic size={24} /> },
+            { label: 'TB điểm số', value: stats.graded > 0 ? `${Math.round(stats.avgScore)}%` : '—', color: getScoreColor(stats.avgScore), icon: <IconDice size={24} /> },
+            { label: 'Thành tích cao', value: stats.graded > 0 ? `${Math.round(stats.bestScore)}%` : '—', color: STATUS.success, icon: <IconCheck size={24} /> },
           ].map((s, i) => (
-            <div key={i} className="flex items-center gap-2 px-3 py-2 rounded-xl shrink-0"
-              style={{ backgroundColor: `${s.color}1A` }}>
-              <span className="text-base font-extrabold" style={{ color: s.color }}>{s.value}</span>
-              <span className="text-[10px] font-medium" style={{ color: 'var(--theme-text-muted)' }}>{s.label}</span>
+            <div key={i} className="relative overflow-hidden rounded-3xl p-5 border shadow-sm backdrop-blur-md transition-all duration-300 hover:-translate-y-1"
+              style={{ 
+                backgroundColor: `${s.color}0A`, 
+                borderColor: 'var(--theme-border)',
+                boxShadow: 'inset 0 1px 0 0 rgba(255, 255, 255, 0.05)'
+              }}>
+              <div className="absolute -right-4 -bottom-4 opacity-10 rotate-12" style={{ color: s.color }}>
+                {s.icon}
+              </div>
+              <div className="relative z-10">
+                <div className="text-xs font-black uppercase tracking-widest mb-1" style={{ color: 'var(--theme-text-muted)' }}>{s.label}</div>
+                <div className="text-3xl font-black" style={{ color: s.color }}>{s.value}</div>
+              </div>
             </div>
           ))}
         </div>
@@ -182,11 +206,9 @@ function ExamSpeakingListContent() {
 
       {/* List */}
       {isLoading ? (
-        <div className="flex justify-center py-10">
-          <IconLoader size={28} style={{ color: ACCENT.xp }} />
-        </div>
+        <GridSkeleton cols={1} count={3} height="h-20" gap="gap-3" />
       ) : !history?.items.length ? (
-        <div className="text-center py-12">
+        <div className="text-center py-16 rounded-2xl border-2 border-dashed" style={{ borderColor: 'var(--theme-border)' }}>
           <p className="text-sm mb-4" style={{ color: 'var(--theme-text-muted)' }}>Chưa có bài nói theo đề nào.</p>
           <Link href="/practice-test/speaking/exam/new"
             className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl font-bold text-sm text-white"
@@ -195,7 +217,7 @@ function ExamSpeakingListContent() {
           </Link>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-4">
           {history.items.map(item => (
             <HistoryCard key={item.id} item={item} onDelete={() => deleteMut.mutate(item.id)} />
           ))}
@@ -205,15 +227,19 @@ function ExamSpeakingListContent() {
       {/* Pagination */}
       {history && history.totalPages > 1 && (
         <div className="flex justify-center gap-2 mt-6">
-          {Array.from({ length: history.totalPages }, (_, i) => i + 1).map(p => (
-            <button key={p} onClick={() => setPage(p)}
-              className="w-8 h-8 rounded-xl text-body font-bold transition-all"
-              style={page === p
-                ? { background: GRADIENT.speaking, color: 'white' }
-                : { backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }}>
-              {p}
-            </button>
-          ))}
+          <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
+            className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-body font-medium disabled:opacity-40"
+            style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-secondary)' }}>
+            <IconChevronLeft size={14} /> Trước
+          </button>
+          <span className="text-body font-medium px-4" style={{ color: 'var(--theme-text-muted)' }}>
+            {page} / {history.totalPages}
+          </span>
+          <button onClick={() => setPage(p => Math.min(history.totalPages, p + 1))} disabled={page === history.totalPages}
+            className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-body font-medium disabled:opacity-40"
+            style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-secondary)' }}>
+            Sau <IconChevronRight size={14} />
+          </button>
         </div>
       )}
     </div>

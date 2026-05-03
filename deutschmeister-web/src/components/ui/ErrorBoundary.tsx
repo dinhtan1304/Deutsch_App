@@ -1,8 +1,7 @@
 ﻿'use client';
-/* eslint-disable no-restricted-syntax */
 
 import React, { Component, ErrorInfo, ReactNode } from 'react';
-import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import { STATUS, GRADIENT } from '@/lib/tokens';
 
 interface Props {
   children: ReactNode;
@@ -41,12 +40,12 @@ export class ErrorBoundary extends Component<Props, State> {
       if (this.props.fallback) return this.props.fallback;
 
       return (
-        <div className="min-h-[400px] flex items-center justify-center p-8">
+        <div className="min-h-100 flex items-center justify-center p-8">
           <div className="max-w-md w-full text-center">
             {/* Error Icon */}
             <div className="w-20 h-20 mx-auto mb-6 rounded-2xl flex items-center justify-center"
-              style={{ background: 'linear-gradient(135deg, rgba(239,68,68,.1), rgba(239,68,68,.2))' }}>
-              <svg width={36} height={36} viewBox="0 0 24 24" fill="none" stroke="#EF4444"
+              style={{ background: GRADIENT.dangerBg }}>
+              <svg width={36} height={36} viewBox="0 0 24 24" fill="none" stroke={STATUS.danger}
                 strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="10" />
                 <line x1="12" y1="8" x2="12" y2="12" />
@@ -79,7 +78,7 @@ export class ErrorBoundary extends Component<Props, State> {
             <div className="flex gap-3 justify-center">
               <button onClick={this.handleReset}
                 className="px-5 py-2.5 rounded-xl font-semibold text-sm text-white transition-all duration-200 hover:-translate-y-0.5"
-                style={{ background: 'linear-gradient(135deg, #3B82F6, #6366F1)', boxShadow: '0 4px 12px rgba(59,130,246,.25)' }}>
+                style={{ background: GRADIENT.action, boxShadow: '0 4px 12px rgba(59,130,246,.25)' }}>
                 Thử lại
               </button>
               <button onClick={() => window.location.reload()}

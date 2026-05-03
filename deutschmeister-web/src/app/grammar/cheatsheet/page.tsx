@@ -2,7 +2,7 @@
 /* eslint-disable no-restricted-syntax */
 
 import { useState } from 'react';
-import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import { ACCENT, STATUS } from '@/lib/tokens';
 import { useRouter } from 'next/navigation';
 import { IconBook, IconChevronDown, IconChevronLeft, IconChevronRight } from '@/components/ui/Icons';
 

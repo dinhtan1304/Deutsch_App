@@ -1,8 +1,7 @@
 'use client';
-/* eslint-disable no-restricted-syntax */
 
 import { useMemo } from 'react';
-import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import { ACCENT, GRADIENT } from '@/lib/tokens';
 import type { WeeklyProgress } from '@/types/dashboard';
 
 interface WeeklyChartProps {
@@ -35,18 +34,18 @@ export function WeeklyChart({ data }: WeeklyChartProps) {
         <h3 className="text-title font-bold flex items-center gap-2"
           style={{ color: 'var(--theme-text-primary)' }}>
           <span className="w-7 h-7 rounded-lg flex items-center justify-center text-xs"
-            style={{ background: 'linear-gradient(135deg, rgba(59,130,246,.15), rgba(99,102,241,.1))' }}>
-            <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="#3B82F6" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10" /><line x1="12" y1="20" x2="12" y2="4" /><line x1="6" y1="20" x2="6" y2="14" /></svg>
+            style={{ background: GRADIENT.srsIconBg }}>
+            <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke={ACCENT.srs} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10" /><line x1="12" y1="20" x2="12" y2="4" /><line x1="6" y1="20" x2="6" y2="14" /></svg>
           </span>
           Tiến độ 7 ngày qua
         </h3>
         <div className="flex items-center gap-4 text-xs">
           <div className="flex items-center gap-1.5">
-            <div className="w-2.5 h-2.5 rounded-full" style={{ background: 'linear-gradient(135deg, #3B82F6, #6366F1)' }} />
+            <div className="w-2.5 h-2.5 rounded-full" style={{ background: GRADIENT.action }} />
             <span style={{ color: 'var(--theme-text-muted)' }}>Từ vựng</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <div className="w-2.5 h-2.5 rounded-full" style={{ background: 'linear-gradient(135deg, #10B981, #34D399)' }} />
+            <div className="w-2.5 h-2.5 rounded-full" style={{ background: GRADIENT.emerald }} />
             <span style={{ color: 'var(--theme-text-muted)' }}>Games</span>
           </div>
         </div>
@@ -68,7 +67,7 @@ export function WeeklyChart({ data }: WeeklyChartProps) {
                     className="w-full rounded-t-md transition-all duration-500 hover:opacity-85"
                     style={{
                       height: day.wordsLearned > 0 ? `${Math.max(wH, 8)}%` : '2px',
-                      background: 'linear-gradient(180deg, #6366F1, #3B82F6)',
+                      background: GRADIENT.wordsBar,
                       opacity: day.wordsLearned > 0 ? 1 : 0.15,
                     }}
                   />
@@ -89,7 +88,7 @@ export function WeeklyChart({ data }: WeeklyChartProps) {
                     className="w-full rounded-t-md transition-all duration-500 hover:opacity-85"
                     style={{
                       height: day.gamesPlayed > 0 ? `${Math.max(gH, 8)}%` : '2px',
-                      background: 'linear-gradient(180deg, #34D399, #10B981)',
+                      background: GRADIENT.gamesBar,
                       opacity: day.gamesPlayed > 0 ? 1 : 0.15,
                     }}
                   />
@@ -98,7 +97,7 @@ export function WeeklyChart({ data }: WeeklyChartProps) {
                       text-caption font-medium rounded-md shadow-lg pointer-events-none
                       opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10
                       text-white"
-                      style={{ backgroundColor: '#10B981' }}>
+                      style={{ backgroundColor: ACCENT.emerald }}>
                       {day.gamesPlayed} game
                     </div>
                   )}
@@ -113,7 +112,7 @@ export function WeeklyChart({ data }: WeeklyChartProps) {
                     : ''
                   }`}
                 style={today
-                  ? { background: 'linear-gradient(135deg, #3B82F6, #6366F1)' }
+                  ? { background: GRADIENT.action }
                   : { color: 'var(--theme-text-muted)' }}
               >
                 {day.day}
@@ -127,7 +126,7 @@ export function WeeklyChart({ data }: WeeklyChartProps) {
       <div className="grid grid-cols-3 gap-3 pt-4" style={{ borderTop: '1px solid var(--theme-border)' }}>
         {[
           { value: totals.words, label: 'Từ đã học', color: ACCENT.srs },
-          { value: totals.games, label: 'Games đã chơi', color: '#10B981' },
+          { value: totals.games, label: 'Games đã chơi', color: ACCENT.emerald },
           {
             value: totals.minutes < 60
               ? `${totals.minutes}m`

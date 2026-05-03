@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useFreeSpeakingSession } from '@/hooks/useFreeSpeaking';
-import { PageHeader, FixedActionBar } from '@/components/ui';
+import { PageHeader, FixedActionBar, ScoreRing } from '@/components/ui';
 import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
@@ -36,7 +36,7 @@ function IconVolume({ size = 13, style }: { size?: number; style?: React.CSSProp
 // ─── Constants ────────────────────────────────────────────────────────────────
 const CRITERIA_CONFIG = {
   aufgabe:    { label: 'Aufgabe',    icon: '🎯', color: STATUS.success, bg: 'rgba(34,197,94,.08)'  },
-  grammatik:  { label: 'Grammatik',  icon: '📐', color: ACCENT.xp,      bg: 'rgba(245,158,11,.08)' },
+  grammatik:  { label: 'Grammatik',  icon: '📐', color: ACCENT.speaking, bg: 'rgba(245,158,11,.08)' },
   aussprache: { label: 'Aussprache', icon: '🔊', color: ACCENT.cyan,    bg: 'rgba(6,182,212,.08)'  },
   wortschatz: { label: 'Wortschatz', icon: '📚', color: ACCENT.vocab,   bg: 'rgba(139,92,246,.08)' },
 };
@@ -44,7 +44,7 @@ const CRITERIA_CONFIG = {
 function getGrade(score: number) {
   if (score >= 80) return { badge: 'Xuất sắc', emoji: '🏆', title: 'Hoàn hảo! 🎉',         color: STATUS.success, bg: 'rgba(34,197,94,.15)'  };
   if (score >= 65) return { badge: 'Tốt lắm',  emoji: '🌟', title: 'Bạn nói rất tốt! 👏',   color: STATUS.success, bg: 'rgba(34,197,94,.12)'  };
-  if (score >= 50) return { badge: 'Khá tốt',  emoji: '👍', title: 'Tiến bộ rồi đấy! 💪',   color: ACCENT.xp,     bg: 'rgba(245,158,11,.15)' };
+  if (score >= 50) return { badge: 'Khá tốt',  emoji: '👍', title: 'Tiến bộ rồi đấy! 💪',   color: ACCENT.speaking, bg: 'rgba(245,158,11,.15)' };
   if (score >= 35) return { badge: 'Cố lên',   emoji: '📖', title: 'Tiếp tục luyện tập! 🤗', color: ACCENT.games,  bg: 'rgba(249,115,22,.12)' };
   return             { badge: 'Cần luyện', emoji: '💪', title: 'Đừng bỏ cuộc nhé! 📚',  color: STATUS.danger, bg: 'rgba(239,68,68,.12)'  };
 }
@@ -107,10 +107,10 @@ function NativeSpeakerPlayer({ text }: { text: string }) {
     <div className="flex items-center gap-2.5">
       <button onClick={toggle}
         className="w-9 h-9 rounded-full flex items-center justify-center shrink-0 transition-all hover:scale-105 active:scale-95"
-        style={{ background: GRADIENT.reading, color: 'white' }}>
+        style={{ background: GRADIENT.speaking, color: 'white' }}>
         {playing ? <IconPause size={13} /> : <IconPlay size={13} />}
       </button>
-      <WaveformBars progress={progress} color={STATUS.success} />
+      <WaveformBars progress={progress} color={ACCENT.speaking} />
       <span className="text-caption font-mono shrink-0" style={{ color: 'var(--theme-text-muted)' }}>{fmt(elapsed)}</span>
     </div>
   );
@@ -120,41 +120,12 @@ function NativeSpeakerPlayer({ text }: { text: string }) {
 function UserAudioPlayer() {
   return (
     <div className="flex items-center gap-2.5">
-      <div className="w-9 h-9 rounded-full flex items-center justify-center shrink-0"
-        style={{ backgroundColor: `${ACCENT.xp}40`, color: ACCENT.xp }}>
+      <div className="w-9 h-9 rounded-full flex items-center justify-center shrink-0 shadow-inner"
+        style={{ backgroundColor: `${ACCENT.speaking}33`, color: ACCENT.speaking }}>
         <IconPlay size={13} />
       </div>
-      <WaveformBars progress={0.72} color={ACCENT.xp} />
+      <WaveformBars progress={0.72} color={ACCENT.speaking} />
       <span className="text-caption font-mono shrink-0" style={{ color: 'var(--theme-text-muted)' }}>—:——</span>
-    </div>
-  );
-}
-
-// ─── Score Ring ───────────────────────────────────────────────────────────────
-function ScoreRing({ score }: { score: number }) {
-  const size = 128;
-  const r = 52;
-  const c = 2 * Math.PI * r;
-  const color = score >= 65 ? STATUS.success : score >= 50 ? ACCENT.xp : STATUS.danger;
-  const offset = c - c * (score / 100);
-  return (
-    <div style={{ position: 'relative', width: size, height: size }}>
-      <svg width={size} height={size} style={{ transform: 'rotate(-90deg)', display: 'block' }}>
-        <defs>
-          <linearGradient id="scoreGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor={ACCENT.xp} />
-            <stop offset="100%" stopColor={STATUS.danger} />
-          </linearGradient>
-        </defs>
-        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="var(--theme-border)" strokeWidth={10} />
-        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={score >= 65 ? color : 'url(#scoreGrad)'} strokeWidth={10}
-          strokeDasharray={c} strokeDashoffset={offset} strokeLinecap="round"
-          style={{ transition: 'stroke-dashoffset 1.2s ease' }} />
-      </svg>
-      <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-        <span style={{ fontSize: 32, fontWeight: 900, lineHeight: 1, color: score >= 65 ? color : ACCENT.xp }}>{score}</span>
-        <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--theme-text-muted)' }}>/100</span>
-      </div>
     </div>
   );
 }
@@ -177,28 +148,33 @@ export default function FreeSpeakingResultPage() {
   }, [session, id, router]);
 
   if (isLoading || !session) return (
-    <div className="py-16 flex flex-col items-center gap-3">
-      <IconLoader size={28} style={{ color: ACCENT.xp }} />
-      <p className="text-body" style={{ color: 'var(--theme-text-muted)' }}>Đang tải kết quả...</p>
+    <div className="py-24 flex flex-col items-center gap-4">
+      <IconLoader size={28} style={{ color: ACCENT.speaking }} />
+      <p className="text-body font-semibold" style={{ color: 'var(--theme-text-muted)' }}>Đang tải kết quả...</p>
     </div>
   );
 
   if (session.status === 'GRADING') return (
-    <div className="py-16 flex flex-col items-center gap-5">
-      <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{ backgroundColor: `${ACCENT.xp}1F` }}>
-        <IconLoader size={28} style={{ color: ACCENT.xp }} />
+    <div className="py-24 flex flex-col items-center gap-6 text-center">
+      <div className="w-20 h-20 rounded-3xl flex items-center justify-center shadow-2xl relative overflow-hidden"
+           style={{ background: GRADIENT.speaking }}>
+        <div className="absolute inset-0 bg-white/20 animate-pulse" />
+        <IconLoader size={32} style={{ color: 'white' }} />
       </div>
-      <div className="text-center">
-        <p className="font-bold text-[15px]" style={{ color: 'var(--theme-text-primary)' }}>AI đang chấm điểm...</p>
-        <p className="text-body mt-1" style={{ color: 'var(--theme-text-muted)' }}>Gemini phân tích audio và transcript. Vui lòng chờ.</p>
+      <div>
+        <h2 className="text-xl font-black mb-2" style={{ color: 'var(--theme-text-primary)' }}>AI đang chấm điểm...</h2>
+        <p className="text-sm opacity-60 max-w-xs" style={{ color: 'var(--theme-text-primary)' }}>Gemini đang phân tích âm thanh và nội dung bài nói của bạn. Vui lòng chờ trong giây lát.</p>
       </div>
     </div>
   );
 
   if (session.status === 'ERROR') return (
-    <div className="py-16 text-center">
-      <p style={{ color: STATUS.danger }} className="mb-3">Chấm điểm thất bại.</p>
-      <Link href="/practice-test/speaking" className="text-body" style={{ color: ACCENT.xp }}>← Danh sách</Link>
+    <div className="py-24 text-center">
+      <div className="w-16 h-16 rounded-3xl bg-rose-500/10 flex items-center justify-center mx-auto mb-6 text-rose-500">
+         <IconWarn size={32} />
+      </div>
+      <p style={{ color: STATUS.danger }} className="font-bold mb-6">Chấm điểm thất bại. Vui lòng thử lại sau.</p>
+      <Link href="/practice-test/speaking" className="text-sm font-black uppercase tracking-widest" style={{ color: ACCENT.speaking }}>← Quay lại danh sách</Link>
     </div>
   );
 
@@ -213,224 +189,210 @@ export default function FreeSpeakingResultPage() {
   const strengths = grading.strengths || [];
 
   return (
-    <div className="py-6">
-
+    <div className="py-6 pb-28">
       <PageHeader
         backHref="/practice-test/speaking"
         title="Kết quả luyện nói"
-        accent="xp"
+        subtitle={session.topicType.replace(/_/g, ' ')}
+        accent="speaking"
         right={
-          <span className="text-caption px-2.5 py-1 rounded-full font-bold"
-            style={{ backgroundColor: `${ACCENT.xp}1F`, color: ACCENT.xp }}>
-            {session.cefrLevel}
-          </span>
+          <span className="px-3 py-1 rounded-xl text-xs font-black text-white shadow-lg"
+            style={{ backgroundColor: ACCENT.speaking }}>{session.cefrLevel}</span>
         }
       />
 
-      {/* ── Page title ── */}
-      <div className="flex items-center gap-2.5 mb-5">
-        <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-          style={{ backgroundColor: `${ACCENT.xp}1F` }}>
-          <IconMic size={16} style={{ color: ACCENT.xp }} />
-        </div>
-        <div>
-          <p className="text-caption font-medium" style={{ color: 'var(--theme-text-muted)' }}>Kết quả luyện nói</p>
-          <h1 className="text-base font-bold leading-tight" style={{ color: 'var(--theme-text-primary)' }}>
-            {session.topicType.replace(/_/g, ' ')}
-          </h1>
-        </div>
-      </div>
+      {/* Hero card ── */}
+      <div className="rounded-3xl border mb-8 overflow-hidden shadow-2xl relative"
+        style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
+        
+        <div className="absolute top-0 inset-x-0 h-1.5" style={{ background: GRADIENT.speaking }} />
 
-      {/* Hero card: ring LEFT + grade RIGHT ── */}
-      <div className="rounded-3xl border mb-6 overflow-hidden shadow-xl"
-        style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)', backdropFilter: 'blur(10px)' }}>
-        <div className="px-6 pt-5 pb-4 border-b text-center" style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-secondary)' }}>
-          <p className="text-xs font-black uppercase tracking-widest opacity-60 mb-1" style={{ color: 'var(--theme-text-primary)' }}>
-            {session.topicType.replace(/_/g, ' ')} · SPRACHBAUSTEINE
-          </p>
-          <p className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>
-            {session.gradedAt ? new Date(session.gradedAt).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Gerade eben'}
-          </p>
-        </div>
-
-        <div className="flex flex-col sm:flex-row divide-y sm:divide-y-0 sm:divide-x" style={{ borderColor: 'var(--theme-border)' }}>
-          <div className="sm:w-1/2 flex items-center justify-center py-6">
-            <ScoreRing score={score} />
+        <div className="flex flex-col md:flex-row divide-y md:divide-y-0 md:divide-x" style={{ borderColor: 'var(--theme-border)' }}>
+          <div className="md:w-[320px] flex items-center justify-center py-10 bg-white/[0.02]">
+            <ScoreRing value={score} accent="speaking" variant="exam" size={160} label={`${score}%`} />
           </div>
-          <div className="sm:w-1/2 flex flex-col justify-center p-6 gap-3">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full flex items-center justify-center shadow-inner"
-                style={{ backgroundColor: grade.bg, color: grade.color }}>
-                <span className="text-xl font-bold">{grade.emoji}</span>
+          
+          <div className="flex-1 flex flex-col justify-center p-8 gap-4">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg text-2xl"
+                style={{ background: grade.bg, color: grade.color }}>
+                {grade.emoji}
               </div>
-              <h2 className="text-h2 font-black tracking-tight" style={{ color: grade.color }}>
-                {grade.badge}
-              </h2>
+              <div>
+                <h2 className="text-h2 font-black tracking-tight" style={{ color: grade.color }}>
+                  {grade.badge}
+                </h2>
+                <p className="text-lg font-bold opacity-80" style={{ color: 'var(--theme-text-primary)' }}>
+                  {grade.title}
+                </p>
+              </div>
             </div>
-            <p className="text-h3 font-black" style={{ color: 'var(--theme-text-primary)' }}>
-              {grade.title}
-            </p>
-            <div className="flex items-center gap-4 mt-1">
-              <div className="flex flex-col">
-                <span className="text-[10px] font-bold uppercase tracking-wider opacity-40">Gesamtscore</span>
-                <span className="text-lg font-black" style={{ color: grade.color }}>{score}%</span>
+
+            <div className="grid grid-cols-2 gap-6 mt-2">
+              <div className="flex flex-col gap-1">
+                <span className="text-[10px] font-black uppercase tracking-widest opacity-40">Điểm tổng kết</span>
+                <span className="text-2xl font-black" style={{ color: grade.color }}>{score}<span className="text-xs ml-0.5">/100</span></span>
               </div>
               {wordCount > 0 && (
-                <div className="flex flex-col">
-                  <span className="text-[10px] font-bold uppercase tracking-wider opacity-40">Wortanzahl</span>
-                  <span className="text-lg font-black" style={{ color: 'var(--theme-text-primary)' }}>{wordCount}</span>
+                <div className="flex flex-col gap-1">
+                  <span className="text-[10px] font-black uppercase tracking-widest opacity-40">Số lượng từ</span>
+                  <span className="text-2xl font-black" style={{ color: 'var(--theme-text-primary)' }}>{wordCount}</span>
                 </div>
               )}
             </div>
-          </div>
-        </div>
-      </div>
 
-      {/* ── Criteria detail ── */}
-      <div className="rounded-2xl p-4 mb-4"
-        style={{ background: 'var(--theme-bg-card)', border: '1px solid var(--theme-border)' }}>
-        <p className="text-body font-bold mb-4" style={{ color: 'var(--theme-text-primary)' }}>
-          Chi tiết theo tiêu chí
-        </p>
-        <div className="space-y-4">
-          {criteriaOrder.map(key => {
-            const cfg = CRITERIA_CONFIG[key];
-            const val = grading.criteriaScores?.[key as keyof typeof grading.criteriaScores] ?? 0;
-            const pct = (val / 25) * 100;
-            return (
-              <div key={key}>
-                <div className="flex items-center gap-2 mb-1.5">
-                  <span className="text-[15px]">{cfg.icon}</span>
-                  <span className="text-body font-bold flex-1" style={{ color: 'var(--theme-text-primary)' }}>{cfg.label}</span>
-                  <span className="text-body font-bold" style={{ color: cfg.color }}>
-                    {val}
-                    <span className="text-caption font-normal" style={{ color: 'var(--theme-text-muted)' }}> / 25</span>
-                  </span>
-                </div>
-                <div className="h-2.5 rounded-full overflow-hidden" style={{ background: 'var(--theme-bg-secondary)' }}>
-                  <div className="h-full rounded-full transition-all duration-700"
-                    style={{ width: `${pct}%`, background: cfg.color }} />
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* ── Audio players ── */}
-      <div className="grid grid-cols-2 gap-3 mb-4">
-        <div className="rounded-2xl p-3.5"
-          style={{ backgroundColor: 'var(--theme-bg-card)', border: '1px solid var(--theme-border)' }}>
-          <div className="flex items-center gap-1.5 mb-3">
-            <IconMic size={12} style={{ color: ACCENT.xp }} />
-            <span className="text-caption font-semibold" style={{ color: 'var(--theme-text-secondary)' }}>Bạn đã nói</span>
-          </div>
-          <UserAudioPlayer />
-        </div>
-        <div className="rounded-2xl p-3.5"
-          style={{ backgroundColor: 'var(--theme-bg-card)', border: `1px solid ${STATUS.success}33` }}>
-          <div className="flex items-center gap-1.5 mb-3">
-            <IconVolume size={12} style={{ color: STATUS.success }} />
-            <span className="text-caption font-semibold" style={{ color: 'var(--theme-text-secondary)' }}>Native speaker</span>
-          </div>
-          <NativeSpeakerPlayer text={session.transcript || session.prompt} />
-        </div>
-      </div>
-
-      {/* ── Transcript & errors ── */}
-      {(session.transcript || corrections.length > 0) && (
-        <div className="rounded-2xl p-4 mb-4"
-          style={{ background: 'var(--theme-bg-card)', border: '1px solid var(--theme-border)' }}>
-          <div className="flex items-center gap-2 mb-3">
-            <span className="text-sm">📄</span>
-            <p className="text-body font-bold" style={{ color: 'var(--theme-text-primary)' }}>
-              Transcript & lỗi phát hiện
+            <p className="text-xs font-medium opacity-40 mt-2">
+              Hoàn thành vào: {session.gradedAt ? new Date(session.gradedAt).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Vừa xong'}
             </p>
           </div>
-          {session.transcript && (
-            <p className="text-sm leading-relaxed mb-4" style={{ color: 'var(--theme-text-secondary)', fontFamily: 'Georgia, serif' }}>
-              {session.transcript}
-            </p>
-          )}
-          {corrections.length > 0 && (
-            <div className="space-y-2">
-              {corrections.map((c, i) => {
-                const type = detectCorrectionType(c);
-                const isGrammar = type === 'grammar';
+        </div>
+      </div>
+
+      <div className="flex flex-col lg:flex-row gap-8">
+        
+        {/* Left: Detailed Criteria & Audio */}
+        <div className="lg:w-[420px] shrink-0 space-y-6">
+          <div className="rounded-3xl border p-6 shadow-lg"
+            style={{ background: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}>
+            <h3 className="text-xs font-black uppercase tracking-widest mb-6 opacity-60">Chi tiết tiêu chí</h3>
+            <div className="space-y-6">
+              {criteriaOrder.map(key => {
+                const cfg = CRITERIA_CONFIG[key];
+                const val = grading.criteriaScores?.[key as keyof typeof grading.criteriaScores] ?? 0;
+                const pct = (val / 25) * 100;
                 return (
-                  <div key={i} className="rounded-xl p-3"
-                    style={{ background: isGrammar ? 'rgba(239,68,68,.07)' : 'rgba(245,158,11,.07)', border: `1px solid ${isGrammar ? 'rgba(239,68,68,.2)' : 'rgba(245,158,11,.2)'}` }}>
-                    <p className="text-caption font-bold mb-1" style={{ color: isGrammar ? STATUS.danger : ACCENT.xp }}>
-                      {i + 1} · {isGrammar ? 'Lỗi ngữ pháp' : 'Lỗi phát âm'}
-                    </p>
-                    <p className="text-body" style={{ color: 'var(--theme-text-secondary)' }}>{c}</p>
+                  <div key={key}>
+                    <div className="flex items-center gap-3 mb-2">
+                      <span className="text-lg">{cfg.icon}</span>
+                      <span className="text-sm font-bold flex-1" style={{ color: 'var(--theme-text-primary)' }}>{cfg.label}</span>
+                      <span className="text-sm font-black" style={{ color: cfg.color }}>{val}<span className="text-[10px] opacity-40 font-normal ml-0.5">/25</span></span>
+                    </div>
+                    <div className="h-2 rounded-full overflow-hidden bg-white/5 border border-white/5">
+                      <div className="h-full rounded-full transition-all duration-1000 ease-out"
+                        style={{ width: `${pct}%`, background: cfg.color, boxShadow: `0 0 10px ${cfg.color}44` }} />
+                    </div>
                   </div>
                 );
               })}
             </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4">
+            <div className="rounded-2xl border p-5 shadow-lg"
+              style={{ backgroundColor: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}>
+              <div className="flex items-center gap-2 mb-4">
+                <IconMic size={14} style={{ color: ACCENT.speaking }} />
+                <span className="text-[10px] font-black uppercase tracking-widest opacity-60">Giọng nói của bạn</span>
+              </div>
+              <UserAudioPlayer />
+            </div>
+            <div className="rounded-2xl border p-5 shadow-lg"
+              style={{ backgroundColor: 'var(--theme-bg-card)', borderColor: `${STATUS.success}33` }}>
+              <div className="flex items-center gap-2 mb-4">
+                <IconVolume size={14} style={{ color: STATUS.success }} />
+                <span className="text-[10px] font-black uppercase tracking-widest opacity-60">Mẫu phát âm chuẩn</span>
+              </div>
+              <NativeSpeakerPlayer text={session.transcript || session.prompt} />
+            </div>
+          </div>
+        </div>
+
+        {/* Right: Transcript, Corrections, Feedback */}
+        <div className="flex-1 min-w-0 space-y-6">
+          {/* Transcript & Corrections */}
+          {(session.transcript || corrections.length > 0) && (
+            <div className="rounded-3xl border p-8 shadow-lg"
+              style={{ background: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}>
+              <h3 className="text-xs font-black uppercase tracking-widest mb-6 opacity-60">Transcript & Sửa lỗi</h3>
+              
+              {session.transcript && (
+                <div className="relative mb-8 p-6 rounded-2xl bg-white/[0.02] border border-white/5">
+                   <p className="text-lg font-semibold italic leading-relaxed" style={{ color: 'var(--theme-text-primary)' }}>
+                    "{session.transcript}"
+                  </p>
+                </div>
+              )}
+
+              {corrections.length > 0 && (
+                <div className="space-y-3">
+                  {corrections.map((c, i) => {
+                    const type = detectCorrectionType(c);
+                    const isGrammar = type === 'grammar';
+                    return (
+                      <div key={i} className="rounded-2xl p-4 border flex gap-4"
+                        style={{ 
+                          background: isGrammar ? 'rgba(239,68,68,.03)' : 'rgba(245,158,11,.03)', 
+                          borderColor: isGrammar ? 'rgba(239,68,68,.15)' : 'rgba(245,158,11,.15)' 
+                        }}>
+                        <div className="w-6 h-6 rounded-lg flex items-center justify-center shrink-0 text-[10px] font-black text-white"
+                             style={{ background: isGrammar ? STATUS.danger : ACCENT.speaking }}>
+                          {i + 1}
+                        </div>
+                        <div>
+                          <p className="text-[10px] font-black uppercase tracking-widest mb-1" style={{ color: isGrammar ? STATUS.danger : ACCENT.speaking }}>
+                            {isGrammar ? 'Ngữ pháp' : 'Phát âm'}
+                          </p>
+                          <p className="text-sm font-semibold" style={{ color: 'var(--theme-text-secondary)' }}>{c}</p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Feedback & Strengths */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+             <div className="rounded-3xl border p-6 bg-emerald-500/[0.02] border-emerald-500/10">
+                <h4 className="text-[10px] font-black uppercase tracking-widest mb-4 text-emerald-500">Điểm mạnh</h4>
+                <ul className="space-y-3">
+                  {(strengths.length > 0 ? strengths : ['Cách diễn đạt tự nhiên']).map((s, i) => (
+                    <li key={i} className="flex items-start gap-3">
+                      <div className="mt-1 shrink-0 text-emerald-500"><IconCheck size={14} /></div>
+                      <span className="text-sm font-semibold opacity-80" style={{ color: 'var(--theme-text-primary)' }}>{s}</span>
+                    </li>
+                  ))}
+                </ul>
+             </div>
+             <div className="rounded-3xl border p-6 bg-rose-500/[0.02] border-rose-500/10">
+                <h4 className="text-[10px] font-black uppercase tracking-widest mb-4 text-rose-500">Cần cải thiện</h4>
+                <ul className="space-y-3">
+                  {(corrections.length > 0 ? corrections.slice(0, 3) : ['Hãy chú ý các âm cuối']).map((c, i) => (
+                    <li key={i} className="flex items-start gap-3">
+                      <div className="mt-1 shrink-0 text-rose-500"><IconWarn size={14} /></div>
+                      <span className="text-sm font-semibold opacity-80" style={{ color: 'var(--theme-text-primary)' }}>{c.split('.')[0]}.</span>
+                    </li>
+                  ))}
+                </ul>
+             </div>
+          </div>
+
+          {grading.feedbackVi && (
+            <div className="rounded-3xl border p-8 shadow-xl relative overflow-hidden"
+              style={{ background: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}>
+              <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500 opacity-[0.03] blur-3xl -mr-16 -mt-16" />
+              <h3 className="text-xs font-black uppercase tracking-widest mb-4 opacity-60">Nhận xét từ AI</h3>
+              <p className="text-[15px] font-medium leading-relaxed" style={{ color: 'var(--theme-text-secondary)' }}>
+                {grading.feedbackVi}
+              </p>
+            </div>
           )}
         </div>
-      )}
-
-      {/* ── Strengths & Improvements ── */}
-      {(strengths.length > 0 || corrections.length > 0) && (
-        <div className="grid grid-cols-2 gap-3 mb-4">
-          <div className="rounded-2xl p-4"
-            style={{ background: 'rgba(34,197,94,.05)', border: `1px solid ${STATUS.success}33` }}>
-            <div className="flex items-center gap-1.5 mb-3">
-              <span className="text-body">🌿</span>
-              <p className="text-xs font-bold" style={{ color: STATUS.success }}>Điểm mạnh</p>
-            </div>
-            <ul className="space-y-2">
-              {(strengths.length > 0 ? strengths : ['Đã hoàn thành bài nói']).map((s, i) => (
-                <li key={i} className="flex items-start gap-1.5">
-                  <span className="mt-0.5 shrink-0" style={{ color: STATUS.success }}><IconCheck size={11} /></span>
-                  <span className="text-xs leading-snug" style={{ color: 'var(--theme-text-secondary)' }}>{s}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div className="rounded-2xl p-4"
-            style={{ background: 'rgba(245,158,11,.05)', border: `1px solid ${ACCENT.xp}33` }}>
-            <div className="flex items-center gap-1.5 mb-3">
-              <span className="text-body">⚠️</span>
-              <p className="text-xs font-bold" style={{ color: ACCENT.xp }}>Cần cải thiện</p>
-            </div>
-            <ul className="space-y-2">
-              {(corrections.length > 0 ? corrections : ['Hãy luyện tập thêm!']).map((c, i) => (
-                <li key={i} className="flex items-start gap-1.5">
-                  <span className="mt-0.5 shrink-0" style={{ color: ACCENT.xp }}><IconWarn size={11} /></span>
-                  <span className="text-xs leading-snug" style={{ color: 'var(--theme-text-secondary)' }}>{c}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      )}
-
-      {/* ── General feedback ── */}
-      {grading.feedbackVi && (
-        <div className="rounded-2xl p-4 mb-4"
-          style={{ background: 'var(--theme-bg-card)', border: '1px solid var(--theme-border)' }}>
-          <p className="text-caption font-bold uppercase tracking-wider mb-2" style={{ color: ACCENT.xp }}>Nhận xét chung</p>
-          <p className="text-body leading-relaxed" style={{ color: 'var(--theme-text-secondary)' }}>
-            {grading.feedbackVi}
-          </p>
-        </div>
-      )}
+      </div>
 
       <FixedActionBar columns={2}>
         <button
-          className="flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl font-black text-sm border-2 transition-all hover:bg-black/5"
+          className="flex-1 flex items-center justify-center gap-3 py-4.5 rounded-2xl font-black text-sm border-2 transition-all hover:bg-black/5"
           style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)', backgroundColor: 'var(--theme-bg-card)' }}
           onClick={() => { if (navigator.share) navigator.share({ title: 'Kết quả luyện nói', text: `Tôi đạt ${score}/100 điểm!`, url: window.location.href }); }}>
-          <IconShare size={16} /> Chia sẻ
+          <IconShare size={18} /> Chia sẻ
         </button>
         <button
-          className="flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl font-black text-sm text-white transition-all hover:-translate-y-0.5 shadow-xl"
-          style={{ background: GRADIENT.speaking, boxShadow: `0 12px 32px ${ACCENT.xp}4D` }}
+          className="flex-1 flex items-center justify-center gap-3 py-4.5 rounded-2xl font-black text-sm text-white transition-all hover:scale-[1.02] shadow-2xl active:scale-95"
+          style={{ background: GRADIENT.speaking, boxShadow: `0 15px 35px ${ACCENT.speaking}4D` }}
           onClick={() => router.push('/practice-test/speaking/new')}>
-          <span className="text-base">✨</span> Bài mới
+          <span className="text-lg">✨</span> BÀI NÓI MỚI
         </button>
       </FixedActionBar>
 

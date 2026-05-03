@@ -1,7 +1,6 @@
 'use client';
-/* eslint-disable no-restricted-syntax */
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
@@ -20,11 +19,11 @@ type QuizMode = 'gender' | 'de-vi' | 'vi-de' | 'mixed';
 type Phase = 'loading' | 'empty' | 'setup' | 'reviewing' | 'complete';
 
 const ARTIKEL_STYLE: Record<string, { gradient: string; chipBg: string; chipColor: string }> = {
-  der: { gradient: 'linear-gradient(135deg, #0a1628 0%, #1e3a8a 100%)', chipBg: `${ACCENT.srs}4D`,       chipColor: '#93C5FD' },
-  die: { gradient: 'linear-gradient(135deg, #2a0a1e 0%, #9d174d 100%)', chipBg: `${ACCENT.listening}4D`, chipColor: '#F9A8D4' },
-  das: { gradient: 'linear-gradient(135deg, #0a2218 0%, #065f46 100%)', chipBg: `${ACCENT.teal}4D`,      chipColor: '#5EEAD4' },
+  der: { gradient: GRADIENT.cardDer, chipBg: `${ACCENT.srs}4D`,       chipColor: ACCENT.srsLight },
+  die: { gradient: GRADIENT.cardDie, chipBg: `${ACCENT.listening}4D`, chipColor: ACCENT.listeningLight },
+  das: { gradient: GRADIENT.cardDas, chipBg: `${ACCENT.teal}4D`,      chipColor: ACCENT.tealLight },
 };
-const DEFAULT_CARD_GRADIENT = 'linear-gradient(135deg, #1e1b4b 0%, #4338ca 100%)';
+const DEFAULT_CARD_GRADIENT = GRADIENT.cardDefault;
 
 export default function SRSReviewPage() {
   const router = useRouter();
@@ -37,7 +36,15 @@ export default function SRSReviewPage() {
   const addWordsMutation = useAddWordsToSRS();
   const { refetch: refetchRandom } = useRandomWords(20, {});
 
-  const [phase, setPhase] = useState<Phase>('loading');
+  const [manualPhase, setManualPhase] = useState<'reviewing' | 'complete' | 'setup' | null>(null);
+  const phase = useMemo<Phase>(() => {
+    if (manualPhase !== null) return manualPhase;
+    if (dueLoading) return 'loading';
+    if (!stats) return 'loading';
+    if (stats.total === 0) return 'empty';
+    if (stats.due === 0) return 'complete';
+    return 'setup';
+  }, [manualPhase, dueLoading, stats]);
   const [quizMode, setQuizMode] = useState<QuizMode>('mixed');
   const [reviewQueue, setReviewQueue] = useState<Progress[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -66,12 +73,10 @@ export default function SRSReviewPage() {
   useEffect(() => { loadSettings(); }, [loadSettings]);
 
   useEffect(() => {
-    if (phase !== 'reviewing') { setSessionSeconds(0); return; }
+    if (phase !== 'reviewing') return;
     const id = setInterval(() => setSessionSeconds(s => s + 1), 1000);
     return () => clearInterval(id);
   }, [phase]);
-
-  useEffect(() => { setShowExampleTrans(false); }, [currentIndex]);
 
   const flipCard = useCallback(() => {
     if (!isFlipped) {
@@ -80,13 +85,6 @@ export default function SRSReviewPage() {
     }
   }, [isFlipped, playClick]);
 
-  useEffect(() => {
-    if (dueLoading) { setPhase('loading'); return; }
-    if (!stats) return;
-    if (stats.total === 0) setPhase('empty');
-    else if (stats.due === 0 && phase !== 'reviewing' && phase !== 'complete') setPhase('complete');
-    else if (phase === 'loading') setPhase('setup');
-  }, [dueLoading, stats, phase]);
 
   const getCardQuizMode = useCallback((card: Progress): Exclude<QuizMode, 'mixed'> => {
     if (quizMode !== 'mixed') return quizMode;
@@ -97,11 +95,12 @@ export default function SRSReviewPage() {
   }, [quizMode]);
 
   const startReview = useCallback(() => {
-    if (dueCards.length === 0) { setPhase('complete'); return; }
+    if (dueCards.length === 0) { setManualPhase('complete'); return; }
     const shuffled = [...dueCards].sort(() => Math.random() - 0.5);
     const queue = shuffled.slice(0, settings.questionsPerGame);
     setReviewQueue(queue);
     setCurrentIndex(0);
+    setShowExampleTrans(false);
     currentIndexRef.current = 0;
     reviewQueueLengthRef.current = queue.length;
     setQueueNewAtStart(queue.filter(c => (c.repetitions ?? 0) === 0).length);
@@ -113,7 +112,8 @@ export default function SRSReviewPage() {
     const modes: Record<number, Exclude<QuizMode, 'mixed'>> = {};
     queue.forEach((card, i) => { modes[i] = getCardQuizMode(card); });
     setCardModes(modes);
-    setPhase('reviewing');
+    setSessionSeconds(0);
+    setManualPhase('reviewing');
     playClick();
   }, [dueCards, settings.questionsPerGame, playClick, getCardQuizMode]);
 
@@ -148,9 +148,9 @@ export default function SRSReviewPage() {
       nextCardTimerRef.current = setTimeout(() => {
         nextCardTimerRef.current = null;
         if (currentIndexRef.current + 1 >= reviewQueueLengthRef.current) {
-          playLevelUp(); setPhase('complete'); refetchDue();
+          playLevelUp(); setManualPhase('complete'); refetchDue();
         } else {
-          setCurrentIndex(i => i + 1); setIsFlipped(false);
+          setCurrentIndex(i => i + 1); setIsFlipped(false); setShowExampleTrans(false);
         }
         reviewSubmittingRef.current = false;
         setIsSubmittingReview(false);
@@ -185,7 +185,7 @@ export default function SRSReviewPage() {
         await addWordsMutation.mutateAsync(result.data.map(w => w.id));
         playStreak();
         refetchDue();
-        setPhase('setup');
+        setManualPhase('setup');
       }
     } catch { /* silently ignore – non-critical */ }
   };
@@ -218,7 +218,7 @@ export default function SRSReviewPage() {
         <div className="rounded-3xl p-8 text-center border"
           style={{ backgroundColor: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}>
           <div className="w-20 h-20 rounded-3xl mx-auto flex items-center justify-center mb-6"
-            style={{ background: `linear-gradient(135deg, ${ACCENT.srs}26, ${ACCENT.writing}1A)` }}>
+            style={{ background: GRADIENT.srsIconBg }}>
             <IconBrain size={36} style={{ color: ACCENT.srs }} />
           </div>
           <h1 className="text-2xl font-bold mb-3" style={{ color: 'var(--theme-text-primary)' }}>SRS Review</h1>
@@ -270,7 +270,7 @@ export default function SRSReviewPage() {
       <SRSCompleteScreen
         sessionStats={sessionStats}
         stats={stats}
-        onContinue={() => { refetchDue(); setPhase('setup'); }}
+        onContinue={() => { refetchDue(); setManualPhase('setup'); }}
         onAddWords={addRandomWords}
         onBack={() => router.push('/games')}
       />
@@ -287,7 +287,7 @@ export default function SRSReviewPage() {
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-3">
           <button
-            onClick={() => { playClick(); refetchDue(); setPhase('setup'); }}
+            onClick={() => { playClick(); refetchDue(); setManualPhase('setup'); }}
             className="w-9 h-9 rounded-xl flex items-center justify-center transition-all hover:opacity-70"
             style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }}
           >
@@ -340,7 +340,7 @@ export default function SRSReviewPage() {
       <div className="flex items-center gap-3 mb-5">
         <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
           <div className="h-full rounded-full transition-all duration-500"
-            style={{ width: `${progress}%`, background: `linear-gradient(90deg, ${ACCENT.srs}, ${STATUS.success})` }} />
+            style={{ width: `${progress}%`, background: GRADIENT.progressBar }} />
         </div>
         <span className="shrink-0 text-caption font-bold px-2 py-0.5 rounded-lg"
           style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }}>
@@ -393,7 +393,7 @@ export default function SRSReviewPage() {
         <p className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>
           Phím tắt: 1 Quên · 2 Khó · 3 Được · 4 Dễ
         </p>
-        <button onClick={() => { playClick(); refetchDue(); setPhase('setup'); }}
+        <button onClick={() => { playClick(); refetchDue(); setManualPhase('setup'); }}
           className="flex items-center gap-1.5 text-xs font-medium transition-all hover:opacity-70"
           style={{ color: 'var(--theme-text-muted)' }}>
           <IconX size={13} /> Dừng

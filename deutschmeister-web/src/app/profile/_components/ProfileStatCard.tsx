@@ -12,7 +12,7 @@ export function ProfileStatCard({
 }) {
   return (
     <div
-      className="group rounded-[1.5rem] border p-5 text-center relative overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+      className="group rounded-3xl border p-5 text-center relative overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
       style={{
         borderColor: 'var(--theme-border)',
         backgroundColor: 'var(--theme-bg-card)',

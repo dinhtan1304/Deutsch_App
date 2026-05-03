@@ -1,10 +1,9 @@
 'use client';
-/* eslint-disable no-restricted-syntax */
 
 import { useState, useEffect, useRef } from 'react';
-import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import { ACCENT, STATUS } from '@/lib/tokens';
 import { PersonalWord, WordTypeInfo, GenderInfo, Gender, WordCollection } from '@/types/personalWord';
-import { IconVolume, IconStar, IconLightbulb, IconCheck } from '@/components/ui/Icons';
+import { IconVolume, IconStar, IconCheck } from '@/components/ui/Icons';
 import { useWordCollections, useAddToCollection, useRemoveFromCollection } from '@/hooks/usePersonalWords';
 
 // ── Collection Popover ────────────────────────────────────────────────────────
@@ -128,8 +127,8 @@ export function WordBankCard({ word, onToggleFavorite, onSpeak, collections = []
       case 'adjektiv':
         return (word.adjektivData?.komparativ || word.adjektivData?.superlativ) ? (
           <div className="flex flex-wrap gap-1">
-            {word.adjektivData.komparativ && <span className="px-1.5 py-0.5 rounded text-caption" style={chipStyle('rgba(245,158,11,.1)', '#D97706')}>{word.adjektivData.komparativ}</span>}
-            {word.adjektivData.superlativ && <span className="px-1.5 py-0.5 rounded text-caption" style={chipStyle('rgba(245,158,11,.1)', '#D97706')}>{word.adjektivData.superlativ}</span>}
+            {word.adjektivData.komparativ && <span className="px-1.5 py-0.5 rounded text-caption" style={chipStyle(`${ACCENT.xp}1a`, ACCENT.xpDark)}>{word.adjektivData.komparativ}</span>}
+            {word.adjektivData.superlativ && <span className="px-1.5 py-0.5 rounded text-caption" style={chipStyle(`${ACCENT.xp}1a`, ACCENT.xpDark)}>{word.adjektivData.superlativ}</span>}
           </div>
         ) : null;
       case 'praposition':
@@ -149,110 +148,40 @@ export function WordBankCard({ word, onToggleFavorite, onSpeak, collections = []
   };
 
   return (
-    <tr onClick={onClick} className="group transition-colors hover:bg-black/5 dark:hover:bg-white/5 border-b border-black/5 dark:border-white/5 last:border-0 relative cursor-pointer">
-      
-      {/* TỪ VỰNG */}
-      <td className="px-4 py-3 align-middle" style={{ borderLeft: `4px solid ${typeInfo.color}` }}>
-        <div className="flex items-center gap-3">
-          <button onClick={(e) => { e.stopPropagation(); handleSpeak(); }}
-            className="w-8 h-8 rounded-full flex items-center justify-center transition-all hover:scale-110 shrink-0"
-            style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-secondary)' }}
-            title="Phát âm">
-            <IconVolume size={14} />
-          </button>
-          <div className="flex flex-col min-w-0">
-            <span className="text-base font-bold truncate" style={{ color: 'var(--theme-text-primary)' }}>
-              {displayWord()}
-            </span>
-            <div className="flex items-center gap-1.5 mt-0.5">
-              <span className="px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider"
-                style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }}>
-                {word.level}
-              </span>
-              {word.category && (
-                <span className="px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider truncate max-w-[100px]"
-                  style={{ backgroundColor: 'rgba(59,130,246,.08)', color: ACCENT.srs }}>
-                  {word.category}
-                </span>
-              )}
-            </div>
-          </div>
+    <div 
+      onClick={onClick} 
+      className="group flex flex-col bg-[(--theme-bg-card)] rounded-3xl p-5 relative cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-xl overflow-hidden shadow-sm"
+      style={{ boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.05)' }}
+    >
+      {/* Decorative Top Border Glow based on word type */}
+      <div className="absolute top-0 left-0 right-0 h-1" style={{ backgroundColor: typeInfo.color }} />
+
+      {/* Header: Actions (Star, Folder) & Tags */}
+      <div className="flex justify-between items-start mb-3">
+        <div className="flex flex-wrap gap-1.5">
+          <span className="px-2 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-wider whitespace-nowrap"
+            style={{ backgroundColor: typeInfo.color + '15', color: typeInfo.color }}>
+            {typeInfo.icon} {typeInfo.labelDe}
+          </span>
+          <span className="px-2 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-wider"
+            style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }}>
+            {word.level}
+          </span>
         </div>
-      </td>
 
-      {/* NGHĨA */}
-      <td className="px-4 py-3 align-middle min-w-[120px]">
-        <div className="flex flex-col gap-1 text-sm">
-          {word.translationVi && (
-            <span className="font-medium whitespace-normal line-clamp-2" style={{ color: 'var(--theme-text-primary)' }}>
-              {word.translationVi}
-            </span>
-          )}
-          {word.translationEn && (
-            <span className="text-xs whitespace-normal line-clamp-1" style={{ color: 'var(--theme-text-secondary)' }}>
-              {word.translationEn}
-            </span>
-          )}
-        </div>
-      </td>
-
-      {/* PHÂN LOẠI */}
-      <td className="px-4 py-3 align-middle">
-        <span className="px-2 py-1 rounded-lg text-xs font-bold whitespace-nowrap" style={{ backgroundColor: typeInfo.color + '15', color: typeInfo.color }}>
-          {typeInfo.icon} {typeInfo.labelDe}
-        </span>
-      </td>
-
-      {/* ĐẶC TÍNH */}
-      <td className="px-4 py-3 align-middle min-w-[120px]">
-        <div className="flex flex-col gap-1">
-          {renderDetails()}
-          {word.tags && word.tags.length > 0 && (
-            <div className="flex flex-wrap gap-1 mt-0.5">
-              {word.tags.map((t, i) => (
-                <span key={i} className="px-1.5 py-0.5 rounded text-[10px]"
-                  style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }}>
-                  #{t}
-                </span>
-              ))}
-            </div>
-          )}
-        </div>
-      </td>
-
-      {/* VÍ DỤ */}
-      <td className="px-4 py-3 align-middle max-w-[200px]">
-        <div className="flex flex-col gap-1">
-          {word.examples?.length > 0 ? (
-            <span className="text-xs italic whitespace-normal line-clamp-2" style={{ color: 'var(--theme-text-secondary)' }}>
-              "{word.examples[0]}"
-            </span>
-          ) : (
-            <span className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>—</span>
-          )}
-          {word.notes && (
-            <div className="flex items-start gap-1 text-[11px] mt-0.5" style={{ color: ACCENT.xp }}>
-              <IconLightbulb size={12} className="shrink-0 mt-0.5" />
-              <span className="whitespace-normal line-clamp-2">{word.notes}</span>
-            </div>
-          )}
-        </div>
-      </td>
-
-      {/* THAO TÁC */}
-      <td className="px-4 py-3 align-middle text-right w-[100px]">
-        <div className="flex items-center justify-end gap-1 relative">
+        <div className="flex items-center gap-1">
           <button onClick={(e) => { e.stopPropagation(); onToggleFavorite(word.id); }}
-            className="w-8 h-8 flex items-center justify-center rounded-lg transition-all hover:scale-110"
+            className="w-8 h-8 flex items-center justify-center rounded-xl transition-all hover:scale-110 hover:bg-black/5"
             title="Yêu thích">
             <IconStar size={16} style={word.isFavorite
               ? { fill: ACCENT.xp, color: ACCENT.xp }
               : { color: 'var(--theme-text-muted)', opacity: 0.5 }} />
           </button>
+          
           <div className="relative">
             <button
               onClick={(e) => { e.stopPropagation(); setShowCollPopover(v => !v); }}
-              className="w-8 h-8 flex items-center justify-center rounded-lg transition-all text-base hover:bg-black/5 dark:hover:bg-white/5"
+              className="w-8 h-8 flex items-center justify-center rounded-xl transition-all text-base hover:bg-black/5"
               title="Thêm vào thư mục"
               style={{ opacity: showCollPopover ? 1 : 0.6, color: 'var(--theme-text-secondary)' }}>
               <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" /></svg>
@@ -268,7 +197,53 @@ export function WordBankCard({ word, onToggleFavorite, onSpeak, collections = []
             )}
           </div>
         </div>
-      </td>
-    </tr>
+      </div>
+
+      {/* Main Word + Pronunciation */}
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-xl font-black truncate pr-2" style={{ color: 'var(--theme-text-primary)' }}>
+          {displayWord()}
+        </span>
+        <button onClick={(e) => { e.stopPropagation(); handleSpeak(); }}
+          className="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 transition-transform duration-300 hover:scale-110 shadow-sm"
+          style={{ backgroundColor: `${typeInfo.color}15`, color: typeInfo.color }}
+          title="Phát âm">
+          <IconVolume size={18} />
+        </button>
+      </div>
+
+      {/* Meaning & Secondary translation */}
+      <div className="flex flex-col gap-1 mb-4">
+        {word.translationVi && (
+          <span className="font-medium text-sm line-clamp-2" style={{ color: 'var(--theme-text-primary)' }}>
+            {word.translationVi}
+          </span>
+        )}
+        {word.translationEn && (
+          <span className="text-xs line-clamp-1 italic opacity-70" style={{ color: 'var(--theme-text-secondary)' }}>
+            {word.translationEn}
+          </span>
+        )}
+      </div>
+
+      {/* Details & Tags (Verbs info, noun plural, etc.) */}
+      <div className="mt-auto pt-3 flex flex-col gap-2 border-t border-[(--theme-border)]">
+        <div className="min-h-6">
+           {renderDetails()}
+        </div>
+        
+        {word.tags && word.tags.length > 0 && (
+          <div className="flex flex-wrap gap-1">
+            {word.tags.map((t, i) => (
+              <span key={i} className="px-2 py-0.5 rounded-md text-[10px] font-bold tracking-wide"
+                style={{ backgroundColor: 'var(--theme-bg-body)', color: 'var(--theme-text-muted)' }}>
+                #{t}
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
+
+    </div>
   );
 }

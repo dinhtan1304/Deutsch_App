@@ -1,5 +1,5 @@
 'use client';
-/* eslint-disable no-restricted-syntax */
+
 
 import { IconBrain, IconBookOpen, IconTarget, IconFlame, IconChevronLeft, IconPlus } from '@/components/ui/Icons';
 import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';

@@ -1,8 +1,7 @@
-﻿'use client';
-/* eslint-disable no-restricted-syntax */
+'use client';
 
-import { useState, useCallback, useEffect } from 'react';
-import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import { useReducer, useCallback, useEffect } from 'react';
+import { ACCENT, STATUS } from '@/lib/tokens';
 import type { TopicWord } from '@/types/topic';
 
 // ─── Icons ───
@@ -81,6 +80,71 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
+// ─── State management ───
+
+type FlashState = {
+  deck: TopicWord[];
+  currentIndex: number;
+  isFlipped: boolean;
+  known: Set<string>;
+  unknown: Set<string>;
+  isFinished: boolean;
+};
+
+type FlashAction =
+  | { type: 'init'; words: TopicWord[] }
+  | { type: 'flip' }
+  | { type: 'next' }
+  | { type: 'prev' }
+  | { type: 'known'; id: string }
+  | { type: 'unknown'; id: string }
+  | { type: 'restart'; deck: TopicWord[] };
+
+function flashReducer(state: FlashState, action: FlashAction): FlashState {
+  switch (action.type) {
+    case 'init':
+      return { deck: shuffle(action.words), currentIndex: 0, isFlipped: false, known: new Set(), unknown: new Set(), isFinished: false };
+    case 'flip':
+      return { ...state, isFlipped: !state.isFlipped };
+    case 'next':
+      if (state.currentIndex < state.deck.length - 1) {
+        return { ...state, currentIndex: state.currentIndex + 1, isFlipped: false };
+      }
+      return { ...state, isFinished: true };
+    case 'prev':
+      if (state.currentIndex > 0) {
+        return { ...state, currentIndex: state.currentIndex - 1, isFlipped: false };
+      }
+      return state;
+    case 'known': {
+      const known = new Set(state.known);
+      known.add(action.id);
+      if (state.currentIndex < state.deck.length - 1) {
+        return { ...state, known, currentIndex: state.currentIndex + 1, isFlipped: false };
+      }
+      return { ...state, known, isFinished: true };
+    }
+    case 'unknown': {
+      const unknown = new Set(state.unknown);
+      unknown.add(action.id);
+      if (state.currentIndex < state.deck.length - 1) {
+        return { ...state, unknown, currentIndex: state.currentIndex + 1, isFlipped: false };
+      }
+      return { ...state, unknown, isFinished: true };
+    }
+    case 'restart':
+      return { deck: action.deck, currentIndex: 0, isFlipped: false, known: new Set(), unknown: new Set(), isFinished: false };
+    default:
+      return state;
+  }
+}
+
+function initFlash(words: TopicWord[]): FlashState {
+  return { deck: shuffle(words), currentIndex: 0, isFlipped: false, known: new Set(), unknown: new Set(), isFinished: false };
+}
+
+// ─── Component ───
+
 interface Props {
   words: TopicWord[];
   topicColor: string;
@@ -88,23 +152,12 @@ interface Props {
 }
 
 export function TopicFlashcard({ words, topicColor, onMarkLearned }: Props) {
-  const [deck, setDeck] = useState<TopicWord[]>([]);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [isFlipped, setIsFlipped] = useState(false);
-  const [known, setKnown] = useState<Set<string>>(new Set());
-  const [unknown, setUnknown] = useState<Set<string>>(new Set());
-  const [isFinished, setIsFinished] = useState(false);
+  const [state, dispatch] = useReducer(flashReducer, words, initFlash);
+  const { deck, currentIndex, isFlipped, known, unknown, isFinished } = state;
 
-  // Init deck
+  // Re-init when the word list changes
   useEffect(() => {
-    if (words.length > 0) {
-      setDeck(shuffle(words));
-      setCurrentIndex(0);
-      setIsFlipped(false);
-      setKnown(new Set());
-      setUnknown(new Set());
-      setIsFinished(false);
-    }
+    if (words.length > 0) dispatch({ type: 'init', words });
   }, [words]);
 
   const currentWord = deck[currentIndex];
@@ -116,44 +169,28 @@ export function TopicFlashcard({ words, topicColor, onMarkLearned }: Props) {
     speechSynthesis.speak(u);
   }, []);
 
-  const goNext = useCallback(() => {
-    if (currentIndex < total - 1) {
-      setCurrentIndex(i => i + 1);
-      setIsFlipped(false);
-    } else {
-      setIsFinished(true);
-    }
-  }, [currentIndex, total]);
-
   const handleKnown = useCallback(() => {
     if (!currentWord) return;
-    setKnown(s => new Set(s).add(currentWord.id));
     onMarkLearned?.(currentWord.id);
-    goNext();
-  }, [currentWord, goNext, onMarkLearned]);
+    dispatch({ type: 'known', id: currentWord.id });
+  }, [currentWord, onMarkLearned]);
 
   const handleUnknown = useCallback(() => {
     if (!currentWord) return;
-    setUnknown(s => new Set(s).add(currentWord.id));
-    goNext();
-  }, [currentWord, goNext]);
+    dispatch({ type: 'unknown', id: currentWord.id });
+  }, [currentWord]);
 
   const restart = useCallback((onlyUnknown = false) => {
     const newDeck = onlyUnknown
       ? shuffle(deck.filter(w => unknown.has(w.id)))
       : shuffle(words);
-    setDeck(newDeck);
-    setCurrentIndex(0);
-    setIsFlipped(false);
-    setKnown(new Set());
-    setUnknown(new Set());
-    setIsFinished(false);
+    dispatch({ type: 'restart', deck: newDeck });
   }, [words, deck, unknown]);
 
   // Keyboard
   useEffect(() => {
     const handle = (e: KeyboardEvent) => {
-      if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); setIsFlipped(f => !f); }
+      if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); dispatch({ type: 'flip' }); }
       if (e.key === 'ArrowRight' || e.key === '1') handleKnown();
       if (e.key === 'ArrowLeft' || e.key === '2') handleUnknown();
     };
@@ -205,7 +242,7 @@ export function TopicFlashcard({ words, topicColor, onMarkLearned }: Props) {
   }
 
   if (!currentWord) return null;
-  const ac = ArticleColor[currentWord.article] || '#6B7280';
+  const ac = ArticleColor[currentWord.article] || ACCENT.gray;
 
   return (
     <div>
@@ -228,7 +265,7 @@ export function TopicFlashcard({ words, topicColor, onMarkLearned }: Props) {
       {/* Card */}
       <div className="flex justify-center mb-6">
         <div
-          onClick={() => setIsFlipped(f => !f)}
+          onClick={() => dispatch({ type: 'flip' })}
           className="relative w-full max-w-md cursor-pointer select-none"
           style={{ perspective: '1000px' }}
         >
@@ -294,7 +331,7 @@ export function TopicFlashcard({ words, topicColor, onMarkLearned }: Props) {
                 <div className="w-full mt-2 px-4">
                   <div className="text-xs italic text-center py-2 rounded-lg"
                     style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-secondary)' }}>
-                    „{currentWord.examples[0]}"
+                    „{currentWord.examples[0]}&quot;
                   </div>
                 </div>
               )}
@@ -322,7 +359,7 @@ export function TopicFlashcard({ words, topicColor, onMarkLearned }: Props) {
 
       {/* Navigation */}
       <div className="flex justify-center gap-2 mt-4">
-        <button onClick={() => { if (currentIndex > 0) { setCurrentIndex(i => i - 1); setIsFlipped(false); } }}
+        <button onClick={() => dispatch({ type: 'prev' })}
           disabled={currentIndex === 0}
           className="p-2 rounded-lg transition-all disabled:opacity-30"
           style={{ color: 'var(--theme-text-muted)' }}>
@@ -333,7 +370,7 @@ export function TopicFlashcard({ words, topicColor, onMarkLearned }: Props) {
           style={{ color: 'var(--theme-text-muted)' }} title="Xáo trộn lại">
           <IconShuffle size={18} />
         </button>
-        <button onClick={() => { if (currentIndex < total - 1) { setCurrentIndex(i => i + 1); setIsFlipped(false); } }}
+        <button onClick={() => dispatch({ type: 'next' })}
           disabled={currentIndex >= total - 1}
           className="p-2 rounded-lg transition-all disabled:opacity-30"
           style={{ color: 'var(--theme-text-muted)' }}>

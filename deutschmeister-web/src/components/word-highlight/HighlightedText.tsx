@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
-import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import { ACCENT, STATUS } from '@/lib/tokens';
 import { useWordHighlightStore } from '@/stores/wordHighlightStore';
 
 interface HighlightedTextProps {

@@ -12,7 +12,7 @@ import {
   GameSetupCard, GameResultCard,
   StatCard, AnswerReview, AddWrongWordsToBank, GameResultUpsell, GameInfoBox,
   GamePlayHeader, GameStatsBar, useGameTimer,
-  IconHeadphones, IconRocket, IconChevronLeft, IconRefresh, IconVolume, IconX,
+  IconHeadphones, IconRocket, IconChevronLeft, IconRefresh, IconVolume,
 } from '@/components/games/GameUI';
 import { Button } from '@/components/ui';
 import { ACCENT, STATUS } from '@/lib/tokens';

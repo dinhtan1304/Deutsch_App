@@ -3,12 +3,12 @@
 
 import { useWeeklyChallenges, useChallengeHistory } from '@/hooks/useChallenges';
 import type { ChallengeProgress } from '@/lib/api/challenges';
-import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import { ACCENT, STATUS } from '@/lib/tokens';
 import Link from 'next/link';
 import { GridSkeleton } from '@/components/ui';
 import {
-  IconTrophy, IconChevronLeft, IconCheck, IconZap,
-  IconFlame, IconTarget, IconUsers, IconBookOpen, IconRotateCcw, IconSettings
+ IconChevronLeft, IconCheck, IconZap,
+  IconFlame, IconTarget, IconUsers, IconBookOpen, IconRotateCcw,
 } from '@/components/ui/Icons';
 
 const EVENT_COLORS: Record<string, string> = {
@@ -51,7 +51,7 @@ function ChallengeCard({ challenge }: { challenge: ChallengeProgress }) {
   const description = CHALLENGE_DESCRIPTIONS[challenge.challengeKey] || 'Hoàn thành nhiệm vụ để nhận phần thưởng XP hấp dẫn.';
 
   return (
-    <div className="group relative p-6 rounded-[1.5rem] border transition-all duration-500 hover:scale-[1.02] overflow-hidden"
+    <div className="group relative p-6 rounded-3xl border transition-all duration-500 hover:scale-[1.02] overflow-hidden"
       style={{ 
         backgroundColor: 'var(--theme-bg-card)', 
         borderColor: challenge.completed ? `${color}44` : 'var(--theme-border)',

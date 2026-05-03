@@ -3,7 +3,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   adminApi, adminWordApi, adminFeedbackApi,
-  AdminStats, AdminUserListResponse, AdminUserDetail, AdminWordItem, CreateWordPayload,
+  AdminStats, AdminUserListResponse, AdminUserDetail, CreateWordPayload,
   AdminFeedbackListResponse, AdminTokenStats,
 } from '@/lib/api/admin';
 
@@ -13,7 +13,7 @@ export const adminKeys = {
   all: ['admin'] as const,
   stats: () => [...adminKeys.all, 'stats'] as const,
   tokenStats: () => [...adminKeys.all, 'token-stats'] as const,
-  users: (params?: Record<string, any>) => [...adminKeys.all, 'users', params] as const,
+  users: (params?: Record<string, unknown>) => [...adminKeys.all, 'users', params] as const,
   user: (id: string) => [...adminKeys.all, 'users', id] as const,
 };
 
@@ -80,7 +80,7 @@ export function useDeleteAdminUser() {
 
 export const adminFeedbackKeys = {
   all: ['admin-feedback'] as const,
-  list: (params?: Record<string, any>) => [...adminFeedbackKeys.all, 'list', params] as const,
+  list: (params?: Record<string, unknown>) => [...adminFeedbackKeys.all, 'list', params] as const,
 };
 
 export function useAdminFeedback(params?: { status?: string; type?: string; page?: number }) {
@@ -105,7 +105,7 @@ export function useUpdateFeedbackStatus() {
 
 export const adminWordKeys = {
   all: ['admin-words'] as const,
-  list: (params?: Record<string, any>) => [...adminWordKeys.all, 'list', params] as const,
+  list: (params?: Record<string, unknown>) => [...adminWordKeys.all, 'list', params] as const,
   detail: (id: string) => [...adminWordKeys.all, id] as const,
 };
 

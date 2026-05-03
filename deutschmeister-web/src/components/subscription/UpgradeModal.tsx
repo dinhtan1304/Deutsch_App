@@ -1,7 +1,7 @@
 ﻿'use client';
 /* eslint-disable no-restricted-syntax -- custom UI gradients */
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import {
   useRequestUpgrade,
   useValidatePromo,
@@ -11,7 +11,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { useModalA11y } from '@/hooks/useModalA11y';
 import { trackEvent } from '@/lib/analytics';
 import type { UpgradeResponse, BillingPeriod } from '@/lib/api/subscriptions';
-import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import { ACCENT, STATUS } from '@/lib/tokens';
 
 interface Props {
   open: boolean;
@@ -122,11 +122,6 @@ export function UpgradeModal({ open, onClose, defaultPeriod = 'yearly', featureC
   const validatePromoMut = useValidatePromo();
   const { data: lifetimeInfo } = useLifetimeRemaining();
 
-  // Reset promo when period changes
-  useEffect(() => {
-    setPromoApplied(null);
-    setPromoError(null);
-  }, [period]);
 
   const handleClose = useCallback(() => {
     setStep('select');
@@ -225,7 +220,7 @@ export function UpgradeModal({ open, onClose, defaultPeriod = 'yearly', featureC
                 return (
                   <button
                     key={p}
-                    onClick={() => !disabled && setPeriod(p)}
+                    onClick={() => { if (!disabled) { setPeriod(p); setPromoApplied(null); setPromoError(null); } }}
                     disabled={disabled}
                     className="relative py-3 px-2 rounded-xl text-xs font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                     style={{

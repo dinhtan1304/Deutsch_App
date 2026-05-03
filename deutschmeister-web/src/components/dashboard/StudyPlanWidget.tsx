@@ -1,8 +1,7 @@
 'use client';
-/* eslint-disable no-restricted-syntax */
 
 import Link from 'next/link';
-import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import { ACCENT, STATUS, GRADIENT } from '@/lib/tokens';
 import { useStudyPlan } from '@/hooks/useStudyPlan';
 import { IconRocket, IconCalendar } from '@/app/study-plan/icons';
 
@@ -21,12 +20,12 @@ export function StudyPlanWidget() {
         className="flex items-center gap-4 p-4 rounded-2xl border-2 transition-all group hover:-translate-y-1 relative overflow-hidden active:scale-95 shadow-sm"
         style={{
           borderColor: 'rgba(99,102,241,0.1)',
-          background: 'linear-gradient(135deg, rgba(59,130,246,0.03), rgba(139,92,246,0.05))',
+          background: GRADIENT.srsBg,
         }}
       >
         <div
           className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0 shadow-md transition-transform group-hover:scale-110"
-          style={{ background: 'linear-gradient(135deg, #3B82F6, #8B5CF6)' }}
+          style={{ background: GRADIENT.srsVocab }}
         >
           <IconRocket size={22} style={{ color: 'white' }} />
         </div>

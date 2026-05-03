@@ -14,10 +14,10 @@ import {
 
 export const dictationKeys = {
   all: ['dictation'] as const,
-  library: (params?: Record<string, any>) => [...dictationKeys.all, 'library', params] as const,
-  random: (params?: Record<string, any>) => [...dictationKeys.all, 'random', params] as const,
+  library: (params?: Record<string, unknown>) => [...dictationKeys.all, 'library', params] as const,
+  random: (params?: Record<string, unknown>) => [...dictationKeys.all, 'random', params] as const,
   session: (id: string) => [...dictationKeys.all, 'session', id] as const,
-  history: (params?: Record<string, any>) => [...dictationKeys.all, 'history', params] as const,
+  history: (params?: Record<string, unknown>) => [...dictationKeys.all, 'history', params] as const,
   stats: () => [...dictationKeys.all, 'stats'] as const,
 };
 
@@ -100,8 +100,10 @@ export function useSubmitDictation() {
   return useMutation({
     mutationFn: ({ id, userAnswers }: { id: string; userAnswers: Record<string, string> }) =>
       dictationApi.submitSession(id, userAnswers),
-    onSuccess: (_, { id }) => {
-      queryClient.invalidateQueries({ queryKey: dictationKeys.session(id) });
+    onSuccess: (data, { id }) => {
+      // Set cache directly with the GRADED result so the result page
+      // never sees a stale DRAFT and incorrectly redirects back to play
+      queryClient.setQueryData(dictationKeys.session(id), data);
       queryClient.invalidateQueries({ queryKey: dictationKeys.history() });
       queryClient.invalidateQueries({ queryKey: dictationKeys.stats() });
     },

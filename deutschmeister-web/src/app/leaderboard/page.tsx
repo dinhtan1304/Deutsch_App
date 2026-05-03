@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useLeaderboard } from '@/hooks/useLeaderboard';
 import { useAuthStore } from '@/stores/authStore';
 import Link from 'next/link';
+import Image from 'next/image';
 import { GRADIENT, ACCENT } from '@/lib/tokens';
 import { GridSkeleton } from '@/components/ui';
 import {
@@ -132,7 +133,7 @@ export default function LeaderboardPage() {
                       <div className="w-16 h-16 md:w-20 md:h-20 rounded-full border-4 overflow-hidden"
                         style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-secondary)' }}>
                         {top3[1].avatar
-                          ? <img src={top3[1].avatar} alt="" className="w-full h-full object-cover" />
+                          ? <Image src={top3[1].avatar} alt="" fill className="object-cover" />
                           : <div className="w-full h-full flex items-center justify-center" style={{ color: 'var(--theme-text-muted)' }}><IconUser size={32} /></div>}
                       </div>
                       <div className="absolute -bottom-2 left-1/2 -translate-x-1/2">
@@ -154,7 +155,7 @@ export default function LeaderboardPage() {
                       <div className="w-20 h-20 md:w-28 md:h-28 rounded-full border-4 overflow-hidden shadow-2xl"
                         style={{ borderColor: ACCENT.xp, backgroundColor: 'var(--theme-bg-secondary)' }}>
                         {top3[0].avatar
-                          ? <img src={top3[0].avatar} alt="" className="w-full h-full object-cover" />
+                          ? <Image src={top3[0].avatar} alt="" fill className="object-cover" />
                           : <div className="w-full h-full flex items-center justify-center" style={{ color: ACCENT.xp }}><IconUser size={48} /></div>}
                       </div>
                       <div className="absolute -bottom-3 left-1/2 -translate-x-1/2">
@@ -178,7 +179,7 @@ export default function LeaderboardPage() {
                       <div className="w-16 h-16 md:w-20 md:h-20 rounded-full border-4 overflow-hidden"
                         style={{ borderColor: `${ACCENT.xp}4D`, backgroundColor: 'var(--theme-bg-secondary)' }}>
                         {top3[2].avatar
-                          ? <img src={top3[2].avatar} alt="" className="w-full h-full object-cover" />
+                          ? <Image src={top3[2].avatar} alt="" fill className="object-cover" />
                           : <div className="w-full h-full flex items-center justify-center" style={{ color: ACCENT.xp }}><IconUser size={32} /></div>}
                       </div>
                       <div className="absolute -bottom-2 left-1/2 -translate-x-1/2">
@@ -200,7 +201,7 @@ export default function LeaderboardPage() {
                 const isMe = user?.id === entry.userId;
                 return (
                   <div key={entry.userId}
-                    className="flex items-center gap-4 px-5 py-3.5 rounded-[1.25rem] border transition-all hover:scale-[1.01]"
+                    className="flex items-center gap-4 px-5 py-3.5 rounded-xl border transition-all hover:scale-[1.01]"
                     style={{
                       borderColor: isMe ? ACCENT.srs : 'var(--theme-border)',
                       backgroundColor: isMe ? `${ACCENT.srs}1A` : 'var(--theme-bg-card)',
@@ -210,10 +211,10 @@ export default function LeaderboardPage() {
                       <RankBadge rank={rank} />
                     </div>
 
-                    <div className="w-10 h-10 rounded-full overflow-hidden shrink-0 border"
+                    <div className="relative w-10 h-10 rounded-full overflow-hidden shrink-0 border"
                       style={{ backgroundColor: 'var(--theme-bg-secondary)', borderColor: 'var(--theme-border)' }}>
                       {entry.avatar
-                        ? <img src={entry.avatar} alt="" className="w-full h-full object-cover" />
+                        ? <Image src={entry.avatar} alt="" fill className="object-cover" />
                         : <div className="w-full h-full flex items-center justify-center opacity-30"><IconUser size={20} /></div>}
                     </div>
 

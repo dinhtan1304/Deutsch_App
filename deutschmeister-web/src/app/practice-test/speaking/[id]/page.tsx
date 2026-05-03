@@ -35,7 +35,7 @@ function Waveform({ active }: { active: boolean }) {
         <div key={i}
           style={{
             width: 3, borderRadius: 2,
-            backgroundColor: ACCENT.xp,
+            backgroundColor: ACCENT.speaking,
             height: active ? `${h * 2.5}px` : '4px',
             animation: active ? `wave ${0.5 + i * 0.07}s ease-in-out infinite alternate` : 'none',
             transition: 'height 0.3s ease',
@@ -116,14 +116,12 @@ export default function FreeSpeakingSessionPage() {
     recorderRef.current?.stop();
   }, [liveTranscript]);
 
-  // Auto-stop at max duration
   useEffect(() => {
     if (recState === 'recording' && elapsed >= MAX_RECORD_SECS) {
       setTimeout(() => stopRecording(), 0);
     }
   }, [elapsed, recState, stopRecording]);
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
@@ -132,7 +130,6 @@ export default function FreeSpeakingSessionPage() {
     };
   }, []);
 
-  // Redirect if already graded
   useEffect(() => {
     if (session?.status === 'GRADED' || session?.status === 'GRADING') {
       router.push(`/practice-test/speaking/${id}/result`);
@@ -221,7 +218,7 @@ export default function FreeSpeakingSessionPage() {
 
   if (isLoading) return (
     <div className="py-16 flex flex-col items-center gap-3">
-      <IconLoader size={28} style={{ color: ACCENT.xp }} />
+      <IconLoader size={28} style={{ color: ACCENT.speaking }} />
       <p className="text-body" style={{ color: 'var(--theme-text-muted)' }}>Đang tải bài nói...</p>
     </div>
   );
@@ -229,7 +226,7 @@ export default function FreeSpeakingSessionPage() {
   if (error || !session) return (
     <div className="py-16 text-center">
       <p style={{ color: STATUS.danger }}>Không tìm thấy bài nói.</p>
-      <Link href="/practice-test/speaking" className="text-body mt-3 inline-block" style={{ color: ACCENT.xp }}>← Danh sách</Link>
+      <Link href="/practice-test/speaking" className="text-body mt-3 inline-block" style={{ color: ACCENT.speaking }}>← Danh sách</Link>
     </div>
   );
 
@@ -239,111 +236,103 @@ export default function FreeSpeakingSessionPage() {
 
   if (submitMut.isPending) {
     return (
-      <div className="py-16 flex flex-col items-center gap-4">
-        <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{ backgroundColor: `${ACCENT.xp}1F` }}>
-          <IconLoader size={28} style={{ color: ACCENT.xp }} />
+      <div className="py-24 flex flex-col items-center gap-6">
+        <div className="w-20 h-20 rounded-3xl flex items-center justify-center shadow-2xl relative overflow-hidden"
+             style={{ background: GRADIENT.speaking }}>
+          <div className="absolute inset-0 bg-white/20 animate-pulse" />
+          <IconLoader size={32} style={{ color: 'white' }} />
         </div>
         <div className="text-center">
-          <p className="font-bold text-[15px]" style={{ color: 'var(--theme-text-primary)' }}>AI đang chấm điểm...</p>
-          <p className="text-body mt-1" style={{ color: 'var(--theme-text-muted)' }}>Gemini phân tích audio + transcript. Khoảng 15–30 giây.</p>
+          <h2 className="text-xl font-black mb-2" style={{ color: 'var(--theme-text-primary)' }}>AI đang chấm điểm...</h2>
+          <p className="text-sm opacity-60 max-w-xs mx-auto" style={{ color: 'var(--theme-text-primary)' }}>Gemini đang phân tích giọng nói và nội dung của bạn. Quá trình này mất khoảng 15-30 giây.</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="py-6 pb-28">
+    <div className="py-6 pb-32">
       <PageHeader
         backHref="/practice-test/speaking"
-        title="Luyện Nói Tự Do"
+        title="Luyện Nói"
+        subtitle={session.topicType.replace(/_/g, ' ')}
         accent="speaking"
         right={
-          <span className="px-2.5 py-0.5 rounded-lg text-xs font-black text-white"
-            style={{ backgroundColor: ACCENT.xp }}>{session.cefrLevel}</span>
+          <span className="px-3 py-1 rounded-xl text-xs font-black text-white shadow-lg"
+            style={{ backgroundColor: ACCENT.speaking }}>{session.cefrLevel}</span>
         }
       />
 
-      <div className="flex items-start justify-between gap-3 mb-6">
-        <div className="flex-1 min-w-0">
-          <h1 className="text-h2 font-black tracking-tight mb-1" style={{ color: 'var(--theme-text-primary)' }}>
-            {session.topicType.replace(/_/g, ' ')}
-          </h1>
-          <div className="flex items-center gap-2 text-xs font-bold" style={{ color: 'var(--theme-text-muted)' }}>
-             <span className="px-1.5 py-0.5 rounded bg-orange-500/10 text-orange-500 uppercase tracking-widest text-[10px]">{session.topicType}</span>
-             <span className="opacity-40">·</span>
-             <span>Sprechen · AI-Assisted Practice</span>
-          </div>
-        </div>
-      </div>
-
-      <div className="flex flex-col lg:flex-row gap-8">
-
-        <div className="lg:w-1/2 shrink-0 lg:sticky lg:top-20 lg:self-start lg:max-h-[calc(100vh-10rem)] lg:overflow-y-auto lg:pr-1 space-y-6">
-          <div className="rounded-3xl border p-6" style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
-            <div className="flex items-center gap-2 mb-4">
-               <span className="w-8 h-8 rounded-xl flex items-center justify-center text-xs font-black text-white" style={{ background: GRADIENT.speaking }}>?</span>
-               <h3 className="text-body font-black uppercase tracking-widest" style={{ color: 'var(--theme-text-primary)' }}>Câu hỏi / Prompt</h3>
-            </div>
-            <p className="text-lg font-bold leading-relaxed mb-4" style={{ color: 'var(--theme-text-primary)' }}>
-              {session.prompt}
-            </p>
-            <div className="p-4 rounded-2xl bg-orange-500/5 border border-orange-500/10 italic text-[15px]" style={{ color: 'var(--theme-text-secondary)' }}>
-              {session.promptVi}
+      <div className="flex flex-col lg:flex-row gap-8 items-start">
+        
+        {/* Left Side: Prompt & Suggestions */}
+        <div className="lg:w-1/2 shrink-0 lg:sticky lg:top-20 lg:self-start space-y-6">
+          <div className="rounded-3xl border p-8 shadow-xl relative overflow-hidden"
+            style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
+            <div className="absolute top-0 right-0 w-32 h-32 bg-rose-500 opacity-[0.03] blur-3xl -mr-16 -mt-16" />
+            
+            <div className="relative z-10">
+              <div className="flex items-center gap-3 mb-6">
+                 <div className="w-10 h-10 rounded-2xl flex items-center justify-center text-white shadow-lg" style={{ background: GRADIENT.speaking }}>
+                   <span className="text-lg font-black">?</span>
+                 </div>
+                 <h3 className="text-xs font-black uppercase tracking-widest opacity-60" style={{ color: 'var(--theme-text-primary)' }}>Đề bài / Prompt</h3>
+              </div>
+              <p className="text-xl font-black leading-relaxed mb-6" style={{ color: 'var(--theme-text-primary)' }}>
+                {session.prompt}
+              </p>
+              <div className="p-5 rounded-2xl border bg-rose-500/5 italic text-[15px] leading-relaxed" 
+                   style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)' }}>
+                {session.promptVi}
+              </div>
             </div>
           </div>
 
           {session.keyPoints?.length > 0 && (
-            <div className="rounded-3xl border p-6" style={{ borderColor: `${ACCENT.xp}33`, backgroundColor: `${ACCENT.xp}0D` }}>
-              <div className="flex items-center gap-2 mb-4">
-                 <h3 className="text-body font-black uppercase tracking-widest" style={{ color: ACCENT.xp }}>Gợi ý nên đề cập</h3>
-              </div>
-              <ul className="space-y-3">
+            <div className="rounded-3xl border p-8 shadow-lg relative overflow-hidden" 
+                 style={{ borderColor: `${ACCENT.speaking}22`, backgroundColor: `${ACCENT.speaking}08` }}>
+              <h3 className="text-xs font-black uppercase tracking-widest mb-6" style={{ color: ACCENT.speaking }}>Gợi ý nên đề cập</h3>
+              <ul className="space-y-4">
                 {session.keyPoints.map((pt: string, i: number) => (
-                  <li key={i} className="flex items-start gap-3 text-[14px] font-medium" style={{ color: 'var(--theme-text-secondary)' }}>
-                    <span className="mt-0.5 w-5 h-5 rounded-lg flex items-center justify-center shrink-0 text-[10px] font-black"
-                      style={{ backgroundColor: `${ACCENT.xp}33`, color: ACCENT.xp }}>{i + 1}</span>
+                  <li key={i} className="flex items-start gap-4 text-[15px] font-semibold" style={{ color: 'var(--theme-text-secondary)' }}>
+                    <span className="mt-0.5 w-6 h-6 rounded-xl flex items-center justify-center shrink-0 text-[10px] font-black shadow-sm"
+                      style={{ backgroundColor: `${ACCENT.speaking}1A`, color: ACCENT.speaking, border: `1px solid ${ACCENT.speaking}33` }}>{i + 1}</span>
                     {pt}
                   </li>
                 ))}
               </ul>
             </div>
           )}
-
-          <div className="rounded-3xl border p-5 flex gap-3" style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
-             <div className="w-10 h-10 rounded-2xl bg-black/5 flex items-center justify-center shrink-0">💡</div>
-             <p className="text-xs leading-relaxed" style={{ color: 'var(--theme-text-muted)' }}>
-               Nói rõ ràng, tự nhiên bằng tiếng Đức. AI sẽ nhận xét phát âm, ngữ pháp, từ vựng và mức độ hoàn thành câu hỏi.
-             </p>
-          </div>
         </div>
 
-        <div className="lg:w-1/2 min-w-0 space-y-6">
-          <div className="rounded-3xl border p-8 text-center relative overflow-hidden"
+        {/* Right Side: Recorder */}
+        <div className="flex-1 min-w-0 w-full space-y-6">
+          <div className="rounded-3xl border p-8 text-center relative overflow-hidden transition-all duration-500"
             style={{
-              borderColor: recState === 'recording' ? ACCENT.xp : 'var(--theme-border)',
+              borderColor: recState === 'recording' ? ACCENT.speaking : 'var(--theme-border)',
               backgroundColor: 'var(--theme-bg-card)',
-              boxShadow: recState === 'recording' ? `0 20px 40px ${ACCENT.xp}26` : 'none'
+              boxShadow: recState === 'recording' ? `0 20px 50px ${ACCENT.speaking}26` : '0 10px 30px rgba(0,0,0,0.05)'
             }}>
 
             {recState === 'recording' && (
-              <div className="absolute top-4 right-4">
-                 <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-500/10 text-red-500 font-black text-[10px] uppercase tracking-widest animate-pulse">
-                    <div className="w-2 h-2 rounded-full bg-red-500" /> REC
+              <div className="absolute top-6 right-6">
+                 <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-500/10 text-red-500 font-black text-[10px] uppercase tracking-widest animate-pulse border border-red-500/20">
+                    <div className="w-2.5 h-2.5 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]" /> REC
                  </div>
               </div>
             )}
 
-            <div className="mb-8">
-              <p className="text-xs font-black uppercase tracking-widest mb-6" style={{ color: 'var(--theme-text-muted)' }}>
-                {recState === 'idle' ? 'Sẵn sàng ghi âm' : recState === 'recording' ? 'Đang ghi âm...' : 'Đã ghi âm xong'}
+            <div className="mb-10">
+              <p className="text-xs font-black uppercase tracking-widest mb-8 opacity-40" style={{ color: 'var(--theme-text-primary)' }}>
+                {recState === 'idle' ? 'Sẵn sàng ghi âm' : recState === 'recording' ? 'Đang lắng nghe...' : 'Đã ghi âm xong'}
               </p>
 
-              <div className="flex justify-center mb-8 scale-150 transform">
+              <div className="flex justify-center mb-10 scale-125">
                 {recState === 'recording' ? (
-                  <CountdownRing seconds={remaining} total={MAX_RECORD_SECS} size={64} color={remaining < 20 ? STATUS.danger : ACCENT.xp} />
+                  <CountdownRing seconds={remaining} total={MAX_RECORD_SECS} size={72} color={remaining < 20 ? STATUS.danger : ACCENT.speaking} />
                 ) : (
-                  <div className="w-16 h-16 rounded-full border-4 flex items-center justify-center" style={{ borderColor: 'var(--theme-border)' }}>
-                     <IconMic size={24} style={{ color: 'var(--theme-text-muted)' }} />
+                  <div className="w-20 h-20 rounded-full border-4 flex items-center justify-center shadow-inner" style={{ borderColor: 'var(--theme-border)' }}>
+                     <IconMic size={32} style={{ color: 'var(--theme-text-muted)' }} />
                   </div>
                 )}
               </div>
@@ -354,37 +343,41 @@ export default function FreeSpeakingSessionPage() {
             </div>
 
             {(recState === 'recording' || recState === 'done') && (
-              <div className="text-left mt-8 pt-8 border-t" style={{ borderColor: 'var(--theme-border)' }}>
-                <p className="text-[10px] font-black uppercase tracking-widest mb-4 opacity-40">
-                  {recState === 'recording' ? 'Transcript trực tiếp' : 'Transcript nội dung'}
-                </p>
-                <div className="p-5 rounded-2xl min-h-[120px] transition-all"
+              <div className="text-left mt-10 pt-10 border-t" style={{ borderColor: 'var(--theme-border)' }}>
+                <div className="flex items-center justify-between mb-4">
+                  <p className="text-[10px] font-black uppercase tracking-widest opacity-40">
+                    {recState === 'recording' ? 'Transcript trực tiếp (Live)' : 'Nội dung nhận diện'}
+                  </p>
+                  {recState === 'done' && (
+                    <span className="text-[10px] font-black text-emerald-500 uppercase">Đã hoàn thành</span>
+                  )}
+                </div>
+                <div className="p-6 rounded-2xl min-h-[140px] transition-all relative overflow-hidden"
                   style={{
                     backgroundColor: 'var(--theme-bg-secondary)',
                     border: '1px solid var(--theme-border)',
-                    boxShadow: recState === 'recording' ? 'inset 0 2px 8px rgba(0,0,0,0.02)' : 'none'
                   }}>
-                  <p className="text-[15px] font-medium leading-relaxed italic" style={{ color: 'var(--theme-text-primary)' }}>
-                    {recState === 'recording' ? (liveTranscript || <span className="opacity-30">Đang nghe giọng nói của bạn...</span>) : (finalTranscript || <span className="opacity-30">Không có dữ liệu văn bản</span>)}
+                  <p className="text-lg font-semibold leading-relaxed italic" style={{ color: 'var(--theme-text-primary)' }}>
+                    {recState === 'recording' ? (liveTranscript || <span className="opacity-20">Hãy nói điều gì đó...</span>) : (finalTranscript || <span className="opacity-20 text-sm font-normal">Không có dữ liệu transcript</span>)}
                   </p>
                 </div>
               </div>
             )}
 
             {recState === 'done' && (
-              <div className="flex items-center gap-2 mt-6 justify-center">
-                <div className="px-4 py-2 rounded-2xl bg-green-500/10 text-green-600 text-xs font-black flex items-center gap-2 border border-green-500/20">
-                   <IconCheck size={14} /> Đã ghi âm {elapsed} giây
+              <div className="flex items-center gap-3 mt-8 justify-center">
+                <div className="px-4 py-2 rounded-xl bg-emerald-500/10 text-emerald-500 text-xs font-black flex items-center gap-2 border border-emerald-500/20 shadow-sm">
+                   <IconCheck size={16} /> Ghi âm thành công ({elapsed}s)
                 </div>
               </div>
             )}
           </div>
 
           {!speechSupported && (
-            <div className="rounded-2xl p-4 bg-orange-500/5 border border-orange-500/10 flex gap-3 items-center">
-               <span className="text-lg">⚠️</span>
-               <p className="text-[11px] font-medium leading-snug" style={{ color: 'var(--theme-text-secondary)' }}>
-                 Trình duyệt không hỗ trợ nhận diện giọng nói. Transcript sẽ trống, nhưng AI vẫn sẽ chấm điểm trực tiếp từ audio của bạn.
+            <div className="rounded-2xl p-5 bg-orange-500/5 border border-orange-500/20 flex gap-4 items-center shadow-sm">
+               <span className="text-2xl">⚠️</span>
+               <p className="text-[12px] font-semibold leading-relaxed" style={{ color: 'var(--theme-text-secondary)' }}>
+                 Trình duyệt của bạn không hỗ trợ hiển thị transcript trực tiếp. Đừng lo, AI vẫn sẽ nhận được file ghi âm của bạn và chấm điểm bình thường.
                </p>
             </div>
           )}
@@ -394,10 +387,10 @@ export default function FreeSpeakingSessionPage() {
       <FixedActionBar columns={recState === 'done' ? 2 : 1}>
         {recState === 'idle' && (
           <button onClick={startRecording}
-            className="w-full py-4 rounded-2xl font-black text-sm text-white flex items-center justify-center gap-3 transition-all hover:scale-[1.02] shadow-2xl"
-            style={{ background: GRADIENT.speaking, boxShadow: `0 12px 32px ${ACCENT.xp}4D` }}>
-            <div className="w-6 h-6 rounded-lg bg-white/20 flex items-center justify-center">
-               <IconMic size={14} />
+            className="w-full py-4.5 rounded-2xl font-black text-sm text-white flex items-center justify-center gap-3 transition-all hover:scale-[1.02] active:scale-95 shadow-2xl"
+            style={{ background: GRADIENT.speaking, boxShadow: `0 15px 35px ${ACCENT.speaking}4D` }}>
+            <div className="w-8 h-8 rounded-xl bg-white/20 flex items-center justify-center shadow-inner">
+               <IconMic size={18} />
             </div>
             BẮT ĐẦU GHI ÂM
           </button>
@@ -405,9 +398,9 @@ export default function FreeSpeakingSessionPage() {
 
         {recState === 'recording' && (
           <button onClick={stopRecording}
-            className="w-full py-4 rounded-2xl font-black text-sm flex items-center justify-center gap-3 transition-all hover:scale-[1.02] bg-red-500/10 border-2 border-red-500/30"
+            className="w-full py-4.5 rounded-2xl font-black text-sm flex items-center justify-center gap-3 transition-all hover:scale-[1.02] active:scale-95 bg-rose-500/10 border-2 border-rose-500/30 group"
             style={{ color: STATUS.danger }}>
-            <div className="w-3 h-3 rounded-sm bg-red-500 animate-pulse" />
+            <div className="w-3.5 h-3.5 rounded-sm bg-rose-500 animate-pulse group-hover:scale-110" />
             DỪNG GHI ÂM ({elapsed}s)
           </button>
         )}
@@ -416,14 +409,14 @@ export default function FreeSpeakingSessionPage() {
           <>
             {canRetake ? (
               <button onClick={handleRetake}
-                className="py-4 px-8 rounded-2xl font-black text-sm border-2 transition-all hover:bg-black/5 flex items-center justify-center gap-2"
-                style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)' }}>
-                <IconRefresh size={16} /> Ghi lại
+                className="py-4.5 px-10 rounded-2xl font-black text-sm border-2 transition-all hover:bg-black/5 flex items-center justify-center gap-3"
+                style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)', backgroundColor: 'var(--theme-bg-card)' }}>
+                <IconRefresh size={18} /> Ghi lại
               </button>
             ) : <div />}
             <button onClick={handleSubmit}
-              className="flex-1 py-4 rounded-2xl font-black text-sm text-white flex items-center justify-center gap-3 transition-all hover:scale-[1.02] shadow-2xl"
-              style={{ background: GRADIENT.speaking, boxShadow: `0 12px 32px ${ACCENT.xp}4D` }}>
+              className="flex-1 py-4.5 rounded-2xl font-black text-sm text-white flex items-center justify-center gap-3 transition-all hover:scale-[1.02] active:scale-95 shadow-2xl"
+              style={{ background: GRADIENT.speaking, boxShadow: `0 15px 35px ${ACCENT.speaking}4D` }}>
               <IconSend size={18} /> NỘP BÀI & CHẤM ĐIỂM
             </button>
           </>
@@ -431,9 +424,11 @@ export default function FreeSpeakingSessionPage() {
       </FixedActionBar>
 
       {submitError && (
-        <p className="fixed bottom-24 left-1/2 -translate-x-1/2 text-xs font-bold text-red-500 bg-red-50 px-4 py-2 rounded-full border border-red-100 shadow-sm z-50">
-          {submitError}
-        </p>
+        <div className="fixed bottom-28 left-1/2 -translate-x-1/2 z-50 animate-in fade-in slide-in-from-bottom-4">
+          <p className="text-xs font-black text-white bg-rose-500 px-6 py-2.5 rounded-full shadow-2xl border border-white/20">
+            {submitError}
+          </p>
+        </div>
       )}
     </div>
   );

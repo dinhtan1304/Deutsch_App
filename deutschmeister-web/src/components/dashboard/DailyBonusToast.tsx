@@ -14,20 +14,21 @@ interface Props {
  * Auto-dismisses after 4s; user can also click to dismiss early.
  */
 export function DailyBonusToast({ bonus, onDismiss }: Props) {
-  const [visible, setVisible] = useState(false);
+  if (!bonus?.claimed) return null;
+  return <DailyBonusToastInner bonus={bonus} onDismiss={onDismiss} />;
+}
+
+function DailyBonusToastInner({ bonus, onDismiss }: { bonus: DailyBonusResult; onDismiss: () => void }) {
+  const [visible, setVisible] = useState(true);
 
   useEffect(() => {
-    if (!bonus || !bonus.claimed) return;
-    setVisible(true);
     const t1 = setTimeout(() => setVisible(false), 3700);
     const t2 = setTimeout(() => onDismiss(), 4000);
     return () => {
       clearTimeout(t1);
       clearTimeout(t2);
     };
-  }, [bonus, onDismiss]);
-
-  if (!bonus || !bonus.claimed) return null;
+  }, [onDismiss]);
 
   return (
     <div

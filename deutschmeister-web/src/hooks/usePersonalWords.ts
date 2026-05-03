@@ -8,6 +8,7 @@
  */
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import type { PersonalWord } from '@/types/personalWord';
 import {
   personalWordsApi,
   collectionsApi,
@@ -18,6 +19,7 @@ import {
   SRSQueryParams,
   ReviewWordDto,
   SRSRating,
+  PaginatedPersonalWords,
 } from '@/lib/api/personal-words';
 
 // ============================================
@@ -146,11 +148,11 @@ export function useToggleFavorite() {
       // Optimistic update trong list cache
       queryClient.setQueriesData(
         { queryKey: personalWordsKeys.lists() },
-        (old: any) => {
+        (old: PaginatedPersonalWords | undefined) => {
           if (!old?.data) return old;
           return {
             ...old,
-            data: old.data.map((w: any) =>
+            data: old.data.map((w: PersonalWord) =>
               w.id === updatedWord.id ? { ...w, isFavorite: updatedWord.isFavorite } : w
             ),
           };
@@ -247,10 +249,11 @@ export function useReviewWord() {
     onSuccess: (updatedWord) => {
       // Update word in cache
       queryClient.setQueryData(personalWordsKeys.detail(updatedWord.id), updatedWord);
-      
-      // Invalidate SRS queries
-      queryClient.invalidateQueries({ queryKey: srsKeys.all });
-      queryClient.invalidateQueries({ queryKey: personalWordsKeys.stats() });
+      // Mark stale but do NOT refetch immediately — avoids 3-4 background API
+      // calls per review that push fast sessions over the 200 req/min throttle.
+      // Queries will auto-refetch when the user next visits the word bank page.
+      queryClient.invalidateQueries({ queryKey: srsKeys.all, refetchType: 'none' });
+      queryClient.invalidateQueries({ queryKey: personalWordsKeys.stats(), refetchType: 'none' });
     },
   });
 }

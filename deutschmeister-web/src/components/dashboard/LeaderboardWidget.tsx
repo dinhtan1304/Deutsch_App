@@ -1,26 +1,25 @@
 'use client';
-/* eslint-disable no-restricted-syntax */
 
 import Link from 'next/link';
-import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import { ACCENT, GRADIENT } from '@/lib/tokens';
 import { useLeaderboard } from '@/hooks/useLeaderboard';
 import { useAuthStore } from '@/stores/authStore';
 import { IconTrophy, IconStar, IconArrowRight, IconZap } from '@/components/ui/Icons';
 
 function MiniRank({ rank }: { rank: number }) {
   if (rank === 1) return (
-    <div style={{ width: 20, height: 20, borderRadius: '50%', background: 'linear-gradient(135deg, #F59E0B, #D97706)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-      <IconTrophy size={10} style={{ color: '#fff' }} />
+    <div style={{ width: 20, height: 20, borderRadius: '50%', background: GRADIENT.xpGold, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+      <IconTrophy size={10} style={{ color: 'white' }} />
     </div>
   );
   if (rank === 2) return (
-    <div style={{ width: 20, height: 20, borderRadius: '50%', background: 'linear-gradient(135deg, #9CA3AF, #6B7280)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-      <IconStar size={10} style={{ color: '#fff' }} />
+    <div style={{ width: 20, height: 20, borderRadius: '50%', background: GRADIENT.silver, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+      <IconStar size={10} style={{ color: 'white' }} />
     </div>
   );
   if (rank === 3) return (
-    <div style={{ width: 20, height: 20, borderRadius: '50%', background: 'linear-gradient(135deg, #CD7C2F, #A16207)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-      <IconStar size={10} style={{ color: '#fff' }} />
+    <div style={{ width: 20, height: 20, borderRadius: '50%', background: GRADIENT.bronze, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+      <IconStar size={10} style={{ color: 'white' }} />
     </div>
   );
   return (
@@ -38,8 +37,8 @@ export function LeaderboardWidget() {
     <div className="rounded-card p-5 border shadow-card" style={{ backgroundColor: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}>
       <div className="flex justify-between items-center mb-4">
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #F59E0B, #EF4444)' }}>
-            <IconTrophy size={14} style={{ color: '#fff' }} />
+          <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: GRADIENT.speaking }}>
+            <IconTrophy size={14} style={{ color: 'white' }} />
           </div>
           <h3 className="text-title font-bold m-0" style={{ color: 'var(--theme-text-primary)' }}>BXH tuần này</h3>
         </div>

@@ -4,7 +4,7 @@ import { useState, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import { useAuthStore } from '@/stores/authStore';
 import { AuthGate } from '@/components/ui';
-import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import { ACCENT, GRADIENT } from '@/lib/tokens';
 import { WordBankCard } from '@/components/word-bank/WordBankCard';
 import { WordDetailModal } from '@/components/word-bank/WordDetailModal';
 import { SRSBanner } from '@/components/word-bank/SRSBanner';
@@ -28,14 +28,14 @@ import {
   useExportPersonalWords,
   useSRSStats,
 } from '@/hooks/usePersonalWords';
-import { ImportRow } from '@/types/personalWord';
+import { ImportRow, PersonalWord } from '@/types/personalWord';
 
 export default function WordBankPage() {
   const { isAuthenticated } = useAuthStore();
   const { filters, page, setFilters, resetFilters, setPage, getApiParams } = useWordBankUI();
   const [showImportModal, setShowImportModal] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
-  const [selectedWord, setSelectedWord] = useState<any | null>(null);
+  const [selectedWord, setSelectedWord] = useState<PersonalWord | null>(null);
   const [selectedView, setSelectedView] = useState<string>('all');
 
   const baseApiParams = getApiParams();
@@ -221,29 +221,16 @@ export default function WordBankPage() {
               </div>
             ) : (
               <>
-                <div className="border border-black/5 dark:border-white/5 rounded-2xl shadow-sm overflow-x-auto"
-                  style={{ backgroundColor: 'var(--theme-bg-card)' }}>
-                  <table className="w-full text-left text-sm whitespace-nowrap">
-                    <thead className="border-b border-black/5 dark:border-white/5 bg-black/5 dark:bg-white/5">
-                      <tr>
-                        {['TỪ VỰNG', 'NGHĨA', 'PHÂN LOẠI', 'ĐẶC TÍNH', 'VÍ DỤ', 'THAO TÁC'].map((h, i) => (
-                          <th key={h} className={`px-4 py-3 font-semibold${i === 5 ? ' text-right' : ''}`}
-                            style={{ color: 'var(--theme-text-muted)' }}>{h}</th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {words.map(w => (
-                        <WordBankCard
-                          key={w.id}
-                          word={w}
-                          onClick={() => setSelectedWord(w)}
-                          onToggleFavorite={id => toggleFavoriteMutation.mutate(id)}
-                          onSpeak={speak}
-                        />
-                      ))}
-                    </tbody>
-                  </table>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                  {words.map(w => (
+                    <WordBankCard
+                      key={w.id}
+                      word={w}
+                      onClick={() => setSelectedWord(w)}
+                      onToggleFavorite={id => toggleFavoriteMutation.mutate(id)}
+                      onSpeak={speak}
+                    />
+                  ))}
                 </div>
 
                 {totalPages > 1 && (

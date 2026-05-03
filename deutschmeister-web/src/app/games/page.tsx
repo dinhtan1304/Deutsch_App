@@ -2,7 +2,7 @@
 /* eslint-disable no-restricted-syntax */
 
 import Link from 'next/link';
-import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import { ACCENT, STATUS } from '@/lib/tokens';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
 import {
   IconGamepad, IconTarget, IconClock, IconPenTool, IconLayers,
@@ -36,7 +36,7 @@ export default function GamesPage() {
   return (
     <div className="py-6 pb-12">
       {/* Hero Section */}
-      <div className="relative rounded-[2rem] overflow-hidden mb-8 bg-slate-900 group">
+      <div className="relative rounded-4xl overflow-hidden mb-8 bg-slate-900 group">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_-20%,#4338ca,transparent)] opacity-40" />
         
         <div className="relative z-10 px-6 py-10 md:py-12 flex flex-col items-center text-center">
@@ -44,7 +44,7 @@ export default function GamesPage() {
             <IconGamepad size={28} className="text-white" />
           </div>
           <h1 className="text-3xl md:text-4xl font-black text-white tracking-tight mb-2">
-            Game <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">Center</span>
+            Game <span className="text-transparent bg-clip-text bg-linear-to-r from-blue-400 to-purple-400">Center</span>
           </h1>
           <p className="text-sm md:text-base text-slate-400 max-w-xl font-medium leading-relaxed">
             Học tiếng Đức qua các thử thách kịch tính và tích lũy từ vựng mỗi ngày.

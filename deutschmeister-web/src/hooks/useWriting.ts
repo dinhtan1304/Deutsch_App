@@ -23,7 +23,7 @@ import {
 export const writingKeys = {
   all: ['writing'] as const,
   topics: (level: string) => [...writingKeys.all, 'topics', level] as const,
-  history: (params?: Record<string, any>) => [...writingKeys.all, 'history', params] as const,
+  history: (params?: Record<string, unknown>) => [...writingKeys.all, 'history', params] as const,
   stats: () => [...writingKeys.all, 'stats'] as const,
   session: (id: string) => [...writingKeys.all, 'session', id] as const,
 };

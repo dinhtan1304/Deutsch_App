@@ -14,7 +14,7 @@ import {
   GameSetupCard, GameResultCard, GameProgressBar,
   StatCard, AnswerReview, AddWrongWordsToBank, GameResultUpsell, GameInfoBox, KBD,
   GamePlayHeader, GameStatsBar, GameWordCard, GenderButtons, useGameTimer,
-  IconZap, IconTarget, IconCheck, IconX, IconRocket, IconKeyboard, IconVolume,
+  IconZap, IconTarget, IconRocket, IconKeyboard, IconVolume,
   IconRefresh, IconChevronLeft,
 } from '@/components/games/GameUI';
 import { Button } from '@/components/ui';

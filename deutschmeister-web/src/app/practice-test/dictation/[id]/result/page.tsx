@@ -6,54 +6,84 @@ import Link from 'next/link';
 import { useDictationSession, useStartDictation } from '@/hooks/useDictation';
 import { DictationSessionGraded, Part } from '@/lib/api/dictation';
 import { YouTubeEmbed, YouTubeEmbedRef } from '@/components/dictation/YouTubeEmbed';
-import { ScoreRing } from '@/components/ui';
-import { STATUS, GRADIENT, ACCENT } from '@/lib/tokens';
+import { ScoreRing, PageHeader } from '@/components/ui';
+import { GRADIENT, ACCENT } from '@/lib/tokens';
 
-const GRADIENT_STR = GRADIENT.dictation;
-const COLOR = ACCENT.dictation;
+type GradingDetail = DictationSessionGraded['gradingDetails'][number];
+type GradingMap = Map<string, GradingDetail>;
 
 function getGradeInfo(score: number): { emoji: string; label: string; color: string } {
-  if (score >= 90) return { emoji: '🏆', label: 'Xuất sắc!',         color: STATUS.success };
-  if (score >= 75) return { emoji: '🌟', label: 'Rất tốt!',          color: STATUS.success };
-  if (score >= 60) return { emoji: '✓',  label: 'Bestanden! 💪',      color: STATUS.warning };
-  if (score >= 40) return { emoji: '📖', label: 'Cần cố gắng thêm',   color: ACCENT.games };
-  return              { emoji: '💪', label: 'Hãy ôn luyện thêm',  color: STATUS.danger };
+  if (score >= 90) return { emoji: '🏆', label: 'Xuất sắc!',        color: 'var(--color-status-success)' };
+  if (score >= 75) return { emoji: '🌟', label: 'Rất tốt!',         color: 'var(--color-status-success)' };
+  if (score >= 60) return { emoji: '✓',  label: 'Đạt yêu cầu!',     color: 'var(--color-accent-xp)' };
+  if (score >= 40) return { emoji: '📖', label: 'Cần cố gắng thêm',  color: ACCENT.games };
+  return              { emoji: '💪', label: 'Hãy ôn luyện thêm', color: 'var(--color-status-danger)' };
 }
 
 function formatTimestamp(ms: number): string {
   const s = Math.floor(ms / 1000);
   const m = Math.floor(s / 60);
-  const sec = s % 60;
-  return `${m}:${sec.toString().padStart(2, '0')}`;
+  return `${m}:${(s % 60).toString().padStart(2, '0')}`;
 }
 
-function GradedPart({ part }: { part: Part }) {
+// Resolve grading data for a blank part — first from the part itself, then from gradingMap fallback
+function resolveBlank(part: Part & { type: 'blank' }, gradingMap: GradingMap) {
+  if ('isCorrect' in part) {
+    return { isCorrect: part.isCorrect, userAnswer: part.userAnswer, correctWord: part.correctWord };
+  }
+  const d = gradingMap.get(part.blankId);
+  if (d) return { isCorrect: d.isCorrect, userAnswer: d.userAnswer, correctWord: d.correctWord };
+  return null;
+}
+
+function getSegmentStats(
+  seg: DictationSessionGraded['segments'][number],
+  gradingMap: GradingMap
+): { correct: number; total: number; hasWrong: boolean } {
+  let correct = 0, total = 0;
+  for (const p of seg.parts) {
+    if (p.type !== 'blank') continue;
+    total++;
+    const info = resolveBlank(p as Part & { type: 'blank' }, gradingMap);
+    if (info?.isCorrect) correct++;
+  }
+  return { correct, total, hasWrong: total > 0 && correct < total };
+}
+
+function GradedPart({ part, gradingMap }: { part: Part; gradingMap: GradingMap }) {
   if (part.type === 'text') {
-    return <span>{part.text}</span>;
+    return <span style={{ color: 'var(--theme-text-primary)', opacity: 0.85 }}>{part.text}</span>;
   }
 
-  if ('isCorrect' in part) {
-    const color = part.isCorrect ? STATUS.success : STATUS.danger;
+  const info = resolveBlank(part as Part & { type: 'blank' }, gradingMap);
+
+  if (!info) {
     return (
-      <span className="inline-flex flex-col items-center gap-0.5 mx-0.5">
-        <span
-          className="inline-block text-center font-semibold border-b-2 px-1 leading-tight"
-          style={{ color, borderColor: color, minWidth: `${(part.displayLength || 6) + 1}ch` }}
-        >
-          {part.userAnswer || '—'}
-        </span>
-        {!part.isCorrect && (
-          <span className="text-[11px]" style={{ color: STATUS.success }}>{part.correctWord}</span>
-        )}
+      <span className="inline-block font-bold px-2 py-0.5 rounded-lg text-sm opacity-30"
+        style={{ color: 'var(--theme-text-secondary)' }}>—</span>
+    );
+  }
+
+  if (info.isCorrect) {
+    return (
+      <span className="inline-block font-bold px-2 py-0.5 rounded-lg text-sm"
+        style={{ color: 'var(--color-status-success)', background: 'rgba(34,197,94,0.12)' }}>
+        {info.userAnswer}
       </span>
     );
   }
 
-  // Blank without grading info (shouldn't happen in GRADED, but safe fallback)
   return (
-    <span className="inline-block px-1 font-semibold border-b-2"
-      style={{ color: 'var(--theme-text-muted)', borderColor: 'var(--theme-border)' }}>
-      —
+    <span className="inline-flex items-center gap-1 flex-wrap">
+      <span className="inline-block font-bold px-2 py-0.5 rounded-lg text-sm line-through"
+        style={{ color: 'var(--color-status-danger)', background: 'rgba(239,68,68,0.10)' }}>
+        {info.userAnswer || '—'}
+      </span>
+      <span className="text-[10px] opacity-40" style={{ color: 'var(--theme-text-muted)' }}>→</span>
+      <span className="inline-block font-bold px-2 py-0.5 rounded-lg text-sm"
+        style={{ color: 'var(--color-status-success)', background: 'rgba(34,197,94,0.12)' }}>
+        {info.correctWord}
+      </span>
     </span>
   );
 }
@@ -63,31 +93,31 @@ export default function DictationResultPage() {
   const router = useRouter();
   const playerRef = useRef<YouTubeEmbedRef | null>(null);
   const [isRetrying, setIsRetrying] = useState(false);
+  const [segmentFilter, setSegmentFilter] = useState<'all' | 'wrong'>('all');
 
-  const { data: session, isLoading } = useDictationSession(id);
+  const { data: session, isLoading, isFetching } = useDictationSession(id);
   const { mutate: startSession } = useStartDictation();
 
+  // Only redirect when fetch is settled (not mid-flight to avoid DRAFT→GRADED race)
   useEffect(() => {
-    if (session && session.status !== 'GRADED') {
+    if (!isFetching && session && session.status !== 'GRADED') {
       router.replace(`/practice-test/dictation/${id}`);
     }
-  }, [session, id, router]);
+  }, [session, id, router, isFetching]);
 
-  function handleRetry() {
+  const handleRetry = () => {
     if (!session) return;
     setIsRetrying(true);
     startSession({ videoId: session.video.id }, {
       onSuccess: (newSession) => router.push(`/practice-test/dictation/${newSession.id}`),
       onSettled: () => setIsRetrying(false),
     });
-  }
+  };
 
-  if (isLoading) {
+  if (isLoading || isFetching) {
     return (
-      <div className="flex justify-center items-center min-h-64">
-        <svg className="animate-spin" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={COLOR} strokeWidth="2.5">
-          <path d="M21 12a9 9 0 1 1-6.219-8.56" />
-        </svg>
+      <div className="flex justify-center items-center min-h-[60vh]">
+        <div className="w-10 h-10 border-4 border-pink-500/20 border-t-pink-500 rounded-full animate-spin" />
       </div>
     );
   }
@@ -95,162 +125,273 @@ export default function DictationResultPage() {
   if (!session || session.status !== 'GRADED') return null;
 
   const graded = session as DictationSessionGraded;
-  const { emoji, label, color } = getGradeInfo(graded.score);
+  const { emoji, label, color } = getGradeInfo(graded.score ?? 0);
+
+  // Build lookup map once — used as fallback when backend doesn't embed grading into parts
+  const gradingMap: GradingMap = new Map(
+    (graded.gradingDetails ?? []).map(d => [d.blankId, d])
+  );
+
+  const wrongItems = (graded.gradingDetails ?? []).filter(d => !d.isCorrect);
+  const hasMistakes = wrongItems.length > 0;
+  const wrongSegmentCount = graded.segments.filter(
+    seg => getSegmentStats(seg, gradingMap).hasWrong
+  ).length;
 
   return (
-    <div className="py-6 max-w-3xl mx-auto px-4">
-      {/* Back */}
-      <button type="button" onClick={() => router.replace('/practice-test/dictation')}
-        className="flex items-center gap-1.5 text-sm mb-5"
-        style={{ color: 'var(--theme-text-muted)' }}>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <polyline points="15 18 9 12 15 6" />
+    <div className="py-6 pb-20">
+      <PageHeader
+        backHref="/practice-test/dictation"
+        title="Kết quả luyện tập"
+        subtitle={graded.video.title}
+        accent="listening"
+      />
+
+      {/* ── Top row: video | score (50/50) ── */}
+      <div className="mt-6 flex flex-col sm:flex-row gap-5">
+        <div className="sm:w-1/2 rounded-2xl overflow-hidden shadow-2xl border border-white/5 bg-black/20">
+          <YouTubeEmbed ref={playerRef} youtubeId={graded.video.youtubeId} />
+        </div>
+        <div className="sm:w-1/2">
+          <ScoreCard graded={graded} emoji={emoji} label={label} color={color}
+            onRetry={handleRetry} isRetrying={isRetrying} />
+        </div>
+      </div>
+
+      <div className="mt-5 space-y-5">
+        {hasMistakes && <MistakesSummary items={wrongItems} />}
+        <div className="space-y-3">
+          <h3 className="text-body font-bold uppercase tracking-wider mb-1"
+            style={{ color: 'var(--theme-text-muted)' }}>
+            Xem lại từng câu
+          </h3>
+          <SegmentList
+            segments={graded.segments}
+            gradingMap={gradingMap}
+            onPlay={(s, e) => playerRef.current?.playSegment(s, e)}
+            filter={segmentFilter}
+            onFilterChange={setSegmentFilter}
+            wrongSegmentCount={wrongSegmentCount}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Sub-components ────────────────────────────────────────────────────────────
+
+function ScoreCard({ graded, emoji, label, color, onRetry, isRetrying }: {
+  graded: DictationSessionGraded;
+  emoji: string; label: string; color: string;
+  onRetry: () => void; isRetrying: boolean;
+}) {
+  return (
+    <div className="rounded-3xl border p-8 flex flex-col items-center relative overflow-hidden"
+      style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)', boxShadow: '0 20px 50px rgba(0,0,0,0.15)' }}>
+      <div className="absolute top-0 inset-x-0 h-1.5" style={{ background: GRADIENT.listening }} />
+      <ScoreRing value={graded.score ?? 0} accent="listening" variant="exam" size={150}
+        label={`${Math.round(graded.score ?? 0)}%`}
+        sublabel={`${graded.correctBlanks ?? 0}/${graded.totalBlanks ?? 0}`} />
+      <div className="text-center mt-6">
+        <h2 className="text-2xl font-black tracking-tight" style={{ color }}>{emoji} {label}</h2>
+      </div>
+      <div className="grid grid-cols-1 gap-2 w-full mt-8">
+        <button onClick={onRetry} disabled={isRetrying}
+          className="flex items-center justify-center gap-3 p-4 rounded-2xl border border-white/5 bg-white/5 transition-all hover:bg-white/10 disabled:opacity-50">
+          <IconRetry size={18} />
+          <span className="text-xs font-black uppercase tracking-widest">Làm lại bài này</span>
+        </button>
+        <Link href="/practice-test/dictation/library"
+          className="flex items-center justify-center gap-3 p-4 rounded-2xl border border-white/5 bg-white/5 transition-all hover:bg-white/10">
+          <IconLibrary size={18} />
+          <span className="text-xs font-black uppercase tracking-widest">Chọn bài khác</span>
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+function MistakesSummary({
+  items,
+}: {
+  items: Array<{ blankId: string; userAnswer: string; correctWord: string }>;
+}) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="rounded-2xl border mb-5 overflow-hidden"
+      style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
+      <button onClick={() => setOpen(v => !v)}
+        className="w-full flex items-center justify-between p-4 text-left"
+        style={{ color: 'var(--theme-text-primary)' }}>
+        <div className="flex items-center gap-2">
+          <IconAlertTriangle size={16} />
+          <span className="text-sm font-bold">Lỗi cần ôn luyện</span>
+          <span className="text-[10px] font-black px-2 py-0.5 rounded-full"
+            style={{ background: 'rgba(239,68,68,0.12)', color: 'var(--color-status-danger)' }}>
+            {items.length}
+          </span>
+        </div>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
+          className="shrink-0 transition-transform"
+          style={{ color: 'var(--theme-text-muted)', transform: open ? 'rotate(180deg)' : 'none' }}>
+          <polyline points="6 9 12 15 18 9" />
         </svg>
-        Chép chính tả
       </button>
+      {open && (
+        <div className="px-4 pb-4 border-t" style={{ borderColor: 'var(--theme-border)' }}>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 pt-3">
+            {items.map(({ blankId, userAnswer, correctWord }) => (
+              <div key={blankId}
+                className="rounded-xl px-3 py-2.5 flex items-center gap-1.5 min-w-0"
+                style={{ background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.18)' }}>
+                {userAnswer ? (
+                  <span className="font-bold text-sm line-through shrink min-w-0 truncate"
+                    style={{ color: 'var(--color-status-danger)' }} title={userAnswer}>
+                    {userAnswer}
+                  </span>
+                ) : (
+                  <span className="text-xs italic shrink-0" style={{ color: 'var(--theme-text-muted)' }}>
+                    (bỏ qua)
+                  </span>
+                )}
+                <span className="text-[10px] shrink-0 opacity-50" style={{ color: 'var(--theme-text-muted)' }}>→</span>
+                <span className="font-bold text-sm px-1.5 py-0.5 rounded-lg shrink-0 truncate max-w-[50%]"
+                  style={{ color: 'var(--color-status-success)', background: 'rgba(34,197,94,0.12)' }} title={correctWord}>
+                  {correctWord}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
-      {/* Score card */}
-      <div className="rounded-2xl border p-6 flex flex-col items-center gap-4 mb-6"
-        style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
+function SegmentList({ segments, gradingMap, onPlay, filter, onFilterChange, wrongSegmentCount }: {
+  segments: DictationSessionGraded['segments'];
+  gradingMap: GradingMap;
+  onPlay: (startSec: number, endSec: number) => void;
+  filter: 'all' | 'wrong';
+  onFilterChange: (f: 'all' | 'wrong') => void;
+  wrongSegmentCount: number;
+}) {
+  if (!segments || segments.length === 0) {
+    return (
+      <div className="rounded-2xl border p-8 text-center"
+        style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-secondary)' }}>
+        <p className="text-sm opacity-50" style={{ color: 'var(--theme-text-muted)' }}>
+          Không có dữ liệu chi tiết cho bài này.
+        </p>
+      </div>
+    );
+  }
 
-        <ScoreRing value={graded.score} accent="dictation" variant="exam" size={140}
-          label={`${graded.score.toFixed(1)}%`}
-          sublabel={`${graded.correctBlanks}/${graded.totalBlanks}`} />
+  const visibleSegments = filter === 'wrong'
+    ? segments.filter(seg => getSegmentStats(seg, gradingMap).hasWrong)
+    : segments;
 
-        <div className="text-center">
-          <p className="text-2xl font-black" style={{ color }}>{emoji} {label}</p>
-          <p className="text-sm mt-1 truncate max-w-xs" style={{ color: 'var(--theme-text-muted)' }}>
-            {graded.video.title}
+  const TABS: { key: 'all' | 'wrong'; label: string }[] = [
+    { key: 'all',   label: `Tất cả (${segments.length})` },
+    { key: 'wrong', label: `Chỉ câu sai (${wrongSegmentCount})` },
+  ];
+
+  return (
+    <div>
+      {/* Filter tabs */}
+      <div className="flex gap-1 p-1 rounded-xl mb-4"
+        style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
+        {TABS.map(tab => (
+          <button key={tab.key} onClick={() => onFilterChange(tab.key)}
+            className="flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all"
+            style={filter === tab.key
+              ? { background: GRADIENT.listening, color: 'white', boxShadow: '0 2px 8px rgba(236,72,153,0.35)' }
+              : { color: 'var(--theme-text-muted)' }
+            }>
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Empty filter state */}
+      {visibleSegments.length === 0 && (
+        <div className="rounded-2xl border p-8 text-center"
+          style={{ borderColor: 'rgba(34,197,94,0.25)', backgroundColor: 'rgba(34,197,94,0.05)' }}>
+          <p className="text-sm font-semibold" style={{ color: 'var(--color-status-success)' }}>
+            ✓ Tuyệt vời! Bạn không sai câu nào.
           </p>
         </div>
+      )}
 
-        {/* Stats row */}
-        <div className="grid grid-cols-3 gap-3 w-full mt-2">
-          {[
-            { label: 'Đúng',    value: `${graded.correctBlanks}/${graded.totalBlanks}` },
-            { label: 'Cấp độ',  value: graded.difficulty },
-            { label: 'XP',      value: '+25' },
-          ].map(s => (
-            <div key={s.label} className="rounded-xl p-3 text-center border"
-              style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-secondary)' }}>
-              <p className="text-base font-bold" style={{ color: COLOR }}>{s.value}</p>
-              <p className="text-xs mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>{s.label}</p>
-            </div>
-          ))}
-        </div>
-      </div>
+      <div className="space-y-3">
+        {visibleSegments.map((seg) => {
+          const { correct, total, hasWrong } = getSegmentStats(seg, gradingMap);
 
-      {/* Action buttons */}
-      <div className="flex gap-3 mb-6">
-        <button
-          type="button"
-          onClick={handleRetry}
-          disabled={isRetrying}
-          className="flex-1 py-3 rounded-xl text-sm font-bold text-center border transition-colors disabled:opacity-60"
-          style={{ borderColor: COLOR, color: COLOR }}>
-          {isRetrying ? (
-            <span className="flex items-center justify-center gap-2">
-              <svg className="animate-spin" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={COLOR} strokeWidth="2.5">
-                <path d="M21 12a9 9 0 1 1-6.219-8.56" />
-              </svg>
-              Đang tạo...
-            </span>
-          ) : (
-            <span className="flex items-center justify-center gap-2">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="23 4 23 10 17 10" />
-                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
-              </svg>
-              Làm lại bài này
-            </span>
-          )}
-        </button>
-        <Link
-          href="/practice-test/dictation/library"
-          className="flex-1 py-3 rounded-xl text-sm font-bold text-center border transition-colors"
-          style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)' }}>
-          Chọn video khác
-        </Link>
-        <button
-          type="button"
-          onClick={() => router.push('/practice-test/dictation')}
-          className="flex-1 py-3 rounded-xl text-sm font-bold text-white"
-          style={{ background: GRADIENT_STR }}>
-          Về trang chính
-        </button>
-      </div>
+          const badgeColor = !hasWrong
+            ? 'var(--color-status-success)'
+            : correct === 0
+            ? 'var(--color-status-danger)'
+            : ACCENT.games;
+          const badgeBg = !hasWrong
+            ? 'rgba(34,197,94,0.12)'
+            : correct === 0
+            ? 'rgba(239,68,68,0.10)'
+            : 'rgba(249,115,22,0.12)';
 
-      {/* YouTube player for replay */}
-      <div className="mb-6">
-        <h2 className="text-sm font-bold mb-3 uppercase tracking-wide"
-          style={{ color: 'var(--theme-text-muted)' }}>
-          Nghe lại video
-        </h2>
-        <YouTubeEmbed
-          ref={playerRef}
-          youtubeId={graded.video.youtubeId}
-        />
-      </div>
-
-      {/* Segment review */}
-      <h2 className="text-sm font-bold mb-3 uppercase tracking-wide"
-        style={{ color: 'var(--theme-text-muted)' }}>
-        Xem lại từng câu
-      </h2>
-
-      <div className="rounded-2xl border overflow-hidden"
-        style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
-        {graded.segments.map((seg) => {
-          const hasWrong = seg.parts.some(p => p.type === 'blank' && 'isCorrect' in p && !p.isCorrect);
           return (
             <div key={seg.id}
-              className="px-4 py-3 border-b last:border-b-0 flex items-start gap-3 group"
-              style={{ borderColor: 'var(--theme-border)' }}>
-              {/* Play button — click to replay segment */}
-              <button
-                type="button"
-                title="Nghe lại câu này"
-                onClick={() => playerRef.current?.playSegment(seg.start / 1000, seg.end / 1000)}
-                className="shrink-0 w-7 h-7 rounded-lg flex items-center justify-center transition-colors mt-0.5"
-                style={{ backgroundColor: 'var(--theme-bg-secondary)', color: COLOR }}
-                onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#06B6D41A')}
-                onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'var(--theme-bg-secondary)')}
-              >
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M3 18v-6a9 9 0 0 1 18 0v6" />
-                  <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z" />
-                </svg>
-              </button>
+              className="rounded-2xl border p-4 shadow-sm"
+              style={{
+                borderColor: hasWrong ? 'rgba(239,68,68,0.25)' : 'rgba(34,197,94,0.20)',
+                backgroundColor: 'var(--theme-bg-secondary)',
+              }}>
+              <div className="flex items-start gap-3">
+                <button
+                  onClick={() => onPlay(seg.start / 1000, seg.end / 1000)}
+                  className="shrink-0 w-9 h-9 rounded-xl flex items-center justify-center transition-transform hover:scale-110 active:scale-95"
+                  style={{ background: 'rgba(236,72,153,0.12)', color: ACCENT.listening }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                    <polygon points="5 3 19 12 5 21 5 3" />
+                  </svg>
+                </button>
 
-              {/* Status icon */}
-              <span className="shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold text-white mt-0.5"
-                style={{ background: hasWrong ? STATUS.danger : STATUS.success }}>
-                {hasWrong ? '✗' : '✓'}
-              </span>
+                <div className="flex-1 min-w-0">
+                  <div className="flex flex-wrap items-center gap-x-0.5 gap-y-2 text-[15px] leading-loose">
+                    {seg.parts.map((part, i) => (
+                      <GradedPart key={i} part={part} gradingMap={gradingMap} />
+                    ))}
+                  </div>
+                </div>
 
-              {/* Sentence */}
-              <div className="flex-1 min-w-0 flex flex-wrap items-baseline gap-x-1 gap-y-1 text-sm leading-loose">
-                {seg.parts.map((part, i) => (
-                  <GradedPart key={i} part={part} />
-                ))}
+                <div className="shrink-0 flex flex-col items-end gap-1 pt-1">
+                  {total > 0 && (
+                    <span className="text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest"
+                      style={{ color: badgeColor, background: badgeBg }}>
+                      {correct}/{total} đúng
+                    </span>
+                  )}
+                  <span className="text-[10px] font-mono opacity-40"
+                    style={{ color: 'var(--theme-text-muted)' }}>
+                    {formatTimestamp(seg.start)}
+                  </span>
+                </div>
               </div>
-
-              {/* Timestamp */}
-              <button
-                type="button"
-                title="Nhảy tới vị trí này"
-                onClick={() => playerRef.current?.seekTo(seg.start / 1000)}
-                className="shrink-0 text-[11px] font-mono mt-1 transition-colors"
-                style={{ color: 'var(--theme-text-muted)' }}
-                onMouseEnter={e => (e.currentTarget.style.color = COLOR)}
-                onMouseLeave={e => (e.currentTarget.style.color = 'var(--theme-text-muted)')}
-              >
-                {formatTimestamp(seg.start)}
-              </button>
             </div>
           );
         })}
       </div>
     </div>
   );
+}
+
+// Icons
+function IconRetry({ size = 18 }: { size?: number }) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" /><path d="M21 3v5h-5" /></svg>;
+}
+function IconLibrary({ size = 18 }: { size?: number }) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><line x1="9" y1="3" x2="9" y2="21" /></svg>;
+}
+function IconAlertTriangle({ size = 14 }: { size?: number }) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 3 22h18a2 2 0 0 0 .73-4Z" /><line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg>;
 }

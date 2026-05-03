@@ -10,7 +10,7 @@ import {
 
 export const examReadingKeys = {
   all: ['exam-reading'] as const,
-  history: (params?: Record<string, any>) => [...examReadingKeys.all, 'history', params] as const,
+  history: (params?: Record<string, unknown>) => [...examReadingKeys.all, 'history', params] as const,
   stats: () => [...examReadingKeys.all, 'stats'] as const,
   session: (id: string) => [...examReadingKeys.all, 'session', id] as const,
 };

@@ -2,7 +2,7 @@
 /* eslint-disable no-restricted-syntax */
 
 import React, { useEffect, useRef, useState, forwardRef } from 'react';
-import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import { STATUS } from '@/lib/tokens';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/stores/authStore';
 import { useXp } from '@/hooks/useXp';

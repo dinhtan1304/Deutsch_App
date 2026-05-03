@@ -1,8 +1,7 @@
 'use client';
-/* eslint-disable no-restricted-syntax */
 
 import type { CriterionScores } from '@/lib/api/writing';
-import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import { ACCENT, STATUS } from '@/lib/tokens';
 
 interface CriterionRadarProps {
   scores: CriterionScores;
@@ -100,13 +99,13 @@ export function CriterionRadar({ scores, size = 260 }: CriterionRadarProps) {
           points={polygonPoints}
           fill="url(#radarFill)"
           fillOpacity={0.35}
-          stroke="#6366F1"
+          stroke={ACCENT.writing}
           strokeWidth={2}
         />
         <defs>
           <radialGradient id="radarFill" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="#8B5CF6" stopOpacity={0.6} />
-            <stop offset="100%" stopColor="#6366F1" stopOpacity={0.2} />
+            <stop offset="0%" stopColor={ACCENT.vocab} stopOpacity={0.6} />
+            <stop offset="100%" stopColor={ACCENT.writing} stopOpacity={0.2} />
           </radialGradient>
         </defs>
 

@@ -10,7 +10,7 @@ import {
 
 export const examWritingKeys = {
   all: ['exam-writing'] as const,
-  history: (params?: Record<string, any>) => [...examWritingKeys.all, 'history', params] as const,
+  history: (params?: Record<string, unknown>) => [...examWritingKeys.all, 'history', params] as const,
   stats: () => [...examWritingKeys.all, 'stats'] as const,
   session: (id: string) => [...examWritingKeys.all, 'session', id] as const,
 };

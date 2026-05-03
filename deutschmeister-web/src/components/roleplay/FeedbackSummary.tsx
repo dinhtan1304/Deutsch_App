@@ -2,7 +2,7 @@
 /* eslint-disable no-restricted-syntax */
 
 import { RoleplayFeedback } from '@/lib/api/roleplay';
-import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import { ACCENT, STATUS } from '@/lib/tokens';
 
 function getScoreColor(score: number) {
   if (score >= 80) return STATUS.success;

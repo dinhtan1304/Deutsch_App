@@ -32,7 +32,7 @@ function AuthCallbackInner() {
       .catch(() => {
         router.replace('/auth/login?error=oauth_failed');
       });
-  }, []);
+  }, [loginWithOAuth, router, searchParams]);
 
   return (
     <div style={{ minHeight: '100vh', background: '#0a0f1e', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

@@ -7,10 +7,16 @@ import { YouTubeEmbed, YouTubeEmbedRef } from '@/components/dictation/YouTubeEmb
 import { DictationSegmentRow } from '@/components/dictation/DictationSegmentRow';
 import { DictationHeader } from '@/components/dictation/DictationHeader';
 import { VideoUnavailableFallback } from '@/components/dictation/VideoUnavailableFallback';
+import { STATUS, ACCENT, GRADIENT } from '@/lib/tokens';
+import { PageHeader } from '@/components/ui';
 
 const AUTOSAVE_DEBOUNCE_MS = 3000;
 const SPEED_OPTIONS = [0.5, 0.75, 1, 1.25, 1.5] as const;
 const NAVBAR_HEIGHT = 64;
+
+const CEFR_COLORS: Record<string, string> = {
+  A1: STATUS.success, A2: ACCENT.srs, B1: ACCENT.vocab,
+};
 
 export default function DictationPlayPage() {
   const { id } = useParams<{ id: string }>();
@@ -25,19 +31,12 @@ export default function DictationPlayPage() {
   const { mutate: autosave } = useAutosaveDictation();
   const { mutate: submit, isPending: isSubmitting } = useSubmitDictation();
 
-  const [userAnswers, setUserAnswers] = useState<Record<string, string>>({});
+  const [localAnswers, setLocalAnswers] = useState<Record<string, string> | null>(null);
+  const userAnswers = localAnswers ?? (session?.userAnswers as Record<string, string> | undefined) ?? {};
   const [videoError, setVideoError] = useState(false);
   const [showSubmitWarning, setShowSubmitWarning] = useState(false);
   const [activeSegmentId, setActiveSegmentId] = useState<string | null>(null);
   const [speed, setSpeed] = useState(1);
-  const [videoCollapsed, setVideoCollapsed] = useState(false);
-
-  // Hydrate answers from session on load
-  useEffect(() => {
-    if (session?.userAnswers && Object.keys(userAnswers).length === 0) {
-      setUserAnswers(session.userAnswers as Record<string, string>);
-    }
-  }, [session]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Redirect if already graded
   useEffect(() => {
@@ -46,45 +45,24 @@ export default function DictationPlayPage() {
     }
   }, [session?.status, id, router]);
 
-  // ── Auto-collapse video when user scrolls past the title sentinel ──
-  useEffect(() => {
-    const sentinel = sentinelRef.current;
-    if (!sentinel) return;
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const entry = entries[0];
-        if (entry) setVideoCollapsed(!entry.isIntersecting);
-      },
-      { threshold: 0, rootMargin: `-${NAVBAR_HEIGHT}px 0px 0px 0px` },
-    );
-    observer.observe(sentinel);
-    return () => observer.disconnect();
-  }, [session]); // re-attach when session loads
-
-  // ── Smart scroll: scroll active segment into visible area below sticky header ──
+  // Smart scroll
   useEffect(() => {
     if (!activeSegmentId) return;
-
-    // Small delay to let the DOM render the highlight first
     const timer = setTimeout(() => {
       const el = document.querySelector(`[data-segment-id="${activeSegmentId}"]`) as HTMLElement | null;
       if (!el) return;
 
       const stickyHeight = stickyRef.current?.offsetHeight ?? 200;
-      const topBarrier = NAVBAR_HEIGHT + stickyHeight + 12; // top edge of visible content
-      const bottomBarrier = window.innerHeight - 40;        // bottom edge with padding
-
+      const topBarrier = NAVBAR_HEIGHT + stickyHeight + 12;
+      const bottomBarrier = window.innerHeight - 40;
       const rect = el.getBoundingClientRect();
 
-      // Only scroll if segment is not fully visible in the "content zone"
       if (rect.top < topBarrier || rect.bottom > bottomBarrier) {
-        // Scroll so the segment sits just below the sticky header
         const targetY = el.getBoundingClientRect().top + window.scrollY - topBarrier;
         window.scrollTo({ top: targetY, behavior: 'smooth' });
       }
     }, 50);
-
     return () => clearTimeout(timer);
   }, [activeSegmentId]);
 
@@ -106,8 +84,9 @@ export default function DictationPlayPage() {
   }
 
   function handleChange(blankId: string, value: string) {
-    setUserAnswers(prev => {
-      const next = { ...prev, [blankId]: value };
+    setLocalAnswers(prev => {
+      const base = prev ?? (session?.userAnswers as Record<string, string> | undefined) ?? {};
+      const next = { ...base, [blankId]: value };
       scheduleAutosave(next);
       return next;
     });
@@ -134,70 +113,47 @@ export default function DictationPlayPage() {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center min-h-64">
-        <svg className="animate-spin" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#06B6D4" strokeWidth="2.5">
-          <path d="M21 12a9 9 0 1 1-6.219-8.56" />
-        </svg>
+      <div className="flex justify-center items-center min-h-100">
+        <div className="w-10 h-10 border-4 border-cyan-500/20 border-t-cyan-500 rounded-full animate-spin" />
       </div>
     );
   }
 
   if (!session) {
     return (
-      <div className="py-12 text-center">
-        <p style={{ color: 'var(--theme-text-muted)' }}>Không tìm thấy phiên làm bài.</p>
+      <div className="py-20 text-center">
+        <p className="text-sm font-medium" style={{ color: 'var(--theme-text-muted)' }}>Không tìm thấy phiên làm bài.</p>
       </div>
     );
   }
 
   const answeredCount = Object.values(userAnswers).filter(v => v?.trim()).length;
-  const unanswered = session.totalBlanks - answeredCount;
+  const unansweredCount = session.totalBlanks - answeredCount;
 
   return (
-    <div className="max-w-3xl mx-auto px-4">
-      {/* Back + title — scrolls away; also acts as sentinel for collapse */}
-      <div ref={sentinelRef} className="pt-4 pb-2">
-        <button type="button" onClick={() => router.back()}
-          className="flex items-center gap-1.5 text-sm mb-3"
-          style={{ color: 'var(--theme-text-muted)' }}>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="15 18 9 12 15 6" />
-          </svg>
-          Quay lại
-        </button>
-        <h1 className="text-base font-bold truncate" style={{ color: 'var(--theme-text-primary)' }}>
-          {session.video.title}
-        </h1>
+    <div className="pb-24">
+      {/* Header Container — sentinel for collapse */}
+      <div ref={sentinelRef} className="pt-2">
+        <PageHeader
+          backHref="/practice-test/dictation"
+          title={session.video.title}
+          subtitle="Nghe video và điền các từ còn thiếu trong phụ đề"
+          accent="listening"
+        />
       </div>
 
       {videoError ? (
         <VideoUnavailableFallback sessionId={id} />
       ) : (
-        <>
-          {/* ── Sticky panel: video + controls ── */}
-          <div
-            ref={stickyRef}
-            className="sticky z-20 -mx-4 px-4 pb-3"
-            style={{ top: `${NAVBAR_HEIGHT}px`, backgroundColor: 'var(--theme-bg-body)' }}
-          >
-            {/* Video + controls layout: side-by-side when collapsed */}
-            <div style={{
-              display: 'flex',
-              flexDirection: videoCollapsed ? 'row' : 'column',
-              gap: videoCollapsed ? '12px' : '0',
-              alignItems: videoCollapsed ? 'flex-start' : 'stretch',
-              transition: 'gap 0.3s ease',
-            }}>
-              {/* Video wrapper — shrinks when collapsed */}
-              <div
-                style={{
-                  width: videoCollapsed ? '240px' : '100%',
-                  minWidth: videoCollapsed ? '240px' : 'auto',
-                  borderRadius: '16px',
-                  overflow: 'hidden',
-                  transition: 'width 0.4s ease, min-width 0.4s ease',
-                }}
-              >
+        <div className="flex flex-col lg:flex-row gap-8 items-start">
+          
+          {/* Sticky Panel: Video + Controls */}
+          <div ref={stickyRef} className="w-full lg:w-100 lg:sticky z-30"
+            style={{ top: `${NAVBAR_HEIGHT + 16}px` }}>
+            
+            <div className="flex flex-col gap-4">
+              {/* Video wrapper */}
+              <div className="relative shadow-2xl rounded-2xl overflow-hidden border border-white/5 w-full aspect-video">
                 <YouTubeEmbed
                   ref={playerRef}
                   youtubeId={session.video.youtubeId}
@@ -206,88 +162,74 @@ export default function DictationPlayPage() {
                 />
               </div>
 
-              {/* Control bar — expands to fill remaining space when collapsed */}
-              <div
-                className="rounded-2xl border"
-                style={{
-                  borderColor: 'var(--theme-border)',
+              {/* Controls Card */}
+              <div className="rounded-2xl border p-4 shadow-xl backdrop-blur-md relative overflow-hidden"
+                style={{ 
+                  borderColor: 'var(--theme-border)', 
                   backgroundColor: 'var(--theme-bg-card)',
-                  flex: videoCollapsed ? '1' : 'unset',
-                  marginTop: videoCollapsed ? '0' : '8px',
-                  padding: '12px',
-                  transition: 'margin-top 0.3s ease',
-                }}
-              >
-                {/* Speed buttons */}
-                <div className="flex items-center gap-1 mb-2">
-                  <span className="text-[10px] font-bold uppercase tracking-wide mr-1"
-                    style={{ color: 'var(--theme-text-muted)' }}>
-                    Tốc độ
-                  </span>
-                  {SPEED_OPTIONS.map(s => (
-                    <button
-                      key={s}
-                      type="button"
-                      onClick={() => handleSpeedChange(s)}
-                      className="px-2 py-0.5 rounded-lg text-[11px] font-bold transition-all"
-                      style={{
-                        backgroundColor: speed === s ? '#06B6D4' : 'var(--theme-bg-secondary)',
-                        color: speed === s ? '#fff' : 'var(--theme-text-secondary)',
-                      }}
-                    >
-                      {s}x
-                    </button>
-                  ))}
-                </div>
+                  boxShadow: '0 10px 30px rgba(0,0,0,0.1)'
+                }}>
+                <div className="absolute top-0 right-0 w-32 h-32 opacity-[0.02] blur-3xl -mr-16 -mt-16" style={{ backgroundColor: ACCENT.dictation }} />
 
-                {/* Progress + submit */}
-                <DictationHeader
-                  difficulty={session.difficulty}
-                  answeredCount={answeredCount}
-                  totalBlanks={session.totalBlanks}
-                  onSubmit={handleSubmit}
-                  isSubmitting={isSubmitting}
-                />
+                <div className="relative z-10 flex flex-col gap-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1">
+                      <span className="text-[10px] font-black uppercase tracking-widest mr-1 opacity-50" style={{ color: 'var(--theme-text-primary)' }}>Tốc độ</span>
+                      {SPEED_OPTIONS.map(s => (
+                        <button key={s} type="button" onClick={() => handleSpeedChange(s)}
+                          className={`px-2 py-0.5 rounded-lg text-[11px] font-black transition-all ${speed === s ? 'text-white' : 'hover:bg-white/5'}`}
+                          style={{
+                            backgroundColor: speed === s ? ACCENT.dictation : 'transparent',
+                            color: speed === s ? 'white' : 'var(--theme-text-secondary)',
+                          }}>{s}x</button>
+                      ))}
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                       <span className="text-[11px] font-black px-2 py-0.5 rounded-md bg-white/5 border border-white/10" style={{ color: CEFR_COLORS[session.difficulty] }}>
+                         {session.difficulty}
+                       </span>
+                    </div>
+                  </div>
+
+                  <DictationHeader
+                    difficulty={session.difficulty}
+                    answeredCount={answeredCount}
+                    totalBlanks={session.totalBlanks}
+                    onSubmit={handleSubmit}
+                    isSubmitting={isSubmitting}
+                  />
+                </div>
               </div>
             </div>
           </div>
 
-          {/* ── Scrollable content ── */}
-          <div className="pb-8">
-            {/* Submit warning */}
+          {/* Main Content: Segments List */}
+          <div className="flex-1 min-w-0 w-full">
             {showSubmitWarning && (
-              <div className="mb-4 mt-4 p-4 rounded-2xl border flex items-start gap-3"
-                style={{ borderColor: '#F59E0B44', backgroundColor: '#F59E0B0D' }}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 mt-0.5">
+              <div className="mb-6 p-4 rounded-2xl border flex items-start gap-3 shadow-lg animate-in slide-in-from-top-4 duration-300"
+                style={{ borderColor: `${STATUS.warning}44`, backgroundColor: `${STATUS.warning}0A` }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={STATUS.warning} strokeWidth="2.5" className="shrink-0 mt-0.5">
                   <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
                   <line x1="12" y1="9" x2="12" y2="13" />
                   <line x1="12" y1="17" x2="12.01" y2="17" />
                 </svg>
                 <div className="flex-1">
-                  <p className="text-sm font-semibold" style={{ color: '#F59E0B' }}>
-                    Còn {unanswered} chỗ trống chưa điền
-                  </p>
-                  <p className="text-xs mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>
-                    Các ô trống sẽ tính là sai. Bạn có muốn nộp bài không?
-                  </p>
+                  <p className="text-sm font-black" style={{ color: STATUS.warning }}>Còn {unansweredCount} ô chưa hoàn thành</p>
+                  <p className="text-xs mt-0.5 opacity-70" style={{ color: 'var(--theme-text-primary)' }}>Những ô này sẽ tính là không chính xác. Bạn có muốn nộp bài?</p>
                 </div>
                 <div className="flex gap-2 shrink-0">
                   <button type="button" onClick={() => setShowSubmitWarning(false)}
-                    className="text-xs px-3 py-1.5 rounded-lg border"
-                    style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-muted)' }}>
-                    Tiếp tục
-                  </button>
+                    className="text-xs px-3 py-1.5 rounded-xl border font-bold transition-colors hover:bg-white/5"
+                    style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)' }}>Tiếp tục viết</button>
                   <button type="button" onClick={handleSubmit} disabled={isSubmitting}
-                    className="text-xs px-3 py-1.5 rounded-lg text-white font-bold disabled:opacity-60"
-                    style={{ background: 'linear-gradient(135deg, #06B6D4, #3B82F6)' }}>
-                    Nộp bài
-                  </button>
+                    className="text-xs px-4 py-1.5 rounded-xl text-white font-black transition-all hover:scale-105 active:scale-95"
+                    style={{ background: GRADIENT.dictation }}>Nộp ngay</button>
                 </div>
               </div>
             )}
 
-            {/* Segments list */}
-            <div className="mt-6 flex flex-col gap-2">
+            <div className="space-y-4">
               {session.segments.map(seg => (
                 <DictationSegmentRow
                   key={seg.id}
@@ -300,7 +242,7 @@ export default function DictationPlayPage() {
               ))}
             </div>
           </div>
-        </>
+        </div>
       )}
     </div>
   );

@@ -2,7 +2,7 @@
 /* eslint-disable no-restricted-syntax */
 
 import { useEffect, useRef, useState } from 'react';
-import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import { ACCENT } from '@/lib/tokens';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {

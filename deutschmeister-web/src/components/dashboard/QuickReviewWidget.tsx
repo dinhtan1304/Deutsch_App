@@ -1,8 +1,7 @@
-﻿'use client';
-/* eslint-disable no-restricted-syntax */
+'use client';
 
 import { useState } from 'react';
-import { ACCENT, STATUS } from '@/lib/tokens';
+import { ACCENT, STATUS, GRADIENT } from '@/lib/tokens';
 import Link from 'next/link';
 import { useDueCards, useReviewCard, useProgressStats, useProgressIntervalPreview } from '@/hooks/useProgress';
 import { getDelayText } from '@/lib/srs';
@@ -59,11 +58,11 @@ export function QuickReviewWidget() {
       <div className="rounded-2xl border p-5"
         style={{
           borderColor: 'rgba(34,197,94,.25)',
-          background: 'linear-gradient(135deg, rgba(34,197,94,.08), rgba(20,184,166,.04))',
+          background: GRADIENT.readingBg,
         }}>
         <div className="flex items-center gap-3 mb-2">
           <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white"
-            style={{ background: 'linear-gradient(135deg, #22C55E, #14B8A6)' }}>
+            style={{ background: GRADIENT.reading }}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="20 6 9 17 4 12" />
             </svg>
@@ -83,7 +82,7 @@ export function QuickReviewWidget() {
           <Link href="/review"
             className="block text-center text-body font-bold px-4 py-2.5 rounded-xl transition-all hover:scale-[1.02]"
             style={{
-              background: 'linear-gradient(135deg, #8B5CF6, #A855F7)',
+              background: GRADIENT.vocab,
               color: 'white',
               boxShadow: '0 4px 12px rgba(139,92,246,.3)',
             }}>
@@ -116,12 +115,12 @@ export function QuickReviewWidget() {
     <div className="rounded-2xl border p-5"
       style={{
         borderColor: 'rgba(239,68,68,.25)',
-        background: 'linear-gradient(135deg, rgba(239,68,68,.05), rgba(245,158,11,.03))',
+        background: GRADIENT.warnDangerBg,
       }}>
       {/* Header */}
       <div className="flex items-center justify-between gap-3 mb-3">
         <div className="flex items-center gap-2">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#EF4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" /></svg>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={STATUS.danger} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" /></svg>
           <div>
             <h3 className="text-sm font-bold" style={{ color: 'var(--theme-text-primary)' }}>
               Ôn nhanh {cards.length} từ
@@ -142,7 +141,7 @@ export function QuickReviewWidget() {
         <div className="h-full rounded-full transition-all duration-500"
           style={{
             width: `${progressPct}%`,
-            background: 'linear-gradient(90deg, #EF4444, #F59E0B)',
+            background: GRADIENT.dangerToXp,
           }} />
       </div>
 

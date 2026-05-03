@@ -1,5 +1,4 @@
 'use client';
-/* eslint-disable no-restricted-syntax */
 
 import { IconTrophy, IconRefresh, IconChevronLeft, IconPlus } from '@/components/ui/Icons';
 import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';

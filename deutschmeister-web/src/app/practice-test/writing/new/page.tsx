@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useWritingTopics, useGeneratePrompt } from '@/hooks/useWriting';
 import { QuotaPaywall } from '@/components/subscription/QuotaPaywall';
-import { IconDice, IconLoader, IconRobot } from '../icons';
+import { IconLoader, IconRobot } from '../icons';
 import { PageHeader } from '@/components/ui';
 import { ACCENT, STATUS } from '@/lib/tokens';
 
@@ -26,18 +26,17 @@ export default function NewWritingPage() {
   const { data: suggestions, isLoading } = useWritingTopics(level);
   const generateMutation = useGeneratePrompt();
 
-  useEffect(() => { setSelectedTopic(''); setCustomTopic(''); setWritingType(''); setWordCountIdx(0); }, [level]);
-  useEffect(() => { if (suggestions?.writingTypes.length && !writingType) setWritingType(suggestions.writingTypes[0]!.value); }, [suggestions, writingType]);
 
+  const effectiveWritingType = writingType || suggestions?.writingTypes[0]?.value || '';
   const finalTopic = customTopic.trim() || selectedTopic;
   const wordCount = suggestions?.wordCountSuggestions[wordCountIdx];
-  const canGenerate = finalTopic && writingType && wordCount;
+  const canGenerate = finalTopic && effectiveWritingType && wordCount;
 
   const handleGenerate = async () => {
     if (!canGenerate || !wordCount) return;
     try {
       const session = await generateMutation.mutateAsync({
-        topic: finalTopic, cefrLevel: level, writingType,
+        topic: finalTopic, cefrLevel: level, writingType: effectiveWritingType,
         wordCountMin: wordCount.min, wordCountMax: wordCount.max,
       });
       router.push(`/practice-test/writing/${session.id}`);
@@ -144,7 +143,7 @@ export default function NewWritingPage() {
                 style={{ color: 'var(--theme-text-muted)' }}>3. Dạng bài</h2>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                 {suggestions?.writingTypes.map(t => {
-                  const isActive = writingType === t.value;
+                  const isActive = effectiveWritingType === t.value;
                   return (
                     <button key={t.value} onClick={() => setWritingType(t.value)}
                       className="p-3 rounded-xl border-2 text-left transition-all duration-200 hover:-translate-y-0.5"
@@ -203,7 +202,7 @@ export default function NewWritingPage() {
                 </span>
                 <span style={{ color: 'var(--theme-text-muted)' }}>Dạng bài:</span>
                 <span className="font-semibold" style={{ color: 'var(--theme-text-primary)' }}>
-                  {suggestions?.writingTypes.find(t => t.value === writingType)?.labelVi || 'Chưa chọn'}
+                  {suggestions?.writingTypes.find(t => t.value === effectiveWritingType)?.labelVi || 'Chưa chọn'}
                 </span>
                 <span style={{ color: 'var(--theme-text-muted)' }}>Độ dài:</span>
                 <span className="font-semibold" style={{ color: 'var(--theme-text-primary)' }}>{wordCount?.label || '—'}</span>

@@ -2,7 +2,6 @@
 /* eslint-disable no-restricted-syntax */
 
 export default function GlobalError({
-  error,
   reset,
 }: {
   error: Error & { digest?: string };

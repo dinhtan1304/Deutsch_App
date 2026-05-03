@@ -1,8 +1,7 @@
 ﻿'use client';
-/* eslint-disable no-restricted-syntax */
 
 import { useState, useEffect, useRef } from 'react';
-import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import { STATUS, GRADIENT } from '@/lib/tokens';
 import { useCollections, useCreateCollection, useAddToCollection, useRemoveFromCollection, useWordCollections } from '@/hooks/usePersonalWords';
 import { IconCheck, IconPlus, IconX } from '@/components/ui/Icons';
 
@@ -138,7 +137,7 @@ export function AddToCollectionPicker({ personalWordId, onClose }: AddToCollecti
               onClick={handleCreate}
               disabled={!newName.trim() || createCollection.isPending}
               className="flex-1 py-1 rounded-lg text-caption font-semibold text-white transition-all disabled:opacity-40"
-              style={{ background: 'linear-gradient(135deg, #6366F1, #8B5CF6)' }}>
+              style={{ background: GRADIENT.writing }}>
               Tạo
             </button>
             <button

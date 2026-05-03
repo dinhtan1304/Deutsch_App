@@ -11,7 +11,7 @@ import {
   GameSetupCard, GameResultCard, GameProgressBar,
   StatCard, AnswerReview, AddWrongWordsToBank, GameResultUpsell, GameInfoBox, KBD,
   GamePlayHeader, GameStatsBar, useGameTimer,
-  IconPenTool, IconTarget, IconCheck, IconX, IconRocket, IconKeyboard, IconVolume,
+  IconPenTool, IconTarget, IconCheck, IconRocket, IconKeyboard, IconVolume,
   IconRefresh, IconChevronLeft, IconLightbulb,
 } from '@/components/games/GameUI';
 import { Button } from '@/components/ui';
@@ -194,7 +194,6 @@ export default function FillBlankPage() {
   }
 
   // ─── Playing ───
-  const genderColor = currentWord ? (AC[currentWord.gender] || ACCENT.vocab) : ACCENT.vocab;
   const correctCount = answers.filter(a => a.isCorrect).length;
 
   return (

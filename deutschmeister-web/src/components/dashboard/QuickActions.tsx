@@ -1,8 +1,6 @@
 'use client';
-/* eslint-disable no-restricted-syntax */
-
 import Link from 'next/link';
-import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import { ACCENT, GRADIENT } from '@/lib/tokens';
 import {
   IconLayers, IconBook,
   IconBrain, IconArrowRight, IconZap, IconGraduationCap, IconRotateCcw,
@@ -18,8 +16,8 @@ const actions = [
     label: 'Học chủ đề',
     description: '12 chủ đề A1',
     href: '/topics',
-    gradient: 'linear-gradient(135deg, rgba(139,92,246,.1), rgba(168,85,247,.06))',
-    iconBg: 'linear-gradient(135deg, #8B5CF6, #A855F7)',
+    gradient: GRADIENT.vocabBg,
+    iconBg: GRADIENT.vocab,
     accent: ACCENT.vocab,
   },
   {
@@ -27,8 +25,8 @@ const actions = [
     label: 'Từ điển',
     description: 'Tra cứu từ vựng',
     href: '/words',
-    gradient: 'linear-gradient(135deg, rgba(245,158,11,.1), rgba(251,191,36,.06))',
-    iconBg: 'linear-gradient(135deg, #F59E0B, #FBBF24)',
+    gradient: GRADIENT.xpBg,
+    iconBg: GRADIENT.xpLight,
     accent: ACCENT.xp,
   },
   {
@@ -36,8 +34,8 @@ const actions = [
     label: 'Luyện đề',
     description: 'Goethe & TELC',
     href: '/practice-test',
-    gradient: 'linear-gradient(135deg, rgba(236,72,153,.1), rgba(168,85,247,.06))',
-    iconBg: 'linear-gradient(135deg, #EC4899, #A855F7)',
+    gradient: GRADIENT.listeningBg,
+    iconBg: GRADIENT.pronunciation,
     accent: ACCENT.listening,
   },
   {
@@ -45,8 +43,8 @@ const actions = [
     label: 'SRS',
     description: 'Ôn tập thẻ nhớ',
     href: '/srs',
-    gradient: 'linear-gradient(135deg, rgba(6,182,212,.1), rgba(14,165,233,.06))',
-    iconBg: 'linear-gradient(135deg, #06B6D4, #0EA5E9)',
+    gradient: GRADIENT.cyanBg,
+    iconBg: GRADIENT.cyanSky,
     accent: ACCENT.cyan,
   },
 ];
@@ -64,7 +62,7 @@ export function QuickActions({ wordsToReview }: QuickActionsProps) {
       {/* Header */}
       <div className="flex items-center gap-2 mb-4">
         <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
-          style={{ background: 'linear-gradient(135deg, #FBBF24, #F97316)' }}>
+          style={{ background: GRADIENT.xpBright }}>
           <IconZap size={15} className="text-white" />
         </div>
         <h3 className="text-title font-bold m-0" style={{ color: 'var(--theme-text-primary)' }}>
@@ -77,7 +75,7 @@ export function QuickActions({ wordsToReview }: QuickActionsProps) {
         <Link
           href="/srs"
           className="group flex items-center gap-3 p-4 rounded-xl mb-4 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5"
-          style={{ background: 'linear-gradient(135deg, #F97316 0%, #FBBF24 100%)' }}
+          style={{ background: GRADIENT.xpReverse }}
         >
           <div className="w-11 h-11 rounded-full bg-white/20 flex items-center justify-center shrink-0
             transition-transform duration-300 group-hover:scale-110">

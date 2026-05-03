@@ -1,8 +1,9 @@
-﻿'use client';
-/* eslint-disable no-restricted-syntax */
+'use client';
 
 import Link from 'next/link';
 import { useStreakStatus } from '@/hooks/useDailyBonus';
+import { GRADIENT } from '@/lib/tokens';
+
 
 /**
  * Shows a warning banner when the user has an active streak (≥3) but
@@ -21,7 +22,7 @@ export function StreakWarningBanner() {
       className="relative overflow-hidden rounded-2xl p-4 flex items-center gap-3"
       style={{
         background:
-          'linear-gradient(135deg, rgba(239,68,68,.12), rgba(249,115,22,.10))',
+          GRADIENT.dangerGamesBg,
         border: '1px solid rgba(239,68,68,.25)',
       }}
     >
@@ -45,7 +46,7 @@ export function StreakWarningBanner() {
         href="/games/quick-quiz"
         className="shrink-0 px-4 py-2 rounded-xl font-semibold text-body text-white shadow-lg transition-transform hover:scale-105"
         style={{
-          background: 'linear-gradient(135deg, #EF4444, #F97316)',
+          background: GRADIENT.dangerGames,
         }}
       >
         Học ngay

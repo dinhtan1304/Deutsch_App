@@ -2,7 +2,7 @@
 /* eslint-disable no-restricted-syntax */
 
 import { RoleplayScenario } from '@/lib/api/roleplay';
-import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import { ACCENT, STATUS } from '@/lib/tokens';
 
 const LEVEL_COLORS: Record<string, string> = {
   A1: STATUS.success,

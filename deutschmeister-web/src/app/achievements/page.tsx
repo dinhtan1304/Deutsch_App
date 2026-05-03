@@ -44,21 +44,21 @@ const CATEGORY_ICONS: Record<string, React.ReactNode> = {
 
 function AchievementIcon({ unlocked, color, gradient }: { unlocked: boolean; color: string; gradient: string }) {
   if (!unlocked) return (
-    <div className="w-16 h-16 rounded-[1.25rem] flex items-center justify-center opacity-20 border"
+    <div className="w-16 h-16 rounded-xl flex items-center justify-center opacity-20 border"
       style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)', borderColor: 'var(--theme-border)' }}>
       <IconLock size={28} />
     </div>
   );
 
   return (
-    <div className="w-16 h-16 rounded-[1.25rem] flex items-center justify-center relative overflow-hidden group-hover:scale-110 transition-transform duration-500"
+    <div className="w-16 h-16 rounded-xl flex items-center justify-center relative overflow-hidden group-hover:scale-110 transition-transform duration-500"
       style={{ background: gradient, boxShadow: `0 8px 20px -5px ${color}66` }}>
       <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
       <div className="text-white relative z-10 drop-shadow-md">
         <IconTrophy size={32} />
       </div>
       {/* Shimmer sweep on hover */}
-      <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]" />
+      <div className="absolute inset-0 bg-linear-to-tr from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]" />
     </div>
   );
 }
@@ -119,7 +119,7 @@ export default function AchievementsPage() {
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                   {items.map((a) => (
                     <div key={a.key}
-                      className={`group relative rounded-[1.5rem] p-5 border transition-all duration-500 hover:-translate-y-1.5 overflow-hidden ${a.unlocked ? 'shadow-lg' : ''}`}
+                      className={`group relative rounded-3xl p-5 border transition-all duration-500 hover:-translate-y-1.5 overflow-hidden ${a.unlocked ? 'shadow-lg' : ''}`}
                       style={{
                         backgroundColor: a.unlocked ? 'var(--theme-bg-card)' : 'var(--theme-bg-secondary)',
                         borderColor: a.unlocked ? `${CATEGORY_COLORS[a.category]}33` : 'var(--theme-border)',
@@ -135,7 +135,7 @@ export default function AchievementsPage() {
                         <div className="mb-4">
                           <AchievementIcon
                             unlocked={a.unlocked}
-                            color={CATEGORY_COLORS[a.category] ?? '#6B7280'}
+                            color={CATEGORY_COLORS[a.category] ?? 'var(--theme-text-muted)'}
                             gradient={CATEGORY_GRADIENTS[a.category] ?? GRADIENT.xp}
                           />
                         </div>

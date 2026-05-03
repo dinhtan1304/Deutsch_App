@@ -2,7 +2,7 @@
 /* eslint-disable no-restricted-syntax */
 
 import Link from 'next/link';
-import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import { ACCENT, STATUS } from '@/lib/tokens';
 import { useSkills } from '@/hooks/useUser';
 import type { SkillScores, SkillScore } from '@/lib/api/users';
 
@@ -76,7 +76,7 @@ function RadarChart({ data }: { data: SkillScores }) {
     .join(' ');
 
   return (
-    <svg viewBox="0 0 280 280" className="w-full max-w-[280px] mx-auto drop-shadow-[0_0_15px_rgba(99,102,241,0.1)]">
+    <svg viewBox="0 0 280 280" className="w-full max-w-70 mx-auto drop-shadow-[0_0_15px_rgba(99,102,241,0.1)]">
       {/* Grid rings */}
       {LEVELS.map((pct) => {
         const pts = Array.from({ length: n }, (_, i) => {

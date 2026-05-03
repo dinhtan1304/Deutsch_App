@@ -1,5 +1,4 @@
 'use client';
-/* eslint-disable no-restricted-syntax */
 
 import { STATUS } from '@/lib/tokens';
 import type { Question } from '../_data';

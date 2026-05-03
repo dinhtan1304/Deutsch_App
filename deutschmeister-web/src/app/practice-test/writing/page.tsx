@@ -1,11 +1,34 @@
 'use client';
+// UI_REFRESH_FORCE_SYNC: 2026-05-01_v3
 
 import { useState } from 'react';
 import Link from 'next/link';
 import { useWritingHistory, useWritingStats, useDeleteWriting } from '@/hooks/useWriting';
-import { IconAlertTriangle, IconChevronLeft, IconChevronRight, IconDice, IconPenLine, IconSearch, IconStar, IconTrash } from './icons';
 import { PageHeader, GridSkeleton } from '@/components/ui';
 import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+
+// ─── Local Icons ─────────────────────────────────────────────────────────────
+function IconPenLine({ size = 16, style }: { size?: number; style?: React.CSSProperties }) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}><path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" /></svg>;
+}
+function IconPlus({ size = 16, style }: { size?: number; style?: React.CSSProperties }) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>;
+}
+function IconDice({ size = 16, style }: { size?: number; style?: React.CSSProperties }) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}><rect width="12" height="12" x="2" y="10" rx="2" ry="2" /><path d="m17.92 14 3.5-3.5a2.24 2.24 0 0 0 0-3l-5-4.92a2.24 2.24 0 0 0-3 0L10 6" /><path d="M6 18h.01" /><path d="M10 14h.01" /><path d="M15 6h.01" /><path d="M18 9h.01" /></svg>;
+}
+function IconCheck({ size = 16, style }: { size?: number; style?: React.CSSProperties }) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}><polyline points="20 6 9 17 4 12" /></svg>;
+}
+function IconTrash({ size = 16, style }: { size?: number; style?: React.CSSProperties }) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /></svg>;
+}
+function IconChevronLeft({ size = 16, style }: { size?: number; style?: React.CSSProperties }) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}><polyline points="15 18 9 12 15 6" /></svg>;
+}
+function IconChevronRight({ size = 16, style }: { size?: number; style?: React.CSSProperties }) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}><polyline points="9 18 15 12 9 6" /></svg>;
+}
 
 // ─── Helpers ───
 const WRITING_TYPE_LABELS: Record<string, { de: string; vi: string; color: string }> = {
@@ -23,10 +46,10 @@ const WRITING_TYPE_LABELS: Record<string, { de: string; vi: string; color: strin
 
 const STATUS_CONFIG = {
   DRAFT:     { label: 'Nháp',        color: 'var(--theme-text-muted)', bg: 'rgba(107,114,128,.1)' },
-  SUBMITTED: { label: 'Đã nộp',     color: STATUS.info,               bg: `${STATUS.info}1A` },
-  GRADING:   { label: 'Đang chấm…', color: STATUS.warning,            bg: `${STATUS.warning}1A` },
-  GRADED:    { label: 'Đã chấm',    color: STATUS.success,            bg: `${STATUS.success}1A` },
-  ERROR:     { label: 'Lỗi',        color: STATUS.danger,             bg: `${STATUS.danger}1A` },
+  SUBMITTED: { label: 'Đã nộp',     color: STATUS.info,               bg: 'rgba(59, 130, 246, 0.1)' },
+  GRADING:   { label: 'Đang chấm…', color: STATUS.warning,            bg: 'rgba(245, 158, 11, 0.1)' },
+  GRADED:    { label: 'Đã chấm',    color: STATUS.success,            bg: 'rgba(34, 197, 94, 0.1)' },
+  ERROR:     { label: 'Lỗi',        color: STATUS.danger,             bg: 'rgba(239, 68, 68, 0.1)' },
 };
 
 function getScoreColor(score: number | null) {
@@ -43,58 +66,13 @@ function formatDate(dateStr: string) {
   });
 }
 
-// ─── Stats Overview ───
-function StatsOverview() {
-  const { data: stats, isLoading } = useWritingStats();
-
-  if (isLoading) {
-    return (
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-        {[1, 2, 3, 4].map(i => (
-          <div key={i} className="h-20 rounded-xl animate-pulse"
-            style={{ backgroundColor: 'var(--theme-bg-secondary)' }} />
-        ))}
-      </div>
-    );
-  }
-  if (!stats) return null;
-
-  const cards = [
-    { label: 'Tổng bài viết', value: stats.totalSessions, color: ACCENT.srs,     icon: IconPenLine },
-    { label: 'Điểm TB',       value: stats.averageScore || '—', color: ACCENT.xp, icon: IconStar },
-    { label: 'Tổng lỗi',      value: stats.totalErrors,  color: STATUS.danger,   icon: IconSearch },
-    { label: 'Lỗi phổ biến',  value: stats.topErrors[0]?.label.vi || '—', color: ACCENT.vocab, icon: IconAlertTriangle },
-  ];
-
-  return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-      {cards.map((card, i) => {
-        const Ic = card.icon;
-        return (
-          <div key={i} className="rounded-xl border p-4 transition-all duration-200 hover:-translate-y-0.5"
-            style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
-            <div className="flex items-center gap-2 mb-1.5">
-              <div className="w-6 h-6 rounded-md flex items-center justify-center"
-                style={{ background: `linear-gradient(135deg, ${card.color}, ${card.color}cc)` }}>
-                <Ic size={12} style={{ color: 'white' }} />
-              </div>
-              <span className="text-caption font-medium" style={{ color: 'var(--theme-text-muted)' }}>{card.label}</span>
-            </div>
-            <div className="text-title font-extrabold" style={{ color: 'var(--theme-text-primary)' }}>
-              {card.value}
-            </div>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
-// ─── Main Page ───
+// ─── Main Component: WritingListPage ────────────────────────────────────────
 export default function WritingListPage() {
   const [page, setPage] = useState(1);
   const [filterStatus, setFilterStatus] = useState<string>('');
   const [filterLevel, setFilterLevel] = useState<string>('');
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+
   const { data: history, isLoading } = useWritingHistory({
     page, limit: 10,
     status: filterStatus || undefined,
@@ -103,197 +81,218 @@ export default function WritingListPage() {
   const deleteMutation = useDeleteWriting();
   const { data: stats } = useWritingStats();
 
-  const handleDelete = async (id: string, e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (!confirm('Bạn có chắc muốn xóa bài viết này?')) return;
-    try {
-      await deleteMutation.mutateAsync(id);
-    } catch {
-      // Mutation error already shown via global handleGlobalError toast
-    }
+  const confirmDelete = async () => {
+    if (!confirmDeleteId) return;
+    try { await deleteMutation.mutateAsync(confirmDeleteId); } catch { /* handled */ }
+    setConfirmDeleteId(null);
   };
 
   return (
-      <div className="py-6">
-
-        <PageHeader
-          backHref="/practice-test"
-          title="Luyện Viết"
-          subtitle="AI tạo đề bài tiếng Đức — Viết và nhận phản hồi chi tiết"
-          accent="writing"
-          right={
-            <div className="flex items-center gap-2">
-              <Link href="/practice-test/writing/exam"
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-body font-semibold border transition-all hover:-translate-y-0.5"
-                style={{ borderColor: `${ACCENT.examWriting}40`, color: ACCENT.examWriting, backgroundColor: `${ACCENT.examWriting}0A` }}>
-                Theo đề chuẩn →
-              </Link>
-              <Link href="/practice-test/writing/new"
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white transition-all duration-200 hover:-translate-y-0.5"
-                style={{ background: GRADIENT.writing, boxShadow: `0 4px 12px ${ACCENT.writing}33` }}>
-                <IconDice size={16} /> Tạo đề mới
-              </Link>
-            </div>
-          }
-        />
-
-        {/* ─── Stats Banner ─── */}
-        {stats && (
-          <div className="flex items-center gap-3 mb-5 overflow-x-auto no-scrollbar">
-            {[
-              { label: 'Tổng bài', value: stats.totalSessions, color: ACCENT.writing },
-              { label: 'TB điểm', value: stats.averageScore ? `${Math.round(stats.averageScore)}%` : '—', color: ACCENT.xp },
-              { label: 'Tổng lỗi', value: stats.totalErrors, color: STATUS.danger },
-              { label: 'Lỗi phổ biến', value: stats.topErrors[0]?.label.vi || '—', color: ACCENT.vocab },
-            ].map((s, i) => (
-              <div key={i} className="flex items-center gap-2 px-3 py-2 rounded-xl shrink-0"
-                style={{ backgroundColor: `${s.color}1A` }}>
-                <span className="text-base font-extrabold" style={{ color: s.color }}>{s.value}</span>
-                <span className="text-[10px] font-medium" style={{ color: 'var(--theme-text-muted)' }}>{s.label}</span>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* ─── Filters ─── */}
-        <div className="flex flex-col gap-3 mb-6">
-          <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
-            {['', 'A1', 'A2', 'B1', 'B2', 'C1'].map(lvl => {
-              const isActive = filterLevel === lvl;
-              return (
-                <button key={lvl}
-                  onClick={() => { setFilterLevel(lvl); setPage(1); }}
-                  className="px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all duration-200"
-                  style={isActive
-                    ? { background: GRADIENT.writing, color: 'white', boxShadow: `0 4px 12px ${ACCENT.writing}33` }
-                    : { backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }
-                  }>
-                  {lvl || 'TẤT CẢ TRÌNH ĐỘ'}
-                </button>
-              );
-            })}
-          </div>
-          <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
-            {['', 'DRAFT', 'GRADED', 'ERROR'].map(status => {
-              const isActive = filterStatus === status;
-              const cfg = status ? (STATUS_CONFIG as unknown as Record<string, typeof STATUS_CONFIG.DRAFT>)[status] : null;
-              const label = status === '' ? 'Tất cả trạng thái' : cfg?.label || status;
-              const color = cfg?.color || 'var(--theme-text-muted)';
-              return (
-                <button key={status}
-                  onClick={() => { setFilterStatus(status); setPage(1); }}
-                  className="px-4 py-2 rounded-xl text-body font-semibold whitespace-nowrap transition-all duration-200"
-                  style={isActive
-                    ? { background: `linear-gradient(135deg, ${color}, ${color}cc)`, color: 'white', boxShadow: `0 4px 12px ${color}30` }
-                    : { backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }
-                  }>
-                  {label}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* ─── History List ─── */}
-        {isLoading ? (
-          <GridSkeleton cols={1} count={3} height="h-20" gap="gap-3" />
-        ) : !history?.data.length ? (
-          <div className="text-center py-16 rounded-2xl border-2 border-dashed"
-            style={{ borderColor: 'var(--theme-border)' }}>
-            <div className="w-16 h-16 rounded-2xl mx-auto flex items-center justify-center mb-4"
-              style={{ background: GRADIENT.writing }}>
-              <IconPenLine size={28} style={{ color: 'white' }} />
-            </div>
-            <p className="text-sm mb-4" style={{ color: 'var(--theme-text-muted)' }}>Bạn chưa có bài viết nào</p>
+    <div className="max-w-5xl mx-auto px-4 py-8 pb-32">
+      <PageHeader
+        backHref="/practice-test"
+        title="Luyện Viết"
+        subtitle="AI tạo đề bài tiếng Đức — Viết và nhận phản hồi chi tiết"
+        accent="writing"
+        right={
+          <div className="flex items-center gap-3">
+            <Link href="/practice-test/writing/exam"
+              className="px-6 py-3 rounded-xl text-sm font-black border transition-all hover:bg-black/3 dark:hover:bg-white/5"
+              style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-primary)' }}>
+              Theo đề chuẩn →
+            </Link>
             <Link href="/practice-test/writing/new"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white"
+              className="flex items-center gap-2 px-7 py-3.5 rounded-xl text-sm font-black text-white transition-all hover:scale-[1.02] active:scale-95 shadow-xl shadow-indigo-500/30"
               style={{ background: GRADIENT.writing }}>
-              <IconDice size={16} /> Bắt đầu viết bài đầu tiên
+              <IconPlus size={20} /> Bài viết mới
             </Link>
           </div>
-        ) : (
-          <div className="space-y-2">
-            {history.data.map(item => {
-              const typeInfo = WRITING_TYPE_LABELS[item.writingType] || { de: item.writingType, vi: item.writingType, color: 'var(--theme-text-muted)' };
-              const statusCfg = (STATUS_CONFIG as unknown as Record<string, typeof STATUS_CONFIG.DRAFT>)[item.status] ?? STATUS_CONFIG.DRAFT;
+        }
+      />
 
-              return (
-                <Link key={item.id}
-                  href={item.status === 'GRADED' ? `/practice-test/writing/${item.id}/result` : `/practice-test/writing/${item.id}`}
-                  className="flex items-center gap-4 p-4 rounded-xl border transition-all duration-200 hover:-translate-y-0.5 group"
-                  style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
-
-                  {/* Icon */}
-                  <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0"
-                    style={{ background: `linear-gradient(135deg, ${typeInfo.color}18, ${typeInfo.color}08)` }}>
-                    <IconPenLine size={18} style={{ color: typeInfo.color }} />
+      {/* Stats Dashboard */}
+      {stats && stats.totalSessions > 0 && (
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 mb-16">
+          {[
+            { label: 'Tổng bài viết', value: stats.totalSessions, color: ACCENT.writing, icon: <IconPenLine size={28} /> },
+            { label: 'TB điểm số', value: stats.averageScore ? `${stats.averageScore}%` : '—', color: ACCENT.xp, icon: <IconDice size={28} /> },
+            { label: 'Thành tích cao', value: stats.totalErrors ? `${stats.totalErrors}%` : '—', color: STATUS.success, icon: <IconCheck size={28} /> },
+          ].map((s, i) => (
+            <div key={i} className="relative overflow-hidden rounded-[2.5rem] p-8 border shadow-sm backdrop-blur-xl transition-all duration-300 hover:-translate-y-1.5"
+              style={{ 
+                backgroundColor: 'var(--theme-bg-card)',
+                borderColor: 'var(--theme-border)',
+                boxShadow: '0 20px 40px rgba(0,0,0,0.04)'
+              }}>
+              <div className="absolute -right-6 -bottom-6 w-32 h-32 blur-3xl opacity-20" style={{ backgroundColor: s.color }} />
+              
+              <div className="relative z-10">
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-inner" style={{ backgroundColor: `${s.color}15`, color: s.color }}>
+                    {s.icon}
                   </div>
+                  <div className="text-[11px] font-black uppercase tracking-widest opacity-40" style={{ color: 'var(--theme-text-primary)' }}>{s.label}</div>
+                </div>
+                <div className="text-4xl font-black tracking-tighter" style={{ color: 'var(--theme-text-primary)' }}>{s.value}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
-                  {/* Info */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-sm font-semibold truncate" style={{ color: 'var(--theme-text-primary)' }}>
-                        {item.topic}
-                      </span>
-                      <span className="px-2 py-0.5 rounded-md text-caption font-bold shrink-0"
-                        style={{ backgroundColor: `${STATUS.info}1A`, color: STATUS.info }}>
-                        {item.cefrLevel}
-                      </span>
-                      <span className="px-2 py-0.5 rounded-md text-caption font-bold shrink-0"
-                        style={{ backgroundColor: statusCfg.bg, color: statusCfg.color }}>
-                        {statusCfg.label}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 text-xs" style={{ color: 'var(--theme-text-muted)' }}>
-                      <span>{typeInfo.vi}</span>
-                      <span>·</span>
-                      <span>{formatDate(item.createdAt)}</span>
-                      {item.wordCount && (<><span>·</span><span>{item.wordCount} từ</span></>)}
-                    </div>
-                  </div>
-
-                  {/* Score */}
-                  {item.overallScore !== null && (
-                    <div className="text-right shrink-0">
-                      <div className="text-title font-extrabold" style={{ color: getScoreColor(item.overallScore) }}>
-                        {Math.round(item.overallScore)}%
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Delete */}
-                  <button onClick={(e) => handleDelete(item.id, e)}
-                    className="p-2 rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-200 hover:scale-110"
-                    style={{ color: 'var(--theme-text-muted)' }}
-                    title="Xóa bài viết">
-                    <IconTrash size={16} />
-                  </button>
-                </Link>
-              );
-            })}
+      {/* Action Banner for Deletion */}
+      {confirmDeleteId && (
+        <div className="mb-10 rounded-[2.5rem] border-2 p-8 flex items-center justify-between gap-8 flex-wrap animate-in fade-in slide-in-from-top-4 duration-500"
+          style={{ borderColor: `${STATUS.danger}40`, backgroundColor: `${STATUS.danger}05` }}>
+          <div>
+            <h4 className="text-xl font-black mb-1.5" style={{ color: 'var(--theme-text-primary)' }}>Xác nhận xóa?</h4>
+            <p className="text-base opacity-50 font-medium" style={{ color: 'var(--theme-text-primary)' }}>Bạn sẽ không thể khôi phục lại kết quả luyện tập này.</p>
           </div>
-        )}
-
-        {/* ─── Pagination ─── */}
-        {history && history.totalPages > 1 && (
-          <div className="flex items-center justify-center gap-2 mt-6">
-            <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
-              className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-body font-medium disabled:opacity-40 transition-all"
-              style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-secondary)' }}>
-              <IconChevronLeft size={14} /> Trước
-            </button>
-            <span className="text-body font-medium px-3" style={{ color: 'var(--theme-text-muted)' }}>
-              {page} / {history.totalPages}
-            </span>
-            <button onClick={() => setPage(p => Math.min(history.totalPages, p + 1))} disabled={page === history.totalPages}
-              className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-body font-medium disabled:opacity-40 transition-all"
-              style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-secondary)' }}>
-              Sau <IconChevronRight size={14} />
-            </button>
+          <div className="flex gap-4">
+            <button onClick={() => setConfirmDeleteId(null)} className="px-6 py-3 rounded-xl text-xs font-black border transition-all hover:bg-white/5"
+              style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)' }}>Hủy</button>
+            <button onClick={confirmDelete} className="px-6 py-3 rounded-xl text-xs font-black text-white transition-all hover:brightness-110 shadow-xl shadow-red-500/30"
+              style={{ backgroundColor: STATUS.danger }}>Xóa vĩnh viễn</button>
           </div>
-        )}
+        </div>
+      )}
 
+      {/* Filters Bar */}
+      <div className="flex flex-col gap-5 mb-10">
+        <div className="flex gap-3 overflow-x-auto no-scrollbar pb-1">
+          {['', 'A1', 'A2', 'B1', 'B2', 'C1'].map(lvl => {
+            const isActive = filterLevel === lvl;
+            return (
+              <button key={lvl} onClick={() => { setFilterLevel(lvl); setPage(1); }}
+                className="px-5 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all duration-300"
+                style={isActive
+                  ? { background: GRADIENT.writing, color: 'white', boxShadow: '0 10px 20px rgba(139, 92, 246, 0.3)' }
+                  : { backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }
+                }>{lvl || 'Tất cả trình độ'}</button>
+            );
+          })}
+        </div>
+        <div className="flex gap-3 overflow-x-auto no-scrollbar pb-1">
+          {[
+            { id: '', label: 'Tất cả trạng thái' },
+            { id: 'DRAFT', label: 'Nháp' },
+            { id: 'SUBMITTED', label: 'Đã nộp' },
+            { id: 'GRADING', label: 'Đang chấm' },
+            { id: 'GRADED', label: 'Đã chấm' },
+          ].map(status => {
+            const isActive = filterStatus === status.id;
+            const color = status.id === '' ? ACCENT.writing : STATUS_CONFIG[status.id as keyof typeof STATUS_CONFIG]?.color || ACCENT.writing;
+            return (
+              <button key={status.id} onClick={() => { setFilterStatus(status.id); setPage(1); }}
+                className="px-6 py-3 rounded-xl text-xs font-black transition-all duration-300 border shadow-sm"
+                style={isActive
+                  ? { background: 'var(--theme-bg-card)', borderColor: color, color: color, boxShadow: '0 4px 15px rgba(0,0,0,0.05)' }
+                  : { backgroundColor: 'transparent', borderColor: 'var(--theme-border)', color: 'var(--theme-text-muted)' }
+                }>{status.label}</button>
+            );
+          })}
+        </div>
       </div>
+
+      {/* List Content */}
+      {isLoading ? (
+        <GridSkeleton cols={1} count={4} height="h-40" gap="gap-8" />
+      ) : !history?.data.length ? (
+        <div className="text-center py-28 rounded-[3.5rem] border-2 border-dashed" style={{ borderColor: 'var(--theme-border)' }}>
+          <div className="w-24 h-24 rounded-4xl mx-auto flex items-center justify-center mb-8 shadow-2xl" style={{ background: GRADIENT.writing }}>
+            <IconPenLine size={40} style={{ color: 'white' }} />
+          </div>
+          <h3 className="text-2xl font-black mb-3" style={{ color: 'var(--theme-text-primary)' }}>Chưa có bài viết nào</h3>
+          <p className="text-base opacity-50 mb-10 max-w-xs mx-auto font-medium">Bạn chưa thực hiện bài luyện viết nào. Hãy bắt đầu ngay nhé!</p>
+          <Link href="/practice-test/writing/new" className="inline-flex items-center gap-2 px-10 py-5 rounded-2xl text-base font-black text-white shadow-2xl shadow-indigo-500/30 transition-all hover:scale-105 active:scale-95"
+            style={{ background: GRADIENT.writing }}>Bắt đầu ngay</Link>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 gap-8">
+          {history.data.map(item => {
+            const typeInfo = WRITING_TYPE_LABELS[item.writingType] || { de: item.writingType, vi: item.writingType, color: 'var(--theme-text-muted)' };
+            const statusCfg = STATUS_CONFIG[item.status as keyof typeof STATUS_CONFIG] ?? STATUS_CONFIG.DRAFT;
+            const targetHref = item.status === 'GRADED' ? `/practice-test/writing/${item.id}/result` : `/practice-test/writing/${item.id}`;
+
+            return (
+              <Link key={item.id} href={targetHref}
+                className="group block rounded-4xl p-6 transition-all duration-500 hover:-translate-y-1.5 hover:shadow-2xl relative overflow-hidden border border-transparent hover:border-indigo-500/20"
+                style={{ 
+                  backgroundColor: 'var(--theme-bg-card)', 
+                  boxShadow: '0 15px 35px rgba(0, 0, 0, 0.05), inset 0 0 0 1px rgba(255, 255, 255, 0.05)' 
+                }}>
+                
+                <div className="absolute inset-0 opacity-0 group-hover:opacity-[0.03] transition-opacity duration-700 pointer-events-none" 
+                  style={{ background: GRADIENT.writing }} />
+
+                <div className="relative z-10 flex items-center gap-6">
+                  <div className="w-16 h-16 rounded-2xl flex items-center justify-center shrink-0 shadow-lg transition-all duration-500 group-hover:scale-110 group-hover:rotate-3"
+                    style={{ backgroundColor: `${ACCENT.writing}15`, border: `1px solid ${ACCENT.writing}33` }}>
+                    <IconPenLine size={28} style={{ color: ACCENT.writing }} />
+                  </div>
+
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-3 mb-2.5 flex-wrap">
+                      <span className="text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg text-white shadow-sm"
+                        style={{ backgroundColor: ACCENT.writing }}>{item.cefrLevel}</span>
+                      <span className="text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg"
+                        style={{ backgroundColor: statusCfg.bg, color: statusCfg.color }}>{statusCfg.label}</span>
+                      <span className="text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg border bg-black/3 dark:bg-white/5"
+                        style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-muted)' }}>{typeInfo.vi}</span>
+                    </div>
+
+                    <p className="text-xl font-black tracking-tight mb-1.5 truncate" style={{ color: 'var(--theme-text-primary)' }}>{item.topic}</p>
+
+                    <div className="flex items-center gap-3 text-[11px] font-bold opacity-40 uppercase tracking-widest" style={{ color: 'var(--theme-text-primary)' }}>
+                      <span>Loại: {typeInfo.vi}</span>
+                      <span className="w-1 h-1 rounded-full bg-current" />
+                      {item.status === 'GRADED' && (
+                        <>
+                          <span className="text-emerald-500">Đã chấm điểm</span>
+                          <span className="w-1 h-1 rounded-full bg-current" />
+                        </>
+                      )}
+                      <span>{formatDate(item.createdAt)}</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-8 shrink-0">
+                    {item.overallScore !== null && (
+                      <div className="text-right">
+                        <div className="text-4xl font-black tracking-tighter" style={{ color: getScoreColor(item.overallScore) }}>
+                          {Math.round(item.overallScore)}<span className="text-sm ml-0.5">%</span>
+                        </div>
+                      </div>
+                    )}
+                    <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); setConfirmDeleteId(item.id); }}
+                      className="w-12 h-12 rounded-xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-red-500/10 hover:text-red-500"
+                      style={{ color: 'var(--theme-text-muted)' }}><IconTrash size={20} /></button>
+                  </div>
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Pagination Controls */}
+      {history && history.totalPages > 1 && (
+        <div className="flex items-center justify-center gap-4 mt-16">
+          <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
+            className="flex items-center gap-2 px-6 py-3 rounded-xl text-xs font-black disabled:opacity-30 transition-all hover:bg-black/3 dark:hover:bg-white/5 border border-transparent hover:border-indigo-500/20"
+            style={{ backgroundColor: 'var(--theme-bg-card)', color: 'var(--theme-text-primary)', boxShadow: '0 8px 20px rgba(0,0,0,0.05)' }}>
+            <IconChevronLeft size={18} /> TRƯỚC
+          </button>
+          <div className="px-8 py-3 rounded-xl bg-black/3 dark:bg-white/5 text-xs font-black tracking-widest" style={{ color: 'var(--theme-text-primary)' }}>
+            {page} / {history.totalPages}
+          </div>
+          <button onClick={() => setPage(p => Math.min(history.totalPages, p + 1))} disabled={page === history.totalPages}
+            className="flex items-center gap-2 px-6 py-3 rounded-xl text-xs font-black disabled:opacity-30 transition-all hover:bg-black/3 dark:hover:bg-white/5 border border-transparent hover:border-indigo-500/20"
+            style={{ backgroundColor: 'var(--theme-bg-card)', color: 'var(--theme-text-primary)', boxShadow: '0 8px 20px rgba(0,0,0,0.05)' }}>
+            SAU <IconChevronRight size={18} />
+          </button>
+        </div>
+      )}
+    </div>
   );
 }

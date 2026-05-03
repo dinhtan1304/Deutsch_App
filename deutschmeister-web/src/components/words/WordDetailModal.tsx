@@ -1,14 +1,14 @@
 ﻿'use client';
-/* eslint-disable no-restricted-syntax */
 
 import { useEffect, useCallback, useState } from 'react';
-import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import { ACCENT, STATUS, GRADIENT } from '@/lib/tokens';
 import { Word, GenderInfo } from '@/types';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { GenderTip } from './GenderTip';
 import { IconStar, IconX, IconVolume, IconCheck, IconPlus, IconLoader, IconBookOpen, IconLightbulb } from '@/components/ui/Icons';
 import { useQuickAddWithCollection } from '@/hooks/useQuickAddWithCollection';
 import { AddToCollectionPicker } from '@/components/word-bank/AddToCollectionPicker';
+import Image from 'next/image' 
 
 interface WordDetailModalProps {
   word: Word | null;
@@ -20,22 +20,22 @@ interface WordDetailModalProps {
 
 const GENDER_STYLES = {
   masculine: {
-    gradient: 'linear-gradient(135deg,#3B82F6,#1D4ED8)',
-    bg: 'rgba(59,130,246,.1)',
+    gradient: GRADIENT.der,
+    bg: `${ACCENT.srs}1a`,
     text: ACCENT.srs,
-    light: 'rgba(59,130,246,.06)',
+    light: `${ACCENT.srs}0f`,
   },
   feminine: {
-    gradient: 'linear-gradient(135deg,#EC4899,#BE185D)',
-    bg: 'rgba(236,72,153,.1)',
+    gradient: GRADIENT.die,
+    bg: `${ACCENT.listening}1a`,
     text: ACCENT.listening,
-    light: 'rgba(236,72,153,.06)',
+    light: `${ACCENT.listening}0f`,
   },
   neuter: {
-    gradient: 'linear-gradient(135deg,#22C55E,#15803D)',
-    bg: 'rgba(34,197,94,.1)',
-    text: STATUS.success,
-    light: 'rgba(34,197,94,.06)',
+    gradient: GRADIENT.das,
+    bg: `${ACCENT.reading}1a`,
+    text: ACCENT.reading,
+    light: `${ACCENT.reading}0f`,
   },
 };
 
@@ -48,7 +48,8 @@ export function WordDetailModal({
 }: WordDetailModalProps) {
   const { settings } = useSettingsStore();
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const [imageError, setImageError] = useState(false);
+  const [imageErrorWordId, setImageErrorWordId] = useState<string | null>(null);
+  const imageError = imageErrorWordId === word?.id;
   const { isAdding, isAdded, pendingWordId, quickAdd, closePicker, reset } = useQuickAddWithCollection();
 
   useEffect(() => {
@@ -63,7 +64,7 @@ export function WordDetailModal({
     };
   }, [isOpen, onClose]);
 
-  useEffect(() => { setImageError(false); reset(); }, [word?.id, reset]);
+  useEffect(() => { reset(); }, [word?.id, reset]);
 
   const speak = useCallback((text: string) => {
     if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
@@ -130,7 +131,7 @@ export function WordDetailModal({
                 onClick={() => onFavoriteToggle(word.id)}
                 className="w-10 h-10 rounded-xl flex items-center justify-center bg-white/15 hover:bg-white/25 transition-all"
                 title={isFavorite ? 'Bỏ yêu thích' : 'Thêm yêu thích'}>
-                <IconStar size={20} style={isFavorite ? { fill: '#FBBF24', color: '#FBBF24' } : { color: 'white' }} />
+                <IconStar size={20} style={isFavorite ? { fill: ACCENT.xp, color: ACCENT.xp } : { color: 'white' }} />
               </button>
             ) : <div />}
             <button
@@ -182,9 +183,9 @@ export function WordDetailModal({
           {/* Image */}
           {word.imageUrl && !imageError && (
             <div className="rounded-xl overflow-hidden shadow-md">
-              <img src={word.imageUrl} alt={word.word}
+              <Image src={word.imageUrl} alt={word.word}
                 className="w-full h-48 object-cover"
-                onError={() => setImageError(true)} />
+                onError={() => setImageErrorWordId(word.id)} />
             </div>
           )}
 
@@ -211,7 +212,7 @@ export function WordDetailModal({
                 <div className="flex items-center gap-3 p-3 rounded-xl"
                   style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
                   <span className="text-caption font-bold px-2 py-0.5 rounded-md shrink-0"
-                    style={{ backgroundColor: 'rgba(239,68,68,.08)', color: STATUS.danger }}>VN</span>
+                    style={{ backgroundColor: `${STATUS.danger}14`, color: STATUS.danger }}>VN</span>
                   <span className="text-[15px]" style={{ color: 'var(--theme-text-primary)' }}>
                     {word.translationVi}
                   </span>
@@ -255,17 +256,17 @@ export function WordDetailModal({
           {word.tips && word.tips.length > 0 && (
             <div>
               <h3 className="text-caption font-bold uppercase tracking-wider mb-3 flex items-center gap-2"
-                style={{ color: '#EAB308' }}>
+                style={{ color: ACCENT.xp }}>
                 <span className="w-6 h-6 rounded-md flex items-center justify-center shrink-0"
-                  style={{ backgroundColor: 'rgba(234,179,8,.1)' }}>
-                  <IconLightbulb size={13} style={{ color: '#EAB308' }} />
+                  style={{ backgroundColor: `${ACCENT.xp}1a` }}>
+                  <IconLightbulb size={13} style={{ color: ACCENT.xp }} />
                 </span>
                 Ghi chú ({word.tips.length})
               </h3>
               <div className="space-y-2">
                 {word.tips.map((tip, i) => (
                   <div key={i} className="p-3 rounded-xl"
-                    style={{ backgroundColor: 'rgba(234,179,8,.06)', borderLeft: '3px solid #EAB308' }}>
+                    style={{ backgroundColor: `${ACCENT.xp}0f`, borderLeft: `3px solid ${ACCENT.xp}` }}>
                     <p className="text-sm" style={{ color: 'var(--theme-text-primary)' }}>{tip}</p>
                   </div>
                 ))}

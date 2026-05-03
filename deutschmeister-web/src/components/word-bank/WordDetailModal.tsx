@@ -1,6 +1,5 @@
 import { PersonalWord, WordTypeInfo, GenderInfo, Gender } from '@/types/personalWord';
-/* eslint-disable no-restricted-syntax */
-import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import { ACCENT, STATUS } from '@/lib/tokens';
 import { IconVolume, IconStar, IconLightbulb, IconX } from '@/components/ui/Icons';
 import { useEffect, useRef } from 'react';
 
@@ -54,8 +53,8 @@ export function WordDetailModal({ word, onClose, onSpeak, onToggleFavorite }: Wo
       case 'adjektiv':
         return (word.adjektivData?.komparativ || word.adjektivData?.superlativ) ? (
           <div className="flex flex-wrap gap-2">
-            {word.adjektivData.komparativ && <span className="px-2 py-1 rounded text-sm font-medium" style={chipStyle('rgba(245,158,11,.1)', '#D97706')}>{word.adjektivData.komparativ}</span>}
-            {word.adjektivData.superlativ && <span className="px-2 py-1 rounded text-sm font-medium" style={chipStyle('rgba(245,158,11,.1)', '#D97706')}>{word.adjektivData.superlativ}</span>}
+            {word.adjektivData.komparativ && <span className="px-2 py-1 rounded text-sm font-medium" style={chipStyle(`${ACCENT.xp}1a`, ACCENT.xpDark)}>{word.adjektivData.komparativ}</span>}
+            {word.adjektivData.superlativ && <span className="px-2 py-1 rounded text-sm font-medium" style={chipStyle(`${ACCENT.xp}1a`, ACCENT.xpDark)}>{word.adjektivData.superlativ}</span>}
           </div>
         ) : null;
       case 'praposition':
@@ -74,7 +73,7 @@ export function WordDetailModal({ word, onClose, onSpeak, onToggleFavorite }: Wo
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+    <div className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
       onClick={onClose}>
       <div ref={ref} onClick={e => e.stopPropagation()}
         role="dialog"
@@ -148,7 +147,7 @@ export function WordDetailModal({ word, onClose, onSpeak, onToggleFavorite }: Wo
             )}
 
             {word.notes && (
-              <div className="mb-4 p-3 rounded-xl" style={{ backgroundColor: 'rgba(245,158,11,.05)', color: '#D97706' }}>
+              <div className="mb-4 p-3 rounded-xl" style={{ backgroundColor: `${ACCENT.xp}0d`, color: ACCENT.xpDark }}>
                 <div className="flex items-start gap-2 text-sm leading-relaxed">
                   <IconLightbulb size={16} className="shrink-0 mt-0.5" />
                   <span>{word.notes}</span>

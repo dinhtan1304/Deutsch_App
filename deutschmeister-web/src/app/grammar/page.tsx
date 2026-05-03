@@ -3,7 +3,8 @@
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { useGrammarLessons, useGrammarProgress } from '@/hooks/useGrammar';
-import { GrammarLessonCard } from '@/components/grammar/GrammarLessonCard';
+import { GrammarProgress } from '@/types/grammar';
+import GrammarLessonCard from '@/components/grammar/GrammarLessonCard';
 import { GRADIENT, ACCENT, STATUS } from '@/lib/tokens';
 import {
   IconBook, IconList,
@@ -12,9 +13,9 @@ import {
 const LEVELS = ['ALL', 'A1', 'A2', 'B1'] as const;
 
 const LEVEL_COLORS = {
-  A1: { color: ACCENT.reading, gradient: `linear-gradient(135deg, ${ACCENT.reading}, #16A34A)` },
-  A2: { color: ACCENT.srs,     gradient: `linear-gradient(135deg, ${ACCENT.srs}, #2563EB)` },
-  B1: { color: ACCENT.xp,      gradient: `linear-gradient(135deg, ${ACCENT.xp}, #D97706)` },
+  A1: { color: ACCENT.reading, gradient: `linear-gradient(135deg, ${ACCENT.reading}, #16A34A)`, glow: `${ACCENT.reading}40` },
+  A2: { color: ACCENT.srs,     gradient: `linear-gradient(135deg, ${ACCENT.srs}, #2563EB)`, glow: `${ACCENT.srs}40` },
+  B1: { color: ACCENT.xp,      gradient: `linear-gradient(135deg, ${ACCENT.xp}, #D97706)`, glow: `${ACCENT.xp}40` },
 };
 
 export default function GrammarDashboardPage() {
@@ -23,11 +24,19 @@ export default function GrammarDashboardPage() {
   const { data: lessons = [], isLoading: lessonsLoading } = useGrammarLessons();
   const { data: progress = [] } = useGrammarProgress();
 
-  const filteredLessons = (
-    filterLevel === 'ALL' ? lessons : lessons.filter(l => l.level === filterLevel)
-  ).sort((a, b) => a.lessonNumber - b.lessonNumber);
+  const filteredLessons = useMemo(() => {
+    return (
+      filterLevel === 'ALL' ? lessons : lessons.filter(l => l.level === filterLevel)
+    ).sort((a, b) => a.lessonNumber - b.lessonNumber);
+  }, [lessons, filterLevel]);
 
-  const getLessonProgress = (lessonId: string) => progress.find(p => p.lessonId === lessonId);
+  const progressMap = useMemo(() => {
+    const map: Record<string, GrammarProgress> = {};
+    for (const p of progress) {
+      map[p.lessonId] = p;
+    }
+    return map;
+  }, [progress]);
 
   const lessonsByLevel = useMemo(() => {
     const map: Record<string, typeof lessons> = { A1: [], A2: [], B1: [] };
@@ -48,7 +57,9 @@ export default function GrammarDashboardPage() {
     const passedSet = new Set(
       progress.filter(p => p.status === 'completed' && (p.score ?? 0) >= 80).map(p => p.lessonId)
     );
+    const lessonMap = new Map(lessons.map(l => [l.id, l]));
     const map: Record<string, { locked: boolean; reason: string }> = {};
+    
     for (const lesson of lessons) {
       const prereqs = lesson.prerequisiteIds ?? [];
       if (prereqs.length === 0) {
@@ -59,7 +70,7 @@ export default function GrammarDashboardPage() {
       if (unmet.length === 0) {
         map[lesson.id] = { locked: false, reason: '' };
       } else {
-        const names = lessons.filter(l => unmet.includes(l.id)).map(l => l.titleVi);
+        const names = unmet.map(id => lessonMap.get(id)?.titleVi).filter(Boolean);
         map[lesson.id] = {
           locked: true,
           reason: names.length > 0
@@ -207,7 +218,7 @@ export default function GrammarDashboardPage() {
           if (levelLessons.length === 0) return null;
 
           const lc = LEVEL_COLORS[lvl];
-          const lvlCompleted = levelLessons.filter(l => getLessonProgress(l.id)?.status === 'completed').length;
+          const lvlCompleted = levelLessons.filter(l => progressMap[l.id]?.status === 'completed').length;
           const lvlPct = levelLessons.length > 0 ? Math.round((lvlCompleted / levelLessons.length) * 100) : 0;
 
           return (
@@ -255,17 +266,36 @@ export default function GrammarDashboardPage() {
                 <span className="text-sm font-bold shrink-0" style={{ color: lc.color }}>{lvlPct}%</span>
               </div>
 
-              {/* Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {levelLessons.map(lesson => (
-                  <GrammarLessonCard
-                    key={lesson.id}
-                    lesson={lesson}
-                    progress={getLessonProgress(lesson.id)}
-                    locked={lockInfo[lesson.id]?.locked}
-                    lockedReason={lockInfo[lesson.id]?.reason}
-                  />
-                ))}
+              {/* Gamified Journey Path */}
+              <div className="relative flex flex-col items-center py-10 mt-4 overflow-hidden">
+                {/* Center Path Line (Background) */}
+                <div className="absolute top-0 bottom-0 w-3 rounded-full"
+                  style={{ backgroundColor: 'var(--theme-bg-secondary)' }} />
+                
+                {/* Active Path Line Overlay */}
+                <div className="absolute top-0 w-3 rounded-full transition-all duration-1000 z-0"
+                  style={{ background: lc.gradient, height: `${lvlPct}%`, boxShadow: `0 0 15px ${lc.glow}` }} />
+
+                {levelLessons.map((lesson, idx) => {
+                  // Create a snaking pattern: center, right, right-far, right, center, left, left-far, left
+                  // We'll use a simpler sine-wave pattern for better visual flow: 0, 50, 0, -50
+                  const translateX = Math.sin((idx * Math.PI) / 2) * 60;
+
+                  return (
+                    <div
+                      key={lesson.id}
+                      className="relative z-10 my-4 sm:my-6 transition-transform hover:z-20"
+                      style={{ transform: `translateX(${translateX}px)` }}
+                    >
+                      <GrammarLessonCard
+                        lesson={lesson}
+                        progress={progressMap[lesson.id]}
+                        locked={lockInfo[lesson.id]?.locked}
+                        lockedReason={lockInfo[lesson.id]?.reason}
+                      />
+                    </div>
+                  );
+                })}
               </div>
             </section>
           );

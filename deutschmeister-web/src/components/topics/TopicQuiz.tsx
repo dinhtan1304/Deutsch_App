@@ -1,8 +1,7 @@
-﻿'use client';
-/* eslint-disable no-restricted-syntax */
+'use client';
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
-import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import { useReducer, useEffect, useCallback } from 'react';
+import { ACCENT, STATUS, GRADIENT } from '@/lib/tokens';
 import type { TopicWord } from '@/types/topic';
 
 function IconVolume({ size = 16 }: { size?: number }) {
@@ -55,7 +54,6 @@ function generateQuestions(words: TopicWord[], count: number): Question[] {
   const questions: Question[] = [];
 
   for (const word of selected) {
-    // Random mode
     const modes: QuizMode[] = ['de-to-vi', 'vi-to-de'];
     if (word.article) modes.push('article');
     const mode = modes[Math.floor(Math.random() * modes.length)]!;
@@ -74,34 +72,60 @@ function generateQuestions(words: TopicWord[], count: number): Question[] {
         .filter(w => w.id !== word.id)
         .map(w => w.article ? `${w.article} ${w.word}` : w.word);
     } else {
-      // article quiz
       correct = word.article;
       distractorPool = ['der', 'die', 'das'].filter(a => a !== word.article);
-      // For article mode, only 3 options
       const options = shuffle([correct, ...distractorPool]);
-      questions.push({
-        word,
-        options,
-        correctIndex: options.indexOf(correct),
-        mode,
-      });
+      questions.push({ word, options, correctIndex: options.indexOf(correct), mode });
       continue;
     }
 
-    // Pick 3 random distractors
     const distractors = shuffle(distractorPool).slice(0, 3);
     const options = shuffle([correct, ...distractors]);
-
-    questions.push({
-      word,
-      options,
-      correctIndex: options.indexOf(correct),
-      mode,
-    });
+    questions.push({ word, options, correctIndex: options.indexOf(correct), mode });
   }
 
   return questions;
 }
+
+// ─── State management ───
+
+type QuizState = {
+  questions: Question[];
+  currentIndex: number;
+  selectedOption: number | null;
+  isAnswered: boolean;
+  score: number;
+  wrongWords: Set<string>;
+  isFinished: boolean;
+};
+
+type QuizAction =
+  | { type: 'init'; questions: Question[] }
+  | { type: 'select'; optionIndex: number; correctIndex: number; wordId: string }
+  | { type: 'next' };
+
+function quizReducer(state: QuizState, action: QuizAction): QuizState {
+  switch (action.type) {
+    case 'init':
+      return { questions: action.questions, currentIndex: 0, selectedOption: null, isAnswered: false, score: 0, wrongWords: new Set(), isFinished: false };
+    case 'select': {
+      const correct = action.optionIndex === action.correctIndex;
+      const wrongWords = correct ? state.wrongWords : new Set(state.wrongWords).add(action.wordId);
+      return { ...state, selectedOption: action.optionIndex, isAnswered: true, score: correct ? state.score + 1 : state.score, wrongWords };
+    }
+    case 'next':
+      if (state.currentIndex < state.questions.length - 1) {
+        return { ...state, currentIndex: state.currentIndex + 1, selectedOption: null, isAnswered: false };
+      }
+      return { ...state, isFinished: true };
+    default:
+      return state;
+  }
+}
+
+const QUIZ_SIZE = 10;
+
+// ─── Component ───
 
 interface Props {
   words: TopicWord[];
@@ -109,65 +133,44 @@ interface Props {
   onMarkLearned?: (wordId: string) => void;
 }
 
+const monoGradient = (color: string) => `linear-gradient(135deg, ${color}, ${color}cc)`;
+
 export function TopicQuiz({ words, topicColor, onMarkLearned }: Props) {
-  const [questions, setQuestions] = useState<Question[]>([]);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [selectedOption, setSelectedOption] = useState<number | null>(null);
-  const [isAnswered, setIsAnswered] = useState(false);
-  const [score, setScore] = useState(0);
-  const [wrongWords, setWrongWords] = useState<Set<string>>(new Set());
-  const [isFinished, setIsFinished] = useState(false);
-  const QUIZ_SIZE = 10;
+  const [state, dispatch] = useReducer(quizReducer, {
+    questions: [], currentIndex: 0, selectedOption: null,
+    isAnswered: false, score: 0, wrongWords: new Set<string>(), isFinished: false,
+  });
+  const { questions, currentIndex, selectedOption, isAnswered, score, wrongWords, isFinished } = state;
 
-  const startQuiz = useCallback((wordSet?: TopicWord[]) => {
-    const qs = generateQuestions(wordSet || words, QUIZ_SIZE);
-    setQuestions(qs);
-    setCurrentIndex(0);
-    setSelectedOption(null);
-    setIsAnswered(false);
-    setScore(0);
-    setWrongWords(new Set());
-    setIsFinished(false);
-  }, [words]);
-
+  // Init / re-init when words change
   useEffect(() => {
-    if (words.length >= 4) startQuiz();
-  }, [words, startQuiz]);
+    if (words.length >= 4) dispatch({ type: 'init', questions: generateQuestions(words, QUIZ_SIZE) });
+  }, [words]);
 
   const current = questions[currentIndex];
   const total = questions.length;
 
+  const startQuiz = useCallback((wordSet?: TopicWord[]) => {
+    dispatch({ type: 'init', questions: generateQuestions(wordSet ?? words, QUIZ_SIZE) });
+  }, [words]);
+
   const handleSelect = useCallback((optionIndex: number) => {
     if (isAnswered || !current) return;
-    setSelectedOption(optionIndex);
-    setIsAnswered(true);
-    if (optionIndex === current.correctIndex) {
-      setScore(s => s + 1);
-      onMarkLearned?.(current.word.id);
-    } else {
-      setWrongWords(s => new Set(s).add(current.word.id));
-    }
+    dispatch({ type: 'select', optionIndex, correctIndex: current.correctIndex, wordId: current.word.id });
+    if (optionIndex === current.correctIndex) onMarkLearned?.(current.word.id);
   }, [isAnswered, current, onMarkLearned]);
 
   const handleNext = useCallback(() => {
-    if (currentIndex < total - 1) {
-      setCurrentIndex(i => i + 1);
-      setSelectedOption(null);
-      setIsAnswered(false);
-    } else {
-      setIsFinished(true);
-    }
-  }, [currentIndex, total]);
+    dispatch({ type: 'next' });
+  }, []);
 
-  // Keyboard: 1-4 select, Enter next
+  // Keyboard: 1-4 select, Enter/Space next
   useEffect(() => {
     const handle = (e: KeyboardEvent) => {
       if (!current) return;
       if (!isAnswered) {
         const num = parseInt(e.key);
-        if (num >= 1 && num <= current.options.length) {
-          handleSelect(num - 1);
-        }
+        if (num >= 1 && num <= current.options.length) handleSelect(num - 1);
       } else if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
         handleNext();
@@ -197,6 +200,7 @@ export function TopicQuiz({ words, topicColor, onMarkLearned }: Props) {
   // ─── Finished ───
   if (isFinished) {
     const pct = total > 0 ? Math.round((score / total) * 100) : 0;
+    const scoreGradient = pct >= 80 ? GRADIENT.readingGreenH : pct >= 50 ? GRADIENT.xpGoldH : GRADIENT.dangerSolidH;
     return (
       <div className="text-center py-10">
         <div className="text-5xl mb-4">{pct >= 80 ? '🏆' : pct >= 50 ? '👍' : '📖'}</div>
@@ -211,12 +215,7 @@ export function TopicQuiz({ words, topicColor, onMarkLearned }: Props) {
         <div className="w-64 mx-auto mb-6">
           <div className="h-3 rounded-full overflow-hidden" style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
             <div className="h-full rounded-full transition-all duration-700"
-              style={{
-                width: `${pct}%`,
-                background: pct >= 80 ? 'linear-gradient(90deg, #22C55E, #16A34A)' :
-                  pct >= 50 ? 'linear-gradient(90deg, #F59E0B, #D97706)' :
-                  'linear-gradient(90deg, #EF4444, #DC2626)',
-              }} />
+              style={{ width: `${pct}%`, background: scoreGradient }} />
           </div>
           <div className="text-body font-bold mt-1" style={{ color: topicColor }}>{pct}%</div>
         </div>
@@ -231,7 +230,7 @@ export function TopicQuiz({ words, topicColor, onMarkLearned }: Props) {
             <div className="space-y-1.5">
               {words.filter(w => wrongWords.has(w.id)).map(w => (
                 <div key={w.id} className="flex items-center gap-2 text-body">
-                  <span className="font-semibold" style={{ color: ArticleColor[w.article] || 'var(--theme-text-primary)' }}>
+                  <span className="font-semibold" style={{ color: ArticleColor[w.article] || ACCENT.gray }}>
                     {w.article} {w.word}
                   </span>
                   <span style={{ color: 'var(--theme-text-muted)' }}>—</span>
@@ -248,8 +247,7 @@ export function TopicQuiz({ words, topicColor, onMarkLearned }: Props) {
           {wrongWords.size > 0 && (
             <button onClick={() => {
               const wrongList = words.filter(w => wrongWords.has(w.id));
-              if (wrongList.length >= 4) startQuiz(wrongList);
-              else startQuiz();
+              startQuiz(wrongList.length >= 4 ? wrongList : undefined);
             }}
               className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-body font-semibold transition-all hover:-translate-y-0.5"
               style={{ background: 'rgba(239,68,68,.1)', color: STATUS.danger }}>
@@ -268,7 +266,7 @@ export function TopicQuiz({ words, topicColor, onMarkLearned }: Props) {
 
   if (!current) return null;
 
-  const ac = ArticleColor[current.word.article] || '#6B7280';
+  const ac = ArticleColor[current.word.article] || ACCENT.gray;
   const questionLabel = current.mode === 'de-to-vi'
     ? 'Nghĩa của từ này?'
     : current.mode === 'vi-to-de'
@@ -346,10 +344,7 @@ export function TopicQuiz({ words, topicColor, onMarkLearned }: Props) {
                 color: STATUS.danger,
               };
             } else {
-              optStyle = {
-                ...optStyle,
-                opacity: 0.4,
-              };
+              optStyle = { ...optStyle, opacity: 0.4 };
             }
           }
 
@@ -375,7 +370,7 @@ export function TopicQuiz({ words, topicColor, onMarkLearned }: Props) {
           </div>
           <button onClick={handleNext}
             className="px-5 py-2.5 rounded-xl text-body font-semibold text-white transition-all hover:-translate-y-0.5"
-            style={{ background: `linear-gradient(135deg, ${topicColor}, ${topicColor}cc)` }}>
+            style={{ background: monoGradient(topicColor) }}>
             {currentIndex < total - 1 ? 'Câu tiếp → Enter' : 'Xem kết quả'}
           </button>
         </div>

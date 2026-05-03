@@ -10,6 +10,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { UpsellTrigger } from '@/components/subscription/UpsellTrigger';
 import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 import type { Word } from '@/types';
+import type { Level } from '@/types/personalWord';
 import {
   IconTrophy, IconFlame, IconZap, IconTarget, IconClock,
   IconPenTool, IconLayers, IconBookOpen, IconLink,
@@ -201,7 +202,7 @@ export function GenderButtons({ onAnswer, answered, selectedAnswer, correctGende
 }
 
 /** Answer review list for result screens */
-export function AnswerReview<T extends { word: any; isCorrect: boolean }>({ answers, getCorrectArticle, getSelectedLabel }: {
+export function AnswerReview<T extends { word: { word: string }; isCorrect: boolean }>({ answers, getCorrectArticle, getSelectedLabel }: {
   answers: T[];
   getCorrectArticle: (a: T) => { article: string; color: string };
   getSelectedLabel?: (a: T) => string | null;
@@ -302,7 +303,7 @@ export function AddWrongWordsToBank({ wrongWords }: { wrongWords: Word[] }) {
           translationEn: w.translationEn,
           translationVi: w.translationVi || '',
           nomenData: { article: w.article, gender: w.gender, plural: w.plural || '' },
-          level: w.level as any,
+          level: w.level as Level,
           category: w.category,
         });
       } catch { /* duplicate — skip */ }
@@ -382,12 +383,18 @@ export function GameResultUpsell() {
 
 /** Self-contained session timer. Resets when active goes false→true. */
 export function useGameTimer(active: boolean): string {
-  const [seconds, setSeconds] = React.useState(0);
+  const [seconds, dispatch] = React.useReducer(
+    (s: number, action: 'reset' | 'tick') => action === 'reset' ? 0 : s + 1,
+    0,
+  );
+
   useEffect(() => {
-    if (!active) { setSeconds(0); return; }
-    const id = setInterval(() => setSeconds(s => s + 1), 1000);
+    if (!active) return;
+    dispatch('reset');
+    const id = setInterval(() => dispatch('tick'), 1000);
     return () => clearInterval(id);
   }, [active]);
+
   return `${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`;
 }
 

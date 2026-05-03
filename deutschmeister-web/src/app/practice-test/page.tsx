@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 /* eslint-disable no-restricted-syntax -- custom UI gradients */
 
 import { useState } from 'react';
@@ -9,7 +9,7 @@ import {
 } from '@/components/ui/Icons';
 import { useIsExamUnlocked } from '@/hooks/useSubscription';
 import { UpgradeModal } from '@/components/subscription/UpgradeModal';
-import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import { ACCENT, STATUS } from '@/lib/tokens';
 
 // ─── Data ──────────────────────────────────────────────────────────────────────
 type CardDef = {
@@ -101,78 +101,96 @@ function Card({
   onPremiumClick?: () => void;
 }) {
   const Ic = card.icon;
+
   if (card.locked) {
     return (
-      <div className="rounded-card border p-5 opacity-55 cursor-not-allowed select-none"
-        style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
-        <div className="relative w-12 h-12 rounded-xl flex items-center justify-center mb-4"
-          style={{ background: card.gradient }}>
-          <Ic size={22} className="text-white" />
-          <span className="absolute -top-1.5 -right-1.5 text-[9px] font-extrabold px-1.5 py-0.5 rounded-full text-white"
-            style={{ backgroundColor: '#6B7280' }}>Soon</span>
+      <div className="rounded-3xl p-6 opacity-60 cursor-not-allowed select-none relative overflow-hidden shadow-sm"
+        style={{ boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.05)', backgroundColor: 'var(--theme-bg-card)' }}>
+        <div className="relative w-14 h-14 rounded-2xl flex items-center justify-center mb-5"
+          style={{ background: card.gradient, opacity: 0.8 }}>
+          <Ic size={24} className="text-white" />
+          <span className="absolute -top-2 -right-2 text-[10px] font-black px-2 py-0.5 rounded-full text-white shadow-sm"
+            style={{ backgroundColor: '#6B7280' }}>Sắp ra mắt</span>
         </div>
-        <p className="text-caption font-semibold mb-0.5" style={{ color: 'var(--theme-text-muted)' }}>{card.titleDe}</p>
-        <h3 className="text-base font-bold mb-2" style={{ color: 'var(--theme-text-primary)' }}>{card.title}</h3>
-        <p className="text-body leading-relaxed" style={{ color: 'var(--theme-text-secondary)' }}>{card.description}</p>
+        <p className="text-xs font-bold uppercase tracking-wider mb-1" style={{ color: 'var(--theme-text-muted)' }}>{card.titleDe}</p>
+        <h3 className="text-lg font-black mb-2" style={{ color: 'var(--theme-text-primary)' }}>{card.title}</h3>
+        <p className="text-sm leading-relaxed" style={{ color: 'var(--theme-text-secondary)' }}>{card.description}</p>
       </div>
     );
   }
+
   if (premiumLocked) {
     return (
       <button
         type="button"
         onClick={onPremiumClick}
-        className="group text-left w-full rounded-card border shadow-card p-5 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg relative"
-        style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}
+        className="group text-left w-full rounded-3xl p-6 transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl relative overflow-hidden shadow-sm"
+        style={{ backgroundColor: 'var(--theme-bg-card)', boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.05)' }}
       >
+        <div className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity duration-300 pointer-events-none" style={{ background: card.gradient }} />
+        
         {/* Icon with lock overlay */}
-        <div className="relative w-12 h-12 rounded-xl flex items-center justify-center mb-4 transition-transform duration-200 group-hover:scale-110"
+        <div className="relative w-14 h-14 rounded-2xl flex items-center justify-center mb-5 transition-transform duration-300 group-hover:scale-110 shadow-md"
           style={{ background: card.gradient }}>
-          <Ic size={22} className="text-white" />
-          <span className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full flex items-center justify-center"
+          <Ic size={24} className="text-white" />
+          <span className="absolute -top-2 -right-2 w-6 h-6 rounded-full flex items-center justify-center shadow-lg transform group-hover:rotate-12 transition-transform"
             style={{ background: 'linear-gradient(135deg, #F59E0B, #EF4444)' }}>
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
               <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
               <path d="M7 11V7a5 5 0 0 1 10 0v4" />
             </svg>
           </span>
         </div>
+        
         {/* PREMIUM badge */}
         <span
-          className="absolute top-4 right-4 text-[9px] font-extrabold px-1.5 py-0.5 rounded-full text-white"
+          className="absolute top-5 right-5 text-[10px] font-black px-2.5 py-1 rounded-full text-white shadow-sm"
           style={{ background: 'linear-gradient(135deg, #F59E0B, #EF4444)' }}
         >
           PREMIUM
         </span>
+        
         {/* Text */}
-        <p className="text-caption font-semibold mb-0.5" style={{ color: 'var(--theme-text-muted)' }}>{card.titleDe}</p>
-        <h3 className="text-base font-bold mb-2" style={{ color: 'var(--theme-text-primary)' }}>{card.title}</h3>
-        <p className="text-body leading-relaxed mb-4" style={{ color: 'var(--theme-text-secondary)' }}>{card.description}</p>
+        <p className="text-xs font-bold uppercase tracking-wider mb-1" style={{ color: 'var(--theme-text-muted)' }}>{card.titleDe}</p>
+        <h3 className="text-lg font-black mb-2" style={{ color: 'var(--theme-text-primary)' }}>{card.title}</h3>
+        <p className="text-sm leading-relaxed mb-6" style={{ color: 'var(--theme-text-secondary)' }}>{card.description}</p>
+        
         {/* CTA */}
-        <div className="flex items-center gap-1.5 text-body font-semibold"
+        <div className="flex items-center gap-2 text-sm font-bold opacity-80 group-hover:opacity-100 transition-opacity duration-300"
           style={{ color: card.color }}>
-          Nâng cấp để mở khoá <IconArrowRight size={13} />
+          Nâng cấp để mở khoá <IconArrowRight size={16} className="transform group-hover:translate-x-1 transition-transform" />
         </div>
       </button>
     );
   }
+
   return (
     <Link href={card.href}
-      className="group block rounded-card border shadow-card p-5 transition-all duration-200 hover:-translate-y-1 hover:shadow-hero"
-      style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
+      className="group block rounded-3xl p-6 transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl relative overflow-hidden shadow-sm"
+      style={{ backgroundColor: 'var(--theme-bg-card)', boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.05)' }}>
+      
+      {/* Background Hover Glow */}
+      <div className="absolute inset-0 opacity-0 group-hover:opacity-5 transition-opacity duration-300 pointer-events-none" style={{ background: card.gradient }} />
+
+      {/* Dynamic Border Glow via inset box-shadow trick */}
+      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-3xl" 
+        style={{ boxShadow: `inset 0 0 0 2px ${card.color}50` }} />
+
       {/* Icon */}
-      <div className="relative w-12 h-12 rounded-xl flex items-center justify-center mb-4 transition-transform duration-200 group-hover:scale-110"
+      <div className="relative w-14 h-14 rounded-2xl flex items-center justify-center mb-5 transition-transform duration-300 group-hover:scale-110 shadow-md group-hover:shadow-lg"
         style={{ background: card.gradient }}>
-        <Ic size={22} className="text-white" />
+        <Ic size={24} className="text-white" />
       </div>
+      
       {/* Text */}
-      <p className="text-caption font-semibold mb-0.5" style={{ color: 'var(--theme-text-muted)' }}>{card.titleDe}</p>
-      <h3 className="text-base font-bold mb-2" style={{ color: 'var(--theme-text-primary)' }}>{card.title}</h3>
-      <p className="text-body leading-relaxed mb-4" style={{ color: 'var(--theme-text-secondary)' }}>{card.description}</p>
+      <p className="text-xs font-bold uppercase tracking-wider mb-1 transition-colors group-hover:text-opacity-80" style={{ color: card.color }}>{card.titleDe}</p>
+      <h3 className="text-lg font-black mb-2 transition-colors duration-300 group-hover:text-opacity-90" style={{ color: 'var(--theme-text-primary)' }}>{card.title}</h3>
+      <p className="text-sm leading-relaxed mb-6" style={{ color: 'var(--theme-text-secondary)' }}>{card.description}</p>
+      
       {/* CTA */}
-      <div className="flex items-center gap-1.5 text-body font-semibold opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+      <div className="flex items-center gap-2 text-sm font-bold opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0"
         style={{ color: card.color }}>
-        Bắt đầu <IconArrowRight size={13} />
+        Bắt đầu ngay <IconArrowRight size={16} className="transform group-hover:translate-x-1 transition-transform" />
       </div>
     </Link>
   );

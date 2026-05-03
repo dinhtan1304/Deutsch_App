@@ -1,8 +1,7 @@
 'use client';
-/* eslint-disable no-restricted-syntax */
 
 import Link from 'next/link';
-import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import { ACCENT, STATUS, GRADIENT } from '@/lib/tokens';
 import { useDailyPath } from '@/hooks/useDashboard';
 
 function CheckIcon() {
@@ -24,19 +23,19 @@ function TaskIcon({ type, completed }: { type: string; completed: boolean }) {
 
   const iconMap = {
     learn_words: {
-      bg: 'linear-gradient(135deg, #3B82F6, #6366F1)',
+      bg: GRADIENT.action,
       svg: <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" /></svg>,
     },
     review: {
-      bg: 'linear-gradient(135deg, #8B5CF6, #A855F7)',
+      bg: GRADIENT.vocab,
       svg: <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round"><polyline points="23 4 23 10 17 10" /><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" /></svg>,
     },
     quiz: {
-      bg: 'linear-gradient(135deg, #F59E0B, #EF4444)',
+      bg: GRADIENT.speaking,
       svg: <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><circle cx="12" cy="12" r="6" /><circle cx="12" cy="12" r="2" /></svg>,
     },
     reading: {
-      bg: 'linear-gradient(135deg, #22C55E, #14B8A6)',
+      bg: GRADIENT.reading,
       svg: <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /></svg>,
     },
   };
@@ -58,7 +57,6 @@ export function TodayFocusCard() {
   const { tasks, completedCount, totalCount, srsDueCount } = data;
   const allDone = completedCount === totalCount;
   const progressPct = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
-  const nextTask = tasks.find((t) => !t.completed);
 
   return (
     <div
@@ -66,7 +64,7 @@ export function TodayFocusCard() {
       style={{
         borderColor: allDone ? 'rgba(34,197,94,0.2)' : 'var(--theme-border)',
         background: allDone
-          ? 'linear-gradient(135deg, rgba(34,197,94,0.06), rgba(20,184,166,0.03))'
+          ? GRADIENT.readingBgSoft
           : 'var(--theme-bg-secondary)',
       }}
     >
@@ -75,7 +73,7 @@ export function TodayFocusCard() {
         {/* Icon */}
         <div
           className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-white text-lg"
-          style={{ background: allDone ? 'linear-gradient(135deg, #22C55E, #14B8A6)' : 'linear-gradient(135deg, #3B82F6, #8B5CF6)' }}
+          style={{ background: allDone ? GRADIENT.reading : GRADIENT.srsVocab }}
         >
           {allDone
             ? <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>
@@ -111,7 +109,7 @@ export function TodayFocusCard() {
           className="h-full rounded-full transition-all duration-700"
           style={{
             width: `${progressPct}%`,
-            background: allDone ? 'linear-gradient(90deg, #22C55E, #14B8A6)' : 'linear-gradient(90deg, #3B82F6, #8B5CF6)',
+            background: allDone ? GRADIENT.readingH : GRADIENT.srsVocabH,
           }}
         />
       </div>
@@ -126,7 +124,7 @@ export function TodayFocusCard() {
             style={{
               background: t.completed ? 'rgba(34,197,94,0.08)' : 'var(--theme-overlay-soft)',
               border: `1px solid ${t.completed ? 'rgba(34,197,94,0.15)' : 'var(--theme-border)'}`,
-              color: t.completed ? '#4ADE80' : 'var(--theme-text-secondary)',
+              color: t.completed ? ACCENT.readingLight : 'var(--theme-text-secondary)',
               textDecoration: t.completed ? 'line-through' : 'none',
               opacity: t.completed ? 0.7 : 1,
             }}

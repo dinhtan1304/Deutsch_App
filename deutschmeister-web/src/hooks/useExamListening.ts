@@ -5,7 +5,7 @@ import { examListeningApi, ExamListeningSession, ExamListeningHistoryResponse, E
 
 export const examListeningKeys = {
   all: ['exam-listening'] as const,
-  history: (params?: Record<string, any>) => [...examListeningKeys.all, 'history', params] as const,
+  history: (params?: Record<string, unknown>) => [...examListeningKeys.all, 'history', params] as const,
   stats: () => [...examListeningKeys.all, 'stats'] as const,
   session: (id: string) => [...examListeningKeys.all, 'session', id] as const,
 };

@@ -1,8 +1,8 @@
 'use client';
-/* eslint-disable no-restricted-syntax */
 
 import { useEffect, useState } from 'react';
 import { IconTrophy, IconX } from '@/components/ui/Icons';
+import { GRADIENT } from '@/lib/tokens';
 
 export interface AchievementUnlocked {
   key: string;
@@ -39,8 +39,8 @@ export function AchievementToast({ achievement, onDismiss }: Props) {
       display: 'flex',
       alignItems: 'center',
       gap: 12,
-      background: 'linear-gradient(135deg, #F59E0B, #EF4444)',
-      color: '#fff',
+      background: GRADIENT.speaking,
+      color: 'white',
       borderRadius: 16,
       padding: '12px 20px',
       boxShadow: '0 8px 32px rgba(0,0,0,0.25)',
@@ -50,7 +50,7 @@ export function AchievementToast({ achievement, onDismiss }: Props) {
       transition: 'transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s',
     }}>
       <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-        <IconTrophy size={20} style={{ color: '#fff' }} />
+        <IconTrophy size={20} style={{ color: 'white' }} />
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ fontSize: 10, fontWeight: 700, opacity: 0.85, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 2 }}>
@@ -60,7 +60,7 @@ export function AchievementToast({ achievement, onDismiss }: Props) {
       </div>
       <button
         onClick={() => { setVisible(false); setTimeout(onDismiss, 400); }}
-        style={{ flexShrink: 0, background: 'none', border: 'none', color: '#fff', opacity: 0.7, cursor: 'pointer', padding: 2, display: 'flex' }}
+        style={{ flexShrink: 0, background: 'none', border: 'none', color: 'white', opacity: 0.7, cursor: 'pointer', padding: 2, display: 'flex' }}
       >
         <IconX size={16} />
       </button>

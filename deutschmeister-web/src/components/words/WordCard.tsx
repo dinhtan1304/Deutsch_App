@@ -1,14 +1,15 @@
 ﻿'use client';
-/* eslint-disable no-restricted-syntax */
 
 import { useState } from 'react';
-import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import { STATUS, GRADIENT, ACCENT } from '@/lib/tokens';
 import { Word, GenderInfo } from '@/types';
+import type { Level } from '@/types/personalWord';
 import { WordDetailModal } from './WordDetailModal';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useAddToHistory } from '@/hooks/useHistory';
 import { IconVolume, IconStar, IconPlus, IconCheck } from '@/components/ui/Icons';
 import { useCreatePersonalWord } from '@/hooks/usePersonalWords';
+import Image from 'next/image' 
 
 interface WordCardProps {
   word: Word;
@@ -32,26 +33,26 @@ export function WordCard({
   const addToHistory = useAddToHistory();
   const createPersonalWord = useCreatePersonalWord();
 
-  const genderInfo = GenderInfo[word.gender] ?? { label: word.gender || 'n', article: 'das', color: '#22c55e' };
+  const genderInfo = GenderInfo[word.gender] ?? { label: word.gender || 'n', article: 'das', color: ACCENT.reading };
 
   const genderStyles = {
     masculine: {
-      border: '#3b82f6',
-      bg: 'rgba(59,130,246,.1)',
-      text: '#3b82f6',
-      gradient: 'linear-gradient(135deg,#3b82f6,#1d4ed8)',
+      border: ACCENT.srs,
+      bg: `${ACCENT.srs}1a`,
+      text: ACCENT.srs,
+      gradient: GRADIENT.der,
     },
     feminine: {
-      border: '#ec4899',
-      bg: 'rgba(236,72,153,.1)',
-      text: '#ec4899',
-      gradient: 'linear-gradient(135deg,#ec4899,#be185d)',
+      border: ACCENT.listening,
+      bg: `${ACCENT.listening}1a`,
+      text: ACCENT.listening,
+      gradient: GRADIENT.die,
     },
     neuter: {
-      border: '#22c55e',
-      bg: 'rgba(34,197,94,.1)',
-      text: '#22c55e',
-      gradient: 'linear-gradient(135deg,#22c55e,#15803d)',
+      border: ACCENT.reading,
+      bg: `${ACCENT.reading}1a`,
+      text: ACCENT.reading,
+      gradient: GRADIENT.das,
     },
   };
   const styles = genderStyles[word.gender] ?? genderStyles.neuter;
@@ -76,7 +77,7 @@ export function WordCard({
         translationEn: word.translationEn,
         translationVi: word.translationVi || '',
         nomenData: { article: word.article, gender: word.gender, plural: word.plural || '' },
-        level: word.level as any,
+        level: word.level as Level,
         category: word.category,
         examples: word.examples,
       });
@@ -129,8 +130,8 @@ export function WordCard({
             {showFavoriteButton && onFavoriteToggle && (
               <button onClick={handleFavoriteClick}
                 className="w-8 h-8 rounded-lg flex items-center justify-center transition-all hover:scale-110"
-                style={{ backgroundColor: isFavorite ? 'rgba(234,179,8,.15)' : 'var(--theme-bg-secondary)', color: isFavorite ? '#FBBF24' : 'var(--theme-text-muted)' }}>
-                <IconStar size={15} style={isFavorite ? { fill: '#FBBF24' } : {}} />
+                style={{ backgroundColor: isFavorite ? `${ACCENT.xp}26` : 'var(--theme-bg-secondary)', color: isFavorite ? ACCENT.xp : 'var(--theme-text-muted)' }}>
+                <IconStar size={15} style={isFavorite ? { fill: ACCENT.xp } : {}} />
               </button>
             )}
           </div>
@@ -224,9 +225,9 @@ export function WordCard({
                 {showFavoriteButton && onFavoriteToggle && (
                   <button onClick={handleFavoriteClick}
                     className="w-8 h-8 flex items-center justify-center rounded-xl transition-all hover:scale-110"
-                    style={{ backgroundColor: isFavorite ? 'rgba(234,179,8,.15)' : 'var(--theme-bg-secondary)', color: isFavorite ? '#FBBF24' : 'var(--theme-text-muted)' }}
+                    style={{ backgroundColor: isFavorite ? `${ACCENT.xp}26` : 'var(--theme-bg-secondary)', color: isFavorite ? ACCENT.xp : 'var(--theme-text-muted)' }}
                     title={isFavorite ? 'Bỏ yêu thích' : 'Thêm vào yêu thích'}>
-                    <IconStar size={16} style={isFavorite ? { fill: '#FBBF24' } : {}} />
+                    <IconStar size={16} style={isFavorite ? { fill: ACCENT.xp } : {}} />
                   </button>
                 )}
                 <button onClick={handleAddToBank}
@@ -243,7 +244,7 @@ export function WordCard({
               {hasImage && (
                 <div className="w-16 h-16 rounded-xl overflow-hidden shadow-sm"
                   style={{ border: `2px solid ${styles.border}22` }}>
-                  <img src={word.imageUrl!} alt={word.word}
+                  <Image src={word.imageUrl!} alt={word.word}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                     onError={() => setImageError(true)} />
                 </div>
@@ -255,7 +256,7 @@ export function WordCard({
           {settings.showExamples && word.examples && word.examples.length > 0 && (
             <div className="mt-3 pt-3 border-t" style={{ borderColor: 'var(--theme-border)' }}>
               <p className="text-xs italic line-clamp-1" style={{ color: 'var(--theme-text-muted)' }}>
-                „{word.examples[0]}"
+                „{word.examples[0]}&quot;
               </p>
             </div>
           )}

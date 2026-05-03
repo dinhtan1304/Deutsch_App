@@ -2,7 +2,7 @@
 /* eslint-disable no-restricted-syntax */
 
 import { useState } from 'react';
-import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import { ACCENT, STATUS } from '@/lib/tokens';
 import { useRouter } from 'next/navigation';
 import { useCreateStudyPlan } from '@/hooks/useStudyPlan';
 
@@ -38,14 +38,15 @@ export default function StudyPlanSetup() {
   const [targetLevel, setTargetLevel] = useState('');
   const [examDate, setExamDate] = useState('');
   const [error, setError] = useState('');
+  const [now] = useState(Date.now);
 
   const selectedExam = EXAM_OPTIONS.find((e) => e.id === examFormat);
 
   const weeksUntilExam = examDate
-    ? Math.floor((new Date(examDate).getTime() - Date.now()) / (7 * 24 * 60 * 60 * 1000))
+    ? Math.floor((new Date(examDate).getTime() - now) / (7 * 24 * 60 * 60 * 1000))
     : 0;
 
-  const minDate = new Date(Date.now() + 28 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  const minDate = new Date(now + 28 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
 
   const handleSubmit = async () => {
     if (!examFormat || !targetLevel || !examDate) return;
@@ -97,7 +98,7 @@ export default function StudyPlanSetup() {
                 <button
                   key={exam.id}
                   onClick={() => { setExamFormat(exam.id); setTargetLevel(''); setStep(1); }}
-                  className="w-full text-left p-6 rounded-[2rem] border-2 transition-all duration-300 group relative overflow-hidden active:scale-[0.98]"
+                  className="w-full text-left p-6 rounded-4xl border-2 transition-all duration-300 group relative overflow-hidden active:scale-[0.98]"
                   style={{
                     borderColor: examFormat === exam.id ? exam.color : 'var(--theme-border)',
                     backgroundColor: examFormat === exam.id ? `${exam.color}08` : 'var(--theme-bg-card)',
@@ -163,7 +164,7 @@ export default function StudyPlanSetup() {
                   <button
                     key={level}
                     onClick={() => { setTargetLevel(level); setStep(2); }}
-                    className="w-full text-left p-6 rounded-[2rem] border-2 transition-all duration-300 relative group overflow-hidden active:scale-[0.98]"
+                    className="w-full text-left p-6 rounded-4xl border-2 transition-all duration-300 relative group overflow-hidden active:scale-[0.98]"
                     style={{
                       borderColor: isSelected ? selectedExam.color : 'var(--theme-border)',
                       backgroundColor: isSelected ? `${selectedExam.color}08` : 'var(--theme-bg-card)',
@@ -265,7 +266,7 @@ export default function StudyPlanSetup() {
               <button
                 onClick={handleSubmit}
                 disabled={!examDate || weeksUntilExam < 4 || createPlan.isPending}
-                className="w-full py-5 rounded-[2rem] text-white font-black text-sm tracking-widest uppercase transition-all shadow-xl disabled:opacity-40 disabled:scale-100 active:scale-95 hover:-translate-y-1"
+                className="w-full py-5 rounded-4xl text-white font-black text-sm tracking-widest uppercase transition-all shadow-xl disabled:opacity-40 disabled:scale-100 active:scale-95 hover:-translate-y-1"
                 style={{ background: 'linear-gradient(135deg, #3B82F6, #8B5CF6, #EC4899)', boxShadow: '0 12px 30px rgba(99,102,241,.3)' }}
               >
                 {createPlan.isPending ? 'Đang tạo lộ trình...' : 'Bắt đầu ngay'}

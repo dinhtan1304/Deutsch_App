@@ -52,35 +52,41 @@ export function ActionCard({
   return (
     <div
       className={cn(
-        'relative overflow-hidden rounded-lg p-6 text-white',
+        'group relative overflow-hidden rounded-2xl p-6 text-white shadow-lg transition-all duration-500 hover:-translate-y-1.5 hover:shadow-xl',
         className,
       )}
       style={{ background: gradient }}
     >
-      {/* Decorative bloom — subtle, not an orb farm */}
+      {/* Decorative 3D orbs & glassmorphic blooms */}
       <div
         aria-hidden
-        className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full opacity-20"
-        style={{ background: 'rgba(255,255,255,0.4)' }}
+        className="pointer-events-none absolute -right-12 -top-12 h-48 w-48 rounded-full opacity-30 mix-blend-overlay transition-transform duration-700 group-hover:scale-110 group-hover:-rotate-12"
+        style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 70%)' }}
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -left-16 -bottom-16 h-48 w-48 rounded-full opacity-20 mix-blend-overlay transition-transform duration-700 group-hover:scale-125"
+        style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0) 70%)' }}
       />
 
-      <div className="relative flex items-start gap-4">
+      <div className="relative flex flex-col sm:flex-row items-start sm:items-center gap-4">
         <div
-          className="flex h-12 w-12 shrink-0 items-center justify-center rounded-md backdrop-blur-sm"
-          style={{ background: 'rgba(255,255,255,0.18)' }}
+          className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl backdrop-blur-md shadow-sm transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3"
+          style={{ background: 'rgba(255,255,255,0.2)', border: '1px solid rgba(255,255,255,0.3)' }}
         >
           {icon}
         </div>
 
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
-            <h3 className="text-h3 font-semibold leading-tight">{title}</h3>
+          <div className="flex items-center gap-2 flex-wrap mb-0.5">
+            <h3 className="text-xl font-bold leading-tight tracking-tight drop-shadow-sm">{title}</h3>
             {badge && (
               <span
-                className="rounded-pill px-2 py-0.5 text-caption font-semibold"
+                className="rounded-full px-2 py-0.5 text-[10px] font-black uppercase tracking-widest shadow-sm animate-pulse"
                 style={{
-                  background: badge.tone === 'urgent' ? 'rgba(239,68,68,0.9)' : 'rgba(255,255,255,0.2)',
+                  background: badge.tone === 'urgent' ? 'rgba(239,68,68,0.95)' : 'rgba(255,255,255,0.25)',
                   color: 'white',
+                  backdropFilter: 'blur(4px)'
                 }}
               >
                 {badge.label}
@@ -88,48 +94,51 @@ export function ActionCard({
             )}
           </div>
           {subtitle && (
-            <p className="mt-1 text-body opacity-90">{subtitle}</p>
+             <p className="mt-0.5 text-sm font-medium opacity-90 drop-shadow-sm max-w-xl">{subtitle}</p>
           )}
         </div>
       </div>
 
       {progress && (
-        <div className="relative mt-5">
-          <div className="flex items-center justify-between text-caption opacity-90">
+        <div className="relative mt-5 max-w-xl">
+          <div className="flex items-center justify-between text-xs font-bold opacity-90 mb-1.5">
             <span>{progress.label ?? 'Tiến độ'}</span>
-            <span className="font-semibold">
-              {progress.current}/{progress.total}
+            <span>
+              {progress.current} / {progress.total}
             </span>
           </div>
           <div
-            className="mt-2 h-2 overflow-hidden rounded-pill"
-            style={{ background: 'rgba(255,255,255,0.2)' }}
+            className="h-2 overflow-hidden rounded-full shadow-inner"
+            style={{ background: 'rgba(0,0,0,0.15)' }}
           >
             <div
-              className="h-full rounded-pill transition-all duration-500"
+              className="h-full rounded-full transition-all duration-1000 ease-out relative overflow-hidden"
               style={{ width: `${progressPct}%`, background: 'white' }}
-            />
+            >
+               <div className="absolute inset-0 bg-white opacity-50 blur-sm animate-pulse" />
+            </div>
           </div>
         </div>
       )}
 
       {tasks && tasks.length > 0 && (
-        <ul className="relative mt-5 flex flex-wrap gap-2">
+        <ul className="relative mt-5 flex flex-wrap gap-2 max-w-2xl">
           {tasks.map((task, i) => {
             const content = (
               <span
                 className={cn(
-                  'inline-flex items-center gap-1.5 rounded-pill px-3 py-1.5 text-caption font-semibold transition-all',
-                  task.done ? 'opacity-70' : 'hover:-translate-y-0.5',
+                  'inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-all shadow-sm',
+                  task.done ? 'opacity-50' : 'hover:-translate-y-0.5 hover:shadow-md',
                 )}
                 style={{
-                  background: task.done ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.25)',
+                  background: task.done ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.2)',
                   color: 'white',
-                  textDecoration: task.done ? 'line-through' : 'none',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  backdropFilter: 'blur(8px)',
                 }}
               >
-                <span className="inline-flex h-4 w-4 items-center justify-center">{task.icon}</span>
-                {task.label}
+                <span className="inline-flex h-4 w-4 items-center justify-center bg-white/20 rounded-full">{task.icon}</span>
+                <span style={{ textDecoration: task.done ? 'line-through' : 'none' }}>{task.label}</span>
               </span>
             );
             return (
@@ -141,21 +150,21 @@ export function ActionCard({
         </ul>
       )}
 
-      <div className="relative mt-6 flex items-center gap-3">
+      <div className="relative mt-6 flex flex-wrap items-center gap-3">
         <Link
           href={cta.href}
-          className="inline-flex items-center gap-2 rounded-md px-5 py-2.5 text-body font-semibold transition-all hover:-translate-y-0.5"
+          className="inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-black uppercase tracking-wider transition-all hover:scale-105 shadow-md hover:shadow-lg"
           style={{ background: 'white', color: ACCENT[accent] }}
         >
           {cta.label}
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="transform group-hover:translate-x-1 transition-transform">
             <path d="M5 12h14M13 5l7 7-7 7" />
           </svg>
         </Link>
         {secondary && (
           <Link
             href={secondary.href}
-            className="text-caption font-semibold opacity-90 hover:opacity-100"
+            className="px-4 py-3 rounded-xl text-xs font-bold text-white opacity-80 hover:opacity-100 hover:bg-white/10 transition-colors"
           >
             {secondary.label}
           </Link>

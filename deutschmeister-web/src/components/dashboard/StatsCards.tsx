@@ -6,7 +6,7 @@ import {
   IconFlame, IconBookOpen, IconTarget,
   IconClock, IconLayers, IconBrain, IconGraduationCap,
 } from '@/components/ui/Icons';
-import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import { ACCENT } from '@/lib/tokens';
 
 interface StatsCardsProps {
   stats: DashboardStats;
@@ -120,18 +120,23 @@ export function StatsCards({ stats }: StatsCardsProps) {
         return (
           <div
             key={i}
-            className={`relative overflow-hidden rounded-2xl p-4 transition-all duration-300
-              hover:-translate-y-0.5 hover:shadow-lg cursor-default group ${colSpanClass}`}
-            style={{ background: card.gradient }}
+            className={`relative overflow-hidden rounded-3xl p-5 transition-all duration-500
+              hover:-translate-y-1.5 hover:shadow-xl cursor-default group ${colSpanClass} border shadow-sm backdrop-blur-md`}
+            style={{ 
+              background: card.gradient, 
+              borderColor: 'var(--theme-border)',
+              boxShadow: `inset 0 1px 0 0 rgba(255, 255, 255, 0.05)`
+            }}
           >
             {/* Streak freeze badge — only on streak card */}
             {isStreakCard && stats.streakFreezesAvailable > 0 && (
               <div
-                className="absolute top-2 right-2 flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-caption font-bold z-10"
+                className="absolute top-4 right-4 flex items-center gap-1 px-2 py-1 rounded-full text-xs font-black z-10 shadow-sm"
                 style={{
                   background: 'rgba(59,130,246,.15)',
                   color: ACCENT.srs,
                   border: '1px solid rgba(59,130,246,.3)',
+                  backdropFilter: 'blur(4px)'
                 }}
                 title={`${stats.streakFreezesAvailable} streak freeze — bảo vệ streak nếu bạn lỡ 1 ngày`}
               >

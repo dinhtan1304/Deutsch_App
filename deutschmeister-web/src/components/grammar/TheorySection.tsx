@@ -2,7 +2,7 @@
 /* eslint-disable no-restricted-syntax */
 
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import { ACCENT, STATUS } from '@/lib/tokens';
 import { usePronunciation } from '@/hooks/usePronunciation';
 import { HighlightedText } from '@/components/word-highlight/HighlightedText';
 import { IconVolume } from '@/components/ui/Icons';

@@ -1,5 +1,7 @@
 'use client';
 
+import { GRADIENT } from '@/lib/tokens';
+
 interface Props {
   difficulty: string;
   answeredCount: number;
@@ -16,7 +18,7 @@ export function DictationHeader({ difficulty, answeredCount, totalBlanks, onSubm
       <div className="flex items-center gap-2">
         <span
           className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold text-white"
-          style={{ background: 'linear-gradient(135deg, #06B6D4, #3B82F6)' }}
+          style={{ background: GRADIENT.dictation }}
         >
           Độ khó: {difficulty}
         </span>
@@ -32,7 +34,7 @@ export function DictationHeader({ difficulty, answeredCount, totalBlanks, onSubm
         onClick={onSubmit}
         disabled={isSubmitting}
         className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold text-white transition-opacity disabled:opacity-60"
-        style={{ background: 'linear-gradient(135deg, #06B6D4, #3B82F6)' }}
+        style={{ background: GRADIENT.dictation }}
       >
         {isSubmitting ? (
           <svg className="animate-spin" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">

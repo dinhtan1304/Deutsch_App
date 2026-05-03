@@ -1,10 +1,11 @@
 ﻿'use client';
-/* eslint-disable no-restricted-syntax */
 
 import Link from 'next/link';
-import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import { ACCENT, GRADIENT } from '@/lib/tokens';
 import type { TopicProgress } from '@/types/dashboard';
 import { IconLayers, IconArrowRight } from '@/components/ui/Icons';
+
+const monoGradientH = (color: string) => `linear-gradient(90deg, ${color}, ${color}aa)`;
 
 interface TopicProgressListProps {
   data: TopicProgress[];
@@ -33,7 +34,7 @@ export function TopicProgressList({ data, limit }: TopicProgressListProps) {
         <h3 className="text-title font-bold flex items-center gap-2"
           style={{ color: 'var(--theme-text-primary)' }}>
           <span className="w-7 h-7 rounded-lg flex items-center justify-center"
-            style={{ background: 'linear-gradient(135deg, rgba(236,72,153,.15), rgba(244,114,182,.1))' }}>
+            style={{ background: GRADIENT.listeningIconBg }}>
             <IconLayers size={15} style={{ color: ACCENT.listening }} />
           </span>
           Tiến độ theo chủ đề
@@ -63,13 +64,13 @@ export function TopicProgressList({ data, limit }: TopicProgressListProps) {
               className="h-full rounded-full transition-all duration-700"
               style={{
                 width: `${overallProgress}%`,
-                background: 'linear-gradient(90deg, #3B82F6, #10B981)',
+                background: GRADIENT.progressBarEmerald,
               }}
             />
           </div>
         </div>
         <div className="text-center px-3">
-          <div className="text-xl font-extrabold" style={{ color: '#10B981' }}>{completedCount}</div>
+          <div className="text-xl font-extrabold" style={{ color: ACCENT.emerald }}>{completedCount}</div>
           <div className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>Hoàn thành</div>
         </div>
       </div>
@@ -103,7 +104,7 @@ export function TopicProgressList({ data, limit }: TopicProgressListProps) {
                   </span>
                   {isComplete && (
                     <span className="text-caption px-1.5 py-0.5 rounded-full font-semibold"
-                      style={{ backgroundColor: 'rgba(16,185,129,.12)', color: '#10B981' }}>
+                      style={{ backgroundColor: `${ACCENT.emerald}1f`, color: ACCENT.emerald }}>
                       ✓
                     </span>
                   )}
@@ -122,13 +123,13 @@ export function TopicProgressList({ data, limit }: TopicProgressListProps) {
                     style={{
                       width: `${topic.percent}%`,
                       background: isComplete
-                        ? 'linear-gradient(90deg, #10B981, #34D399)'
-                        : `linear-gradient(90deg, ${topic.color}, ${topic.color}aa)`,
+                        ? GRADIENT.emeraldH
+                        : monoGradientH(topic.color),
                     }}
                   />
                 </div>
                 <span className="text-xs font-semibold w-10 text-right"
-                  style={{ color: isComplete ? '#10B981' : topic.color }}>
+                  style={{ color: isComplete ? ACCENT.emerald : topic.color }}>
                   {Math.round(topic.percent)}%
                 </span>
               </div>
@@ -141,7 +142,7 @@ export function TopicProgressList({ data, limit }: TopicProgressListProps) {
       {data.length === 0 && (
         <div className="text-center py-8 px-4">
           <div className="w-14 h-14 mx-auto mb-3 rounded-2xl flex items-center justify-center"
-            style={{ background: 'linear-gradient(135deg, rgba(236,72,153,.12), rgba(244,114,182,.08))' }}>
+            style={{ background: GRADIENT.listeningIconBg }}>
             <IconLayers size={28} style={{ color: ACCENT.listening }} />
           </div>
           <p className="text-body font-semibold mb-1" style={{ color: 'var(--theme-text-primary)' }}>
@@ -153,7 +154,7 @@ export function TopicProgressList({ data, limit }: TopicProgressListProps) {
           <Link
             href="/topics"
             className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-body font-semibold text-white transition-all hover:-translate-y-0.5"
-            style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' }}
+            style={{ background: GRADIENT.listening }}
           >
             Khám phá chủ đề
             <IconArrowRight size={14} />

@@ -1,8 +1,7 @@
 ﻿'use client';
-/* eslint-disable no-restricted-syntax */
 
 import { Gender } from '@/types';
-import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import { ACCENT, STATUS } from '@/lib/tokens';
 import { getBestRule, getTipForWord } from '@/lib/genderRules';
 
 interface GenderTipProps {
@@ -23,9 +22,9 @@ function IconLightbulb({ size = 16 }: { size?: number }) {
 }
 
 const COLORS = {
-  masculine: { bg: 'rgba(59,130,246,.1)', border: ACCENT.srs, text: '#2563EB', light: 'rgba(59,130,246,.06)' },
-  feminine: { bg: 'rgba(236,72,153,.1)', border: ACCENT.listening, text: '#DB2777', light: 'rgba(236,72,153,.06)' },
-  neuter: { bg: 'rgba(34,197,94,.1)', border: STATUS.success, text: '#16A34A', light: 'rgba(34,197,94,.06)' },
+  masculine: { bg: `${ACCENT.srs}1a`, border: ACCENT.srs, text: ACCENT.srs, light: `${ACCENT.srs}0d` },
+  feminine: { bg: `${ACCENT.listening}1a`, border: ACCENT.listening, text: ACCENT.listening, light: `${ACCENT.listening}0d` },
+  neuter: { bg: `${STATUS.success}1a`, border: STATUS.success, text: STATUS.success, light: `${STATUS.success}0d` },
 };
 
 export function GenderTip({ word, gender, showDetailed = false }: GenderTipProps) {

@@ -2,7 +2,7 @@
 /* eslint-disable no-restricted-syntax */
 
 import Link from 'next/link';
-import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import { ACCENT } from '@/lib/tokens';
 
 export default function BillingPage() {
   return (

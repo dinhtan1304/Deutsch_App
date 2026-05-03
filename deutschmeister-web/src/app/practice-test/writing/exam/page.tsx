@@ -8,6 +8,15 @@ import { PageHeader } from '@/components/ui';
 import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 
 // ─── Inline icons ─────────────────────────────────────────────────────────────
+function IconPenLine({ size = 16, style }: { size?: number; style?: React.CSSProperties }) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}><path d="m18 5-3-3H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L18 5Z" /><path d="M14 2v4a1 1 0 0 0 1 1h4" /><path d="M8 10h8" /><path d="M8 14h8" /><path d="M8 18h5" /></svg>;
+}
+function IconDice({ size = 16, style }: { size?: number; style?: React.CSSProperties }) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}><rect width="12" height="12" x="2" y="10" rx="2" ry="2" /><path d="m17.92 14 3.5-3.5a2.24 2.24 0 0 0 0-3l-5-4.92a2.24 2.24 0 0 0-3 0L10 6" /><path d="M6 18h.01" /><path d="M10 14h.01" /><path d="M15 6h.01" /><path d="M18 9h.01" /></svg>;
+}
+function IconCheck({ size = 16, style }: { size?: number; style?: React.CSSProperties }) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}><polyline points="20 6 9 17 4 12" /></svg>;
+}
 function IconPlus({ size = 16, style }: { size?: number; style?: React.CSSProperties }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>;
 }
@@ -58,32 +67,48 @@ function HistoryCard({ item, onDelete }: { item: ExamWritingHistoryItem; onDelet
 
   return (
     <Link href={href}
-      className="group block rounded-2xl border p-4 transition-all hover:-translate-y-0.5"
-      style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)', boxShadow: '0 2px 8px rgba(0,0,0,.04)' }}>
-      <div className="flex items-start justify-between gap-3">
+      className="group block rounded-3xl p-5 transition-all duration-500 hover:-translate-y-1.5 hover:shadow-2xl relative overflow-hidden"
+      style={{ 
+        backgroundColor: 'var(--theme-bg-card)', 
+        boxShadow: 'inset 0 0 0 1px rgba(255, 255, 255, 0.05), 0 4px 12px rgba(0, 0, 0, 0.1)' 
+      }}>
+      
+      {/* Background Glow on Hover */}
+      <div className="absolute inset-0 opacity-0 group-hover:opacity-[0.03] transition-opacity duration-500 pointer-events-none" 
+        style={{ background: GRADIENT.examWriting }} />
+
+      <div className="relative z-10 flex items-start justify-between gap-4">
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap mb-1.5">
+          <div className="flex items-center gap-2 flex-wrap mb-2">
             <ExamBadge examType={item.examType} cefrLevel={item.cefrLevel} />
             <StatusBadge status={item.status} />
           </div>
-          <p className="text-body font-semibold" style={{ color: 'var(--theme-text-primary)' }}>
-            Luyện Viết Theo Đề
+          <p className="text-lg font-bold tracking-tight mb-1" style={{ color: 'var(--theme-text-primary)' }}>
+            Luyện Viết Theo Đề Chuẩn
           </p>
-          <p className="text-xs mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>
-            {new Date(item.createdAt).toLocaleDateString('vi-VN')}
-            {item.gradedAt && ` · Chấm lúc ${new Date(item.gradedAt).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}`}
-          </p>
+          <div className="flex items-center gap-2 text-xs font-medium" style={{ color: 'var(--theme-text-muted)' }}>
+            <span>{new Date(item.createdAt).toLocaleDateString('vi-VN')}</span>
+            {item.gradedAt && (
+              <>
+                <span className="opacity-30">·</span>
+                <span>Chấm lúc {new Date(item.gradedAt).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}</span>
+              </>
+            )}
+          </div>
         </div>
-        <div className="flex flex-col items-end gap-2">
+
+        <div className="flex items-center gap-4 shrink-0">
           {isGraded && item.totalScore != null && (
-            <span className="text-title font-extrabold" style={{ color: getScoreColor(item.totalScore) }}>
-              {Math.round(item.totalScore)}%
-            </span>
+            <div className="text-right">
+              <div className="text-3xl font-black tracking-tighter" style={{ color: getScoreColor(item.totalScore) }}>
+                {Math.round(item.totalScore)}<span className="text-sm ml-0.5">%</span>
+              </div>
+            </div>
           )}
           <button onClick={(e) => { e.preventDefault(); onDelete(); }}
-            className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-all hover:scale-110"
-            style={{ backgroundColor: `${STATUS.danger}1A`, color: STATUS.danger }}>
-            <IconTrash size={13} />
+            className="w-10 h-10 rounded-xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-red-500/10 hover:text-red-500"
+            style={{ color: 'var(--theme-text-muted)' }}>
+            <IconTrash size={18} />
           </button>
         </div>
       </div>
@@ -142,16 +167,25 @@ function ExamWritingListContent() {
 
       {/* Stats Banner */}
       {stats && (
-        <div className="flex items-center gap-3 mb-5 overflow-x-auto no-scrollbar">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
           {[
-            { label: 'Tổng bài', value: stats.total, color: ACCENT.examWriting },
-            { label: 'TB điểm', value: stats.graded > 0 ? `${Math.round(stats.avgScore)}%` : '—', color: getScoreColor(stats.avgScore) },
-            { label: 'Cao nhất', value: stats.graded > 0 ? `${Math.round(stats.bestScore)}%` : '—', color: STATUS.success },
+            { label: 'Tổng bài thi', value: stats.total, color: ACCENT.examWriting, icon: <IconPenLine size={24} /> },
+            { label: 'TB điểm số', value: stats.graded > 0 ? `${Math.round(stats.avgScore)}%` : '—', color: getScoreColor(stats.avgScore), icon: <IconDice size={24} /> },
+            { label: 'Thành tích cao', value: stats.graded > 0 ? `${Math.round(stats.bestScore)}%` : '—', color: STATUS.success, icon: <IconCheck size={24} /> },
           ].map((s, i) => (
-            <div key={i} className="flex items-center gap-2 px-3 py-2 rounded-xl shrink-0"
-              style={{ backgroundColor: `${s.color}1A` }}>
-              <span className="text-base font-extrabold" style={{ color: s.color }}>{s.value}</span>
-              <span className="text-[10px] font-medium" style={{ color: 'var(--theme-text-muted)' }}>{s.label}</span>
+            <div key={i} className="relative overflow-hidden rounded-3xl p-5 border shadow-sm backdrop-blur-md transition-all duration-300 hover:-translate-y-1"
+              style={{ 
+                backgroundColor: `${s.color}0A`, 
+                borderColor: 'var(--theme-border)',
+                boxShadow: 'inset 0 1px 0 0 rgba(255, 255, 255, 0.05)'
+              }}>
+              <div className="absolute -right-4 -bottom-4 opacity-10 rotate-12" style={{ color: s.color }}>
+                {s.icon}
+              </div>
+              <div className="relative z-10">
+                <div className="text-xs font-black uppercase tracking-widest mb-1" style={{ color: 'var(--theme-text-muted)' }}>{s.label}</div>
+                <div className="text-3xl font-black" style={{ color: s.color }}>{s.value}</div>
+              </div>
             </div>
           ))}
         </div>

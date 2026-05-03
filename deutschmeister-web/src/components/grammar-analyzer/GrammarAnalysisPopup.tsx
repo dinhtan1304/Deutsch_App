@@ -2,7 +2,7 @@
 /* eslint-disable no-restricted-syntax */
 
 import { useEffect, useRef } from 'react';
-import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import { ACCENT, STATUS } from '@/lib/tokens';
 import { useGrammarAnalyzerStore } from '@/stores/grammarAnalyzerStore';
 
 /** Màu cho từng vai trò ngữ pháp */
@@ -59,7 +59,7 @@ export function GrammarAnalysisPopup() {
   // Tính vị trí
   const scrollY = typeof window !== 'undefined' ? window.scrollY : 0;
   let x = popupPosition?.x ?? 100;
-  let y = (popupPosition?.y ?? 100) + scrollY + 8;
+  const y = (popupPosition?.y ?? 100) + scrollY + 8;
   if (typeof window !== 'undefined') {
     if (x + 400 > window.innerWidth) x = window.innerWidth - 416;
     if (x < 16) x = 16;
@@ -118,7 +118,7 @@ export function GrammarAnalysisPopup() {
             <div className="gp-section">
               <div className="gp-label">Cấu trúc câu</div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '8px' }}>
-                {result.components.map((comp : any, i : any) => (
+                {result.components.map((comp, i) => (
                   <span
                     key={i}
                     className="gp-comp-chip"
@@ -138,7 +138,7 @@ export function GrammarAnalysisPopup() {
 
               {/* Component notes */}
               <div className="gp-comp-notes">
-                {result.components.filter(c => c.noteVi).map((comp : any, i: any) => (
+                {result.components.filter(c => c.noteVi).map((comp, i) => (
                   <div key={i} className="gp-comp-note">
                     <span style={{ color: getRoleColor(comp.role), fontWeight: 600 }}>{comp.text}</span>
                     <span className="gp-muted"> — {comp.noteVi}</span>
@@ -159,7 +159,7 @@ export function GrammarAnalysisPopup() {
             {result.grammarRules.length > 0 && (
               <div className="gp-section">
                 <div className="gp-label">📐 Quy tắc</div>
-                {result.grammarRules.map((rule : any, i: any) => (
+                {result.grammarRules.map((rule, i) => (
                   <div key={i} className="gp-rule">
                     <span className="gp-primary" style={{ fontWeight: 600, fontSize: '13px' }}>
                       {rule.rule}

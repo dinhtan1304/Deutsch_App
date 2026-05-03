@@ -1,6 +1,5 @@
 import { TopicWord, ArticleColor } from '@/types/topic';
-/* eslint-disable no-restricted-syntax */
-import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import { ACCENT, STATUS } from '@/lib/tokens';
 import { IconVolume, IconLightbulb, IconX } from '@/components/ui/Icons';
 import { useEffect, useRef } from 'react';
 
@@ -12,7 +11,8 @@ interface TopicWordDetailModalProps {
 
 export function TopicWordDetailModal({ word, onClose, onSpeak }: TopicWordDetailModalProps) {
   const ref = useRef<HTMLDivElement>(null);
-  const ac = word.article ? (ArticleColor[word.article] || { color: '#6B7280', bg: 'rgba(107,114,128,.1)' }) : { color: '#6B7280', bg: 'rgba(107,114,128,.1)' };
+  const DEFAULT_AC = { color: ACCENT.gray, bg: `${ACCENT.gray}1a` };
+  const ac = ArticleColor[word.article] ?? DEFAULT_AC;
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -27,7 +27,7 @@ export function TopicWordDetailModal({ word, onClose, onSpeak }: TopicWordDetail
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+    <div className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
       onClick={onClose}>
       <div ref={ref} onClick={e => e.stopPropagation()}
         role="dialog"
@@ -115,7 +115,7 @@ export function TopicWordDetailModal({ word, onClose, onSpeak }: TopicWordDetail
             )}
 
             {word.tips && word.tips.length > 0 && (
-              <div className="mb-4 p-3 rounded-xl" style={{ backgroundColor: 'rgba(245,158,11,.05)', color: '#D97706' }}>
+              <div className="mb-4 p-3 rounded-xl" style={{ backgroundColor: `${ACCENT.xp}0d`, color: ACCENT.xpDark }}>
                 <div className="flex flex-col gap-2">
                   {word.tips.map((tip, i) => (
                     <div key={i} className="flex items-start gap-2 text-sm leading-relaxed">

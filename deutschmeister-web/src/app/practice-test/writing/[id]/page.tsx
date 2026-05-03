@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useWritingSession, useSaveDraft, useSubmitWriting } from '@/hooks/useWriting';
 import { IconBookOpen, IconChevronDown, IconChevronLeft, IconEye, IconEyeOff, IconLoader, IconPenLine, IconSave, IconSend } from '../icons';
-import { PageHeader, FixedActionBar } from '@/components/ui';
+import { FixedActionBar } from '@/components/ui';
 import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 
 function IconChevronUp({ size = 14 }: { size?: number }) {
@@ -43,17 +43,16 @@ export default function WritingEditorPage() {
   // version without adding saveDraftMutation to useCallback deps (would recreate on
   // every save cycle, resetting the 30 s debounce).
   const saveDraftMutateRef = useRef(saveDraftMutation.mutate);
-  saveDraftMutateRef.current = saveDraftMutation.mutate;
+  useEffect(() => { saveDraftMutateRef.current = saveDraftMutation.mutate; });
 
-  const [text, setText] = useState('');
+  const [localText, setLocalText] = useState<string | null>(null);
+  const text = localText ?? session?.userText ?? '';
   const [showHints, setShowHints] = useState(true);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [stickyPromptOpen, setStickyPromptOpen] = useState(false);
   const [showStickyPrompt, setShowStickyPrompt] = useState(false);
   const promptRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => { if (session?.userText) setText(session.userText); }, [session?.userText]);
   useEffect(() => { if (session?.status === 'GRADED') router.replace(`/practice-test/writing/${id}/result`); }, [session?.status, id, router]);
 
   useEffect(() => {
@@ -106,7 +105,7 @@ export default function WritingEditorPage() {
     if (!textareaRef.current) return;
     const { selectionStart, selectionEnd } = textareaRef.current;
     const newText = text.substring(0, selectionStart) + char + text.substring(selectionEnd);
-    setText(newText);
+    setLocalText(newText);
     setTimeout(() => {
       if (textareaRef.current) {
         textareaRef.current.focus();
@@ -322,7 +321,7 @@ export default function WritingEditorPage() {
               </div>
 
               {/* Textarea */}
-              <textarea ref={textareaRef} value={text} onChange={e => setText(e.target.value)} autoFocus
+              <textarea ref={textareaRef} value={text} onChange={e => setLocalText(e.target.value)} autoFocus
                 placeholder={`Schreiben Sie hier Ihren Text...\n\nViết bài của bạn ở đây... (${session.wordCountMin}–${session.wordCountMax} từ)`}
                 className="w-full min-h-112 p-5 bg-transparent resize-y focus:outline-none text-[15px] leading-relaxed"
                 style={{ color: 'var(--theme-text-primary)' }} />

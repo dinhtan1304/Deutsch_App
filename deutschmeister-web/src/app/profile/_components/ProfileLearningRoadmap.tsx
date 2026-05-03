@@ -65,7 +65,7 @@ export function ProfileLearningRoadmap() {
   const notPassed = selectedLessons.filter(l => l.status !== 'passed');
 
   return (
-    <div className="rounded-[2rem] border mb-8 overflow-hidden shadow-2xl backdrop-blur-md"
+    <div className="rounded-4xl border mb-8 overflow-hidden shadow-2xl backdrop-blur-md"
       style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
 
       {/* Header */}
@@ -92,7 +92,7 @@ export function ProfileLearningRoadmap() {
       {/* Level track */}
       <div className="px-6 py-8" style={{ borderBottom: '1px solid var(--theme-border)' }}>
         <div className="flex items-start justify-between gap-4 relative">
-          <div className="absolute top-6 h-[2px] mx-12"
+          <div className="absolute top-6 h-0.5 mx-12"
             style={{ left: 0, right: 0, backgroundColor: 'var(--theme-border)', opacity: 0.3, zIndex: 0 }} />
 
           {LEVELS.map(level => {
@@ -115,7 +115,7 @@ export function ProfileLearningRoadmap() {
                 <div className="text-[11px] font-black" style={{ color: stat.pct > 0 ? lColor : 'var(--theme-text-muted)' }}>
                   {loadingLessons ? '—' : `${stat.pct}%`}
                 </div>
-                <div className="w-full max-w-[64px] h-1.5 rounded-full overflow-hidden bg-white/10">
+                <div className="w-full max-w-16 h-1.5 rounded-full overflow-hidden bg-white/10">
                   <div className="h-full rounded-full transition-all duration-1000"
                     style={{ width: `${stat.pct}%`, background: `linear-gradient(90deg, ${lColor}, ${lColor}cc)` }} />
                 </div>
@@ -130,7 +130,7 @@ export function ProfileLearningRoadmap() {
               <IconLock size={16} className="text-white/40" />
             </div>
             <div className="text-[11px] font-black text-white/20">B2</div>
-            <div className="w-full max-w-[64px] h-1.5 rounded-full bg-white/5" />
+            <div className="w-full max-w-16 h-1.5 rounded-full bg-white/5" />
           </div>
         </div>
       </div>

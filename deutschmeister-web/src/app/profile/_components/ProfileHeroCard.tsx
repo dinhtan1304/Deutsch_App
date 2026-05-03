@@ -66,7 +66,7 @@ export function ProfileHeroCard({ user, xpInfo, isLoading, points }: Props) {
                   ) : (
                     user?.name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || 'U'
                   )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
+                  <div className="absolute inset-0 bg-linear-to-t from-black/20 to-transparent pointer-events-none" />
                 </div>
               </div>
             </div>

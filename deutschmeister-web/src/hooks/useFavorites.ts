@@ -6,7 +6,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { ApiError } from '@/lib/api/client';
 
 export function useFavorites() {
-  const { isAuthenticated, logout } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
   
   return useQuery({
     queryKey: ['favorites'],

@@ -1,13 +1,12 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useDictationLibrary, useStartDictation } from '@/hooks/useDictation';
 import { DictationVideo } from '@/lib/api/dictation';
+import { PageHeader, GridSkeleton } from '@/components/ui';
 import { ACCENT, STATUS } from '@/lib/tokens';
-
-const GRADIENT = 'linear-gradient(135deg, #06B6D4, #3B82F6)';
-const COLOR = '#06B6D4';
 
 const CEFR_COLORS: Record<string, string> = {
   A1: STATUS.success, A2: ACCENT.srs, B1: ACCENT.vocab,
@@ -24,63 +23,80 @@ function VideoCard({ video, onStart, isStarting }: { video: DictationVideo; onSt
   return (
     <div 
       onClick={isStarting ? undefined : onStart}
-      className={`group rounded-2xl border overflow-hidden transition-all duration-300 ${isStarting ? 'opacity-70 cursor-wait' : 'cursor-pointer hover:-translate-y-1 hover:shadow-xl hover:border-[#06B6D450]'}`}
+      className={`group relative rounded-4xl border overflow-hidden transition-all duration-700 ${isStarting ? 'opacity-70 cursor-wait' : 'cursor-pointer hover:-translate-y-2 hover:shadow-[0_20px_50px_rgba(6,182,212,0.15)] hover:border-cyan-500/30'}`}
       style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
-      {/* Thumbnail */}
-      <div className="relative w-full aspect-video bg-gray-100 overflow-hidden">
+      
+      {/* Thumbnail Area */}
+      <div className="relative w-full aspect-video bg-black/40 overflow-hidden">
+        {/* Shimmer / Skeleton Loader Effect while loading can be added here */}
+        <div className="absolute inset-0 bg-linear-to-br from-cyan-500/10 to-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+
         {imgError ? (
-          <div className="w-full h-full flex items-center justify-center transition-transform duration-500 group-hover:scale-105"
-            style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke={COLOR} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M3 18v-6a9 9 0 0 1 18 0v6" />
-              <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z" />
-            </svg>
+          <div className="w-full h-full flex items-center justify-center bg-white/2">
+            <div className="flex flex-col items-center gap-2 opacity-20">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/><path d="M9 10h.01"/><path d="M15 10h.01"/><path d="M9.5 15.5c.667.667 1.5 1 2.5 1s1.833-.333 2.5-1"/></svg>
+              <span className="text-[10px] font-black uppercase tracking-tighter">Preview Unavailable</span>
+            </div>
           </div>
         ) : (
-          /* eslint-disable-next-line @next/next/no-img-element */
-          <img
+          <Image
             src={video.thumbnailUrl ?? `https://img.youtube.com/vi/${video.youtubeId}/hqdefault.jpg`}
             alt={video.title}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+            fill
+            className="object-cover transition-all duration-1000 group-hover:scale-110 grayscale-20 group-hover:grayscale-0"
             onError={() => setImgError(true)}
           />
         )}
         
-        {/* Play Overlay */}
-        <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-          <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/30 text-white shadow-lg transform scale-90 group-hover:scale-100 transition-transform duration-300">
+        {/* Play Button Overlay */}
+        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 bg-black/20 backdrop-blur-[2px]">
+          <div className="w-14 h-14 rounded-full bg-white flex items-center justify-center text-black shadow-2xl transform scale-75 group-hover:scale-100 transition-transform duration-500">
             {isStarting ? (
-               <svg className="animate-spin" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                 <path d="M21 12a9 9 0 1 1-6.219-8.56" />
-               </svg>
+               <div className="w-6 h-6 border-4 border-black/10 border-t-black rounded-full animate-spin" />
             ) : (
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none">
-                <polygon points="5 3 19 12 5 21 5 3"></polygon>
-              </svg>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 3 20 12 6 21 6 3" /></svg>
             )}
           </div>
         </div>
 
-        {/* Level badge */}
-        <span className="absolute top-2 left-2 text-[10px] font-black px-2 py-0.5 rounded-full text-white shadow-sm"
-          style={{ backgroundColor: CEFR_COLORS[video.cefrLevel] || ACCENT.vocab }}>
-          {video.cefrLevel}
-        </span>
-        {video.durationSec > 0 && (
-          <span className="absolute bottom-2 right-2 text-[10px] font-bold px-1.5 py-0.5 rounded bg-black/70 text-white backdrop-blur-md">
-            {formatDuration(video.durationSec)}
+        {/* Floating Badges */}
+        <div className="absolute top-3 left-3 flex items-center gap-2">
+          <span className="text-[10px] font-black px-3 py-1 rounded-xl text-white shadow-xl backdrop-blur-xl border border-white/20"
+            style={{ backgroundColor: `${CEFR_COLORS[video.cefrLevel] || ACCENT.vocab}CC` }}>
+            {video.cefrLevel}
           </span>
-        )}
+        </div>
+        
+        <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between pointer-events-none">
+           <span className="text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-lg bg-black/60 text-white backdrop-blur-md border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+             {video.topic ?? 'General'}
+           </span>
+           {video.durationSec > 0 && (
+             <span className="text-[10px] font-black px-2 py-1 rounded-lg bg-black/80 text-white backdrop-blur-md border border-white/10">
+               {formatDuration(video.durationSec)}
+             </span>
+           )}
+        </div>
       </div>
 
-      {/* Info */}
-      <div className="p-3">
-        <p className="text-sm font-semibold line-clamp-2 mb-1 transition-colors group-hover:text-[#06B6D4]" style={{ color: 'var(--theme-text-primary)' }}>
+      {/* Info Content */}
+      <div className="p-5 space-y-3">
+        <h3 className="text-base font-black line-clamp-2 leading-tight tracking-tight group-hover:text-cyan-400 transition-colors duration-300" style={{ color: 'var(--theme-text-primary)' }}>
           {video.title}
-        </p>
-        <p className="text-xs mb-1" style={{ color: 'var(--theme-text-muted)' }}>
-          {video.channelName ?? 'YouTube'} · {video.topic ?? 'Chép chính tả'}
-        </p>
+        </h3>
+        <div className="flex items-center justify-between">
+           <div className="flex items-center gap-2">
+              <div className="w-5 h-5 rounded-full bg-white/5 flex items-center justify-center border border-white/10">
+                 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"/><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"/></svg>
+              </div>
+              <span className="text-[11px] font-bold opacity-40 uppercase tracking-wider" style={{ color: 'var(--theme-text-primary)' }}>
+                {video.channelName ?? 'YouTube'}
+              </span>
+           </div>
+           <span className="text-[10px] font-black uppercase text-cyan-500 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+             Luyện tập →
+           </span>
+        </div>
       </div>
     </div>
   );
@@ -96,66 +112,49 @@ export default function DictationLibraryPage() {
   const { data, isLoading } = useDictationLibrary({ page, limit: 12, cefrLevel: cefrLevel || undefined, topic: topic || undefined });
   const { mutate: startSession } = useStartDictation();
 
-  function handleStart(videoId: string) {
+  const handleStart = (videoId: string) => {
     setStartingId(videoId);
     startSession({ videoId }, {
       onSuccess: (session) => router.push(`/practice-test/dictation/${session.id}`),
       onSettled: () => setStartingId(null),
     });
-  }
+  };
 
   return (
-    <div className="py-6 max-w-5xl mx-auto px-4">
-      {/* Header */}
-      <div className="flex items-center gap-3 mb-6">
-        <button type="button" onClick={() => router.back()}
-          className="w-8 h-8 rounded-xl flex items-center justify-center border"
-          style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-muted)' }}>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="15 18 9 12 15 6" />
-          </svg>
-        </button>
-        <div>
-          <h1 className="text-xl font-bold" style={{ color: 'var(--theme-text-primary)' }}>Thư viện video</h1>
-          <p className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>Chọn video để bắt đầu chép chính tả</p>
-        </div>
-      </div>
+    <div className="py-6 space-y-10">
+      <PageHeader
+        backHref="/practice-test/dictation"
+        title="Thư viện video"
+        subtitle="Chọn từ hàng trăm video được tuyển chọn để bắt đầu hành trình chinh phục tiếng Đức"
+        accent="listening"
+      />
 
-      {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-3 mb-6">
-        <div className="flex items-center p-1 rounded-xl shrink-0" style={{ backgroundColor: 'var(--theme-bg-card)' }}>
+      {/* Filter Toolbar */}
+      <div className="space-y-6">
+        <div className="flex flex-wrap items-center gap-3">
           {['', 'A1', 'A2', 'B1'].map(l => (
-            <button key={l} type="button" onClick={() => { setCefrLevel(l); setPage(1); }}
-              className="px-4 py-1.5 rounded-lg text-xs font-bold transition-all"
+            <button key={l} onClick={() => { setCefrLevel(l); setPage(1); }}
+              className="px-6 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all border"
               style={{
-                backgroundColor: cefrLevel === l ? 'var(--theme-bg-body)' : 'transparent',
-                color: cefrLevel === l ? COLOR : 'var(--theme-text-secondary)',
-                boxShadow: cefrLevel === l ? '0 2px 8px rgba(0,0,0,0.1)' : 'none',
+                backgroundColor: cefrLevel === l ? 'var(--theme-text-primary)' : 'var(--theme-bg-card)',
+                color: cefrLevel === l ? 'var(--theme-bg-body)' : 'var(--theme-text-muted)',
+                borderColor: cefrLevel === l ? 'var(--theme-text-primary)' : 'var(--theme-border)',
+                boxShadow: cefrLevel === l ? '0 10px 20px rgba(0,0,0,0.2)' : 'none',
               }}>
-              {l || 'Tất cả cấp độ'}
+              {l || 'Tất cả trình độ'}
             </button>
           ))}
         </div>
 
         {data?.availableTopics && data.availableTopics.length > 0 && (
-          <div className="flex items-center p-1 rounded-xl overflow-x-auto no-scrollbar" style={{ backgroundColor: 'var(--theme-bg-card)' }}>
-            <button type="button" onClick={() => { setTopic(''); setPage(1); }}
-              className="px-4 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap shrink-0"
-              style={{
-                backgroundColor: topic === '' ? 'var(--theme-bg-body)' : 'transparent',
-                color: topic === '' ? COLOR : 'var(--theme-text-secondary)',
-                boxShadow: topic === '' ? '0 2px 8px rgba(0,0,0,0.1)' : 'none',
-              }}>
+          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-2">
+            <button onClick={() => { setTopic(''); setPage(1); }}
+              className={`px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap border ${topic === '' ? 'border-cyan-500/50 text-cyan-500 bg-cyan-500/5' : 'border-transparent text-muted hover:text-primary'}`}>
               Tất cả chủ đề
             </button>
             {data.availableTopics.map(t => (
-              <button key={t} type="button" onClick={() => { setTopic(t); setPage(1); }}
-                className="px-4 py-1.5 rounded-lg text-xs font-bold transition-all capitalize whitespace-nowrap shrink-0"
-                style={{
-                  backgroundColor: topic === t ? 'var(--theme-bg-body)' : 'transparent',
-                  color: topic === t ? COLOR : 'var(--theme-text-secondary)',
-                  boxShadow: topic === t ? '0 2px 8px rgba(0,0,0,0.1)' : 'none',
-                }}>
+              <button key={t} onClick={() => { setTopic(t); setPage(1); }}
+                className={`px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest whitespace-nowrap border ${topic === t ? 'border-cyan-500/50 text-cyan-500 bg-cyan-500/5' : 'border-transparent text-muted hover:text-primary'}`}>
                 {t}
               </button>
             ))}
@@ -163,20 +162,20 @@ export default function DictationLibraryPage() {
         )}
       </div>
 
-      {/* Grid */}
+      {/* Grid Content */}
       {isLoading ? (
-        <div className="flex justify-center py-16">
-          <svg className="animate-spin" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={COLOR} strokeWidth="2.5">
-            <path d="M21 12a9 9 0 1 1-6.219-8.56" />
-          </svg>
-        </div>
+        <GridSkeleton cols={3} count={12} />
       ) : !data?.items.length ? (
-        <div className="text-center py-16">
-          <p className="text-sm" style={{ color: 'var(--theme-text-muted)' }}>Không có video nào phù hợp.</p>
+        <div className="text-center py-32 rounded-[3rem] border-2 border-dashed transition-all hover:border-cyan-500/30" 
+          style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)/30' }}>
+          <div className="w-20 h-20 rounded-3xl bg-white/5 flex items-center justify-center mx-auto mb-6 border border-white/10 opacity-20">
+             <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/><path d="M9 10h.01"/><path d="M15 10h.01"/><path d="M9.5 15.5c.667.667 1.5 1 2.5 1s1.833-.333 2.5-1"/></svg>
+          </div>
+          <p className="text-sm font-black uppercase tracking-widest opacity-30">Không tìm thấy video phù hợp</p>
         </div>
       ) : (
         <>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
             {data.items.map(video => (
               <VideoCard
                 key={video.id}
@@ -189,24 +188,33 @@ export default function DictationLibraryPage() {
 
           {/* Pagination */}
           {data.totalPages > 1 && (
-            <div className="flex justify-center gap-2 mt-8">
-              <button type="button" disabled={page <= 1} onClick={() => setPage(p => p - 1)}
-                className="px-4 py-2 rounded-xl text-sm font-bold border disabled:opacity-40"
-                style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)' }}>
-                Trước
+            <div className="flex justify-center items-center gap-6 mt-20 pt-10 border-t border-white/5">
+              <button disabled={page <= 1} onClick={() => setPage(p => p - 1)}
+                className="w-12 h-12 rounded-2xl flex items-center justify-center border transition-all hover:bg-white/5 disabled:opacity-20 active:scale-90"
+                style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-primary)' }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="15 18 9 12 15 6" />
+                </svg>
               </button>
-              <span className="px-4 py-2 text-sm" style={{ color: 'var(--theme-text-muted)' }}>
-                {page}/{data.totalPages}
-              </span>
-              <button type="button" disabled={page >= data.totalPages} onClick={() => setPage(p => p + 1)}
-                className="px-4 py-2 rounded-xl text-sm font-bold border disabled:opacity-40"
-                style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)' }}>
-                Tiếp
+              
+              <div className="px-6 py-2 rounded-full bg-white/5 border border-white/5">
+                <span className="text-[10px] font-black tracking-[0.3em] uppercase opacity-40">
+                  Trang {page} / {data.totalPages}
+                </span>
+              </div>
+
+              <button disabled={page >= data.totalPages} onClick={() => setPage(p => p + 1)}
+                className="w-12 h-12 rounded-2xl flex items-center justify-center border transition-all hover:bg-white/5 disabled:opacity-20 active:scale-90"
+                style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-primary)' }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="9 18 15 12 9 6" />
+                </svg>
               </button>
             </div>
           )}
         </>
       )}
     </div>
+
   );
 }

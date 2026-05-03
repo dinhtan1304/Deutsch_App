@@ -1,8 +1,9 @@
 'use client';
-/* eslint-disable no-restricted-syntax */
-
+  
 import Link from 'next/link';
 import { STATUS, GRADIENT } from '@/lib/tokens';
+
+const monoSoftBg = (color: string) => `linear-gradient(135deg, ${color}26, ${color}14)`;
 import { IconBrain, IconTarget, IconRefresh } from '@/components/ui/Icons';
 import type { SRSStats } from '@/lib/api/personal-words';
 
@@ -25,9 +26,7 @@ export function SRSBanner({ srsStats, statTotal }: SRSBannerProps) {
         <div
           className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
           style={{
-            background: isDue
-              ? `linear-gradient(135deg, ${STATUS.danger}26, ${STATUS.danger}14)`
-              : `linear-gradient(135deg, ${STATUS.success}26, ${STATUS.success}14)`,
+            background: monoSoftBg(isDue ? STATUS.danger : STATUS.success),
           }}
         >
           <IconBrain size={20} style={{ color: isDue ? STATUS.danger : STATUS.success }} />
@@ -58,7 +57,7 @@ export function SRSBanner({ srsStats, statTotal }: SRSBannerProps) {
         <Link
           href="/word-bank/review"
           className="flex items-center gap-1.5 px-4 py-2 rounded-xl font-semibold text-xs text-white transition-all hover:scale-105"
-          style={{ background: isDue ? 'linear-gradient(135deg, #EF4444, #DC2626)' : GRADIENT.action }}
+          style={{ background: isDue ? GRADIENT.dangerSolid : GRADIENT.action }}
         >
           <IconRefresh size={14} /> {isDue ? 'Ôn ngay' : 'Học thêm'}
         </Link>

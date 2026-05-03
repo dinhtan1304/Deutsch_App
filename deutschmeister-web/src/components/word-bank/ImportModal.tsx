@@ -91,7 +91,7 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
     const workbook = XLSX.read(data, { type: 'array' });
     const sheetName = workbook.SheetNames[0]!;
     const worksheet = workbook.Sheets[sheetName]!;
-    const jsonData = XLSX.utils.sheet_to_json<Record<string, any>>(worksheet, { defval: '' });
+    const jsonData = XLSX.utils.sheet_to_json<Record<string, unknown>>(worksheet, { defval: '' });
 
     if (jsonData.length === 0) return [];
 

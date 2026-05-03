@@ -58,7 +58,7 @@ export function EmptyState({
 // Welcome state for new users
 export function WelcomeState() {
   return (
-    <div className="p-8 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 text-white text-center">
+    <div className="p-8 rounded-2xl bg-linear-to-br from-blue-500 to-purple-600 text-white text-center">
       <div className="text-6xl mb-4">🇩🇪</div>
       <h2 className="text-2xl font-bold mb-2">
         Chào mừng đến với Deutschmeister!

@@ -2,7 +2,7 @@
 /* eslint-disable no-restricted-syntax */
 
 import { useCallback } from 'react';
-import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import { ACCENT, STATUS } from '@/lib/tokens';
 import { useDictionaryLookup, useCheckWordBank } from '@/hooks/useDictionaryLookup';
 import { useQuickAddWithCollection } from '@/hooks/useQuickAddWithCollection';
 import { AddToCollectionPicker } from '@/components/word-bank/AddToCollectionPicker';

@@ -54,6 +54,7 @@ export default function WordMatchPage() {
   const [results, setResults] = useState<MatchResult[]>([]);
   const [elapsedSec, setElapsedSec] = useState(0);
   const [attempts, setAttempts] = useState<Record<string, number>>({}); // wordId → attempts
+  const [wrongCount, setWrongCount] = useState(0);
 
   const scoreRef = useRef(0);
   const comboRef = useRef(0);
@@ -99,7 +100,7 @@ export default function WordMatchPage() {
     setScore(0); scoreRef.current = 0;
     setCombo(0); comboRef.current = 0;
     setBestCombo(0); bestComboRef.current = 0;
-    correctRef.current = 0; wrongRef.current = 0;
+    correctRef.current = 0; wrongRef.current = 0; setWrongCount(0);
     setResults([]);
     setAttempts({});
     setElapsedSec(0);
@@ -174,6 +175,7 @@ export default function WordMatchPage() {
       comboRef.current = 0;
       setCombo(0);
       wrongRef.current++;
+      setWrongCount(c => c + 1);
       setWrongFlash({ left: leftId, right: rightId });
       setTimeout(() => {
         setWrongFlash(null);
@@ -253,7 +255,7 @@ export default function WordMatchPage() {
       <GameStatsBar stats={[
         { label: 'Điểm',     value: score,                       color: ACCENT.cyan },
         { label: 'Cặp',      value: `${matchedIds.size}/${PAIRS}`, color: STATUS.success, dot: true },
-        { label: 'Sai',      value: wrongRef.current,            color: STATUS.danger, dot: true },
+        { label: 'Sai',      value: wrongCount,                  color: STATUS.danger, dot: true },
         { label: 'Thời gian', value: formatTime(elapsedSec),     color: 'var(--theme-text-primary)' },
       ]} />
 

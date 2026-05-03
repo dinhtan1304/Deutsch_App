@@ -9,7 +9,7 @@ import {
 
 export const examRagKeys = {
   all: ['exam-rag'] as const,
-  list: (params?: Record<string, any>) => [...examRagKeys.all, 'list', params] as const,
+  list: (params?: Record<string, unknown>) => [...examRagKeys.all, 'list', params] as const,
   detail: (id: string) => [...examRagKeys.all, id] as const,
 };
 

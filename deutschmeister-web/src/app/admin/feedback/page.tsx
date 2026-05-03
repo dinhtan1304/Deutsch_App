@@ -193,8 +193,8 @@ function FeedbackRow({
   onStatusChange: (id: string, status: 'new' | 'reviewed' | 'resolved') => void;
   onImageClick: (src: string) => void;
 }) {
-  const typeStyle = TYPE_COLORS[item.type] ?? TYPE_COLORS.other;
-  const statusStyle = STATUS_COLORS[item.status] ?? STATUS_COLORS.new;
+  const typeStyle = TYPE_COLORS[item.type] ?? TYPE_COLORS.other!;
+  const statusStyle = STATUS_COLORS[item.status] ?? STATUS_COLORS.new!;
   const date = new Date(item.createdAt);
   const hasImages = item.imageUrls && item.imageUrls.length > 0;
 
@@ -298,7 +298,7 @@ function FeedbackRow({
               <div style={{ display: 'flex', gap: 8 }}>
                 {(['new', 'reviewed', 'resolved'] as const).map(s => {
                   const active = item.status === s;
-                  const sc = STATUS_COLORS[s];
+                  const sc = STATUS_COLORS[s]!;
                   return (
                     <button
                       key={s}

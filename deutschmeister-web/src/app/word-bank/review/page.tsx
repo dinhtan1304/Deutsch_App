@@ -3,10 +3,11 @@
 import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '@/stores/authStore';
 import { AuthGate } from '@/components/ui';
 import { GRADIENT, ACCENT, STATUS } from '@/lib/tokens';
-import { useSRSDue, useSRSStats, useReviewWord, useWeakWords, useIntervalPreview, SRSRating } from '@/hooks/usePersonalWords';
+import { useSRSDue, useSRSStats, useReviewWord, useWeakWords, useIntervalPreview, SRSRating, srsKeys, personalWordsKeys } from '@/hooks/usePersonalWords';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
 import { usePronunciation } from '@/hooks/usePronunciation';
 import { PersonalWord, getSRSStatus, getIntervalText, SRSStatusInfo, WordTypeInfo, GenderInfo } from '@/types/personalWord';
@@ -224,7 +225,7 @@ function RatingButtons({ word, onRate, isLoading }: RatingButtonsProps) {
   return (
     <div className="grid grid-cols-4 gap-2 sm:gap-3 mt-6 max-w-lg mx-auto">
       {ratings.map(({ rating, label, color, hotkey }) => (
-        <button key={rating} onClick={() => onRate(rating)} disabled={isLoading || intervalsLoading || !intervals}
+        <button key={rating} onClick={() => onRate(rating)} disabled={isLoading}
           className="flex flex-col items-center p-3 sm:p-4 rounded-2xl transition-all duration-200
             hover:-translate-y-1 hover:shadow-lg active:translate-y-0 disabled:opacity-40"
           style={{ background: `${color}12`, border: `2px solid ${color}30` }}>
@@ -354,8 +355,10 @@ export default function WordBankReviewPage() {
   const searchParams = useSearchParams();
   const mode = searchParams.get('mode') === 'weak' ? 'weak' : 'srs';
 
+  const queryClient = useQueryClient();
   const [session, setSession] = useState<ReviewSession | null>(null);
   const [isFlipped, setIsFlipped] = useState(false);
+  const [reviewError, setReviewError] = useState<string | null>(null);
 
   const srsQuery = useSRSDue({ limit: 20, includeNew: true, newLimit: 5 });
   const weakQuery = useWeakWords(20);
@@ -426,8 +429,9 @@ export default function WordBankReviewPage() {
         };
       });
       setIsFlipped(false);
-    } catch (error) {
-      if (process.env.NODE_ENV === 'development') console.error('Review failed:', error);
+    } catch {
+      setReviewError('Quá nhiều yêu cầu, vui lòng thử lại sau vài giây.');
+      setTimeout(() => setReviewError(null), 3000);
     } finally {
       ratingInFlightRef.current = false;
     }
@@ -455,6 +459,15 @@ export default function WordBankReviewPage() {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleRate]);
+
+  // Flush stale-marked queries once the session ends so the completion screen
+  // and word bank page show accurate post-session stats.
+  useEffect(() => {
+    if (isComplete) {
+      queryClient.invalidateQueries({ queryKey: srsKeys.all });
+      queryClient.invalidateQueries({ queryKey: personalWordsKeys.stats() });
+    }
+  }, [isComplete, queryClient]);
 
   const handleRestart = useCallback(() => { setSession(null); refetch(); }, [refetch]);
 
@@ -537,7 +550,14 @@ export default function WordBankReviewPage() {
 
             {/* Rating buttons */}
             {isFlipped && (
-              <RatingButtons word={currentWord} onRate={handleRate} isLoading={reviewMutation.isPending} />
+              <>
+                <RatingButtons word={currentWord} onRate={handleRate} isLoading={reviewMutation.isPending} />
+                {reviewError && (
+                  <p className="text-center text-sm mt-3" style={{ color: STATUS.danger }}>
+                    {reviewError}
+                  </p>
+                )}
+              </>
             )}
 
             {/* Flip hint */}

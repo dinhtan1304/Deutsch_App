@@ -2,7 +2,7 @@
 /* eslint-disable no-restricted-syntax */
 
 import { useState } from 'react';
-import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import { ACCENT, STATUS } from '@/lib/tokens';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useStudyPlan, useStudyPlanWeek, usePauseStudyPlan, useResumeStudyPlan, useDeleteStudyPlan } from '@/hooks/useStudyPlan';
@@ -13,10 +13,11 @@ import {
   IconListening, IconSpeaking, IconReview, IconGame, 
   IconExam, IconRocket, IconCalendar 
 } from './icons';
+import { IconCheck } from '@/components/ui/Icons';
 
 const DAY_NAMES = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
 
-const TASK_ICONS: Record<string, any> = {
+const TASK_ICONS: Record<string, React.ReactNode> = {
   vocab: <IconVocab size={18} />,
   grammar: <IconGrammar size={18} />,
   reading: <IconReading size={18} />,
@@ -378,42 +379,69 @@ export default function StudyPlanPage() {
                 {[0, 1, 2].map(i => <div key={i} className="w-1 h-1 rounded-full bg-gray-300" />)}
               </div>
             </div>
-            <div className="divide-y" style={{ borderColor: 'var(--theme-border)' }}>
-              {displayTasks.map((task: WeeklyTask, i: number) => {
-                const isToday = task.day === today && activeWeek === currentWeek;
-                return (
-                  <Link
-                    key={i}
-                    href={task.href}
-                    className="flex items-center gap-5 px-6 py-4.5 transition-all group relative hover:bg-gray-50/50"
-                  >
-                    <div className="w-10 text-center shrink-0">
-                      <div className={`text-[10px] font-black uppercase tracking-widest ${isToday ? 'text-blue-600' : 'opacity-40'}`}>
-                        {DAY_NAMES[task.day] || 'ALL'}
+            <div className="relative py-4 px-6">
+              {/* Timeline background line */}
+              <div className="absolute left-[52px] top-8 bottom-8 w-0.5 bg-gray-100 dark:bg-white/5" />
+              
+              <div className="space-y-6 relative">
+                {displayTasks.map((task: WeeklyTask, i: number) => {
+                  const isToday = task.day === today && activeWeek === currentWeek;
+                  const isCompleted = task.completed;
+                  
+                  return (
+                    <Link
+                      key={i}
+                      href={task.href}
+                      className={`flex items-start gap-5 transition-all group relative ${isCompleted ? 'opacity-60 hover:opacity-100' : ''}`}
+                    >
+                      {/* Day Label */}
+                      <div className="w-10 pt-2 text-center shrink-0">
+                        <div className={`text-[10px] font-black uppercase tracking-widest ${isToday ? 'text-blue-600' : 'opacity-40'}`}>
+                          {DAY_NAMES[task.day] || 'ALL'}
+                        </div>
                       </div>
-                    </div>
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-110 ${isToday ? 'bg-blue-50 text-blue-600' : 'bg-gray-50 text-gray-400'}`}
-                      style={{ border: isToday ? '1px solid rgba(59,130,246,0.1)' : '1px solid transparent' }}>
-                      {TASK_ICONS[task.type] || <IconRocket size={18} />}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className={`text-[15px] font-bold ${isToday ? 'text-blue-600' : 'var(--theme-text-primary)'}`}>
-                        {task.title}
+                      
+                      {/* Timeline Node & Icon */}
+                      <div className="relative">
+                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 relative z-10 transition-transform duration-300 group-hover:scale-110 shadow-sm
+                          ${isCompleted 
+                            ? 'bg-green-500 text-white shadow-green-500/40' 
+                            : isToday 
+                              ? 'bg-blue-50 text-blue-600 border border-blue-200 shadow-blue-500/20' 
+                              : 'bg-[var(--theme-bg-secondary)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]'}`}
+                        >
+                          {isCompleted ? <IconCheck size={20} /> : (TASK_ICONS[task.type] || <IconRocket size={20} />)}
+                        </div>
+                        
+                        {/* Glow effect for today */}
+                        {isToday && !isCompleted && (
+                          <div className="absolute inset-0 bg-blue-400 rounded-2xl blur-md opacity-30 animate-pulse" />
+                        )}
                       </div>
-                      <div className="text-xs font-medium mt-0.5 opacity-60 truncate" style={{ color: 'var(--theme-text-muted)' }}>
-                        {task.description}
+                      
+                      {/* Task Content */}
+                      <div className="flex-1 min-w-0 pt-1.5 pb-2 border-b border-[var(--theme-border)] group-last:border-0">
+                        <div className={`text-[15px] font-bold ${isCompleted ? 'line-through text-[var(--theme-text-muted)]' : isToday ? 'text-blue-600' : 'text-[var(--theme-text-primary)]'}`}>
+                          {task.title}
+                        </div>
+                        <div className="text-xs font-medium mt-1 opacity-60 line-clamp-2" style={{ color: 'var(--theme-text-muted)' }}>
+                          {task.description}
+                        </div>
                       </div>
-                    </div>
-                    <div className="shrink-0 opacity-0 group-hover:opacity-100 transition-all transform translate-x-2 group-hover:translate-x-0">
-                      <div className="w-8 h-8 rounded-full flex items-center justify-center bg-white border shadow-sm">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{ color: 'var(--theme-text-muted)' }}>
-                          <path d="M9 18l6-6-6-6" />
-                        </svg>
+                      
+                      {/* Action Arrow */}
+                      <div className="shrink-0 pt-2 opacity-0 group-hover:opacity-100 transition-all transform translate-x-2 group-hover:translate-x-0">
+                        <div className="w-8 h-8 rounded-full flex items-center justify-center bg-white dark:bg-black border shadow-sm"
+                          style={{ borderColor: 'var(--theme-border)' }}>
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{ color: 'var(--theme-text-muted)' }}>
+                            <path d="M9 18l6-6-6-6" />
+                          </svg>
+                        </div>
                       </div>
-                    </div>
-                  </Link>
-                );
-              })}
+                    </Link>
+                  );
+                })}
+              </div>
             </div>
           </div>
         </div>

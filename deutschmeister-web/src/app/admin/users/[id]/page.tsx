@@ -101,7 +101,7 @@ export default function AdminUserDetailPage() {
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontSize: 20, fontWeight: 700, color: '#fff',
             }}>
-              {(user.name || user.email)[0].toUpperCase()}
+              {(user.name || user.email || '?').charAt(0).toUpperCase()}
             </div>
             <div>
               <p style={{ fontSize: 18, fontWeight: 800, color: '#F1F5F9' }}>{user.name || <span style={{ color: '#475569', fontStyle: 'italic' }}>Chưa đặt tên</span>}</p>

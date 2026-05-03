@@ -2,15 +2,14 @@
 /* eslint-disable no-restricted-syntax */
 
 import { useState } from 'react';
-import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
-import { useRouter } from 'next/navigation';
+import { ACCENT, STATUS } from '@/lib/tokens';
 import { usePlans, useLifetimeRemaining } from '@/hooks/useSubscription';
 import { useAuthStore } from '@/stores/authStore';
 import { UpgradeModal } from '@/components/subscription/UpgradeModal';
-import { PlanCard } from '@/components/ui/PlanCard';
 import type { BillingPeriod } from '@/lib/api/subscriptions';
-import { IconChevronLeft, IconCheck, IconZap, IconStar, IconMessageCircle, IconSettings } from '@/components/ui/Icons';
+import { IconChevronLeft, IconCheck, IconZap, IconStar, IconMessageCircle } from '@/components/ui/Icons';
 import Link from 'next/link';
+import Image from 'next/image';
 
 // Simple X icon for comparison
 const IconX = ({ size = 16 }: { size?: number }) => (
@@ -65,7 +64,6 @@ function formatVND(n: number) {
 type PremiumPeriod = 'monthly' | 'quarterly' | 'yearly';
 
 export default function PricingPage() {
-  const router = useRouter();
   const { isAuthenticated, user } = useAuthStore();
   const { data: plans } = usePlans();
   const { data: lifetimeInfo } = useLifetimeRemaining();
@@ -109,7 +107,7 @@ export default function PricingPage() {
         {/* Header Section */}
         <div className="text-center mb-12 animate-[slideUp_0.4s_ease-out_both]">
           <div className="flex flex-col items-center mb-8">
-            <img src="/logo.png" width={48} height={48} alt="Logo" className="rounded-2xl shadow-2xl mb-3" />
+            <Image src="/logo.png" width={48} height={48} alt="Logo" className="rounded-2xl shadow-2xl mb-3" />
             <span className="text-[10px] font-black uppercase tracking-[0.3em] opacity-40">DeutschMeister</span>
           </div>
           
@@ -129,7 +127,7 @@ export default function PricingPage() {
 
         {/* Pricing Toggle */}
         <div className="flex justify-center mb-12 animate-[slideUp_0.5s_ease-out_0.1s_both]">
-          <div className="inline-flex p-1.5 rounded-[1.25rem] bg-white/5 border border-white/10 backdrop-blur-xl shadow-inner"
+          <div className="inline-flex p-1.5 rounded-xl bg-white/5 border border-white/10 backdrop-blur-xl shadow-inner"
             style={{ backgroundColor: 'var(--theme-bg-secondary)', borderColor: 'var(--theme-border)' }}>
             {PERIOD_OPTIONS.map(({ key, label, savePct }) => {
               const isActive = activePeriod === key;
@@ -151,7 +149,7 @@ export default function PricingPage() {
         {/* Plan Cards */}
         <div className="grid md:grid-cols-3 gap-6 mb-20 animate-[slideUp_0.6s_ease-out_0.2s_both] items-stretch">
           {/* Free Plan */}
-          <div className="group relative flex flex-col p-8 rounded-[2rem] border bg-theme-bg-card transition-all duration-500 hover:-translate-y-1" style={{ borderColor: 'var(--theme-border)' }}>
+          <div className="group relative flex flex-col p-8 rounded-4xl border bg-theme-bg-card transition-all duration-500 hover:-translate-y-1" style={{ borderColor: 'var(--theme-border)' }}>
             <div className="mb-8">
               <div className="text-[11px] font-black uppercase tracking-widest opacity-40 mb-2">Essential</div>
               <div className="text-3xl font-black mb-1">Miễn phí</div>
@@ -176,7 +174,7 @@ export default function PricingPage() {
           </div>
 
           {/* Premium Plan - Featured */}
-          <div className="group relative flex flex-col p-8 rounded-[2rem] border bg-theme-bg-card transition-all duration-500 hover:-translate-y-2 scale-105 z-10"
+          <div className="group relative flex flex-col p-8 rounded-4xl border bg-theme-bg-card transition-all duration-500 hover:-translate-y-2 scale-105 z-10"
             style={{ borderColor: ACCENT.writing, boxShadow: '0 20px 50px -12px rgba(99,102,241,0.15)' }}>
             <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full bg-indigo-500 text-white text-[10px] font-black uppercase tracking-widest shadow-lg">
               Phổ biến nhất
@@ -214,7 +212,7 @@ export default function PricingPage() {
           </div>
 
           {/* Lifetime Plan */}
-          <div className="group relative flex flex-col p-8 rounded-[2rem] border bg-theme-bg-card transition-all duration-500 hover:-translate-y-1" 
+          <div className="group relative flex flex-col p-8 rounded-4xl border bg-theme-bg-card transition-all duration-500 hover:-translate-y-1" 
             style={{ borderColor: '#EC489933' }}>
             <div className="mb-8">
               <div className="flex items-center gap-2 mb-2">
@@ -247,7 +245,7 @@ export default function PricingPage() {
             <h2 className="text-2xl font-black mb-2">So sánh chi tiết</h2>
             <p className="text-xs opacity-40 font-medium uppercase tracking-widest">Lựa chọn thông minh cho lộ trình của bạn</p>
           </div>
-          <div className="rounded-[2rem] border overflow-hidden backdrop-blur-xl bg-theme-bg-card/50" style={{ borderColor: 'var(--theme-border)' }}>
+          <div className="rounded-4xl border overflow-hidden backdrop-blur-xl bg-theme-bg-card/50" style={{ borderColor: 'var(--theme-border)' }}>
             <table className="w-full">
               <thead>
                 <tr className="bg-theme-bg-secondary/50">
@@ -257,9 +255,9 @@ export default function PricingPage() {
                   <th className="text-center py-6 px-6 text-[11px] font-black uppercase tracking-widest text-pink-500 w-28">Lifetime</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/[0.03]">
+              <tbody className="divide-y divide-white/3">
                 {COMPARISON.map((row) => (
-                  <tr key={row.feature} className="hover:bg-white/[0.01] transition-colors">
+                  <tr key={row.feature} className="hover:bg-white/1 transition-colors">
                     <td className="py-4 px-8 text-[13px] font-bold opacity-80">{row.feature}</td>
                     <td className="text-center py-4 px-6">
                       {row.free === true ? <div className="flex justify-center"><IconCheck size={16} className="opacity-30" /></div> : row.free === false ? <div className="flex justify-center"><IconX size={16} /></div> : <span className="text-[10px] font-black opacity-30">{row.free}</span>}
@@ -292,7 +290,7 @@ export default function PricingPage() {
               { q: 'Chính sách hoàn tiền như thế nào?', a: 'Chúng tôi cam kết hoàn tiền 100% trong vòng 7 ngày đầu tiên nếu bạn không hài lòng với dịch vụ và chưa sử dụng quá 10 lượt luyện tập AI.' },
               { q: 'Nếu dùng hết lượt AI ở bản Free?', a: 'Bạn vẫn có thể học từ vựng, ngữ pháp và chơi mini-games bình thường. Các lượt luyện tập AI sẽ được làm mới vào mỗi thứ Hai hàng tuần.' },
             ].map(({ q, a }) => (
-              <details key={q} className="group rounded-[1.5rem] border border-theme-border bg-theme-bg-card p-6 transition-all hover:bg-white/[0.02]">
+              <details key={q} className="group rounded-4xl border border-theme-border bg-theme-bg-card p-6 transition-all hover:bg-white/2">
                 <summary className="text-sm font-bold cursor-pointer list-none flex items-center justify-between opacity-80 group-open:opacity-100 group-open:mb-4">
                   {q}
                   <div className="w-6 h-6 rounded-lg bg-theme-bg-secondary flex items-center justify-center transition-transform group-open:rotate-180">

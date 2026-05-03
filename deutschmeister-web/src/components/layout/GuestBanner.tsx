@@ -1,21 +1,22 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useSyncExternalStore } from 'react';
 import Link from 'next/link';
 import { useAuthStore } from '@/stores/authStore';
 import { GRADIENT } from '@/lib/tokens';
 
 const DISMISSED_KEY = 'dm-guest-banner-dismissed';
 
+function subscribe(): () => void { return () => {}; }
+function getSnapshot(): boolean { return sessionStorage.getItem(DISMISSED_KEY) === '1'; }
+function getServerSnapshot(): boolean { return true; }
+
 export function GuestBanner() {
   const { isAuthenticated } = useAuthStore();
-  const [dismissed, setDismissed] = useState(true);
+  const storedDismissed = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  const [dismissed, setDismissed] = useState(false);
 
-  useEffect(() => {
-    setDismissed(sessionStorage.getItem(DISMISSED_KEY) === '1');
-  }, []);
-
-  if (isAuthenticated || dismissed) return null;
+  if (isAuthenticated || storedDismissed || dismissed) return null;
 
   const dismiss = () => {
     sessionStorage.setItem(DISMISSED_KEY, '1');
