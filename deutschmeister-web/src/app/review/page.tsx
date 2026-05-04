@@ -7,6 +7,7 @@ import { useSoundEffects } from '@/hooks/useSoundEffects';
 import { usePronunciation } from '@/hooks/usePronunciation';
 import { useRandomWords } from '@/hooks/useWords';
 import { useDueCards, useReviewCard, useAddWordsToSRS, useProgressStats, useProgressIntervalPreview } from '@/hooks/useProgress';
+import { useXp } from '@/hooks/useXp';
 import { ReviewRating, Progress } from '@/types';
 import { IconBrain, IconX } from '@/components/ui/Icons';
 import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
@@ -57,6 +58,9 @@ export default function SRSReviewPage() {
   const [queueNewAtStart, setQueueNewAtStart] = useState(0);
   const { speak } = usePronunciation();
 
+  const { data: xpData, refetch: refetchXp } = useXp();
+  const levelBeforeSessionRef = useRef<number | null>(null);
+
   const reviewMutateRef = useRef(reviewMutation.mutateAsync);
   useEffect(() => { reviewMutateRef.current = reviewMutation.mutateAsync; }, [reviewMutation.mutateAsync]);
 
@@ -96,6 +100,7 @@ export default function SRSReviewPage() {
 
   const startReview = useCallback(() => {
     if (dueCards.length === 0) { setManualPhase('complete'); return; }
+    levelBeforeSessionRef.current = xpData?.level ?? null;
     const shuffled = [...dueCards].sort(() => Math.random() - 0.5);
     const queue = shuffled.slice(0, settings.questionsPerGame);
     setReviewQueue(queue);
@@ -115,7 +120,7 @@ export default function SRSReviewPage() {
     setSessionSeconds(0);
     setManualPhase('reviewing');
     playClick();
-  }, [dueCards, settings.questionsPerGame, playClick, getCardQuizMode]);
+  }, [dueCards, settings.questionsPerGame, playClick, getCardQuizMode, xpData?.level]);
 
   const currentCard = reviewQueue[currentIndex] ?? null;
   const currentWord = currentCard?.word ?? null;
@@ -148,7 +153,17 @@ export default function SRSReviewPage() {
       nextCardTimerRef.current = setTimeout(() => {
         nextCardTimerRef.current = null;
         if (currentIndexRef.current + 1 >= reviewQueueLengthRef.current) {
-          playLevelUp(); setManualPhase('complete'); refetchDue();
+          setManualPhase('complete'); refetchDue();
+          // Wait for the async XP update to land, then check if level crossed a threshold
+          setTimeout(() => {
+            refetchXp().then(result => {
+              if (result.data && levelBeforeSessionRef.current !== null &&
+                  result.data.level > levelBeforeSessionRef.current) {
+                playLevelUp();
+              }
+              levelBeforeSessionRef.current = null;
+            }).catch(() => { levelBeforeSessionRef.current = null; });
+          }, 800);
         } else {
           setCurrentIndex(i => i + 1); setIsFlipped(false); setShowExampleTrans(false);
         }
@@ -160,7 +175,7 @@ export default function SRSReviewPage() {
       reviewSubmittingRef.current = false;
       setIsSubmittingReview(false);
     }
-  }, [currentCard, playCorrect, playWrong, playCombo, playLevelUp, refetchDue]);
+  }, [currentCard, playCorrect, playWrong, playCombo, playLevelUp, refetchDue, refetchXp]);
 
   useEffect(() => {
     const handle = (e: KeyboardEvent) => {

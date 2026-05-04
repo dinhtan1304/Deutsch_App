@@ -50,7 +50,7 @@ function speakGerman(text: string, rate = 0.85) {
 export default function ListeningQuizPage() {
   const router = useRouter();
   const { settings, isLoaded, loadSettings } = useSettingsStore();
-  const { playCorrect, playWrong, playCombo, playLevelUp, playGameOver, playClick } = useSoundEffects();
+  const { playCorrect, playWrong, playCombo, playGameOver, playClick } = useSoundEffects();
   const session = useGameSession('listening');
 
   const [phase, setPhase] = useState<Phase>('setup');
@@ -170,7 +170,7 @@ export default function ListeningQuizPage() {
         setBestCombo(newCombo);
       }
       if (newCombo === 3 || newCombo === 5 || newCombo === 10) setTimeout(() => playCombo(), 200);
-      if (scoreRef.current > 0 && scoreRef.current % 100 === 0) setTimeout(() => playLevelUp(), 300);
+      if (scoreRef.current > 0 && scoreRef.current % 100 === 0) setTimeout(() => playCombo(), 300);
     } else {
       playWrong();
       wrongRef.current++;
@@ -196,7 +196,7 @@ export default function ListeningQuizPage() {
         setTimeout(() => playCurrentWord(questions[nextIndex]!.correct), 200);
       }
     }, 1200);
-  }, [answered, questions, index, answers, questionsCount, playCorrect, playWrong, playCombo, playLevelUp, playGameOver, playCurrentWord, session]);
+  }, [answered, questions, index, answers, questionsCount, playCorrect, playWrong, playCombo, playGameOver, playCurrentWord, session]);
 
   const timer = useGameTimer(phase === 'playing');
 

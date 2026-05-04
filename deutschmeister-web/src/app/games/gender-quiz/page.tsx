@@ -31,7 +31,7 @@ interface AnswerRecord {
 export default function GenderQuizPage() {
   const router = useRouter();
   const { settings, isLoaded, loadSettings } = useSettingsStore();
-  const { playCorrect, playWrong, playCombo, playLevelUp, playGameOver, playClick } = useSoundEffects();
+  const { playCorrect, playWrong, playCombo, playGameOver, playClick } = useSoundEffects();
   // BUG FIX 1: was 'quick-quiz' — caused all GenderQuiz sessions to be
   // recorded as QuickQuiz in the backend, corrupting game history stats.
   const session = useGameSession('gender-quiz');
@@ -83,14 +83,14 @@ export default function GenderQuizPage() {
       setCombo(newCombo);
       if (newCombo > bestCombo) { setBestCombo(newCombo); bestComboRef.current = newCombo; }
       if (newCombo === 3 || newCombo === 5 || newCombo === 10) setTimeout(() => playCombo(), 200);
-      if ((score + 10 * multiplier) % 100 === 0) setTimeout(() => playLevelUp(), 300);
+      if ((score + 10 * multiplier) % 100 === 0) setTimeout(() => playCombo(), 300);
     } else { playWrong(); wrongRef.current++; setCombo(0); }
 
     setTimeout(() => {
       if (index + 1 >= questionsCount) { playGameOver(); setPhase('result'); }
       else { setIndex(i => i + 1); setAnswered(false); setSelectedAnswer(null); }
     }, 1200);
-  }, [answered, currentWord, combo, bestCombo, index, questionsCount, score, playCorrect, playWrong, playCombo, playLevelUp, playGameOver]);
+  }, [answered, currentWord, combo, bestCombo, index, questionsCount, score, playCorrect, playWrong, playCombo, playGameOver]);
 
   useEffect(() => {
     const handle = (e: KeyboardEvent) => {

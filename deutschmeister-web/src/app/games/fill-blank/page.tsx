@@ -31,7 +31,7 @@ interface AnswerRecord {
 export default function FillBlankPage() {
   const router = useRouter();
   const { settings, isLoaded, loadSettings } = useSettingsStore();
-  const { playCorrect, playWrong, playCombo, playLevelUp, playGameOver, playClick } = useSoundEffects();
+  const { playCorrect, playWrong, playCombo, playGameOver, playClick } = useSoundEffects();
   const session = useGameSession('fill-blank');
   const inputRef = useRef<HTMLInputElement>(null);
   const scoreRef = useRef(0);
@@ -90,9 +90,9 @@ export default function FillBlankPage() {
       setCombo(newCombo);
       if (newCombo > bestCombo) { setBestCombo(newCombo); bestComboRef.current = newCombo; }
       if (newCombo === 3 || newCombo === 5 || newCombo === 10) setTimeout(() => playCombo(), 200);
-      if ((score + 10 * multiplier) % 100 === 0) setTimeout(() => playLevelUp(), 300);
+      if ((score + 10 * multiplier) % 100 === 0) setTimeout(() => playCombo(), 300);
     } else { playWrong(); wrongRef.current++; setCombo(0); }
-  }, [answered, currentWord, userInput, combo, bestCombo, score, playCorrect, playWrong, playCombo, playLevelUp]);
+  }, [answered, currentWord, userInput, combo, bestCombo, score, playCorrect, playWrong, playCombo]);
 
   const nextQuestion = useCallback(() => {
     if (index + 1 >= questionsCount) { playGameOver(); setPhase('result'); }

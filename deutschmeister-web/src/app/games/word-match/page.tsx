@@ -38,7 +38,7 @@ function shuffle<T>(arr: T[]): T[] {
 export default function WordMatchPage() {
   const router = useRouter();
   const { settings, loadSettings } = useSettingsStore();
-  const { playCorrect, playWrong, playCombo, playLevelUp, playGameOver, playClick } = useSoundEffects();
+  const { playCorrect, playWrong, playCombo, playGameOver, playClick } = useSoundEffects();
   const session = useGameSession('matching');
 
   const [phase, setPhase] = useState<Phase>('setup');
@@ -150,7 +150,7 @@ export default function WordMatchPage() {
       correctRef.current++;
       playCorrect();
       if (newCombo === 3 || newCombo === 5 || newCombo === 10) setTimeout(() => playCombo(), 200);
-      if (scoreRef.current > 0 && scoreRef.current % 50 === 0) setTimeout(() => playLevelUp(), 300);
+      if (scoreRef.current > 0 && scoreRef.current % 50 === 0) setTimeout(() => playCombo(), 300);
 
       // Find word for result
       const word = leftItems.find(li => li.id === leftId)?.word;
@@ -182,7 +182,7 @@ export default function WordMatchPage() {
         setSelectedLeft(null);
       }, 700);
     }
-  }, [selectedLeft, matchedIds, wrongFlash, attempts, leftItems, results, playCorrect, playWrong, playCombo, playLevelUp, endGame]);
+  }, [selectedLeft, matchedIds, wrongFlash, attempts, leftItems, results, playCorrect, playWrong, playCombo, endGame]);
 
   // ─── Setup Screen ───
   if (phase === 'setup') {

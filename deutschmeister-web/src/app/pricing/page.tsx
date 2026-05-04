@@ -204,11 +204,19 @@ export default function PricingPage() {
                 Bao gồm mọi tính năng Free
               </li>
             </ul>
-            <button onClick={() => openUpgrade(activePeriod)}
-              className="w-full py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all text-white shadow-xl shadow-indigo-500/20 hover:scale-[1.02] active:scale-95"
-              style={{ background: 'linear-gradient(135deg, #6366F1, #4F46E5)' }}>
-              {isPremium ? 'Gói của bạn' : 'Nâng cấp ngay'}
-            </button>
+            {!isAuthenticated ? (
+              <Link href="/auth/login?returnTo=/pricing"
+                className="w-full py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all text-white shadow-xl shadow-indigo-500/20 hover:scale-[1.02] active:scale-95 flex items-center justify-center"
+                style={{ background: 'linear-gradient(135deg, #6366F1, #4F46E5)' }}>
+                Đăng nhập để mua
+              </Link>
+            ) : (
+              <button onClick={() => openUpgrade(activePeriod)}
+                className="w-full py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all text-white shadow-xl shadow-indigo-500/20 hover:scale-[1.02] active:scale-95"
+                style={{ background: 'linear-gradient(135deg, #6366F1, #4F46E5)' }}>
+                {isPremium ? 'Gói của bạn' : 'Nâng cấp ngay'}
+              </button>
+            )}
           </div>
 
           {/* Lifetime Plan */}
@@ -232,10 +240,17 @@ export default function PricingPage() {
                 </li>
               ))}
             </ul>
-            <button onClick={() => openUpgrade('lifetime')} disabled={lifetimeSoldOut}
-              className={`w-full py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all shadow-lg ${lifetimeSoldOut ? 'bg-theme-bg-secondary opacity-40 cursor-not-allowed' : 'bg-pink-500/10 text-pink-500 border border-pink-500/20 hover:bg-pink-500/20 hover:scale-[1.02]'}`}>
-              {isLifetime ? 'Đã kích hoạt' : lifetimeSoldOut ? 'Hết suất ưu đãi' : 'Mua trọn đời'}
-            </button>
+            {!isAuthenticated ? (
+              <Link href="/auth/login?returnTo=/pricing"
+                className="w-full py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all shadow-lg bg-pink-500/10 text-pink-500 border border-pink-500/20 hover:bg-pink-500/20 hover:scale-[1.02] flex items-center justify-center">
+                Đăng nhập để mua
+              </Link>
+            ) : (
+              <button onClick={() => openUpgrade('lifetime')} disabled={lifetimeSoldOut}
+                className={`w-full py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all shadow-lg ${lifetimeSoldOut ? 'bg-theme-bg-secondary opacity-40 cursor-not-allowed' : 'bg-pink-500/10 text-pink-500 border border-pink-500/20 hover:bg-pink-500/20 hover:scale-[1.02]'}`}>
+                {isLifetime ? 'Đã kích hoạt' : lifetimeSoldOut ? 'Hết suất ưu đãi' : 'Mua trọn đời'}
+              </button>
+            )}
           </div>
         </div>
 

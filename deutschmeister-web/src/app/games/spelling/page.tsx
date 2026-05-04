@@ -32,7 +32,7 @@ interface AnswerRecord {
 export default function SpellingBeePage() {
   const router = useRouter();
   const { settings, isLoaded, loadSettings } = useSettingsStore();
-  const { playCorrect, playWrong, playCombo, playLevelUp, playGameOver, playClick } = useSoundEffects();
+  const { playCorrect, playWrong, playCombo, playGameOver, playClick } = useSoundEffects();
   const session = useGameSession('spelling');
 
   const [phase, setPhase] = useState<Phase>('setup');
@@ -116,7 +116,7 @@ export default function SpellingBeePage() {
         setBestCombo(newCombo);
       }
       if (newCombo === 3 || newCombo === 5 || newCombo === 10) setTimeout(() => playCombo(), 200);
-      if (scoreRef.current > 0 && scoreRef.current % 100 === 0) setTimeout(() => playLevelUp(), 300);
+      if (scoreRef.current > 0 && scoreRef.current % 100 === 0) setTimeout(() => playCombo(), 300);
       advanceToNext(1000);
     } else {
       setFeedback('wrong');
@@ -126,7 +126,7 @@ export default function SpellingBeePage() {
       setCombo(0);
       advanceToNext(1600);
     }
-  }, [currentWord, feedback, input, playCorrect, playWrong, playCombo, playLevelUp, advanceToNext]);
+  }, [currentWord, feedback, input, playCorrect, playWrong, playCombo, advanceToNext]);
 
   // Enter key to submit
   useEffect(() => {
