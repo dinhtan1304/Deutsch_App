@@ -54,27 +54,27 @@ function HistoryCard({ item, onDelete }: { item: ExamListeningHistoryItem; onDel
 
   return (
     <Link href={isGraded ? `/practice-test/listening/exam/${item.id}/result` : `/practice-test/listening/exam/${item.id}`}
-      className="group block rounded-[2.5rem] p-6 transition-all duration-500 hover:-translate-y-1.5 hover:shadow-2xl relative overflow-hidden border border-transparent hover:border-blue-500/20"
+      className="group block rounded-2xl p-4 transition-all duration-500 hover:-translate-y-1 hover:shadow-xl relative overflow-hidden border border-transparent hover:border-blue-500/20"
       style={{
         backgroundColor: 'var(--theme-bg-card)',
-        boxShadow: '0 15px 35px rgba(0, 0, 0, 0.05), inset 0 0 0 1px rgba(255, 255, 255, 0.05)',
+        boxShadow: '0 4px 16px rgba(0,0,0,0.05), inset 0 0 0 1px rgba(255,255,255,0.05)',
       }}>
 
       <div className="absolute inset-0 opacity-0 group-hover:opacity-[0.03] transition-opacity duration-700 pointer-events-none"
         style={{ background: GRADIENT.listening }} />
 
-      <div className="relative z-10 flex items-center gap-6">
-        <div className="w-16 h-16 rounded-2xl flex items-center justify-center shrink-0 shadow-lg transition-all duration-500 group-hover:scale-110 group-hover:rotate-3"
+      <div className="relative z-10 flex items-center gap-4">
+        <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 shadow-md transition-all duration-500 group-hover:scale-110 group-hover:rotate-3"
           style={{
             background: isGraded ? GRADIENT.listening : 'var(--theme-bg-secondary)',
             color: isGraded ? 'white' : ACCENT.listening,
             boxShadow: isGraded ? '0 10px 20px rgba(59, 130, 246, 0.2)' : 'none',
           }}>
-          <IconHeadphones size={28} />
+          <IconHeadphones size={22} />
         </div>
 
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-3 mb-2.5 flex-wrap">
+          <div className="flex items-center gap-2 mb-2 flex-wrap">
             <ExamBadge examType={item.examType} cefrLevel={item.cefrLevel} />
             <span className="text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg"
               style={{
@@ -84,7 +84,7 @@ function HistoryCard({ item, onDelete }: { item: ExamListeningHistoryItem; onDel
               {isGraded ? 'Đã chấm' : 'Chưa nộp'}
             </span>
           </div>
-          <p className="text-xl font-black tracking-tight mb-1.5 truncate" style={{ color: 'var(--theme-text-primary)' }}>
+          <p className="text-base font-black tracking-tight mb-1 truncate" style={{ color: 'var(--theme-text-primary)' }}>
             Luyện Nghe Theo Đề Chuẩn
           </p>
           <div className="flex items-center gap-3 text-[11px] font-bold opacity-40 uppercase tracking-widest" style={{ color: 'var(--theme-text-primary)' }}>
@@ -111,7 +111,7 @@ function HistoryCard({ item, onDelete }: { item: ExamListeningHistoryItem; onDel
         <div className="flex items-center gap-8 shrink-0">
           {isGraded && score !== null && (
             <div className="text-right">
-              <div className="text-4xl font-black tracking-tighter" style={{ color: getScoreColor(score) }}>
+              <div className="text-2xl font-black tracking-tight" style={{ color: getScoreColor(score) }}>
                 {Math.round(score)}<span className="text-sm ml-0.5">%</span>
               </div>
             </div>
@@ -165,27 +165,25 @@ export default function ExamListeningListPage() {
 
       {/* Stats Dashboard */}
       {stats && stats.total > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 mb-16">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
           {[
-            { label: 'Tổng bài thi', value: stats.total, color: ACCENT.listening, icon: <IconHeadphones size={28} /> },
-            { label: 'TB điểm số', value: stats.graded > 0 ? `${Math.round(stats.avgScore)}%` : '—', color: ACCENT.xp, icon: <IconDice size={28} /> },
-            { label: 'Thành tích cao', value: stats.graded > 0 ? `${Math.round(stats.bestScore)}%` : '—', color: STATUS.success, icon: <IconCheck size={28} /> },
+            { label: 'Tổng bài thi', value: stats.total, color: ACCENT.listening, icon: <IconHeadphones size={20} /> },
+            { label: 'TB điểm số', value: stats.graded > 0 ? `${Math.round(stats.avgScore)}%` : '—', color: ACCENT.xp, icon: <IconDice size={20} /> },
+            { label: 'Thành tích cao', value: stats.graded > 0 ? `${Math.round(stats.bestScore)}%` : '—', color: STATUS.success, icon: <IconCheck size={20} /> },
           ].map((s, i) => (
-            <div key={i} className="relative overflow-hidden rounded-[2.5rem] p-8 border shadow-sm backdrop-blur-xl transition-all duration-300 hover:-translate-y-1.5"
+            <div key={i} className="relative overflow-hidden rounded-2xl px-5 py-4 border shadow-sm backdrop-blur-xl flex items-center gap-4 transition-all duration-300 hover:-translate-y-1"
               style={{
                 backgroundColor: 'var(--theme-bg-card)',
                 borderColor: 'var(--theme-border)',
-                boxShadow: '0 20px 40px rgba(0,0,0,0.04)',
+                boxShadow: '0 8px 24px rgba(0,0,0,0.04)',
               }}>
-              <div className="absolute -right-6 -bottom-6 w-32 h-32 blur-3xl opacity-20" style={{ backgroundColor: s.color }} />
-              <div className="relative z-10">
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-inner" style={{ backgroundColor: `${s.color}15`, color: s.color }}>
-                    {s.icon}
-                  </div>
-                  <div className="text-[11px] font-black uppercase tracking-widest opacity-40" style={{ color: 'var(--theme-text-primary)' }}>{s.label}</div>
-                </div>
-                <div className="text-4xl font-black tracking-tighter" style={{ color: 'var(--theme-text-primary)' }}>{s.value}</div>
+              <div className="absolute -right-4 -bottom-4 w-20 h-20 blur-2xl opacity-20" style={{ backgroundColor: s.color }} />
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: `${s.color}15`, color: s.color }}>
+                {s.icon}
+              </div>
+              <div className="relative z-10 min-w-0">
+                <div className="text-[10px] font-black uppercase tracking-widest opacity-40" style={{ color: 'var(--theme-text-primary)' }}>{s.label}</div>
+                <div className="text-2xl font-black tracking-tight" style={{ color: 'var(--theme-text-primary)' }}>{s.value}</div>
               </div>
             </div>
           ))}

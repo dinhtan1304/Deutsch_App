@@ -113,9 +113,9 @@ export default function TopicsPage() {
   }, [topicsWithProgress]);
 
   const statItems = [
-    { label: 'Tổng chủ đề',   value: stats?.totalTopics ?? topicsData?.total ?? 0, color: ACCENT.srs,     icon: <IconLayers size={26} /> },
-    { label: 'Tổng từ vựng',  value: stats?.totalWords ?? totalWords,              color: ACCENT.reading,  icon: <IconBrain size={26} /> },
-    { label: 'Từ đã học',     value: learnedWords,                                 color: STATUS.success,  icon: <IconTarget size={26} /> },
+    { label: 'Tổng chủ đề',   value: stats?.totalTopics ?? topicsData?.total ?? 0, color: ACCENT.srs,     icon: <IconLayers size={20} /> },
+    { label: 'Tổng từ vựng',  value: stats?.totalWords ?? totalWords,              color: ACCENT.reading,  icon: <IconBrain size={20} /> },
+    { label: 'Từ đã học',     value: learnedWords,                                 color: STATUS.success,  icon: <IconTarget size={20} /> },
   ];
 
   return (
@@ -160,28 +160,26 @@ export default function TopicsPage() {
       </div>
 
       {/* ─── Stats (practice style) ─── */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
         {statItems.map((s, i) => (
           <div key={i}
-            className="relative overflow-hidden rounded-[2.5rem] p-7 border transition-all duration-300 hover:-translate-y-1.5"
+            className="relative overflow-hidden rounded-2xl px-5 py-4 border flex items-center gap-4 transition-all duration-300 hover:-translate-y-1"
             style={{
               backgroundColor: 'var(--theme-bg-card)',
               borderColor: 'var(--theme-border)',
-              boxShadow: '0 20px 40px rgba(0,0,0,0.04)',
+              boxShadow: '0 8px 24px rgba(0,0,0,0.04)',
             }}>
-            <div className="absolute -right-6 -bottom-6 w-28 h-28 blur-3xl opacity-20" style={{ backgroundColor: s.color }} />
-            <div className="relative z-10">
-              <div className="flex items-center gap-4 mb-4">
-                <div className="w-11 h-11 rounded-2xl flex items-center justify-center shadow-inner"
-                  style={{ backgroundColor: `${s.color}18`, color: s.color }}>
-                  {s.icon}
-                </div>
-                <div className="text-[11px] font-black uppercase tracking-widest opacity-40"
-                  style={{ color: 'var(--theme-text-primary)' }}>
-                  {s.label}
-                </div>
+            <div className="absolute -right-4 -bottom-4 w-20 h-20 blur-2xl opacity-20" style={{ backgroundColor: s.color }} />
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+              style={{ backgroundColor: `${s.color}18`, color: s.color }}>
+              {s.icon}
+            </div>
+            <div className="relative z-10 min-w-0">
+              <div className="text-[10px] font-black uppercase tracking-widest opacity-40"
+                style={{ color: 'var(--theme-text-primary)' }}>
+                {s.label}
               </div>
-              <div className="text-4xl font-black tracking-tighter" style={{ color: 'var(--theme-text-primary)' }}>
+              <div className="text-2xl font-black tracking-tight" style={{ color: 'var(--theme-text-primary)' }}>
                 {s.value}
               </div>
             </div>
@@ -196,7 +194,7 @@ export default function TopicsPage() {
           const isActive = selectedLevel === level;
           return (
             <button key={level} onClick={() => setSelectedLevel(level)}
-              className="px-5 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all duration-300 whitespace-nowrap"
+              className="px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all duration-300 whitespace-nowrap"
               style={isActive ? {
                 background: lc.gradient,
                 color: 'white',

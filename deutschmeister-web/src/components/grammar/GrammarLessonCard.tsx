@@ -74,11 +74,11 @@ const GrammarLessonCard = ({ lesson, progress, locked, lockedReason }: GrammarLe
 
   const cardContent = (
     <div
-      className={`group relative overflow-hidden rounded-[2.5rem] p-6 transition-all duration-500 border border-transparent
-        ${isLocked ? 'opacity-70 cursor-not-allowed' : 'hover:-translate-y-1.5 hover:shadow-2xl hover:border-violet-500/20'}`}
+      className={`group relative overflow-hidden rounded-2xl p-4 transition-all duration-500 border border-transparent
+        ${isLocked ? 'opacity-70 cursor-not-allowed' : 'hover:-translate-y-1 hover:shadow-xl hover:border-violet-500/20'}`}
       style={{
         backgroundColor: 'var(--theme-bg-card)',
-        boxShadow: '0 15px 35px rgba(0,0,0,0.05), inset 0 0 0 1px rgba(255,255,255,0.05)',
+        boxShadow: '0 4px 16px rgba(0,0,0,0.05), inset 0 0 0 1px rgba(255,255,255,0.05)',
       }}
     >
       {/* Hover aura */}
@@ -87,28 +87,28 @@ const GrammarLessonCard = ({ lesson, progress, locked, lockedReason }: GrammarLe
           style={{ background: GRADIENT.writing }} />
       )}
 
-      <div className="relative z-10 flex items-center gap-6">
+      <div className="relative z-10 flex items-center gap-4">
         {/* Icon badge */}
         <div
-          className="w-16 h-16 rounded-2xl flex items-center justify-center shrink-0 shadow-lg transition-all duration-500 group-hover:scale-110 group-hover:rotate-3"
+          className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 shadow-md transition-all duration-500 group-hover:scale-110 group-hover:rotate-3"
           style={{
             background: isCompleted ? GRADIENT.writing : isLocked ? 'var(--theme-bg-secondary)' : `${levelColor}18`,
             color: isCompleted ? 'white' : isLocked ? 'var(--theme-text-muted)' : levelColor,
-            boxShadow: isCompleted ? '0 10px 20px rgba(99,102,241,0.25)' : 'none',
+            boxShadow: isCompleted ? '0 6px 14px rgba(99,102,241,0.25)' : 'none',
           }}
         >
           {isLocked
-            ? <IconLock size={28} />
+            ? <IconLock size={22} />
             : isCompleted
-              ? <IconCheck size={28} />
-              : <span className="text-2xl font-black">{lesson.lessonNumber}</span>
+              ? <IconCheck size={22} />
+              : <span className="text-lg font-black">{lesson.lessonNumber}</span>
           }
         </div>
 
         {/* Content */}
         <div className="flex-1 min-w-0">
           {/* Badges */}
-          <div className="flex items-center gap-2 mb-2.5 flex-wrap">
+          <div className="flex items-center gap-2 mb-2 flex-wrap">
             <span
               className="text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg text-white shadow-sm"
               style={{ backgroundColor: levelColor }}
@@ -132,7 +132,7 @@ const GrammarLessonCard = ({ lesson, progress, locked, lockedReason }: GrammarLe
           </div>
 
           {/* Title */}
-          <p className="text-xl font-black tracking-tight mb-1 truncate" style={{ color: 'var(--theme-text-primary)' }}>
+          <p className="text-base font-black tracking-tight mb-0.5 truncate" style={{ color: 'var(--theme-text-primary)' }}>
             {lesson.titleVi}
           </p>
 
@@ -157,7 +157,7 @@ const GrammarLessonCard = ({ lesson, progress, locked, lockedReason }: GrammarLe
 
           {/* Progress bar if in_progress */}
           {isInProgress && exercisePct > 0 && (
-            <div className="mt-3 h-1 rounded-full overflow-hidden" style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
+            <div className="mt-2 h-1 rounded-full overflow-hidden" style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
               <div className="h-full rounded-full transition-all duration-700"
                 style={{ width: `${exercisePct}%`, background: GRADIENT.writing }} />
             </div>
@@ -167,8 +167,8 @@ const GrammarLessonCard = ({ lesson, progress, locked, lockedReason }: GrammarLe
         {/* Score or chevron */}
         {isCompleted && progress?.score !== undefined ? (
           <div className="text-right shrink-0">
-            <div className="text-4xl font-black tracking-tighter" style={{ color: getScoreColor(progress.score) }}>
-              {Math.round(progress.score)}<span className="text-sm ml-0.5">đ</span>
+            <div className="text-2xl font-black tracking-tight" style={{ color: getScoreColor(progress.score) }}>
+              {Math.round(progress.score)}<span className="text-xs ml-0.5">đ</span>
             </div>
           </div>
         ) : !isLocked ? (

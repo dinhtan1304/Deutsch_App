@@ -57,10 +57,10 @@ export function TopicCard({ topic, showProgress = false }: TopicCardProps) {
   return (
     <Link href={`/topics/${topic.slug}`} className="block outline-none">
       <div
-        className="group relative overflow-hidden rounded-[2.5rem] p-6 transition-all duration-500 hover:-translate-y-1.5 hover:shadow-2xl border border-transparent"
+        className="group relative overflow-hidden rounded-2xl p-4 transition-all duration-500 hover:-translate-y-1 hover:shadow-xl border border-transparent"
         style={{
           backgroundColor: 'var(--theme-bg-card)',
-          boxShadow: '0 15px 35px rgba(0,0,0,0.05), inset 0 0 0 1px rgba(255,255,255,0.05)',
+          boxShadow: '0 4px 16px rgba(0,0,0,0.05), inset 0 0 0 1px rgba(255,255,255,0.05)',
           // dynamic hover border via CSS not easily doable with inline — use Tailwind class below
         }}
       >
@@ -74,10 +74,10 @@ export function TopicCard({ topic, showProgress = false }: TopicCardProps) {
           style={{ backgroundColor: topicColor }}
         />
 
-        <div className="relative z-10 flex items-center gap-6">
+        <div className="relative z-10 flex items-center gap-4">
           {/* Icon badge */}
           <div
-            className="w-16 h-16 rounded-2xl flex items-center justify-center shrink-0 text-3xl shadow-lg transition-all duration-500 group-hover:scale-110 group-hover:rotate-3"
+            className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 text-2xl shadow-md transition-all duration-500 group-hover:scale-110 group-hover:rotate-3"
             style={{
               background: isCompleted
                 ? `linear-gradient(135deg, ${topicColor}, ${topicColor}cc)`
@@ -93,7 +93,7 @@ export function TopicCard({ topic, showProgress = false }: TopicCardProps) {
           {/* Content */}
           <div className="flex-1 min-w-0">
             {/* Badges */}
-            <div className="flex items-center gap-2 mb-2.5 flex-wrap">
+            <div className="flex items-center gap-2 mb-2 flex-wrap">
               <span
                 className="text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg text-white shadow-sm"
                 style={{ backgroundColor: levelColor }}
@@ -115,7 +115,7 @@ export function TopicCard({ topic, showProgress = false }: TopicCardProps) {
             </div>
 
             {/* Title */}
-            <p className="text-xl font-black tracking-tight mb-1 truncate" style={{ color: 'var(--theme-text-primary)' }}>
+            <p className="text-base font-black tracking-tight mb-0.5 truncate" style={{ color: 'var(--theme-text-primary)' }}>
               {topic.nameDe}
             </p>
 
@@ -137,7 +137,7 @@ export function TopicCard({ topic, showProgress = false }: TopicCardProps) {
           {/* Right: mastery % or chevron */}
           {showProgress && masteryPct > 0 ? (
             <div className="text-right shrink-0">
-              <div className="text-4xl font-black tracking-tighter"
+              <div className="text-2xl font-black tracking-tight"
                 style={{ color: getScoreColor(masteryPct) }}>
                 {Math.round(masteryPct)}<span className="text-sm ml-0.5">%</span>
               </div>
