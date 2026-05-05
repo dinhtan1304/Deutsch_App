@@ -8,6 +8,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { UpgradeModal } from '@/components/subscription/UpgradeModal';
 import type { BillingPeriod } from '@/lib/api/subscriptions';
 import { IconChevronLeft, IconCheck, IconZap, IconStar, IconMessageCircle } from '@/components/ui/Icons';
+import { DEFAULT_PRICES } from '@/lib/constants/pricing';
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -76,10 +77,10 @@ export default function PricingPage() {
 
   const premiumPlan = plans?.find((p) => p.code === 'premium');
   const lifetimePlan = plans?.find((p) => p.code === 'lifetime');
-  const monthlyPrice = premiumPlan?.monthlyPrice ?? 50000;
-  const quarterlyPrice = premiumPlan?.quarterlyPrice ?? 119000;
-  const yearlyPrice = premiumPlan?.yearlyPrice ?? 369000;
-  const lifetimePrice = lifetimePlan?.price ?? 1499000;
+  const monthlyPrice = premiumPlan?.monthlyPrice ?? DEFAULT_PRICES.monthly;
+  const quarterlyPrice = premiumPlan?.quarterlyPrice ?? DEFAULT_PRICES.quarterly;
+  const yearlyPrice = premiumPlan?.yearlyPrice ?? DEFAULT_PRICES.yearly;
+  const lifetimePrice = lifetimePlan?.price ?? DEFAULT_PRICES.lifetime;
 
   const savePctYearly = Math.round((1 - yearlyPrice / (monthlyPrice * 12)) * 100);
   const savePctQuarterly = Math.round((1 - quarterlyPrice / (monthlyPrice * 3)) * 100);

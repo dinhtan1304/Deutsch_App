@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 /* eslint-disable no-restricted-syntax -- custom UI gradients */
 
 import { useState, useCallback } from 'react';
@@ -6,12 +6,14 @@ import {
   useRequestUpgrade,
   useValidatePromo,
   useLifetimeRemaining,
+  usePlans,
 } from '@/hooks/useSubscription';
 import { useAuthStore } from '@/stores/authStore';
 import { useModalA11y } from '@/hooks/useModalA11y';
 import { trackEvent } from '@/lib/analytics';
 import type { UpgradeResponse, BillingPeriod } from '@/lib/api/subscriptions';
 import { ACCENT, STATUS } from '@/lib/tokens';
+import { DEFAULT_PRICES } from '@/lib/constants/pricing';
 
 interface Props {
   open: boolean;
@@ -94,16 +96,16 @@ function getBankBin(bankName: string): string {
   return bankName;
 }
 
-const MONTHLY_PRICE = 50000;
-const QUARTERLY_PRICE = 119000;
-const YEARLY_PRICE = 369000;
-const LIFETIME_PRICE = 1499000;
+// Fallback values moved to @/lib/constants/pricing.ts
 
-function priceForPeriod(p: BillingPeriod): number {
-  if (p === 'lifetime') return LIFETIME_PRICE;
-  if (p === 'yearly') return YEARLY_PRICE;
-  if (p === 'quarterly') return QUARTERLY_PRICE;
-  return MONTHLY_PRICE;
+function priceForPeriod(p: BillingPeriod, plans?: any[]): number {
+  const premium = plans?.find(plan => plan.code === 'premium');
+  const lifetime = plans?.find(plan => plan.code === 'lifetime');
+
+  if (p === 'lifetime') return lifetime?.price ?? DEFAULT_PRICES.lifetime;
+  if (p === 'yearly') return premium?.yearlyPrice ?? DEFAULT_PRICES.yearly;
+  if (p === 'quarterly') return premium?.quarterlyPrice ?? DEFAULT_PRICES.quarterly;
+  return premium?.monthlyPrice ?? DEFAULT_PRICES.monthly;
 }
 
 export function UpgradeModal({ open, onClose, defaultPeriod = 'yearly', featureContext }: Props) {
@@ -120,6 +122,7 @@ export function UpgradeModal({ open, onClose, defaultPeriod = 'yearly', featureC
 
   const upgradeMut = useRequestUpgrade();
   const validatePromoMut = useValidatePromo();
+  const { data: plans } = usePlans();
   const { data: lifetimeInfo } = useLifetimeRemaining();
 
 
@@ -160,14 +163,14 @@ export function UpgradeModal({ open, onClose, defaultPeriod = 'yearly', featureC
       period,
       promoCode: promoApplied ? promoCode.trim() : undefined,
     });
-    trackEvent('purchase', { period, value: Math.max(0, priceForPeriod(period) - (promoApplied?.discount ?? 0)), currency: 'VND' });
+    trackEvent('purchase', { period, value: Math.max(0, priceForPeriod(period, plans) - (promoApplied?.discount ?? 0)), currency: 'VND' });
     setUpgradeData(res);
     setStep('payment');
   };
 
   if (!open) return null;
 
-  const basePrice = priceForPeriod(period);
+  const basePrice = priceForPeriod(period, plans);
   const finalPrice = Math.max(0, basePrice - (promoApplied?.discount ?? 0));
   const lifetimeSoldOut = lifetimeInfo ? lifetimeInfo.remaining <= 0 : false;
 
@@ -235,7 +238,7 @@ export function UpgradeModal({ open, onClose, defaultPeriod = 'yearly', featureC
                       {p === 'monthly' ? 'Tháng' : p === 'quarterly' ? '3 Tháng' : p === 'yearly' ? 'Năm' : 'Trọn đời'}
                     </div>
                     <div className="text-body font-bold mt-0.5">
-                      {formatVND(priceForPeriod(p))}
+                      {formatVND(priceForPeriod(p, plans))}
                     </div>
                     {p === 'quarterly' && (
                       <div
