@@ -2,8 +2,10 @@
 /* eslint-disable no-restricted-syntax -- game pages use custom dark-theme gradients */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useRandomWords } from '@/hooks/useWords';
+import { useWordBankGameWords } from '@/hooks/usePersonalWords';
+import { personalWordsToGameWords, getEligibleWordsForGame } from '@/lib/personalWordAdapter';
 import { useGameSession } from '@/hooks/useGameSession';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
@@ -26,6 +28,10 @@ type GamePhase = 'setup' | 'playing' | 'result';
 
 export default function QuickQuizPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const isWordBankMode = searchParams.get('source') === 'wordbank';
+  const collectionId = searchParams.get('collectionId') ?? undefined;
+
   const session = useGameSession('quick-quiz');
   const { settings, isLoaded, loadSettings } = useSettingsStore();
   const { playCorrect, playWrong, playGameOver } = useSoundEffects();
@@ -40,33 +46,40 @@ export default function QuickQuizPage() {
   const [selectedAnswer, setSelectedAnswer] = useState<Gender | null>(null);
   const [showFeedback, setShowFeedback] = useState(false);
   const [answers, setAnswers] = useState<{ word: Word; selected: Gender; isCorrect: boolean }[]>([]);
+  const [wbGameWords, setWbGameWords] = useState<Word[]>([]);
 
   // Refs for session.end() — avoid stale closure issues in useEffect
   const scoreRef = useRef(0);
   const correctRef = useRef(0);
   const wrongRef = useRef(0);
 
-  const { data: words, refetch, isLoading } = useRandomWords(TOTAL_QUESTIONS, {});
+  const { data: globalWords, refetch, isLoading: globalLoading } = useRandomWords(TOTAL_QUESTIONS, {});
+  const wbData = useWordBankGameWords({ collectionId, enabled: isWordBankMode });
+  const words = isWordBankMode ? wbGameWords : (globalWords ?? []);
+  const isLoading = isWordBankMode ? wbData.isLoading : globalLoading;
   const currentWord = words?.[currentIndex];
 
   useEffect(() => { loadSettings(); }, [loadSettings]);
 
   const handleStartGame = async () => {
     setLoadError(null);
-    const result = await refetch();
-    if (!result.data?.length) { setLoadError('Không có từ vựng! Vui lòng thêm từ hoặc seed database.'); return; }
-
-    // Reset state
-    setPhase('playing'); setCurrentIndex(0); setScore(0); setAnswers([]);
-    setSelectedAnswer(null); setShowFeedback(false);
-
-    // Reset refs
-    scoreRef.current = 0;
-    correctRef.current = 0;
-    wrongRef.current = 0;
-
-    // Register session on backend
-    session.start(TOTAL_QUESTIONS);
+    if (isWordBankMode) {
+      const eligible = getEligibleWordsForGame('quick-quiz', wbData.data ?? []);
+      if (eligible.length < 4) { setLoadError('Cần ít nhất 4 danh từ có mạo từ trong bộ sưu tập này'); return; }
+      const shuffled = [...eligible].sort(() => Math.random() - 0.5).slice(0, TOTAL_QUESTIONS);
+      setWbGameWords(personalWordsToGameWords(shuffled));
+      setPhase('playing'); setCurrentIndex(0); setScore(0); setAnswers([]);
+      setSelectedAnswer(null); setShowFeedback(false);
+      scoreRef.current = 0; correctRef.current = 0; wrongRef.current = 0;
+      session.start(shuffled.length);
+    } else {
+      const result = await refetch();
+      if (!result.data?.length) { setLoadError('Không có từ vựng! Vui lòng thêm từ hoặc seed database.'); return; }
+      setPhase('playing'); setCurrentIndex(0); setScore(0); setAnswers([]);
+      setSelectedAnswer(null); setShowFeedback(false);
+      scoreRef.current = 0; correctRef.current = 0; wrongRef.current = 0;
+      session.start(TOTAL_QUESTIONS);
+    }
   };
 
   const handleAnswer = useCallback((gender: Gender) => {
@@ -165,7 +178,7 @@ export default function QuickQuizPage() {
             getSelectedLabel={a => !a.isCorrect && a.selected && GenderInfo[a.selected] ? GenderInfo[a.selected].article : null}
           />
         </div>
-        <AddWrongWordsToBank wrongWords={answers.filter(a => !a.isCorrect).map(a => a.word)} />
+        {!isWordBankMode && <AddWrongWordsToBank wrongWords={answers.filter(a => !a.isCorrect).map(a => a.word)} />}
         <GameResultUpsell />
       </>
     );

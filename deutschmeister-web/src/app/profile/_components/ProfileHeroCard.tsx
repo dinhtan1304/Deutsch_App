@@ -26,7 +26,7 @@ interface Props {
 }
 
 export function ProfileHeroCard({ user, xpInfo, isLoading, points }: Props) {
-  const isPremium = user?.subscription?.plan === 'premium';
+  const isPremium = user?.subscription?.plan === 'premium' || user?.subscription?.plan === 'lifetime';
   const joinedDate = user?.createdAt
     ? new Date(user.createdAt).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })
     : '—';

@@ -296,3 +296,53 @@ export const collectionsApi = {
   getWordCollections: (personalWordId: string): Promise<WordCollectionRef[]> =>
     apiGet(`/personal-words/${personalWordId}/collections`),
 };
+
+// ============================================
+// AI Vocabulary Generation
+// ============================================
+
+export interface AIGeneratedVocabWord {
+  word: string;
+  wordType: WordType;
+  nomenData?: { article: 'der' | 'die' | 'das'; gender: string; plural?: string } | null;
+  verbData?: { partizipII?: string; hilfsverb?: 'haben' | 'sein' } | null;
+  adjektivData?: { komparativ?: string; superlativ?: string } | null;
+  translationEn: string;
+  translationVi: string;
+  examples: string[];
+  level: string;
+  category: string;
+}
+
+export interface AiGenerateVocabularyDto {
+  topic: string;
+  count: number;
+  description?: string;
+  level?: string;
+  collectionId?: string;
+  excludeWords?: string[];
+}
+
+export interface AIGenerateResponse {
+  words: AIGeneratedVocabWord[];
+  wordsAdded: number;
+  wordsSkipped: number;
+  quotaUsed: number;
+  quotaRemaining: number;
+  weeklyLimit: number;
+}
+
+export interface AIVocabQuota {
+  used: number;
+  remaining: number;
+  weeklyLimit: number;
+  isPremium: boolean;
+}
+
+export const aiVocabApi = {
+  generate: (dto: AiGenerateVocabularyDto): Promise<AIGenerateResponse> =>
+    apiPost('/personal-words/ai-generate', dto),
+
+  getQuota: (): Promise<AIVocabQuota> =>
+    apiGet('/personal-words/ai-generate/quota'),
+};

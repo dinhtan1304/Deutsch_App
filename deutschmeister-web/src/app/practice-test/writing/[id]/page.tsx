@@ -7,6 +7,7 @@ import { useWritingSession, useSaveDraft, useSubmitWriting } from '@/hooks/useWr
 import { IconBookOpen, IconChevronDown, IconChevronLeft, IconEye, IconEyeOff, IconLoader, IconPenLine, IconSave, IconSend } from '../icons';
 import { FixedActionBar } from '@/components/ui';
 import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import { useUmlautTrigger, UMLAUT_TRIGGER_HINT } from '@/hooks/useUmlautTrigger';
 
 function IconChevronUp({ size = 14 }: { size?: number }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}><polyline points="18 15 12 9 6 15" /></svg>;
@@ -47,6 +48,7 @@ export default function WritingEditorPage() {
 
   const [localText, setLocalText] = useState<string | null>(null);
   const text = localText ?? session?.userText ?? '';
+  const onUmlautKey = useUmlautTrigger(setLocalText);
   const [showHints, setShowHints] = useState(true);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -318,13 +320,17 @@ export default function WritingEditorPage() {
                     {char}
                   </button>
                 ))}
+                <span className="text-[10px] font-medium ml-2 hidden sm:inline" style={{ color: 'var(--theme-text-muted)' }}>
+                  hoặc gõ <span className="font-mono font-bold">{UMLAUT_TRIGGER_HINT}</span>
+                </span>
               </div>
 
               {/* Textarea */}
-              <textarea ref={textareaRef} value={text} onChange={e => setLocalText(e.target.value)} autoFocus
+              <textarea ref={textareaRef} value={text} onChange={e => setLocalText(e.target.value)} onKeyDown={onUmlautKey} autoFocus
                 placeholder={`Schreiben Sie hier Ihren Text...\n\nViết bài của bạn ở đây... (${session.wordCountMin}–${session.wordCountMax} từ)`}
                 className="w-full min-h-112 p-5 bg-transparent resize-y focus:outline-none text-[15px] leading-relaxed"
-                style={{ color: 'var(--theme-text-primary)' }} />
+                style={{ color: 'var(--theme-text-primary)' }}
+                title={`Mẹo: ${UMLAUT_TRIGGER_HINT}`} />
 
               {/* Progress bar */}
               <div className="px-4 pb-3">

@@ -114,7 +114,13 @@ function AppInitializer({ children }: { children: React.ReactNode }) {
 
   // Don't render children until auth verification is done
   // This prevents pages from firing API calls before the access token is refreshed
-  if (!authReady) return null;
+  if (!authReady) return (
+    <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--theme-bg-body)' }}>
+      <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #6366F1, #8B5CF6)' }}>
+        <svg className="animate-spin" width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2.5} strokeLinecap="round"><path d="M21 12a9 9 0 1 1-6.219-8.56" /></svg>
+      </div>
+    </div>
+  );
 
   return <>{children}</>;
 }

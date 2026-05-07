@@ -8,6 +8,7 @@ import {
   DictationLibraryResponse,
   DictationStats,
   DictationVideo,
+  MyDictationRequestsResponse,
 } from '@/lib/api/dictation';
 
 // ─── Query keys ───────────────────────────────────────────────────────────────
@@ -19,6 +20,7 @@ export const dictationKeys = {
   session: (id: string) => [...dictationKeys.all, 'session', id] as const,
   history: (params?: Record<string, unknown>) => [...dictationKeys.all, 'history', params] as const,
   stats: () => [...dictationKeys.all, 'stats'] as const,
+  myRequests: () => [...dictationKeys.all, 'my-requests'] as const,
 };
 
 // ─── Queries ─────────────────────────────────────────────────────────────────
@@ -84,7 +86,16 @@ export function useStartDictationFromUrl() {
       dictationApi.startFromUrl(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: dictationKeys.history() });
+      queryClient.invalidateQueries({ queryKey: dictationKeys.myRequests() });
     },
+  });
+}
+
+export function useMyDictationRequests() {
+  return useQuery<MyDictationRequestsResponse>({
+    queryKey: dictationKeys.myRequests(),
+    queryFn: () => dictationApi.getMyRequests(),
+    staleTime: 30_000,
   });
 }
 

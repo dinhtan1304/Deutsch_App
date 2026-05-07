@@ -4,12 +4,21 @@
 import Link from 'next/link';
 import { ACCENT, STATUS } from '@/lib/tokens';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
+import { useSettingsStore } from '@/stores/settingsStore';
+import { IconInfo } from '@/components/ui/Icons';
 import {
   IconGamepad, IconTarget, IconClock, IconPenTool, IconLayers,
   IconBookOpen, IconLink, IconHeadphones, IconSpellCheck,
   IconLightbulb, IconKeyboard, IconFlame, IconZap, KBD,
   IconChevronRight,
 } from '@/components/games/GameUI';
+
+const LEVEL_ORDER = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'] as const;
+const LEVEL_LABELS: Record<string, string> = {
+  A1: 'Sơ cấp', A2: 'Cơ bản', B1: 'Trung cấp',
+  B2: 'Trung cấp cao', C1: 'Nâng cao', C2: 'Thành thạo',
+  all: 'Tất cả trình độ',
+};
 
 const games = [
   { id: 'gender-quiz', name: 'Gender Quiz', description: 'Chọn mạo từ đúng (der/die/das) cho mỗi từ',
@@ -28,10 +37,21 @@ const games = [
     icon: IconHeadphones, color: ACCENT.games, href: '/games/listening' },
   { id: 'spelling', name: 'Spelling Bee', description: 'Viết đúng chính tả từ tiếng Đức',
     icon: IconSpellCheck, color: ACCENT.listening, href: '/games/spelling' },
+  { id: 'typing', name: 'Luyện gõ phím', description: 'Tăng tốc độ gõ tiếng Đức · 60 giây · WPM + Accuracy',
+    icon: IconKeyboard, color: ACCENT.games, href: '/games/typing' },
 ];
 
 export default function GamesPage() {
   const { playClick } = useSoundEffects();
+  const { settings, isLoaded } = useSettingsStore();
+
+  const preferredLevel = settings.preferredLevel;
+  const maxIdx = LEVEL_ORDER.indexOf(preferredLevel as typeof LEVEL_ORDER[number]);
+  const allowedLevels =
+    preferredLevel === 'all'
+      ? [...LEVEL_ORDER]
+      : maxIdx >= 0 ? LEVEL_ORDER.slice(0, maxIdx + 1) : ['A1'];
+  const levelLabel = LEVEL_LABELS[preferredLevel] ?? preferredLevel;
 
   return (
     <div className="py-6 pb-12">
@@ -53,11 +73,42 @@ export default function GamesPage() {
           <div className="flex gap-3 mt-6">
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-white text-[10px] font-black uppercase tracking-widest">
               <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-              8 Games
+              9 Games
             </div>
           </div>
         </div>
       </div>
+
+      {/* Level Info Banner */}
+      {isLoaded && (
+        <div
+          className="mb-6 rounded-2xl border px-4 py-3 flex items-start gap-3"
+          style={{
+            backgroundColor: `${ACCENT.srs}0D`,
+            borderColor: `${ACCENT.srs}33`,
+          }}
+        >
+          <div
+            className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 mt-0.5"
+            style={{ backgroundColor: `${ACCENT.srs}1A`, color: ACCENT.srs }}
+          >
+            <IconInfo size={16} />
+          </div>
+          <div className="min-w-0 leading-relaxed">
+            <p className="text-sm font-bold" style={{ color: 'var(--theme-text-primary)' }}>
+              Trình độ của bạn:{' '}
+              <span style={{ color: ACCENT.srs }}>
+                {preferredLevel === 'all' ? levelLabel : `${preferredLevel} (${levelLabel})`}
+              </span>
+            </p>
+            <p className="text-xs font-medium mt-0.5" style={{ color: ACCENT.srs }}>
+              Phạm vi từ vựng:{' '}
+              <span className="font-bold">{allowedLevels.join(', ')}</span>
+              {' '}— 70% từ bạn đã học + 30% từ mới
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Games grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

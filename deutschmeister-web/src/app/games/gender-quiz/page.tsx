@@ -2,11 +2,13 @@
 /* eslint-disable no-restricted-syntax -- game pages use custom dark-theme gradients */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useRandomWords } from '@/hooks/useWords';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
 import { useGameSession } from '@/hooks/useGameSession';
+import { useWordBankGameWords } from '@/hooks/usePersonalWords';
+import { personalWordsToGameWords, getEligibleWordsForGame } from '@/lib/personalWordAdapter';
 import { Gender, GenderInfo, Word } from '@/types';
 import {
   GameSetupCard, GameResultCard, GameProgressBar,
@@ -30,6 +32,10 @@ interface AnswerRecord {
 
 export default function GenderQuizPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const isWordBankMode = searchParams.get('source') === 'wordbank';
+  const collectionId = searchParams.get('collectionId') ?? undefined;
+
   const { settings, isLoaded, loadSettings } = useSettingsStore();
   const { playCorrect, playWrong, playCombo, playGameOver, playClick } = useSoundEffects();
   // BUG FIX 1: was 'quick-quiz' — caused all GenderQuiz sessions to be
@@ -45,13 +51,17 @@ export default function GenderQuizPage() {
   const [answered, setAnswered] = useState(false);
   const [selectedAnswer, setSelectedAnswer] = useState<Gender | null>(null);
   const [answers, setAnswers] = useState<AnswerRecord[]>([]);
+  const [wbGameWords, setWbGameWords] = useState<Word[]>([]);
   const scoreRef = useRef(0);
   const bestComboRef = useRef(0);
   const correctRef = useRef(0);
   const wrongRef = useRef(0);
 
   const questionsCount = isLoaded ? settings.questionsPerGame : 20;
-  const { data: words, refetch, isLoading } = useRandomWords(questionsCount, {});
+  const { data: globalWords, refetch, isLoading: globalLoading } = useRandomWords(questionsCount, {});
+  const wbData = useWordBankGameWords({ collectionId, enabled: isWordBankMode });
+  const words = isWordBankMode ? wbGameWords : (globalWords ?? []);
+  const isLoading = isWordBankMode ? wbData.isLoading : globalLoading;
   const currentWord = words?.[index];
 
   useEffect(() => { loadSettings(); }, [loadSettings]);
@@ -59,13 +69,25 @@ export default function GenderQuizPage() {
   const startGame = async () => {
     playClick();
     setLoadError(null);
-    const result = await refetch();
-    if (!result.data?.length) { setLoadError('Không có từ vựng! Vui lòng seed database.'); return; }
-    setIndex(0); setScore(0); setCombo(0); setBestCombo(0);
-    scoreRef.current = 0; bestComboRef.current = 0;
-    correctRef.current = 0; wrongRef.current = 0;
-    setAnswered(false); setSelectedAnswer(null); setAnswers([]); setPhase('playing');
-    session.start(questionsCount);
+    if (isWordBankMode) {
+      const eligible = getEligibleWordsForGame('gender-quiz', wbData.data ?? []);
+      if (eligible.length < 4) { setLoadError('Cần ít nhất 4 danh từ có mạo từ trong bộ sưu tập này'); return; }
+      const shuffled = [...eligible].sort(() => Math.random() - 0.5).slice(0, questionsCount);
+      setWbGameWords(personalWordsToGameWords(shuffled));
+      setIndex(0); setScore(0); setCombo(0); setBestCombo(0);
+      scoreRef.current = 0; bestComboRef.current = 0;
+      correctRef.current = 0; wrongRef.current = 0;
+      setAnswered(false); setSelectedAnswer(null); setAnswers([]); setPhase('playing');
+      session.start(shuffled.length);
+    } else {
+      const result = await refetch();
+      if (!result.data?.length) { setLoadError('Không có từ vựng! Vui lòng seed database.'); return; }
+      setIndex(0); setScore(0); setCombo(0); setBestCombo(0);
+      scoreRef.current = 0; bestComboRef.current = 0;
+      correctRef.current = 0; wrongRef.current = 0;
+      setAnswered(false); setSelectedAnswer(null); setAnswers([]); setPhase('playing');
+      session.start(questionsCount);
+    }
   };
 
   const handleAnswer = useCallback((gender: Gender) => {
@@ -185,7 +207,7 @@ export default function GenderQuizPage() {
             getSelectedLabel={a => !a.isCorrect ? GenderInfo[a.selectedAnswer].article : null}
           />
         </div>
-        <AddWrongWordsToBank wrongWords={answers.filter(a => !a.isCorrect).map(a => a.word)} />
+        {!isWordBankMode && <AddWrongWordsToBank wrongWords={answers.filter(a => !a.isCorrect).map(a => a.word)} />}
         <GameResultUpsell />
       </>
     );

@@ -2,8 +2,10 @@
 /* eslint-disable no-restricted-syntax -- game pages use custom dark-theme gradients that don't map to design tokens */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useRandomWords } from '@/hooks/useWords';
+import { useWordBankGameWords } from '@/hooks/usePersonalWords';
+import { personalWordsToGameWords, getEligibleWordsForGame } from '@/lib/personalWordAdapter';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
 import { useGameSession } from '@/hooks/useGameSession';
@@ -16,6 +18,7 @@ import {
 } from '@/components/games/GameUI';
 import { Button } from '@/components/ui';
 import { ACCENT, STATUS } from '@/lib/tokens';
+import { useUmlautTrigger, UMLAUT_TRIGGER_HINT } from '@/hooks/useUmlautTrigger';
 
 type Phase = 'setup' | 'playing' | 'result';
 type Feedback = 'correct' | 'wrong' | null;
@@ -31,6 +34,10 @@ interface AnswerRecord {
 
 export default function SpellingBeePage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const isWordBankMode = searchParams.get('source') === 'wordbank';
+  const collectionId = searchParams.get('collectionId') ?? undefined;
+
   const { settings, isLoaded, loadSettings } = useSettingsStore();
   const { playCorrect, playWrong, playCombo, playGameOver, playClick } = useSoundEffects();
   const session = useGameSession('spelling');
@@ -42,6 +49,7 @@ export default function SpellingBeePage() {
   const [combo, setCombo] = useState(0);
   const [bestCombo, setBestCombo] = useState(0);
   const [input, setInput] = useState('');
+  const onUmlautKey = useUmlautTrigger(setInput);
   const [feedback, setFeedback] = useState<Feedback>(null);
   const [answers, setAnswers] = useState<AnswerRecord[]>([]);
 
@@ -53,7 +61,11 @@ export default function SpellingBeePage() {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const questionsCount = isLoaded ? settings.questionsPerGame : 20;
-  const { data: words, refetch, isLoading } = useRandomWords(questionsCount, {});
+  const [wbGameWords, setWbGameWords] = useState<Word[]>([]);
+  const { data: globalWords, refetch, isLoading: globalLoading } = useRandomWords(questionsCount, {});
+  const wbData = useWordBankGameWords({ collectionId, enabled: isWordBankMode });
+  const words = isWordBankMode ? wbGameWords : (globalWords ?? []);
+  const isLoading = isWordBankMode ? wbData.isLoading : globalLoading;
   const currentWord = words?.[index];
 
   useEffect(() => { loadSettings(); }, [loadSettings]);
@@ -68,14 +80,27 @@ export default function SpellingBeePage() {
   const startGame = async () => {
     playClick();
     setLoadError(null);
-    const result = await refetch();
-    if (!result.data?.length) { setLoadError('Không có từ vựng! Vui lòng thêm từ hoặc seed database.'); return; }
-    setIndex(0); setScore(0); setCombo(0); setBestCombo(0);
-    scoreRef.current = 0; comboRef.current = 0; bestComboRef.current = 0;
-    correctRef.current = 0; wrongRef.current = 0;
-    setInput(''); setFeedback(null); setAnswers([]);
-    setPhase('playing');
-    session.start(questionsCount);
+    if (isWordBankMode) {
+      const eligible = getEligibleWordsForGame('spelling', wbData.data ?? []);
+      if (eligible.length < 4) { setLoadError('Cần ít nhất 4 từ trong bộ sưu tập này'); return; }
+      const shuffled = [...eligible].sort(() => Math.random() - 0.5).slice(0, questionsCount);
+      setWbGameWords(personalWordsToGameWords(shuffled));
+      setIndex(0); setScore(0); setCombo(0); setBestCombo(0);
+      scoreRef.current = 0; comboRef.current = 0; bestComboRef.current = 0;
+      correctRef.current = 0; wrongRef.current = 0;
+      setInput(''); setFeedback(null); setAnswers([]);
+      setPhase('playing');
+      session.start(shuffled.length);
+    } else {
+      const result = await refetch();
+      if (!result.data?.length) { setLoadError('Không có từ vựng! Vui lòng thêm từ hoặc seed database.'); return; }
+      setIndex(0); setScore(0); setCombo(0); setBestCombo(0);
+      scoreRef.current = 0; comboRef.current = 0; bestComboRef.current = 0;
+      correctRef.current = 0; wrongRef.current = 0;
+      setInput(''); setFeedback(null); setAnswers([]);
+      setPhase('playing');
+      session.start(questionsCount);
+    }
   };
 
   const advanceToNext = useCallback((delay: number, callback?: () => void) => {
@@ -218,7 +243,7 @@ export default function SpellingBeePage() {
             getSelectedLabel={a => !a.isCorrect ? a.selectedAnswer : null}
           />
         </div>
-        <AddWrongWordsToBank wrongWords={answers.filter(a => !a.isCorrect).map(a => a.word)} />
+        {!isWordBankMode && <AddWrongWordsToBank wrongWords={answers.filter(a => !a.isCorrect).map(a => a.word)} />}
         <GameResultUpsell />
       </>
     );
@@ -296,7 +321,9 @@ export default function SpellingBeePage() {
                   type="text"
                   value={input}
                   onChange={e => setInput(e.target.value)}
+                  onKeyDown={onUmlautKey}
                   placeholder="Gõ từ tiếng Đức..."
+                  title={`Mẹo: ${UMLAUT_TRIGGER_HINT}`}
                   className="w-full rounded-xl px-4 py-3 text-center text-base font-semibold outline-none transition-all border-2"
                   style={{
                     borderColor: ACCENT.listening,
@@ -318,6 +345,9 @@ export default function SpellingBeePage() {
                     </button>
                   ))}
                 </div>
+                <p className="text-center text-[10px] mt-2 opacity-60" style={{ color: 'white' }}>
+                  hoặc gõ <span className="font-mono font-bold">{UMLAUT_TRIGGER_HINT}</span>
+                </p>
                 <div className="mt-4">
                   <Button variant="game" accent="listening" onClick={submitAnswer} disabled={!input.trim()}>
                     <IconCheck size={16} /> Xác nhận

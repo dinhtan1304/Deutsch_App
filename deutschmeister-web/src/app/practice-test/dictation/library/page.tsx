@@ -2,8 +2,9 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useDictationLibrary, useStartDictation } from '@/hooks/useDictation';
+import { useStartShadowing } from '@/hooks/useShadowing';
 import { DictationVideo } from '@/lib/api/dictation';
 import { PageHeader, GridSkeleton } from '@/components/ui';
 import { ACCENT, STATUS } from '@/lib/tokens';
@@ -18,7 +19,7 @@ function formatDuration(sec: number) {
   return `${m}:${s.toString().padStart(2, '0')}`;
 }
 
-function VideoCard({ video, onStart, isStarting }: { video: DictationVideo; onStart: () => void; isStarting: boolean }) {
+function VideoCard({ video, onStart, isStarting, ctaLabel = 'Luyện tập →' }: { video: DictationVideo; onStart: () => void; isStarting: boolean; ctaLabel?: string }) {
   const [imgError, setImgError] = useState(false);
   return (
     <div 
@@ -94,7 +95,7 @@ function VideoCard({ video, onStart, isStarting }: { video: DictationVideo; onSt
               </span>
            </div>
            <span className="text-[10px] font-black uppercase text-cyan-500 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-             Luyện tập →
+             {ctaLabel}
            </span>
         </div>
       </div>
@@ -104,6 +105,8 @@ function VideoCard({ video, onStart, isStarting }: { video: DictationVideo; onSt
 
 export default function DictationLibraryPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const isShadowingMode = searchParams.get('mode') === 'shadowing';
   const [cefrLevel, setCefrLevel] = useState('');
   const [topic, setTopic] = useState('');
   const [page, setPage] = useState(1);
@@ -111,21 +114,33 @@ export default function DictationLibraryPage() {
 
   const { data, isLoading } = useDictationLibrary({ page, limit: 12, cefrLevel: cefrLevel || undefined, topic: topic || undefined });
   const { mutate: startSession } = useStartDictation();
+  const { mutate: startShadowing } = useStartShadowing();
 
   const handleStart = (videoId: string) => {
     setStartingId(videoId);
-    startSession({ videoId }, {
-      onSuccess: (session) => router.push(`/practice-test/dictation/${session.id}`),
-      onSettled: () => setStartingId(null),
-    });
+    if (isShadowingMode) {
+      startShadowing({ videoId }, {
+        onSuccess: (session) => router.push(`/practice-test/dictation/shadow/${session.id}`),
+        onSettled: () => setStartingId(null),
+      });
+    } else {
+      startSession({ videoId }, {
+        onSuccess: (session) => router.push(`/practice-test/dictation/${session.id}`),
+        onSettled: () => setStartingId(null),
+      });
+    }
   };
 
   return (
     <div className="py-6 space-y-10">
       <PageHeader
-        backHref="/practice-test/dictation"
-        title="Thư viện video"
-        subtitle="Chọn từ hàng trăm video được tuyển chọn để bắt đầu hành trình chinh phục tiếng Đức"
+        backHref={isShadowingMode ? '/practice-test/dictation/shadow' : '/practice-test/dictation'}
+        title={isShadowingMode ? 'Thư viện cho Shadowing' : 'Thư viện video'}
+        subtitle={
+          isShadowingMode
+            ? 'Chọn 1 video để bắt đầu luyện shadowing — nghe câu mẫu và nói theo'
+            : 'Chọn từ hàng trăm video được tuyển chọn để bắt đầu hành trình chinh phục tiếng Đức'
+        }
         accent="listening"
       />
 
@@ -182,6 +197,7 @@ export default function DictationLibraryPage() {
                 video={video}
                 onStart={() => handleStart(video.id)}
                 isStarting={startingId === video.id}
+                ctaLabel={isShadowingMode ? '🎤 Shadowing →' : 'Luyện tập →'}
               />
             ))}
           </div>

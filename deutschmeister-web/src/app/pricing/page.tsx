@@ -8,7 +8,6 @@ import { useAuthStore } from '@/stores/authStore';
 import { UpgradeModal } from '@/components/subscription/UpgradeModal';
 import type { BillingPeriod } from '@/lib/api/subscriptions';
 import { IconChevronLeft, IconCheck, IconZap, IconStar, IconMessageCircle } from '@/components/ui/Icons';
-import { DEFAULT_PRICES } from '@/lib/constants/pricing';
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -66,7 +65,7 @@ type PremiumPeriod = 'monthly' | 'quarterly' | 'yearly';
 
 export default function PricingPage() {
   const { isAuthenticated, user } = useAuthStore();
-  const { data: plans } = usePlans();
+  const { data: plans, isLoading: plansLoading } = usePlans();
   const { data: lifetimeInfo } = useLifetimeRemaining();
   const [upgradeOpen, setUpgradeOpen] = useState(false);
   const [defaultPeriod, setDefaultPeriod] = useState<BillingPeriod>('yearly');
@@ -77,13 +76,14 @@ export default function PricingPage() {
 
   const premiumPlan = plans?.find((p) => p.code === 'premium');
   const lifetimePlan = plans?.find((p) => p.code === 'lifetime');
-  const monthlyPrice = premiumPlan?.monthlyPrice ?? DEFAULT_PRICES.monthly;
-  const quarterlyPrice = premiumPlan?.quarterlyPrice ?? DEFAULT_PRICES.quarterly;
-  const yearlyPrice = premiumPlan?.yearlyPrice ?? DEFAULT_PRICES.yearly;
-  const lifetimePrice = lifetimePlan?.price ?? DEFAULT_PRICES.lifetime;
+  const priceReady = !plansLoading && !!plans;
+  const monthlyPrice = premiumPlan?.monthlyPrice ?? 0;
+  const quarterlyPrice = premiumPlan?.quarterlyPrice ?? 0;
+  const yearlyPrice = premiumPlan?.yearlyPrice ?? 0;
+  const lifetimePrice = lifetimePlan?.price ?? 0;
 
-  const savePctYearly = Math.round((1 - yearlyPrice / (monthlyPrice * 12)) * 100);
-  const savePctQuarterly = Math.round((1 - quarterlyPrice / (monthlyPrice * 3)) * 100);
+  const savePctYearly = priceReady && monthlyPrice > 0 ? Math.round((1 - yearlyPrice / (monthlyPrice * 12)) * 100) : 0;
+  const savePctQuarterly = priceReady && monthlyPrice > 0 ? Math.round((1 - quarterlyPrice / (monthlyPrice * 3)) * 100) : 0;
   const lifetimeSoldOut = lifetimeInfo ? lifetimeInfo.remaining <= 0 : false;
 
   const currentPrice = activePeriod === 'monthly' ? monthlyPrice : activePeriod === 'quarterly' ? quarterlyPrice : yearlyPrice;
@@ -108,8 +108,8 @@ export default function PricingPage() {
         {/* Header Section */}
         <div className="text-center mb-12 animate-[slideUp_0.4s_ease-out_both]">
           <div className="flex flex-col items-center mb-8">
-            <Image src="/logo.png" width={48} height={48} alt="Logo" className="rounded-2xl shadow-2xl mb-3" />
-            <span className="text-[10px] font-black uppercase tracking-[0.3em] opacity-40">DeutschMeister</span>
+            <Image src="/logo.png" width={48} height={48} alt="Logo" priority className="rounded-2xl shadow-2xl mb-3" />
+            <span className="text-[10px] font-black uppercase tracking-[0.3em] opacity-60">DeutschMeister</span>
           </div>
           
           <h1 className="text-4xl md:text-5xl font-black tracking-tight mb-6 flex flex-col md:flex-row items-center justify-center gap-x-3">
@@ -152,9 +152,9 @@ export default function PricingPage() {
           {/* Free Plan */}
           <div className="group relative flex flex-col p-8 rounded-4xl border bg-theme-bg-card transition-all duration-500 hover:-translate-y-1" style={{ borderColor: 'var(--theme-border)' }}>
             <div className="mb-8">
-              <div className="text-[11px] font-black uppercase tracking-widest opacity-40 mb-2">Essential</div>
+              <div className="text-[11px] font-black uppercase tracking-widest opacity-60 mb-2">Essential</div>
               <div className="text-3xl font-black mb-1">Miễn phí</div>
-              <div className="text-xs opacity-40 font-medium">Cơ bản & ôn tập nhẹ nhàng</div>
+              <div className="text-xs opacity-60 font-medium">Cơ bản & ôn tập nhẹ nhàng</div>
             </div>
             <ul className="space-y-4 mb-8 flex-1">
               {FREE_FEATURES.map((f, i) => (
@@ -188,10 +188,12 @@ export default function PricingPage() {
                 )}
               </div>
               <div className="flex items-baseline gap-1">
-                <div className="text-4xl font-black text-indigo-500">{formatVND(currentPrice)}</div>
-                <div className="text-xs opacity-40 font-medium">{periodLabel}</div>
+                <div className="text-4xl font-black text-indigo-500">
+                  {priceReady ? formatVND(currentPrice) : <span className="opacity-60">—</span>}
+                </div>
+                <div className="text-xs opacity-60 font-medium">{periodLabel}</div>
               </div>
-              {perMonthPrice && <div className="text-[11px] opacity-40 font-medium mt-1">Chỉ {formatVND(perMonthPrice)}/tháng</div>}
+              {priceReady && perMonthPrice ? <div className="text-[11px] opacity-60 font-medium mt-1">Chỉ {formatVND(perMonthPrice)}/tháng</div> : null}
             </div>
             <ul className="space-y-4 mb-8 flex-1">
               {PREMIUM_EXTRA.map((f, i) => (
@@ -200,7 +202,7 @@ export default function PricingPage() {
                   {f}
                 </li>
               ))}
-              <li className="flex items-start gap-3 text-[13px] font-bold opacity-40">
+              <li className="flex items-start gap-3 text-[13px] font-bold opacity-60">
                 <IconCheck size={16} style={{ marginTop: '2px' }} />
                 Bao gồm mọi tính năng Free
               </li>
@@ -230,8 +232,10 @@ export default function PricingPage() {
                   <span className="px-2 py-0.5 rounded-md bg-pink-500/10 text-pink-500 text-[9px] font-black">CÒN {lifetimeInfo.remaining} SUẤT</span>
                 )}
               </div>
-              <div className="text-3xl font-black text-pink-500">{formatVND(lifetimePrice)}</div>
-              <div className="text-xs opacity-40 font-medium">Mua một lần - Dùng mãi mãi</div>
+              <div className="text-3xl font-black text-pink-500">
+                {priceReady ? formatVND(lifetimePrice) : <span className="opacity-60">—</span>}
+              </div>
+              <div className="text-xs opacity-60 font-medium">Mua một lần - Dùng mãi mãi</div>
             </div>
             <ul className="space-y-4 mb-8 flex-1">
               {LIFETIME_EXTRA.map((f, i) => (
@@ -248,7 +252,7 @@ export default function PricingPage() {
               </Link>
             ) : (
               <button onClick={() => openUpgrade('lifetime')} disabled={lifetimeSoldOut}
-                className={`w-full py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all shadow-lg ${lifetimeSoldOut ? 'bg-theme-bg-secondary opacity-40 cursor-not-allowed' : 'bg-pink-500/10 text-pink-500 border border-pink-500/20 hover:bg-pink-500/20 hover:scale-[1.02]'}`}>
+                className={`w-full py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all shadow-lg ${lifetimeSoldOut ? 'bg-theme-bg-secondary opacity-60 cursor-not-allowed' : 'bg-pink-500/10 text-pink-500 border border-pink-500/20 hover:bg-pink-500/20 hover:scale-[1.02]'}`}>
                 {isLifetime ? 'Đã kích hoạt' : lifetimeSoldOut ? 'Hết suất ưu đãi' : 'Mua trọn đời'}
               </button>
             )}
@@ -259,14 +263,14 @@ export default function PricingPage() {
         <div className="mb-24 animate-[slideUp_0.6s_ease-out_0.3s_both]">
           <div className="text-center mb-10">
             <h2 className="text-2xl font-black mb-2">So sánh chi tiết</h2>
-            <p className="text-xs opacity-40 font-medium uppercase tracking-widest">Lựa chọn thông minh cho lộ trình của bạn</p>
+            <p className="text-xs opacity-60 font-medium uppercase tracking-widest">Lựa chọn thông minh cho lộ trình của bạn</p>
           </div>
           <div className="rounded-4xl border overflow-hidden backdrop-blur-xl bg-theme-bg-card/50" style={{ borderColor: 'var(--theme-border)' }}>
             <table className="w-full">
               <thead>
                 <tr className="bg-theme-bg-secondary/50">
-                  <th className="text-left py-6 px-8 text-[11px] font-black uppercase tracking-widest opacity-40">Tính năng</th>
-                  <th className="text-center py-6 px-6 text-[11px] font-black uppercase tracking-widest opacity-40 w-28">Free</th>
+                  <th className="text-left py-6 px-8 text-[11px] font-black uppercase tracking-widest opacity-60">Tính năng</th>
+                  <th className="text-center py-6 px-6 text-[11px] font-black uppercase tracking-widest opacity-60 w-28">Free</th>
                   <th className="text-center py-6 px-6 text-[11px] font-black uppercase tracking-widest text-indigo-500 w-28">Premium</th>
                   <th className="text-center py-6 px-6 text-[11px] font-black uppercase tracking-widest text-pink-500 w-28">Lifetime</th>
                 </tr>
@@ -276,7 +280,7 @@ export default function PricingPage() {
                   <tr key={row.feature} className="hover:bg-white/1 transition-colors">
                     <td className="py-4 px-8 text-[13px] font-bold opacity-80">{row.feature}</td>
                     <td className="text-center py-4 px-6">
-                      {row.free === true ? <div className="flex justify-center"><IconCheck size={16} className="opacity-30" /></div> : row.free === false ? <div className="flex justify-center"><IconX size={16} /></div> : <span className="text-[10px] font-black opacity-30">{row.free}</span>}
+                      {row.free === true ? <div className="flex justify-center"><IconCheck size={16} className="opacity-60" /></div> : row.free === false ? <div className="flex justify-center"><IconX size={16} /></div> : <span className="text-[10px] font-black opacity-60">{row.free}</span>}
                     </td>
                     <td className="text-center py-4 px-6">
                       {row.premium === true ? <div className="flex justify-center"><IconZap size={16} className="text-indigo-500" /></div> : row.premium === false ? <div className="flex justify-center"><IconX size={16} /></div> : <span className="text-[10px] font-black text-indigo-500">{row.premium}</span>}
@@ -322,7 +326,7 @@ export default function PricingPage() {
         </div>
 
         {/* Footer Info */}
-        <div className="text-center py-10 opacity-30 text-[10px] font-black uppercase tracking-[0.2em]">
+        <div className="text-center py-10 opacity-60 text-[10px] font-black uppercase tracking-[0.2em]">
           Bảo mật thanh toán · Hỗ trợ 24/7 · DeutschMeister Team
         </div>
       </div>

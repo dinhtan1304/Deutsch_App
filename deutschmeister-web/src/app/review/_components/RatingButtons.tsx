@@ -12,10 +12,10 @@ interface RatingButtonsProps {
 }
 
 const BUTTONS = [
-  { rating: 'again' as ReviewRating, label: 'Quen', marker: '1', textColor: '#FCA5A5', bg: 'linear-gradient(160deg, #450a0a, #991b1b)', borderKey: 'danger' },
-  { rating: 'hard' as ReviewRating, label: 'Kho', marker: '2', textColor: '#FCD34D', bg: 'linear-gradient(160deg, #431407, #92400e)', borderKey: 'xp' },
-  { rating: 'good' as ReviewRating, label: 'Duoc', marker: '3', textColor: '#86EFAC', bg: 'linear-gradient(160deg, #052e16, #166534)', borderKey: 'success' },
-  { rating: 'easy' as ReviewRating, label: 'De', marker: '4', textColor: '#93C5FD', bg: 'linear-gradient(160deg, #0c1a3f, #1e40af)', borderKey: 'srs' },
+  { rating: 'again' as ReviewRating, label: 'Quên', marker: '1', textColor: '#FCA5A5', bg: 'linear-gradient(160deg, #450a0a, #991b1b)', borderKey: 'danger' },
+  { rating: 'hard' as ReviewRating, label: 'Khó', marker: '2', textColor: '#FCD34D', bg: 'linear-gradient(160deg, #431407, #92400e)', borderKey: 'xp' },
+  { rating: 'good' as ReviewRating, label: 'Được', marker: '3', textColor: '#86EFAC', bg: 'linear-gradient(160deg, #052e16, #166534)', borderKey: 'success' },
+  { rating: 'easy' as ReviewRating, label: 'Dễ', marker: '4', textColor: '#93C5FD', bg: 'linear-gradient(160deg, #0c1a3f, #1e40af)', borderKey: 'srs' },
 ] as const;
 
 const BORDER_COLORS: Record<string, string> = {
@@ -35,7 +35,8 @@ export function RatingButtons({ intervals, onReview, disabled = false }: RatingB
             key={btn.rating}
             onClick={() => onReview(btn.rating)}
             disabled={disabled}
-            title={`Ban se thay lai tu nay sau ${delayText}`}
+            title={`Bạn sẽ thấy lại từ này sau ${delayText}`}
+            aria-label={`${btn.label} — ôn lại sau ${delayText}`}
             className="relative py-5 rounded-2xl transition-all duration-200 hover:-translate-y-1.5 hover:shadow-2xl active:scale-95 disabled:opacity-55 disabled:hover:translate-y-0 disabled:cursor-not-allowed"
             style={{ background: btn.bg, border: `1.5px solid ${BORDER_COLORS[btn.borderKey]}` }}
           >

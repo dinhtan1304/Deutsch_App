@@ -21,6 +21,7 @@ const PAYMENT_STATUS_LABELS: Record<string, string> = {
 const PLAN_COLORS: Record<string, string> = {
   free: '#64748B',
   premium: '#6366F1',
+  lifetime: '#F59E0B',
 };
 
 export default function AdminSubscriptionsPage() {
@@ -32,7 +33,7 @@ export default function AdminSubscriptionsPage() {
   const [actionNote, setActionNote] = useState('');
   const [actionTarget, setActionTarget] = useState<{ type: 'confirm' | 'reject'; id: string } | null>(null);
   const [grantTarget, setGrantTarget] = useState<AdminSubscription | null>(null);
-  const [grantPeriod, setGrantPeriod] = useState<'monthly' | 'yearly' | 'lifetime'>('monthly');
+  const [grantPeriod, setGrantPeriod] = useState<'monthly' | 'quarterly' | 'yearly' | 'lifetime'>('monthly');
   const [grantNote, setGrantNote] = useState('');
 
   const queryClient = useQueryClient();
@@ -68,7 +69,7 @@ export default function AdminSubscriptionsPage() {
   });
 
   const grantMut = useMutation({
-    mutationFn: ({ userId, period, note }: { userId: string; period: 'monthly' | 'yearly' | 'lifetime'; note?: string }) =>
+    mutationFn: ({ userId, period, note }: { userId: string; period: 'monthly' | 'quarterly' | 'yearly' | 'lifetime'; note?: string }) =>
       adminSubscriptionsApi.grantPremium(userId, period, note),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-subs'] });
@@ -233,7 +234,7 @@ export default function AdminSubscriptionsPage() {
                           backgroundColor: `${PLAN_COLORS[s.plan] || '#64748B'}20`,
                           color: PLAN_COLORS[s.plan] || '#64748B',
                         }}>
-                          {s.plan === 'premium' ? '⭐ Premium' : 'Free'}
+                          {s.plan === 'lifetime' ? '👑 Lifetime' : s.plan === 'premium' ? '⭐ Premium' : 'Free'}
                         </span>
                       </td>
                       <td style={{ padding: '10px 14px', color: '#64748B', fontSize: 12 }}>{s.status}</td>
@@ -246,7 +247,7 @@ export default function AdminSubscriptionsPage() {
                             style={{ padding: '4px 10px', borderRadius: 6, border: 'none', backgroundColor: '#6366F1', color: '#fff', fontSize: 11, fontWeight: 700, cursor: 'pointer' }}>
                             Cấp Premium
                           </button>
-                          {s.plan === 'premium' && (
+                          {(s.plan === 'premium' || s.plan === 'lifetime') && (
                             <button onClick={() => revokeMut.mutate(s.userId)} disabled={revokeMut.isPending}
                               style={{ padding: '4px 10px', borderRadius: 6, border: '1px solid #EF4444', backgroundColor: 'transparent', color: '#EF4444', fontSize: 11, fontWeight: 700, cursor: 'pointer' }}>
                               Thu hồi
@@ -306,10 +307,10 @@ export default function AdminSubscriptionsPage() {
             <div style={{ marginBottom: 14 }}>
               <label style={{ fontSize: 11, color: '#64748B', display: 'block', marginBottom: 6 }}>Thời hạn</label>
               <div style={{ display: 'flex', gap: 8 }}>
-                {(['monthly', 'yearly', 'lifetime'] as const).map(p => (
+                {(['monthly', 'quarterly', 'yearly', 'lifetime'] as const).map(p => (
                   <button key={p} onClick={() => setGrantPeriod(p)}
                     style={{ flex: 1, padding: '7px 0', borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: 'pointer', border: grantPeriod === p ? 'none' : '1px solid #334155', backgroundColor: grantPeriod === p ? '#6366F1' : 'transparent', color: grantPeriod === p ? '#fff' : '#64748B' }}>
-                    {p === 'monthly' ? '1 tháng' : p === 'yearly' ? '1 năm' : 'Vĩnh viễn'}
+                    {p === 'monthly' ? '1 tháng' : p === 'quarterly' ? '3 tháng' : p === 'yearly' ? '1 năm' : 'Vĩnh viễn'}
                   </button>
                 ))}
               </div>

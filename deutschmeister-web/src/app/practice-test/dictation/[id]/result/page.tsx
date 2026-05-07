@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useDictationSession, useStartDictation } from '@/hooks/useDictation';
+import { useStartShadowing } from '@/hooks/useShadowing';
 import { DictationSessionGraded, Part } from '@/lib/api/dictation';
 import { YouTubeEmbed, YouTubeEmbedRef } from '@/components/dictation/YouTubeEmbed';
 import { ScoreRing, PageHeader } from '@/components/ui';
@@ -97,6 +98,7 @@ export default function DictationResultPage() {
 
   const { data: session, isLoading, isFetching } = useDictationSession(id);
   const { mutate: startSession } = useStartDictation();
+  const { mutate: startShadowing } = useStartShadowing();
 
   // Only redirect when fetch is settled (not mid-flight to avoid DRAFT→GRADED race)
   useEffect(() => {
@@ -111,6 +113,13 @@ export default function DictationResultPage() {
     startSession({ videoId: session.video.id }, {
       onSuccess: (newSession) => router.push(`/practice-test/dictation/${newSession.id}`),
       onSettled: () => setIsRetrying(false),
+    });
+  };
+
+  const handleShadow = () => {
+    if (!session) return;
+    startShadowing({ videoId: session.video.id }, {
+      onSuccess: (s) => router.push(`/practice-test/dictation/shadow/${s.id}`),
     });
   };
 
@@ -154,7 +163,7 @@ export default function DictationResultPage() {
         </div>
         <div className="sm:w-1/2">
           <ScoreCard graded={graded} emoji={emoji} label={label} color={color}
-            onRetry={handleRetry} isRetrying={isRetrying} />
+            onRetry={handleRetry} isRetrying={isRetrying} onShadow={handleShadow} />
         </div>
       </div>
 
@@ -181,10 +190,10 @@ export default function DictationResultPage() {
 
 // ── Sub-components ────────────────────────────────────────────────────────────
 
-function ScoreCard({ graded, emoji, label, color, onRetry, isRetrying }: {
+function ScoreCard({ graded, emoji, label, color, onRetry, isRetrying, onShadow }: {
   graded: DictationSessionGraded;
   emoji: string; label: string; color: string;
-  onRetry: () => void; isRetrying: boolean;
+  onRetry: () => void; isRetrying: boolean; onShadow: () => void;
 }) {
   return (
     <div className="rounded-3xl border p-8 flex flex-col items-center relative overflow-hidden"
@@ -207,6 +216,12 @@ function ScoreCard({ graded, emoji, label, color, onRetry, isRetrying }: {
           <IconLibrary size={18} />
           <span className="text-xs font-black uppercase tracking-widest">Chọn bài khác</span>
         </Link>
+        <button onClick={onShadow}
+          className="flex items-center justify-center gap-3 p-4 rounded-2xl text-white transition-all hover:brightness-110 active:scale-95"
+          style={{ background: GRADIENT.reading, boxShadow: '0 8px 20px rgba(34,197,94,0.25)' }}>
+          🎤
+          <span className="text-xs font-black uppercase tracking-widest">Luyện shadowing video này</span>
+        </button>
       </div>
     </div>
   );

@@ -23,14 +23,33 @@ function IconLoader({ size = 16 }: { size?: number }) {
 
 function isPremiumActive(u: AdminUserItem): boolean {
   const sub = u.subscription;
-  if (!sub || sub.plan !== 'premium' || sub.status !== 'active') return false;
+  if (!sub || (sub.plan !== 'premium' && sub.plan !== 'lifetime') || sub.status !== 'active') return false;
   if (sub.expiresAt && new Date(sub.expiresAt) <= new Date()) return false;
   return true;
 }
 
+function isLifetimeActive(u: AdminUserItem): boolean {
+  const sub = u.subscription;
+  return !!sub && sub.plan === 'lifetime' && sub.status === 'active';
+}
+
 function PlanBadge({ user }: { user: AdminUserItem }) {
   const premium = isPremiumActive(user);
+  const lifetime = isLifetimeActive(user);
   const sub = user.subscription;
+  if (lifetime) {
+    return (
+      <span style={{
+        display: 'inline-flex', alignItems: 'center', gap: 4,
+        fontSize: 11, fontWeight: 800, padding: '3px 9px', borderRadius: 20,
+        background: 'linear-gradient(90deg, rgba(245,158,11,.25), rgba(234,179,8,.2))',
+        color: '#FCD34D', border: '1px solid rgba(245,158,11,.3)',
+        whiteSpace: 'nowrap',
+      }}>
+        👑 Lifetime
+      </span>
+    );
+  }
   if (premium) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -65,6 +84,7 @@ function PlanBadge({ user }: { user: AdminUserItem }) {
 const FILTER_OPTS = [
   { value: '', label: 'Tất cả' },
   { value: 'premium', label: '⭐ Premium' },
+  { value: 'lifetime', label: '👑 Lifetime' },
   { value: 'admin', label: 'Admin' },
   { value: 'inactive', label: 'Không hoạt động' },
 ];
@@ -77,7 +97,7 @@ export default function AdminUsersPage() {
 
   const roleFilter = filter === 'admin' ? 'admin' : undefined;
   const isActiveFilter = filter === 'inactive' ? 'false' : undefined;
-  const planFilter = filter === 'premium' ? 'premium' : undefined;
+  const planFilter = filter === 'premium' ? 'premium' : filter === 'lifetime' ? 'lifetime' : undefined;
 
   const { data, isLoading, isFetching } = useAdminUsers({
     search: search || undefined,
@@ -105,6 +125,7 @@ export default function AdminUsersPage() {
 
   const totalPages = data?.totalPages ?? 1;
   const premiumCount = data?.items?.filter(isPremiumActive).length ?? 0;
+  const lifetimeCount = data?.items?.filter(isLifetimeActive).length ?? 0;
 
   return (
     <div>
@@ -118,6 +139,9 @@ export default function AdminUsersPage() {
                 {data.total} người dùng
                 {planFilter === 'premium' && premiumCount > 0 && (
                   <span style={{ marginLeft: 8, color: '#818CF8', fontWeight: 600 }}>· {premiumCount} Premium</span>
+                )}
+                {planFilter === 'lifetime' && lifetimeCount > 0 && (
+                  <span style={{ marginLeft: 8, color: '#FCD34D', fontWeight: 600 }}>· {lifetimeCount} Lifetime</span>
                 )}
               </>
             ) : '...'}
@@ -184,11 +208,12 @@ export default function AdminUsersPage() {
             <tbody>
               {data.items.map((u) => {
                 const premium = isPremiumActive(u);
+                const lifetime = isLifetimeActive(u);
                 return (
                   <tr key={u.id} style={{
                     borderTop: '1px solid #334155',
-                    backgroundColor: premium ? 'rgba(99,102,241,.04)' : 'transparent',
-                    borderLeft: premium ? '3px solid #6366F1' : '3px solid transparent',
+                    backgroundColor: lifetime ? 'rgba(245,158,11,.05)' : premium ? 'rgba(99,102,241,.04)' : 'transparent',
+                    borderLeft: lifetime ? '3px solid #F59E0B' : premium ? '3px solid #6366F1' : '3px solid transparent',
                   }}>
                     {/* Name */}
                     <td style={{ padding: '10px 14px' }}>

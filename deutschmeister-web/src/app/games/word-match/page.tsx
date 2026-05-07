@@ -1,8 +1,10 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useRandomWords } from '@/hooks/useWords';
+import { useWordBankGameWords } from '@/hooks/usePersonalWords';
+import { personalWordsToGameWords, getEligibleWordsForGame } from '@/lib/personalWordAdapter';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
 import { useGameSession } from '@/hooks/useGameSession';
@@ -37,6 +39,10 @@ function shuffle<T>(arr: T[]): T[] {
 
 export default function WordMatchPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const isWordBankMode = searchParams.get('source') === 'wordbank';
+  const collectionId = searchParams.get('collectionId') ?? undefined;
+
   const { settings, loadSettings } = useSettingsStore();
   const { playCorrect, playWrong, playCombo, playGameOver, playClick } = useSoundEffects();
   const session = useGameSession('matching');
@@ -64,7 +70,9 @@ export default function WordMatchPage() {
   const startTimeRef = useRef(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const { refetch, isLoading } = useRandomWords(PAIRS + 2, {});
+  const { refetch, isLoading: globalLoading } = useRandomWords(PAIRS + 2, {});
+  const wbData = useWordBankGameWords({ collectionId, enabled: isWordBankMode });
+  const isLoading = isWordBankMode ? wbData.isLoading : globalLoading;
 
   useEffect(() => { loadSettings(); }, [loadSettings]);
 
@@ -88,9 +96,18 @@ export default function WordMatchPage() {
   const startGame = async () => {
     playClick();
     setLoadError(null);
-    const result = await refetch();
-    const fetched = result.data?.slice(0, PAIRS);
-    if (!fetched?.length) { setLoadError('Không có từ vựng! Vui lòng thêm từ hoặc seed database.'); return; }
+    let fetched: (typeof leftItems[0]['word'])[];
+    if (isWordBankMode) {
+      const eligible = getEligibleWordsForGame('word-match', wbData.data ?? []);
+      if (eligible.length < 4) { setLoadError('Cần ít nhất 4 từ trong bộ sưu tập này'); return; }
+      const pairs = Math.min(PAIRS, Math.floor(eligible.length / 2) * 2);
+      const shuffled = [...eligible].sort(() => Math.random() - 0.5).slice(0, pairs);
+      fetched = personalWordsToGameWords(shuffled);
+    } else {
+      const result = await refetch();
+      fetched = result.data?.slice(0, PAIRS) ?? [];
+      if (!fetched.length) { setLoadError('Không có từ vựng! Vui lòng thêm từ hoặc seed database.'); return; }
+    }
 
     setLeftItems(shuffle(fetched.map(w => ({ id: w.id, word: w }))));
     setRightItems(shuffle(fetched.map(w => ({ id: w.id, word: w }))));

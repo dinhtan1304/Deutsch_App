@@ -11,6 +11,8 @@ export interface DictationVideo {
   cefrLevel: string;
   topic?: string;
   durationSec: number;
+  /** "youtube" = extracted from CC, "ai" = Gemini-transcribed (shadowing only) */
+  transcriptSource?: 'youtube' | 'ai';
 }
 
 export type Part =
@@ -49,6 +51,26 @@ export interface DictationSessionGraded extends DictationSessionBase {
 }
 
 export type DictationSession = DictationSessionDraft | DictationSessionGraded;
+
+export type StartFromUrlResponse =
+  | { id: string; status: 'DRAFT' }
+  | { status: 'QUEUED'; requestId: string; message: string };
+
+export interface MyDictationRequestItem {
+  id: string;
+  youtubeUrl: string;
+  youtubeId: string;
+  cefrLevel: string | null;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  rejectionReason: string | null;
+  reviewedAt: string | null;
+  createdAt: string;
+  video: { id: string; title: string; thumbnailUrl: string | null; cefrLevel: string } | null;
+}
+
+export interface MyDictationRequestsResponse {
+  items: MyDictationRequestItem[];
+}
 
 export interface DictationHistoryItem {
   id: string;
@@ -108,7 +130,10 @@ export const dictationApi = {
     apiPost<{ id: string; status: string }>('/dictation/start', data),
 
   startFromUrl: (data: { youtubeUrl: string; cefrLevel?: string }) =>
-    apiPost<{ id: string; status: string }>('/dictation/start-from-url', data),
+    apiPost<StartFromUrlResponse>('/dictation/start-from-url', data),
+
+  getMyRequests: () =>
+    apiGet<MyDictationRequestsResponse>('/dictation/my-requests'),
 
   getSession: (id: string) =>
     apiGet<DictationSession>(`/dictation/session/${id}`),

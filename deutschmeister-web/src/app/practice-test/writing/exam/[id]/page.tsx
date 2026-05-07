@@ -7,6 +7,7 @@ import { useExamWritingSession, useSaveExamWritingDraft, useSubmitExamWriting } 
 import { ExamWritingTeil } from '@/lib/api/examWriting';
 import { HighlightedText } from '@/components/word-highlight/HighlightedText';
 import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import { useUmlautTrigger, UMLAUT_TRIGGER_HINT } from '@/hooks/useUmlautTrigger';
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
 function IconLoader({ size = 24, style }: { size?: number; style?: React.CSSProperties }) {
@@ -84,6 +85,7 @@ function TeilWriter({ teil, value, onChange, promptRef, hidePrompt = false }: {
 }) {
   const wc = countWords(value);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const onUmlautKey = useUmlautTrigger(onChange);
 
   const insertSpecial = useCallback((char: string) => {
     if (!textareaRef.current) return;
@@ -157,12 +159,16 @@ function TeilWriter({ teil, value, onChange, promptRef, hidePrompt = false }: {
               {char}
             </button>
           ))}
+          <span className="text-[10px] font-medium ml-2 hidden sm:inline" style={{ color: 'var(--theme-text-muted)' }}>
+            hoặc gõ <span className="font-mono font-bold">{UMLAUT_TRIGGER_HINT}</span>
+          </span>
         </div>
 
         <textarea
           ref={textareaRef}
           value={value}
           onChange={e => onChange(e.target.value)}
+          onKeyDown={onUmlautKey}
           placeholder={`Schreiben Sie hier Ihren Text…`}
           rows={14}
           className="w-full px-5 py-5 text-body leading-relaxed resize-none outline-none block bg-transparent"
@@ -171,6 +177,7 @@ function TeilWriter({ teil, value, onChange, promptRef, hidePrompt = false }: {
             fontFamily: 'Georgia, serif',
             minHeight: '400px',
           }}
+          title={`Mẹo: ${UMLAUT_TRIGGER_HINT}`}
         />
         <div className="px-5 pb-5 pt-1">
           <WordCountBar count={wc} min={teil.minWords} max={teil.maxWords} />

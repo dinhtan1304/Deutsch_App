@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { ACCENT, STATUS } from '@/lib/tokens';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useAuthStore } from '@/stores/authStore';
 import {
   IconZap, IconTarget, IconLayers, IconPenTool,
@@ -186,8 +187,7 @@ export default function HomePage() {
       }}>
         <div style={{ maxWidth: 1200, margin: '0 auto', display: 'flex', alignItems: 'center', height: 64 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo.png" width={36} height={36} alt="Deutschmeister" style={{ borderRadius: 10 }} />
+            <Image src="/logo.png" width={36} height={36} alt="Deutschmeister" priority style={{ borderRadius: 10 }} />
             <span style={{ fontWeight: 800, fontSize: 17, color: 'white', letterSpacing: '-0.3px' }}>Deutschmeister</span>
           </div>
           <div className="hide-mobile" style={{ display: 'flex', alignItems: 'center', gap: 32, marginRight: 32 }}>
@@ -203,7 +203,7 @@ export default function HomePage() {
             <Link href="/auth/login" className="btn-outline-hover" style={{ padding: '8px 18px', borderRadius: 10, border: '1px solid rgba(255,255,255,.2)', color: 'white', fontSize: 13.5, fontWeight: 600, textDecoration: 'none' }}>Đăng nhập</Link>
             <Link href="/words" className="btn-glow" style={{ padding: '8px 18px', borderRadius: 10, background: 'linear-gradient(135deg, #6366F1, #8B5CF6)', color: 'white', fontSize: 13.5, fontWeight: 700, textDecoration: 'none', boxShadow: '0 4px 14px rgba(99,102,241,.4)' }}>Bắt đầu ngay</Link>
           </div>
-          <button onClick={() => setMenuOpen(v => !v)} className="mobile-menu" style={{ display: 'none', background: 'none', border: 'none', color: 'white', cursor: 'pointer', padding: 4 }}>
+          <button onClick={() => setMenuOpen(v => !v)} className="mobile-menu" aria-label={menuOpen ? 'Đóng menu' : 'Mở menu'} aria-expanded={menuOpen} style={{ display: 'none', background: 'none', border: 'none', color: 'white', cursor: 'pointer', padding: 4 }}>
             {menuOpen ? <IconX /> : <IconMenu />}
           </button>
         </div>
@@ -249,7 +249,7 @@ export default function HomePage() {
               Xem gói Premium
             </Link>
           </div>
-          <p style={{ fontSize: 12.5, color: 'rgba(255,255,255,.3)', margin: 0 }}>
+          <p style={{ fontSize: 12.5, color: 'rgba(255,255,255,.6)', margin: 0 }}>
             Không cần thẻ tín dụng · Miễn phí mãi mãi · 3 tính năng AI/tuần
           </p>
         </div>
@@ -283,7 +283,7 @@ export default function HomePage() {
             <div key={s.label}>
               <div style={{ fontSize: '1.75rem', fontWeight: 900, background: 'linear-gradient(135deg, #60a5fa, #a78bfa)', backgroundClip: 'text', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>{s.num}</div>
               <div style={{ fontSize: 12.5, fontWeight: 700, color: 'white', marginTop: 3 }}>{s.label}</div>
-              <div style={{ fontSize: 11, color: 'rgba(255,255,255,.4)', marginTop: 1 }}>{s.sub}</div>
+              <div style={{ fontSize: 11, color: 'rgba(255,255,255,.6)', marginTop: 1 }}>{s.sub}</div>
             </div>
           ))}
         </div>
@@ -352,7 +352,7 @@ export default function HomePage() {
               <div style={{ width: 32, height: 32, borderRadius: 8, background: 'linear-gradient(135deg, #4285F4, #34A853, #FBBC04, #EA4335)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, fontWeight: 900, color: 'white' }}>G</div>
               <div style={{ textAlign: 'left' }}>
                 <div style={{ fontSize: 13, fontWeight: 700, color: 'white' }}>Gemini AI</div>
-                <div style={{ fontSize: 11, color: 'rgba(255,255,255,.4)' }}>Multimodal AI Engine</div>
+                <div style={{ fontSize: 11, color: 'rgba(255,255,255,.6)' }}>Multimodal AI Engine</div>
               </div>
             </div>
           </div>
@@ -375,7 +375,7 @@ export default function HomePage() {
                 <div style={{ fontSize: 24 }}>{idx === 0 ? '🏆' : '🏆'}</div>
                 <div>
                   <div style={{ fontWeight: 800, fontSize: 16, color: 'white' }}>{name}</div>
-                  <div style={{ fontSize: 12, color: 'rgba(255,255,255,.4)' }}>A1 · A2 · B1</div>
+                  <div style={{ fontSize: 12, color: 'rgba(255,255,255,.6)' }}>A1 · A2 · B1</div>
                 </div>
               </div>
               {EXAM_LEVELS.map(l => (
@@ -383,7 +383,7 @@ export default function HomePage() {
                   <span style={{ minWidth: 36, height: 36, borderRadius: 10, background: 'linear-gradient(135deg, #F59E0B, #EF4444)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 900, color: 'white' }}>{l.level}</span>
                   <div>
                     <div style={{ fontSize: 13, fontWeight: 700, color: 'white', marginBottom: 2 }}>{l.desc}</div>
-                    <div style={{ fontSize: 11.5, color: 'rgba(255,255,255,.35)' }}>{l.teile} kỹ năng · {l.time} phút</div>
+                    <div style={{ fontSize: 11.5, color: 'rgba(255,255,255,.6)' }}>{l.teile} kỹ năng · {l.time} phút</div>
                   </div>
                 </div>
               ))}
@@ -402,7 +402,7 @@ export default function HomePage() {
               <div key={s.skill} style={{ borderRadius: 16, padding: '20px 16px', textAlign: 'center', background: `rgba(${hexToRgb(s.color)}, .06)`, border: `1px solid rgba(${hexToRgb(s.color)}, .2)` }}>
                 <div style={{ width: 40, height: 40, borderRadius: 10, background: `rgba(${hexToRgb(s.color)}, .15)`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: s.color, margin: '0 auto 12px' }}><Ic /></div>
                 <div style={{ fontWeight: 800, fontSize: 15, color: 'white', marginBottom: 4 }}>{s.skill}</div>
-                <div style={{ fontSize: 11.5, color: 'rgba(255,255,255,.4)', lineHeight: 1.5 }}>{s.desc}</div>
+                <div style={{ fontSize: 11.5, color: 'rgba(255,255,255,.6)', lineHeight: 1.5 }}>{s.desc}</div>
               </div>
             );
           })}
@@ -428,7 +428,7 @@ export default function HomePage() {
                   <Ic size={22} />
                 </div>
                 <div style={{ fontWeight: 800, fontSize: 13.5, color: 'white', marginBottom: 4 }}>{g.name}</div>
-                <div style={{ fontSize: 11.5, color: 'rgba(255,255,255,.4)' }}>{g.vi}</div>
+                <div style={{ fontSize: 11.5, color: 'rgba(255,255,255,.6)' }}>{g.vi}</div>
               </div>
               );
             })}

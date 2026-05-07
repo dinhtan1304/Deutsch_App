@@ -79,12 +79,20 @@ async function refreshAccessToken(): Promise<string | null> {
   isRefreshing = true;
   refreshPromise = (async () => {
     try {
-      const response = await fetch(`${API_URL}/auth/refresh`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include', // IMPORTANT: This sends the httpOnly cookie
-        body: JSON.stringify({}), // Empty body, refresh token comes from cookie
-      });
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 6000); // 6s timeout
+      let response: Response;
+      try {
+        response = await fetch(`${API_URL}/auth/refresh`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include', // IMPORTANT: This sends the httpOnly cookie
+          body: JSON.stringify({}), // Empty body, refresh token comes from cookie
+          signal: controller.signal,
+        });
+      } finally {
+        clearTimeout(timeoutId);
+      }
 
       if (!response.ok) {
         console.warn('[Auth] Refresh failed:', response.status, await response.text().catch(() => ''));

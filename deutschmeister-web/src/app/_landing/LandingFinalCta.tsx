@@ -30,7 +30,7 @@ export function LandingFinalCta() {
         </Link>
         <div style={{ marginTop: 24, display: 'flex', gap: 24, justifyContent: 'center', flexWrap: 'wrap' }}>
           {['AI', 'Chuẩn Goethe/TELC'].map(t => (
-            <div key={t} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'rgba(255,255,255,.4)', fontWeight: 500 }}>
+            <div key={t} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'rgba(255,255,255,.6)', fontWeight: 500 }}>
               <span style={{ color: STATUS.success }}><IconCheck /></span> {t}
             </div>
           ))}

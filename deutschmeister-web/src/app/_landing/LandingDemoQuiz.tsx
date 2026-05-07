@@ -107,7 +107,7 @@ export function LandingDemoQuiz() {
           ))}
         </div>
 
-        <div style={{ textAlign: 'center', color: 'rgba(255,255,255,.4)', fontSize: 13, fontWeight: 600, marginBottom: 8 }}>
+        <div style={{ textAlign: 'center', color: 'rgba(255,255,255,.6)', fontSize: 13, fontWeight: 600, marginBottom: 8 }}>
           Câu {idx + 1} / {words.length}
         </div>
 
@@ -120,11 +120,11 @@ export function LandingDemoQuiz() {
             {selected ? (
               <><span style={{ color: ARTICLE_COLORS[correct] || 'white' }}>{w.article}</span> {w.word}</>
             ) : (
-              <><span style={{ color: 'rgba(255,255,255,.3)' }}>___</span> {w.word}</>
+              <><span style={{ color: 'rgba(255,255,255,.6)' }}>___</span> {w.word}</>
             )}
           </div>
           {w.translationVi && (
-            <div style={{ fontSize: 14, color: 'rgba(255,255,255,.45)', fontStyle: 'italic' }}>
+            <div style={{ fontSize: 14, color: 'rgba(255,255,255,.6)', fontStyle: 'italic' }}>
               {w.translationVi}
             </div>
           )}
@@ -182,7 +182,7 @@ export function LandingDemoQuiz() {
     <div style={{ textAlign: 'center' }}>
       <div style={{ fontSize: 56, marginBottom: 12 }}>{emoji}</div>
       <div style={{ fontSize: 40, fontWeight: 900, color: 'white', marginBottom: 4 }}>
-        {score}<span style={{ color: 'rgba(255,255,255,.3)', fontWeight: 600 }}>/{words.length}</span>
+        {score}<span style={{ color: 'rgba(255,255,255,.6)', fontWeight: 600 }}>/{words.length}</span>
       </div>
       <div style={{ fontSize: 16, color: 'rgba(255,255,255,.55)', marginBottom: 8 }}>{msg}</div>
       <div

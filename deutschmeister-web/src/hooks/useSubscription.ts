@@ -31,7 +31,7 @@ export function usePlans() {
   return useQuery<Plan[]>({
     queryKey: subscriptionKeys.plans(),
     queryFn: () => subscriptionsApi.getPlans(),
-    staleTime: 60 * 60 * 1000, // 1h — plans rarely change
+    staleTime: 5 * 60 * 1000, // 5min — prices can change after deploy
   });
 }
 

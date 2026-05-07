@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 
 const IconArrow = () => (
   <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
@@ -49,7 +50,7 @@ const linkStyle: React.CSSProperties = {
 };
 
 const colHeading: React.CSSProperties = {
-  fontSize: 12, fontWeight: 800, color: 'rgba(255,255,255,.35)',
+  fontSize: 12, fontWeight: 800, color: 'rgba(255,255,255,.6)',
   letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 16,
 };
 
@@ -61,11 +62,10 @@ export function LandingFooter() {
         {/* Brand */}
         <div style={{ gridColumn: 'span 1' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo.png" width={38} height={38} alt="Deutschmeister" style={{ borderRadius: 11, flexShrink: 0 }} />
+            <Image src="/logo.png" width={38} height={38} alt="Deutschmeister" style={{ borderRadius: 11, flexShrink: 0 }} />
             <span style={{ fontWeight: 800, fontSize: 16, color: 'white' }}>Deutschmeister</span>
           </div>
-          <p style={{ fontSize: 13, color: 'rgba(255,255,255,.45)', lineHeight: 1.7, marginBottom: 20, maxWidth: 240 }}>
+          <p style={{ fontSize: 13, color: 'rgba(255,255,255,.6)', lineHeight: 1.7, marginBottom: 20, maxWidth: 240 }}>
             Nền tảng học tiếng Đức toàn diện — từ cơ bản đến luyện thi Goethe/TELC.
           </p>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '8px 12px', borderRadius: 10, background: 'rgba(255,255,255,.04)', border: '1px solid rgba(255,255,255,.08)' }}>
@@ -74,13 +74,13 @@ export function LandingFooter() {
               style={{ width: 26, height: 26, borderRadius: 7, background: 'linear-gradient(135deg, #4285F4, #34A853, #FBBC04, #EA4335)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 900, color: 'white', flexShrink: 0 }}>G</div>
             <div>
               <div style={{ fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,.8)' }}>Gemini AI</div>
-              <div style={{ fontSize: 10.5, color: 'rgba(255,255,255,.35)' }}>Multimodal AI Engine</div>
+              <div style={{ fontSize: 10.5, color: 'rgba(255,255,255,.6)' }}>Multimodal AI Engine</div>
             </div>
           </div>
         </div>
 
         <div>
-          <h4 style={colHeading}>Học tập</h4>
+          <h3 style={colHeading}>Học tập</h3>
           <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 11 }}>
             {LEARNING_LINKS.map(([label, href]) => (
               <li key={label}>
@@ -92,7 +92,7 @@ export function LandingFooter() {
         </div>
 
         <div>
-          <h4 style={colHeading}>Luyện thi</h4>
+          <h3 style={colHeading}>Luyện thi</h3>
           <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 11 }}>
             {EXAM_LINKS.map(([label, href]) => (
               <li key={label}>
@@ -104,7 +104,7 @@ export function LandingFooter() {
         </div>
 
         <div>
-          <h4 style={colHeading}>Cộng đồng</h4>
+          <h3 style={colHeading}>Cộng đồng</h3>
           <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 11 }}>
             <li>
               <a href="https://discord.gg/NfztBxtxh" target="_blank" rel="noopener noreferrer" style={linkStyle}
@@ -116,7 +116,7 @@ export function LandingFooter() {
         </div>
 
         <div>
-          <h4 style={colHeading}>Tài khoản</h4>
+          <h3 style={colHeading}>Tài khoản</h3>
           <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 11, marginBottom: 24 }}>
             {ACCOUNT_LINKS.map(([label, href]) => (
               <li key={label}>
@@ -131,7 +131,7 @@ export function LandingFooter() {
             Bắt đầu ngay <IconArrow />
           </Link>
 
-          <h4 style={{ ...colHeading, marginTop: 28, marginBottom: 12 }}>Chính sách</h4>
+          <h3 style={{ ...colHeading, marginTop: 28, marginBottom: 12 }}>Chính sách</h3>
           <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 11 }}>
             {POLICY_LINKS.map(([label, href]) => (
               <li key={label}>
@@ -149,8 +149,8 @@ export function LandingFooter() {
           <div style={{ fontSize: 12.5, color: 'rgba(255,255,255,.25)', display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
             <span>© 2025 – 2026 Deutschmeister · Made with Yuii in Vietnam</span>
             <span style={{ color: 'rgba(255,255,255,.12)' }}>|</span>
-            <Link href="/privacy" style={{ color: 'rgba(255,255,255,.3)', textDecoration: 'none', fontSize: 12 }}>Bảo mật</Link>
-            <Link href="/terms" style={{ color: 'rgba(255,255,255,.3)', textDecoration: 'none', fontSize: 12 }}>Điều khoản</Link>
+            <Link href="/privacy" style={{ color: 'rgba(255,255,255,.6)', textDecoration: 'none', fontSize: 12 }}>Bảo mật</Link>
+            <Link href="/terms" style={{ color: 'rgba(255,255,255,.6)', textDecoration: 'none', fontSize: 12 }}>Điều khoản</Link>
           </div>
           <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
             {LEVEL_BADGES.map(l => (

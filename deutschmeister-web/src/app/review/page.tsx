@@ -385,7 +385,7 @@ export default function SRSReviewPage() {
       ) : isFlipped ? (
         <div className="w-full py-4 rounded-2xl text-center text-sm font-semibold"
           style={{ backgroundColor: 'var(--theme-bg-card)', border: '1px solid var(--theme-border)', color: 'var(--theme-text-muted)' }}>
-          Dang tinh lich on...
+          Đang tính lịch ôn...
         </div>
       ) : (
         <button

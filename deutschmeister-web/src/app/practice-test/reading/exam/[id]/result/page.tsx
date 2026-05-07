@@ -32,6 +32,12 @@ function taskTypeLabel(type: string) {
   return map[type] || type;
 }
 
+function formatAnswer(value: string | undefined | null): string {
+  if (value == null || value === '') return '—';
+  if (String(value).toUpperCase() === 'X') return 'X (Keine passt)';
+  return String(value);
+}
+
 // ─── Question Review (per-Teil) ───────────────────────────────────────────────
 function QuestionReview({ teil, details }: { teil: ExamReadingTeil; details: TeilGradingDetail[] }) {
   const [showPassage, setShowPassage] = useState(false);
@@ -106,7 +112,7 @@ function QuestionReview({ teil, details }: { teil: ExamReadingTeil; details: Tei
                 </p>
                 {!isCorrect && (
                   <p className="text-xs mt-0.5" style={{ color: STATUS.danger }}>
-                    Bạn: <strong>{detail.userAnswer ?? '—'}</strong> · Đáp án: <strong>{detail.correctAnswer}</strong>
+                    Bạn: <strong>{formatAnswer(detail.userAnswer)}</strong> · Đáp án: <strong>{formatAnswer(detail.correctAnswer)}</strong>
                   </p>
                 )}
               </div>
@@ -144,14 +150,14 @@ function QuestionReview({ teil, details }: { teil: ExamReadingTeil; details: Tei
                     })}
                   </div>
                 )}
-                {/* Richtig/Falsch or Ja/Nein answer display (no options) */}
+                {/* Richtig/Falsch or Ja/Nein or Zuordnung answer display (no options) */}
                 {(!q.options || q.options.length === 0) && (
                   <div className="flex gap-3 pt-3 flex-wrap">
                     <div className="flex items-center gap-1.5 text-xs" style={{ color: 'var(--theme-text-secondary)' }}>
                       <span style={{ color: 'var(--theme-text-muted)' }}>Bạn trả lời:</span>
                       <span className="font-bold px-2 py-0.5 rounded-lg"
                         style={{ backgroundColor: isCorrect ? `${STATUS.success}1A` : `${STATUS.danger}1A`, color: isCorrect ? STATUS.success : STATUS.danger }}>
-                        {detail.userAnswer ?? '(bỏ qua)'}
+                        {detail.userAnswer ? formatAnswer(detail.userAnswer) : '(bỏ qua)'}
                       </span>
                     </div>
                     {!isCorrect && (
@@ -159,7 +165,7 @@ function QuestionReview({ teil, details }: { teil: ExamReadingTeil; details: Tei
                         <span style={{ color: 'var(--theme-text-muted)' }}>Đúng:</span>
                         <span className="font-bold px-2 py-0.5 rounded-lg"
                           style={{ backgroundColor: `${STATUS.success}1A`, color: STATUS.success }}>
-                          {detail.correctAnswer}
+                          {formatAnswer(detail.correctAnswer)}
                         </span>
                       </div>
                     )}

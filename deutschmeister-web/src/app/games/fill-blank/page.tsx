@@ -1,8 +1,10 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useRandomWords } from '@/hooks/useWords';
+import { useWordBankGameWords } from '@/hooks/usePersonalWords';
+import { personalWordsToGameWords, getEligibleWordsForGame } from '@/lib/personalWordAdapter';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
 import { useGameSession } from '@/hooks/useGameSession';
@@ -30,6 +32,10 @@ interface AnswerRecord {
 
 export default function FillBlankPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const isWordBankMode = searchParams.get('source') === 'wordbank';
+  const collectionId = searchParams.get('collectionId') ?? undefined;
+
   const { settings, isLoaded, loadSettings } = useSettingsStore();
   const { playCorrect, playWrong, playCombo, playGameOver, playClick } = useSoundEffects();
   const session = useGameSession('fill-blank');
@@ -52,7 +58,11 @@ export default function FillBlankPage() {
   const [showHint, setShowHint] = useState(false);
 
   const questionsCount = isLoaded ? settings.questionsPerGame : 20;
-  const { data: words, refetch, isLoading } = useRandomWords(questionsCount, {});
+  const [wbGameWords, setWbGameWords] = useState<Word[]>([]);
+  const { data: globalWords, refetch, isLoading: globalLoading } = useRandomWords(questionsCount, {});
+  const wbData = useWordBankGameWords({ collectionId, enabled: isWordBankMode });
+  const words = isWordBankMode ? wbGameWords : (globalWords ?? []);
+  const isLoading = isWordBankMode ? wbData.isLoading : globalLoading;
   const currentWord = words?.[index];
 
   useEffect(() => { loadSettings(); }, [loadSettings]);
@@ -64,14 +74,27 @@ export default function FillBlankPage() {
   const startGame = async () => {
     playClick();
     setLoadError(null);
-    const result = await refetch();
-    if (!result.data?.length) { setLoadError('Không có từ vựng! Vui lòng thêm từ hoặc seed database.'); return; }
-    setIndex(0); setScore(0); setCombo(0); setBestCombo(0);
-    scoreRef.current = 0; bestComboRef.current = 0;
-    correctRef.current = 0; wrongRef.current = 0;
-    setUserInput(''); setAnswered(false); setIsCorrect(false);
-    setAnswers([]); setShowHint(false); setPhase('playing');
-    session.start(questionsCount);
+    if (isWordBankMode) {
+      const eligible = getEligibleWordsForGame('fill-blank', wbData.data ?? []);
+      if (eligible.length < 4) { setLoadError('Cần ít nhất 4 danh từ có mạo từ trong bộ sưu tập này'); return; }
+      const shuffled = [...eligible].sort(() => Math.random() - 0.5).slice(0, questionsCount);
+      setWbGameWords(personalWordsToGameWords(shuffled));
+      setIndex(0); setScore(0); setCombo(0); setBestCombo(0);
+      scoreRef.current = 0; bestComboRef.current = 0;
+      correctRef.current = 0; wrongRef.current = 0;
+      setUserInput(''); setAnswered(false); setIsCorrect(false);
+      setAnswers([]); setShowHint(false); setPhase('playing');
+      session.start(shuffled.length);
+    } else {
+      const result = await refetch();
+      if (!result.data?.length) { setLoadError('Không có từ vựng! Vui lòng thêm từ hoặc seed database.'); return; }
+      setIndex(0); setScore(0); setCombo(0); setBestCombo(0);
+      scoreRef.current = 0; bestComboRef.current = 0;
+      correctRef.current = 0; wrongRef.current = 0;
+      setUserInput(''); setAnswered(false); setIsCorrect(false);
+      setAnswers([]); setShowHint(false); setPhase('playing');
+      session.start(questionsCount);
+    }
   };
 
   const checkAnswer = useCallback(() => {
@@ -187,7 +210,7 @@ export default function FillBlankPage() {
             getSelectedLabel={a => !a.isCorrect ? (a.userInput || '(trống)') : null}
           />
         </div>
-        <AddWrongWordsToBank wrongWords={answers.filter(a => !a.isCorrect).map(a => a.word)} />
+        {!isWordBankMode && <AddWrongWordsToBank wrongWords={answers.filter(a => !a.isCorrect).map(a => a.word)} />}
         <GameResultUpsell />
       </>
     );

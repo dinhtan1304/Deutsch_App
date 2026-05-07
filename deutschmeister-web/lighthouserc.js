@@ -40,6 +40,12 @@ module.exports = {
         'unused-javascript': ['warn', { maxLength: 0 }],
         'uses-text-compression': 'warn',
         'uses-optimized-images': 'warn',
+
+        // Informational audits — preset asserts minScore but Lighthouse returns
+        // null/details (no numeric score), producing NaN. Disable to avoid false fails.
+        'lcp-lazy-loaded': 'off',
+        'non-composited-animations': 'off',
+        'prioritize-lcp-image': 'off',
       },
     },
     upload: {

@@ -13,21 +13,21 @@ export const EXAM_READING_DISPLAY: Record<string, Record<string, {
     },
     A2: {
       teile: 4, questions: 20, timeMin: 30, totalPoints: 20,
-      structure: ['Bài văn → Multiple Choice a/b/c', 'Bảng thông tin → MCQ', 'Email → MCQ', '5 người → 6 website (Zuordnung)'],
+      structure: ['Bài văn → Multiple Choice a/b/c', 'Bảng thông tin → MCQ', 'Email → MCQ', '5 người → 6 website (Zuordnung, có thể chọn X)'],
     },
     B1: {
       teile: 5, questions: 30, timeMin: 65, totalPoints: 30,
-      structure: ['Email → Richtig/Falsch (6 câu)', '2 bài → MCQ a/b/c', '7 người → 10 Anzeigen (Zuordnung)', '7 ý kiến → Ja/Nein', '1 bài → MCQ a/b/c'],
+      structure: ['Email → Richtig/Falsch (6 câu)', '2 bài → MCQ a/b/c', '7 người → 10 Anzeigen (Zuordnung, có thể chọn X)', '7 ý kiến → Ja/Nein', '1 bài → MCQ a/b/c'],
     },
   },
   TELC: {
     A2: {
       teile: 5, questions: 30, timeMin: 45, totalPoints: 40,
-      structure: ['Bài → Richtig/Falsch', 'Zuordnung', 'MCQ a/b/c', 'Richtig/Falsch', 'Sprachbausteine (10 gaps MCQ)'],
+      structure: ['Bài → Richtig/Falsch', 'Zuordnung (có thể chọn X)', 'MCQ a/b/c', 'Richtig/Falsch', 'Sprachbausteine (10 gaps MCQ)'],
     },
     B1: {
       teile: 6, questions: 45, timeMin: 60, totalPoints: 60,
-      structure: ['Bài dài → 10 Richtig/Falsch', 'Zuordnung', '5→8 Anzeigen (Zuordnung)', 'MCQ a/b/c', 'Richtig/Falsch', 'Sprachbausteine (20 gaps)'],
+      structure: ['Bài dài → 10 Richtig/Falsch', 'Zuordnung (có thể chọn X)', '5→8 Anzeigen (Zuordnung, có thể chọn X)', 'MCQ a/b/c', 'Richtig/Falsch', 'Sprachbausteine (20 gaps)'],
     },
   },
 };

@@ -10,12 +10,18 @@ import { WordDetailModal } from '@/components/word-bank/WordDetailModal';
 import { SRSBanner } from '@/components/word-bank/SRSBanner';
 import { CollectionsSidebar } from '@/components/word-bank/CollectionsSidebar';
 import { WordBankFiltersBar } from '@/components/word-bank/WordBankFiltersBar';
+import { WordBankGamesLauncher } from '@/components/word-bank/WordBankGamesLauncher';
 import {
-  IconNotebook, IconSearch, IconChevronLeft, IconChevronRight, IconDownload, IconUpload,
+  IconNotebook, IconSearch, IconChevronLeft, IconChevronRight, IconDownload, IconUpload, IconSparkles,
 } from '@/components/ui/Icons';
 
 const ImportModal = dynamic(
   () => import('@/components/word-bank/ImportModal').then(m => ({ default: m.ImportModal })),
+  { ssr: false }
+);
+
+const AIVocabModal = dynamic(
+  () => import('@/components/word-bank/AIVocabModal').then(m => ({ default: m.AIVocabModal })),
   { ssr: false }
 );
 import { useWordBankUI } from '@/stores/wordBankStore';
@@ -34,6 +40,7 @@ export default function WordBankPage() {
   const { isAuthenticated } = useAuthStore();
   const { filters, page, setFilters, resetFilters, setPage, getApiParams } = useWordBankUI();
   const [showImportModal, setShowImportModal] = useState(false);
+  const [showAIModal, setShowAIModal] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [selectedWord, setSelectedWord] = useState<PersonalWord | null>(null);
   const [selectedView, setSelectedView] = useState<string>('all');
@@ -125,6 +132,15 @@ export default function WordBankPage() {
             </div>
           </div>
           <div className="flex gap-2">
+            {selectedView !== 'all' && selectedView !== 'favorites' && (
+              <button
+                onClick={() => setShowAIModal(true)}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl text-body font-semibold text-white transition-all hover:shadow-md hover:-translate-y-0.5"
+                style={{ background: GRADIENT.vocab }}
+              >
+                <IconSparkles size={15} /> Tạo từ bằng AI
+              </button>
+            )}
             <button
               onClick={() => setShowImportModal(true)}
               className="flex items-center gap-2 px-4 py-2 rounded-xl text-body font-semibold text-white transition-all hover:shadow-md hover:-translate-y-0.5"
@@ -164,6 +180,13 @@ export default function WordBankPage() {
 
           {/* ── Main Content ── */}
           <div className="flex-1 min-w-0">
+
+            {statTotal > 0 && (
+              <WordBankGamesLauncher
+                collectionId={selectedView !== 'all' && selectedView !== 'favorites' ? selectedView : undefined}
+                words={words}
+              />
+            )}
 
             {statTotal > 0 && (
               <WordBankFiltersBar
@@ -279,6 +302,14 @@ export default function WordBankPage() {
         onClose={() => setShowImportModal(false)}
         onImport={handleImport}
       />
+
+      {showAIModal && (
+        <AIVocabModal
+          isOpen={showAIModal}
+          onClose={() => setShowAIModal(false)}
+          collectionId={selectedView !== 'all' && selectedView !== 'favorites' ? selectedView : undefined}
+        />
+      )}
 
       {selectedWord && (
         <WordDetailModal

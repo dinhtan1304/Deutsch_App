@@ -3,6 +3,7 @@
 import { ACCENT, STATUS } from '@/lib/tokens';
 import { Part, SegmentWithParts } from '@/lib/api/dictation';
 import { YouTubeEmbedRef } from './YouTubeEmbed';
+import { useUmlautTrigger, UMLAUT_TRIGGER_HINT } from '@/hooks/useUmlautTrigger';
 
 interface Props {
   segment: SegmentWithParts;
@@ -123,6 +124,23 @@ function SegmentPart({ part, userAnswers, onChange, isGraded }: {
     );
   }
 
+  return (
+    <BlankInput
+      part={part}
+      value={value}
+      onChange={onChange}
+      pxWidth={pxWidth}
+    />
+  );
+}
+
+function BlankInput({ part, value, onChange, pxWidth }: {
+  part: Extract<Part, { type: 'blank' }>;
+  value: string;
+  onChange: (blankId: string, value: string) => void;
+  pxWidth: string;
+}) {
+  const onUmlautKey = useUmlautTrigger((next) => onChange(part.blankId, next));
   const isFilled = value.trim().length > 0;
   const idleBg = isFilled ? `${ACCENT.dictation}15` : 'var(--theme-bg-card)';
   const idleBorder = isFilled ? `${ACCENT.dictation}40` : 'var(--theme-border)';
@@ -133,6 +151,8 @@ function SegmentPart({ part, userAnswers, onChange, isGraded }: {
       type="text"
       value={value}
       onChange={e => onChange(part.blankId, e.target.value)}
+      onKeyDown={onUmlautKey}
+      title={`Mẹo gõ umlaut: ${UMLAUT_TRIGGER_HINT}`}
       className="inline-block text-center rounded-lg shadow-sm font-bold outline-none transition-all duration-200 mx-1 py-1"
       style={{
         width: pxWidth,

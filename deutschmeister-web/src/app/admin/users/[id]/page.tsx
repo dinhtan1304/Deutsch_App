@@ -172,14 +172,16 @@ export default function AdminUserDetailPage() {
             </button>
             {(() => {
               const sub = user.subscription;
-              const isPremium = sub?.plan === 'premium' && sub?.status === 'active' &&
+              const isPremium = (sub?.plan === 'premium' || sub?.plan === 'lifetime') && sub?.status === 'active' &&
                 (!sub?.expiresAt || new Date(sub.expiresAt) > new Date());
+              const isLifetime = sub?.plan === 'lifetime' && sub?.status === 'active';
               return isPremium ? (
                 <span style={{
                   fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 6,
-                  backgroundColor: 'rgba(99,102,241,.15)', color: '#818CF8',
+                  backgroundColor: isLifetime ? 'rgba(245,158,11,.15)' : 'rgba(99,102,241,.15)',
+                  color: isLifetime ? '#F59E0B' : '#818CF8',
                 }}>
-                  ⭐ PREMIUM
+                  {isLifetime ? '👑 LIFETIME' : '⭐ PREMIUM'}
                   {sub?.expiresAt && (
                     <span style={{ fontWeight: 400, marginLeft: 4 }}>
                       · hết {new Date(sub.expiresAt).toLocaleDateString('vi-VN')}

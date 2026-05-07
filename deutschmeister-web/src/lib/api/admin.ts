@@ -252,3 +252,50 @@ export const adminGrammarApi = {
   deleteLesson: (id: string) =>
     api<{ success: boolean }>(`/grammar/lessons/${id}`, { method: 'DELETE' }),
 };
+
+// ─── Admin Dictation Requests API ─────────────────────────────────────────────
+
+export interface AdminDictationRequest {
+  id: string;
+  youtubeUrl: string;
+  youtubeId: string;
+  cefrLevel: string | null;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  rejectionReason: string | null;
+  reviewedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+  user: { id: string; email: string; name: string | null };
+  reviewer: { id: string; name: string | null } | null;
+  video: { id: string; title: string; thumbnailUrl: string | null; isActive: boolean } | null;
+}
+
+export interface AdminDictationRequestListResponse {
+  items: AdminDictationRequest[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export interface ApproveRequestPayload {
+  cefrLevel?: 'A1' | 'A2' | 'B1';
+  topic?: string;
+  addToLibrary?: boolean;
+}
+
+export const adminDictationRequestApi = {
+  getAll: (params?: { status?: string; page?: number; limit?: number }) =>
+    apiGet<AdminDictationRequestListResponse>(`/admin/dictation-requests${toQS(params)}`),
+
+  getOne: (id: string) =>
+    apiGet<AdminDictationRequest>(`/admin/dictation-requests/${id}`),
+
+  approve: (id: string, data: ApproveRequestPayload) =>
+    apiPost<{ request: AdminDictationRequest; video: { id: string; title: string } }>(
+      `/admin/dictation-requests/${id}/approve`, data,
+    ),
+
+  reject: (id: string, reason: string) =>
+    apiPost<AdminDictationRequest>(`/admin/dictation-requests/${id}/reject`, { reason }),
+};

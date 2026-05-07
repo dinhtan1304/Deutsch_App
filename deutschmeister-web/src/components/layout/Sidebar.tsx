@@ -344,13 +344,13 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
       {/* ─── Premium CTA ─── */}
       {user && (
         <div className="px-3 pb-1 shrink-0">
-          {user.subscription?.plan === 'premium' && user.subscription?.status === 'active' ? (
+          {(user.subscription?.plan === 'premium' || user.subscription?.plan === 'lifetime') && user.subscription?.status === 'active' ? (
             <Link
               href="/profile/subscription"
               className="flex items-center justify-center gap-2 py-2 rounded-xl text-xs font-bold transition-colors"
               style={{ color: ACCENT.premium, backgroundColor: `${ACCENT.premium}14` }}
             >
-              {!isCollapsed && <span>Premium</span>}
+              {!isCollapsed && <span>{user.subscription.plan === 'lifetime' ? 'Lifetime' : 'Premium'}</span>}
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={ACCENT.premium} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
               </svg>

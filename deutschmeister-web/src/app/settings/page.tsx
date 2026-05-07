@@ -404,9 +404,12 @@ export default function SettingsPage() {
               />
 
               <div className="py-5 border-b" style={{ borderColor: 'var(--theme-border)' }}>
-                <label className="block text-[11px] font-black uppercase tracking-widest opacity-40 mb-3 px-1">
+                <label className="block text-[11px] font-black uppercase tracking-widest opacity-40 mb-1 px-1">
                   Trình độ ưu tiên
                 </label>
+                <p className="text-[11px] font-medium mb-3 px-1 opacity-50" style={{ color: 'var(--theme-text-muted)' }}>
+                  Từ trong các game sẽ random trong phạm vi từ A1 đến trình độ này
+                </p>
                 <div className="relative">
                   <select value={settings.preferredLevel}
                     onChange={e => handleChange('preferredLevel', e.target.value as 'A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C2' | 'all')}

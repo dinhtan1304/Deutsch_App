@@ -116,12 +116,14 @@ function TeilLeftContent({ teil }: { teil: ExamReadingTeil }) {
 
 // ─── RIGHT: questions per task type ───────────────────────────────────────────
 
-function TeilRightContent({ teil, answers, onAnswer }: {
+function TeilRightContent({ teil, answers, onAnswer, cefrLevel }: {
   teil: ExamReadingTeil;
   answers: Record<string, string>;
   onAnswer: (qid: string, val: string) => void;
+  cefrLevel: string;
 }) {
   const questions = teil.questions as ExamTeilQuestion[];
+  const showNoMatchOption = cefrLevel !== 'A1' && teil.taskType === 'zuordnung';
 
   switch (teil.taskType) {
 
@@ -250,6 +252,15 @@ function TeilRightContent({ teil, answers, onAnswer }: {
       const labels = teil.texts.map(t => t.label || t.id).filter(Boolean);
       return (
         <div className="space-y-4">
+          {showNoMatchOption && (
+            <div className="rounded-xl px-4 py-3 text-[13px] leading-relaxed border"
+              style={{ borderColor: `${ACCENT.reading}33`, backgroundColor: `${ACCENT.reading}0D`, color: 'var(--theme-text-secondary)' }}>
+              <span className="font-bold" style={{ color: ACCENT.reading }}>Lưu ý:</span>{' '}
+              Có thể có yêu cầu KHÔNG khớp với quảng cáo nào — chọn{' '}
+              <span className="font-black px-1.5 py-0.5 rounded" style={{ backgroundColor: `${ACCENT.reading}26`, color: ACCENT.reading }}>X</span>{' '}
+              cho trường hợp đó.
+            </div>
+          )}
           {questions.map((q, i) => {
             const isAns = !!answers[q.id];
             return (
@@ -273,6 +284,7 @@ function TeilRightContent({ teil, answers, onAnswer }: {
                   }}>
                   <option value="">— Bitte wählen / Vui lòng chọn —</option>
                   {labels.map(lbl => <option key={lbl} value={lbl}>{lbl}</option>)}
+                  {showNoMatchOption && <option value="X">X — Keine passt / Không có đáp án phù hợp</option>}
                 </select>
               </div>
             );
@@ -463,6 +475,7 @@ export default function ExamReadingPage() {
             teil={teil}
             answers={teilAnswers}
             onAnswer={(qid, val) => handleAnswer(teil.number, qid, val)}
+            cefrLevel={session.cefrLevel}
           />
         </div>
       </div>

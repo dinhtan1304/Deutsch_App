@@ -33,6 +33,9 @@ function IconDatabase({ size = 18 }: { size?: number }) {
 function IconArrowLeft({ size = 16 }: { size?: number }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}><line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" /></svg>;
 }
+function IconVideo({ size = 18 }: { size?: number }) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}><path d="m22 8-6 4 6 4V8Z" /><rect width="14" height="12" x="2" y="6" rx="2" ry="2" /></svg>;
+}
 function IconZap({ size = 18 }: { size?: number }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" /></svg>;
 }
@@ -49,6 +52,7 @@ const NAV_ITEMS = [
   { href: '/admin/subscriptions', label: 'Đăng ký', icon: IconCreditCard, exact: false },
   { href: '/admin/token-usage', label: 'Token AI', icon: IconZap, exact: false },
   { href: '/admin/feedback', label: 'Phản hồi', icon: IconMessageSquare, exact: false },
+  { href: '/admin/dictation-requests', label: 'Dictation Queue', icon: IconVideo, exact: false },
   { href: '/admin/exam-rag', label: 'Đề mẫu RAG', icon: IconDatabase, exact: false },
 ];
 

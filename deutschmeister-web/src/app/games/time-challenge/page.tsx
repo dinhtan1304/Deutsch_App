@@ -2,10 +2,12 @@
 /* eslint-disable no-restricted-syntax -- game pages use custom dark-theme gradients that don't map to design tokens */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
 import { useGameSession } from '@/hooks/useGameSession';
+import { useWordBankGameWords } from '@/hooks/usePersonalWords';
+import { personalWordsToGameWords, getEligibleWordsForGame } from '@/lib/personalWordAdapter';
 import { wordsApi } from '@/lib/api/words';
 import { Gender, Word } from '@/types';
 import {
@@ -28,6 +30,10 @@ type Phase = 'setup' | 'countdown' | 'playing' | 'result';
 
 export default function TimedChallengePage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const isWordBankMode = searchParams.get('source') === 'wordbank';
+  const collectionId = searchParams.get('collectionId') ?? undefined;
+
   const { settings, isLoaded, loadSettings } = useSettingsStore();
   const { playCorrect, playWrong, playCombo, playGameOver, playTick, playClick } = useSoundEffects();
   const session = useGameSession('timed-challenge');
@@ -61,6 +67,7 @@ export default function TimedChallengePage() {
 
   const currentWord = words[index];
   const duration = isLoaded ? settings.timedChallengeSeconds : 60;
+  const wbData = useWordBankGameWords({ collectionId, enabled: isWordBankMode });
 
   useEffect(() => { loadSettings(); }, [loadSettings]);
 
@@ -88,14 +95,14 @@ export default function TimedChallengePage() {
     }
   }, []);
 
-  // Trigger prefetch when approaching end of current buffer
+  // Trigger prefetch when approaching end of current buffer (global mode only)
   useEffect(() => {
-    if (phase !== 'playing') return;
+    if (phase !== 'playing' || isWordBankMode) return;
     const remaining = words.length - index;
     if (remaining <= PREFETCH_THRESHOLD) {
       fetchBatch();
     }
-  }, [index, words.length, phase, fetchBatch]);
+  }, [index, words.length, phase, fetchBatch, isWordBankMode]);
 
   const startGame = async () => {
     playClick(); setStarting(true); setLoadError(null); clearTimers();
@@ -106,6 +113,14 @@ export default function TimedChallengePage() {
       scoreRef.current = 0; bestComboRef.current = 0;
       correctRef.current = 0; wrongRef.current = 0;
 
+      if (isWordBankMode) {
+        const eligible = getEligibleWordsForGame('time-challenge', wbData.data ?? []);
+        if (eligible.length < 10) { setLoadError('Cần ít nhất 10 danh từ có mạo từ trong bộ sưu tập này'); setStarting(false); return; }
+        const wbWords = [...personalWordsToGameWords(eligible)].sort(() => Math.random() - 0.5);
+        setWords(wbWords);
+        setPhase('countdown');
+        session.start(wbWords.length);
+      } else {
       // Fetch initial batch — much faster than ORDER BY RANDOM() LIMIT 200
       isFetchingRef.current = true;
       const firstBatch = await wordsApi.getGameWords(BATCH_SIZE, {});
@@ -115,6 +130,7 @@ export default function TimedChallengePage() {
       setWords(firstBatch);
       setPhase('countdown');
       session.start(BATCH_SIZE);
+      }
 
       let c = 3;
       countdownRef.current = setInterval(() => {

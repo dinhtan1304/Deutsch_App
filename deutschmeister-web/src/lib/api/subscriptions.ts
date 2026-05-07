@@ -93,12 +93,26 @@ export interface AdminSubscription {
   user: { id: string; email: string; name: string | null };
 }
 
-export type PracticeFeat = 'writing' | 'reading' | 'listening' | 'speaking' | 'freeSpeaking' | 'roleplay' | 'pronunciation';
+export type PracticeFeat =
+  | 'writing'
+  | 'reading'
+  | 'listening'
+  | 'speaking'
+  | 'freeSpeaking'
+  | 'roleplay'
+  | 'pronunciation'
+  | 'shadowing'
+  | 'examReading'
+  | 'examWriting'
+  | 'examListening'
+  | 'examSpeaking';
 
 export interface QuotaInfo {
   allowed: boolean;
   used: number;
   limit: number;
+  /** 'daily' for shadowing, 'weekly' for everything else. */
+  window: 'daily' | 'weekly';
 }
 
 export interface BetaStatus {
@@ -138,7 +152,7 @@ export const adminSubscriptionsApi = {
     if (params?.page) qs.set('page', String(params.page));
     return apiGet<{ items: AdminSubscription[]; total: number; totalPages: number }>(`/subscriptions/admin/list?${qs}`);
   },
-  grantPremium: (userId: string, period: 'monthly' | 'yearly' | 'lifetime', note?: string) =>
+  grantPremium: (userId: string, period: 'monthly' | 'quarterly' | 'yearly' | 'lifetime', note?: string) =>
     apiPost(`/subscriptions/admin/grant/${userId}`, { period, note }),
   revokePremium: (userId: string) =>
     apiPost(`/subscriptions/admin/revoke/${userId}`, {}),

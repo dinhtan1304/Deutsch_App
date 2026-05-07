@@ -8,10 +8,26 @@ export interface YouTubeEmbedRef {
   setSpeed: (rate: number) => void;
 }
 
+export interface AutoPauseSegment {
+  id: string;
+  /** ms */
+  start: number;
+  /** ms */
+  end: number;
+}
+
 interface Props {
   youtubeId: string;
   onError?: () => void;
   onTimeUpdate?: (currentSec: number) => void;
+  /**
+   * When provided AND non-empty, the player auto-pauses when continuous
+   * playback crosses out of a segment (i.e. user reaches end of phrase).
+   * Skipped while a `playSegment(...)` call is in flight — that path has
+   * its own end-of-segment pause and shouldn't double-fire.
+   */
+  autoPauseSegments?: ReadonlyArray<AutoPauseSegment>;
+  onAutoPaused?: (endedSegmentId: string) => void;
 }
 
 interface YTPlayer {
@@ -63,7 +79,7 @@ function loadYTScript(): Promise<void> {
 }
 
 export const YouTubeEmbed = forwardRef<YouTubeEmbedRef, Props>(function YouTubeEmbed(
-  { youtubeId, onError, onTimeUpdate },
+  { youtubeId, onError, onTimeUpdate, autoPauseSegments, onAutoPaused },
   ref,
 ) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -72,6 +88,11 @@ export const YouTubeEmbed = forwardRef<YouTubeEmbedRef, Props>(function YouTubeE
   const timeUpdateTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const onTimeUpdateRef = useRef(onTimeUpdate);
   onTimeUpdateRef.current = onTimeUpdate;
+  const autoPauseSegmentsRef = useRef(autoPauseSegments);
+  autoPauseSegmentsRef.current = autoPauseSegments;
+  const onAutoPausedRef = useRef(onAutoPaused);
+  onAutoPausedRef.current = onAutoPaused;
+  const lastActiveSegIdRef = useRef<string | null>(null);
 
   useImperativeHandle(ref, () => ({
     seekTo(seconds: number) {
@@ -122,7 +143,31 @@ export const YouTubeEmbed = forwardRef<YouTubeEmbedRef, Props>(function YouTubeE
                 timeUpdateTimerRef.current = setInterval(() => {
                   try {
                     const t = playerRef.current?.getCurrentTime?.();
-                    if (t !== undefined) onTimeUpdateRef.current?.(t);
+                    if (t === undefined) return;
+                    onTimeUpdateRef.current?.(t);
+
+                    // Auto-pause at segment boundary during continuous play.
+                    // Always update lastActiveSegId so single-segment playback
+                    // doesn't leave a stale value that triggers a false pause
+                    // when the user resumes continuous play.
+                    const segs = autoPauseSegmentsRef.current;
+                    if (segs?.length) {
+                      const ms = t * 1000;
+                      const active = segs.find(s => ms >= s.start && ms <= s.end);
+                      const newId = active?.id ?? null;
+                      const prevId = lastActiveSegIdRef.current;
+                      // Only pause when boundary is crossed during continuous
+                      // playback (no playSegment in flight).
+                      if (
+                        !segmentTimerRef.current &&
+                        prevId !== null &&
+                        newId !== prevId
+                      ) {
+                        try { playerRef.current?.pauseVideo(); } catch {}
+                        onAutoPausedRef.current?.(prevId);
+                      }
+                      lastActiveSegIdRef.current = newId;
+                    }
                   } catch {}
                 }, 300);
               }

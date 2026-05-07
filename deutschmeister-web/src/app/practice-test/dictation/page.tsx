@@ -2,8 +2,9 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import * as DictationHooks from '@/hooks/useDictation';
-import { DictationHistoryItem } from '@/lib/api/dictation';
+import { DictationHistoryItem, dictationApi } from '@/lib/api/dictation';
 import { PageHeader, GridSkeleton } from '@/components/ui';
 import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 
@@ -28,6 +29,9 @@ function IconChevronLeft({ size = 14, style }: { size?: number; style?: React.CS
 }
 function IconChevronRight({ size = 14, style }: { size?: number; style?: React.CSSProperties }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}><polyline points="9 18 15 12 9 6" /></svg>;
+}
+function IconLink({ size = 16, style }: { size?: number; style?: React.CSSProperties }) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>;
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -120,10 +124,21 @@ function HistoryCard({ item, onDelete }: { item: DictationHistoryItem; onDelete:
 
 // ─── Main Component: DictationListPage ──────────────────────────────────────
 export default function DictationListPage() {
+  const router = useRouter();
   const [page, setPage] = useState(1);
   const [filterStatus, setFilterStatus] = useState<string>('');
   const [filterLevel, setFilterLevel] = useState<string>('');
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+
+  // Quick-start: URL
+  const [youtubeUrl, setYoutubeUrl] = useState('');
+  const [urlLevel, setUrlLevel] = useState('');
+  const [urlError, setUrlError] = useState('');
+  const [queuedMessage, setQueuedMessage] = useState('');
+  // Quick-start: Random
+  const [randomLevel, setRandomLevel] = useState('');
+  const [isLoadingRandom, setIsLoadingRandom] = useState(false);
+  const [randomError, setRandomError] = useState('');
 
   const { data: history, isLoading } = DictationHooks.useDictationHistory({
     page, limit: 10,
@@ -132,11 +147,52 @@ export default function DictationListPage() {
   });
   const deleteMutation = DictationHooks.useDeleteDictation();
   const { data: stats } = DictationHooks.useDictationStats();
+  const startFromUrlMutation = DictationHooks.useStartDictationFromUrl();
+  const startSessionMutation = DictationHooks.useStartDictation();
+  const { data: myRequests } = DictationHooks.useMyDictationRequests();
 
   const confirmDelete = async () => {
     if (!confirmDeleteId) return;
     try { await deleteMutation.mutateAsync(confirmDeleteId); } catch { /* handled */ }
     setConfirmDeleteId(null);
+  };
+
+  const handleStartFromUrl = async () => {
+    if (!youtubeUrl.trim()) { setUrlError('Vui lòng nhập URL YouTube.'); return; }
+    if (!/(?:youtu\.be\/|youtube(?:-nocookie)?\.com\/(?:watch|embed|shorts|live|v)\/?)/i.test(youtubeUrl)) {
+      setUrlError('URL không hợp lệ. Vui lòng dùng link YouTube.'); return;
+    }
+    setUrlError('');
+    setQueuedMessage('');
+    try {
+      const result = await startFromUrlMutation.mutateAsync({
+        youtubeUrl: youtubeUrl.trim(),
+        cefrLevel: urlLevel || undefined,
+      });
+      if ('status' in result && result.status === 'QUEUED') {
+        setQueuedMessage(result.message);
+        setYoutubeUrl('');
+        return;
+      }
+      router.push(`/practice-test/dictation/${result.id}`);
+    } catch (err) {
+      const msg = err instanceof Error && err.message ? err.message : '';
+      setUrlError(msg || 'Không thể xử lý video này. Vui lòng thử URL khác.');
+    }
+  };
+
+  const handleStartRandom = async () => {
+    setIsLoadingRandom(true);
+    setRandomError('');
+    try {
+      const video = await dictationApi.getRandom({ cefrLevel: randomLevel || undefined });
+      const session = await startSessionMutation.mutateAsync({ videoId: video.id });
+      router.push(`/practice-test/dictation/${session.id}`);
+    } catch {
+      setRandomError('Không tìm thấy video phù hợp. Thử cấp độ khác!');
+    } finally {
+      setIsLoadingRandom(false);
+    }
   };
 
   return (
@@ -148,10 +204,10 @@ export default function DictationListPage() {
         accent="listening"
         right={
           <div className="flex items-center gap-3">
-            <Link href="/practice-test/dictation/library"
-              className="px-6 py-3 rounded-xl text-sm font-black border transition-all hover:bg-black/3 dark:hover:bg-white/5"
+            <Link href="/practice-test/dictation/shadow"
+              className="flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-black border transition-all hover:bg-black/3 dark:hover:bg-white/5"
               style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-primary)' }}>
-              Thư viện video →
+              🎤 Luyện shadowing
             </Link>
             <Link href="/practice-test/dictation/library"
               className="flex items-center gap-2 px-7 py-3.5 rounded-xl text-sm font-black text-white transition-all hover:scale-[1.02] active:scale-95 shadow-xl shadow-cyan-500/30"
@@ -161,6 +217,162 @@ export default function DictationListPage() {
           </div>
         }
       />
+
+      {/* Quick Start */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+
+        {/* YouTube URL card */}
+        <div className="rounded-2xl p-5 border" style={{ backgroundColor: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)', boxShadow: '0 4px 16px rgba(0,0,0,0.05)' }}>
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: `${ACCENT.dictation}15`, color: ACCENT.dictation }}>
+              <IconLink size={18} />
+            </div>
+            <div>
+              <div className="text-sm font-black tracking-tight" style={{ color: 'var(--theme-text-primary)' }}>Nhập URL YouTube</div>
+              <div className="text-[11px] opacity-50 font-medium" style={{ color: 'var(--theme-text-primary)' }}>Luyện từ bất kỳ video nào</div>
+            </div>
+          </div>
+          <input
+            type="text"
+            value={youtubeUrl}
+            onChange={e => { setYoutubeUrl(e.target.value); setUrlError(''); setQueuedMessage(''); }}
+            onKeyDown={e => e.key === 'Enter' && handleStartFromUrl()}
+            placeholder="https://youtube.com/watch?v=..."
+            className="w-full px-4 py-3 rounded-xl text-sm font-medium outline-none border transition-all mb-2"
+            style={{
+              backgroundColor: 'var(--theme-bg-secondary)',
+              borderColor: urlError ? STATUS.danger : 'var(--theme-border)',
+              color: 'var(--theme-text-primary)',
+            }}
+          />
+          {urlError && <p className="text-xs mb-2 font-medium" style={{ color: STATUS.danger }}>{urlError}</p>}
+          {queuedMessage && (
+            <div className="flex items-start gap-2 mb-2 px-3 py-2.5 rounded-xl text-xs font-medium"
+              style={{ backgroundColor: `${STATUS.success}12`, color: STATUS.success }}>
+              <IconCheck size={14} style={{ marginTop: 1, flexShrink: 0 }} />
+              <span>{queuedMessage}</span>
+            </div>
+          )}
+          <div className="flex gap-2 mb-4 flex-wrap">
+            {['', 'A1', 'A2', 'B1'].map(lvl => (
+              <button key={lvl} onClick={() => setUrlLevel(lvl)}
+                className="px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all"
+                style={urlLevel === lvl
+                  ? { background: GRADIENT.dictation, color: 'white' }
+                  : { backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }}>
+                {lvl || 'Tất cả'}
+              </button>
+            ))}
+          </div>
+          <button
+            onClick={handleStartFromUrl}
+            disabled={startFromUrlMutation.isPending}
+            className="w-full py-3 rounded-xl text-sm font-black text-white transition-all hover:brightness-110 active:scale-95 disabled:opacity-60 flex items-center justify-center gap-2"
+            style={{ background: GRADIENT.dictation, boxShadow: '0 8px 20px rgba(6,182,212,0.2)' }}>
+            {startFromUrlMutation.isPending
+              ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Đang xử lý...</>
+              : 'Bắt đầu →'}
+          </button>
+        </div>
+
+        {/* Random card */}
+        <div className="rounded-2xl p-5 border" style={{ backgroundColor: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)', boxShadow: '0 4px 16px rgba(0,0,0,0.05)' }}>
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: `${ACCENT.xp}15`, color: ACCENT.xp }}>
+              <IconDice size={18} />
+            </div>
+            <div>
+              <div className="text-sm font-black tracking-tight" style={{ color: 'var(--theme-text-primary)' }}>Ngẫu nhiên từ thư viện</div>
+              <div className="text-[11px] opacity-50 font-medium" style={{ color: 'var(--theme-text-primary)' }}>Chọn cấp độ rồi thử vận may</div>
+            </div>
+          </div>
+          <p className="text-xs opacity-50 mb-4 font-medium leading-relaxed" style={{ color: 'var(--theme-text-primary)' }}>
+            Hệ thống sẽ chọn ngẫu nhiên một video từ thư viện phù hợp với cấp độ bạn chọn.
+          </p>
+          <div className="flex gap-2 mb-4 flex-wrap">
+            {['', 'A1', 'A2', 'B1'].map(lvl => (
+              <button key={lvl} onClick={() => setRandomLevel(lvl)}
+                className="px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all"
+                style={randomLevel === lvl
+                  ? { background: GRADIENT.dictation, color: 'white' }
+                  : { backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }}>
+                {lvl || 'Tất cả'}
+              </button>
+            ))}
+          </div>
+          {randomError && <p className="text-xs mb-3 font-medium" style={{ color: STATUS.danger }}>{randomError}</p>}
+          <button
+            onClick={handleStartRandom}
+            disabled={isLoadingRandom}
+            className="w-full py-3 rounded-xl text-sm font-black text-white transition-all hover:brightness-110 active:scale-95 disabled:opacity-60 flex items-center justify-center gap-2"
+            style={{ background: GRADIENT.dictation, boxShadow: '0 8px 20px rgba(6,182,212,0.2)' }}>
+            {isLoadingRandom
+              ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Đang tìm video...</>
+              : <><IconDice size={14} /> Làm bài ngẫu nhiên</>}
+          </button>
+        </div>
+      </div>
+
+      {/* My Requests */}
+      {myRequests && myRequests.items.length > 0 && (
+        <div className="mb-8">
+          <h3 className="text-sm font-black uppercase tracking-widest mb-3 opacity-50" style={{ color: 'var(--theme-text-primary)' }}>
+            Yêu cầu của tôi
+          </h3>
+          <div className="space-y-2">
+            {myRequests.items.map(req => {
+              const statusConfig = {
+                PENDING:  { label: 'Chờ duyệt', color: '#FBBF24', bg: 'rgba(245,158,11,0.12)' },
+                APPROVED: { label: 'Đã duyệt',  color: '#4ADE80', bg: 'rgba(34,197,94,0.12)' },
+                REJECTED: { label: 'Từ chối',   color: '#FCA5A5', bg: 'rgba(239,68,68,0.12)' },
+              }[req.status];
+              return (
+                <div key={req.id}
+                  className="rounded-xl border p-3 flex items-center gap-3 flex-wrap"
+                  style={{ backgroundColor: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={`https://img.youtube.com/vi/${req.youtubeId}/default.jpg`}
+                    alt=""
+                    className="w-20 h-14 rounded-lg object-cover shrink-0 bg-black/20"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1 flex-wrap">
+                      <span className="text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded"
+                        style={{ backgroundColor: statusConfig.bg, color: statusConfig.color }}>
+                        {statusConfig.label}
+                      </span>
+                      <span className="text-[10px] opacity-40 font-medium" style={{ color: 'var(--theme-text-primary)' }}>
+                        {new Date(req.createdAt).toLocaleDateString('vi-VN')}
+                      </span>
+                    </div>
+                    <p className="text-xs font-bold truncate" style={{ color: 'var(--theme-text-secondary)' }}>
+                      {req.video?.title ?? req.youtubeUrl}
+                    </p>
+                    {req.status === 'REJECTED' && req.rejectionReason && (
+                      <p className="text-[11px] mt-0.5 font-medium" style={{ color: '#FCA5A5' }}>
+                        Lý do: {req.rejectionReason}
+                      </p>
+                    )}
+                  </div>
+                  {req.status === 'APPROVED' && req.video && (
+                    <button
+                      onClick={() => startSessionMutation.mutate(
+                        { videoId: req.video!.id },
+                        { onSuccess: (s) => router.push(`/practice-test/dictation/${s.id}`) },
+                      )}
+                      disabled={startSessionMutation.isPending}
+                      className="px-4 py-2 rounded-lg text-xs font-black text-white shrink-0 disabled:opacity-60"
+                      style={{ background: GRADIENT.dictation }}>
+                      Bắt đầu →
+                    </button>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Stats Dashboard */}
       {stats && stats.total > 0 && (
@@ -209,7 +421,7 @@ export default function DictationListPage() {
       {/* Filters Bar */}
       <div className="flex flex-col gap-5 mb-10">
         <div className="flex gap-3 overflow-x-auto no-scrollbar pb-1">
-          {['', 'A1', 'A2', 'B1', 'B2'].map(lvl => {
+          {['', 'A1', 'A2', 'B1'].map(lvl => {
             const isActive = filterLevel === lvl;
             return (
               <button key={lvl} onClick={() => { setFilterLevel(lvl); setPage(1); }}

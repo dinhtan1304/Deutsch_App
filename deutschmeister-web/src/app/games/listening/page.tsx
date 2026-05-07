@@ -2,8 +2,10 @@
 /* eslint-disable no-restricted-syntax -- game pages use custom dark-theme gradients that don't map to design tokens */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useRandomWords } from '@/hooks/useWords';
+import { useWordBankGameWords } from '@/hooks/usePersonalWords';
+import { personalWordsToGameWords, getEligibleWordsForGame } from '@/lib/personalWordAdapter';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
 import { useGameSession } from '@/hooks/useGameSession';
@@ -49,6 +51,10 @@ function speakGerman(text: string, rate = 0.85) {
 
 export default function ListeningQuizPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const isWordBankMode = searchParams.get('source') === 'wordbank';
+  const collectionId = searchParams.get('collectionId') ?? undefined;
+
   const { settings, isLoaded, loadSettings } = useSettingsStore();
   const { playCorrect, playWrong, playCombo, playGameOver, playClick } = useSoundEffects();
   const session = useGameSession('listening');
@@ -76,7 +82,9 @@ export default function ListeningQuizPage() {
   const questionsCount = isLoaded ? settings.questionsPerGame : 20;
   // Fetch enough words for questions + distractors
   const fetchCount = Math.min(questionsCount * OPTIONS_PER_Q, 80);
-  const { refetch, isLoading } = useRandomWords(fetchCount, {});
+  const { refetch, isLoading: globalLoading } = useRandomWords(fetchCount, {});
+  const wbData = useWordBankGameWords({ collectionId, enabled: isWordBankMode });
+  const isLoading = isWordBankMode ? wbData.isLoading : globalLoading;
 
   useEffect(() => { loadSettings(); }, [loadSettings]);
 
@@ -105,10 +113,18 @@ export default function ListeningQuizPage() {
   const startGame = async () => {
     playClick();
     setLoadError(null);
-    const result = await refetch();
-    if (!result.data?.length) { setLoadError('Không có từ vựng! Vui lòng thêm từ hoặc seed database.'); return; }
+    let pool: Word[];
+    if (isWordBankMode) {
+      const eligible = getEligibleWordsForGame('listening', wbData.data ?? []);
+      if (eligible.length < 4) { setLoadError('Cần ít nhất 4 từ trong bộ sưu tập này'); return; }
+      pool = personalWordsToGameWords(eligible);
+    } else {
+      const result = await refetch();
+      if (!result.data?.length) { setLoadError('Không có từ vựng! Vui lòng thêm từ hoặc seed database.'); return; }
+      pool = result.data;
+    }
 
-    const qs = buildQuestions(result.data, questionsCount);
+    const qs = buildQuestions(pool, questionsCount);
     setQuestions(qs);
     setIndex(0);
     setScore(0); scoreRef.current = 0;
@@ -120,7 +136,7 @@ export default function ListeningQuizPage() {
     setAnswers([]);
     setReplayCount(0); replayCountRef.current = 0;
     setPhase('playing');
-    session.start(questionsCount);
+    session.start(qs.length);
 
     // Auto-play first word after state settles
     setTimeout(() => playCurrentWord(qs[0]!.correct), 300);
@@ -271,7 +287,7 @@ export default function ListeningQuizPage() {
             getSelectedLabel={a => !a.isCorrect ? a.selectedAnswer : null}
           />
         </div>
-        <AddWrongWordsToBank wrongWords={answers.filter(a => !a.isCorrect).map(a => a.word)} />
+        {!isWordBankMode && <AddWrongWordsToBank wrongWords={answers.filter(a => !a.isCorrect).map(a => a.word)} />}
         <GameResultUpsell />
       </>
     );

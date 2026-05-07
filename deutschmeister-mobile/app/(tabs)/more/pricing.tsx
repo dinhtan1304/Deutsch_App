@@ -104,7 +104,7 @@ export default function PricingScreen() {
   } = useQuery({
     queryKey: ['subscriptions', 'plans'],
     queryFn: subscriptionsApi.getPlans,
-    staleTime: 5 * 60_000,
+    staleTime: 60_000,
   });
 
   const {

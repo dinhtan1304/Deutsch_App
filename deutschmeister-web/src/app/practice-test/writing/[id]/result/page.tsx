@@ -133,7 +133,7 @@ function ErrorCard({ error, sessionId }: { error: WritingError; sessionId: strin
   const [analysis, setAnalysis] = useState<GrammarAnalysis | null>(null);
   const explainMut = useExplainError();
   const { user } = useAuthStore();
-  const isPremium = user?.subscription?.plan === 'premium' && user?.subscription?.status === 'active';
+  const isPremium = (user?.subscription?.plan === 'premium' || user?.subscription?.plan === 'lifetime') && user?.subscription?.status === 'active';
   const typeInfo = ERROR_TYPE_INFO[error.errorType] || { labelVi: error.errorType, color: 'var(--theme-text-muted)' };
   const severity = (SEVERITY_CONFIG as unknown as Record<string, typeof SEVERITY_CONFIG.error>)[error.severity] ?? SEVERITY_CONFIG.error;
 

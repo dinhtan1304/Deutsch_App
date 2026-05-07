@@ -37,6 +37,8 @@ export default function DictationPlayPage() {
   const [showSubmitWarning, setShowSubmitWarning] = useState(false);
   const [activeSegmentId, setActiveSegmentId] = useState<string | null>(null);
   const [speed, setSpeed] = useState(1);
+  const [autoPause, setAutoPause] = useState(true);
+  const [pausedAtSegmentId, setPausedAtSegmentId] = useState<string | null>(null);
 
   // Redirect if already graded
   useEffect(() => {
@@ -95,6 +97,18 @@ export default function DictationPlayPage() {
   function handleSpeedChange(rate: number) {
     setSpeed(rate);
     playerRef.current?.setSpeed(rate);
+  }
+
+  function handlePlayNext() {
+    if (!session?.segments) return;
+    // Prefer the segment AFTER the one we paused at; fall back to the
+    // current active, or the very first segment.
+    const anchorId = pausedAtSegmentId ?? activeSegmentId;
+    const idx = anchorId ? session.segments.findIndex(s => s.id === anchorId) : -1;
+    const next = idx >= 0 ? session.segments[idx + 1] : session.segments[0];
+    if (!next) return;
+    setPausedAtSegmentId(null);
+    playerRef.current?.playSegment(next.start / 1000, next.end / 1000);
   }
 
   function handleSubmit() {
@@ -159,6 +173,11 @@ export default function DictationPlayPage() {
                   youtubeId={session.video.youtubeId}
                   onError={() => setVideoError(true)}
                   onTimeUpdate={handleTimeUpdate}
+                  autoPauseSegments={autoPause ? session.segments : undefined}
+                  onAutoPaused={(segId) => {
+                    setPausedAtSegmentId(segId);
+                    setActiveSegmentId(segId);
+                  }}
                 />
               </div>
 
@@ -190,6 +209,30 @@ export default function DictationPlayPage() {
                          {session.difficulty}
                        </span>
                     </div>
+                  </div>
+
+                  {/* Auto-pause + Next segment row */}
+                  <div className="flex items-center justify-between gap-3 flex-wrap">
+                    <label className="flex items-center gap-2 cursor-pointer select-none">
+                      <input
+                        type="checkbox"
+                        checked={autoPause}
+                        onChange={e => setAutoPause(e.target.checked)}
+                        className="w-4 h-4 rounded accent-cyan-500"
+                      />
+                      <span className="text-[11px] font-black uppercase tracking-widest" style={{ color: 'var(--theme-text-secondary)' }}>
+                        Tự động dừng sau mỗi câu
+                      </span>
+                    </label>
+                    <button
+                      type="button"
+                      onClick={handlePlayNext}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-black uppercase tracking-widest text-white transition-all hover:brightness-110 active:scale-95"
+                      style={{ background: GRADIENT.dictation }}
+                    >
+                      Câu tiếp theo
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6" /></svg>
+                    </button>
                   </div>
 
                   <DictationHeader

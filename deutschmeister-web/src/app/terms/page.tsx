@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 /* eslint-disable no-restricted-syntax */
 
 const LAST_UPDATED = '27/03/2026';
@@ -22,8 +23,7 @@ export default function TermsPage() {
       }}>
         <div style={{ maxWidth: 800, margin: '0 auto', padding: '16px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo.png" width={32} height={32} alt="Deutschmeister" style={{ borderRadius: 8 }} />
+            <Image src="/logo.png" width={32} height={32} alt="" priority style={{ borderRadius: 8 }} />
             <span style={{ fontWeight: 800, fontSize: 15, color: 'white' }}>Deutschmeister</span>
           </Link>
           <Link href="/" style={{ fontSize: 13, color: 'rgba(255,255,255,.5)', textDecoration: 'none' }}>
@@ -38,7 +38,7 @@ export default function TermsPage() {
           <h1 style={{ fontSize: '2rem', fontWeight: 900, marginBottom: 8, letterSpacing: '-0.5px' }}>
             Điều khoản sử dụng
           </h1>
-          <p style={{ fontSize: 13, color: 'rgba(255,255,255,.4)' }}>
+          <p style={{ fontSize: 13, color: 'rgba(255,255,255,.6)' }}>
             Cập nhật lần cuối: {LAST_UPDATED}
           </p>
         </div>
@@ -180,7 +180,7 @@ export default function TermsPage() {
           <Link href="/" style={{ fontSize: 14, color: '#A78BFA', textDecoration: 'none', fontWeight: 600 }}>
             Quay lại trang chủ
           </Link>
-          <Link href="/privacy" style={{ fontSize: 14, color: 'rgba(255,255,255,.4)', textDecoration: 'none', fontWeight: 500 }}>
+          <Link href="/privacy" style={{ fontSize: 14, color: 'rgba(255,255,255,.6)', textDecoration: 'none', fontWeight: 500 }}>
             Chính sách bảo mật
           </Link>
         </div>

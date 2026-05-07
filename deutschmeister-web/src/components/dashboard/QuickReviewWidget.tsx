@@ -105,7 +105,7 @@ export function QuickReviewWidget() {
       setIndex((i) => i + 1);
       setRevealed(false);
     } catch {
-      setError('Khong the luu ket qua on. Thu lai.');
+      setError('Không thể lưu kết quả ôn. Thử lại.');
     }
   };
 

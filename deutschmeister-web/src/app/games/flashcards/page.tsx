@@ -1,11 +1,13 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useRandomWords } from '@/hooks/useWords';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
 import { useGameSession } from '@/hooks/useGameSession';
+import { useWordBankGameWords } from '@/hooks/usePersonalWords';
+import { personalWordsToGameWords, getEligibleWordsForGame } from '@/lib/personalWordAdapter';
 import { GenderInfo, Word } from '@/types';
 import {
   GameSetupCard, GameResultCard, GameProgressBar, StatCard,
@@ -35,16 +37,20 @@ function IconShuffle({ size = 16 }: { size?: number }) {
   );
 }
 
-function speakWord(text: string) {
+function speakWord(text: string, rate = 0.85) {
   if (typeof window === 'undefined' || !window.speechSynthesis) return;
   window.speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(text);
-  u.lang = 'de-DE'; u.rate = 0.85;
+  u.lang = 'de-DE'; u.rate = rate;
   window.speechSynthesis.speak(u);
 }
 
 export default function FlashcardsPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const isWordBankMode = searchParams.get('source') === 'wordbank';
+  const collectionId = searchParams.get('collectionId') ?? undefined;
+
   const { settings, isLoaded, loadSettings } = useSettingsStore();
   const { playCorrect, playWrong, playCombo, playClick, playGameOver, playStreak } = useSoundEffects();
   const session = useGameSession('flashcard');
@@ -59,9 +65,13 @@ export default function FlashcardsPage() {
   const knewRef = useRef(0);
   const bestStreakRef = useRef(0);
   const didntKnowRef = useRef(0);
+  const [wbGameWords, setWbGameWords] = useState<Word[]>([]);
 
   const cardsCount = isLoaded ? settings.questionsPerGame : 20;
-  const { data: words, refetch, isLoading } = useRandomWords(cardsCount, {});
+  const { data: globalWords, refetch, isLoading: globalLoading } = useRandomWords(cardsCount, {});
+  const wbData = useWordBankGameWords({ collectionId, enabled: isWordBankMode });
+  const words = isWordBankMode ? wbGameWords : (globalWords ?? []);
+  const isLoading = isWordBankMode ? wbData.isLoading : globalLoading;
   const currentWord = words?.[index];
 
   useEffect(() => { loadSettings(); }, [loadSettings]);
@@ -69,12 +79,23 @@ export default function FlashcardsPage() {
   const startGame = async () => {
     playClick();
     setLoadError(null);
-    const result = await refetch();
-    if (!result.data?.length) { setLoadError('Không có từ vựng! Vui lòng thêm từ hoặc seed database.'); return; }
-    setIndex(0); setIsFlipped(false); setResults([]); setStreak(0); setBestStreak(0);
-    knewRef.current = 0; bestStreakRef.current = 0; didntKnowRef.current = 0;
-    setPhase('playing');
-    session.start(cardsCount);
+    if (isWordBankMode) {
+      const eligible = getEligibleWordsForGame('flashcards', wbData.data ?? []);
+      if (eligible.length < 2) { setLoadError('Cần ít nhất 2 từ trong bộ sưu tập này'); return; }
+      const shuffled = [...eligible].sort(() => Math.random() - 0.5).slice(0, cardsCount);
+      setWbGameWords(personalWordsToGameWords(shuffled));
+      setIndex(0); setIsFlipped(false); setResults([]); setStreak(0); setBestStreak(0);
+      knewRef.current = 0; bestStreakRef.current = 0; didntKnowRef.current = 0;
+      setPhase('playing');
+      session.start(shuffled.length);
+    } else {
+      const result = await refetch();
+      if (!result.data?.length) { setLoadError('Không có từ vựng! Vui lòng thêm từ hoặc seed database.'); return; }
+      setIndex(0); setIsFlipped(false); setResults([]); setStreak(0); setBestStreak(0);
+      knewRef.current = 0; bestStreakRef.current = 0; didntKnowRef.current = 0;
+      setPhase('playing');
+      session.start(cardsCount);
+    }
   };
 
   const flipCard = useCallback(() => { playClick(); setIsFlipped(f => !f); }, [playClick]);
@@ -125,6 +146,14 @@ export default function FlashcardsPage() {
       session.end(knewRef.current * 10, bestStreakRef.current, knewRef.current, didntKnowRef.current);
     }
   }, [phase, session]);
+
+  // Auto-play pronunciation when a new card appears
+  useEffect(() => {
+    if (phase !== 'playing') return;
+    if (!settings.autoPlaySound) return;
+    if (!currentWord?.word) return;
+    speakWord(currentWord.word, settings.speechRate);
+  }, [phase, index, currentWord, settings.autoPlaySound, settings.speechRate]);
 
   const timer = useGameTimer(phase === 'playing');
 
@@ -199,7 +228,7 @@ export default function FlashcardsPage() {
             </div>
           </div>
         )}
-        <AddWrongWordsToBank wrongWords={needReview.map(r => r.word)} />
+        {!isWordBankMode && <AddWrongWordsToBank wrongWords={needReview.map(r => r.word)} />}
         <GameResultUpsell />
       </>
     );
@@ -263,7 +292,7 @@ export default function FlashcardsPage() {
 
               {/* Audio button */}
               <button
-                onClick={(e) => { e.stopPropagation(); speakWord(currentWord.word); }}
+                onClick={(e) => { e.stopPropagation(); speakWord(currentWord.word, settings.speechRate); }}
                 className="w-10 h-10 rounded-xl flex items-center justify-center transition-all hover:scale-110 mb-5"
                 style={{ backgroundColor: 'rgba(59,130,246,.1)', color: ACCENT.srs }}>
                 <IconVolume size={20} />
@@ -347,7 +376,7 @@ export default function FlashcardsPage() {
           <IconChevronLeft size={18} />
         </button>
         <button
-          onClick={() => speakWord(currentWord?.word || '')}
+          onClick={() => speakWord(currentWord?.word || '', settings.speechRate)}
           className="p-2.5 rounded-xl border transition-all hover:opacity-80"
           style={{ color: 'var(--theme-text-muted)', borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}
           title="Phát âm">

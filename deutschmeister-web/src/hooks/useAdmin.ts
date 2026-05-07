@@ -2,9 +2,10 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
-  adminApi, adminWordApi, adminFeedbackApi,
+  adminApi, adminWordApi, adminFeedbackApi, adminDictationRequestApi,
   AdminStats, AdminUserListResponse, AdminUserDetail, CreateWordPayload,
   AdminFeedbackListResponse, AdminTokenStats,
+  AdminDictationRequestListResponse, AdminDictationRequest, ApproveRequestPayload,
 } from '@/lib/api/admin';
 
 // ─── Query keys ───────────────────────────────────────────────────────────────
@@ -97,6 +98,51 @@ export function useUpdateFeedbackStatus() {
       adminFeedbackApi.updateStatus(id, status),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: adminFeedbackKeys.all });
+    },
+  });
+}
+
+// ─── Dictation video requests (admin moderation queue) ───────────────────────
+
+export const adminDictationKeys = {
+  all: ['admin-dictation-requests'] as const,
+  list: (params?: Record<string, unknown>) => [...adminDictationKeys.all, 'list', params] as const,
+  detail: (id: string) => [...adminDictationKeys.all, id] as const,
+};
+
+export function useAdminDictationRequests(params?: { status?: string; page?: number; limit?: number }) {
+  return useQuery<AdminDictationRequestListResponse>({
+    queryKey: adminDictationKeys.list(params),
+    queryFn: () => adminDictationRequestApi.getAll(params),
+  });
+}
+
+export function useAdminDictationRequest(id: string) {
+  return useQuery<AdminDictationRequest>({
+    queryKey: adminDictationKeys.detail(id),
+    queryFn: () => adminDictationRequestApi.getOne(id),
+    enabled: !!id,
+  });
+}
+
+export function useApproveDictationRequest() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: ApproveRequestPayload }) =>
+      adminDictationRequestApi.approve(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: adminDictationKeys.all });
+    },
+  });
+}
+
+export function useRejectDictationRequest() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, reason }: { id: string; reason: string }) =>
+      adminDictationRequestApi.reject(id, reason),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: adminDictationKeys.all });
     },
   });
 }

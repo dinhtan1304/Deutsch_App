@@ -13,7 +13,6 @@ import { useModalA11y } from '@/hooks/useModalA11y';
 import { trackEvent } from '@/lib/analytics';
 import type { UpgradeResponse, BillingPeriod } from '@/lib/api/subscriptions';
 import { ACCENT, STATUS } from '@/lib/tokens';
-import { DEFAULT_PRICES } from '@/lib/constants/pricing';
 
 interface Props {
   open: boolean;
@@ -96,16 +95,14 @@ function getBankBin(bankName: string): string {
   return bankName;
 }
 
-// Fallback values moved to @/lib/constants/pricing.ts
-
 function priceForPeriod(p: BillingPeriod, plans?: any[]): number {
-  const premium = plans?.find(plan => plan.code === 'premium');
-  const lifetime = plans?.find(plan => plan.code === 'lifetime');
+  const premium = plans?.find((plan: any) => plan.code === 'premium');
+  const lifetime = plans?.find((plan: any) => plan.code === 'lifetime');
 
-  if (p === 'lifetime') return lifetime?.price ?? DEFAULT_PRICES.lifetime;
-  if (p === 'yearly') return premium?.yearlyPrice ?? DEFAULT_PRICES.yearly;
-  if (p === 'quarterly') return premium?.quarterlyPrice ?? DEFAULT_PRICES.quarterly;
-  return premium?.monthlyPrice ?? DEFAULT_PRICES.monthly;
+  if (p === 'lifetime') return lifetime?.price ?? 0;
+  if (p === 'yearly') return premium?.yearlyPrice ?? 0;
+  if (p === 'quarterly') return premium?.quarterlyPrice ?? 0;
+  return premium?.monthlyPrice ?? 0;
 }
 
 export function UpgradeModal({ open, onClose, defaultPeriod = 'yearly', featureContext }: Props) {
@@ -122,7 +119,7 @@ export function UpgradeModal({ open, onClose, defaultPeriod = 'yearly', featureC
 
   const upgradeMut = useRequestUpgrade();
   const validatePromoMut = useValidatePromo();
-  const { data: plans } = usePlans();
+  const { data: plans, isLoading: plansLoading } = usePlans();
   const { data: lifetimeInfo } = useLifetimeRemaining();
 
 
@@ -238,7 +235,7 @@ export function UpgradeModal({ open, onClose, defaultPeriod = 'yearly', featureC
                       {p === 'monthly' ? 'Tháng' : p === 'quarterly' ? '3 Tháng' : p === 'yearly' ? 'Năm' : 'Trọn đời'}
                     </div>
                     <div className="text-body font-bold mt-0.5">
-                      {formatVND(priceForPeriod(p, plans))}
+                      {plansLoading ? '...' : formatVND(priceForPeriod(p, plans))}
                     </div>
                     {p === 'quarterly' && (
                       <div
@@ -364,7 +361,7 @@ export function UpgradeModal({ open, onClose, defaultPeriod = 'yearly', featureC
                     opacity: promoApplied ? 0.5 : 1,
                   }}
                 >
-                  {formatVND(basePrice)}
+                  {plansLoading ? '...' : formatVND(basePrice)}
                 </span>
               </div>
               {promoApplied && (
@@ -397,11 +394,11 @@ export function UpgradeModal({ open, onClose, defaultPeriod = 'yearly', featureC
 
             <button
               onClick={handleUpgrade}
-              disabled={upgradeMut.isPending}
+              disabled={upgradeMut.isPending || plansLoading}
               className="w-full py-3 rounded-xl text-sm font-bold text-white transition-transform hover:scale-[1.01] disabled:opacity-60"
               style={{ background: 'linear-gradient(135deg, #6366F1, #8B5CF6)' }}
             >
-              {upgradeMut.isPending ? 'Đang tạo...' : 'Tiếp tục thanh toán'}
+              {upgradeMut.isPending ? 'Đang tạo...' : plansLoading ? 'Đang tải...' : 'Tiếp tục thanh toán'}
             </button>
           </>
         ) : upgradeData ? (

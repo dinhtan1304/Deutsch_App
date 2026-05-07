@@ -12,6 +12,7 @@ import type { PersonalWord } from '@/types/personalWord';
 import {
   personalWordsApi,
   collectionsApi,
+  aiVocabApi,
   PersonalWordsListParams,
   CreatePersonalWordDto,
   UpdatePersonalWordDto,
@@ -20,6 +21,7 @@ import {
   ReviewWordDto,
   SRSRating,
   PaginatedPersonalWords,
+  AiGenerateVocabularyDto,
 } from '@/lib/api/personal-words';
 
 // ============================================
@@ -377,6 +379,47 @@ export function useRemoveFromCollection() {
     onSuccess: (_data, { personalWordId }) => {
       queryClient.invalidateQueries({ queryKey: collectionKeys.all });
       queryClient.invalidateQueries({ queryKey: collectionKeys.wordCollections(personalWordId) });
+    },
+  });
+}
+
+// ── Word Bank Game Words ─────────────────────────────────────────────────────
+
+export function useWordBankGameWords(params: {
+  collectionId?: string;
+  enabled?: boolean;
+}) {
+  return useQuery({
+    queryKey: ['wordbank-game-words', params.collectionId ?? 'all'],
+    queryFn: () =>
+      personalWordsApi.list({ collectionId: params.collectionId, limit: 200, page: 1 }).then(r => r.data),
+    staleTime: 60 * 1000,
+    enabled: params.enabled !== false,
+  });
+}
+
+// ── AI Vocabulary Generation ─────────────────────────────────────────────────
+
+const aiVocabKeys = {
+  quota: () => ['ai-vocab-quota'] as const,
+};
+
+export function useAIVocabQuota() {
+  return useQuery({
+    queryKey: aiVocabKeys.quota(),
+    queryFn: () => aiVocabApi.getQuota(),
+    staleTime: 30 * 1000,
+  });
+}
+
+export function useAIGenerateVocabulary() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (dto: AiGenerateVocabularyDto) => aiVocabApi.generate(dto),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: personalWordsKeys.all });
+      queryClient.invalidateQueries({ queryKey: collectionKeys.all });
+      queryClient.invalidateQueries({ queryKey: aiVocabKeys.quota() });
     },
   });
 }

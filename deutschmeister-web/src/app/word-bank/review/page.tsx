@@ -180,6 +180,32 @@ function ReviewCard({ word, isFlipped, onFlip, onSpeak }: ReviewCardProps) {
           <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full bg-white/10" />
           <div className="absolute -bottom-6 -left-6 w-24 h-24 rounded-full bg-white/5" />
 
+          {/* German word reminder + replay audio */}
+          <div className="relative flex items-center gap-2 mb-3">
+            <span className="text-base font-semibold text-white/85">
+              {word.wordType === 'nomen' && word.nomenData
+                ? `${word.nomenData.article} ${word.word}`
+                : word.word}
+            </span>
+            <button
+              type="button"
+              onClick={e => {
+                e.stopPropagation();
+                const text = word.wordType === 'nomen' && word.nomenData
+                  ? `${word.nomenData.article} ${word.word}`
+                  : word.word;
+                onSpeak(text);
+              }}
+              aria-label="Phát âm lại"
+              className="w-7 h-7 rounded-full flex items-center justify-center bg-white/20 hover:bg-white/30 transition-colors"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+              </svg>
+            </button>
+          </div>
+
           <div className="relative text-center">
             <div className="text-3xl font-bold text-white mb-2">{word.translationVi}</div>
             <div className="text-lg text-white/70">{word.translationEn}</div>
@@ -193,7 +219,7 @@ function ReviewCard({ word, isFlipped, onFlip, onSpeak }: ReviewCardProps) {
           )}
 
           <div className="absolute bottom-4 text-xs text-white/50">
-            Lần ôn tiếp: {getIntervalText(word.interval)}
+            Cấp độ hiện tại: {getIntervalText(word.interval)}
           </div>
         </div>
       </div>

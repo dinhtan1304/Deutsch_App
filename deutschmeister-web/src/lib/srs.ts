@@ -14,18 +14,17 @@ export interface SRSPreviewItem {
 export type SRSPreviewResponse = Record<ReviewRating, SRSPreviewItem>;
 
 export function getIntervalText(interval: number): string {
-  if (interval <= 0) return '10 phut';
-  if (interval === 1) return '1 ngay';
-  if (interval < 7) return `${interval} ngay`;
-  if (interval < 30) return `${Math.round(interval / 7)} tuan`;
-  if (interval < 365) return `${Math.round(interval / 30)} thang`;
-  return `${Math.round(interval / 365)} nam`;
+  if (interval <= 0) return '10 phút';
+  if (interval === 1) return '1 ngày';
+  if (interval < 30) return `${interval} ngày`;
+  if (interval < 365) return `${Math.round(interval / 30)} tháng`;
+  return `${Math.round(interval / 365)} năm`;
 }
 
 export function getDelayText(delayMinutes: number): string {
-  if (delayMinutes < 60) return `${delayMinutes} phut`;
+  if (delayMinutes < 60) return `${delayMinutes} phút`;
   const hours = Math.round(delayMinutes / 60);
-  if (hours < 24) return `${hours} gio`;
+  if (hours < 24) return `${hours} giờ`;
   const days = Math.round(delayMinutes / 1440);
   return getIntervalText(days);
 }
