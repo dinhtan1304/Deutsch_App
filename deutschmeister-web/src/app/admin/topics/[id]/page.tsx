@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getTopic, updateTopic, deleteTopic, addWordsToTopic, removeWordsFromTopic } from '@/lib/api/topics';
-import { apiGet } from '@/lib/api/client';
+import { apiGet, getApiErrorMessage } from '@/lib/api/client';
 
 function IconArrowLeft({ size = 16 }: { size?: number }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}><line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" /></svg>;
@@ -21,10 +21,10 @@ function IconSearch({ size = 14 }: { size?: number }) {
 }
 
 const inputStyle = {
-  width: '100%', padding: '8px 10px', backgroundColor: '#0F172A', border: '1px solid #334155',
-  borderRadius: 8, color: '#F1F5F9', fontSize: 13, outline: 'none', boxSizing: 'border-box' as const,
+  width: '100%', padding: '8px 10px', backgroundColor: 'var(--theme-bg-body)', border: '1px solid var(--theme-border)',
+  borderRadius: 8, color: 'var(--theme-text-primary)', fontSize: 13, outline: 'none', boxSizing: 'border-box' as const,
 };
-const labelStyle = { fontSize: 11, color: '#64748B', display: 'block', marginBottom: 4 } as const;
+const labelStyle = { fontSize: 11, color: 'var(--theme-text-muted)', display: 'block', marginBottom: 4 } as const;
 
 const ARTICLE_COLORS: Record<string, string> = { der: '#3B82F6', die: '#EC4899', das: '#22C55E' };
 
@@ -55,6 +55,7 @@ export default function AdminTopicEditPage() {
   const [imageUrl, setImageUrl] = useState('');
   const [isActive, setIsActive] = useState(true);
   const [saved, setSaved] = useState(false);
+  const [error, setError] = useState('');
   const [showDelete, setShowDelete] = useState(false);
   const [wordSearch, setWordSearch] = useState('');
 
@@ -69,12 +70,14 @@ export default function AdminTopicEditPage() {
 
   const saveMut = useMutation({
     mutationFn: () => updateTopic(id, { slug, nameDe, nameEn, nameVi, descriptionVi: descVi || undefined, level, order, icon: icon || undefined, color: color || undefined, imageUrl: imageUrl || undefined, isActive }),
-    onSuccess: () => { setSaved(true); queryClient.invalidateQueries({ queryKey: topicKey }); queryClient.invalidateQueries({ queryKey: ['admin-topics'] }); },
+    onSuccess: () => { setSaved(true); setError(''); queryClient.invalidateQueries({ queryKey: topicKey }); queryClient.invalidateQueries({ queryKey: ['admin-topics'] }); },
+    onError: (err) => { setSaved(false); setError(getApiErrorMessage(err, 'Lỗi khi lưu. Vui lòng thử lại.')); },
   });
 
   const deleteMut = useMutation({
     mutationFn: () => deleteTopic(id),
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['admin-topics'] }); router.push('/admin/topics'); },
+    onError: (err) => setError(getApiErrorMessage(err, 'Lỗi khi xóa topic.')),
   });
 
   const removeWordMut = useMutation({
@@ -100,23 +103,23 @@ export default function AdminTopicEditPage() {
     return <div style={{ display: 'flex', justifyContent: 'center', padding: '60px 0' }}><span style={{ color: '#6366F1' }}><IconLoader size={28} /></span></div>;
   }
   if (!topic) {
-    return <div style={{ textAlign: 'center', padding: '60px 0' }}><p style={{ color: '#64748B', fontSize: 14 }}>Không tìm thấy topic.</p><Link href="/admin/topics" style={{ color: '#6366F1', fontSize: 13, textDecoration: 'none' }}>← Quay lại</Link></div>;
+    return <div style={{ textAlign: 'center', padding: '60px 0' }}><p style={{ color: 'var(--theme-text-muted)', fontSize: 14 }}>Không tìm thấy topic.</p><Link href="/admin/topics" style={{ color: '#6366F1', fontSize: 13, textDecoration: 'none' }}>← Quay lại</Link></div>;
   }
 
   return (
     <div style={{ maxWidth: 800 }}>
-      <Link href="/admin/topics" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: '#64748B', fontSize: 12, textDecoration: 'none', marginBottom: 20 }}>
+      <Link href="/admin/topics" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: 'var(--theme-text-muted)', fontSize: 12, textDecoration: 'none', marginBottom: 20 }}>
         <IconArrowLeft size={14} /> Danh sách Topics
       </Link>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
         <span style={{ fontSize: 28 }}>{topic.icon || '📚'}</span>
-        <h1 style={{ fontSize: 20, fontWeight: 800, color: '#F1F5F9' }}>{topic.nameDe}</h1>
-        <span style={{ fontSize: 11, color: '#475569' }}>Cập nhật: {new Date(topic.updatedAt).toLocaleString('vi-VN')}</span>
+        <h1 style={{ fontSize: 20, fontWeight: 800, color: 'var(--theme-text-primary)' }}>{topic.nameDe}</h1>
+        <span style={{ fontSize: 11, color: 'var(--theme-text-muted)' }}>Cập nhật: {new Date(topic.updatedAt).toLocaleString('vi-VN')}</span>
       </div>
 
       {/* Edit form */}
-      <div style={{ backgroundColor: '#1E293B', borderRadius: 12, border: '1px solid #334155', padding: 24, marginBottom: 16, display: 'flex', flexDirection: 'column', gap: 14 }}>
+      <div style={{ backgroundColor: 'var(--theme-bg-card)', borderRadius: 12, border: '1px solid var(--theme-border)', padding: 24, marginBottom: 16, display: 'flex', flexDirection: 'column', gap: 14 }}>
         <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: 12 }}>
           <div><label style={labelStyle}>Slug</label><input value={slug} onChange={e => { setSlug(e.target.value); setSaved(false); }} style={inputStyle} /></div>
           <div>
@@ -141,13 +144,18 @@ export default function AdminTopicEditPage() {
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <label style={labelStyle}>Hiển thị</label>
           <button onClick={() => { setIsActive(v => !v); setSaved(false); }}
-            style={{ width: 36, height: 20, borderRadius: 10, border: 'none', cursor: 'pointer', backgroundColor: isActive ? '#22C55E' : '#334155', position: 'relative' }}>
+            style={{ width: 36, height: 20, borderRadius: 10, border: 'none', cursor: 'pointer', backgroundColor: isActive ? '#22C55E' : 'var(--theme-border)', position: 'relative' }}>
             <span style={{ position: 'absolute', top: 2, left: isActive ? 18 : 2, width: 16, height: 16, borderRadius: '50%', backgroundColor: '#fff', transition: 'left 0.2s' }} />
           </button>
         </div>
-        {saved && <p style={{ color: '#22C55E', fontSize: 13 }}>Đã lưu.</p>}
+        {saved && !error && <p style={{ color: '#22C55E', fontSize: 13 }}>Đã lưu.</p>}
+        {error && (
+          <div style={{ padding: '10px 12px', borderRadius: 8, backgroundColor: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)', color: '#FCA5A5', fontSize: 12 }}>
+            {error}
+          </div>
+        )}
         <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-          <button onClick={() => saveMut.mutate()} disabled={saveMut.isPending}
+          <button onClick={() => { setError(''); saveMut.mutate(); }} disabled={saveMut.isPending}
             style={{ padding: '9px 18px', borderRadius: 8, border: 'none', backgroundColor: '#6366F1', color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
             {saveMut.isPending && <IconLoader size={14} />} Lưu
           </button>
@@ -155,32 +163,32 @@ export default function AdminTopicEditPage() {
       </div>
 
       {/* Words in topic */}
-      <div style={{ backgroundColor: '#1E293B', borderRadius: 12, border: '1px solid #334155', padding: 20, marginBottom: 16 }}>
+      <div style={{ backgroundColor: 'var(--theme-bg-card)', borderRadius: 12, border: '1px solid var(--theme-border)', padding: 20, marginBottom: 16 }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-          <p style={{ fontSize: 12, fontWeight: 700, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+          <p style={{ fontSize: 12, fontWeight: 700, color: 'var(--theme-text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
             Từ vựng trong topic ({topic.words?.length ?? 0})
           </p>
         </div>
 
         {/* Search to add words */}
         <div style={{ position: 'relative', marginBottom: 12 }}>
-          <span style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: '#475569' }}><IconSearch size={14} /></span>
+          <span style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--theme-text-muted)' }}><IconSearch size={14} /></span>
           <input value={wordSearch} onChange={e => setWordSearch(e.target.value)} placeholder="Tìm từ để thêm vào topic..."
-            style={{ width: '100%', paddingLeft: 32, paddingRight: 12, height: 36, backgroundColor: '#0F172A', border: '1px solid #334155', borderRadius: 8, color: '#F1F5F9', fontSize: 13, outline: 'none', boxSizing: 'border-box' }} />
+            style={{ width: '100%', paddingLeft: 32, paddingRight: 12, height: 36, backgroundColor: 'var(--theme-bg-body)', border: '1px solid var(--theme-border)', borderRadius: 8, color: 'var(--theme-text-primary)', fontSize: 13, outline: 'none', boxSizing: 'border-box' }} />
         </div>
 
         {/* Search results */}
         {wordSearch.length >= 2 && searchData?.items && (
-          <div style={{ backgroundColor: '#0F172A', borderRadius: 8, border: '1px solid #334155', marginBottom: 12, overflow: 'hidden' }}>
+          <div style={{ backgroundColor: 'var(--theme-bg-body)', borderRadius: 8, border: '1px solid var(--theme-border)', marginBottom: 12, overflow: 'hidden' }}>
             {searchData.items.length === 0 ? (
-              <p style={{ padding: '12px 14px', fontSize: 13, color: '#475569' }}>Không tìm thấy từ nào.</p>
+              <p style={{ padding: '12px 14px', fontSize: 13, color: 'var(--theme-text-muted)' }}>Không tìm thấy từ nào.</p>
             ) : (
               searchData.items.map(w => (
-                <div key={w.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 14px', borderBottom: '1px solid #1E293B' }}>
+                <div key={w.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 14px', borderBottom: '1px solid var(--theme-border)' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <span style={{ fontSize: 10, fontWeight: 700, padding: '1px 5px', borderRadius: 4, backgroundColor: `${ARTICLE_COLORS[w.article] || '#475569'}20`, color: ARTICLE_COLORS[w.article] || '#475569' }}>{w.article}</span>
-                    <span style={{ fontSize: 13, color: '#F1F5F9', fontWeight: 600 }}>{w.word}</span>
-                    <span style={{ fontSize: 12, color: '#64748B' }}>{w.translationVi || w.translationEn}</span>
+                    <span style={{ fontSize: 10, fontWeight: 700, padding: '1px 5px', borderRadius: 4, backgroundColor: `${ARTICLE_COLORS[w.article] || 'var(--theme-text-muted)'}20`, color: ARTICLE_COLORS[w.article] || 'var(--theme-text-muted)' }}>{w.article}</span>
+                    <span style={{ fontSize: 13, color: 'var(--theme-text-primary)', fontWeight: 600 }}>{w.word}</span>
+                    <span style={{ fontSize: 12, color: 'var(--theme-text-muted)' }}>{w.translationVi || w.translationEn}</span>
                   </div>
                   {existingWordIds.has(w.id) ? (
                     <span style={{ fontSize: 11, color: '#22C55E', fontWeight: 600 }}>Đã thêm</span>
@@ -198,16 +206,16 @@ export default function AdminTopicEditPage() {
 
         {/* Existing words */}
         {!topic.words?.length ? (
-          <p style={{ fontSize: 13, color: '#475569', textAlign: 'center', padding: '16px 0' }}>Chưa có từ vựng nào.</p>
+          <p style={{ fontSize: 13, color: 'var(--theme-text-muted)', textAlign: 'center', padding: '16px 0' }}>Chưa có từ vựng nào.</p>
         ) : (
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
             {topic.words.map(w => (
-              <div key={w.id} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '4px 8px 4px 6px', borderRadius: 6, backgroundColor: '#0F172A', border: '1px solid #334155' }}>
-                <span style={{ fontSize: 10, fontWeight: 700, padding: '1px 4px', borderRadius: 3, backgroundColor: `${ARTICLE_COLORS[w.article] || '#475569'}20`, color: ARTICLE_COLORS[w.article] || '#475569' }}>{w.article}</span>
-                <span style={{ fontSize: 12, color: '#F1F5F9', fontWeight: 600 }}>{w.word}</span>
+              <div key={w.id} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '4px 8px 4px 6px', borderRadius: 6, backgroundColor: 'var(--theme-bg-body)', border: '1px solid var(--theme-border)' }}>
+                <span style={{ fontSize: 10, fontWeight: 700, padding: '1px 4px', borderRadius: 3, backgroundColor: `${ARTICLE_COLORS[w.article] || 'var(--theme-text-muted)'}20`, color: ARTICLE_COLORS[w.article] || 'var(--theme-text-muted)' }}>{w.article}</span>
+                <span style={{ fontSize: 12, color: 'var(--theme-text-primary)', fontWeight: 600 }}>{w.word}</span>
                 {w.isCore && <span style={{ fontSize: 9, fontWeight: 700, color: '#F59E0B' }}>CORE</span>}
                 <button onClick={() => removeWordMut.mutate(w.id)}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#475569', padding: 0, display: 'flex', alignItems: 'center' }}>
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--theme-text-muted)', padding: 0, display: 'flex', alignItems: 'center' }}>
                   <IconX size={12} />
                 </button>
               </div>
@@ -217,12 +225,12 @@ export default function AdminTopicEditPage() {
       </div>
 
       {/* Danger zone */}
-      <div style={{ backgroundColor: '#1E293B', borderRadius: 12, border: '1px solid #334155', padding: 20 }}>
+      <div style={{ backgroundColor: 'var(--theme-bg-card)', borderRadius: 12, border: '1px solid var(--theme-border)', padding: 20 }}>
         <p style={{ fontSize: 12, fontWeight: 700, color: '#EF4444', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 12 }}>Vùng nguy hiểm</p>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
           <div>
-            <p style={{ fontSize: 13, color: '#94A3B8', fontWeight: 600 }}>Xóa topic này</p>
-            <p style={{ fontSize: 12, color: '#475569', marginTop: 2 }}>Xóa topic và tất cả dữ liệu học tập liên quan.</p>
+            <p style={{ fontSize: 13, color: 'var(--theme-text-secondary)', fontWeight: 600 }}>Xóa topic này</p>
+            <p style={{ fontSize: 12, color: 'var(--theme-text-muted)', marginTop: 2 }}>Xóa topic và tất cả dữ liệu học tập liên quan.</p>
           </div>
           <button onClick={() => setShowDelete(true)}
             style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid #EF4444', backgroundColor: 'transparent', color: '#EF4444', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
@@ -233,11 +241,11 @@ export default function AdminTopicEditPage() {
 
       {showDelete && (
         <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}>
-          <div style={{ backgroundColor: '#1E293B', borderRadius: 12, padding: 24, maxWidth: 360, width: '90%', border: '1px solid #334155' }}>
-            <h3 style={{ fontSize: 16, fontWeight: 700, color: '#F1F5F9', marginBottom: 8 }}>Xóa topic "{topic.nameDe}"?</h3>
-            <p style={{ fontSize: 13, color: '#64748B', marginBottom: 20 }}>Thao tác này không thể hoàn tác.</p>
+          <div style={{ backgroundColor: 'var(--theme-bg-card)', borderRadius: 12, padding: 24, maxWidth: 360, width: '90%', border: '1px solid var(--theme-border)' }}>
+            <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--theme-text-primary)', marginBottom: 8 }}>Xóa topic "{topic.nameDe}"?</h3>
+            <p style={{ fontSize: 13, color: 'var(--theme-text-muted)', marginBottom: 20 }}>Thao tác này không thể hoàn tác.</p>
             <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-              <button onClick={() => setShowDelete(false)} style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid #334155', backgroundColor: 'transparent', color: '#94A3B8', fontSize: 13, cursor: 'pointer' }}>Hủy</button>
+              <button onClick={() => setShowDelete(false)} style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid var(--theme-border)', backgroundColor: 'transparent', color: 'var(--theme-text-secondary)', fontSize: 13, cursor: 'pointer' }}>Hủy</button>
               <button onClick={() => deleteMut.mutate()} disabled={deleteMut.isPending}
                 style={{ padding: '8px 16px', borderRadius: 8, border: 'none', backgroundColor: '#EF4444', color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
                 {deleteMut.isPending && <IconLoader size={14} />} Xóa

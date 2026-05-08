@@ -73,8 +73,8 @@ function PlanBadge({ user }: { user: AdminUserItem }) {
   return (
     <span style={{
       fontSize: 11, fontWeight: 600, padding: '3px 9px', borderRadius: 20,
-      backgroundColor: 'rgba(71,85,105,.15)', color: '#64748B',
-      border: '1px solid #334155',
+      backgroundColor: 'rgba(71,85,105,.15)', color: 'var(--theme-text-muted)',
+      border: '1px solid var(--theme-border)',
     }}>
       Free
     </span>
@@ -94,12 +94,13 @@ export default function AdminUsersPage() {
   const [filter, setFilter] = useState('');
   const [page, setPage] = useState(1);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [roleChange, setRoleChange] = useState<{ userId: string; userLabel: string; from: string; to: string } | null>(null);
 
   const roleFilter = filter === 'admin' ? 'admin' : undefined;
   const isActiveFilter = filter === 'inactive' ? 'false' : undefined;
   const planFilter = filter === 'premium' ? 'premium' : filter === 'lifetime' ? 'lifetime' : undefined;
 
-  const { data, isLoading, isFetching } = useAdminUsers({
+  const { data, isLoading, isFetching, isError, error, refetch } = useAdminUsers({
     search: search || undefined,
     role: roleFilter,
     isActive: isActiveFilter,
@@ -115,8 +116,22 @@ export default function AdminUsersPage() {
     updateUser.mutate({ id, data: { isActive: !current } });
   }
 
-  function handleRoleChange(id: string, role: string) {
-    updateUser.mutate({ id, data: { role } });
+  function requestRoleChange(user: AdminUserItem, newRole: string) {
+    if (newRole === user.role) return;
+    setRoleChange({
+      userId: user.id,
+      userLabel: user.name || user.email,
+      from: user.role,
+      to: newRole,
+    });
+  }
+
+  function confirmRoleChange() {
+    if (!roleChange) return;
+    updateUser.mutate(
+      { id: roleChange.userId, data: { role: roleChange.to } },
+      { onSettled: () => setRoleChange(null) },
+    );
   }
 
   function handleDelete(id: string) {
@@ -132,8 +147,8 @@ export default function AdminUsersPage() {
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20, flexWrap: 'wrap', gap: 10 }}>
         <div>
-          <h1 style={{ fontSize: 20, fontWeight: 800, color: '#F1F5F9', marginBottom: 2 }}>Người dùng</h1>
-          <p style={{ fontSize: 12, color: '#64748B' }}>
+          <h1 style={{ fontSize: 20, fontWeight: 800, color: 'var(--theme-text-primary)', marginBottom: 2 }}>Người dùng</h1>
+          <p style={{ fontSize: 12, color: 'var(--theme-text-muted)' }}>
             {data ? (
               <>
                 {data.total} người dùng
@@ -152,7 +167,7 @@ export default function AdminUsersPage() {
       {/* Filters */}
       <div style={{ display: 'flex', gap: 10, marginBottom: 16, flexWrap: 'wrap' }}>
         <div style={{ position: 'relative', flex: '1 1 220px' }}>
-          <span style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: '#475569' }}>
+          <span style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--theme-text-muted)' }}>
             <IconSearch size={14} />
           </span>
           <input
@@ -161,8 +176,8 @@ export default function AdminUsersPage() {
             placeholder="Tìm tên, email..."
             style={{
               width: '100%', paddingLeft: 32, paddingRight: 12, height: 36,
-              backgroundColor: '#1E293B', border: '1px solid #334155', borderRadius: 8,
-              color: '#F1F5F9', fontSize: 13, outline: 'none', boxSizing: 'border-box',
+              backgroundColor: 'var(--theme-bg-card)', border: '1px solid var(--theme-border)', borderRadius: 8,
+              color: 'var(--theme-text-primary)', fontSize: 13, outline: 'none', boxSizing: 'border-box',
             }}
           />
         </div>
@@ -173,11 +188,11 @@ export default function AdminUsersPage() {
               onClick={() => { setFilter(opt.value); setPage(1); }}
               style={{
                 padding: '0 14px', height: 36, borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: 'pointer',
-                border: filter === opt.value ? '1px solid #6366F1' : '1px solid #334155',
+                border: filter === opt.value ? '1px solid #6366F1' : '1px solid var(--theme-border)',
                 backgroundColor: filter === opt.value
                   ? (opt.value === 'premium' ? 'rgba(99,102,241,.2)' : 'rgba(99,102,241,.15)')
-                  : '#1E293B',
-                color: filter === opt.value ? '#818CF8' : '#64748B',
+                  : 'var(--theme-bg-card)',
+                color: filter === opt.value ? '#818CF8' : 'var(--theme-text-muted)',
               }}
             >
               {opt.label}
@@ -187,21 +202,30 @@ export default function AdminUsersPage() {
       </div>
 
       {/* Table */}
-      <div style={{ backgroundColor: '#1E293B', borderRadius: 12, border: '1px solid #334155', overflow: 'hidden' }}>
+      <div style={{ backgroundColor: 'var(--theme-bg-card)', borderRadius: 12, border: '1px solid var(--theme-border)', overflow: 'hidden' }}>
         {isLoading ? (
           <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }}>
             <span style={{ color: '#6366F1' }}><IconLoader size={24} /></span>
           </div>
+        ) : isError ? (
+          <div style={{ textAlign: 'center', padding: '40px 16px' }}>
+            <div style={{ color: '#F87171', fontSize: 13, marginBottom: 8 }}>Không tải được danh sách người dùng.</div>
+            <div style={{ color: 'var(--theme-text-muted)', fontSize: 12, marginBottom: 12 }}>{(error as any)?.message ?? 'Lỗi không xác định.'}</div>
+            <button onClick={() => refetch()}
+              style={{ padding: '6px 14px', borderRadius: 6, border: '1px solid var(--theme-border)', backgroundColor: 'var(--theme-bg-body)', color: 'var(--theme-text-secondary)', fontSize: 12, cursor: 'pointer' }}>
+              Thử lại
+            </button>
+          </div>
         ) : !data?.items?.length ? (
-          <div style={{ textAlign: 'center', padding: '40px 0', color: '#475569', fontSize: 13 }}>
+          <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--theme-text-muted)', fontSize: 13 }}>
             Không tìm thấy người dùng nào.
           </div>
         ) : (
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
             <thead>
-              <tr style={{ borderBottom: '1px solid #334155', backgroundColor: '#172033' }}>
+              <tr style={{ borderBottom: '1px solid var(--theme-border)', backgroundColor: 'var(--theme-bg-secondary)' }}>
                 {['Người dùng', 'Email', 'Loại tài khoản', 'Vai trò', 'Hoạt động', 'Ngày tạo', ''].map(h => (
-                  <th key={h} style={{ padding: '10px 14px', textAlign: 'left', fontSize: 10, fontWeight: 700, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.06em', whiteSpace: 'nowrap' }}>{h}</th>
+                  <th key={h} style={{ padding: '10px 14px', textAlign: 'left', fontSize: 10, fontWeight: 700, color: 'var(--theme-text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', whiteSpace: 'nowrap' }}>{h}</th>
                 ))}
               </tr>
             </thead>
@@ -211,18 +235,18 @@ export default function AdminUsersPage() {
                 const lifetime = isLifetimeActive(u);
                 return (
                   <tr key={u.id} style={{
-                    borderTop: '1px solid #334155',
+                    borderTop: '1px solid var(--theme-border)',
                     backgroundColor: lifetime ? 'rgba(245,158,11,.05)' : premium ? 'rgba(99,102,241,.04)' : 'transparent',
                     borderLeft: lifetime ? '3px solid #F59E0B' : premium ? '3px solid #6366F1' : '3px solid transparent',
                   }}>
                     {/* Name */}
                     <td style={{ padding: '10px 14px' }}>
-                      <Link href={`/admin/users/${u.id}`} style={{ color: '#F1F5F9', fontWeight: 600, textDecoration: 'none' }}>
-                        {u.name || <span style={{ color: '#475569', fontStyle: 'italic' }}>Chưa đặt tên</span>}
+                      <Link href={`/admin/users/${u.id}`} style={{ color: 'var(--theme-text-primary)', fontWeight: 600, textDecoration: 'none' }}>
+                        {u.name || <span style={{ color: 'var(--theme-text-muted)', fontStyle: 'italic' }}>Chưa đặt tên</span>}
                       </Link>
                     </td>
                     {/* Email */}
-                    <td style={{ padding: '10px 14px', color: '#94A3B8' }}>{u.email}</td>
+                    <td style={{ padding: '10px 14px', color: 'var(--theme-text-secondary)' }}>{u.email}</td>
                     {/* Plan badge */}
                     <td style={{ padding: '10px 14px' }}>
                       <PlanBadge user={u} />
@@ -231,16 +255,16 @@ export default function AdminUsersPage() {
                     <td style={{ padding: '10px 14px' }}>
                       <select
                         value={u.role}
-                        onChange={e => handleRoleChange(u.id, e.target.value)}
+                        onChange={e => requestRoleChange(u, e.target.value)}
                         style={{
                           backgroundColor: u.role === 'admin' ? 'rgba(99,102,241,.15)' : 'transparent',
-                          color: u.role === 'admin' ? '#818CF8' : '#64748B',
-                          border: '1px solid #334155', borderRadius: 6, padding: '2px 6px',
+                          color: u.role === 'admin' ? '#818CF8' : 'var(--theme-text-muted)',
+                          border: '1px solid var(--theme-border)', borderRadius: 6, padding: '2px 6px',
                           fontSize: 11, fontWeight: 700, cursor: 'pointer', outline: 'none',
                         }}
                       >
-                        <option value="user" style={{ backgroundColor: '#1E293B' }}>user</option>
-                        <option value="admin" style={{ backgroundColor: '#1E293B' }}>admin</option>
+                        <option value="user" style={{ backgroundColor: 'var(--theme-bg-card)' }}>user</option>
+                        <option value="admin" style={{ backgroundColor: 'var(--theme-bg-card)' }}>admin</option>
                       </select>
                     </td>
                     {/* Active toggle */}
@@ -249,7 +273,7 @@ export default function AdminUsersPage() {
                         onClick={() => handleToggleActive(u.id, u.isActive)}
                         style={{
                           width: 36, height: 20, borderRadius: 10, border: 'none', cursor: 'pointer',
-                          backgroundColor: u.isActive ? '#22C55E' : '#334155',
+                          backgroundColor: u.isActive ? '#22C55E' : 'var(--theme-border)',
                           position: 'relative', transition: 'background-color 0.2s', flexShrink: 0,
                         }}
                       >
@@ -261,7 +285,7 @@ export default function AdminUsersPage() {
                       </button>
                     </td>
                     {/* Date */}
-                    <td style={{ padding: '10px 14px', color: '#475569', whiteSpace: 'nowrap', fontSize: 12 }}>
+                    <td style={{ padding: '10px 14px', color: 'var(--theme-text-muted)', whiteSpace: 'nowrap', fontSize: 12 }}>
                       {new Date(u.createdAt).toLocaleDateString('vi-VN')}
                     </td>
                     {/* Actions */}
@@ -273,7 +297,7 @@ export default function AdminUsersPage() {
                         </Link>
                         <button
                           onClick={() => setDeleteId(u.id)}
-                          style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#475569', padding: 4, display: 'flex' }}
+                          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--theme-text-muted)', padding: 4, display: 'flex' }}
                         >
                           <IconTrash size={14} />
                         </button>
@@ -290,7 +314,7 @@ export default function AdminUsersPage() {
       {/* Pagination */}
       {totalPages > 1 && (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 16 }}>
-          <span style={{ fontSize: 12, color: '#475569' }}>
+          <span style={{ fontSize: 12, color: 'var(--theme-text-muted)' }}>
             Trang {page} / {totalPages} {isFetching && <span style={{ color: '#6366F1' }}>· đang tải...</span>}
           </span>
           <div style={{ display: 'flex', gap: 6 }}>
@@ -299,8 +323,8 @@ export default function AdminUsersPage() {
               disabled={page === 1}
               style={{
                 width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                borderRadius: 8, border: '1px solid #334155', backgroundColor: '#1E293B',
-                color: page === 1 ? '#334155' : '#94A3B8', cursor: page === 1 ? 'not-allowed' : 'pointer',
+                borderRadius: 8, border: '1px solid var(--theme-border)', backgroundColor: 'var(--theme-bg-card)',
+                color: page === 1 ? 'var(--theme-border)' : 'var(--theme-text-secondary)', cursor: page === 1 ? 'not-allowed' : 'pointer',
               }}
             >
               <IconChevronLeft size={15} />
@@ -310,12 +334,49 @@ export default function AdminUsersPage() {
               disabled={page === totalPages}
               style={{
                 width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                borderRadius: 8, border: '1px solid #334155', backgroundColor: '#1E293B',
-                color: page === totalPages ? '#334155' : '#94A3B8', cursor: page === totalPages ? 'not-allowed' : 'pointer',
+                borderRadius: 8, border: '1px solid var(--theme-border)', backgroundColor: 'var(--theme-bg-card)',
+                color: page === totalPages ? 'var(--theme-border)' : 'var(--theme-text-secondary)', cursor: page === totalPages ? 'not-allowed' : 'pointer',
               }}
             >
               <IconChevronRight size={15} />
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Role change confirm modal */}
+      {roleChange && (
+        <div style={{
+          position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.7)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50,
+        }}>
+          <div style={{ backgroundColor: 'var(--theme-bg-card)', borderRadius: 12, padding: 24, maxWidth: 400, width: '90%', border: '1px solid var(--theme-border)' }}>
+            <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--theme-text-primary)', marginBottom: 8 }}>
+              {roleChange.to === 'admin' ? 'Cấp quyền admin?' : 'Thu hồi quyền admin?'}
+            </h3>
+            <p style={{ fontSize: 13, color: 'var(--theme-text-muted)', marginBottom: 20, lineHeight: 1.5 }}>
+              Đổi vai trò của <strong style={{ color: 'var(--theme-text-primary)' }}>{roleChange.userLabel}</strong> từ{' '}
+              <span style={{ color: 'var(--theme-text-secondary)' }}>{roleChange.from}</span> →{' '}
+              <span style={{ color: roleChange.to === 'admin' ? '#818CF8' : 'var(--theme-text-secondary)', fontWeight: 600 }}>{roleChange.to}</span>.
+              {roleChange.to === 'admin' && ' Người dùng sẽ có toàn quyền quản trị.'}
+            </p>
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+              <button
+                onClick={() => setRoleChange(null)}
+                disabled={updateUser.isPending}
+                style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid var(--theme-border)', backgroundColor: 'transparent', color: 'var(--theme-text-secondary)', fontSize: 13, cursor: 'pointer' }}
+              >
+                Hủy
+              </button>
+              <button
+                onClick={confirmRoleChange}
+                disabled={updateUser.isPending}
+                style={{ padding: '8px 16px', borderRadius: 8, border: 'none', backgroundColor: roleChange.to === 'admin' ? '#6366F1' : 'var(--theme-text-muted)', color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}
+              >
+                {updateUser.isPending && <IconLoader size={14} />}
+                Xác nhận
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -326,15 +387,15 @@ export default function AdminUsersPage() {
           position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.7)',
           display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50,
         }}>
-          <div style={{ backgroundColor: '#1E293B', borderRadius: 12, padding: 24, maxWidth: 360, width: '90%', border: '1px solid #334155' }}>
-            <h3 style={{ fontSize: 16, fontWeight: 700, color: '#F1F5F9', marginBottom: 8 }}>Xóa người dùng?</h3>
-            <p style={{ fontSize: 13, color: '#64748B', marginBottom: 20 }}>
+          <div style={{ backgroundColor: 'var(--theme-bg-card)', borderRadius: 12, padding: 24, maxWidth: 360, width: '90%', border: '1px solid var(--theme-border)' }}>
+            <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--theme-text-primary)', marginBottom: 8 }}>Xóa người dùng?</h3>
+            <p style={{ fontSize: 13, color: 'var(--theme-text-muted)', marginBottom: 20 }}>
               Thao tác này không thể hoàn tác. Tất cả dữ liệu của người dùng sẽ bị xóa.
             </p>
             <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
               <button
                 onClick={() => setDeleteId(null)}
-                style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid #334155', backgroundColor: 'transparent', color: '#94A3B8', fontSize: 13, cursor: 'pointer' }}
+                style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid var(--theme-border)', backgroundColor: 'transparent', color: 'var(--theme-text-secondary)', fontSize: 13, cursor: 'pointer' }}
               >
                 Hủy
               </button>

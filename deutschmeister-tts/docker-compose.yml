@@ -1,0 +1,17 @@
+services:
+  tts:
+    build: .
+    image: deutschmeister-tts:latest
+    container_name: deutschmeister-tts
+    restart: unless-stopped
+    ports:
+      - "8001:8001"
+    environment:
+      TTS_SHARED_SECRET: ${TTS_SHARED_SECRET:-change-me-in-prod}
+      TTS_MODEL: tts_models/de/thorsten/vits
+      TTS_MAX_TEXT_LEN: "500"
+    volumes:
+      - tts-models:/models
+
+volumes:
+  tts-models:

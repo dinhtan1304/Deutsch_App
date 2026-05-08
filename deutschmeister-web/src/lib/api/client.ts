@@ -67,6 +67,21 @@ export class ApiError extends Error {
 }
 
 /**
+ * Pull a user-facing message out of any thrown value.
+ * NestJS class-validator errors come back as `{ message: string[] }` —
+ * we join them so the form sees every failing field, not just the first.
+ */
+export function getApiErrorMessage(err: unknown, fallback = 'Đã xảy ra lỗi'): string {
+  if (err instanceof ApiError) {
+    const raw = (err.data as { message?: unknown })?.message ?? err.message;
+    if (Array.isArray(raw)) return raw.filter(Boolean).join(' · ') || fallback;
+    return typeof raw === 'string' && raw.length > 0 ? raw : fallback;
+  }
+  if (err instanceof Error && err.message) return err.message;
+  return fallback;
+}
+
+/**
  * Refresh access token using httpOnly cookie
  * The refresh token is automatically sent via cookie by the browser
  */

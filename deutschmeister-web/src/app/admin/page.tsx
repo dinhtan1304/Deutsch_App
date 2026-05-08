@@ -41,9 +41,9 @@ function StatCard({
 }) {
   const inner = (
     <div style={{
-      backgroundColor: accent ? `${color}10` : '#1E293B',
+      backgroundColor: accent ? `${color}10` : 'var(--theme-bg-card)',
       borderRadius: 12,
-      border: `1px solid ${accent ? `${color}28` : '#334155'}`,
+      border: `1px solid ${accent ? `${color}28` : 'var(--theme-border)'}`,
       padding: '16px 18px',
       display: 'flex',
       alignItems: 'center',
@@ -59,9 +59,9 @@ function StatCard({
         <span style={{ color }}><Icon size={18} /></span>
       </div>
       <div style={{ minWidth: 0, flex: 1 }}>
-        <p style={{ fontSize: 20, fontWeight: 800, color: '#F1F5F9', lineHeight: 1 }}>{value}</p>
-        <p style={{ fontSize: 11, color: '#64748B', marginTop: 3 }}>{label}</p>
-        {sub && <p style={{ fontSize: 10, color: '#475569', marginTop: 1 }}>{sub}</p>}
+        <p style={{ fontSize: 20, fontWeight: 800, color: 'var(--theme-text-primary)', lineHeight: 1 }}>{value}</p>
+        <p style={{ fontSize: 11, color: 'var(--theme-text-muted)', marginTop: 3 }}>{label}</p>
+        {sub && <p style={{ fontSize: 10, color: 'var(--theme-text-muted)', marginTop: 1 }}>{sub}</p>}
       </div>
     </div>
   );
@@ -75,7 +75,7 @@ function StatCard({
 function SL({ children }: { children: React.ReactNode }) {
   return (
     <p style={{
-      fontSize: 11, fontWeight: 700, color: '#475569',
+      fontSize: 11, fontWeight: 700, color: 'var(--theme-text-muted)',
       textTransform: 'uppercase', letterSpacing: '0.1em',
       marginBottom: 10, marginTop: 24,
     }}>
@@ -101,7 +101,7 @@ type Period = 'today' | 'week' | 'total';
 function FeatureChart({ features, period }: { features: Record<string, FeatureStat>; period: Period }) {
   const rows = Object.entries(features).map(([key, stat]) => ({
     key,
-    meta: FEATURE_META[key] ?? { label: key, color: '#64748B', gradient: 'linear-gradient(90deg,#64748B,#94A3B8)' },
+    meta: FEATURE_META[key] ?? { label: key, color: 'var(--theme-text-muted)', gradient: 'linear-gradient(90deg,#64748B,#94A3B8)' },
     value: period === 'total' ? stat.total : period === 'week' ? stat.week : stat.today,
     isAi: stat.isAi,
   })).sort((a, b) => b.value - a.value);
@@ -113,10 +113,10 @@ function FeatureChart({ features, period }: { features: Record<string, FeatureSt
       {rows.map(({ key, meta, value, isAi }) => (
         <div key={key} style={{ display: 'grid', gridTemplateColumns: '130px 1fr 52px', alignItems: 'center', gap: 10 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span style={{ fontSize: 12, color: '#94A3B8', fontWeight: 500 }}>{meta.label}</span>
+            <span style={{ fontSize: 12, color: 'var(--theme-text-secondary)', fontWeight: 500 }}>{meta.label}</span>
             {isAi && <span style={{ fontSize: 9, fontWeight: 800, padding: '1px 5px', borderRadius: 4, backgroundColor: 'rgba(99,102,241,.2)', color: '#818CF8', flexShrink: 0 }}>AI</span>}
           </div>
-          <div style={{ height: 7, borderRadius: 4, backgroundColor: '#0F172A', overflow: 'hidden' }}>
+          <div style={{ height: 7, borderRadius: 4, backgroundColor: 'var(--theme-bg-body)', overflow: 'hidden' }}>
             <div style={{
               height: '100%',
               width: `${value > 0 ? Math.max(Math.round((value / max) * 100), 2) : 0}%`,
@@ -125,7 +125,7 @@ function FeatureChart({ features, period }: { features: Record<string, FeatureSt
               transition: 'width 0.5s ease',
             }} />
           </div>
-          <p style={{ fontSize: 13, fontWeight: 700, color: '#F1F5F9', textAlign: 'right' }}>{value.toLocaleString()}</p>
+          <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--theme-text-primary)', textAlign: 'right' }}>{value.toLocaleString()}</p>
         </div>
       ))}
     </div>
@@ -134,7 +134,7 @@ function FeatureChart({ features, period }: { features: Record<string, FeatureSt
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function AdminDashboardPage() {
-  const { data: stats, isLoading } = useAdminStats();
+  const { data: stats, isLoading, isError, error, refetch } = useAdminStats();
   const [period, setPeriod] = useState<Period>('week');
 
   return (
@@ -142,8 +142,8 @@ export default function AdminDashboardPage() {
       {/* Header row */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24, flexWrap: 'wrap', gap: 10 }}>
         <div>
-          <h1 style={{ fontSize: 20, fontWeight: 800, color: '#F1F5F9', marginBottom: 2 }}>Dashboard</h1>
-          <p style={{ fontSize: 12, color: '#64748B' }}>Tổng quan nền tảng DeutschMeister</p>
+          <h1 style={{ fontSize: 20, fontWeight: 800, color: 'var(--theme-text-primary)', marginBottom: 2 }}>Dashboard</h1>
+          <p style={{ fontSize: 12, color: 'var(--theme-text-muted)' }}>Tổng quan nền tảng DeutschMeister</p>
         </div>
         <Link href="/admin/subscriptions"
           style={{ padding: '7px 14px', borderRadius: 8, backgroundColor: 'rgba(99,102,241,.12)', color: '#818CF8', fontSize: 12, fontWeight: 600, textDecoration: 'none', border: '1px solid rgba(99,102,241,.25)', whiteSpace: 'nowrap' }}>
@@ -155,8 +155,15 @@ export default function AdminDashboardPage() {
         <div style={{ display: 'flex', justifyContent: 'center', padding: '60px 0' }}>
           <span style={{ color: '#6366F1' }}><IconLoader size={28} /></span>
         </div>
-      ) : !stats ? (
-        <p style={{ color: '#64748B' }}>Không tải được dữ liệu.</p>
+      ) : isError || !stats ? (
+        <div style={{ textAlign: 'center', padding: '60px 16px', backgroundColor: 'var(--theme-bg-card)', borderRadius: 12, border: '1px solid var(--theme-border)' }}>
+          <div style={{ color: '#F87171', fontSize: 14, fontWeight: 600, marginBottom: 8 }}>Không tải được số liệu dashboard.</div>
+          <div style={{ color: 'var(--theme-text-muted)', fontSize: 12, marginBottom: 16 }}>{(error as any)?.message ?? 'Lỗi không xác định.'}</div>
+          <button onClick={() => refetch()}
+            style={{ padding: '8px 18px', borderRadius: 8, border: '1px solid var(--theme-border)', backgroundColor: 'var(--theme-bg-body)', color: 'var(--theme-text-secondary)', fontSize: 12, cursor: 'pointer' }}>
+            Thử lại
+          </button>
+        </div>
       ) : (
         <>
           {/* ── Users ────────────────────────────────────────── */}
@@ -206,17 +213,17 @@ export default function AdminDashboardPage() {
 
           {/* ── Feature breakdown ─────────────────────────────── */}
           <SL>Lượt dùng theo tính năng</SL>
-          <div style={{ backgroundColor: '#1E293B', borderRadius: 12, border: '1px solid #334155', padding: '20px 22px' }}>
+          <div style={{ backgroundColor: 'var(--theme-bg-card)', borderRadius: 12, border: '1px solid var(--theme-border)', padding: '20px 22px' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
-              <p style={{ fontSize: 12, color: '#94A3B8', fontWeight: 600 }}>Số lượt theo kỳ</p>
+              <p style={{ fontSize: 12, color: 'var(--theme-text-secondary)', fontWeight: 600 }}>Số lượt theo kỳ</p>
               <div style={{ display: 'flex', gap: 4 }}>
                 {([['today', 'Hôm nay'], ['week', 'Tuần'], ['total', 'Tổng']] as [Period, string][]).map(([k, l]) => (
                   <button key={k} onClick={() => setPeriod(k)}
                     style={{
                       padding: '3px 10px', borderRadius: 6, fontSize: 11, fontWeight: 600, cursor: 'pointer',
-                      border: period === k ? '1px solid #6366F1' : '1px solid #334155',
+                      border: period === k ? '1px solid #6366F1' : '1px solid var(--theme-border)',
                       backgroundColor: period === k ? 'rgba(99,102,241,.15)' : 'transparent',
-                      color: period === k ? '#818CF8' : '#64748B',
+                      color: period === k ? '#818CF8' : 'var(--theme-text-muted)',
                     }}>
                     {l}
                   </button>
@@ -224,7 +231,7 @@ export default function AdminDashboardPage() {
               </div>
             </div>
             <FeatureChart features={stats.features} period={period} />
-            <p style={{ fontSize: 10, color: '#334155', marginTop: 14, textAlign: 'right' }}>
+            <p style={{ fontSize: 10, color: 'var(--theme-border)', marginTop: 14, textAlign: 'right' }}>
               Nhãn AI = có Gemini grading · Luyện tự do: Viết, Đọc, Nghe, Nói · Thi chuẩn: 4 exam modes
             </p>
           </div>
@@ -250,8 +257,8 @@ export default function AdminDashboardPage() {
               <Link key={href} href={href}
                 style={{
                   padding: '7px 14px', borderRadius: 8, fontSize: 12, fontWeight: 600,
-                  backgroundColor: '#1E293B', border: '1px solid #334155',
-                  color: '#94A3B8', textDecoration: 'none',
+                  backgroundColor: 'var(--theme-bg-card)', border: '1px solid var(--theme-border)',
+                  color: 'var(--theme-text-secondary)', textDecoration: 'none',
                 }}>
                 {label}
               </Link>

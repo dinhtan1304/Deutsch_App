@@ -186,7 +186,7 @@ export default function AdminDictationRequestsPage() {
   const [approveTarget, setApproveTarget] = useState<AdminDictationRequest | null>(null);
   const [rejectTarget, setRejectTarget] = useState<AdminDictationRequest | null>(null);
 
-  const { data, isLoading } = useAdminDictationRequests({
+  const { data, isLoading, isError, error, refetch } = useAdminDictationRequests({
     status: status || undefined, page, limit: 20,
   });
 
@@ -224,6 +224,21 @@ export default function AdminDictationRequestsPage() {
       {isLoading ? (
         <div className="text-center py-16 opacity-50" style={{ color: 'var(--theme-text-primary)' }}>
           Đang tải...
+        </div>
+      ) : isError ? (
+        <div className="text-center py-12 rounded-2xl border-2 border-dashed"
+          style={{ borderColor: 'var(--theme-border)' }}>
+          <p className="text-sm font-bold mb-1" style={{ color: '#FCA5A5' }}>
+            Không tải được danh sách yêu cầu.
+          </p>
+          <p className="text-xs opacity-60 mb-4" style={{ color: 'var(--theme-text-primary)' }}>
+            {(error as any)?.message ?? 'Lỗi không xác định.'}
+          </p>
+          <button onClick={() => refetch()}
+            className="px-4 py-2 rounded-lg text-xs font-black border"
+            style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-primary)' }}>
+            Thử lại
+          </button>
         </div>
       ) : !data?.items.length ? (
         <div className="text-center py-16 rounded-2xl border-2 border-dashed"

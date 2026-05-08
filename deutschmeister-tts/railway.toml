@@ -1,0 +1,19 @@
+# Railway deployment for the Coqui TTS service.
+# Deploy: `railway up` from this directory after `railway link`.
+#
+# Cost note: Coqui TTS holds ~500 MB of weights in RAM. Pick a Railway plan
+# with at least 1 GB RAM. CPU-only inference is fine for low traffic; for
+# high traffic, run multiple containers behind a load balancer.
+
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+# No startCommand — Dockerfile CMD uses shell form `${PORT:-8001}`, which
+# Railway's exec runner can't expand. Leaving CMD in charge keeps env-var
+# substitution inside the container's shell where it works correctly.
+healthcheckPath = "/health"
+healthcheckTimeout = 300
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 3

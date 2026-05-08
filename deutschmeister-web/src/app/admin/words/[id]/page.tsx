@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import { adminWordKeys, useUpdateWord, useDeleteWord } from '@/hooks/useAdmin';
-import { apiGet } from '@/lib/api/client';
+import { apiGet, getApiErrorMessage } from '@/lib/api/client';
 import { AdminWordItem, CreateWordPayload } from '@/lib/api/admin';
 
 function IconArrowLeft({ size = 16 }: { size?: number }) {
@@ -22,10 +22,10 @@ function IconLoader({ size = 16 }: { size?: number }) {
 }
 
 const inputStyle = {
-  width: '100%', padding: '8px 10px', backgroundColor: '#0F172A', border: '1px solid #334155',
-  borderRadius: 8, color: '#F1F5F9', fontSize: 13, outline: 'none', boxSizing: 'border-box' as const,
+  width: '100%', padding: '8px 10px', backgroundColor: 'var(--theme-bg-body)', border: '1px solid var(--theme-border)',
+  borderRadius: 8, color: 'var(--theme-text-primary)', fontSize: 13, outline: 'none', boxSizing: 'border-box' as const,
 };
-const labelStyle = { fontSize: 11, color: '#64748B', display: 'block', marginBottom: 4 } as const;
+const labelStyle = { fontSize: 11, color: 'var(--theme-text-muted)', display: 'block', marginBottom: 4 } as const;
 
 function ArrayField({ label, values, onChange }: { label: string; values: string[]; onChange: (v: string[]) => void }) {
   return (
@@ -36,13 +36,13 @@ function ArrayField({ label, values, onChange }: { label: string; values: string
           <div key={i} style={{ display: 'flex', gap: 6 }}>
             <input value={v} onChange={e => { const n = [...values]; n[i] = e.target.value; onChange(n); }} style={{ ...inputStyle, flex: 1 }} />
             <button onClick={() => onChange(values.filter((_, j) => j !== i))}
-              style={{ width: 32, height: 36, borderRadius: 8, border: '1px solid #334155', backgroundColor: '#1E293B', color: '#475569', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              style={{ width: 32, height: 36, borderRadius: 8, border: '1px solid var(--theme-border)', backgroundColor: 'var(--theme-bg-card)', color: 'var(--theme-text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               <IconX size={13} />
             </button>
           </div>
         ))}
         <button onClick={() => onChange([...values, ''])}
-          style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '5px 10px', borderRadius: 8, border: '1px dashed #334155', backgroundColor: 'transparent', color: '#475569', fontSize: 12, cursor: 'pointer', alignSelf: 'flex-start' }}>
+          style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '5px 10px', borderRadius: 8, border: '1px dashed var(--theme-border)', backgroundColor: 'transparent', color: 'var(--theme-text-muted)', fontSize: 12, cursor: 'pointer', alignSelf: 'flex-start' }}>
           <IconPlus size={12} /> Thêm
         </button>
       </div>
@@ -67,24 +67,26 @@ export default function AdminWordEditPage() {
   const [error, setError] = useState('');
   const [saved, setSaved] = useState(false);
 
+  function snapshotFromWord(w: AdminWordItem): Partial<CreateWordPayload> {
+    return {
+      word: w.word,
+      article: w.article,
+      gender: w.gender,
+      plural: w.plural ?? '',
+      pronunciation: w.pronunciation ?? '',
+      translationEn: w.translationEn,
+      translationVi: w.translationVi ?? '',
+      imageUrl: w.imageUrl ?? '',
+      category: w.category,
+      level: w.level,
+      frequency: w.frequency,
+      examples: w.examples ?? [],
+      tips: w.tips ?? [],
+    };
+  }
+
   useEffect(() => {
-    if (word) {
-      setForm({
-        word: word.word,
-        article: word.article,
-        gender: word.gender,
-        plural: word.plural ?? '',
-        pronunciation: word.pronunciation ?? '',
-        translationEn: word.translationEn,
-        translationVi: word.translationVi ?? '',
-        imageUrl: word.imageUrl ?? '',
-        category: word.category,
-        level: word.level,
-        frequency: word.frequency,
-        examples: word.examples ?? [],
-        tips: word.tips ?? [],
-      });
-    }
+    if (word) setForm(snapshotFromWord(word));
   }, [word]);
 
   function set(key: keyof CreateWordPayload, value: any) {
@@ -109,7 +111,12 @@ export default function AdminWordEditPage() {
 
     updateWord.mutate({ id, data: payload }, {
       onSuccess: () => setSaved(true),
-      onError: () => setError('Lỗi khi lưu. Vui lòng thử lại.'),
+      onError: (err) => {
+        // Restore form to the last-known-good server state so the user
+        // can see what was actually persisted (vs. their failed edits).
+        if (word) setForm(snapshotFromWord(word));
+        setError(getApiErrorMessage(err, 'Lỗi khi lưu. Vui lòng thử lại.'));
+      },
     });
   }
 
@@ -130,7 +137,7 @@ export default function AdminWordEditPage() {
   if (!word) {
     return (
       <div style={{ textAlign: 'center', padding: '60px 0' }}>
-        <p style={{ color: '#64748B', fontSize: 14 }}>Không tìm thấy từ này.</p>
+        <p style={{ color: 'var(--theme-text-muted)', fontSize: 14 }}>Không tìm thấy từ này.</p>
         <Link href="/admin/words" style={{ color: '#6366F1', fontSize: 13, textDecoration: 'none' }}>← Quay lại</Link>
       </div>
     );
@@ -138,20 +145,20 @@ export default function AdminWordEditPage() {
 
   return (
     <div style={{ maxWidth: 720 }}>
-      <Link href="/admin/words" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: '#64748B', fontSize: 12, textDecoration: 'none', marginBottom: 20 }}>
+      <Link href="/admin/words" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: 'var(--theme-text-muted)', fontSize: 12, textDecoration: 'none', marginBottom: 20 }}>
         <IconArrowLeft size={14} /> Danh sách từ
       </Link>
 
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20, flexWrap: 'wrap', gap: 10 }}>
-        <h1 style={{ fontSize: 20, fontWeight: 800, color: '#F1F5F9' }}>
+        <h1 style={{ fontSize: 20, fontWeight: 800, color: 'var(--theme-text-primary)' }}>
           Sửa: <span style={{ color: '#818CF8' }}>{word.article} {word.word}</span>
         </h1>
-        <span style={{ fontSize: 11, color: '#475569' }}>
+        <span style={{ fontSize: 11, color: 'var(--theme-text-muted)' }}>
           Cập nhật: {new Date(word.updatedAt).toLocaleString('vi-VN')}
         </span>
       </div>
 
-      <div style={{ backgroundColor: '#1E293B', borderRadius: 12, border: '1px solid #334155', padding: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <div style={{ backgroundColor: 'var(--theme-bg-card)', borderRadius: 12, border: '1px solid var(--theme-border)', padding: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
         <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: 12 }}>
           <div>
             <label style={labelStyle}>Từ *</label>
@@ -228,7 +235,7 @@ export default function AdminWordEditPage() {
         {saved && <p style={{ color: '#22C55E', fontSize: 13 }}>Đã lưu thành công.</p>}
 
         <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', paddingTop: 4 }}>
-          <Link href="/admin/words" style={{ padding: '9px 18px', borderRadius: 8, border: '1px solid #334155', color: '#94A3B8', fontSize: 13, textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}>Hủy</Link>
+          <Link href="/admin/words" style={{ padding: '9px 18px', borderRadius: 8, border: '1px solid var(--theme-border)', color: 'var(--theme-text-secondary)', fontSize: 13, textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}>Hủy</Link>
           <button onClick={handleSave} disabled={updateWord.isPending}
             style={{ padding: '9px 18px', borderRadius: 8, border: 'none', backgroundColor: '#6366F1', color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
             {updateWord.isPending && <IconLoader size={14} />} Lưu
@@ -237,12 +244,12 @@ export default function AdminWordEditPage() {
       </div>
 
       {/* Danger zone */}
-      <div style={{ backgroundColor: '#1E293B', borderRadius: 12, border: '1px solid #334155', padding: 20, marginTop: 16 }}>
+      <div style={{ backgroundColor: 'var(--theme-bg-card)', borderRadius: 12, border: '1px solid var(--theme-border)', padding: 20, marginTop: 16 }}>
         <p style={{ fontSize: 12, fontWeight: 700, color: '#EF4444', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 12 }}>Vùng nguy hiểm</p>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
           <div>
-            <p style={{ fontSize: 13, color: '#94A3B8', fontWeight: 600 }}>Xóa từ này</p>
-            <p style={{ fontSize: 12, color: '#475569', marginTop: 2 }}>Xóa khỏi tất cả topics, game answers vĩnh viễn.</p>
+            <p style={{ fontSize: 13, color: 'var(--theme-text-secondary)', fontWeight: 600 }}>Xóa từ này</p>
+            <p style={{ fontSize: 12, color: 'var(--theme-text-muted)', marginTop: 2 }}>Xóa khỏi tất cả topics, game answers vĩnh viễn.</p>
           </div>
           <button onClick={() => setShowDelete(true)}
             style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid #EF4444', backgroundColor: 'transparent', color: '#EF4444', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
@@ -253,11 +260,11 @@ export default function AdminWordEditPage() {
 
       {showDelete && (
         <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}>
-          <div style={{ backgroundColor: '#1E293B', borderRadius: 12, padding: 24, maxWidth: 360, width: '90%', border: '1px solid #334155' }}>
-            <h3 style={{ fontSize: 16, fontWeight: 700, color: '#F1F5F9', marginBottom: 8 }}>Xóa từ "{word.word}"?</h3>
-            <p style={{ fontSize: 13, color: '#64748B', marginBottom: 20 }}>Thao tác này không thể hoàn tác.</p>
+          <div style={{ backgroundColor: 'var(--theme-bg-card)', borderRadius: 12, padding: 24, maxWidth: 360, width: '90%', border: '1px solid var(--theme-border)' }}>
+            <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--theme-text-primary)', marginBottom: 8 }}>Xóa từ "{word.word}"?</h3>
+            <p style={{ fontSize: 13, color: 'var(--theme-text-muted)', marginBottom: 20 }}>Thao tác này không thể hoàn tác.</p>
             <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-              <button onClick={() => setShowDelete(false)} style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid #334155', backgroundColor: 'transparent', color: '#94A3B8', fontSize: 13, cursor: 'pointer' }}>Hủy</button>
+              <button onClick={() => setShowDelete(false)} style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid var(--theme-border)', backgroundColor: 'transparent', color: 'var(--theme-text-secondary)', fontSize: 13, cursor: 'pointer' }}>Hủy</button>
               <button onClick={handleDelete} disabled={deleteWord.isPending}
                 style={{ padding: '8px 16px', borderRadius: 8, border: 'none', backgroundColor: '#EF4444', color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
                 {deleteWord.isPending && <IconLoader size={14} />} Xóa

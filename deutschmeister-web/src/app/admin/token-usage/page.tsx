@@ -41,14 +41,14 @@ const FEATURE_COLORS: Record<string, { color: string; gradient: string; label: s
 };
 
 function featureMeta(key: string) {
-  return FEATURE_COLORS[key] ?? { color: '#64748B', gradient: 'linear-gradient(90deg,#64748B,#94A3B8)', label: key };
+  return FEATURE_COLORS[key] ?? { color: 'var(--theme-text-muted)', gradient: 'linear-gradient(90deg,#64748B,#94A3B8)', label: key };
 }
 
 // ─── Section label ───────────────────────────────────────────────────────────
 function SL({ children }: { children: React.ReactNode }) {
   return (
     <p style={{
-      fontSize: 11, fontWeight: 700, color: '#475569',
+      fontSize: 11, fontWeight: 700, color: 'var(--theme-text-muted)',
       textTransform: 'uppercase', letterSpacing: '0.1em',
       marginBottom: 10, marginTop: 28,
     }}>
@@ -64,9 +64,9 @@ function StatCard({ label, value, sub, icon: Icon, color, accent }: {
 }) {
   return (
     <div style={{
-      backgroundColor: accent ? `${color}10` : '#1E293B',
+      backgroundColor: accent ? `${color}10` : 'var(--theme-bg-card)',
       borderRadius: 12,
-      border: `1px solid ${accent ? `${color}28` : '#334155'}`,
+      border: `1px solid ${accent ? `${color}28` : 'var(--theme-border)'}`,
       padding: '16px 18px',
       display: 'flex', alignItems: 'center', gap: 12,
     }}>
@@ -78,9 +78,9 @@ function StatCard({ label, value, sub, icon: Icon, color, accent }: {
         <span style={{ color }}><Icon size={18} /></span>
       </div>
       <div style={{ minWidth: 0, flex: 1 }}>
-        <p style={{ fontSize: 20, fontWeight: 800, color: '#F1F5F9', lineHeight: 1 }}>{value}</p>
-        <p style={{ fontSize: 11, color: '#64748B', marginTop: 3 }}>{label}</p>
-        {sub && <p style={{ fontSize: 10, color: '#475569', marginTop: 1 }}>{sub}</p>}
+        <p style={{ fontSize: 20, fontWeight: 800, color: 'var(--theme-text-primary)', lineHeight: 1 }}>{value}</p>
+        <p style={{ fontSize: 11, color: 'var(--theme-text-muted)', marginTop: 3 }}>{label}</p>
+        {sub && <p style={{ fontSize: 10, color: 'var(--theme-text-muted)', marginTop: 1 }}>{sub}</p>}
       </div>
     </div>
   );
@@ -88,7 +88,7 @@ function StatCard({ label, value, sub, icon: Icon, color, accent }: {
 
 // ─── Daily chart (simple bar) ────────────────────────────────────────────────
 function DailyChart({ daily }: { daily: { day: string; tokens: number; calls: number }[] }) {
-  if (!daily.length) return <p style={{ color: '#475569', fontSize: 12 }}>Chưa có dữ liệu</p>;
+  if (!daily.length) return <p style={{ color: 'var(--theme-text-muted)', fontSize: 12 }}>Chưa có dữ liệu</p>;
 
   const maxTokens = Math.max(...daily.map(d => d.tokens), 1);
 
@@ -105,7 +105,7 @@ function DailyChart({ daily }: { daily: { day: string; tokens: number; calls: nu
                 width: '100%', maxWidth: 16, height: h, borderRadius: 3,
                 background: 'linear-gradient(180deg, #6366F1, #818CF8)',
               }} />
-              <span style={{ fontSize: 8, color: '#475569', marginTop: 3, whiteSpace: 'nowrap' }}>{dateStr}</span>
+              <span style={{ fontSize: 8, color: 'var(--theme-text-muted)', marginTop: 3, whiteSpace: 'nowrap' }}>{dateStr}</span>
             </div>
           );
         })}
@@ -123,8 +123,8 @@ export default function AdminTokenUsagePage() {
     <div style={{ width: '100%', maxWidth: '100%' }}>
       {/* Header */}
       <div style={{ marginBottom: 24 }}>
-        <h1 style={{ fontSize: 20, fontWeight: 800, color: '#F1F5F9', marginBottom: 2 }}>Token Usage — Gemini AI</h1>
-        <p style={{ fontSize: 12, color: '#64748B' }}>Theo dõi lượng token đã sử dụng cho các tính năng AI</p>
+        <h1 style={{ fontSize: 20, fontWeight: 800, color: 'var(--theme-text-primary)', marginBottom: 2 }}>Token Usage — Gemini AI</h1>
+        <p style={{ fontSize: 12, color: 'var(--theme-text-muted)' }}>Theo dõi lượng token đã sử dụng cho các tính năng AI</p>
       </div>
 
       {isLoading ? (
@@ -132,7 +132,7 @@ export default function AdminTokenUsagePage() {
           <span style={{ color: '#6366F1' }}><IconLoader size={28} /></span>
         </div>
       ) : !data ? (
-        <p style={{ color: '#64748B' }}>Không tải được dữ liệu.</p>
+        <p style={{ color: 'var(--theme-text-muted)' }}>Không tải được dữ liệu.</p>
       ) : (
         <>
           {/* ── Grand totals ──────────────────────────────────── */}
@@ -167,36 +167,36 @@ export default function AdminTokenUsagePage() {
           {/* ── Prompt vs Candidates breakdown ────────────────── */}
           <div style={{
             marginTop: 12,
-            backgroundColor: '#1E293B', borderRadius: 12, border: '1px solid #334155',
+            backgroundColor: 'var(--theme-bg-card)', borderRadius: 12, border: '1px solid var(--theme-border)',
             padding: '14px 18px', display: 'flex', gap: 24, flexWrap: 'wrap',
           }}>
             <div>
-              <p style={{ fontSize: 10, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Prompt Tokens</p>
-              <p style={{ fontSize: 16, fontWeight: 700, color: '#F1F5F9' }}>{fmtNum(data.totals.allTime.promptTokens)}</p>
+              <p style={{ fontSize: 10, color: 'var(--theme-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Prompt Tokens</p>
+              <p style={{ fontSize: 16, fontWeight: 700, color: 'var(--theme-text-primary)' }}>{fmtNum(data.totals.allTime.promptTokens)}</p>
             </div>
             <div>
-              <p style={{ fontSize: 10, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Output Tokens</p>
-              <p style={{ fontSize: 16, fontWeight: 700, color: '#F1F5F9' }}>{fmtNum(data.totals.allTime.candidatesTokens)}</p>
+              <p style={{ fontSize: 10, color: 'var(--theme-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Output Tokens</p>
+              <p style={{ fontSize: 16, fontWeight: 700, color: 'var(--theme-text-primary)' }}>{fmtNum(data.totals.allTime.candidatesTokens)}</p>
             </div>
             <div>
-              <p style={{ fontSize: 10, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Tổng</p>
-              <p style={{ fontSize: 16, fontWeight: 700, color: '#F1F5F9' }}>{fmtNum(data.totals.allTime.totalTokens)}</p>
+              <p style={{ fontSize: 10, color: 'var(--theme-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Tổng</p>
+              <p style={{ fontSize: 16, fontWeight: 700, color: 'var(--theme-text-primary)' }}>{fmtNum(data.totals.allTime.totalTokens)}</p>
             </div>
           </div>
 
           {/* ── By Feature ────────────────────────────────────── */}
           <SL>Theo tính năng</SL>
-          <div style={{ backgroundColor: '#1E293B', borderRadius: 12, border: '1px solid #334155', padding: '20px 22px' }}>
+          <div style={{ backgroundColor: 'var(--theme-bg-card)', borderRadius: 12, border: '1px solid var(--theme-border)', padding: '20px 22px' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-              <p style={{ fontSize: 12, color: '#94A3B8', fontWeight: 600 }}>Sắp xếp theo</p>
+              <p style={{ fontSize: 12, color: 'var(--theme-text-secondary)', fontWeight: 600 }}>Sắp xếp theo</p>
               <div style={{ display: 'flex', gap: 4 }}>
                 {([['tokens', 'Tokens'], ['calls', 'Lần gọi']] as ['tokens' | 'calls', string][]).map(([k, l]) => (
                   <button key={k} onClick={() => setFeatureSort(k)}
                     style={{
                       padding: '3px 10px', borderRadius: 6, fontSize: 11, fontWeight: 600, cursor: 'pointer',
-                      border: featureSort === k ? '1px solid #6366F1' : '1px solid #334155',
+                      border: featureSort === k ? '1px solid #6366F1' : '1px solid var(--theme-border)',
                       backgroundColor: featureSort === k ? 'rgba(99,102,241,.15)' : 'transparent',
-                      color: featureSort === k ? '#818CF8' : '#64748B',
+                      color: featureSort === k ? '#818CF8' : 'var(--theme-text-muted)',
                     }}>
                     {l}
                   </button>
@@ -217,8 +217,8 @@ export default function AdminTokenUsagePage() {
                     const val = featureSort === 'tokens' ? f.totalTokens : f.calls;
                     return (
                       <div key={f.feature} style={{ display: 'grid', gridTemplateColumns: '120px 1fr 80px 80px', alignItems: 'center', gap: 10 }}>
-                        <span style={{ fontSize: 12, color: '#94A3B8', fontWeight: 500 }}>{meta.label}</span>
-                        <div style={{ height: 7, borderRadius: 4, backgroundColor: '#0F172A', overflow: 'hidden' }}>
+                        <span style={{ fontSize: 12, color: 'var(--theme-text-secondary)', fontWeight: 500 }}>{meta.label}</span>
+                        <div style={{ height: 7, borderRadius: 4, backgroundColor: 'var(--theme-bg-body)', overflow: 'hidden' }}>
                           <div style={{
                             height: '100%',
                             width: `${val > 0 ? Math.max(Math.round((val / maxVal) * 100), 2) : 0}%`,
@@ -227,10 +227,10 @@ export default function AdminTokenUsagePage() {
                             transition: 'width 0.5s ease',
                           }} />
                         </div>
-                        <p style={{ fontSize: 12, fontWeight: 700, color: '#F1F5F9', textAlign: 'right' }}>
+                        <p style={{ fontSize: 12, fontWeight: 700, color: 'var(--theme-text-primary)', textAlign: 'right' }}>
                           {fmtNum(f.totalTokens)}
                         </p>
-                        <p style={{ fontSize: 11, color: '#64748B', textAlign: 'right' }}>
+                        <p style={{ fontSize: 11, color: 'var(--theme-text-muted)', textAlign: 'right' }}>
                           {f.calls.toLocaleString()} calls
                         </p>
                       </div>
@@ -243,41 +243,41 @@ export default function AdminTokenUsagePage() {
 
           {/* ── Daily chart ───────────────────────────────────── */}
           <SL>Biểu đồ 30 ngày gần nhất</SL>
-          <div style={{ backgroundColor: '#1E293B', borderRadius: 12, border: '1px solid #334155', padding: '20px 22px' }}>
+          <div style={{ backgroundColor: 'var(--theme-bg-card)', borderRadius: 12, border: '1px solid var(--theme-border)', padding: '20px 22px' }}>
             <DailyChart daily={data.daily} />
           </div>
 
           {/* ── Top users ─────────────────────────────────────── */}
           <SL>Top người dùng sử dụng nhiều nhất</SL>
-          <div style={{ backgroundColor: '#1E293B', borderRadius: 12, border: '1px solid #334155', overflow: 'hidden' }}>
+          <div style={{ backgroundColor: 'var(--theme-bg-card)', borderRadius: 12, border: '1px solid var(--theme-border)', overflow: 'hidden' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
-                <tr style={{ borderBottom: '1px solid #334155' }}>
-                  <th style={{ padding: '10px 16px', fontSize: 11, fontWeight: 600, color: '#64748B', textAlign: 'left' }}>#</th>
-                  <th style={{ padding: '10px 16px', fontSize: 11, fontWeight: 600, color: '#64748B', textAlign: 'left' }}>Người dùng</th>
-                  <th style={{ padding: '10px 16px', fontSize: 11, fontWeight: 600, color: '#64748B', textAlign: 'right' }}>Lần gọi</th>
-                  <th style={{ padding: '10px 16px', fontSize: 11, fontWeight: 600, color: '#64748B', textAlign: 'right' }}>Tokens</th>
+                <tr style={{ borderBottom: '1px solid var(--theme-border)' }}>
+                  <th style={{ padding: '10px 16px', fontSize: 11, fontWeight: 600, color: 'var(--theme-text-muted)', textAlign: 'left' }}>#</th>
+                  <th style={{ padding: '10px 16px', fontSize: 11, fontWeight: 600, color: 'var(--theme-text-muted)', textAlign: 'left' }}>Người dùng</th>
+                  <th style={{ padding: '10px 16px', fontSize: 11, fontWeight: 600, color: 'var(--theme-text-muted)', textAlign: 'right' }}>Lần gọi</th>
+                  <th style={{ padding: '10px 16px', fontSize: 11, fontWeight: 600, color: 'var(--theme-text-muted)', textAlign: 'right' }}>Tokens</th>
                 </tr>
               </thead>
               <tbody>
                 {data.topUsers.length === 0 ? (
                   <tr>
-                    <td colSpan={4} style={{ padding: '20px 16px', fontSize: 12, color: '#475569', textAlign: 'center' }}>
+                    <td colSpan={4} style={{ padding: '20px 16px', fontSize: 12, color: 'var(--theme-text-muted)', textAlign: 'center' }}>
                       Chưa có dữ liệu
                     </td>
                   </tr>
                 ) : (
                   data.topUsers.map((u, i) => (
-                    <tr key={u.userId} style={{ borderBottom: i < data.topUsers.length - 1 ? '1px solid #1E293B' : 'none' }}>
-                      <td style={{ padding: '10px 16px', fontSize: 12, color: '#475569', fontWeight: 700 }}>{i + 1}</td>
+                    <tr key={u.userId} style={{ borderBottom: i < data.topUsers.length - 1 ? '1px solid var(--theme-border)' : 'none' }}>
+                      <td style={{ padding: '10px 16px', fontSize: 12, color: 'var(--theme-text-muted)', fontWeight: 700 }}>{i + 1}</td>
                       <td style={{ padding: '10px 16px' }}>
-                        <p style={{ fontSize: 13, color: '#F1F5F9', fontWeight: 500 }}>{u.name || '(no name)'}</p>
-                        <p style={{ fontSize: 11, color: '#64748B' }}>{u.email || u.userId}</p>
+                        <p style={{ fontSize: 13, color: 'var(--theme-text-primary)', fontWeight: 500 }}>{u.name || '(no name)'}</p>
+                        <p style={{ fontSize: 11, color: 'var(--theme-text-muted)' }}>{u.email || u.userId}</p>
                       </td>
-                      <td style={{ padding: '10px 16px', fontSize: 13, color: '#94A3B8', textAlign: 'right', fontWeight: 600 }}>
+                      <td style={{ padding: '10px 16px', fontSize: 13, color: 'var(--theme-text-secondary)', textAlign: 'right', fontWeight: 600 }}>
                         {u.calls.toLocaleString()}
                       </td>
-                      <td style={{ padding: '10px 16px', fontSize: 13, color: '#F1F5F9', textAlign: 'right', fontWeight: 700 }}>
+                      <td style={{ padding: '10px 16px', fontSize: 13, color: 'var(--theme-text-primary)', textAlign: 'right', fontWeight: 700 }}>
                         {fmtNum(u.totalTokens)}
                       </td>
                     </tr>

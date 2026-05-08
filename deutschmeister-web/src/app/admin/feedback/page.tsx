@@ -29,7 +29,7 @@ const STATUS_COLORS: Record<string, { bg: string; color: string; border: string 
 const TYPE_COLORS: Record<string, { bg: string; color: string; border: string }> = {
   bug:        { bg: 'rgba(239,68,68,0.12)',  color: '#FCA5A5', border: 'rgba(239,68,68,0.25)' },
   suggestion: { bg: 'rgba(99,102,241,0.12)', color: '#A5B4FC', border: 'rgba(99,102,241,0.25)' },
-  other:      { bg: 'rgba(100,116,139,0.12)', color: '#94A3B8', border: 'rgba(100,116,139,0.25)' },
+  other:      { bg: 'rgba(100,116,139,0.12)', color: 'var(--theme-text-secondary)', border: 'rgba(100,116,139,0.25)' },
 };
 
 const TYPE_LABELS: Record<string, string> = { bug: 'Bug', suggestion: 'Gợi ý', other: 'Khác' };
@@ -84,7 +84,7 @@ export default function AdminFeedbackPage() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
 
-  const { data, isLoading } = useAdminFeedback({
+  const { data, isLoading, isError, error, refetch } = useAdminFeedback({
     status: statusFilter || undefined,
     type: typeFilter || undefined,
     page,
@@ -94,9 +94,11 @@ export default function AdminFeedbackPage() {
   const handleStatusChange = (id: string, status: 'new' | 'reviewed' | 'resolved') => {
     updateStatus.mutate({ id, status });
   };
+  // Row id currently being mutated (for per-row pending UI).
+  const pendingRowId = updateStatus.isPending ? updateStatus.variables?.id : undefined;
 
   const selectStyle: React.CSSProperties = {
-    backgroundColor: '#0F172A', color: '#F1F5F9', border: '1px solid #334155',
+    backgroundColor: 'var(--theme-bg-body)', color: 'var(--theme-text-primary)', border: '1px solid var(--theme-border)',
     borderRadius: 8, padding: '7px 10px', fontSize: 12, outline: 'none', cursor: 'pointer',
   };
 
@@ -108,8 +110,8 @@ export default function AdminFeedbackPage() {
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
         <div>
-          <h1 style={{ fontSize: 20, fontWeight: 800, color: '#F1F5F9', margin: 0 }}>Phản hồi người dùng</h1>
-          <p style={{ fontSize: 13, color: '#64748B', margin: '4px 0 0' }}>
+          <h1 style={{ fontSize: 20, fontWeight: 800, color: 'var(--theme-text-primary)', margin: 0 }}>Phản hồi người dùng</h1>
+          <p style={{ fontSize: 13, color: 'var(--theme-text-muted)', margin: '4px 0 0' }}>
             {data ? `${data.total} phản hồi` : 'Đang tải...'}
           </p>
         </div>
@@ -126,12 +128,12 @@ export default function AdminFeedbackPage() {
       </div>
 
       {/* Table */}
-      <div style={{ borderRadius: 12, border: '1px solid #334155', overflow: 'hidden' }}>
+      <div style={{ borderRadius: 12, border: '1px solid var(--theme-border)', overflow: 'hidden' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
           <thead>
-            <tr style={{ backgroundColor: '#1E293B' }}>
+            <tr style={{ backgroundColor: 'var(--theme-bg-card)' }}>
               {['Loại', 'Nội dung', 'Người gửi', 'Trạng thái', 'Ngày gửi'].map(h => (
-                <th key={h} style={{ padding: '10px 14px', textAlign: 'left', color: '#94A3B8', fontWeight: 700, fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.06em', borderBottom: '1px solid #334155' }}>
+                <th key={h} style={{ padding: '10px 14px', textAlign: 'left', color: 'var(--theme-text-secondary)', fontWeight: 700, fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.06em', borderBottom: '1px solid var(--theme-border)' }}>
                   {h}
                 </th>
               ))}
@@ -139,9 +141,20 @@ export default function AdminFeedbackPage() {
           </thead>
           <tbody>
             {isLoading ? (
-              <tr><td colSpan={5} style={{ padding: 40, textAlign: 'center', color: '#64748B' }}>Đang tải...</td></tr>
+              <tr><td colSpan={5} style={{ padding: 40, textAlign: 'center', color: 'var(--theme-text-muted)' }}>Đang tải...</td></tr>
+            ) : isError ? (
+              <tr>
+                <td colSpan={5} style={{ padding: 40, textAlign: 'center' }}>
+                  <div style={{ color: '#F87171', fontSize: 13, marginBottom: 8 }}>Không tải được phản hồi.</div>
+                  <div style={{ color: 'var(--theme-text-muted)', fontSize: 12, marginBottom: 12 }}>{(error as any)?.message ?? 'Lỗi không xác định.'}</div>
+                  <button onClick={() => refetch()}
+                    style={{ padding: '6px 14px', borderRadius: 6, border: '1px solid var(--theme-border)', backgroundColor: 'var(--theme-bg-body)', color: 'var(--theme-text-secondary)', fontSize: 12, cursor: 'pointer' }}>
+                    Thử lại
+                  </button>
+                </td>
+              </tr>
             ) : !data?.items.length ? (
-              <tr><td colSpan={5} style={{ padding: 40, textAlign: 'center', color: '#64748B' }}>Không có phản hồi nào</td></tr>
+              <tr><td colSpan={5} style={{ padding: 40, textAlign: 'center', color: 'var(--theme-text-muted)' }}>Không có phản hồi nào</td></tr>
             ) : data.items.map((item) => (
               <FeedbackRow
                 key={item.id}
@@ -150,6 +163,7 @@ export default function AdminFeedbackPage() {
                 onToggle={() => setExpandedId(expandedId === item.id ? null : item.id)}
                 onStatusChange={handleStatusChange}
                 onImageClick={setLightboxSrc}
+                isPending={pendingRowId === item.id}
               />
             ))}
           </tbody>
@@ -162,17 +176,17 @@ export default function AdminFeedbackPage() {
           <button
             onClick={() => setPage(p => Math.max(1, p - 1))}
             disabled={page <= 1}
-            style={{ padding: '7px 14px', borderRadius: 8, border: '1px solid #334155', background: '#1E293B', color: page <= 1 ? '#475569' : '#F1F5F9', fontSize: 12, cursor: page <= 1 ? 'not-allowed' : 'pointer' }}
+            style={{ padding: '7px 14px', borderRadius: 8, border: '1px solid var(--theme-border)', background: 'var(--theme-bg-card)', color: page <= 1 ? 'var(--theme-text-muted)' : 'var(--theme-text-primary)', fontSize: 12, cursor: page <= 1 ? 'not-allowed' : 'pointer' }}
           >
             Trước
           </button>
-          <span style={{ display: 'flex', alignItems: 'center', fontSize: 12, color: '#94A3B8' }}>
+          <span style={{ display: 'flex', alignItems: 'center', fontSize: 12, color: 'var(--theme-text-secondary)' }}>
             {page} / {data.totalPages}
           </span>
           <button
             onClick={() => setPage(p => Math.min(data.totalPages, p + 1))}
             disabled={page >= data.totalPages}
-            style={{ padding: '7px 14px', borderRadius: 8, border: '1px solid #334155', background: '#1E293B', color: page >= data.totalPages ? '#475569' : '#F1F5F9', fontSize: 12, cursor: page >= data.totalPages ? 'not-allowed' : 'pointer' }}
+            style={{ padding: '7px 14px', borderRadius: 8, border: '1px solid var(--theme-border)', background: 'var(--theme-bg-card)', color: page >= data.totalPages ? 'var(--theme-text-muted)' : 'var(--theme-text-primary)', fontSize: 12, cursor: page >= data.totalPages ? 'not-allowed' : 'pointer' }}
           >
             Sau
           </button>
@@ -185,13 +199,14 @@ export default function AdminFeedbackPage() {
 // ─── Row component ──────────────────────────────────────────────────────────
 
 function FeedbackRow({
-  item, expanded, onToggle, onStatusChange, onImageClick,
+  item, expanded, onToggle, onStatusChange, onImageClick, isPending,
 }: {
   item: AdminFeedbackItem;
   expanded: boolean;
   onToggle: () => void;
   onStatusChange: (id: string, status: 'new' | 'reviewed' | 'resolved') => void;
   onImageClick: (src: string) => void;
+  isPending: boolean;
 }) {
   const typeStyle = TYPE_COLORS[item.type] ?? TYPE_COLORS.other!;
   const statusStyle = STATUS_COLORS[item.status] ?? STATUS_COLORS.new!;
@@ -205,14 +220,14 @@ function FeedbackRow({
         style={{ cursor: 'pointer', backgroundColor: expanded ? 'rgba(99,102,241,0.04)' : 'transparent', transition: 'background 0.15s' }}
       >
         {/* Type badge */}
-        <td style={{ padding: '10px 14px', borderBottom: '1px solid #1E293B' }}>
+        <td style={{ padding: '10px 14px', borderBottom: '1px solid var(--theme-border)' }}>
           <span style={{ display: 'inline-block', padding: '3px 10px', borderRadius: 20, fontSize: 10, fontWeight: 700, background: typeStyle.bg, color: typeStyle.color, border: `1px solid ${typeStyle.border}` }}>
             {TYPE_LABELS[item.type] ?? item.type}
           </span>
         </td>
 
         {/* Content preview */}
-        <td style={{ padding: '10px 14px', borderBottom: '1px solid #1E293B', color: '#F1F5F9', maxWidth: 400 }}>
+        <td style={{ padding: '10px 14px', borderBottom: '1px solid var(--theme-border)', color: 'var(--theme-text-primary)', maxWidth: 400 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>
               {item.content}
@@ -230,19 +245,19 @@ function FeedbackRow({
         </td>
 
         {/* User */}
-        <td style={{ padding: '10px 14px', borderBottom: '1px solid #1E293B', color: '#94A3B8', fontSize: 12 }}>
-          {item.user ? (item.user.name || item.user.email) : <span style={{ color: '#475569', fontStyle: 'italic' }}>Ẩn danh</span>}
+        <td style={{ padding: '10px 14px', borderBottom: '1px solid var(--theme-border)', color: 'var(--theme-text-secondary)', fontSize: 12 }}>
+          {item.user ? (item.user.name || item.user.email) : <span style={{ color: 'var(--theme-text-muted)', fontStyle: 'italic' }}>Ẩn danh</span>}
         </td>
 
         {/* Status */}
-        <td style={{ padding: '10px 14px', borderBottom: '1px solid #1E293B' }}>
+        <td style={{ padding: '10px 14px', borderBottom: '1px solid var(--theme-border)' }}>
           <span style={{ display: 'inline-block', padding: '3px 10px', borderRadius: 20, fontSize: 10, fontWeight: 700, background: statusStyle.bg, color: statusStyle.color, border: `1px solid ${statusStyle.border}` }}>
             {STATUS_LABELS[item.status] ?? item.status}
           </span>
         </td>
 
         {/* Date */}
-        <td style={{ padding: '10px 14px', borderBottom: '1px solid #1E293B', color: '#64748B', fontSize: 12, whiteSpace: 'nowrap' }}>
+        <td style={{ padding: '10px 14px', borderBottom: '1px solid var(--theme-border)', color: 'var(--theme-text-muted)', fontSize: 12, whiteSpace: 'nowrap' }}>
           {date.toLocaleDateString('vi-VN')} {date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
         </td>
       </tr>
@@ -250,17 +265,17 @@ function FeedbackRow({
       {/* Expanded detail row */}
       {expanded && (
         <tr>
-          <td colSpan={5} style={{ padding: '0 14px 16px', borderBottom: '1px solid #334155', backgroundColor: 'rgba(99,102,241,0.03)' }}>
-            <div style={{ padding: '16px', borderRadius: 10, background: '#0F172A', border: '1px solid #1E293B', marginTop: 8 }}>
+          <td colSpan={5} style={{ padding: '0 14px 16px', borderBottom: '1px solid var(--theme-border)', backgroundColor: 'rgba(99,102,241,0.03)' }}>
+            <div style={{ padding: '16px', borderRadius: 10, background: 'var(--theme-bg-body)', border: '1px solid var(--theme-border)', marginTop: 8 }}>
               {/* Full content */}
-              <p style={{ color: '#F1F5F9', fontSize: 13, lineHeight: 1.7, margin: '0 0 12px', whiteSpace: 'pre-wrap' }}>
+              <p style={{ color: 'var(--theme-text-primary)', fontSize: 13, lineHeight: 1.7, margin: '0 0 12px', whiteSpace: 'pre-wrap' }}>
                 {item.content}
               </p>
 
               {/* Images */}
               {hasImages && (
                 <div style={{ marginBottom: 14 }}>
-                  <p style={{ fontSize: 11, fontWeight: 600, color: '#64748B', marginBottom: 8 }}>
+                  <p style={{ fontSize: 11, fontWeight: 600, color: 'var(--theme-text-muted)', marginBottom: 8 }}>
                     Ảnh đính kèm ({item.imageUrls.length})
                   </p>
                   <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
@@ -273,11 +288,11 @@ function FeedbackRow({
                         onClick={(e) => { e.stopPropagation(); onImageClick(src); }}
                         style={{
                           width: 140, height: 100, objectFit: 'cover',
-                          borderRadius: 8, border: '1px solid #334155',
+                          borderRadius: 8, border: '1px solid var(--theme-border)',
                           cursor: 'zoom-in', transition: 'border-color 0.15s',
                         }}
                         onMouseEnter={e => (e.currentTarget.style.borderColor = '#6366F1')}
-                        onMouseLeave={e => (e.currentTarget.style.borderColor = '#334155')}
+                        onMouseLeave={e => (e.currentTarget.style.borderColor = 'var(--theme-border)')}
                       />
                     ))}
                   </div>
@@ -285,9 +300,9 @@ function FeedbackRow({
               )}
 
               {/* Meta */}
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, fontSize: 12, color: '#64748B', marginBottom: 16 }}>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, fontSize: 12, color: 'var(--theme-text-muted)', marginBottom: 16 }}>
                 {item.user && (
-                  <span>Email: <span style={{ color: '#94A3B8' }}>{item.user.email}</span></span>
+                  <span>Email: <span style={{ color: 'var(--theme-text-secondary)' }}>{item.user.email}</span></span>
                 )}
                 {item.pageUrl && (
                   <span>Trang: <span style={{ color: '#818CF8' }}>{item.pageUrl}</span></span>
@@ -299,16 +314,19 @@ function FeedbackRow({
                 {(['new', 'reviewed', 'resolved'] as const).map(s => {
                   const active = item.status === s;
                   const sc = STATUS_COLORS[s]!;
+                  const disabled = active || isPending;
                   return (
                     <button
                       key={s}
-                      onClick={(e) => { e.stopPropagation(); if (!active) onStatusChange(item.id, s); }}
+                      disabled={disabled}
+                      onClick={(e) => { e.stopPropagation(); if (!disabled) onStatusChange(item.id, s); }}
                       style={{
-                        padding: '5px 14px', borderRadius: 6, fontSize: 11, fontWeight: 600, cursor: active ? 'default' : 'pointer',
-                        border: `1px solid ${active ? sc.border : '#334155'}`,
+                        padding: '5px 14px', borderRadius: 6, fontSize: 11, fontWeight: 600,
+                        cursor: disabled ? (active ? 'default' : 'wait') : 'pointer',
+                        border: `1px solid ${active ? sc.border : 'var(--theme-border)'}`,
                         background: active ? sc.bg : 'transparent',
-                        color: active ? sc.color : '#64748B',
-                        opacity: active ? 1 : 0.7,
+                        color: active ? sc.color : 'var(--theme-text-muted)',
+                        opacity: isPending ? 0.4 : (active ? 1 : 0.7),
                         transition: 'all 0.15s',
                       }}
                     >

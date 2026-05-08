@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createTopic } from '@/lib/api/topics';
+import { getApiErrorMessage } from '@/lib/api/client';
 
 function IconArrowLeft({ size = 16 }: { size?: number }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}><line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" /></svg>;
@@ -14,10 +15,10 @@ function IconLoader({ size = 16 }: { size?: number }) {
 }
 
 const inputStyle = {
-  width: '100%', padding: '8px 10px', backgroundColor: '#0F172A', border: '1px solid #334155',
-  borderRadius: 8, color: '#F1F5F9', fontSize: 13, outline: 'none', boxSizing: 'border-box' as const,
+  width: '100%', padding: '8px 10px', backgroundColor: 'var(--theme-bg-body)', border: '1px solid var(--theme-border)',
+  borderRadius: 8, color: 'var(--theme-text-primary)', fontSize: 13, outline: 'none', boxSizing: 'border-box' as const,
 };
-const labelStyle = { fontSize: 11, color: '#64748B', display: 'block', marginBottom: 4 } as const;
+const labelStyle = { fontSize: 11, color: 'var(--theme-text-muted)', display: 'block', marginBottom: 4 } as const;
 
 interface TopicForm {
   slug: string;
@@ -65,7 +66,7 @@ export default function AdminTopicNewPage() {
       queryClient.invalidateQueries({ queryKey: ['admin-topics'] });
       router.push(`/admin/topics/${topic.id}`);
     },
-    onError: () => setError('Lỗi khi tạo topic. Slug có thể đã tồn tại.'),
+    onError: (err) => setError(getApiErrorMessage(err, 'Lỗi khi tạo topic. Slug có thể đã tồn tại.')),
   });
 
   function set(key: keyof TopicForm, value: any) {
@@ -82,12 +83,12 @@ export default function AdminTopicNewPage() {
 
   return (
     <div style={{ maxWidth: 720 }}>
-      <Link href="/admin/topics" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: '#64748B', fontSize: 12, textDecoration: 'none', marginBottom: 20 }}>
+      <Link href="/admin/topics" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: 'var(--theme-text-muted)', fontSize: 12, textDecoration: 'none', marginBottom: 20 }}>
         <IconArrowLeft size={14} /> Danh sách Topics
       </Link>
-      <h1 style={{ fontSize: 20, fontWeight: 800, color: '#F1F5F9', marginBottom: 20 }}>Tạo Topic mới</h1>
+      <h1 style={{ fontSize: 20, fontWeight: 800, color: 'var(--theme-text-primary)', marginBottom: 20 }}>Tạo Topic mới</h1>
 
-      <div style={{ backgroundColor: '#1E293B', borderRadius: 12, border: '1px solid #334155', padding: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <div style={{ backgroundColor: 'var(--theme-bg-card)', borderRadius: 12, border: '1px solid var(--theme-border)', padding: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
         {/* slug + level + order */}
         <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: 12 }}>
           <div>
@@ -160,7 +161,7 @@ export default function AdminTopicNewPage() {
         {error && <p style={{ color: '#EF4444', fontSize: 13 }}>{error}</p>}
 
         <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', paddingTop: 4 }}>
-          <Link href="/admin/topics" style={{ padding: '9px 18px', borderRadius: 8, border: '1px solid #334155', color: '#94A3B8', fontSize: 13, textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}>Hủy</Link>
+          <Link href="/admin/topics" style={{ padding: '9px 18px', borderRadius: 8, border: '1px solid var(--theme-border)', color: 'var(--theme-text-secondary)', fontSize: 13, textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}>Hủy</Link>
           <button onClick={handleSubmit} disabled={create.isPending}
             style={{ padding: '9px 18px', borderRadius: 8, border: 'none', backgroundColor: '#6366F1', color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
             {create.isPending && <IconLoader size={14} />} Tạo Topic

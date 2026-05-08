@@ -19,7 +19,7 @@ const PAYMENT_STATUS_LABELS: Record<string, string> = {
   rejected: 'Từ chối',
 };
 const PLAN_COLORS: Record<string, string> = {
-  free: '#64748B',
+  free: 'var(--theme-text-muted)',
   premium: '#6366F1',
   lifetime: '#F59E0B',
 };
@@ -85,18 +85,18 @@ export default function AdminSubscriptionsPage() {
   return (
     <div>
       <div style={{ marginBottom: 20 }}>
-        <h1 style={{ fontSize: 20, fontWeight: 800, color: '#F1F5F9', marginBottom: 2 }}>Gói đăng ký</h1>
-        <p style={{ fontSize: 12, color: '#64748B' }}>Quản lý thanh toán và gói Premium của người dùng</p>
+        <h1 style={{ fontSize: 20, fontWeight: 800, color: 'var(--theme-text-primary)', marginBottom: 2 }}>Gói đăng ký</h1>
+        <p style={{ fontSize: 12, color: 'var(--theme-text-muted)' }}>Quản lý thanh toán và gói Premium của người dùng</p>
       </div>
 
       {/* Tabs */}
-      <div style={{ display: 'flex', gap: 4, marginBottom: 20, borderBottom: '1px solid #334155' }}>
+      <div style={{ display: 'flex', gap: 4, marginBottom: 20, borderBottom: '1px solid var(--theme-border)' }}>
         {([['payments', 'Thanh toán'], ['subs', 'Đăng ký']] as const).map(([key, label]) => (
           <button key={key} onClick={() => setTab(key)}
             style={{
               padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer',
               border: 'none', background: 'none',
-              color: tab === key ? '#818CF8' : '#64748B',
+              color: tab === key ? '#818CF8' : 'var(--theme-text-muted)',
               borderBottom: tab === key ? '2px solid #6366F1' : '2px solid transparent',
               marginBottom: -1,
             }}>
@@ -113,9 +113,9 @@ export default function AdminSubscriptionsPage() {
               <button key={s} onClick={() => { setStatusFilter(s); setPaymentPage(1); }}
                 style={{
                   padding: '0 12px', height: 30, borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: 'pointer',
-                  border: statusFilter === s ? '1px solid #6366F1' : '1px solid #334155',
-                  backgroundColor: statusFilter === s ? 'rgba(99,102,241,.15)' : '#1E293B',
-                  color: statusFilter === s ? '#818CF8' : '#64748B',
+                  border: statusFilter === s ? '1px solid #6366F1' : '1px solid var(--theme-border)',
+                  backgroundColor: statusFilter === s ? 'rgba(99,102,241,.15)' : 'var(--theme-bg-card)',
+                  color: statusFilter === s ? '#818CF8' : 'var(--theme-text-muted)',
                 }}>
                 {s ? PAYMENT_STATUS_LABELS[s] : 'Tất cả'}
               </button>
@@ -125,28 +125,28 @@ export default function AdminSubscriptionsPage() {
           {paymentsLoading ? (
             <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0', color: '#6366F1' }}><IconLoader size={24} /></div>
           ) : !payments?.items.length ? (
-            <div style={{ textAlign: 'center', padding: '40px 0', color: '#475569', fontSize: 13 }}>Chưa có thanh toán nào.</div>
+            <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--theme-text-muted)', fontSize: 13 }}>Chưa có thanh toán nào.</div>
           ) : (
-            <div style={{ backgroundColor: '#1E293B', borderRadius: 12, border: '1px solid #334155', overflow: 'hidden' }}>
+            <div style={{ backgroundColor: 'var(--theme-bg-card)', borderRadius: 12, border: '1px solid var(--theme-border)', overflow: 'hidden' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
                 <thead>
-                  <tr style={{ borderBottom: '1px solid #334155' }}>
+                  <tr style={{ borderBottom: '1px solid var(--theme-border)' }}>
                     {['Người dùng', 'Gói', 'Chu kỳ', 'Số tiền', 'Ngày tạo', 'Trạng thái', ''].map(h => (
-                      <th key={h} style={{ padding: '9px 14px', textAlign: 'left', fontSize: 11, fontWeight: 700, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>{h}</th>
+                      <th key={h} style={{ padding: '9px 14px', textAlign: 'left', fontSize: 11, fontWeight: 700, color: 'var(--theme-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>{h}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
                   {payments.items.map((p: AdminPayment) => (
-                    <tr key={p.id} style={{ borderTop: '1px solid #334155' }}>
+                    <tr key={p.id} style={{ borderTop: '1px solid var(--theme-border)' }}>
                       <td style={{ padding: '10px 14px' }}>
-                        <p style={{ fontWeight: 600, color: '#F1F5F9' }}>{p.user.name || '—'}</p>
-                        <p style={{ fontSize: 11, color: '#475569' }}>{p.user.email}</p>
+                        <p style={{ fontWeight: 600, color: 'var(--theme-text-primary)' }}>{p.user.name || '—'}</p>
+                        <p style={{ fontSize: 11, color: 'var(--theme-text-muted)' }}>{p.user.email}</p>
                       </td>
                       <td style={{ padding: '10px 14px', color: '#818CF8', fontWeight: 600 }}>{p.plan}</td>
-                      <td style={{ padding: '10px 14px', color: '#94A3B8' }}>{p.period === 'monthly' ? 'Tháng' : 'Năm'}</td>
-                      <td style={{ padding: '10px 14px', color: '#F1F5F9', fontWeight: 600 }}>{p.amount.toLocaleString('vi-VN')}đ</td>
-                      <td style={{ padding: '10px 14px', color: '#64748B', whiteSpace: 'nowrap' }}>{new Date(p.createdAt).toLocaleDateString('vi-VN')}</td>
+                      <td style={{ padding: '10px 14px', color: 'var(--theme-text-secondary)' }}>{p.period === 'monthly' ? 'Tháng' : 'Năm'}</td>
+                      <td style={{ padding: '10px 14px', color: 'var(--theme-text-primary)', fontWeight: 600 }}>{p.amount.toLocaleString('vi-VN')}đ</td>
+                      <td style={{ padding: '10px 14px', color: 'var(--theme-text-muted)', whiteSpace: 'nowrap' }}>{new Date(p.createdAt).toLocaleDateString('vi-VN')}</td>
                       <td style={{ padding: '10px 14px' }}>
                         <span style={{
                           fontSize: 11, fontWeight: 700, padding: '2px 7px', borderRadius: 6,
@@ -181,7 +181,7 @@ export default function AdminSubscriptionsPage() {
             <div style={{ display: 'flex', justifyContent: 'center', gap: 6, marginTop: 16 }}>
               {Array.from({ length: payments.totalPages }, (_, i) => i + 1).map(p => (
                 <button key={p} onClick={() => setPaymentPage(p)}
-                  style={{ width: 32, height: 32, borderRadius: 8, border: paymentPage === p ? '1px solid #6366F1' : '1px solid #334155', backgroundColor: paymentPage === p ? 'rgba(99,102,241,.15)' : '#1E293B', color: paymentPage === p ? '#818CF8' : '#64748B', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
+                  style={{ width: 32, height: 32, borderRadius: 8, border: paymentPage === p ? '1px solid #6366F1' : '1px solid var(--theme-border)', backgroundColor: paymentPage === p ? 'rgba(99,102,241,.15)' : 'var(--theme-bg-card)', color: paymentPage === p ? '#818CF8' : 'var(--theme-text-muted)', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
                   {p}
                 </button>
               ))}
@@ -198,9 +198,9 @@ export default function AdminSubscriptionsPage() {
               <button key={s} onClick={() => { setPlanFilter(s); setSubsPage(1); }}
                 style={{
                   padding: '0 12px', height: 30, borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: 'pointer',
-                  border: planFilter === s ? '1px solid #6366F1' : '1px solid #334155',
-                  backgroundColor: planFilter === s ? 'rgba(99,102,241,.15)' : '#1E293B',
-                  color: planFilter === s ? '#818CF8' : '#64748B',
+                  border: planFilter === s ? '1px solid #6366F1' : '1px solid var(--theme-border)',
+                  backgroundColor: planFilter === s ? 'rgba(99,102,241,.15)' : 'var(--theme-bg-card)',
+                  color: planFilter === s ? '#818CF8' : 'var(--theme-text-muted)',
                 }}>
                 {s || 'Tất cả'}
               </button>
@@ -210,35 +210,35 @@ export default function AdminSubscriptionsPage() {
           {subsLoading ? (
             <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0', color: '#6366F1' }}><IconLoader size={24} /></div>
           ) : !subs?.items.length ? (
-            <div style={{ textAlign: 'center', padding: '40px 0', color: '#475569', fontSize: 13 }}>Chưa có đăng ký nào.</div>
+            <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--theme-text-muted)', fontSize: 13 }}>Chưa có đăng ký nào.</div>
           ) : (
-            <div style={{ backgroundColor: '#1E293B', borderRadius: 12, border: '1px solid #334155', overflow: 'hidden' }}>
+            <div style={{ backgroundColor: 'var(--theme-bg-card)', borderRadius: 12, border: '1px solid var(--theme-border)', overflow: 'hidden' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
                 <thead>
-                  <tr style={{ borderBottom: '1px solid #334155' }}>
+                  <tr style={{ borderBottom: '1px solid var(--theme-border)' }}>
                     {['Người dùng', 'Gói', 'Trạng thái', 'Hết hạn', ''].map(h => (
-                      <th key={h} style={{ padding: '9px 14px', textAlign: 'left', fontSize: 11, fontWeight: 700, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{h}</th>
+                      <th key={h} style={{ padding: '9px 14px', textAlign: 'left', fontSize: 11, fontWeight: 700, color: 'var(--theme-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{h}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
                   {subs.items.map((s: AdminSubscription) => (
-                    <tr key={s.id} style={{ borderTop: '1px solid #334155' }}>
+                    <tr key={s.id} style={{ borderTop: '1px solid var(--theme-border)' }}>
                       <td style={{ padding: '10px 14px' }}>
-                        <p style={{ fontWeight: 600, color: '#F1F5F9' }}>{s.user.name || '—'}</p>
-                        <p style={{ fontSize: 11, color: '#475569' }}>{s.user.email}</p>
+                        <p style={{ fontWeight: 600, color: 'var(--theme-text-primary)' }}>{s.user.name || '—'}</p>
+                        <p style={{ fontSize: 11, color: 'var(--theme-text-muted)' }}>{s.user.email}</p>
                       </td>
                       <td style={{ padding: '10px 14px' }}>
                         <span style={{
                           fontSize: 12, fontWeight: 700, padding: '2px 8px', borderRadius: 6,
-                          backgroundColor: `${PLAN_COLORS[s.plan] || '#64748B'}20`,
-                          color: PLAN_COLORS[s.plan] || '#64748B',
+                          backgroundColor: `${PLAN_COLORS[s.plan] || 'var(--theme-text-muted)'}20`,
+                          color: PLAN_COLORS[s.plan] || 'var(--theme-text-muted)',
                         }}>
                           {s.plan === 'lifetime' ? '👑 Lifetime' : s.plan === 'premium' ? '⭐ Premium' : 'Free'}
                         </span>
                       </td>
-                      <td style={{ padding: '10px 14px', color: '#64748B', fontSize: 12 }}>{s.status}</td>
-                      <td style={{ padding: '10px 14px', color: '#64748B', fontSize: 12 }}>
+                      <td style={{ padding: '10px 14px', color: 'var(--theme-text-muted)', fontSize: 12 }}>{s.status}</td>
+                      <td style={{ padding: '10px 14px', color: 'var(--theme-text-muted)', fontSize: 12 }}>
                         {s.expiresAt ? new Date(s.expiresAt).toLocaleDateString('vi-VN') : '—'}
                       </td>
                       <td style={{ padding: '10px 14px' }}>
@@ -267,22 +267,22 @@ export default function AdminSubscriptionsPage() {
       {/* Confirm/Reject modal */}
       {actionTarget && (
         <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}>
-          <div style={{ backgroundColor: '#1E293B', borderRadius: 12, padding: 24, maxWidth: 400, width: '90%', border: '1px solid #334155' }}>
-            <h3 style={{ fontSize: 16, fontWeight: 700, color: '#F1F5F9', marginBottom: 12 }}>
+          <div style={{ backgroundColor: 'var(--theme-bg-card)', borderRadius: 12, padding: 24, maxWidth: 400, width: '90%', border: '1px solid var(--theme-border)' }}>
+            <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--theme-text-primary)', marginBottom: 12 }}>
               {actionTarget.type === 'confirm' ? 'Xác nhận thanh toán' : 'Từ chối thanh toán'}
             </h3>
             <div style={{ marginBottom: 16 }}>
-              <label style={{ fontSize: 11, color: '#64748B', display: 'block', marginBottom: 4 }}>Ghi chú (tuỳ chọn)</label>
+              <label style={{ fontSize: 11, color: 'var(--theme-text-muted)', display: 'block', marginBottom: 4 }}>Ghi chú (tuỳ chọn)</label>
               <input
                 value={actionNote}
                 onChange={e => setActionNote(e.target.value)}
                 placeholder={actionTarget.type === 'confirm' ? 'Đã nhận tiền...' : 'Lý do từ chối...'}
-                style={{ width: '100%', padding: '8px 10px', backgroundColor: '#0F172A', border: '1px solid #334155', borderRadius: 8, color: '#F1F5F9', fontSize: 13, outline: 'none', boxSizing: 'border-box' }}
+                style={{ width: '100%', padding: '8px 10px', backgroundColor: 'var(--theme-bg-body)', border: '1px solid var(--theme-border)', borderRadius: 8, color: 'var(--theme-text-primary)', fontSize: 13, outline: 'none', boxSizing: 'border-box' }}
               />
             </div>
             <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
               <button onClick={() => { setActionTarget(null); setActionNote(''); }}
-                style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid #334155', backgroundColor: 'transparent', color: '#94A3B8', fontSize: 13, cursor: 'pointer' }}>Hủy</button>
+                style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid var(--theme-border)', backgroundColor: 'transparent', color: 'var(--theme-text-secondary)', fontSize: 13, cursor: 'pointer' }}>Hủy</button>
               <button
                 disabled={confirmMut.isPending || rejectMut.isPending}
                 onClick={() => {
@@ -301,28 +301,28 @@ export default function AdminSubscriptionsPage() {
       {/* Grant premium modal */}
       {grantTarget && (
         <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}>
-          <div style={{ backgroundColor: '#1E293B', borderRadius: 12, padding: 24, maxWidth: 380, width: '90%', border: '1px solid #334155' }}>
-            <h3 style={{ fontSize: 16, fontWeight: 700, color: '#F1F5F9', marginBottom: 4 }}>Cấp Premium thủ công</h3>
-            <p style={{ fontSize: 13, color: '#64748B', marginBottom: 16 }}>{grantTarget.user.email}</p>
+          <div style={{ backgroundColor: 'var(--theme-bg-card)', borderRadius: 12, padding: 24, maxWidth: 380, width: '90%', border: '1px solid var(--theme-border)' }}>
+            <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--theme-text-primary)', marginBottom: 4 }}>Cấp Premium thủ công</h3>
+            <p style={{ fontSize: 13, color: 'var(--theme-text-muted)', marginBottom: 16 }}>{grantTarget.user.email}</p>
             <div style={{ marginBottom: 14 }}>
-              <label style={{ fontSize: 11, color: '#64748B', display: 'block', marginBottom: 6 }}>Thời hạn</label>
+              <label style={{ fontSize: 11, color: 'var(--theme-text-muted)', display: 'block', marginBottom: 6 }}>Thời hạn</label>
               <div style={{ display: 'flex', gap: 8 }}>
                 {(['monthly', 'quarterly', 'yearly', 'lifetime'] as const).map(p => (
                   <button key={p} onClick={() => setGrantPeriod(p)}
-                    style={{ flex: 1, padding: '7px 0', borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: 'pointer', border: grantPeriod === p ? 'none' : '1px solid #334155', backgroundColor: grantPeriod === p ? '#6366F1' : 'transparent', color: grantPeriod === p ? '#fff' : '#64748B' }}>
+                    style={{ flex: 1, padding: '7px 0', borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: 'pointer', border: grantPeriod === p ? 'none' : '1px solid var(--theme-border)', backgroundColor: grantPeriod === p ? '#6366F1' : 'transparent', color: grantPeriod === p ? '#fff' : 'var(--theme-text-muted)' }}>
                     {p === 'monthly' ? '1 tháng' : p === 'quarterly' ? '3 tháng' : p === 'yearly' ? '1 năm' : 'Vĩnh viễn'}
                   </button>
                 ))}
               </div>
             </div>
             <div style={{ marginBottom: 16 }}>
-              <label style={{ fontSize: 11, color: '#64748B', display: 'block', marginBottom: 4 }}>Ghi chú</label>
+              <label style={{ fontSize: 11, color: 'var(--theme-text-muted)', display: 'block', marginBottom: 4 }}>Ghi chú</label>
               <input value={grantNote} onChange={e => setGrantNote(e.target.value)} placeholder="Lý do cấp..."
-                style={{ width: '100%', padding: '8px 10px', backgroundColor: '#0F172A', border: '1px solid #334155', borderRadius: 8, color: '#F1F5F9', fontSize: 13, outline: 'none', boxSizing: 'border-box' as const }} />
+                style={{ width: '100%', padding: '8px 10px', backgroundColor: 'var(--theme-bg-body)', border: '1px solid var(--theme-border)', borderRadius: 8, color: 'var(--theme-text-primary)', fontSize: 13, outline: 'none', boxSizing: 'border-box' as const }} />
             </div>
             <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
               <button onClick={() => { setGrantTarget(null); setGrantNote(''); }}
-                style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid #334155', backgroundColor: 'transparent', color: '#94A3B8', fontSize: 13, cursor: 'pointer' }}>Hủy</button>
+                style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid var(--theme-border)', backgroundColor: 'transparent', color: 'var(--theme-text-secondary)', fontSize: 13, cursor: 'pointer' }}>Hủy</button>
               <button disabled={grantMut.isPending}
                 onClick={() => grantMut.mutate({ userId: grantTarget.userId, period: grantPeriod, note: grantNote })}
                 style={{ padding: '8px 16px', borderRadius: 8, border: 'none', backgroundColor: '#6366F1', color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>

@@ -77,7 +77,7 @@ export default function AdminUserDetailPage() {
   if (!user) {
     return (
       <div style={{ textAlign: 'center', padding: '60px 0' }}>
-        <p style={{ color: '#64748B', fontSize: 14 }}>Không tìm thấy người dùng.</p>
+        <p style={{ color: 'var(--theme-text-muted)', fontSize: 14 }}>Không tìm thấy người dùng.</p>
         <Link href="/admin/users" style={{ color: '#6366F1', fontSize: 13, textDecoration: 'none' }}>← Quay lại</Link>
       </div>
     );
@@ -86,12 +86,12 @@ export default function AdminUserDetailPage() {
   return (
     <div style={{ maxWidth: 760, margin: '0 auto' }}>
       {/* Back */}
-      <Link href="/admin/users" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: '#64748B', fontSize: 12, textDecoration: 'none', marginBottom: 20 }}>
+      <Link href="/admin/users" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: 'var(--theme-text-muted)', fontSize: 12, textDecoration: 'none', marginBottom: 20 }}>
         <IconArrowLeft size={14} /> Danh sách người dùng
       </Link>
 
       {/* Profile card */}
-      <div style={{ backgroundColor: '#1E293B', borderRadius: 12, border: '1px solid #334155', padding: 24, marginBottom: 16 }}>
+      <div style={{ backgroundColor: 'var(--theme-bg-card)', borderRadius: 12, border: '1px solid var(--theme-border)', padding: 24, marginBottom: 16 }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
             {/* Avatar */}
@@ -104,9 +104,9 @@ export default function AdminUserDetailPage() {
               {(user.name || user.email || '?').charAt(0).toUpperCase()}
             </div>
             <div>
-              <p style={{ fontSize: 18, fontWeight: 800, color: '#F1F5F9' }}>{user.name || <span style={{ color: '#475569', fontStyle: 'italic' }}>Chưa đặt tên</span>}</p>
-              <p style={{ fontSize: 13, color: '#64748B' }}>{user.email}</p>
-              <p style={{ fontSize: 11, color: '#475569', marginTop: 2 }}>
+              <p style={{ fontSize: 18, fontWeight: 800, color: 'var(--theme-text-primary)' }}>{user.name || <span style={{ color: 'var(--theme-text-muted)', fontStyle: 'italic' }}>Chưa đặt tên</span>}</p>
+              <p style={{ fontSize: 13, color: 'var(--theme-text-muted)' }}>{user.email}</p>
+              <p style={{ fontSize: 11, color: 'var(--theme-text-muted)', marginTop: 2 }}>
                 Tham gia: {new Date(user.createdAt).toLocaleDateString('vi-VN')}
               </p>
             </div>
@@ -114,13 +114,13 @@ export default function AdminUserDetailPage() {
           <div style={{ display: 'flex', gap: 8 }}>
             {editing ? (
               <>
-                <button onClick={cancelEdit} style={{ padding: '7px 14px', borderRadius: 8, border: '1px solid #334155', backgroundColor: 'transparent', color: '#94A3B8', fontSize: 12, cursor: 'pointer' }}>Hủy</button>
+                <button onClick={cancelEdit} style={{ padding: '7px 14px', borderRadius: 8, border: '1px solid var(--theme-border)', backgroundColor: 'transparent', color: 'var(--theme-text-secondary)', fontSize: 12, cursor: 'pointer' }}>Hủy</button>
                 <button onClick={saveEdit} disabled={updateUser.isPending} style={{ padding: '7px 14px', borderRadius: 8, border: 'none', backgroundColor: '#6366F1', color: '#fff', fontSize: 12, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
                   {updateUser.isPending && <IconLoader size={13} />} Lưu
                 </button>
               </>
             ) : (
-              <button onClick={startEdit} style={{ padding: '7px 14px', borderRadius: 8, border: '1px solid #334155', backgroundColor: 'transparent', color: '#94A3B8', fontSize: 12, cursor: 'pointer' }}>Chỉnh sửa</button>
+              <button onClick={startEdit} style={{ padding: '7px 14px', borderRadius: 8, border: '1px solid var(--theme-border)', backgroundColor: 'transparent', color: 'var(--theme-text-secondary)', fontSize: 12, cursor: 'pointer' }}>Chỉnh sửa</button>
             )}
           </div>
         </div>
@@ -129,19 +129,19 @@ export default function AdminUserDetailPage() {
         {editing && (
           <div style={{ marginTop: 20, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
             <div>
-              <label style={{ fontSize: 11, color: '#64748B', display: 'block', marginBottom: 4 }}>Tên hiển thị</label>
+              <label style={{ fontSize: 11, color: 'var(--theme-text-muted)', display: 'block', marginBottom: 4 }}>Tên hiển thị</label>
               <input
                 value={name}
                 onChange={e => setName(e.target.value)}
-                style={{ width: '100%', padding: '8px 10px', backgroundColor: '#0F172A', border: '1px solid #334155', borderRadius: 8, color: '#F1F5F9', fontSize: 13, outline: 'none', boxSizing: 'border-box' }}
+                style={{ width: '100%', padding: '8px 10px', backgroundColor: 'var(--theme-bg-body)', border: '1px solid var(--theme-border)', borderRadius: 8, color: 'var(--theme-text-primary)', fontSize: 13, outline: 'none', boxSizing: 'border-box' }}
               />
             </div>
             <div>
-              <label style={{ fontSize: 11, color: '#64748B', display: 'block', marginBottom: 4 }}>Vai trò</label>
+              <label style={{ fontSize: 11, color: 'var(--theme-text-muted)', display: 'block', marginBottom: 4 }}>Vai trò</label>
               <select
                 value={role}
                 onChange={e => setRole(e.target.value)}
-                style={{ width: '100%', padding: '8px 10px', backgroundColor: '#0F172A', border: '1px solid #334155', borderRadius: 8, color: '#F1F5F9', fontSize: 13, outline: 'none', boxSizing: 'border-box' }}
+                style={{ width: '100%', padding: '8px 10px', backgroundColor: 'var(--theme-bg-body)', border: '1px solid var(--theme-border)', borderRadius: 8, color: 'var(--theme-text-primary)', fontSize: 13, outline: 'none', boxSizing: 'border-box' }}
               >
                 <option value="user">user</option>
                 <option value="admin">admin</option>
@@ -156,7 +156,7 @@ export default function AdminUserDetailPage() {
             <span style={{
               fontSize: 11, fontWeight: 700, padding: '3px 8px', borderRadius: 6,
               backgroundColor: user.role === 'admin' ? 'rgba(99,102,241,.15)' : 'rgba(100,116,139,.1)',
-              color: user.role === 'admin' ? '#818CF8' : '#64748B',
+              color: user.role === 'admin' ? '#818CF8' : 'var(--theme-text-muted)',
             }}>
               {user.role.toUpperCase()}
             </span>
@@ -191,7 +191,7 @@ export default function AdminUserDetailPage() {
               ) : (
                 <span style={{
                   fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 6,
-                  backgroundColor: 'rgba(100,116,139,.1)', color: '#64748B',
+                  backgroundColor: 'rgba(100,116,139,.1)', color: 'var(--theme-text-muted)',
                 }}>
                   FREE
                 </span>
@@ -202,26 +202,26 @@ export default function AdminUserDetailPage() {
       </div>
 
       {/* Stats */}
-      <div style={{ backgroundColor: '#1E293B', borderRadius: 12, border: '1px solid #334155', padding: 20, marginBottom: 16 }}>
-        <p style={{ fontSize: 12, fontWeight: 700, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 14 }}>Thống kê học tập</p>
+      <div style={{ backgroundColor: 'var(--theme-bg-card)', borderRadius: 12, border: '1px solid var(--theme-border)', padding: 20, marginBottom: 16 }}>
+        <p style={{ fontSize: 12, fontWeight: 700, color: 'var(--theme-text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 14 }}>Thống kê học tập</p>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, minmax(0, 1fr))', gap: 10 }}>
-          <div style={{ backgroundColor: '#0F172A', borderRadius: 8, padding: '12px 14px', textAlign: 'center' }}>
+          <div style={{ backgroundColor: 'var(--theme-bg-body)', borderRadius: 8, padding: '12px 14px', textAlign: 'center' }}>
             <p style={{ fontSize: 22, fontWeight: 800, color: '#6366F1' }}>{user.stats.totalSessions}</p>
-            <p style={{ fontSize: 11, color: '#64748B', marginTop: 2 }}>Tổng phiên</p>
+            <p style={{ fontSize: 11, color: 'var(--theme-text-muted)', marginTop: 2 }}>Tổng phiên</p>
           </div>
-          <div style={{ backgroundColor: '#0F172A', borderRadius: 8, padding: '12px 14px', textAlign: 'center' }}>
+          <div style={{ backgroundColor: 'var(--theme-bg-body)', borderRadius: 8, padding: '12px 14px', textAlign: 'center' }}>
             <p style={{ fontSize: 22, fontWeight: 800, color: '#F59E0B' }}>
               {user.stats.avgScore > 0 ? `${user.stats.avgScore}%` : '—'}
             </p>
-            <p style={{ fontSize: 11, color: '#64748B', marginTop: 2 }}>Điểm TB</p>
+            <p style={{ fontSize: 11, color: 'var(--theme-text-muted)', marginTop: 2 }}>Điểm TB</p>
           </div>
           {Object.entries(STAT_LABELS).map(([key, label]) => {
             const val = user.stats[key as keyof typeof user.stats] as number;
             if (val === undefined) return null;
             return (
-              <div key={key} style={{ backgroundColor: '#0F172A', borderRadius: 8, padding: '12px 14px', textAlign: 'center' }}>
-                <p style={{ fontSize: 20, fontWeight: 700, color: '#94A3B8' }}>{val}</p>
-                <p style={{ fontSize: 11, color: '#64748B', marginTop: 2 }}>{label}</p>
+              <div key={key} style={{ backgroundColor: 'var(--theme-bg-body)', borderRadius: 8, padding: '12px 14px', textAlign: 'center' }}>
+                <p style={{ fontSize: 20, fontWeight: 700, color: 'var(--theme-text-secondary)' }}>{val}</p>
+                <p style={{ fontSize: 11, color: 'var(--theme-text-muted)', marginTop: 2 }}>{label}</p>
               </div>
             );
           })}
@@ -229,12 +229,12 @@ export default function AdminUserDetailPage() {
       </div>
 
       {/* Danger zone */}
-      <div style={{ backgroundColor: '#1E293B', borderRadius: 12, border: '1px solid #334155', padding: 20 }}>
+      <div style={{ backgroundColor: 'var(--theme-bg-card)', borderRadius: 12, border: '1px solid var(--theme-border)', padding: 20 }}>
         <p style={{ fontSize: 12, fontWeight: 700, color: '#EF4444', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 12 }}>Vùng nguy hiểm</p>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
           <div>
-            <p style={{ fontSize: 13, color: '#94A3B8', fontWeight: 600 }}>Xóa tài khoản này</p>
-            <p style={{ fontSize: 12, color: '#475569', marginTop: 2 }}>Tất cả dữ liệu học tập sẽ bị xóa vĩnh viễn.</p>
+            <p style={{ fontSize: 13, color: 'var(--theme-text-secondary)', fontWeight: 600 }}>Xóa tài khoản này</p>
+            <p style={{ fontSize: 12, color: 'var(--theme-text-muted)', marginTop: 2 }}>Tất cả dữ liệu học tập sẽ bị xóa vĩnh viễn.</p>
           </div>
           <button
             onClick={() => setShowDelete(true)}
@@ -248,13 +248,13 @@ export default function AdminUserDetailPage() {
       {/* Delete modal */}
       {showDelete && (
         <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}>
-          <div style={{ backgroundColor: '#1E293B', borderRadius: 12, padding: 24, maxWidth: 360, width: '90%', border: '1px solid #334155' }}>
-            <h3 style={{ fontSize: 16, fontWeight: 700, color: '#F1F5F9', marginBottom: 8 }}>Xóa người dùng?</h3>
-            <p style={{ fontSize: 13, color: '#64748B', marginBottom: 20 }}>
-              Xóa <strong style={{ color: '#F1F5F9' }}>{user.email}</strong>? Thao tác này không thể hoàn tác.
+          <div style={{ backgroundColor: 'var(--theme-bg-card)', borderRadius: 12, padding: 24, maxWidth: 360, width: '90%', border: '1px solid var(--theme-border)' }}>
+            <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--theme-text-primary)', marginBottom: 8 }}>Xóa người dùng?</h3>
+            <p style={{ fontSize: 13, color: 'var(--theme-text-muted)', marginBottom: 20 }}>
+              Xóa <strong style={{ color: 'var(--theme-text-primary)' }}>{user.email}</strong>? Thao tác này không thể hoàn tác.
             </p>
             <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-              <button onClick={() => setShowDelete(false)} style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid #334155', backgroundColor: 'transparent', color: '#94A3B8', fontSize: 13, cursor: 'pointer' }}>Hủy</button>
+              <button onClick={() => setShowDelete(false)} style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid var(--theme-border)', backgroundColor: 'transparent', color: 'var(--theme-text-secondary)', fontSize: 13, cursor: 'pointer' }}>Hủy</button>
               <button onClick={handleDelete} disabled={deleteUser.isPending} style={{ padding: '8px 16px', borderRadius: 8, border: 'none', backgroundColor: '#EF4444', color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
                 {deleteUser.isPending && <IconLoader size={14} />} Xóa
               </button>

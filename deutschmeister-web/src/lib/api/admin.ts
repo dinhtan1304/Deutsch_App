@@ -242,9 +242,36 @@ export interface CreateGrammarLessonPayload {
   isActive?: boolean;
 }
 
+export interface AdminGrammarLessonItem {
+  id: string;
+  slug: string;
+  level: string;
+  lessonNumber: number;
+  titleDe: string;
+  titleEn: string;
+  titleVi: string;
+  estimatedMinutes: number;
+  exerciseCount: number;
+  isActive: boolean;
+}
+
+export interface AdminGrammarLessonListResponse {
+  items: AdminGrammarLessonItem[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
 export const adminGrammarApi = {
   createLesson: (data: CreateGrammarLessonPayload) =>
     apiPost<{ id: string }>('/grammar/lessons', data),
+
+  getLessons: (params?: { level?: string; page?: number; limit?: number }) =>
+    apiGet<AdminGrammarLessonListResponse>(`/grammar/admin/lessons${toQS(params)}`),
+
+  getLessonById: <T = any>(id: string) =>
+    apiGet<T>(`/grammar/admin/lessons/${id}`),
 
   updateLesson: (id: string, data: Partial<CreateGrammarLessonPayload>) =>
     api<{ id: string }>(`/grammar/lessons/${id}`, { method: 'PUT', body: JSON.stringify(data) }),

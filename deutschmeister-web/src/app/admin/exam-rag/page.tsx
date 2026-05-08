@@ -37,7 +37,7 @@ const SKILL_COLORS: Record<string, { bg: string; color: string; border: string }
   listening: { bg: 'rgba(245,158,11,0.12)', color: '#FBBF24', border: 'rgba(245,158,11,0.25)' },
   speaking:  { bg: 'rgba(239,68,68,0.12)',  color: '#FCA5A5', border: 'rgba(239,68,68,0.25)' },
   all:       { bg: 'rgba(168,85,247,0.12)', color: '#C4B5FD', border: 'rgba(168,85,247,0.25)' },
-  general:   { bg: 'rgba(100,116,139,0.12)', color: '#94A3B8', border: 'rgba(100,116,139,0.25)' },
+  general:   { bg: 'rgba(100,116,139,0.12)', color: 'var(--theme-text-secondary)', border: 'rgba(100,116,139,0.25)' },
 };
 
 // ─── Page ───────────────────────────────────────────────────────────────────
@@ -73,7 +73,7 @@ export default function AdminExamRagPage() {
   };
 
   const selectStyle: React.CSSProperties = {
-    backgroundColor: '#0F172A', color: '#F1F5F9', border: '1px solid #334155',
+    backgroundColor: 'var(--theme-bg-body)', color: 'var(--theme-text-primary)', border: '1px solid var(--theme-border)',
     borderRadius: 8, padding: '7px 10px', fontSize: 12, outline: 'none', cursor: 'pointer',
   };
 
@@ -87,8 +87,8 @@ export default function AdminExamRagPage() {
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
         <div>
-          <h1 style={{ fontSize: 20, fontWeight: 800, color: '#F1F5F9', margin: 0 }}>Exam RAG — Đề mẫu</h1>
-          <p style={{ fontSize: 13, color: '#64748B', margin: '4px 0 0' }}>
+          <h1 style={{ fontSize: 20, fontWeight: 800, color: 'var(--theme-text-primary)', margin: 0 }}>Exam RAG — Đề mẫu</h1>
+          <p style={{ fontSize: 13, color: 'var(--theme-text-muted)', margin: '4px 0 0' }}>
             {data ? `${data.total} tài liệu` : 'Đang tải...'}
           </p>
         </div>
@@ -96,20 +96,20 @@ export default function AdminExamRagPage() {
 
       {/* Upload section */}
       <div style={{
-        borderRadius: 12, border: '1px solid #334155', padding: 20, marginBottom: 24,
+        borderRadius: 12, border: '1px solid var(--theme-border)', padding: 20, marginBottom: 24,
         background: 'rgba(99,102,241,0.03)',
       }}>
-        <p style={{ fontSize: 13, fontWeight: 700, color: '#F1F5F9', margin: '0 0 12px' }}>Upload đề mẫu PDF</p>
+        <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--theme-text-primary)', margin: '0 0 12px' }}>Upload đề mẫu PDF</p>
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'flex-end' }}>
           <div>
-            <label style={{ fontSize: 11, color: '#64748B', display: 'block', marginBottom: 4 }}>Loại đề</label>
+            <label style={{ fontSize: 11, color: 'var(--theme-text-muted)', display: 'block', marginBottom: 4 }}>Loại đề</label>
             <select value={uploadExamType} onChange={e => setUploadExamType(e.target.value)} style={selectStyle}>
               <option value="GOETHE">Goethe</option>
               <option value="TELC">TELC</option>
             </select>
           </div>
           <div>
-            <label style={{ fontSize: 11, color: '#64748B', display: 'block', marginBottom: 4 }}>Trình độ</label>
+            <label style={{ fontSize: 11, color: 'var(--theme-text-muted)', display: 'block', marginBottom: 4 }}>Trình độ</label>
             <select value={uploadLevel} onChange={e => setUploadLevel(e.target.value)} style={selectStyle}>
               <option value="A1">A1</option>
               <option value="A2">A2</option>
@@ -117,7 +117,7 @@ export default function AdminExamRagPage() {
             </select>
           </div>
           <div>
-            <label style={{ fontSize: 11, color: '#64748B', display: 'block', marginBottom: 4 }}>Kỹ năng</label>
+            <label style={{ fontSize: 11, color: 'var(--theme-text-muted)', display: 'block', marginBottom: 4 }}>Kỹ năng</label>
             <select value={uploadSkill} onChange={e => setUploadSkill(e.target.value)} style={selectStyle}>
               <option value="all">Tất cả (Full exam)</option>
               <option value="reading">Reading</option>
@@ -127,8 +127,8 @@ export default function AdminExamRagPage() {
             </select>
           </div>
           <div>
-            <label style={{ fontSize: 11, color: '#64748B', display: 'block', marginBottom: 4 }}>File PDF</label>
-            <input ref={fileRef} type="file" accept=".pdf" style={{ fontSize: 12, color: '#94A3B8' }} />
+            <label style={{ fontSize: 11, color: 'var(--theme-text-muted)', display: 'block', marginBottom: 4 }}>File PDF</label>
+            <input ref={fileRef} type="file" accept=".pdf" style={{ fontSize: 12, color: 'var(--theme-text-secondary)' }} />
           </div>
           <button
             onClick={handleUpload}
@@ -162,14 +162,14 @@ export default function AdminExamRagPage() {
       </div>
 
       {/* Table */}
-      <div style={{ borderRadius: 12, border: '1px solid #334155', overflow: 'hidden' }}>
+      <div style={{ borderRadius: 12, border: '1px solid var(--theme-border)', overflow: 'hidden' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
           <thead>
-            <tr style={{ backgroundColor: '#1E293B' }}>
+            <tr style={{ backgroundColor: 'var(--theme-bg-card)' }}>
               {['File', 'Loại đề', 'Level', 'Kỹ năng', 'Chunks', 'Ngày upload', ''].map(h => (
                 <th key={h} style={{
-                  padding: '10px 14px', textAlign: 'left', color: '#94A3B8', fontWeight: 700,
-                  fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.06em', borderBottom: '1px solid #334155',
+                  padding: '10px 14px', textAlign: 'left', color: 'var(--theme-text-secondary)', fontWeight: 700,
+                  fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.06em', borderBottom: '1px solid var(--theme-border)',
                 }}>
                   {h}
                 </th>
@@ -178,9 +178,9 @@ export default function AdminExamRagPage() {
           </thead>
           <tbody>
             {isLoading ? (
-              <tr><td colSpan={7} style={{ padding: 40, textAlign: 'center', color: '#64748B' }}>Đang tải...</td></tr>
+              <tr><td colSpan={7} style={{ padding: 40, textAlign: 'center', color: 'var(--theme-text-muted)' }}>Đang tải...</td></tr>
             ) : !data?.items.length ? (
-              <tr><td colSpan={7} style={{ padding: 40, textAlign: 'center', color: '#64748B' }}>Chưa có tài liệu nào</td></tr>
+              <tr><td colSpan={7} style={{ padding: 40, textAlign: 'center', color: 'var(--theme-text-muted)' }}>Chưa có tài liệu nào</td></tr>
             ) : data.items.map(item => (
               <DocumentRow
                 key={item.id}
@@ -216,15 +216,15 @@ function DocumentRow({
         onClick={onToggle}
         style={{ cursor: 'pointer', backgroundColor: expanded ? 'rgba(99,102,241,0.04)' : 'transparent', transition: 'background 0.15s' }}
       >
-        <td style={{ padding: '10px 14px', borderBottom: '1px solid #1E293B', color: '#F1F5F9' }}>
+        <td style={{ padding: '10px 14px', borderBottom: '1px solid var(--theme-border)', color: 'var(--theme-text-primary)' }}>
           <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 250 }}>
             {item.filename}
           </div>
         </td>
-        <td style={{ padding: '10px 14px', borderBottom: '1px solid #1E293B', color: '#94A3B8', fontSize: 12 }}>
+        <td style={{ padding: '10px 14px', borderBottom: '1px solid var(--theme-border)', color: 'var(--theme-text-secondary)', fontSize: 12 }}>
           {item.examType}
         </td>
-        <td style={{ padding: '10px 14px', borderBottom: '1px solid #1E293B' }}>
+        <td style={{ padding: '10px 14px', borderBottom: '1px solid var(--theme-border)' }}>
           <span style={{
             display: 'inline-block', padding: '3px 10px', borderRadius: 20, fontSize: 10, fontWeight: 700,
             background: 'rgba(59,130,246,0.12)', color: '#60A5FA', border: '1px solid rgba(59,130,246,0.25)',
@@ -232,7 +232,7 @@ function DocumentRow({
             {item.cefrLevel}
           </span>
         </td>
-        <td style={{ padding: '10px 14px', borderBottom: '1px solid #1E293B' }}>
+        <td style={{ padding: '10px 14px', borderBottom: '1px solid var(--theme-border)' }}>
           <span style={{
             display: 'inline-block', padding: '3px 10px', borderRadius: 20, fontSize: 10, fontWeight: 700,
             background: skillStyle.bg, color: skillStyle.color, border: `1px solid ${skillStyle.border}`,
@@ -240,13 +240,13 @@ function DocumentRow({
             {item.skill}
           </span>
         </td>
-        <td style={{ padding: '10px 14px', borderBottom: '1px solid #1E293B', color: '#94A3B8', fontSize: 12 }}>
+        <td style={{ padding: '10px 14px', borderBottom: '1px solid var(--theme-border)', color: 'var(--theme-text-secondary)', fontSize: 12 }}>
           {item.chunkCount}
         </td>
-        <td style={{ padding: '10px 14px', borderBottom: '1px solid #1E293B', color: '#64748B', fontSize: 12, whiteSpace: 'nowrap' }}>
+        <td style={{ padding: '10px 14px', borderBottom: '1px solid var(--theme-border)', color: 'var(--theme-text-muted)', fontSize: 12, whiteSpace: 'nowrap' }}>
           {date.toLocaleDateString('vi-VN')}
         </td>
-        <td style={{ padding: '10px 14px', borderBottom: '1px solid #1E293B' }}>
+        <td style={{ padding: '10px 14px', borderBottom: '1px solid var(--theme-border)' }}>
           <button
             onClick={(e) => { e.stopPropagation(); onDelete(); }}
             style={{
@@ -272,8 +272,8 @@ function ExpandedChunks({ documentId }: { documentId: string }) {
   if (isLoading) {
     return (
       <tr>
-        <td colSpan={7} style={{ padding: '16px 14px', borderBottom: '1px solid #334155', backgroundColor: 'rgba(99,102,241,0.03)' }}>
-          <span style={{ color: '#64748B', fontSize: 12 }}>Đang tải chunks...</span>
+        <td colSpan={7} style={{ padding: '16px 14px', borderBottom: '1px solid var(--theme-border)', backgroundColor: 'rgba(99,102,241,0.03)' }}>
+          <span style={{ color: 'var(--theme-text-muted)', fontSize: 12 }}>Đang tải chunks...</span>
         </td>
       </tr>
     );
@@ -283,15 +283,15 @@ function ExpandedChunks({ documentId }: { documentId: string }) {
 
   return (
     <tr>
-      <td colSpan={7} style={{ padding: '0 14px 16px', borderBottom: '1px solid #334155', backgroundColor: 'rgba(99,102,241,0.03)' }}>
+      <td colSpan={7} style={{ padding: '0 14px 16px', borderBottom: '1px solid var(--theme-border)', backgroundColor: 'rgba(99,102,241,0.03)' }}>
         <div style={{ padding: '12px 0' }}>
-          <p style={{ fontSize: 12, fontWeight: 700, color: '#94A3B8', marginBottom: 10 }}>
+          <p style={{ fontSize: 12, fontWeight: 700, color: 'var(--theme-text-secondary)', marginBottom: 10 }}>
             {data.chunks.length} chunks
           </p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {data.chunks.map(chunk => (
               <div key={chunk.id} style={{
-                padding: 12, borderRadius: 8, background: '#0F172A', border: '1px solid #1E293B',
+                padding: 12, borderRadius: 8, background: 'var(--theme-bg-body)', border: '1px solid var(--theme-border)',
               }}>
                 <div style={{ display: 'flex', gap: 8, marginBottom: 6, flexWrap: 'wrap', alignItems: 'center' }}>
                   {(() => {
@@ -313,11 +313,11 @@ function ExpandedChunks({ documentId }: { documentId: string }) {
                   </span>
                   <span style={{
                     fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 12,
-                    background: 'rgba(100,116,139,0.12)', color: '#94A3B8', border: '1px solid rgba(100,116,139,0.25)',
+                    background: 'rgba(100,116,139,0.12)', color: 'var(--theme-text-secondary)', border: '1px solid rgba(100,116,139,0.25)',
                   }}>
                     {chunk.teilType}
                   </span>
-                  <span style={{ fontSize: 10, color: '#475569' }}>
+                  <span style={{ fontSize: 10, color: 'var(--theme-text-muted)' }}>
                     {chunk.content.length} chars
                   </span>
                 </div>

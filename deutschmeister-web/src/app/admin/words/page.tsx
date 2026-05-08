@@ -63,7 +63,7 @@ export default function AdminWordsPage() {
 
   const params = { search: search || undefined, level: level || undefined, article: article || undefined, page, limit: 20 };
 
-  const { data, isLoading, isFetching } = useQuery<WordListResponse>({
+  const { data, isLoading, isFetching, isError, error, refetch } = useQuery<WordListResponse>({
     queryKey: adminWordKeys.list(params),
     queryFn: () => apiGet<WordListResponse>(`/words${toQS(params)}`),
     staleTime: 30_000,
@@ -81,8 +81,8 @@ export default function AdminWordsPage() {
     <div>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20, flexWrap: 'wrap', gap: 10 }}>
         <div>
-          <h1 style={{ fontSize: 20, fontWeight: 800, color: '#F1F5F9', marginBottom: 2 }}>Từ vựng</h1>
-          <p style={{ fontSize: 12, color: '#64748B' }}>{data ? `${data.total} từ` : '...'}</p>
+          <h1 style={{ fontSize: 20, fontWeight: 800, color: 'var(--theme-text-primary)', marginBottom: 2 }}>Từ vựng</h1>
+          <p style={{ fontSize: 12, color: 'var(--theme-text-muted)' }}>{data ? `${data.total} từ` : '...'}</p>
         </div>
         <Link href="/admin/words/new"
           style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 8, backgroundColor: '#6366F1', color: '#fff', fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>
@@ -93,87 +93,96 @@ export default function AdminWordsPage() {
       {/* Filters */}
       <div style={{ display: 'flex', gap: 10, marginBottom: 16, flexWrap: 'wrap' }}>
         <div style={{ position: 'relative', flex: '1 1 200px' }}>
-          <span style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: '#475569' }}>
+          <span style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--theme-text-muted)' }}>
             <IconSearch size={14} />
           </span>
           <input
             value={search}
             onChange={e => { setSearch(e.target.value); setPage(1); }}
             placeholder="Tìm từ..."
-            style={{ width: '100%', paddingLeft: 32, paddingRight: 12, height: 36, backgroundColor: '#1E293B', border: '1px solid #334155', borderRadius: 8, color: '#F1F5F9', fontSize: 13, outline: 'none', boxSizing: 'border-box' }}
+            style={{ width: '100%', paddingLeft: 32, paddingRight: 12, height: 36, backgroundColor: 'var(--theme-bg-card)', border: '1px solid var(--theme-border)', borderRadius: 8, color: 'var(--theme-text-primary)', fontSize: 13, outline: 'none', boxSizing: 'border-box' }}
           />
         </div>
         <select
           value={level}
           onChange={e => { setLevel(e.target.value); setPage(1); }}
-          style={{ height: 36, padding: '0 10px', backgroundColor: '#1E293B', border: '1px solid #334155', borderRadius: 8, color: level ? '#F1F5F9' : '#475569', fontSize: 13, outline: 'none' }}
+          style={{ height: 36, padding: '0 10px', backgroundColor: 'var(--theme-bg-card)', border: '1px solid var(--theme-border)', borderRadius: 8, color: level ? 'var(--theme-text-primary)' : 'var(--theme-text-muted)', fontSize: 13, outline: 'none' }}
         >
-          {LEVELS.map(l => <option key={l} value={l} style={{ backgroundColor: '#1E293B' }}>{l || 'Trình độ'}</option>)}
+          {LEVELS.map(l => <option key={l} value={l} style={{ backgroundColor: 'var(--theme-bg-card)' }}>{l || 'Trình độ'}</option>)}
         </select>
         <select
           value={article}
           onChange={e => { setArticle(e.target.value); setPage(1); }}
-          style={{ height: 36, padding: '0 10px', backgroundColor: '#1E293B', border: '1px solid #334155', borderRadius: 8, color: article ? '#F1F5F9' : '#475569', fontSize: 13, outline: 'none' }}
+          style={{ height: 36, padding: '0 10px', backgroundColor: 'var(--theme-bg-card)', border: '1px solid var(--theme-border)', borderRadius: 8, color: article ? 'var(--theme-text-primary)' : 'var(--theme-text-muted)', fontSize: 13, outline: 'none' }}
         >
-          {ARTICLES.map(a => <option key={a} value={a} style={{ backgroundColor: '#1E293B' }}>{a || 'Mạo từ'}</option>)}
+          {ARTICLES.map(a => <option key={a} value={a} style={{ backgroundColor: 'var(--theme-bg-card)' }}>{a || 'Mạo từ'}</option>)}
         </select>
       </div>
 
       {/* Table */}
-      <div style={{ backgroundColor: '#1E293B', borderRadius: 12, border: '1px solid #334155', overflow: 'hidden' }}>
+      <div style={{ backgroundColor: 'var(--theme-bg-card)', borderRadius: 12, border: '1px solid var(--theme-border)', overflow: 'hidden' }}>
         {isLoading ? (
           <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }}>
             <span style={{ color: '#6366F1' }}><IconLoader size={24} /></span>
           </div>
+        ) : isError ? (
+          <div style={{ textAlign: 'center', padding: '40px 16px' }}>
+            <div style={{ color: '#F87171', fontSize: 13, marginBottom: 8 }}>Không tải được danh sách từ.</div>
+            <div style={{ color: 'var(--theme-text-muted)', fontSize: 12, marginBottom: 12 }}>{(error as any)?.message ?? 'Lỗi không xác định.'}</div>
+            <button onClick={() => refetch()}
+              style={{ padding: '6px 14px', borderRadius: 6, border: '1px solid var(--theme-border)', backgroundColor: 'var(--theme-bg-body)', color: 'var(--theme-text-secondary)', fontSize: 12, cursor: 'pointer' }}>
+              Thử lại
+            </button>
+          </div>
         ) : !data?.data?.length ? (
-          <div style={{ textAlign: 'center', padding: '40px 0', color: '#475569', fontSize: 13 }}>
+          <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--theme-text-muted)', fontSize: 13 }}>
             Không tìm thấy từ nào.
           </div>
         ) : (
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
             <thead>
-              <tr style={{ borderBottom: '1px solid #334155' }}>
+              <tr style={{ borderBottom: '1px solid var(--theme-border)' }}>
                 {['Từ', 'Dịch nghĩa', 'Level', 'Danh mục', ''].map(h => (
-                  <th key={h} style={{ padding: '10px 14px', textAlign: 'left', fontSize: 11, fontWeight: 700, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>{h}</th>
+                  <th key={h} style={{ padding: '10px 14px', textAlign: 'left', fontSize: 11, fontWeight: 700, color: 'var(--theme-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {data.data.map((w, i) => (
-                <tr key={w.id} style={{ borderTop: '1px solid #334155' }}>
+                <tr key={w.id} style={{ borderTop: '1px solid var(--theme-border)' }}>
                   <td style={{ padding: '10px 14px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                       <span style={{
                         fontSize: 10, fontWeight: 700, padding: '2px 6px', borderRadius: 4,
-                        backgroundColor: `${ARTICLE_COLORS[w.article] || '#475569'}20`,
-                        color: ARTICLE_COLORS[w.article] || '#475569',
+                        backgroundColor: `${ARTICLE_COLORS[w.article] || 'var(--theme-text-muted)'}20`,
+                        color: ARTICLE_COLORS[w.article] || 'var(--theme-text-muted)',
                       }}>
                         {w.article}
                       </span>
-                      <Link href={`/admin/words/${w.id}`} style={{ fontWeight: 600, color: '#F1F5F9', textDecoration: 'none' }}>
+                      <Link href={`/admin/words/${w.id}`} style={{ fontWeight: 600, color: 'var(--theme-text-primary)', textDecoration: 'none' }}>
                         {w.word}
                       </Link>
                     </div>
                   </td>
-                  <td style={{ padding: '10px 14px', color: '#94A3B8' }}>
+                  <td style={{ padding: '10px 14px', color: 'var(--theme-text-secondary)' }}>
                     {w.translationVi || w.translationEn}
                   </td>
                   <td style={{ padding: '10px 14px' }}>
                     <span style={{
                       fontSize: 11, fontWeight: 700, padding: '2px 7px', borderRadius: 4,
-                      backgroundColor: `${LEVEL_COLORS[w.level] || '#475569'}20`,
-                      color: LEVEL_COLORS[w.level] || '#475569',
+                      backgroundColor: `${LEVEL_COLORS[w.level] || 'var(--theme-text-muted)'}20`,
+                      color: LEVEL_COLORS[w.level] || 'var(--theme-text-muted)',
                     }}>
                       {w.level}
                     </span>
                   </td>
-                  <td style={{ padding: '10px 14px', color: '#64748B', fontSize: 12 }}>{w.category}</td>
+                  <td style={{ padding: '10px 14px', color: 'var(--theme-text-muted)', fontSize: 12 }}>{w.category}</td>
                   <td style={{ padding: '10px 14px' }}>
                     <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
                       <Link href={`/admin/words/${w.id}`} style={{ fontSize: 11, color: '#6366F1', fontWeight: 600, textDecoration: 'none' }}>Sửa</Link>
                       <button
                         onClick={() => setDeleteId(w.id)}
-                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#475569', padding: 4, display: 'flex' }}
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--theme-text-muted)', padding: 4, display: 'flex' }}
                       >
                         <IconTrash size={14} />
                       </button>
@@ -189,14 +198,14 @@ export default function AdminWordsPage() {
       {/* Pagination */}
       {totalPages > 1 && (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 16 }}>
-          <span style={{ fontSize: 12, color: '#475569' }}>Trang {page} / {totalPages} {isFetching && '...'}</span>
+          <span style={{ fontSize: 12, color: 'var(--theme-text-muted)' }}>Trang {page} / {totalPages} {isFetching && '...'}</span>
           <div style={{ display: 'flex', gap: 6 }}>
             <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
-              style={{ width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 8, border: '1px solid #334155', backgroundColor: '#1E293B', color: page === 1 ? '#334155' : '#94A3B8', cursor: page === 1 ? 'not-allowed' : 'pointer' }}>
+              style={{ width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 8, border: '1px solid var(--theme-border)', backgroundColor: 'var(--theme-bg-card)', color: page === 1 ? 'var(--theme-border)' : 'var(--theme-text-secondary)', cursor: page === 1 ? 'not-allowed' : 'pointer' }}>
               <IconChevronLeft size={15} />
             </button>
             <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}
-              style={{ width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 8, border: '1px solid #334155', backgroundColor: '#1E293B', color: page === totalPages ? '#334155' : '#94A3B8', cursor: page === totalPages ? 'not-allowed' : 'pointer' }}>
+              style={{ width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 8, border: '1px solid var(--theme-border)', backgroundColor: 'var(--theme-bg-card)', color: page === totalPages ? 'var(--theme-border)' : 'var(--theme-text-secondary)', cursor: page === totalPages ? 'not-allowed' : 'pointer' }}>
               <IconChevronRight size={15} />
             </button>
           </div>
@@ -206,11 +215,11 @@ export default function AdminWordsPage() {
       {/* Delete confirm */}
       {deleteId && (
         <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}>
-          <div style={{ backgroundColor: '#1E293B', borderRadius: 12, padding: 24, maxWidth: 340, width: '90%', border: '1px solid #334155' }}>
-            <h3 style={{ fontSize: 16, fontWeight: 700, color: '#F1F5F9', marginBottom: 8 }}>Xóa từ này?</h3>
-            <p style={{ fontSize: 13, color: '#64748B', marginBottom: 20 }}>Từ sẽ bị xóa khỏi tất cả topics và game answers.</p>
+          <div style={{ backgroundColor: 'var(--theme-bg-card)', borderRadius: 12, padding: 24, maxWidth: 340, width: '90%', border: '1px solid var(--theme-border)' }}>
+            <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--theme-text-primary)', marginBottom: 8 }}>Xóa từ này?</h3>
+            <p style={{ fontSize: 13, color: 'var(--theme-text-muted)', marginBottom: 20 }}>Từ sẽ bị xóa khỏi tất cả topics và game answers.</p>
             <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-              <button onClick={() => setDeleteId(null)} style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid #334155', backgroundColor: 'transparent', color: '#94A3B8', fontSize: 13, cursor: 'pointer' }}>Hủy</button>
+              <button onClick={() => setDeleteId(null)} style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid var(--theme-border)', backgroundColor: 'transparent', color: 'var(--theme-text-secondary)', fontSize: 13, cursor: 'pointer' }}>Hủy</button>
               <button onClick={() => handleDelete(deleteId)} disabled={deleteWord.isPending}
                 style={{ padding: '8px 16px', borderRadius: 8, border: 'none', backgroundColor: '#EF4444', color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
                 {deleteWord.isPending && <IconLoader size={14} />} Xóa
