@@ -23,6 +23,31 @@ const STAT_LABELS: Record<string, string> = {
   freeSpeaking: 'Free Speaking',
 };
 
+const FEATURE_LABELS: Record<string, string> = {
+  writing: 'Viết tự do',
+  reading: 'Đọc',
+  listening: 'Nghe',
+  examWriting: 'Viết theo đề thi',
+  examReading: 'Đọc theo đề thi',
+  examListening: 'Nghe theo đề thi',
+  examSpeaking: 'Nói theo đề thi',
+  freeSpeaking: 'Nói tự do',
+  roleplay: 'Roleplay',
+  pronunciation: 'Phát âm',
+  grammar: 'Ngữ pháp',
+  words: 'Từ vựng',
+  personalWords: 'Từ vựng cá nhân',
+  shadowing: 'Shadowing',
+};
+
+function formatNumber(n: number): string {
+  return n.toLocaleString('vi-VN');
+}
+
+function formatDateTime(iso: string): string {
+  return new Date(iso).toLocaleString('vi-VN');
+}
+
 export default function AdminUserDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
@@ -226,6 +251,71 @@ export default function AdminUserDetailPage() {
             );
           })}
         </div>
+      </div>
+
+      {/* AI Usage */}
+      <div style={{ backgroundColor: 'var(--theme-bg-card)', borderRadius: 12, border: '1px solid var(--theme-border)', padding: 20, marginBottom: 16 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14, flexWrap: 'wrap', gap: 8 }}>
+          <p style={{ fontSize: 12, fontWeight: 700, color: 'var(--theme-text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+            AI Usage
+          </p>
+          {user.aiUsage.totals.lastUsedAt && (
+            <p style={{ fontSize: 11, color: 'var(--theme-text-muted)' }}>
+              Lần cuối: {formatDateTime(user.aiUsage.totals.lastUsedAt)}
+            </p>
+          )}
+        </div>
+
+        {/* Totals row */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 10, marginBottom: 14 }}>
+          <div style={{ backgroundColor: 'var(--theme-bg-body)', borderRadius: 8, padding: '12px 14px', textAlign: 'center' }}>
+            <p style={{ fontSize: 22, fontWeight: 800, color: '#A855F7' }}>{formatNumber(user.aiUsage.totals.calls)}</p>
+            <p style={{ fontSize: 11, color: 'var(--theme-text-muted)', marginTop: 2 }}>Tổng số call AI</p>
+          </div>
+          <div style={{ backgroundColor: 'var(--theme-bg-body)', borderRadius: 8, padding: '12px 14px', textAlign: 'center' }}>
+            <p style={{ fontSize: 22, fontWeight: 800, color: '#6366F1' }}>{formatNumber(user.aiUsage.totals.totalTokens)}</p>
+            <p style={{ fontSize: 11, color: 'var(--theme-text-muted)', marginTop: 2 }}>Tổng token</p>
+          </div>
+          <div style={{ backgroundColor: 'var(--theme-bg-body)', borderRadius: 8, padding: '12px 14px', textAlign: 'center' }}>
+            <p style={{ fontSize: 22, fontWeight: 800, color: 'var(--theme-text-secondary)' }}>{user.aiUsage.byFeature.length}</p>
+            <p style={{ fontSize: 11, color: 'var(--theme-text-muted)', marginTop: 2 }}>Số tính năng dùng AI</p>
+          </div>
+        </div>
+
+        {/* Per-feature breakdown */}
+        {user.aiUsage.byFeature.length === 0 ? (
+          <p style={{ fontSize: 13, color: 'var(--theme-text-muted)', textAlign: 'center', padding: '20px 0', fontStyle: 'italic' }}>
+            Người dùng này chưa sử dụng AI.
+          </p>
+        ) : (
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+              <thead>
+                <tr style={{ borderBottom: '1px solid var(--theme-border)' }}>
+                  <th style={{ textAlign: 'left', padding: '10px 12px', fontSize: 11, fontWeight: 700, color: 'var(--theme-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Tính năng</th>
+                  <th style={{ textAlign: 'right', padding: '10px 12px', fontSize: 11, fontWeight: 700, color: 'var(--theme-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Số call</th>
+                  <th style={{ textAlign: 'right', padding: '10px 12px', fontSize: 11, fontWeight: 700, color: 'var(--theme-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Tổng token</th>
+                  <th style={{ textAlign: 'right', padding: '10px 12px', fontSize: 11, fontWeight: 700, color: 'var(--theme-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Lần cuối</th>
+                </tr>
+              </thead>
+              <tbody>
+                {user.aiUsage.byFeature.map(f => (
+                  <tr key={f.feature} style={{ borderBottom: '1px solid var(--theme-border)' }}>
+                    <td style={{ padding: '10px 12px', color: 'var(--theme-text-primary)', fontWeight: 600 }}>
+                      {FEATURE_LABELS[f.feature] ?? f.feature}
+                      <span style={{ fontSize: 11, color: 'var(--theme-text-muted)', fontWeight: 400, marginLeft: 6 }}>
+                        ({f.feature})
+                      </span>
+                    </td>
+                    <td style={{ padding: '10px 12px', textAlign: 'right', color: 'var(--theme-text-secondary)' }}>{formatNumber(f.calls)}</td>
+                    <td style={{ padding: '10px 12px', textAlign: 'right', color: 'var(--theme-text-secondary)' }}>{formatNumber(f.totalTokens)}</td>
+                    <td style={{ padding: '10px 12px', textAlign: 'right', color: 'var(--theme-text-muted)', fontSize: 12 }}>{formatDateTime(f.lastUsedAt)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
       {/* Danger zone */}

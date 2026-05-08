@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { Fragment, useState } from 'react';
 import Link from 'next/link';
 import { useAIVocabQuota, useAIGenerateVocabulary } from '@/hooks/usePersonalWords';
 import { AIGeneratedVocabWord } from '@/lib/api/personal-words';
@@ -42,6 +42,7 @@ export function AIVocabModal({ isOpen, onClose, collectionId }: Props) {
   const [level, setLevel] = useState('');
   const [description, setDescription] = useState('');
   const [generatedWords, setGeneratedWords] = useState<AIGeneratedVocabWord[]>([]);
+  const [batchBoundaries, setBatchBoundaries] = useState<number[]>([]);
   const [checkedWords, setCheckedWords] = useState<Set<number>>(new Set());
   const [excludeWords, setExcludeWords] = useState<string[]>([]);
   const [resultInfo, setResultInfo] = useState({ wordsAdded: 0, wordsSkipped: 0, quotaRemaining: 0, weeklyLimit: 1 });
@@ -59,6 +60,7 @@ export function AIVocabModal({ isOpen, onClose, collectionId }: Props) {
     setLevel('');
     setDescription('');
     setGeneratedWords([]);
+    setBatchBoundaries([]);
     setExcludeWords([]);
     setError('');
     onClose();
@@ -79,14 +81,32 @@ export function AIVocabModal({ isOpen, onClose, collectionId }: Props) {
         excludeWords: useExclude && excludeWords.length > 0 ? excludeWords : undefined,
       });
 
-      setGeneratedWords(result.words);
-      setCheckedWords(new Set(result.words.map((_, i) => i)));
-      setResultInfo({
-        wordsAdded: result.wordsAdded,
-        wordsSkipped: result.wordsSkipped,
-        quotaRemaining: result.quotaRemaining,
-        weeklyLimit: result.weeklyLimit,
-      });
+      if (useExclude) {
+        const baseLen = generatedWords.length;
+        setBatchBoundaries(prev => [...prev, baseLen]);
+        setGeneratedWords(prev => [...prev, ...result.words]);
+        setCheckedWords(prev => {
+          const next = new Set(prev);
+          result.words.forEach((_, i) => next.add(baseLen + i));
+          return next;
+        });
+        setResultInfo(prev => ({
+          wordsAdded: prev.wordsAdded + result.wordsAdded,
+          wordsSkipped: prev.wordsSkipped + result.wordsSkipped,
+          quotaRemaining: result.quotaRemaining,
+          weeklyLimit: result.weeklyLimit,
+        }));
+      } else {
+        setBatchBoundaries([]);
+        setGeneratedWords(result.words);
+        setCheckedWords(new Set(result.words.map((_, i) => i)));
+        setResultInfo({
+          wordsAdded: result.wordsAdded,
+          wordsSkipped: result.wordsSkipped,
+          quotaRemaining: result.quotaRemaining,
+          weeklyLimit: result.weeklyLimit,
+        });
+      }
       setExcludeWords(prev =>
         [...new Set([...prev, ...result.words.map(w => w.word)])].slice(-50)
       );
@@ -338,9 +358,22 @@ export function AIVocabModal({ isOpen, onClose, collectionId }: Props) {
                   const typeLabel = w.wordType === 'nomen' && w.nomenData?.article
                     ? w.nomenData.article
                     : (WORD_TYPE_LABELS[w.wordType] ?? w.wordType);
+                  const batchIdx = batchBoundaries.indexOf(i);
                   return (
+                    <Fragment key={i}>
+                      {batchIdx >= 0 && (
+                        <div
+                          className="px-3 py-1.5 text-[10px] font-semibold tracking-wide border-b text-center"
+                          style={{
+                            borderColor: 'var(--theme-border)',
+                            backgroundColor: 'var(--theme-bg-secondary)',
+                            color: 'var(--theme-text-muted)',
+                          }}
+                        >
+                          — Lượt {batchIdx + 2} —
+                        </div>
+                      )}
                     <div
-                      key={i}
                       className="flex items-center gap-3 px-3 py-2.5 border-b last:border-b-0"
                       style={{ borderColor: 'var(--theme-border)' }}
                     >
@@ -382,6 +415,7 @@ export function AIVocabModal({ isOpen, onClose, collectionId }: Props) {
                         {w.level}
                       </span>
                     </div>
+                    </Fragment>
                   );
                 })}
               </div>

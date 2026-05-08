@@ -95,6 +95,26 @@ export interface AdminUserItem {
   subscription?: { plan: string; status: string; expiresAt: string | null } | null;
 }
 
+export interface AdminUserAiUsageFeature {
+  feature: string;
+  calls: number;
+  promptTokens: number;
+  candidatesTokens: number;
+  totalTokens: number;
+  lastUsedAt: string;
+}
+
+export interface AdminUserAiUsage {
+  totals: {
+    calls: number;
+    promptTokens: number;
+    candidatesTokens: number;
+    totalTokens: number;
+    lastUsedAt: string | null;
+  };
+  byFeature: AdminUserAiUsageFeature[];
+}
+
 export interface AdminUserDetail extends AdminUserItem {
   stats: {
     totalSessions: number;
@@ -108,6 +128,7 @@ export interface AdminUserDetail extends AdminUserItem {
     freeSpeaking: number;
     avgScore: number;
   };
+  aiUsage: AdminUserAiUsage;
 }
 
 export interface AdminUserListResponse {

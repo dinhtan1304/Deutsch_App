@@ -9,7 +9,8 @@ import {
 } from '@/components/ui/Icons';
 import { useIsExamUnlocked } from '@/hooks/useSubscription';
 import { UpgradeModal } from '@/components/subscription/UpgradeModal';
-import { ACCENT, STATUS } from '@/lib/tokens';
+import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import { ChooseExam } from './_sections/ChooseExam';
 
 // ─── Data ──────────────────────────────────────────────────────────────────────
 type CardDef = {
@@ -288,6 +289,44 @@ export default function PracticeTestPage() {
           />
         ))}
       </div>
+
+      {/* ── B1 Prep: chọn chứng chỉ + link sang cẩm nang đầy đủ ── */}
+      <div className="mt-12">
+        <ChooseExam />
+      </div>
+
+      {/* CTA banner: Xem cẩm nang đầy đủ */}
+      <Link
+        href="/practice-test/huong-dan-b1"
+        className="group block rounded-2xl p-5 mb-8 transition-transform hover:-translate-y-0.5"
+        style={{
+          backgroundColor: 'var(--theme-bg-card)',
+          border: '1px solid var(--theme-border)',
+          boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.05)',
+        }}
+      >
+        <div className="flex items-center gap-4">
+          <div
+            className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0"
+            style={{ background: GRADIENT.examWriting }}
+          >
+            <IconBookOpen size={20} className="text-white" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-h3 font-bold" style={{ color: 'var(--theme-text-primary)' }}>
+              Cẩm nang luyện thi B1 đầy đủ
+            </p>
+            <p className="text-body" style={{ color: 'var(--theme-text-muted)' }}>
+              Cấu trúc đề, lộ trình 12 tuần, mẫu Schreiben, Redemittel Sprechen, ngữ pháp & FAQ
+            </p>
+          </div>
+          <IconArrowRight
+            size={20}
+            className="shrink-0 transform group-hover:translate-x-1 transition-transform"
+            style={{ color: 'var(--theme-text-muted)' }}
+          />
+        </div>
+      </Link>
 
       <UpgradeModal
         open={upgradeOpen}
