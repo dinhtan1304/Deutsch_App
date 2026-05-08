@@ -9,7 +9,8 @@ import { useSettingsStore } from '@/stores/settingsStore';
 import { useAddToHistory } from '@/hooks/useHistory';
 import { IconVolume, IconStar, IconPlus, IconCheck } from '@/components/ui/Icons';
 import { useCreatePersonalWord } from '@/hooks/usePersonalWords';
-import Image from 'next/image' 
+import { speakGerman, prefetchAudio } from '@/lib/utils';
+import Image from 'next/image'
 
 interface WordCardProps {
   word: Word;
@@ -87,13 +88,15 @@ export function WordCard({
 
   const speakWord = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (typeof window !== 'undefined' && 'speechSynthesis' in window && settings.soundEnabled) {
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(`${word.article} ${word.word}`);
-      utterance.lang = 'de-DE';
-      utterance.rate = settings.speechRate;
-      window.speechSynthesis.speak(utterance);
+    if (settings.soundEnabled) {
+      speakGerman(`${word.article} ${word.word}`);
     }
+  };
+
+  // Warm the cache on hover so the actual click feels instant (~200ms head
+  // start in the common case where the user pauses before clicking).
+  const prewarmAudio = () => {
+    if (settings.soundEnabled) prefetchAudio(`${word.article} ${word.word}`);
   };
 
   const hasImage = word.imageUrl && !imageError;
@@ -122,7 +125,7 @@ export function WordCard({
                 {word.translationEn}
               </p>
             </div>
-            <button onClick={speakWord}
+            <button onClick={speakWord} onMouseEnter={prewarmAudio} onFocus={prewarmAudio}
               className="w-8 h-8 rounded-lg flex items-center justify-center transition-all hover:scale-110"
               style={{ backgroundColor: styles.bg, color: styles.text }}>
               <IconVolume size={15} />
@@ -171,7 +174,7 @@ export function WordCard({
                 <span className="text-title font-bold" style={{ color: 'var(--theme-text-primary)' }}>
                   {word.word}
                 </span>
-                <button onClick={speakWord}
+                <button onClick={speakWord} onMouseEnter={prewarmAudio} onFocus={prewarmAudio}
                   className="w-7 h-7 flex items-center justify-center rounded-lg transition-all hover:scale-110"
                   style={{ backgroundColor: styles.bg, color: styles.text }}
                   title="Nghe phát âm">

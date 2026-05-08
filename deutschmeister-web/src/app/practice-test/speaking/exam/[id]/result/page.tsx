@@ -7,6 +7,7 @@ import { useExamSpeakingSession } from '@/hooks/useExamSpeaking';
 import { ExamSpeakingTeil, TeilGrading } from '@/lib/api/examSpeaking';
 import { PageHeader, FixedActionBar } from '@/components/ui';
 import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import { synthesizeAudio } from '@/lib/utils';
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
 function IconLoader({ size = 24, style }: { size?: number; style?: React.CSSProperties }) {
@@ -89,25 +90,47 @@ function NativeSpeakerPlayer({ text }: { text: string }) {
   const wordCount = text.split(/\s+/).length;
   const duration = Math.max(15, Math.round(wordCount / 110 * 60));
 
-  const toggle = useCallback(() => {
-    if (playing) {
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  const stop = useCallback(() => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       window.speechSynthesis.cancel();
-      setPlaying(false);
-      if (intervalRef.current) clearInterval(intervalRef.current);
-    } else {
-      window.speechSynthesis.cancel();
-      setProgress(0);
+    }
+    setPlaying(false);
+    if (intervalRef.current) clearInterval(intervalRef.current);
+  }, []);
+
+  const toggle = useCallback(async () => {
+    if (playing) { stop(); return; }
+    setProgress(0);
+    const startTimer = () => {
+      let elapsed = 0;
+      intervalRef.current = setInterval(() => { elapsed++; setProgress(Math.min(elapsed / duration, 0.99)); }, 1000);
+    };
+    try {
+      const audio = await synthesizeAudio(text);
+      audio.playbackRate = 0.85;
+      audio.onplay = () => { setPlaying(true); startTimer(); };
+      audio.onended = () => { setPlaying(false); setProgress(1); if (intervalRef.current) clearInterval(intervalRef.current); };
+      audio.onerror = () => stop();
+      audioRef.current = audio;
+      await audio.play();
+    } catch (err) {
+      console.warn('[ExamSpeakingResult] backend failed, falling back to Web Speech API:', err);
       const u = new SpeechSynthesisUtterance(text);
       u.lang = 'de-DE'; u.rate = 0.85;
       u.onend = () => { setPlaying(false); setProgress(1); if (intervalRef.current) clearInterval(intervalRef.current); };
       window.speechSynthesis.speak(u);
       setPlaying(true);
-      let elapsed = 0;
-      intervalRef.current = setInterval(() => { elapsed++; setProgress(Math.min(elapsed / duration, 0.99)); }, 1000);
+      startTimer();
     }
-  }, [playing, text, duration]);
+  }, [playing, text, duration, stop]);
 
-  useEffect(() => () => { window.speechSynthesis.cancel(); if (intervalRef.current) clearInterval(intervalRef.current); }, []);
+  useEffect(() => () => stop(), [stop]);
 
   const elapsed = Math.round(progress * duration);
   const fmt = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;

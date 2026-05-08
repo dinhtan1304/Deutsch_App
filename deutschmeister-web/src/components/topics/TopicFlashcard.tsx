@@ -3,6 +3,7 @@
 import { useReducer, useCallback, useEffect } from 'react';
 import { ACCENT, STATUS } from '@/lib/tokens';
 import type { TopicWord } from '@/types/topic';
+import { speakGerman } from '@/lib/utils';
 
 // ─── Icons ───
 function IconVolume({ size = 16 }: { size?: number }) {
@@ -164,9 +165,7 @@ export function TopicFlashcard({ words, topicColor, onMarkLearned }: Props) {
   const total = deck.length;
 
   const playAudio = useCallback((text: string) => {
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = 'de-DE'; u.rate = 0.85;
-    speechSynthesis.speak(u);
+    speakGerman(text);
   }, []);
 
   const handleKnown = useCallback(() => {

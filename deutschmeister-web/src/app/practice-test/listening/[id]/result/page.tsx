@@ -7,6 +7,7 @@ import { useListeningSession } from '@/hooks/useListening';
 import { ListeningQuestion } from '@/lib/api/listening';
 import { PageHeader, FixedActionBar } from '@/components/ui';
 import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import { speakGerman as speakText } from '@/lib/utils';
 
 function IconVolume2({ size = 14, style }: { size?: number; style?: React.CSSProperties }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" /><path d="M15.54 8.46a5 5 0 0 1 0 7.07" /></svg>;
@@ -33,14 +34,6 @@ function getGradeInfo(score: number): { emoji: string; label: string; color: str
   if (score >= 60) return { emoji: '👍', label: 'Khá tốt!',         color: STATUS.warning, bg: `${STATUS.warning}1F` };
   if (score >= 40) return { emoji: '📖', label: 'Cần cố gắng thêm', color: ACCENT.games,   bg: `${ACCENT.games}1F` };
   return              { emoji: '💪', label: 'Hãy ôn luyện thêm', color: STATUS.danger,  bg: `${STATUS.danger}1F` };
-}
-
-function speakText(text: string) {
-  if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
-  window.speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(text);
-  u.lang = 'de-DE'; u.rate = 0.85;
-  window.speechSynthesis.speak(u);
 }
 
 // ─── Score Ring ───

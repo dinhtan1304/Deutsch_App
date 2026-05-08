@@ -6,6 +6,7 @@ import { useExamListeningSession } from '@/hooks/useExamListening';
 import { ExamListeningTeil, TeilGradingDetail, ExamListeningQuestion } from '@/lib/api/examListening';
 import { PageHeader, FixedActionBar } from '@/components/ui';
 import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import { speakGerman as speakText } from '@/lib/utils';
 
 function IconCheck({ size = 16 }: { size?: number }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}><polyline points="20 6 9 17 4 12" /></svg>;
@@ -30,14 +31,6 @@ function IconShare({ size = 16 }: { size?: number }) {
 }
 function IconSparkles({ size = 16 }: { size?: number }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" /><path d="M5 3v4" /><path d="M3 5h4" /><path d="M21 17v4" /><path d="M19 19h4" /></svg>;
-}
-
-function speakText(text: string) {
-  if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
-  window.speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(text);
-  u.lang = 'de-DE'; u.rate = 0.85;
-  window.speechSynthesis.speak(u);
 }
 
 function taskTypeLabel(type: string) {

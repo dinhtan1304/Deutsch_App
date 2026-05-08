@@ -27,7 +27,10 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name
 logger = logging.getLogger("tts")
 
 SHARED_SECRET = os.environ.get("TTS_SHARED_SECRET", "")
-MAX_TEXT_LEN = int(os.environ.get("TTS_MAX_TEXT_LEN", "500"))
+# 5000 chars covers Goethe B1 listening passages with headroom. Coqui's
+# internal sentence splitter handles long input fine; the only cost is a
+# longer first-synthesis before the disk cache kicks in.
+MAX_TEXT_LEN = int(os.environ.get("TTS_MAX_TEXT_LEN", "5000"))
 FFMPEG_BIN = os.environ.get("FFMPEG_BIN", "ffmpeg")
 
 app = FastAPI(title="DeutschMeister TTS", version="0.1.0")

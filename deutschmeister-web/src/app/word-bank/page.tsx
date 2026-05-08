@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic';
 import { useAuthStore } from '@/stores/authStore';
 import { AuthGate } from '@/components/ui';
 import { ACCENT, GRADIENT } from '@/lib/tokens';
+import { speakGerman } from '@/lib/utils';
 import { WordBankCard } from '@/components/word-bank/WordBankCard';
 import { WordDetailModal } from '@/components/word-bank/WordDetailModal';
 import { SRSBanner } from '@/components/word-bank/SRSBanner';
@@ -63,12 +64,7 @@ export default function WordBankPage() {
   const totalPages = wordsData?.totalPages ?? 1;
 
   const speak = useCallback((text: string) => {
-    if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
-    window.speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = 'de-DE';
-    u.rate = 0.9;
-    window.speechSynthesis.speak(u);
+    speakGerman(text);
   }, []);
 
   const handleImport = (rows: ImportRow[]) => {

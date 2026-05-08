@@ -8,6 +8,7 @@ import { ExamListeningTeil, ExamListeningQuestion } from '@/lib/api/examListenin
 import { EXAM_LISTENING_DISPLAY } from '@/lib/examConfig';
 import { PageHeader, FixedActionBar } from '@/components/ui';
 import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import { synthesizeAudio } from '@/lib/utils';
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
 function IconChevronLeft({ size = 16 }: { size?: number }) {
@@ -49,23 +50,43 @@ function TTSPlayer({ texts, speed, onSpeedChange, playCount, onPlay }: {
   onPlay: () => void;
 }) {
   const [playing, setPlaying] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const fullScript = texts.map(t => t.content).join('\n\n');
 
-  const handlePlay = () => {
-    if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
-    if (playing) {
-      window.speechSynthesis.cancel();
-      setPlaying(false);
-      return;
+  const stopAll = useCallback(() => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
     }
-    window.speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(fullScript);
-    u.lang = 'de-DE';
-    u.rate = speed;
-    u.onstart = () => setPlaying(true);
-    u.onend = () => { setPlaying(false); onPlay(); };
-    u.onerror = () => setPlaying(false);
-    window.speechSynthesis.speak(u);
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+    }
+    setPlaying(false);
+  }, []);
+
+  useEffect(() => () => stopAll(), [stopAll]);
+
+  const handlePlay = async () => {
+    if (playing) { stopAll(); return; }
+    try {
+      const audio = await synthesizeAudio(fullScript);
+      audio.playbackRate = speed;
+      audio.onplay = () => setPlaying(true);
+      audio.onended = () => { setPlaying(false); onPlay(); };
+      audio.onerror = () => setPlaying(false);
+      audioRef.current = audio;
+      await audio.play();
+    } catch (err) {
+      console.warn('[ExamListening] backend failed, falling back to Web Speech API:', err);
+      if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+      const u = new SpeechSynthesisUtterance(fullScript);
+      u.lang = 'de-DE';
+      u.rate = speed;
+      u.onstart = () => setPlaying(true);
+      u.onend = () => { setPlaying(false); onPlay(); };
+      u.onerror = () => setPlaying(false);
+      window.speechSynthesis.speak(u);
+    }
   };
 
   return (

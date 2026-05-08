@@ -8,6 +8,7 @@ import { ReadingQuestion, VocabHighlight } from '@/lib/api/reading';
 import { HighlightedText } from '@/components/word-highlight/HighlightedText';
 import { PageHeader, FixedActionBar } from '@/components/ui';
 import { ACCENT, GRADIENT } from '@/lib/tokens';
+import { synthesizeAudio } from '@/lib/utils';
 import {
   IconLoader, IconSend, IconCheck,
   IconPlay, IconPause, IconClock,
@@ -44,20 +45,47 @@ function AudioPlayer({ passage }: { passage: string }) {
   const [elapsed, setElapsed] = useState(0);
   const [speed, setSpeed] = useState(1.0);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const wordCount = passage.split(/\s+/).length;
   const duration = Math.max(30, Math.round(wordCount / 110 * 60));
   const progress = Math.min(elapsed / duration, 1);
   const fmt = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
 
-  const toggle = useCallback(() => {
-    if (isPlaying) {
+  const stop = useCallback(() => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       window.speechSynthesis.cancel();
-      setIsPlaying(false);
-      if (intervalRef.current) clearInterval(intervalRef.current);
-    } else {
-      window.speechSynthesis.cancel();
-      setElapsed(0);
+    }
+    setIsPlaying(false);
+    if (intervalRef.current) clearInterval(intervalRef.current);
+  }, []);
+
+  const toggle = useCallback(async () => {
+    if (isPlaying) { stop(); return; }
+    setElapsed(0);
+    try {
+      const audio = await synthesizeAudio(passage);
+      audio.playbackRate = 0.85 * speed;
+      audio.onplay = () => {
+        setIsPlaying(true);
+        intervalRef.current = setInterval(() => setElapsed(e => e + 1), 1000);
+      };
+      audio.onended = () => {
+        setIsPlaying(false);
+        if (intervalRef.current) clearInterval(intervalRef.current);
+      };
+      audio.onerror = () => {
+        setIsPlaying(false);
+        if (intervalRef.current) clearInterval(intervalRef.current);
+      };
+      audioRef.current = audio;
+      await audio.play();
+    } catch (err) {
+      console.warn('[ReadingAudio] backend failed, falling back to Web Speech API:', err);
       const u = new SpeechSynthesisUtterance(passage);
       u.lang = 'de-DE';
       u.rate = 0.85 * speed;
@@ -69,12 +97,9 @@ function AudioPlayer({ passage }: { passage: string }) {
       setIsPlaying(true);
       intervalRef.current = setInterval(() => setElapsed(e => e + 1), 1000);
     }
-  }, [isPlaying, passage, speed]);
+  }, [isPlaying, passage, speed, stop]);
 
-  useEffect(() => () => {
-    window.speechSynthesis.cancel();
-    if (intervalRef.current) clearInterval(intervalRef.current);
-  }, []);
+  useEffect(() => () => stop(), [stop]);
 
   return (
     <div className="rounded-2xl p-3.5 mb-4 border"
@@ -93,7 +118,7 @@ function AudioPlayer({ passage }: { passage: string }) {
           </div>
         </div>
         <select value={speed}
-          onChange={e => { setSpeed(Number(e.target.value)); if (isPlaying) { window.speechSynthesis.cancel(); setIsPlaying(false); if (intervalRef.current) clearInterval(intervalRef.current); } }}
+          onChange={e => { setSpeed(Number(e.target.value)); if (isPlaying) stop(); }}
           className="rounded-lg text-[10px] font-bold outline-none cursor-pointer"
           style={{ backgroundColor: 'var(--theme-bg-card)', color: 'var(--theme-text-secondary)', border: '1px solid var(--theme-border)', padding: '5px 8px' }}>
           <option value={0.75}>0.75x</option>

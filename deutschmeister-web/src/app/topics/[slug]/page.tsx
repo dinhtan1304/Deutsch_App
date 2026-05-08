@@ -13,6 +13,7 @@ import {
   IconLightbulb, IconCards, IconPenLine, IconLink,
   IconHeadphones, IconKeyboard, IconFlame,
 } from '@/components/ui/Icons';
+import { speakGerman } from '@/lib/utils';
 import { TopicFlashcard } from '@/components/topics/TopicFlashcard';
 import { TopicQuiz } from '@/components/topics/TopicQuiz';
 import { TopicMatching } from '@/components/topics/TopicMatching';
@@ -423,9 +424,7 @@ export default function TopicDetailPage() {
                       
                       const handlePlay = () => {
                         const text = word.article ? `${word.article} ${word.word}` : word.word;
-                        const u = new SpeechSynthesisUtterance(text);
-                        u.lang = 'de-DE'; u.rate = 0.9;
-                        speechSynthesis.speak(u);
+                        speakGerman(text);
                       };
 
                       return (
@@ -619,11 +618,7 @@ export default function TopicDetailPage() {
           <TopicWordDetailModal
             word={selectedWord}
             onClose={() => setSelectedWord(null)}
-            onSpeak={(text) => {
-              const u = new SpeechSynthesisUtterance(text);
-              u.lang = 'de-DE'; u.rate = 0.9;
-              speechSynthesis.speak(u);
-            }}
+            onSpeak={(text) => speakGerman(text)}
           />
         )}
       </div>

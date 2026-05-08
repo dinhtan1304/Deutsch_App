@@ -7,6 +7,7 @@ import { useListeningSession, useSubmitListening } from '@/hooks/useListening';
 import { ListeningQuestion } from '@/lib/api/listening';
 import { PageHeader, FixedActionBar } from '@/components/ui';
 import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import { synthesizeAudio } from '@/lib/utils';
 
 function IconHeadphones({ size = 20, style }: { size?: number; style?: React.CSSProperties }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}><path d="M3 18v-6a9 9 0 0 1 18 0v6" /><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z" /></svg>;
@@ -26,28 +27,56 @@ function TTSPlayer({ text }: { text: string }) {
   const [playing, setPlaying] = useState(false);
   const [playCount, setPlayCount] = useState(0);
   const [speed, setSpeed] = useState(1.0);
-  const utterRef = useRef<SpeechSynthesisUtterance | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const stop = useCallback(() => {
-    if (typeof window !== 'undefined') window.speechSynthesis.cancel();
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+    }
     setPlaying(false);
   }, []);
 
-  const play = useCallback(() => {
+  // Web Speech API fallback when the backend TTS is unreachable.
+  const playViaBrowser = useCallback(() => {
     if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
-    stop();
     const u = new SpeechSynthesisUtterance(text);
     u.lang = 'de-DE';
     u.rate = speed;
     u.onstart = () => setPlaying(true);
     u.onend = () => { setPlaying(false); setPlayCount(c => c + 1); };
     u.onerror = () => setPlaying(false);
-    utterRef.current = u;
     window.speechSynthesis.speak(u);
-    setPlayCount(c => c + 1);
-  }, [text, speed, stop]);
+  }, [text, speed]);
 
-  useEffect(() => () => { if (typeof window !== 'undefined') window.speechSynthesis.cancel(); }, []);
+  const play = useCallback(async () => {
+    stop();
+    try {
+      const audio = await synthesizeAudio(text);
+      audio.playbackRate = speed;
+      audio.onplay = () => setPlaying(true);
+      audio.onended = () => { setPlaying(false); setPlayCount(c => c + 1); };
+      audio.onerror = () => setPlaying(false);
+      audioRef.current = audio;
+      await audio.play();
+    } catch (err) {
+      console.warn('[TTSPlayer] backend failed, falling back to Web Speech API:', err);
+      playViaBrowser();
+    }
+  }, [text, speed, stop, playViaBrowser]);
+
+  useEffect(() => () => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
+    }
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+    }
+  }, []);
 
   return (
     <div className="rounded-3xl border p-6 transition-all duration-300"

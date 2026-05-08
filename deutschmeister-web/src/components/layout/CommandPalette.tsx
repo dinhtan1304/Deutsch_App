@@ -7,6 +7,7 @@ import { useAutoTranslate } from '@/hooks/useAutoTranslate';
 import { type TranslateLang } from '@/lib/api/translation';
 import { NAV_FLAT, type NavItem } from '@/config/navigation';
 import { ACCENT } from '@/lib/tokens';
+import { speakGerman } from '@/lib/utils';
 
 /**
  * Global command palette — Cmd/Ctrl+K triggered. Three modes based on input:
@@ -112,8 +113,13 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
 
   const speakTranslation = useCallback(() => {
     if (!translated) return;
+    if (tlTo === 'de') {
+      speakGerman(translated);
+      return;
+    }
+    // Vietnamese stays on Web Speech API — backend TTS only handles German.
     const utter = new SpeechSynthesisUtterance(translated);
-    utter.lang = tlTo === 'de' ? 'de-DE' : 'vi-VN';
+    utter.lang = 'vi-VN';
     speechSynthesis.speak(utter);
   }, [translated, tlTo]);
 

@@ -8,7 +8,8 @@ import { GenderTip } from './GenderTip';
 import { IconStar, IconX, IconVolume, IconCheck, IconPlus, IconLoader, IconBookOpen, IconLightbulb } from '@/components/ui/Icons';
 import { useQuickAddWithCollection } from '@/hooks/useQuickAddWithCollection';
 import { AddToCollectionPicker } from '@/components/word-bank/AddToCollectionPicker';
-import Image from 'next/image' 
+import { speakGerman } from '@/lib/utils';
+import Image from 'next/image'
 
 interface WordDetailModalProps {
   word: Word | null;
@@ -67,16 +68,14 @@ export function WordDetailModal({
   useEffect(() => { reset(); }, [word?.id, reset]);
 
   const speak = useCallback((text: string) => {
-    if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
-    window.speechSynthesis.cancel();
     setIsSpeaking(true);
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = 'de-DE';
-    u.rate = settings.speechRate;
-    u.onend = () => setIsSpeaking(false);
-    u.onerror = () => setIsSpeaking(false);
-    window.speechSynthesis.speak(u);
-  }, [settings.speechRate]);
+    speakGerman(text);
+    // Best-effort end signal — backend audio length varies, so use a rough
+    // heuristic instead of precise tracking. ~250ms per word is close enough
+    // to keep the UI indicator honest without instrumenting the player.
+    const ms = Math.max(800, text.split(/\s+/).length * 250);
+    window.setTimeout(() => setIsSpeaking(false), ms);
+  }, []);
 
   useEffect(() => {
     if (isOpen && word && settings.autoPlaySound && settings.soundEnabled) {

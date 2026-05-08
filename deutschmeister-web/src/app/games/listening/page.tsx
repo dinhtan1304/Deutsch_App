@@ -40,14 +40,7 @@ function shuffle<T>(arr: T[]): T[] {
   return [...arr].sort(() => Math.random() - 0.5);
 }
 
-function speakGerman(text: string, rate = 0.85) {
-  if (typeof window === 'undefined' || !window.speechSynthesis) return;
-  window.speechSynthesis.cancel();
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = 'de-DE';
-  utterance.rate = rate;
-  window.speechSynthesis.speak(utterance);
-}
+import { speakGerman, prefetchAudio } from '@/lib/utils';
 
 export default function ListeningQuizPage() {
   const router = useRouter();
@@ -141,6 +134,12 @@ export default function ListeningQuizPage() {
     // Auto-play first word after state settles
     setTimeout(() => playCurrentWord(qs[0]!.correct), 300);
   };
+
+  // Warm the next question's audio so the next "Replay" / auto-play is instant.
+  useEffect(() => {
+    const next = questions[index + 1];
+    if (next?.correct?.word) prefetchAudio(next.correct.word);
+  }, [questions, index]);
 
   const handleReplay = useCallback(() => {
     const q = questions[index];

@@ -6,7 +6,8 @@ import { ACCENT, STATUS } from '@/lib/tokens';
 import type { TopicWord } from '@/types/topic';
 import { useQuickAddWithCollection } from '@/hooks/useQuickAddWithCollection';
 import { AddToCollectionPicker } from '@/components/word-bank/AddToCollectionPicker';
-import Image from 'next/image' 
+import { speakGerman } from '@/lib/utils';
+import Image from 'next/image'
 
 type SvgIconProps = { size?: number } & Omit<React.SVGAttributes<SVGSVGElement>, 'width' | 'height'>;
 
@@ -93,10 +94,7 @@ export function TopicWordCard({
   const handlePlayAudio = () => {
     const fullWord = word.article ? `${word.article} ${word.word}` : word.word;
     if (onPlayAudio) { onPlayAudio(fullWord); return; }
-    const utterance = new SpeechSynthesisUtterance(fullWord);
-    utterance.lang = 'de-DE';
-    utterance.rate = 0.9;
-    speechSynthesis.speak(utterance);
+    speakGerman(fullWord);
   };
 
   return (

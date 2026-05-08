@@ -6,6 +6,7 @@ import { ACCENT, STATUS } from '@/lib/tokens';
 import { useDictionaryLookup, useCheckWordBank } from '@/hooks/useDictionaryLookup';
 import { useQuickAddWithCollection } from '@/hooks/useQuickAddWithCollection';
 import { AddToCollectionPicker } from '@/components/word-bank/AddToCollectionPicker';
+import { speakGerman } from '@/lib/utils';
 
 interface PopupContentProps {
   word: string;
@@ -33,13 +34,7 @@ export function PopupContent({ word }: PopupContentProps) {
   const { isAdding, isAdded, pendingWordId, quickAdd, closePicker } = useQuickAddWithCollection();
 
   const handleSpeak = useCallback((text: string) => {
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'de-DE';
-      utterance.rate = 0.85;
-      window.speechSynthesis.speak(utterance);
-    }
+    speakGerman(text);
   }, []);
 
   const handleAddToWordBank = useCallback(async () => {

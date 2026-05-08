@@ -3,6 +3,7 @@
 import { useReducer, useEffect, useCallback } from 'react';
 import { ACCENT, STATUS, GRADIENT } from '@/lib/tokens';
 import type { TopicWord } from '@/types/topic';
+import { speakGerman } from '@/lib/utils';
 
 function IconVolume({ size = 16 }: { size?: number }) {
   return (
@@ -181,9 +182,7 @@ export function TopicQuiz({ words, topicColor, onMarkLearned }: Props) {
   }, [current, isAnswered, handleSelect, handleNext]);
 
   const playAudio = (text: string) => {
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = 'de-DE'; u.rate = 0.85;
-    speechSynthesis.speak(u);
+    speakGerman(text);
   };
 
   if (words.length < 4) {

@@ -37,13 +37,7 @@ function IconShuffle({ size = 16 }: { size?: number }) {
   );
 }
 
-function speakWord(text: string, rate = 0.85) {
-  if (typeof window === 'undefined' || !window.speechSynthesis) return;
-  window.speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(text);
-  u.lang = 'de-DE'; u.rate = rate;
-  window.speechSynthesis.speak(u);
-}
+import { speakGerman as speakWord, prefetchAudio } from '@/lib/utils';
 
 export default function FlashcardsPage() {
   const router = useRouter();
@@ -152,8 +146,19 @@ export default function FlashcardsPage() {
     if (phase !== 'playing') return;
     if (!settings.autoPlaySound) return;
     if (!currentWord?.word) return;
-    speakWord(currentWord.word, settings.speechRate);
+    speakWord(currentWord.word, settings.speechRate < 0.7);
   }, [phase, index, currentWord, settings.autoPlaySound, settings.speechRate]);
+
+  // Warm the cache for the next 2 cards so their first play is instant.
+  // Fire-and-forget — the prefetch dedupes against the in-flight map, so a
+  // hot back-to-back card flip won't double-fetch.
+  useEffect(() => {
+    if (phase !== 'playing' || !words) return;
+    for (let i = 1; i <= 2; i++) {
+      const next = words[index + i];
+      if (next?.word) prefetchAudio(next.word);
+    }
+  }, [phase, index, words]);
 
   const timer = useGameTimer(phase === 'playing');
 
@@ -292,7 +297,7 @@ export default function FlashcardsPage() {
 
               {/* Audio button */}
               <button
-                onClick={(e) => { e.stopPropagation(); speakWord(currentWord.word, settings.speechRate); }}
+                onClick={(e) => { e.stopPropagation(); speakWord(currentWord.word, settings.speechRate < 0.7); }}
                 className="w-10 h-10 rounded-xl flex items-center justify-center transition-all hover:scale-110 mb-5"
                 style={{ backgroundColor: 'rgba(59,130,246,.1)', color: ACCENT.srs }}>
                 <IconVolume size={20} />
@@ -376,7 +381,7 @@ export default function FlashcardsPage() {
           <IconChevronLeft size={18} />
         </button>
         <button
-          onClick={() => speakWord(currentWord?.word || '', settings.speechRate)}
+          onClick={() => speakWord(currentWord?.word || '', settings.speechRate < 0.7)}
           className="p-2.5 rounded-xl border transition-all hover:opacity-80"
           style={{ color: 'var(--theme-text-muted)', borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}
           title="Phát âm">

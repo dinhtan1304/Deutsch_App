@@ -9,7 +9,7 @@ services:
     environment:
       TTS_SHARED_SECRET: ${TTS_SHARED_SECRET:-change-me-in-prod}
       TTS_MODEL: tts_models/de/thorsten/vits
-      TTS_MAX_TEXT_LEN: "500"
+      TTS_MAX_TEXT_LEN: "5000"
     volumes:
       - tts-models:/models
 

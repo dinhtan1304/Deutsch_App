@@ -8,18 +8,11 @@ import { ExamReadingTeil, ExamTeilQuestion } from '@/lib/api/examReading';
 import { HighlightedText } from '@/components/word-highlight/HighlightedText';
 import { PageHeader, FixedActionBar } from '@/components/ui';
 import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import { speakGerman as speakText } from '@/lib/utils';
 import {
   IconChevronLeft, IconChevronRight, IconLoader,
   IconVolume2, IconCheck, IconSend,
 } from '../../icons';
-
-function speakText(text: string) {
-  if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
-  window.speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(text);
-  u.lang = 'de-DE'; u.rate = 0.85;
-  window.speechSynthesis.speak(u);
-}
 
 // ─── TextCard ─────────────────────────────────────────────────────────────────
 function TextCard({ text }: { text: ExamReadingTeil['texts'][0] }) {

@@ -11,6 +11,7 @@ import { Gender, CEFRLevel, CATEGORIES, LEVELS } from '@/types';
 import { useAutoTranslate } from '@/hooks/useAutoTranslate';
 import { type TranslateLang } from '@/lib/api/translation';
 import { GRADIENT, ACCENT, STATUS } from '@/lib/tokens';
+import { speakGerman } from '@/lib/utils';
 import { GridSkeleton } from '@/components/ui';
 import {
   IconBook, IconSearch, IconLightbulb, IconStar, IconHistory, IconX,
@@ -58,6 +59,10 @@ function CopyBtn({ text }: { text: string }) {
 
 function SpeakBtn({ text, lang }: { text: string; lang: string }) {
   const speak = () => {
+    if (lang === 'de-DE') {
+      speakGerman(text);
+      return;
+    }
     const utter = new SpeechSynthesisUtterance(text);
     utter.lang = lang;
     speechSynthesis.speak(utter);
