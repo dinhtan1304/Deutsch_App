@@ -36,6 +36,9 @@ export interface User {
   email: string;
   name: string | null;
   avatar: string | null;
+  bio?: string | null;
+  coverImage?: string | null;
+  isPublic?: boolean;
   role: string;
   createdAt: string;
   onboardingCompleted?: boolean;

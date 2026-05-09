@@ -221,7 +221,8 @@ export default function AdminUsersPage() {
             Không tìm thấy người dùng nào.
           </div>
         ) : (
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+          <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13, whiteSpace: 'nowrap' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid var(--theme-border)', backgroundColor: 'var(--theme-bg-secondary)' }}>
                 {['Người dùng', 'Email', 'Loại tài khoản', 'Vai trò', 'Hoạt động', 'Ngày tạo', ''].map(h => (
@@ -308,6 +309,7 @@ export default function AdminUsersPage() {
               })}
             </tbody>
           </table>
+          </div>
         )}
       </div>
 

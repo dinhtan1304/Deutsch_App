@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { useAuthStore } from '@/stores/authStore';
 import { AuthGate } from '@/components/ui';
 import { GRADIENT, ACCENT, STATUS } from '@/lib/tokens';
@@ -16,6 +17,7 @@ import { ProfileLearningRoadmap } from './_components/ProfileLearningRoadmap';
 import { ProfileHeroCard } from './_components/ProfileHeroCard';
 import { ProfileAnswerStats } from './_components/ProfileAnswerStats';
 import { ProfileQuickActions } from './_components/ProfileQuickActions';
+import { ProfileEditModal } from './_components/ProfileEditModal';
 
 const toLocalDateStr = (date: Date): string => date.toISOString().slice(0, 10);
 
@@ -35,6 +37,7 @@ export default function ProfilePage() {
   const { data: stats, isLoading } = useUserStats(isAuthenticated);
   const { data: xpInfo } = useXp();
   const { data: heatmapData } = useActivityHeatmap();
+  const [editOpen, setEditOpen] = useState(false);
 
   if (!_hasHydrated) {
     return (
@@ -70,7 +73,14 @@ export default function ProfilePage() {
     <div className="py-10 max-w-4xl mx-auto px-4 min-h-screen"
       style={{ backgroundColor: 'var(--theme-bg-body)', color: 'var(--theme-text-primary)', backgroundImage: 'radial-gradient(circle at 50% -20%, var(--color-accent-brand)12, transparent 70%)' }}>
 
-      <ProfileHeroCard user={user} xpInfo={xpInfo} isLoading={isLoading} points={correct} />
+      <ProfileHeroCard
+        user={user}
+        xpInfo={xpInfo}
+        isLoading={isLoading}
+        points={xpInfo?.xp ?? 0}
+        onEdit={() => setEditOpen(true)}
+      />
+      <ProfileEditModal open={editOpen} onClose={() => setEditOpen(false)} user={user} />
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         {statCards.map((card, i) => (

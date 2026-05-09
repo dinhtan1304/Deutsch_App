@@ -4,19 +4,13 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useWritingSession, useSaveDraft, useSubmitWriting } from '@/hooks/useWriting';
-import { IconBookOpen, IconChevronDown, IconChevronLeft, IconEye, IconEyeOff, IconLoader, IconPenLine, IconSave, IconSend } from '../icons';
-import { FixedActionBar } from '@/components/ui';
+import { IconBookOpen, IconChevronLeft, IconEye, IconEyeOff, IconLoader, IconPenLine, IconSave, IconSend } from '../icons';
+import { FixedActionBar, MobileSplitTabs } from '@/components/ui';
 import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 import { useUmlautTrigger, UMLAUT_TRIGGER_HINT } from '@/hooks/useUmlautTrigger';
 
-function IconChevronUp({ size = 14 }: { size?: number }) {
-  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}><polyline points="18 15 12 9 6 15" /></svg>;
-}
 function IconCheck({ size = 14, style }: { size?: number; style?: React.CSSProperties }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}><polyline points="20 6 9 17 4 12" /></svg>;
-}
-function IconPin({ size = 13 }: { size?: number }) {
-  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}><path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 1 1 0 0 0 1-1V4a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1 1 1 0 0 1 1 1z"/></svg>;
 }
 
 // ─── Helpers ───
@@ -52,21 +46,8 @@ export default function WritingEditorPage() {
   const [showHints, setShowHints] = useState(true);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const [stickyPromptOpen, setStickyPromptOpen] = useState(false);
-  const [showStickyPrompt, setShowStickyPrompt] = useState(false);
-  const promptRef = useRef<HTMLDivElement>(null);
+  const [mobileView, setMobileView] = useState<'task' | 'editor'>('task');
   useEffect(() => { if (session?.status === 'GRADED') router.replace(`/practice-test/writing/${id}/result`); }, [session?.status, id, router]);
-
-  useEffect(() => {
-    const el = promptRef.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => setShowStickyPrompt(!entry!.isIntersecting),
-      { threshold: 0, rootMargin: '-80px 0px 0px 0px' }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [session]);
 
   useEffect(() => {
     if (!text.trim() || !id) return;
@@ -196,44 +177,26 @@ export default function WritingEditorPage() {
           </div>
         </div>
 
-        {/* ── Sticky prompt bar on mobile ── */}
-        {showStickyPrompt && (
-          <div className="sticky z-20 -mx-6 lg:hidden px-6 pb-3" style={{ top: '64px', paddingTop: '8px' }}>
-            <div className="rounded-2xl border overflow-hidden transition-all"
-              style={{
-                borderColor: `${STATUS.info}40`,
-                backgroundColor: 'var(--theme-bg-card)',
-                boxShadow: '0 4px 20px rgba(0,0,0,.1)',
-              }}>
-              <button
-                onClick={() => setStickyPromptOpen(o => !o)}
-                className="w-full flex items-center gap-2 px-3 py-2.5 text-left transition-all"
-              >
-                <IconPin size={12} />
-                <IconBookOpen size={12} />
-                <span className="text-xs font-bold truncate flex-1" style={{ color: 'var(--theme-text-primary)' }}>
-                  Aufgabe / Đề bài
-                </span>
-                {stickyPromptOpen ? <IconChevronUp size={14} /> : <IconChevronDown size={14} />}
-              </button>
-              {stickyPromptOpen && (
-                <div className="border-t px-3 pb-3 pt-2" style={{ borderColor: 'var(--theme-border)', maxHeight: '40vh', overflowY: 'auto' }}>
-                  <p className="text-xs leading-relaxed whitespace-pre-line"
-                    style={{ color: 'var(--theme-text-primary)' }}>
-                    {session.prompt}
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
+        {/* Mobile-only tab switcher between prompt and editor */}
+        <MobileSplitTabs
+          view={mobileView}
+          onChange={setMobileView}
+          accent="writing"
+          taskLabel="Aufgabe / Đề bài"
+          editorLabel="Schreiben / Viết"
+          editorBadge={
+            <span className="text-[10px] font-mono opacity-80">
+              {countWords(text)} W
+            </span>
+          }
+        />
 
-        <div className="flex flex-col lg:flex-row gap-6">
+        <div className="flex flex-col lg:flex-row gap-6 mt-3 lg:mt-0">
 
           {/* Left Side: Prompt + Hints */}
-          <div className="lg:w-1/2 shrink-0 lg:sticky lg:top-20 lg:self-start lg:max-h-[calc(100vh-10rem)] lg:overflow-y-auto lg:pr-1 space-y-4">
+          <div className={`${mobileView === 'task' ? 'block' : 'hidden'} lg:block lg:w-1/2 shrink-0 lg:sticky lg:top-20 lg:self-start lg:max-h-[calc(100vh-10rem)] lg:overflow-y-auto lg:pr-1 space-y-4`}>
             {/* Prompt */}
-            <div ref={promptRef} className="rounded-xl border-2 p-4"
+            <div className="rounded-xl border-2 p-4"
               style={{ borderColor: `${STATUS.info}4D`, backgroundColor: `${STATUS.info}0A` }}>
               <h3 className="text-xs font-bold uppercase tracking-wider mb-2 flex items-center gap-1.5" style={{ color: STATUS.info }}>
                 <IconBookOpen size={13} /> Aufgabe / Đề bài
@@ -287,7 +250,7 @@ export default function WritingEditorPage() {
           </div>
 
           {/* Right Side: Text Editor */}
-          <div className="lg:w-1/2 min-w-0">
+          <div className={`${mobileView === 'editor' ? 'block' : 'hidden'} lg:block lg:w-1/2 min-w-0`}>
             <div className="rounded-2xl border overflow-hidden"
               style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
               {/* Editor header */}

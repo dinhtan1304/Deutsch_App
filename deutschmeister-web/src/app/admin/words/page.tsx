@@ -139,7 +139,8 @@ export default function AdminWordsPage() {
             Không tìm thấy từ nào.
           </div>
         ) : (
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+          <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13, whiteSpace: 'nowrap' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid var(--theme-border)' }}>
                 {['Từ', 'Dịch nghĩa', 'Level', 'Danh mục', ''].map(h => (
@@ -159,9 +160,16 @@ export default function AdminWordsPage() {
                       }}>
                         {w.article}
                       </span>
-                      <Link href={`/admin/words/${w.id}`} style={{ fontWeight: 600, color: 'var(--theme-text-primary)', textDecoration: 'none' }}>
-                        {w.word}
-                      </Link>
+                      <div>
+                        <Link href={`/admin/words/${w.id}`} style={{ fontWeight: 600, color: 'var(--theme-text-primary)', textDecoration: 'none' }}>
+                          {w.word}
+                        </Link>
+                        {w.pronunciation && (
+                          <div style={{ fontSize: 11, color: 'var(--theme-text-muted)', fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace', marginTop: 2 }}>
+                            [{w.pronunciation}]
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </td>
                   <td style={{ padding: '10px 14px', color: 'var(--theme-text-secondary)' }}>
@@ -192,6 +200,7 @@ export default function AdminWordsPage() {
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </div>
 

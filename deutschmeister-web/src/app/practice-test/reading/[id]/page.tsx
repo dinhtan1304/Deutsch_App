@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useReadingSession, useSubmitReading } from '@/hooks/useReading';
 import { ReadingQuestion, VocabHighlight } from '@/lib/api/reading';
 import { HighlightedText } from '@/components/word-highlight/HighlightedText';
-import { PageHeader, FixedActionBar } from '@/components/ui';
+import { PageHeader, FixedActionBar, MobileSplitTabs } from '@/components/ui';
 import { ACCENT, GRADIENT } from '@/lib/tokens';
 import { synthesizeAudio } from '@/lib/utils';
 import {
@@ -222,6 +222,7 @@ export default function ReadingSessionPage() {
   const { data: session, isLoading, error } = useReadingSession(id);
   const submitMutation = useSubmitReading();
   const [userAnswers, setUserAnswers] = useState<Record<string, string>>({});
+  const [mobileView, setMobileView] = useState<'task' | 'editor'>('task');
   const startTimeRef = useRef<number>(0);
 
   useEffect(() => {
@@ -305,9 +306,22 @@ export default function ReadingSessionPage() {
         </div>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-5">
+      <MobileSplitTabs
+        view={mobileView}
+        onChange={setMobileView}
+        accent="reading"
+        taskLabel="Passage / Bài đọc"
+        editorLabel="Fragen / Câu hỏi"
+        editorBadge={
+          <span className="text-[10px] font-mono opacity-80">
+            {answered}/{questions.length}
+          </span>
+        }
+      />
 
-        <div className="lg:w-1/2 shrink-0 lg:sticky lg:top-20 lg:self-start lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto lg:pr-1 space-y-4">
+      <div className="flex flex-col lg:flex-row gap-5 mt-3 lg:mt-0">
+
+        <div className={`${mobileView === 'task' ? 'block' : 'hidden'} lg:block lg:w-1/2 shrink-0 lg:sticky lg:top-20 lg:self-start lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto lg:pr-1 space-y-4`}>
           <AudioPlayer passage={session.passage} />
           <div className="rounded-2xl border p-5" style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
             <div className="text-[15px] leading-relaxed whitespace-pre-wrap"
@@ -320,7 +334,7 @@ export default function ReadingSessionPage() {
           )}
         </div>
 
-        <div className="lg:w-1/2 min-w-0 space-y-4">
+        <div className={`${mobileView === 'editor' ? 'block' : 'hidden'} lg:block lg:w-1/2 min-w-0 space-y-4`}>
           <h2 className="text-title font-bold" style={{ color: 'var(--theme-text-primary)' }}>
             Câu hỏi ({questions.length})
           </h2>

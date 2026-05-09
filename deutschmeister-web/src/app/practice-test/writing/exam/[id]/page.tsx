@@ -13,7 +13,7 @@ import { useUmlautTrigger, UMLAUT_TRIGGER_HINT } from '@/hooks/useUmlautTrigger'
 function IconLoader({ size = 24, style }: { size?: number; style?: React.CSSProperties }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="animate-spin" style={{ display: 'block', ...style }}><path d="M21 12a9 9 0 1 1-6.219-8.56" /></svg>;
 }
-import { FixedActionBar } from '@/components/ui';
+import { FixedActionBar, MobileSplitTabs } from '@/components/ui';
 
 function IconCheck({ size = 14, style }: { size?: number; style?: React.CSSProperties }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}><polyline points="20 6 9 17 4 12" /></svg>;
@@ -201,7 +201,14 @@ export default function ExamWritingPage() {
   const [confirmSubmit, setConfirmSubmit] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [showStickyPrompt, setShowStickyPrompt] = useState(false);
+  const [mobileView, setMobileView] = useState<'task' | 'editor'>('task');
   const promptRef = useRef<HTMLDivElement>(null);
+
+  // Reset to task view when switching Teile so user reads the new prompt first
+  const goToTeil = useCallback((i: number) => {
+    setActiveTeil(i);
+    setMobileView('task');
+  }, []);
   const autoSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const userTextsRef = useRef<Record<string, string>>({});
 
@@ -343,7 +350,7 @@ export default function ExamWritingPage() {
             const filled = (userTexts[`teil_${teil.number}`] ?? '').trim().length > 0;
             const active = i === activeTeil;
             return (
-              <button key={teil.number} onClick={() => setActiveTeil(i)}
+              <button key={teil.number} onClick={() => goToTeil(i)}
                 className="shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all border"
                 style={active
                   ? { background: GRADIENT.examWriting, color: 'white', borderColor: 'transparent', boxShadow: `0 4px 12px ${ACCENT.examWriting}40` }
@@ -360,10 +367,23 @@ export default function ExamWritingPage() {
 
       {/* ── Content ── */}
       <div className="px-6 pb-24">
-        <div className="flex flex-col lg:flex-row gap-8">
+        {/* Mobile-only tab switcher between task and editor */}
+        <MobileSplitTabs
+          view={mobileView}
+          onChange={setMobileView}
+          accent="examWriting"
+          taskLabel="Aufgabe / Đề bài"
+          editorLabel="Schreiben / Viết"
+          editorBadge={
+            <span className="text-[10px] font-mono opacity-80">
+              {countWords(userTexts[`teil_${currentTeil.number}`] ?? '')} W
+            </span>
+          }
+        />
+        <div className="flex flex-col lg:flex-row gap-8 mt-3 lg:mt-0">
 
           {/* Left Side: Exam Task */}
-          <div className="lg:w-1/2 shrink-0 lg:sticky lg:top-20 lg:self-start lg:max-h-[calc(100vh-12rem)] lg:overflow-y-auto lg:pr-1 space-y-4">
+          <div className={`${mobileView === 'task' ? 'block' : 'hidden'} lg:block lg:w-1/2 shrink-0 lg:sticky lg:top-20 lg:self-start lg:max-h-[calc(100vh-12rem)] lg:overflow-y-auto lg:pr-1 space-y-4`}>
             {/* Teil header */}
             <div className="flex items-center gap-3 mb-2">
               <span className="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-extrabold text-white shrink-0"
@@ -407,7 +427,7 @@ export default function ExamWritingPage() {
           </div>
 
           {/* Right Side: Editor */}
-          <div className="lg:w-1/2 min-w-0">
+          <div className={`${mobileView === 'editor' ? 'block' : 'hidden'} lg:block lg:w-1/2 min-w-0`}>
             <TeilWriter
               teil={currentTeil}
               value={userTexts[`teil_${currentTeil.number}`] ?? ''}
@@ -420,7 +440,7 @@ export default function ExamWritingPage() {
 
         {/* Fixed Action Bar */}
         <FixedActionBar columns={3}>
-          <button onClick={() => activeTeil > 0 && setActiveTeil(activeTeil - 1)}
+          <button onClick={() => activeTeil > 0 && goToTeil(activeTeil - 1)}
             disabled={activeTeil === 0}
             className="flex flex-col items-center gap-1 py-2 px-3 rounded-xl text-xs font-semibold transition-all hover:opacity-70 disabled:opacity-20"
             style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-secondary)' }}>
@@ -428,7 +448,7 @@ export default function ExamWritingPage() {
           </button>
 
           {!isLastTeil ? (
-            <button onClick={() => setActiveTeil(activeTeil + 1)}
+            <button onClick={() => goToTeil(activeTeil + 1)}
               className="flex flex-col items-center gap-1 py-2 px-3 rounded-xl text-xs font-bold text-white transition-all hover:-translate-y-0.5"
               style={{ background: GRADIENT.examWriting }}>
               <IconChevronRight size={16} /> Tiếp theo

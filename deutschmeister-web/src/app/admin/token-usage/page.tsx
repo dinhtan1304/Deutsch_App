@@ -249,8 +249,8 @@ export default function AdminTokenUsagePage() {
 
           {/* ── Top users ─────────────────────────────────────── */}
           <SL>Top người dùng sử dụng nhiều nhất</SL>
-          <div style={{ backgroundColor: 'var(--theme-bg-card)', borderRadius: 12, border: '1px solid var(--theme-border)', overflow: 'hidden' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <div style={{ backgroundColor: 'var(--theme-bg-card)', borderRadius: 12, border: '1px solid var(--theme-border)', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', whiteSpace: 'nowrap' }}>
               <thead>
                 <tr style={{ borderBottom: '1px solid var(--theme-border)' }}>
                   <th style={{ padding: '10px 16px', fontSize: 11, fontWeight: 600, color: 'var(--theme-text-muted)', textAlign: 'left' }}>#</th>

@@ -61,6 +61,8 @@ export const PRIMARY_NAV: NavItem[] = [
       { key: 'word-bank-srs', label: 'Ôn SRS',       href: '/word-bank/review',   icon: IconBrain, badge: 'srs-due' },
       { key: 'review-sm2',    label: 'Ôn tập',       href: '/review',             icon: IconRefresh, badge: 'builtin-due' },
       { key: 'topics',        label: 'Chủ đề',       href: '/topics',             icon: IconLayers },
+      { key: 'my-topics',     label: 'Bộ của tôi',   href: '/my-topics',          icon: IconNotebook },
+      { key: 'community-topics', label: 'Khám phá cộng đồng', href: '/community/topics', icon: IconLayers },
     ],
   },
   {
@@ -134,4 +136,6 @@ export const AUTH_HREFS: ReadonlySet<string> = new Set([
   '/profile',
   '/favorites',
   '/history',
+  '/my-topics',
+  '/my-topics/following',
 ]);

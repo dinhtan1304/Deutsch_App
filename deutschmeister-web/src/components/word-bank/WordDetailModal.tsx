@@ -108,6 +108,11 @@ export function WordDetailModal({ word, onClose, onSpeak, onToggleFavorite }: Wo
             </div>
             
             <div className="text-3xl mb-2">{displayWord()}</div>
+            {word.pronunciation && (
+              <p className="text-base mb-2 font-mono" style={{ color: 'var(--theme-text-muted)' }}>
+                [{word.pronunciation}]
+              </p>
+            )}
             <div className="mb-4">{renderDetails()}</div>
             
             <div className="flex flex-col gap-2 mt-4 text-sm">

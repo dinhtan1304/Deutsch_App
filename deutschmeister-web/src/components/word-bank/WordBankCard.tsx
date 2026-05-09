@@ -212,6 +212,13 @@ export function WordBankCard({ word, onToggleFavorite, onSpeak, collections = []
         </button>
       </div>
 
+      {/* IPA */}
+      {word.pronunciation && (
+        <p className="text-xs mb-2 font-mono" style={{ color: 'var(--theme-text-muted)' }}>
+          [{word.pronunciation}]
+        </p>
+      )}
+
       {/* Meaning & Secondary translation */}
       <div className="flex flex-col gap-1 mb-4">
         {word.translationVi && (

@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { usersApi, UpdateSettingsPayload, User } from '@/lib/api/users';
+import { usersApi, UpdateSettingsPayload, UpdateProfilePayload, User } from '@/lib/api/users';
 import { useAuthStore } from '@/stores/authStore';
 
 export function useProfile() {
@@ -17,23 +17,46 @@ export function useUpdateProfile() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: { name?: string; avatar?: string }) =>
+    mutationFn: (data: UpdateProfilePayload) =>
       usersApi.updateProfile(data),
     onSuccess: (updatedUser: User) => {
       queryClient.invalidateQueries({ queryKey: ['users', 'profile'] });
-      // Sync updated name/avatar to authStore so the navbar/header
-      // reflects the change immediately without requiring re-login.
-      // Merge into current user to preserve fields (role, etc.) not
-      // returned by the update endpoint.
+      // Sync updated profile fields to authStore so header/profile reflect
+      // the change immediately without re-login. Merge to preserve role etc.
       const currentUser = useAuthStore.getState().user;
       if (currentUser) {
         useAuthStore.getState().setUser({
           ...currentUser,
           name: updatedUser.name,
           avatar: updatedUser.avatar,
+          bio: updatedUser.bio,
+          coverImage: updatedUser.coverImage,
+          isPublic: updatedUser.isPublic,
         });
       }
     },
+  });
+}
+
+export function usePublicProfile(userId: string | null | undefined) {
+  return useQuery({
+    queryKey: ['users', 'public', userId],
+    queryFn: () => usersApi.getPublicProfile(userId!),
+    enabled: !!userId,
+    staleTime: 60 * 1000,
+    retry: false,
+  });
+}
+
+export function useUploadAvatar() {
+  return useMutation({
+    mutationFn: (file: File) => usersApi.uploadAvatar(file),
+  });
+}
+
+export function useUploadCover() {
+  return useMutation({
+    mutationFn: (file: File) => usersApi.uploadCover(file),
   });
 }
 

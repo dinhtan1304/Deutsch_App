@@ -95,16 +95,16 @@ export default function WritingListPage() {
         subtitle="AI tạo đề bài tiếng Đức — Viết và nhận phản hồi chi tiết"
         accent="writing"
         right={
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
             <Link href="/practice-test/writing/exam"
-              className="px-6 py-3 rounded-xl text-sm font-black border transition-all hover:bg-black/3 dark:hover:bg-white/5"
+              className="px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-black border transition-all hover:bg-black/3 dark:hover:bg-white/5 whitespace-nowrap"
               style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-primary)' }}>
               Theo đề chuẩn →
             </Link>
             <Link href="/practice-test/writing/new"
-              className="flex items-center gap-2 px-7 py-3.5 rounded-xl text-sm font-black text-white transition-all hover:scale-[1.02] active:scale-95 shadow-xl shadow-indigo-500/30"
+              className="flex items-center gap-2 px-4 sm:px-7 py-2.5 sm:py-3.5 rounded-xl text-xs sm:text-sm font-black text-white transition-all hover:scale-[1.02] active:scale-95 shadow-xl shadow-indigo-500/30 whitespace-nowrap"
               style={{ background: GRADIENT.writing }}>
-              <IconPlus size={20} /> Bài viết mới
+              <IconPlus size={18} /> Bài viết mới
             </Link>
           </div>
         }

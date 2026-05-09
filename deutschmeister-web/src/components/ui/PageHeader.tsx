@@ -37,8 +37,8 @@ export function PageHeader({ backHref, onBack, title, subtitle, accent, right }:
   );
 
   return (
-    <header className="flex items-start justify-between gap-4 mb-5">
-      <div className="min-w-0 flex-1">
+    <header className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4 mb-5">
+      <div className="min-w-0 sm:flex-1">
         {showBack && (
           <div className="mb-2">
             {backHref ? (
@@ -57,7 +57,7 @@ export function PageHeader({ backHref, onBack, title, subtitle, accent, right }:
           </p>
         )}
       </div>
-      {right && <div className="shrink-0">{right}</div>}
+      {right && <div className="sm:shrink-0">{right}</div>}
     </header>
   );
 }

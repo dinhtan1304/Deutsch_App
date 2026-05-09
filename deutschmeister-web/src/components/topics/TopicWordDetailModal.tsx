@@ -69,7 +69,13 @@ export function TopicWordDetailModal({ word, onClose, onSpeak }: TopicWordDetail
               {word.article && <span style={{ color: ac.color }} className="mr-2">{word.article}</span>}
               {word.word}
             </div>
-            
+
+            {word.pronunciation && (
+              <p className="text-base mb-2 font-mono" style={{ color: 'var(--theme-text-muted)' }}>
+                [{word.pronunciation}]
+              </p>
+            )}
+
             {word.plural && (
               <div className="mb-4">
                 <span className="text-sm font-medium" style={{ color: 'var(--theme-text-muted)' }}>

@@ -162,8 +162,8 @@ export default function AdminExamRagPage() {
       </div>
 
       {/* Table */}
-      <div style={{ borderRadius: 12, border: '1px solid var(--theme-border)', overflow: 'hidden' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+      <div style={{ borderRadius: 12, border: '1px solid var(--theme-border)', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13, whiteSpace: 'nowrap' }}>
           <thead>
             <tr style={{ backgroundColor: 'var(--theme-bg-card)' }}>
               {['File', 'Loại đề', 'Level', 'Kỹ năng', 'Chunks', 'Ngày upload', ''].map(h => (

@@ -160,16 +160,16 @@ export default function PremiumSpeakingListPage() {
         subtitle="AI tạo prompt tiếng Đức, ghi âm và nhận phản hồi chi tiết (v3)"
         accent="speaking"
         right={
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
             <Link href="/practice-test/speaking/exam"
-              className="px-6 py-3 rounded-xl text-sm font-black border transition-all hover:bg-black/3 dark:hover:bg-white/5"
+              className="px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-black border transition-all hover:bg-black/3 dark:hover:bg-white/5 whitespace-nowrap"
               style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-primary)' }}>
               Theo đề chuẩn →
             </Link>
             <Link href="/practice-test/speaking/new"
-              className="flex items-center gap-2 px-7 py-3.5 rounded-xl text-sm font-black text-white transition-all hover:scale-[1.02] active:scale-95 shadow-xl shadow-indigo-500/30"
+              className="flex items-center gap-2 px-4 sm:px-7 py-2.5 sm:py-3.5 rounded-xl text-xs sm:text-sm font-black text-white transition-all hover:scale-[1.02] active:scale-95 shadow-xl shadow-indigo-500/30 whitespace-nowrap"
               style={{ background: GRADIENT.speaking }}>
-              <IconPlus size={20} /> Bài nói mới
+              <IconPlus size={18} /> Bài nói mới
             </Link>
           </div>
         }

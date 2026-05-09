@@ -128,8 +128,8 @@ export default function AdminFeedbackPage() {
       </div>
 
       {/* Table */}
-      <div style={{ borderRadius: 12, border: '1px solid var(--theme-border)', overflow: 'hidden' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+      <div style={{ borderRadius: 12, border: '1px solid var(--theme-border)', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13, whiteSpace: 'nowrap' }}>
           <thead>
             <tr style={{ backgroundColor: 'var(--theme-bg-card)' }}>
               {['Loại', 'Nội dung', 'Người gửi', 'Trạng thái', 'Ngày gửi'].map(h => (

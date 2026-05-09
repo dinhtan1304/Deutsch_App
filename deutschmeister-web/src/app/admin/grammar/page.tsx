@@ -95,7 +95,8 @@ export default function AdminGrammarPage() {
         ) : !lessons.length ? (
           <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--theme-text-muted)', fontSize: 13 }}>Chưa có bài học nào.</div>
         ) : (
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+          <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13, whiteSpace: 'nowrap' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid var(--theme-border)' }}>
                 {['Level', '#', 'Tiêu đề', 'Slug', 'Bài tập', 'Thời gian', 'Hiển thị', ''].map(h => (
@@ -138,6 +139,7 @@ export default function AdminGrammarPage() {
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </div>
 

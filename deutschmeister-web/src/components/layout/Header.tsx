@@ -55,7 +55,7 @@ export function Header({ sidebarCollapsed, onOpenPalette }: HeaderProps) {
   return (
     <>
       <header
-        className="header-left fixed top-0 right-0 h-16 z-30 backdrop-blur-xl border-b flex items-center justify-between px-6"
+        className="header-left fixed top-0 right-0 h-16 z-30 backdrop-blur-xl border-b flex items-center justify-between gap-2 px-3 sm:px-6"
         style={{
           '--sidebar-ml': `${sidebarCollapsed ? SIDEBAR_COLLAPSED_WIDTH : SIDEBAR_WIDTH}px`,
           backgroundColor: 'color-mix(in srgb, var(--theme-bg-card) 85%, transparent)',
@@ -75,9 +75,10 @@ export function Header({ sidebarCollapsed, onOpenPalette }: HeaderProps) {
           aria-label="Mở command palette"
         >
           <IconSearch size={16} />
-          <span className="flex-1 text-body">Tìm kiếm, điều hướng, dịch câu...</span>
+          <span className="flex-1 text-body truncate sm:hidden">Tìm kiếm...</span>
+          <span className="flex-1 text-body truncate hidden sm:block">Tìm kiếm, điều hướng, dịch câu...</span>
           <kbd
-            className="shrink-0 rounded-sm px-1.5 py-0.5 text-caption font-semibold"
+            className="shrink-0 rounded-sm px-1.5 py-0.5 text-caption font-semibold hidden sm:inline-flex"
             style={{ backgroundColor: 'var(--theme-bg-tertiary)', color: 'var(--theme-text-muted)' }}
           >
             Ctrl+K
@@ -159,7 +160,7 @@ export function Header({ sidebarCollapsed, onOpenPalette }: HeaderProps) {
                   <div className="fixed inset-0 z-40" onClick={() => setShowUserMenu(false)} />
                   <div
                     role="menu"
-                    className="absolute right-0 top-full mt-3 w-91 rounded-[2.5rem] shadow-2xl border p-3 z-50 backdrop-blur-3xl animate-[slideUp_0.4s_cubic-bezier(0.16,1,0.3,1)_both]"
+                    className="absolute right-0 top-full mt-3 w-[min(22rem,calc(100vw-1.5rem))] rounded-[2.5rem] shadow-2xl border p-3 z-50 backdrop-blur-3xl animate-[slideUp_0.4s_cubic-bezier(0.16,1,0.3,1)_both]"
                     style={{
                       background: 'color-mix(in srgb, var(--theme-bg-card) 96%, transparent)',
                       borderColor: 'var(--theme-border)',

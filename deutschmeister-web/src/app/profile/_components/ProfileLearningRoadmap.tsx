@@ -40,6 +40,29 @@ export function ProfileLearningRoadmap() {
     return map;
   }, [progressData]);
 
+  const lockInfo = useMemo(() => {
+    const passedSet = new Set(
+      progressData.filter(p => p.status === 'completed' && (p.score ?? 0) >= 80).map(p => p.lessonId)
+    );
+    const lessonMap = new Map(allLessons.map(l => [l.id, l]));
+    const map = new Map<string, { locked: boolean; reason: string }>();
+    for (const lesson of allLessons) {
+      const prereqs = lesson.prerequisiteIds ?? [];
+      if (prereqs.length === 0) { map.set(lesson.id, { locked: false, reason: '' }); continue; }
+      const unmet = prereqs.filter(id => !passedSet.has(id));
+      if (unmet.length === 0) {
+        map.set(lesson.id, { locked: false, reason: '' });
+      } else {
+        const names = unmet.map(id => lessonMap.get(id)?.titleVi).filter(Boolean);
+        map.set(lesson.id, {
+          locked: true,
+          reason: names.length > 0 ? `Hoàn thành "${names.join(', ')}" trước (≥80%)` : 'Hoàn thành bài tiên quyết trước (≥80%)',
+        });
+      }
+    }
+    return map;
+  }, [allLessons, progressData]);
+
   const levelStats = useMemo(() => {
     return LEVELS.map(level => {
       const lessons = allLessons.filter(l => l.level === level);
@@ -57,8 +80,10 @@ export function ProfileLearningRoadmap() {
         ...lesson,
         progress: progressMap.get(lesson.id),
         status: getLessonStatus(progressMap.get(lesson.id)),
+        locked: lockInfo.get(lesson.id)?.locked ?? false,
+        lockReason: lockInfo.get(lesson.id)?.reason ?? '',
       }));
-  }, [allLessons, selectedLevel, progressMap]);
+  }, [allLessons, selectedLevel, progressMap, lockInfo]);
 
   const selStats = levelStats.find(s => s.level === selectedLevel)!;
   const color = LEVEL_COLORS[selectedLevel];
@@ -205,13 +230,54 @@ export function ProfileLearningRoadmap() {
               <div className="space-y-1 mb-4">
                 {selectedLessons.map((lesson, i) => {
                   const st = lesson.status;
+                  const isLocked = lesson.locked;
                   const dotColor = st === 'passed' ? STATUS.success : st === 'needs_review' ? ACCENT.xp : 'var(--theme-border)';
-                  const statusLabel = st === 'passed'
-                    ? `Đạt${lesson.progress?.score ? ` ${Math.round(lesson.progress.score)}%` : ''}`
-                    : st === 'needs_review'
-                      ? `Cần bổ sung${lesson.progress?.score ? ` ${Math.round(lesson.progress.score)}%` : ''}`
-                      : 'chưa thi';
-                  const statusColor = st === 'passed' ? STATUS.success : st === 'needs_review' ? ACCENT.xp : 'var(--theme-text-muted)';
+                  const statusLabel = isLocked
+                    ? 'Đã khóa'
+                    : st === 'passed'
+                      ? `Đạt${lesson.progress?.score ? ` ${Math.round(lesson.progress.score)}%` : ''}`
+                      : st === 'needs_review'
+                        ? `Cần bổ sung${lesson.progress?.score ? ` ${Math.round(lesson.progress.score)}%` : ''}`
+                        : 'chưa thi';
+                  const statusColor = isLocked
+                    ? 'var(--theme-text-muted)'
+                    : st === 'passed' ? STATUS.success : st === 'needs_review' ? ACCENT.xp : 'var(--theme-text-muted)';
+
+                  const rowContent = (
+                    <>
+                      <div className="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all"
+                        style={{ borderColor: isLocked ? 'var(--theme-border)' : dotColor, backgroundColor: st === 'passed' && !isLocked ? `${dotColor}22` : 'transparent' }}>
+                        {isLocked
+                          ? <IconLock size={10} style={{ color: 'var(--theme-text-muted)' }} />
+                          : st === 'passed' && <IconCheck size={10} style={{ color: dotColor }} />}
+                      </div>
+                      <span className="shrink-0 w-5 h-5 rounded-md flex items-center justify-center text-caption font-bold"
+                        style={{ backgroundColor: isLocked ? 'var(--theme-bg-tertiary)' : `${color}15`, color: isLocked ? 'var(--theme-text-muted)' : color }}>
+                        {i + 1}
+                      </span>
+                      <span className="flex-1 text-body font-medium truncate"
+                        style={{ color: isLocked ? 'var(--theme-text-muted)' : 'var(--theme-text-primary)' }}>
+                        {lesson.titleVi}
+                      </span>
+                      <span className="text-caption font-semibold shrink-0" style={{ color: statusColor }}>
+                        {statusLabel}
+                      </span>
+                      {isLocked
+                        ? <IconLock size={13} style={{ color: 'var(--theme-text-muted)', opacity: 0.5 }} />
+                        : <IconChevronRight size={13} style={{ color: 'var(--theme-text-muted)', opacity: 0.4 }} />}
+                    </>
+                  );
+
+                  if (isLocked) {
+                    return (
+                      <div key={lesson.id}
+                        className="flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-not-allowed"
+                        title={lesson.lockReason}
+                        style={{ backgroundColor: 'var(--theme-bg-secondary)', opacity: 0.55 }}>
+                        {rowContent}
+                      </div>
+                    );
+                  }
 
                   return (
                     <Link key={lesson.id} href={`/grammar/${lesson.slug}`}
@@ -219,21 +285,7 @@ export function ProfileLearningRoadmap() {
                       style={{ backgroundColor: 'var(--theme-bg-secondary)' }}
                       onMouseEnter={e => (e.currentTarget.style.backgroundColor = `${color}10`)}
                       onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'var(--theme-bg-secondary)')}>
-                      <div className="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all"
-                        style={{ borderColor: dotColor, backgroundColor: st === 'passed' ? `${dotColor}22` : 'transparent' }}>
-                        {st === 'passed' && <IconCheck size={10} style={{ color: dotColor }} />}
-                      </div>
-                      <span className="shrink-0 w-5 h-5 rounded-md flex items-center justify-center text-caption font-bold"
-                        style={{ backgroundColor: `${color}15`, color }}>
-                        {i + 1}
-                      </span>
-                      <span className="flex-1 text-body font-medium truncate" style={{ color: 'var(--theme-text-primary)' }}>
-                        {lesson.titleVi}
-                      </span>
-                      <span className="text-caption font-semibold shrink-0" style={{ color: statusColor }}>
-                        {statusLabel}
-                      </span>
-                      <IconChevronRight size={13} style={{ color: 'var(--theme-text-muted)', opacity: 0.4 }} />
+                      {rowContent}
                     </Link>
                   );
                 })}
@@ -249,16 +301,30 @@ export function ProfileLearningRoadmap() {
                   Chưa đạt ({notPassed.length} bài)
                 </p>
                 <div className="flex flex-wrap gap-1.5">
-                  {notPassed.map(l => (
-                    <Link key={l.id} href={`/grammar/${l.slug}`}
-                      className="px-2.5 py-1 rounded-lg text-caption font-medium hover:opacity-80 transition-opacity"
-                      style={{
-                        backgroundColor: l.status === 'needs_review' ? `${ACCENT.xp}26` : 'var(--theme-bg-secondary)',
-                        color: l.status === 'needs_review' ? ACCENT.xp : 'var(--theme-text-muted)',
-                      }}>
-                      {l.titleVi}
-                    </Link>
-                  ))}
+                  {notPassed.map(l => {
+                    const baseClass = 'px-2.5 py-1 rounded-lg text-caption font-medium transition-opacity flex items-center gap-1';
+                    const baseStyle = {
+                      backgroundColor: l.status === 'needs_review' ? `${ACCENT.xp}26` : 'var(--theme-bg-secondary)',
+                      color: l.status === 'needs_review' ? ACCENT.xp : 'var(--theme-text-muted)',
+                    };
+                    if (l.locked) {
+                      return (
+                        <span key={l.id} title={l.lockReason}
+                          className={`${baseClass} cursor-not-allowed`}
+                          style={{ ...baseStyle, opacity: 0.55 }}>
+                          <IconLock size={10} />
+                          {l.titleVi}
+                        </span>
+                      );
+                    }
+                    return (
+                      <Link key={l.id} href={`/grammar/${l.slug}`}
+                        className={`${baseClass} hover:opacity-80`}
+                        style={baseStyle}>
+                        {l.titleVi}
+                      </Link>
+                    );
+                  })}
                 </div>
               </div>
             )}

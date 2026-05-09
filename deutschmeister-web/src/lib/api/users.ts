@@ -1,13 +1,40 @@
 'use client';
 
-import { apiGet, apiPost, apiPut } from './client';
+import { apiGet, apiPost, apiPut, apiUpload } from './client';
 
 export interface User {
   id: string;
   email: string;
   name: string | null;
   avatar: string | null;
+  bio?: string | null;
+  coverImage?: string | null;
+  isPublic?: boolean;
   createdAt: string;
+}
+
+export type UpdateProfilePayload = {
+  name?: string;
+  avatar?: string;
+  bio?: string;
+  coverImage?: string;
+  isPublic?: boolean;
+};
+
+export interface PublicProfile {
+  id: string;
+  name: string | null;
+  avatar: string | null;
+  isPublic: boolean;
+  isPrivate: boolean;
+  bio?: string | null;
+  coverImage?: string | null;
+  xp?: number;
+  level?: number;
+  createdAt?: string;
+  stats?: UserStats;
+  subscription?: { plan: 'free' | 'premium' | 'lifetime' };
+  xpInfo?: { xp: number; level: number; cefr: string; name?: string; nameVi?: string };
 }
 
 export interface Settings {
@@ -91,8 +118,24 @@ export const usersApi = {
     return apiGet<User>('/users/profile');
   },
 
-  updateProfile: async (data: { name?: string; avatar?: string }): Promise<User> => {
+  updateProfile: async (data: UpdateProfilePayload): Promise<User> => {
     return apiPut<User>('/users/profile', data);
+  },
+
+  getPublicProfile: async (id: string): Promise<PublicProfile> => {
+    return apiGet<PublicProfile>(`/users/public/${encodeURIComponent(id)}`);
+  },
+
+  uploadAvatar: async (file: File): Promise<{ url: string }> => {
+    const fd = new FormData();
+    fd.append('file', file);
+    return apiUpload<{ url: string }>('/users/profile/avatar', fd);
+  },
+
+  uploadCover: async (file: File): Promise<{ url: string }> => {
+    const fd = new FormData();
+    fd.append('file', file);
+    return apiUpload<{ url: string }>('/users/profile/cover', fd);
   },
 
   getSettings: async (): Promise<Settings> => {

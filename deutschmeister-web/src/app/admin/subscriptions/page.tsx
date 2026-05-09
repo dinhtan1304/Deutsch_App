@@ -127,8 +127,8 @@ export default function AdminSubscriptionsPage() {
           ) : !payments?.items.length ? (
             <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--theme-text-muted)', fontSize: 13 }}>Chưa có thanh toán nào.</div>
           ) : (
-            <div style={{ backgroundColor: 'var(--theme-bg-card)', borderRadius: 12, border: '1px solid var(--theme-border)', overflow: 'hidden' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+            <div style={{ backgroundColor: 'var(--theme-bg-card)', borderRadius: 12, border: '1px solid var(--theme-border)', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13, whiteSpace: 'nowrap' }}>
                 <thead>
                   <tr style={{ borderBottom: '1px solid var(--theme-border)' }}>
                     {['Người dùng', 'Gói', 'Chu kỳ', 'Số tiền', 'Ngày tạo', 'Trạng thái', ''].map(h => (
@@ -212,8 +212,8 @@ export default function AdminSubscriptionsPage() {
           ) : !subs?.items.length ? (
             <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--theme-text-muted)', fontSize: 13 }}>Chưa có đăng ký nào.</div>
           ) : (
-            <div style={{ backgroundColor: 'var(--theme-bg-card)', borderRadius: 12, border: '1px solid var(--theme-border)', overflow: 'hidden' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+            <div style={{ backgroundColor: 'var(--theme-bg-card)', borderRadius: 12, border: '1px solid var(--theme-border)', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13, whiteSpace: 'nowrap' }}>
                 <thead>
                   <tr style={{ borderBottom: '1px solid var(--theme-border)' }}>
                     {['Người dùng', 'Gói', 'Trạng thái', 'Hết hạn', ''].map(h => (

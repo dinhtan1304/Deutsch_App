@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useExamReadingSession, useSubmitExamReading } from '@/hooks/useExamReading';
 import { ExamReadingTeil, ExamTeilQuestion } from '@/lib/api/examReading';
 import { HighlightedText } from '@/components/word-highlight/HighlightedText';
-import { PageHeader, FixedActionBar } from '@/components/ui';
+import { PageHeader, FixedActionBar, MobileSplitTabs } from '@/components/ui';
 import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 import { speakGerman as speakText } from '@/lib/utils';
 import {
@@ -334,6 +334,13 @@ export default function ExamReadingPage() {
   const [userAnswers, setUserAnswers] = useState<Record<string, Record<string, string>>>({});
   const [currentTeil, setCurrentTeil] = useState(0);
   const [error, setError] = useState('');
+  const [mobileView, setMobileView] = useState<'task' | 'editor'>('task');
+
+  // Reset to passage view when switching Teile so user reads context first
+  const goToTeil = useCallback((i: number) => {
+    setCurrentTeil(i);
+    setMobileView('task');
+  }, []);
 
   const handleAnswer = useCallback((teilNumber: number, qid: string, val: string) => {
     setUserAnswers(prev => ({
@@ -428,7 +435,7 @@ export default function ExamReadingPage() {
           const isDone = tAns >= tTot;
 
           return (
-            <button key={t.number} onClick={() => setCurrentTeil(i)}
+            <button key={t.number} onClick={() => goToTeil(i)}
               className="shrink-0 flex items-center gap-2 px-5 py-2.5 rounded-2xl text-xs font-black transition-all border uppercase tracking-widest"
               style={isCurrent
                 ? { background: GRADIENT.reading, color: 'white', borderColor: 'transparent', boxShadow: `0 8px 16px ${ACCENT.reading}40` }
@@ -442,11 +449,25 @@ export default function ExamReadingPage() {
         })}
       </div>
 
+      {/* Mobile-only tab switcher between passage and questions */}
+      <MobileSplitTabs
+        view={mobileView}
+        onChange={setMobileView}
+        accent="reading"
+        taskLabel="Texte / Bài đọc"
+        editorLabel="Fragen / Câu hỏi"
+        editorBadge={
+          <span className="text-[10px] font-mono opacity-80">
+            {Object.keys(teilAnswers).length}/{teilTotalQ}
+          </span>
+        }
+      />
+
       {/* Split Layout */}
-      <div className="flex flex-col lg:flex-row gap-8">
+      <div className="flex flex-col lg:flex-row gap-8 mt-3 lg:mt-0">
 
         {/* Left Side: Texts (Sticky) */}
-        <div className="lg:w-1/2 shrink-0 lg:sticky lg:top-20 lg:self-start lg:max-h-[calc(100vh-10rem)] lg:overflow-y-auto lg:pr-1 space-y-6">
+        <div className={`${mobileView === 'task' ? 'block' : 'hidden'} lg:block lg:w-1/2 shrink-0 lg:sticky lg:top-20 lg:self-start lg:max-h-[calc(100vh-10rem)] lg:overflow-y-auto lg:pr-1 space-y-6`}>
           <div className="rounded-3xl border p-6" style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
             <div className="flex items-center gap-2 mb-4">
                <span className="w-8 h-8 rounded-xl flex items-center justify-center text-xs font-black text-white" style={{ background: GRADIENT.reading }}>{teil.number}</span>
@@ -460,7 +481,7 @@ export default function ExamReadingPage() {
         </div>
 
         {/* Right Side: Questions */}
-        <div className="lg:w-1/2 min-w-0 space-y-4">
+        <div className={`${mobileView === 'editor' ? 'block' : 'hidden'} lg:block lg:w-1/2 min-w-0 space-y-4`}>
           <h2 className="text-title font-bold px-1" style={{ color: 'var(--theme-text-primary)' }}>
             Fragen ({teilTotalQ})
           </h2>
@@ -478,7 +499,7 @@ export default function ExamReadingPage() {
         <div className="flex items-center gap-4 w-full">
           <div className="flex-1 flex gap-2 items-center">
             {currentTeil > 0 && (
-              <button onClick={() => setCurrentTeil(currentTeil - 1)}
+              <button onClick={() => goToTeil(currentTeil - 1)}
                 className="w-10 h-10 rounded-xl flex items-center justify-center border transition-all hover:bg-black/5"
                 style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)' }}>
                 <IconChevronLeft size={18} />
@@ -488,7 +509,7 @@ export default function ExamReadingPage() {
               Teil {teil.number} / {teile.length}
             </span>
             {!isLastTeil && (
-              <button onClick={() => setCurrentTeil(currentTeil + 1)}
+              <button onClick={() => goToTeil(currentTeil + 1)}
                 className="w-10 h-10 rounded-xl flex items-center justify-center border transition-all hover:bg-black/5"
                 style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)' }}>
                 <IconChevronRight size={18} />

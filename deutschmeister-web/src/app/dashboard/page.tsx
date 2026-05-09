@@ -131,10 +131,10 @@ export default function DashboardPage() {
 
       {/* ═══ Sticky Header Area ═══ */}
       <div
-        className="sticky top-16 z-20 -mx-4 px-4 py-3"
+        className="sticky top-16 z-20 px-4 py-3 rounded-2xl border"
         style={{
-          backgroundColor: 'var(--theme-bg-body)',
-          borderBottom: '1px solid var(--theme-border)',
+          backgroundColor: 'var(--theme-bg-card)',
+          borderColor: 'var(--theme-border)',
           boxShadow: 'var(--shadow-soft, 0 2px 8px rgba(0,0,0,0.06))',
         }}
       >
@@ -147,13 +147,13 @@ export default function DashboardPage() {
           </div>
           <div className="flex items-center gap-2 flex-wrap">
             {stats.streak > 0 && (
-              <StatusPill type="streak" value={stats.streak} label="ngày" />
+              <StatusPill type="streak" value={stats.streak} label="ngày" size="sm" />
             )}
             {xpInfo && (
-              <StatusPill type="xp" value={xpInfo.xp.toLocaleString('vi-VN')} label="XP" />
+              <StatusPill type="xp" value={xpInfo.xp.toLocaleString('vi-VN')} label="XP" size="sm" />
             )}
             {xpInfo && (
-              <StatusPill type="level" value={`Lv.${xpInfo.level}`} label={xpInfo.nameVi} />
+              <StatusPill type="level" value={`Lv.${xpInfo.level}`} label={xpInfo.nameVi} size="sm" />
             )}
           </div>
         </div>
