@@ -30,8 +30,13 @@ export default function PublicProfilePage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="w-8 h-8 rounded-full border-4 border-t-transparent animate-spin"
-          style={{ borderColor: 'var(--theme-border)', borderTopColor: ACCENT.srs }} />
+        <div className="w-8 h-8 rounded-full border-4 animate-spin"
+          style={{
+            borderTopColor: ACCENT.srs,
+            borderRightColor: 'var(--theme-border)',
+            borderBottomColor: 'var(--theme-border)',
+            borderLeftColor: 'var(--theme-border)',
+          }} />
       </div>
     );
   }

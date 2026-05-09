@@ -66,6 +66,24 @@ function RankBadge({ rank }: { rank: number }) {
   );
 }
 
+function ProfileLink({
+  userId,
+  selfId,
+  className,
+  style,
+  children,
+}: {
+  userId: string | null;
+  selfId?: string;
+  className?: string;
+  style?: React.CSSProperties;
+  children: React.ReactNode;
+}) {
+  if (!userId) return <div className={className} style={style}>{children}</div>;
+  const href = userId === selfId ? '/profile' : `/profile/${userId}`;
+  return <Link href={href} className={className} style={style}>{children}</Link>;
+}
+
 export default function LeaderboardPage() {
   const { user } = useAuthStore();
   const [period, setPeriod] = useState<keyof typeof PERIOD_LABELS>('weekly');
@@ -128,12 +146,12 @@ export default function LeaderboardPage() {
               {/* Rank 2 */}
               <div className="flex flex-col items-center">
                 {top3[1] && (
-                  <>
+                  <ProfileLink userId={top3[1].userId} selfId={user?.id} className="flex flex-col items-center max-w-full transition-transform hover:-translate-y-0.5">
                     <div className="relative mb-4">
-                      <div className="w-16 h-16 md:w-20 md:h-20 rounded-full border-4 overflow-hidden"
+                      <div className="relative w-16 h-16 md:w-20 md:h-20 rounded-full border-4 overflow-hidden"
                         style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-secondary)' }}>
                         {top3[1].avatar
-                          ? <Image src={top3[1].avatar} alt="" fill className="object-cover" />
+                          ? <Image src={top3[1].avatar} alt="" fill className="object-cover" unoptimized />
                           : <div className="w-full h-full flex items-center justify-center" style={{ color: 'var(--theme-text-muted)' }}><IconUser size={32} /></div>}
                       </div>
                       <div className="absolute -bottom-2 left-1/2 -translate-x-1/2">
@@ -142,7 +160,7 @@ export default function LeaderboardPage() {
                     </div>
                     <div className="text-[11px] md:text-xs font-black truncate max-w-full mb-1">{top3[1].name || 'Ẩn danh'}</div>
                     <div className="text-[10px] font-bold" style={{ color: 'var(--theme-text-muted)' }}>{top3[1].xp.toLocaleString()} XP</div>
-                  </>
+                  </ProfileLink>
                 )}
                 <div className="w-full h-24 rounded-t-2xl mt-4" style={{ background: PODIUM_BG.silver }} />
               </div>
@@ -150,12 +168,12 @@ export default function LeaderboardPage() {
               {/* Rank 1 */}
               <div className="flex flex-col items-center">
                 {top3[0] && (
-                  <>
+                  <ProfileLink userId={top3[0].userId} selfId={user?.id} className="flex flex-col items-center max-w-full transition-transform hover:-translate-y-0.5">
                     <div className="relative mb-4 scale-110">
-                      <div className="w-20 h-20 md:w-28 md:h-28 rounded-full border-4 overflow-hidden shadow-2xl"
+                      <div className="relative w-20 h-20 md:w-28 md:h-28 rounded-full border-4 overflow-hidden shadow-2xl"
                         style={{ borderColor: ACCENT.xp, backgroundColor: 'var(--theme-bg-secondary)' }}>
                         {top3[0].avatar
-                          ? <Image src={top3[0].avatar} alt="" fill className="object-cover" />
+                          ? <Image src={top3[0].avatar} alt="" fill className="object-cover" unoptimized />
                           : <div className="w-full h-full flex items-center justify-center" style={{ color: ACCENT.xp }}><IconUser size={48} /></div>}
                       </div>
                       <div className="absolute -bottom-3 left-1/2 -translate-x-1/2">
@@ -166,7 +184,7 @@ export default function LeaderboardPage() {
                     <div className="text-[10px] md:text-xs font-black flex items-center gap-1" style={{ color: ACCENT.xp }}>
                       <IconZap size={12} /> {top3[0].xp.toLocaleString()} XP
                     </div>
-                  </>
+                  </ProfileLink>
                 )}
                 <div className="w-full h-36 rounded-t-2xl mt-4" style={{ background: PODIUM_BG.gold }} />
               </div>
@@ -174,12 +192,12 @@ export default function LeaderboardPage() {
               {/* Rank 3 */}
               <div className="flex flex-col items-center">
                 {top3[2] && (
-                  <>
+                  <ProfileLink userId={top3[2].userId} selfId={user?.id} className="flex flex-col items-center max-w-full transition-transform hover:-translate-y-0.5">
                     <div className="relative mb-4">
-                      <div className="w-16 h-16 md:w-20 md:h-20 rounded-full border-4 overflow-hidden"
+                      <div className="relative w-16 h-16 md:w-20 md:h-20 rounded-full border-4 overflow-hidden"
                         style={{ borderColor: `${ACCENT.xp}4D`, backgroundColor: 'var(--theme-bg-secondary)' }}>
                         {top3[2].avatar
-                          ? <Image src={top3[2].avatar} alt="" fill className="object-cover" />
+                          ? <Image src={top3[2].avatar} alt="" fill className="object-cover" unoptimized />
                           : <div className="w-full h-full flex items-center justify-center" style={{ color: ACCENT.xp }}><IconUser size={32} /></div>}
                       </div>
                       <div className="absolute -bottom-2 left-1/2 -translate-x-1/2">
@@ -188,7 +206,7 @@ export default function LeaderboardPage() {
                     </div>
                     <div className="text-[11px] md:text-xs font-black truncate max-w-full mb-1">{top3[2].name || 'Ẩn danh'}</div>
                     <div className="text-[10px] font-bold" style={{ color: ACCENT.xp }}>{top3[2].xp.toLocaleString()} XP</div>
-                  </>
+                  </ProfileLink>
                 )}
                 <div className="w-full h-20 rounded-t-2xl mt-4" style={{ background: PODIUM_BG.bronze }} />
               </div>
@@ -200,13 +218,17 @@ export default function LeaderboardPage() {
                 const rank = index + 4;
                 const isMe = user?.id === entry.userId;
                 return (
-                  <div key={entry.userId}
-                    className="flex items-center gap-4 px-5 py-3.5 rounded-xl border transition-all hover:scale-[1.01]"
+                  <ProfileLink
+                    key={entry.userId ?? `anon-${rank}`}
+                    userId={entry.userId}
+                    selfId={user?.id}
                     style={{
                       borderColor: isMe ? ACCENT.srs : 'var(--theme-border)',
                       backgroundColor: isMe ? `${ACCENT.srs}1A` : 'var(--theme-bg-card)',
                       boxShadow: isMe ? `0 4px 16px ${ACCENT.srs}1A` : 'none',
-                    }}>
+                    }}
+                    className="flex items-center gap-4 px-5 py-3.5 rounded-xl border transition-all hover:scale-[1.01]"
+                  >
                     <div className="w-8 shrink-0 flex justify-center">
                       <RankBadge rank={rank} />
                     </div>
@@ -214,7 +236,7 @@ export default function LeaderboardPage() {
                     <div className="relative w-10 h-10 rounded-full overflow-hidden shrink-0 border"
                       style={{ backgroundColor: 'var(--theme-bg-secondary)', borderColor: 'var(--theme-border)' }}>
                       {entry.avatar
-                        ? <Image src={entry.avatar} alt="" fill className="object-cover" />
+                        ? <Image src={entry.avatar} alt="" fill className="object-cover" unoptimized />
                         : <div className="w-full h-full flex items-center justify-center opacity-30"><IconUser size={20} /></div>}
                     </div>
 
@@ -236,7 +258,7 @@ export default function LeaderboardPage() {
                       </div>
                       <div className="text-[8px] font-bold uppercase tracking-widest opacity-30">XP</div>
                     </div>
-                  </div>
+                  </ProfileLink>
                 );
               }) : !isLoading && top3.length === 0 && (
                 <div className="py-20 text-center opacity-30 italic text-sm">Chưa có ai trên bảng vinh danh...</div>

@@ -32,6 +32,19 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: 'img.youtube.com' },
       { protocol: 'https', hostname: 'i.ytimg.com' },
       { protocol: 'https', hostname: 'lh3.googleusercontent.com' },
+      // User-uploaded avatars/covers served from the API host
+      { protocol: 'http', hostname: 'localhost' },
+      { protocol: 'https', hostname: 'deutschmeister-api-production.up.railway.app' },
+      ...(process.env.NEXT_PUBLIC_API_URL
+        ? (() => {
+            try {
+              const u = new URL(process.env.NEXT_PUBLIC_API_URL!);
+              return [{ protocol: u.protocol.replace(':', '') as 'http' | 'https', hostname: u.hostname }];
+            } catch {
+              return [];
+            }
+          })()
+        : []),
     ],
   },
   async headers() {
