@@ -73,6 +73,9 @@ export default function TypingPracticePage() {
   const sentencesRef = useRef(0);
   const submittedRef = useRef(false);
 
+  // Hidden input ref — focused during 'playing' so mobile soft keyboards open.
+  const inputRef = useRef<HTMLInputElement>(null);
+
   // Imperative fetch — sentences load when the user hits "Start", not on mount.
   const [sentences, setSentences] = useState<TypingSentence[]>([]);
   const [loadingSentences, setLoadingSentences] = useState(false);
@@ -191,46 +194,44 @@ export default function TypingPracticePage() {
     [wordIdx, words.length, sentenceIdx, sentences.length, playGameOver],
   );
 
-  // Keyboard handler — registered only during 'playing'.
+  // Auto-focus hidden input during 'playing' so mobile soft keyboards open.
+  // Re-focus when word/sentence advances (input keeps focus naturally; this
+  // is a safety net in case React re-renders blur it).
   useEffect(() => {
     if (phase !== 'playing') return;
-    const handler = (e: KeyboardEvent) => {
-      if (e.metaKey || e.ctrlKey || e.altKey) return;
+    inputRef.current?.focus();
+  }, [phase, wordIdx, sentenceIdx]);
 
-      if (e.key === ' ' || e.code === 'Space') {
-        e.preventDefault();
-        if (!targetWord) return;
-        if (typed === targetWord) {
+  // Process a single character. Used by both onBeforeInput (mobile + desktop
+  // standard typing) and the umlaut/space paths. Returns the latest typed
+  // string so callers can chain decisions on multi-char input.
+  const processChar = useCallback(
+    (ch: string, currentTyped: string): string => {
+      if (ch === ' ') {
+        if (!targetWord) return currentTyped;
+        if (currentTyped === targetWord) {
           playCorrect();
           advanceWord(false, 0);
         } else {
-          // Skip — count remaining target chars as incorrect.
-          const missing = Math.max(0, targetWord.length - typed.length);
+          const missing = Math.max(0, targetWord.length - currentTyped.length);
           playWrong();
           advanceWord(true, missing);
         }
-        return;
+        return '';
       }
 
-      if (e.key === 'Backspace') {
-        e.preventDefault();
-        setTyped((t) => t.slice(0, -1));
-        return;
-      }
+      if (!targetWord) return currentTyped;
 
-      if (!targetWord) return;
-
-      // `:` after a/o/u/s → swap previous char into umlaut. Re-evaluates
-      // the previous char's correct/incorrect counter against the target.
-      if (e.key === ':') {
-        e.preventDefault();
-        if (typed.length === 0) return;
-        const prevChar = typed[typed.length - 1];
-        if (!prevChar) return;
+      // `:` after a/o/u/s → swap previous char into umlaut. Re-evaluates the
+      // previous char's correct/incorrect counter against the target.
+      if (ch === ':') {
+        if (currentTyped.length === 0) return currentTyped;
+        const prevChar = currentTyped[currentTyped.length - 1];
+        if (!prevChar) return currentTyped;
         const replacement = UMLAUT_MAP[prevChar];
-        if (!replacement) return;
+        if (!replacement) return currentTyped;
 
-        const prevIdx = typed.length - 1;
+        const prevIdx = currentTyped.length - 1;
         const wasCorrect = prevIdx < targetWord.length && prevChar === targetWord[prevIdx];
         const willBeCorrect = prevIdx < targetWord.length && replacement === targetWord[prevIdx];
 
@@ -248,20 +249,16 @@ export default function TypingPracticePage() {
           }
         }
 
-        const newTyped = typed.slice(0, -1) + replacement;
-        setTyped(newTyped);
-
+        const newTyped = currentTyped.slice(0, -1) + replacement;
         if (newTyped === targetWord) {
           playCorrect();
           advanceWord(false, 0);
+          return '';
         }
-        return;
+        return newTyped;
       }
 
-      if (e.key.length !== 1) return;
-      e.preventDefault();
-
-      const newTyped = typed + e.key;
+      const newTyped = currentTyped + ch;
       const idx = newTyped.length - 1;
 
       if (idx < targetWord.length && newTyped[idx] === targetWord[idx]) {
@@ -272,18 +269,46 @@ export default function TypingPracticePage() {
         setIncorrectChars((n) => n + 1);
       }
 
-      setTyped(newTyped);
-
-      // Auto-advance when the word is fully typed correctly (skip the space step).
+      // Auto-advance when the word is fully typed correctly.
       if (newTyped === targetWord) {
         playCorrect();
         advanceWord(false, 0);
+        return '';
       }
-    };
+      return newTyped;
+    },
+    [targetWord, advanceWord, playCorrect, playWrong],
+  );
 
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, [phase, typed, targetWord, advanceWord, playCorrect, playWrong]);
+  // onBeforeInput handler — fires for every char inserted into the hidden
+  // input, including from mobile soft keyboards and IME composition end.
+  // We preventDefault to keep the input value empty (controlled, no diffing).
+  const handleBeforeInput = useCallback(
+    (e: React.FormEvent<HTMLInputElement>) => {
+      const native = e.nativeEvent as InputEvent;
+      const data = native.data;
+      if (!data) return;
+      e.preventDefault();
+
+      // Walk the inserted string char-by-char. Single-char is the common
+      // path; multi-char happens with autocorrect/IME composition.
+      let next = typed;
+      for (const ch of data) {
+        next = processChar(ch, next);
+      }
+      setTyped(next);
+    },
+    [typed, processChar],
+  );
+
+  // onKeyDown handler — only Backspace (not delivered via beforeinput on all
+  // platforms). Other keys flow through onBeforeInput.
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Backspace') {
+      e.preventDefault();
+      setTyped((t) => t.slice(0, -1));
+    }
+  }, []);
 
   // Submit session once when entering result phase.
   useEffect(() => {
@@ -583,7 +608,10 @@ export default function TypingPracticePage() {
   const timerStr = `00:${String(timeLeft).padStart(2, '0')}`;
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-6">
+    <div
+      className="max-w-3xl mx-auto px-4 py-6"
+      onClick={() => inputRef.current?.focus()}
+    >
       <GamePlayHeader
         title="Luyện gõ phím"
         subtitle={`SATZ · ${sentenceIdx + 1} / ${sentences.length} · ${TYPING_CATEGORY_LABELS[category].de.toUpperCase()}`}
@@ -612,10 +640,44 @@ export default function TypingPracticePage() {
         />
       )}
 
+      {/* Hidden input — captures soft keyboard / IME / hardware input.
+          Visually offscreen but still focusable so mobile keyboards open. */}
+      <input
+        ref={inputRef}
+        type="text"
+        value=""
+        onChange={() => {}}
+        onBeforeInput={handleBeforeInput}
+        onKeyDown={handleKeyDown}
+        onBlur={() => {
+          // Re-focus on next tick so the soft keyboard stays open.
+          setTimeout(() => inputRef.current?.focus(), 0);
+        }}
+        inputMode="text"
+        autoComplete="off"
+        autoCapitalize="off"
+        autoCorrect="off"
+        spellCheck={false}
+        aria-label="Vùng gõ phím luyện typing"
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: 1,
+          height: 1,
+          opacity: 0,
+          padding: 0,
+          border: 0,
+          outline: 'none',
+          zIndex: -1,
+        }}
+      />
+
       <p
         className="text-center text-xs mt-8 px-4"
         style={{ color: 'var(--theme-text-muted)' }}
       >
+        <span className="md:hidden">Chạm vào màn hình để mở bàn phím · </span>
         Gõ trực tiếp · Space để qua từ · {DURATION_SEC}s · gõ đúng cả dấu câu ·{' '}
         <span className="font-mono">{UMLAUT_TRIGGER_HINT}</span>
       </p>
