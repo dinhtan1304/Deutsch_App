@@ -23,10 +23,11 @@ interface SidebarProps {
 
 export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
   const pathname = usePathname();
-  const { data: xpInfo } = useXp();
-  const { user, isAuthenticated } = useAuthStore();
-  const { data: srsStats } = useSRSStats();
-  const { data: progressStats } = useProgressStats();
+  const { user, isAuthenticated, bootstrap } = useAuthStore();
+  const { data: xpQuery } = useXp(isAuthenticated && !bootstrap?.xp);
+  const xpInfo = bootstrap?.xp ?? xpQuery;
+  const { data: srsStats } = useSRSStats(isAuthenticated);
+  const { data: progressStats } = useProgressStats(isAuthenticated);
   const srsDue = srsStats?.due ?? 0;
   const builtInDue = progressStats?.due ?? 0;
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
@@ -319,7 +320,7 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
       {/* ─── Logo ─── */}
       <div className="h-16 flex items-center gap-3 px-5 shrink-0 overflow-hidden">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/logo.png" width={36} height={36} alt="Deutschmeister" className="rounded-xl shrink-0" />
+        <img src="/logo-48.png" width={36} height={36} alt="Deutschmeister" className="rounded-xl shrink-0" />
         <span
           className="font-bold text-[15px] tracking-tight whitespace-nowrap"
           style={{

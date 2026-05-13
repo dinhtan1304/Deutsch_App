@@ -130,7 +130,7 @@ export default function RegisterPage() {
       <div className="mb-4">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src="/logo.png"
+          src="/logo-64.png"
           width={64}
           height={64}
           alt="Deutschmeister"

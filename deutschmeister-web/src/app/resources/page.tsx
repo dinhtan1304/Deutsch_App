@@ -1,8 +1,7 @@
 'use client';
-/* eslint-disable no-restricted-syntax */
 
 import { useMemo, useState } from 'react';
-import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import type { CSSProperties, ElementType } from 'react';
 import Link from 'next/link';
 import {
   AUTHENTIC_RESOURCES,
@@ -14,20 +13,30 @@ import {
   type ResourceSkill,
   type ResourceType,
 } from '@/data/authentic-resources';
+import { AppPageShell, SurfaceCard } from '@/components/ui';
+import { ACCENT, STATUS } from '@/lib/tokens';
 import {
-  IconChevronLeft, IconGlobe, IconFileText, IconVideo, IconMicrophone,
-  IconExternalLink, IconSearch, IconBook, IconZap, IconShieldCheck
+  IconBook,
+  IconChevronLeft,
+  IconExternalLink,
+  IconFileText,
+  IconFilter,
+  IconGlobe,
+  IconMicrophone,
+  IconSearch,
+  IconShieldCheck,
+  IconVideo,
 } from '@/components/ui/Icons';
 
 const LEVEL_COLORS: Record<ResourceLevel, string> = {
-  A1: '#10B981',
+  A1: ACCENT.reading,
   A2: ACCENT.srs,
   B1: ACCENT.vocab,
   B2: ACCENT.xp,
   C1: STATUS.danger,
 };
 
-const TYPE_ICONS: Record<ResourceType, React.ElementType> = {
+const TYPE_ICONS: Record<ResourceType, ElementType> = {
   news: IconFileText,
   podcast: IconMicrophone,
   video: IconVideo,
@@ -36,151 +45,238 @@ const TYPE_ICONS: Record<ResourceType, React.ElementType> = {
   youtube: IconVideo,
 };
 
+const LEVEL_OPTIONS = ['all', 'A1', 'A2', 'B1', 'B2', 'C1'] as const;
+const SKILL_OPTIONS = ['all', 'reading', 'listening'] as const;
+
 type LevelFilter = ResourceLevel | 'all';
-type SkillFilter = ResourceSkill;
+type SkillFilter = Extract<ResourceSkill, 'all' | 'reading' | 'listening'>;
 
 export default function ResourcesPage() {
   const [levelFilter, setLevelFilter] = useState<LevelFilter>('all');
   const [skillFilter, setSkillFilter] = useState<SkillFilter>('all');
+  const [query, setQuery] = useState('');
 
   const filtered = useMemo(() => {
-    return AUTHENTIC_RESOURCES.filter((r) => {
-      if (levelFilter !== 'all' && r.level !== levelFilter) return false;
-      if (skillFilter !== 'all' && r.skill !== 'all' && r.skill !== skillFilter) return false;
-      return true;
+    const normalizedQuery = query.trim().toLocaleLowerCase('vi-VN');
+
+    return AUTHENTIC_RESOURCES.filter((resource) => {
+      const matchesLevel = levelFilter === 'all' || resource.level === levelFilter;
+      const matchesSkill =
+        skillFilter === 'all' || resource.skill === 'all' || resource.skill === skillFilter;
+      const searchable = [
+        resource.title,
+        resource.titleVi,
+        resource.source,
+        TYPE_LABELS[resource.type],
+        resource.descriptionVi,
+      ].join(' ').toLocaleLowerCase('vi-VN');
+
+      return matchesLevel && matchesSkill && (!normalizedQuery || searchable.includes(normalizedQuery));
     });
-  }, [levelFilter, skillFilter]);
+  }, [levelFilter, skillFilter, query]);
+
+  const activeFilterCount = Number(levelFilter !== 'all') + Number(skillFilter !== 'all') + Number(query.trim() !== '');
 
   return (
-    <div className="min-h-screen py-10 px-4" style={{ backgroundColor: 'var(--theme-bg-body)', backgroundImage: 'radial-gradient(circle at 50% -20%, var(--color-accent-brand)12, transparent 70%)' }}>
-      <div className="max-w-5xl mx-auto">
-        
-        {/* Header */}
-        <div className="mb-12 text-center">
-          <Link
-            href="/dashboard"
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest mb-6 transition-all hover:bg-theme-bg-secondary"
-            style={{ color: 'var(--theme-text-muted)', border: '1px solid var(--theme-border)' }}
-          >
-            <IconChevronLeft size={12} />
-            Dashboard
-          </Link>
-          
-          <h1 className="text-4xl md:text-5xl font-black tracking-tight mb-4" style={{ color: 'var(--theme-text-primary)' }}>
-            Tài nguyên <span className="text-transparent bg-clip-text bg-linear-to-r from-indigo-500 via-emerald-500 to-amber-500">Bản xứ</span>
-          </h1>
-          
-          <p className="max-w-2xl mx-auto text-body font-medium leading-relaxed opacity-70" style={{ color: 'var(--theme-text-muted)' }}>
-            Thư viện tổng hợp từ báo chí, truyền hình và podcast Đức — giúp bạn rèn luyện kỹ năng với ngôn ngữ thực tế.
-          </p>
+    <AppPageShell
+      title="Tài nguyên bản xứ"
+      subtitle="Nguồn đọc, nghe và xem bằng tiếng Đức thật, được chọn theo cấp độ để bạn luyện với ngôn ngữ đời sống."
+      icon={<IconGlobe size={22} />}
+      accent="reading"
+      right={(
+        <Link
+          href="/dashboard"
+          className="inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-caption font-bold transition-colors hover:bg-theme-secondary"
+          style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)' }}
+        >
+          <IconChevronLeft size={14} />
+          Dashboard
+        </Link>
+      )}
+    >
+      <div className="space-y-5">
+        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
+          <SurfaceCard className="p-4 sm:p-5">
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <div className="flex items-center gap-2 text-caption font-black uppercase" style={{ color: ACCENT.reading }}>
+                    <IconFilter size={14} />
+                    Bộ lọc
+                  </div>
+                  <p className="mt-1 text-body" style={{ color: 'var(--theme-text-muted)' }}>
+                    Lọc nhanh theo trình độ, kỹ năng hoặc tên nguồn.
+                  </p>
+                </div>
+                {activeFilterCount > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setLevelFilter('all');
+                      setSkillFilter('all');
+                      setQuery('');
+                    }}
+                    className="w-fit rounded-lg px-3 py-2 text-caption font-bold transition-colors hover:bg-theme-secondary"
+                    style={{ color: 'var(--theme-text-secondary)' }}
+                  >
+                    Xóa lọc
+                  </button>
+                )}
+              </div>
+
+              <label className="relative block">
+                <span className="sr-only">Tìm tài nguyên</span>
+                <IconSearch
+                  size={17}
+                  className="absolute left-3 top-1/2 -translate-y-1/2"
+                  style={{ color: 'var(--theme-text-muted)' }}
+                />
+                <input
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                  placeholder="Tìm theo tên, nguồn hoặc mô tả..."
+                  className="h-11 w-full rounded-xl border bg-transparent pl-10 pr-3 text-body font-medium outline-none transition focus:ring-2"
+                  style={{
+                    borderColor: 'var(--theme-border)',
+                    color: 'var(--theme-text-primary)',
+                    '--tw-ring-color': `${ACCENT.reading}33`,
+                  } as CSSProperties}
+                />
+              </label>
+
+              <FilterGroup
+                label="Trình độ"
+                options={LEVEL_OPTIONS}
+                value={levelFilter}
+                getLabel={(level) => LEVEL_LABELS[level]}
+                getColor={(level) => (level === 'all' ? ACCENT.brand : LEVEL_COLORS[level])}
+                onChange={setLevelFilter}
+              />
+
+              <FilterGroup
+                label="Kỹ năng"
+                options={SKILL_OPTIONS}
+                value={skillFilter}
+                getLabel={(skill) => SKILL_LABELS[skill]}
+                getColor={(skill) => (skill === 'listening' ? ACCENT.listening : ACCENT.reading)}
+                onChange={setSkillFilter}
+              />
+            </div>
+          </SurfaceCard>
+
+          <SurfaceCard variant="featured" accent="xp" className="p-4 sm:p-5">
+            <div className="flex h-full flex-col justify-between gap-5">
+              <div className="flex items-start gap-3">
+                <div
+                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
+                  style={{ background: 'rgba(245,158,11,0.14)', color: ACCENT.xp }}
+                  aria-hidden
+                >
+                  <IconShieldCheck size={20} />
+                </div>
+                <div>
+                  <h2 className="text-h3 font-extrabold leading-tight" style={{ color: 'var(--theme-text-primary)' }}>
+                    Lưu ý bản quyền
+                  </h2>
+                  <p className="mt-1 text-body leading-relaxed" style={{ color: 'var(--theme-text-muted)' }}>
+                    Đây là các liên kết đến nội dung bên thứ ba. Hãy xem điều khoản của từng nhà cung cấp trước khi tải,
+                    trích dẫn hoặc chia sẻ lại.
+                  </p>
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                <Stat label="Tài nguyên" value={AUTHENTIC_RESOURCES.length.toString()} />
+                <Stat label="Miễn phí" value={AUTHENTIC_RESOURCES.filter((resource) => resource.free).length.toString()} />
+                <Stat label="Nguồn" value={new Set(AUTHENTIC_RESOURCES.map((resource) => resource.source)).size.toString()} />
+              </div>
+            </div>
+          </SurfaceCard>
         </div>
 
-        {/* Disclaimer / Notice */}
-        <div className="max-w-3xl mx-auto mb-10 p-5 rounded-3xl border flex items-start gap-4 transition-all hover:shadow-lg"
-          style={{ backgroundColor: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)', backgroundImage: 'linear-gradient(135deg, rgba(245,158,11,0.05) 0%, transparent 100%)' }}>
-          <div className="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0" style={{ background: 'rgba(245,158,11,0.15)' }}>
-            <IconShieldCheck size={20} className="text-amber-500" />
-          </div>
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h4 className="text-sm font-black uppercase tracking-wider text-amber-500 mb-1">Lưu ý bản quyền</h4>
-            <p className="text-xs leading-relaxed opacity-60" style={{ color: 'var(--theme-text-muted)' }}>
-              Đây là các liên kết đến tài nguyên bên thứ ba. Chúng tôi không sở hữu nội dung và khuyến khích bạn tuân thủ các quy định của nhà cung cấp.
+            <h2 className="text-h2 font-extrabold" style={{ color: 'var(--theme-text-primary)' }}>
+              {filtered.length} tài nguyên phù hợp
+            </h2>
+            <p className="text-body" style={{ color: 'var(--theme-text-muted)' }}>
+              Mở nguồn bên ngoài trong tab mới để học trực tiếp từ nhà xuất bản.
             </p>
           </div>
-        </div>
-
-        {/* Filters Panel */}
-        <div className="mb-10 p-6 rounded-4xl border shadow-xl backdrop-blur-md"
-          style={{ backgroundColor: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}>
-          <div className="grid md:grid-cols-2 gap-8">
-            
-            {/* Level Filter */}
-            <div>
-              <div className="flex items-center gap-2 mb-4">
-                <IconZap size={14} className="text-indigo-500" />
-                <span className="text-[10px] font-black uppercase tracking-[0.2em]" style={{ color: 'var(--theme-text-muted)' }}>Trình độ</span>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {(['all', 'A1', 'A2', 'B1', 'B2', 'C1'] as const).map((lv) => {
-                  const active = levelFilter === lv;
-                  const color = lv === 'all' ? 'var(--theme-text-primary)' : LEVEL_COLORS[lv];
-                  return (
-                    <button
-                      key={lv}
-                      onClick={() => setLevelFilter(lv)}
-                      className="px-4 py-2 rounded-xl text-[11px] font-black transition-all duration-300 relative group overflow-hidden"
-                      style={{
-                        backgroundColor: active ? (lv === 'all' ? ACCENT.writing : color) : 'var(--theme-bg-secondary)44',
-                        color: active ? 'white' : 'var(--theme-text-muted)',
-                        border: `1.5px solid ${active ? 'transparent' : 'var(--theme-border)'}`,
-                        boxShadow: active ? `0 8px 20px ${lv === 'all' ? ACCENT.writing : color}44` : 'none'
-                      }}
-                    >
-                      {LEVEL_LABELS[lv]}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Skill Filter */}
-            <div>
-              <div className="flex items-center gap-2 mb-4">
-                <IconSearch size={14} className="text-emerald-500" />
-                <span className="text-[10px] font-black uppercase tracking-[0.2em]" style={{ color: 'var(--theme-text-muted)' }}>Kỹ năng</span>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {(['all', 'reading', 'listening'] as const).map((sk) => {
-                  const active = skillFilter === sk;
-                  return (
-                    <button
-                      key={sk}
-                      onClick={() => setSkillFilter(sk)}
-                      className="px-4 py-2 rounded-xl text-[11px] font-black transition-all duration-300"
-                      style={{
-                        backgroundColor: active ? '#10B981' : 'var(--theme-bg-secondary)44',
-                        color: active ? 'white' : 'var(--theme-text-muted)',
-                        border: `1.5px solid ${active ? 'transparent' : 'var(--theme-border)'}`,
-                        boxShadow: active ? '0 8px 20px rgba(16,185,129,0.3)' : 'none'
-                      }}
-                    >
-                      {SKILL_LABELS[sk]}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
+          <div className="flex flex-wrap gap-2">
+            {levelFilter !== 'all' && <ActiveChip label={LEVEL_LABELS[levelFilter]} color={LEVEL_COLORS[levelFilter]} />}
+            {skillFilter !== 'all' && <ActiveChip label={SKILL_LABELS[skillFilter]} color={skillFilter === 'listening' ? ACCENT.listening : ACCENT.reading} />}
           </div>
         </div>
 
-        {/* Results Count */}
-        <div className="flex items-center gap-3 mb-6 px-4">
-          <div className="h-px flex-1 bg-linear-to-r from-transparent via-theme-border to-transparent opacity-30" />
-          <span className="text-[11px] font-black uppercase tracking-[0.3em] opacity-40" style={{ color: 'var(--theme-text-muted)' }}>
-            {filtered.length} Tài nguyên tìm thấy
-          </span>
-          <div className="h-px flex-1 bg-linear-to-r from-theme-border via-theme-border to-transparent opacity-30" />
-        </div>
-
-        {/* Results Grid */}
         {filtered.length === 0 ? (
-          <div className="rounded-4xl p-16 text-center border-2 border-dashed"
-            style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)44' }}>
-            <div className="w-16 h-16 rounded-full bg-theme-bg-secondary flex items-center justify-center mx-auto mb-4 opacity-50">
-              <IconSearch size={32} />
+          <SurfaceCard className="py-12 text-center">
+            <div
+              className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl"
+              style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }}
+            >
+              <IconSearch size={24} />
             </div>
-            <p className="text-lg font-bold opacity-50" style={{ color: 'var(--theme-text-muted)' }}>
-              Không tìm thấy tài nguyên phù hợp...
+            <h3 className="text-h3 font-bold" style={{ color: 'var(--theme-text-primary)' }}>
+              Không có tài nguyên phù hợp
+            </h3>
+            <p className="mt-1 text-body" style={{ color: 'var(--theme-text-muted)' }}>
+              Thử bỏ bớt bộ lọc hoặc tìm bằng tên nguồn như DW, Easy German, ARD.
             </p>
-          </div>
+          </SurfaceCard>
         ) : (
-          <div className="grid md:grid-cols-2 gap-6">
-            {filtered.map((r) => (
-              <ResourceCard key={r.id} resource={r} />
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {filtered.map((resource) => (
+              <ResourceCard key={resource.id} resource={resource} />
             ))}
           </div>
         )}
+      </div>
+    </AppPageShell>
+  );
+}
+
+function FilterGroup<T extends string>({
+  label,
+  options,
+  value,
+  getLabel,
+  getColor,
+  onChange,
+}: {
+  label: string;
+  options: readonly T[];
+  value: T;
+  getLabel: (option: T) => string;
+  getColor: (option: T) => string;
+  onChange: (option: T) => void;
+}) {
+  return (
+    <div>
+      <div className="mb-2 text-caption font-black uppercase" style={{ color: 'var(--theme-text-muted)' }}>
+        {label}
+      </div>
+      <div className="flex flex-wrap gap-2">
+        {options.map((option) => {
+          const active = value === option;
+          const color = getColor(option);
+
+          return (
+            <button
+              key={option}
+              type="button"
+              onClick={() => onChange(option)}
+              className="rounded-lg border px-3 py-2 text-caption font-extrabold transition-all"
+              style={{
+                backgroundColor: active ? color : 'transparent',
+                borderColor: active ? color : 'var(--theme-border)',
+                color: active ? 'white' : 'var(--theme-text-secondary)',
+                boxShadow: active ? `0 8px 20px ${color}26` : 'none',
+              }}
+            >
+              {getLabel(option)}
+            </button>
+          );
+        })}
       </div>
     </div>
   );
@@ -191,73 +287,93 @@ function ResourceCard({ resource }: { resource: AuthenticResource }) {
   const TypeIcon = TYPE_ICONS[resource.type] || IconGlobe;
 
   return (
-    <a
-      href={resource.url}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="group block rounded-3xl border p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl relative overflow-hidden"
-      style={{
-        borderColor: 'var(--theme-border)',
-        backgroundColor: 'var(--theme-bg-card)',
-      }}
-    >
-      {/* Subtle corner glow */}
-      <div className="absolute top-0 right-0 w-24 h-24 blur-2xl opacity-[0.03] transition-opacity group-hover:opacity-[0.08]" 
-           style={{ backgroundColor: color }} />
-
-      <div className="flex items-start justify-between gap-4 mb-5">
-        <div className="flex flex-wrap items-center gap-2.5">
-          <div className="w-10 h-10 rounded-2xl flex items-center justify-center shadow-lg transition-transform group-hover:scale-110"
-               style={{ background: `linear-gradient(135deg, ${color}, ${color}cc)`, boxShadow: `0 8px 15px ${color}33` }}>
-            <TypeIcon size={20} className="text-white" />
-          </div>
-          
-          <div className="flex flex-col">
-            <div className="flex items-center gap-2">
-              <span className="text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-lg text-white"
-                style={{ backgroundColor: color }}>
-                {resource.level}
-              </span>
-              <span className="text-[10px] font-black uppercase tracking-widest opacity-40" style={{ color: 'var(--theme-text-primary)' }}>
-                {TYPE_LABELS[resource.type]}
-              </span>
+    <a href={resource.url} target="_blank" rel="noopener noreferrer" className="group block h-full">
+      <SurfaceCard
+        variant="interactive"
+        className="flex h-full flex-col gap-4 p-5"
+        style={{ borderTop: `3px solid ${color}` }}
+      >
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex min-w-0 items-start gap-3">
+            <div
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-white"
+              style={{ background: `linear-gradient(135deg, ${color}, ${color}cc)` }}
+              aria-hidden
+            >
+              <TypeIcon size={19} />
+            </div>
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="rounded-md px-2 py-0.5 text-caption font-black text-white" style={{ backgroundColor: color }}>
+                  {resource.level}
+                </span>
+                <span className="text-caption font-bold uppercase" style={{ color: 'var(--theme-text-muted)' }}>
+                  {TYPE_LABELS[resource.type]}
+                </span>
+              </div>
+              <p className="mt-1 truncate text-caption font-bold" style={{ color }}>
+                {resource.source}
+              </p>
             </div>
           </div>
+          <IconExternalLink
+            size={17}
+            className="mt-1 shrink-0 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+            style={{ color: 'var(--theme-text-muted)' }}
+          />
         </div>
 
-        <div className="flex items-center gap-3">
-          {!resource.free && (
-            <div className="px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest bg-amber-500/10 text-amber-500 border border-amber-500/20">
-              Premium
-            </div>
-          )}
-          <div className="w-8 h-8 rounded-full flex items-center justify-center transition-all group-hover:bg-white/5" style={{ color: 'var(--theme-text-muted)' }}>
-            <IconExternalLink size={16} />
-          </div>
+        <div className="min-w-0 flex-1">
+          <h3 className="text-h3 font-extrabold leading-snug" style={{ color: 'var(--theme-text-primary)' }}>
+            {resource.titleVi}
+          </h3>
+          <p className="mt-1 text-caption font-semibold" style={{ color: 'var(--theme-text-muted)' }}>
+            {resource.title}
+          </p>
+          <p className="mt-3 line-clamp-3 text-body leading-relaxed" style={{ color: 'var(--theme-text-secondary)' }}>
+            {resource.descriptionVi}
+          </p>
         </div>
-      </div>
 
-      <div className="relative pl-4 border-l-2 mb-3" style={{ borderColor: `${color}44` }}>
-        <h3 className="text-xl font-black leading-tight transition-colors group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-linear-to-r"
-            style={{ 
-              color: 'var(--theme-text-primary)', 
-              backgroundImage: `linear-gradient(to right, ${color}, ${color}cc)` 
-            }}>
-          {resource.titleVi}
-        </h3>
-      </div>
-      
-      <p className="text-[11px] font-bold uppercase tracking-widest mb-4 opacity-50" style={{ color: 'var(--theme-text-muted)' }}>
-        {resource.title} · <span style={{ color }}>{resource.source}</span>
-      </p>
-
-      <p className="text-sm font-medium leading-relaxed opacity-60 line-clamp-2" style={{ color: 'var(--theme-text-secondary)' }}>
-        {resource.descriptionVi}
-      </p>
-      
-      {/* Hover accent line */}
-      <div className="absolute bottom-0 left-0 right-0 h-1 transition-all scale-x-0 group-hover:scale-x-100"
-           style={{ background: GRADIENT.brand }} />
+        <div className="flex items-center justify-between gap-3 border-t pt-3" style={{ borderColor: 'var(--theme-border)' }}>
+          <span
+            className="rounded-md px-2.5 py-1 text-caption font-bold"
+            style={{
+              backgroundColor: resource.free ? `${ACCENT.reading}14` : `${ACCENT.xp}16`,
+              color: resource.free ? ACCENT.reading : ACCENT.xp,
+            }}
+          >
+            {resource.free ? 'Miễn phí' : 'Có trả phí'}
+          </span>
+          <span className="text-caption font-bold" style={{ color: 'var(--theme-text-muted)' }}>
+            {SKILL_LABELS[resource.skill]}
+          </span>
+        </div>
+      </SurfaceCard>
     </a>
+  );
+}
+
+function Stat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-lg border p-3" style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
+      <div className="text-h3 font-black leading-none" style={{ color: 'var(--theme-text-primary)' }}>
+        {value}
+      </div>
+      <div className="mt-1 text-caption font-bold" style={{ color: 'var(--theme-text-muted)' }}>
+        {label}
+      </div>
+    </div>
+  );
+}
+
+function ActiveChip({ label, color }: { label: string; color: string }) {
+  return (
+    <span
+      className="rounded-lg px-2.5 py-1 text-caption font-bold"
+      style={{ backgroundColor: `${color}16`, color }}
+    >
+      {label}
+    </span>
   );
 }

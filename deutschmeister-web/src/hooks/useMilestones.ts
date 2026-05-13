@@ -4,7 +4,7 @@ import { milestonesApi } from '@/lib/api/milestones';
 import { useCelebrationStore } from '@/stores/celebrationStore';
 import { useAuthStore } from '@/stores/authStore';
 
-export function useMilestoneCheck() {
+export function useMilestoneCheck(enabled = true) {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const addAll = useCelebrationStore((s) => s.addAll);
   const hasAdded = useRef(false);
@@ -12,7 +12,7 @@ export function useMilestoneCheck() {
   const query = useQuery({
     queryKey: ['milestones'],
     queryFn: milestonesApi.check,
-    enabled: isAuthenticated,
+    enabled: enabled && isAuthenticated,
     staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false,
   });

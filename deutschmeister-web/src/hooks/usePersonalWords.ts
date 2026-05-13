@@ -9,6 +9,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import type { PersonalWord } from '@/types/personalWord';
+import { ApiError } from '@/lib/api/client';
 import {
   personalWordsApi,
   collectionsApi,
@@ -215,10 +216,11 @@ export function useSRSDue(params?: SRSQueryParams) {
 }
 
 /** Thống kê SRS */
-export function useSRSStats() {
+export function useSRSStats(enabled = true) {
   return useQuery({
     queryKey: srsKeys.stats(),
     queryFn: () => personalWordsApi.getSRSStats(),
+    enabled,
     staleTime: 60 * 1000, // 1 minute
   });
 }
@@ -256,6 +258,14 @@ export function useReviewWord() {
       // Queries will auto-refetch when the user next visits the word bank page.
       queryClient.invalidateQueries({ queryKey: srsKeys.all, refetchType: 'none' });
       queryClient.invalidateQueries({ queryKey: personalWordsKeys.stats(), refetchType: 'none' });
+    },
+    onError: (error, variables) => {
+      if (error instanceof ApiError && error.status === 409) {
+        queryClient.invalidateQueries({ queryKey: srsKeys.all });
+        queryClient.invalidateQueries({ queryKey: srsKeys.preview(variables.wordId) });
+        queryClient.invalidateQueries({ queryKey: personalWordsKeys.detail(variables.wordId) });
+        queryClient.invalidateQueries({ queryKey: personalWordsKeys.stats() });
+      }
     },
   });
 }

@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useSettingsStore, BACKEND_SETTINGS_KEYS } from '@/stores/settingsStore';
+import { useSettingsStore, BACKEND_SETTINGS_KEYS, defaultSettings } from '@/stores/settingsStore';
 import { useAuthStore } from '@/stores/authStore';
 import { useUpdateSettings } from '@/hooks/useUser';
 import type { UpdateSettingsPayload } from '@/lib/api/users';
@@ -115,6 +115,19 @@ const THEME_OPTIONS = [
   { value: 'system' as const, icon: IconMonitor, label: 'Hệ thống', color: ACCENT.srs },
 ];
 
+const BACKEND_SETTINGS_KEY_SET = new Set<string>(BACKEND_SETTINGS_KEYS as readonly string[]);
+
+function isBackendSettingsKey(key: PropertyKey) {
+  return typeof key === 'string' && BACKEND_SETTINGS_KEY_SET.has(key);
+}
+
+function pickBackendSettings(source: typeof defaultSettings): UpdateSettingsPayload {
+  return BACKEND_SETTINGS_KEYS.reduce((payload, key) => {
+    (payload as Record<string, unknown>)[key] = source[key];
+    return payload;
+  }, {} as UpdateSettingsPayload);
+}
+
 function SettingToggle({ label, desc, checked, onChange }: {
   label: string; desc: string; checked: boolean; onChange: (v: boolean) => void;
 }) {
@@ -184,7 +197,7 @@ export default function SettingsPage() {
   const router = useRouter();
   const { settings, isLoaded, updateSetting, resetSettings, loadSettings } = useSettingsStore();
   const { user, isAuthenticated, logout } = useAuthStore();
-  const updateSettingsMutation = useUpdateSettings();
+  const { mutate: updateSettings } = useUpdateSettings();
 
   const [toast, setToast] = useState('');
   const [activeTab, setActiveTab] = useState<'display' | 'sound' | 'learning' | 'notification' | 'account'>('display');
@@ -192,10 +205,10 @@ export default function SettingsPage() {
   const toastTimerRef = useRef<NodeJS.Timeout | null>(null);
   const pendingBackendRef = useRef<UpdateSettingsPayload>({});
   const backendDebounceRef = useRef<NodeJS.Timeout | null>(null);
+  const flushBackendSettingsRef = useRef<(showResult?: boolean) => void>(() => {});
 
   useEffect(() => () => {
     if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
-    if (backendDebounceRef.current) clearTimeout(backendDebounceRef.current);
   }, []);
 
   useEffect(() => { loadSettings(); }, [loadSettings]);
@@ -206,26 +219,76 @@ export default function SettingsPage() {
     toastTimerRef.current = setTimeout(() => { toastTimerRef.current = null; setToast(''); }, 2000);
   }, []);
 
+  const sendBackendSettings = useCallback((payload: UpdateSettingsPayload, successMessage?: string, showFailure = true) => {
+    if (Object.keys(payload).length === 0) return;
+
+    updateSettings(payload, {
+      onSuccess: () => {
+        if (successMessage) showToast(successMessage);
+      },
+      onError: () => {
+        if (showFailure) showToast('Không lưu được cài đặt. Thử lại sau.');
+      },
+    });
+  }, [showToast, updateSettings]);
+
+  const flushBackendSettings = useCallback((showResult = true) => {
+    if (backendDebounceRef.current) {
+      clearTimeout(backendDebounceRef.current);
+      backendDebounceRef.current = null;
+    }
+
+    const payload = pendingBackendRef.current;
+    pendingBackendRef.current = {};
+    sendBackendSettings(payload, showResult ? 'Đã lưu!' : undefined, showResult);
+  }, [sendBackendSettings]);
+
+  const queueBackendSetting = useCallback((key: PropertyKey, value: unknown) => {
+    if (!isBackendSettingsKey(key)) return false;
+
+    pendingBackendRef.current = { ...pendingBackendRef.current, [key]: value } as UpdateSettingsPayload;
+    if (backendDebounceRef.current) clearTimeout(backendDebounceRef.current);
+    backendDebounceRef.current = setTimeout(() => {
+      flushBackendSettings(true);
+    }, 500);
+
+    return true;
+  }, [flushBackendSettings]);
+
+  useEffect(() => {
+    flushBackendSettingsRef.current = flushBackendSettings;
+  }, [flushBackendSettings]);
+
+  useEffect(() => () => {
+    flushBackendSettingsRef.current(false);
+  }, []);
+
   const handleChange = <K extends keyof typeof settings>(key: K, value: typeof settings[K]) => {
     updateSetting(key, value);
-    if (isAuthenticated && (BACKEND_SETTINGS_KEYS as readonly string[]).includes(key as string)) {
-      pendingBackendRef.current = { ...pendingBackendRef.current, [key]: value } as UpdateSettingsPayload;
-      if (backendDebounceRef.current) clearTimeout(backendDebounceRef.current);
-      backendDebounceRef.current = setTimeout(() => {
-        backendDebounceRef.current = null;
-        updateSettingsMutation.mutate(pendingBackendRef.current);
-        pendingBackendRef.current = {};
-      }, 500);
+    if (isAuthenticated && queueBackendSetting(key, value)) {
+      return;
     }
     showToast('Đã lưu!');
   };
-
   const handleTheme = (theme: 'light' | 'dark' | 'system') => {
     handleChange('theme', theme);
   };
 
   const handleReset = () => {
-    if (confirm('Đặt lại toàn bộ cài đặt?')) { resetSettings(); showToast('Đã đặt lại!'); }
+    if (!confirm('Đặt lại toàn bộ cài đặt?')) return;
+
+    if (backendDebounceRef.current) {
+      clearTimeout(backendDebounceRef.current);
+      backendDebounceRef.current = null;
+    }
+    pendingBackendRef.current = {};
+
+    resetSettings();
+    if (isAuthenticated) {
+      sendBackendSettings(pickBackendSettings(defaultSettings), 'Đã đặt lại!');
+    } else {
+      showToast('Đã đặt lại!');
+    }
   };
 
   const handleLogout = async () => {
@@ -401,6 +464,16 @@ export default function SettingsPage() {
                 label="Mục tiêu hàng ngày"
                 value={settings.dailyGoal} min={5} max={100} step={5} unit="từ"
                 onChange={v => handleChange('dailyGoal', v)} color={ACCENT.reading}
+              />
+              <SettingSlider
+                label="Số câu mỗi game"
+                value={settings.questionsPerGame} min={5} max={50} step={5} unit="câu"
+                onChange={v => handleChange('questionsPerGame', v)} color={ACCENT.srs}
+              />
+              <SettingSlider
+                label="Thời gian thử thách"
+                value={settings.timedChallengeSeconds} min={30} max={180} step={30} unit="giây"
+                onChange={v => handleChange('timedChallengeSeconds', v)} color={ACCENT.xp}
               />
 
               <div className="py-5 border-b" style={{ borderColor: 'var(--theme-border)' }}>

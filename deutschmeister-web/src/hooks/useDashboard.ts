@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import {
   getFullDashboard,
+  getDashboardOverview,
   getDashboardStats,
   getActivityHeatmap,
   getWeeklyProgress,
@@ -17,6 +18,7 @@ import {
 export const dashboardKeys = {
   all: ['dashboard'] as const,
   full: () => [...dashboardKeys.all, 'full'] as const,
+  overview: () => [...dashboardKeys.all, 'overview'] as const,
   stats: () => [...dashboardKeys.all, 'stats'] as const,
   heatmap: () => [...dashboardKeys.all, 'heatmap'] as const,
   weekly: () => [...dashboardKeys.all, 'weekly'] as const,
@@ -43,14 +45,25 @@ export function useFullDashboard() {
   });
 }
 
+export function useDashboardOverview(enabled = true) {
+  return useQuery({
+    queryKey: dashboardKeys.overview(),
+    queryFn: getDashboardOverview,
+    enabled,
+    staleTime: 2 * 60 * 1000,
+    refetchOnWindowFocus: false,
+  });
+}
+
 /**
  * Hook lấy stats — streak/totalWords are daily metrics, 10min staleTime is appropriate.
  * Header uses this just for streak display; mutations invalidate when needed.
  */
-export function useDashboardStats() {
+export function useDashboardStats(enabled = true) {
   return useQuery({
     queryKey: dashboardKeys.stats(),
     queryFn: getDashboardStats,
+    enabled,
     staleTime: 10 * 60 * 1000,
   });
 }
@@ -58,10 +71,11 @@ export function useDashboardStats() {
 /**
  * Hook lấy heatmap
  */
-export function useActivityHeatmap() {
+export function useActivityHeatmap(enabled = true) {
   return useQuery({
     queryKey: dashboardKeys.heatmap(),
     queryFn: getActivityHeatmap,
+    enabled,
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 }
@@ -69,10 +83,11 @@ export function useActivityHeatmap() {
 /**
  * Hook lấy weekly progress
  */
-export function useWeeklyProgress() {
+export function useWeeklyProgress(enabled = true) {
   return useQuery({
     queryKey: dashboardKeys.weekly(),
     queryFn: getWeeklyProgress,
+    enabled,
     staleTime: 2 * 60 * 1000,
   });
 }
@@ -80,10 +95,11 @@ export function useWeeklyProgress() {
 /**
  * Hook lấy topic progress
  */
-export function useTopicProgress() {
+export function useTopicProgress(enabled = true) {
   return useQuery({
     queryKey: dashboardKeys.topics(),
     queryFn: getTopicProgress,
+    enabled,
     staleTime: 2 * 60 * 1000,
   });
 }
@@ -91,10 +107,11 @@ export function useTopicProgress() {
 /**
  * Hook lấy recent activity
  */
-export function useRecentActivity() {
+export function useRecentActivity(enabled = true) {
   return useQuery({
     queryKey: dashboardKeys.activity(),
     queryFn: getRecentActivity,
+    enabled,
     staleTime: 1 * 60 * 1000, // 1 minute
   });
 }
@@ -113,10 +130,11 @@ export function usePublicStats() {
 /**
  * Hook lấy daily learning path
  */
-export function useDailyPath() {
+export function useDailyPath(enabled = true) {
   return useQuery({
     queryKey: dashboardKeys.dailyPath(),
     queryFn: getDailyPath,
+    enabled,
     staleTime: 2 * 60 * 1000,
     refetchOnWindowFocus: true,
   });
@@ -125,10 +143,11 @@ export function useDailyPath() {
 /**
  * Hook lấy smart next-action recommendation for hero card
  */
-export function useNextAction() {
+export function useNextAction(enabled = true) {
   return useQuery({
     queryKey: dashboardKeys.nextAction(),
     queryFn: getNextAction,
+    enabled,
     staleTime: 2 * 60 * 1000,
     refetchOnWindowFocus: true,
   });

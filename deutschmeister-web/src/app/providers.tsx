@@ -1,128 +1,152 @@
 'use client';
 
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query';
 import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3';
 import { useState, useEffect, useRef } from 'react';
+import { usePathname } from 'next/navigation';
 import { ErrorBoundary } from '@/components/ui';
 import { ApiError, clearTokens, initAuth } from '@/lib/api/client';
+import { authApi } from '@/lib/api/auth';
+import { clearSessionHint, hasSessionHint, setSessionHint } from '@/lib/auth/sessionHint';
 import { useAuthStore } from '@/stores/authStore';
 import { useSettingsStore, applyTheme, BACKEND_SETTINGS_KEYS, AppSettings } from '@/stores/settingsStore';
-import { usersApi } from '@/lib/api/users';
 import { DictionaryProvider } from '@/providers/DictionaryProvider';
 import { WordHighlightProvider } from '@/providers/WordHighlightProvider';
 import { GrammarAnalyzerProvider } from '@/providers/GrammarAnalyzerProvider';
 import { AchievementToastProvider } from '@/components/ui/AchievementToast';
+import { notifKeys } from '@/hooks/useNotifications';
+import { subscriptionKeys } from '@/hooks/useSubscription';
 
 function handleGlobalError(error: unknown) {
   if (error instanceof ApiError && error.status === 401) {
-    // Don't hard-redirect here — let the onAuthExpired callback in authStore
-    // handle the state change, and let each page's own auth guard redirect.
-    // Hard redirect was causing flash-to-login on page refresh before initAuth could complete.
     clearTokens();
+    clearSessionHint();
   }
 }
 
-/**
- * BUG FIX 6: Merged AppInitializer (from the dead providers/index.tsx) into
- * app/providers.tsx so it's actually used.
- *
- * Previously:
- *   - providers/index.tsx had AppInitializer with full settings sync logic
- *   - app/layout.tsx imported Providers from app/providers.tsx (not providers/index.tsx)
- *   - Result: providers/index.tsx was dead code, backend settings sync never fired
- *   - Symptoms: changing theme/dailyGoal on one device never synced to another
- *
- * This component now handles:
- *   1. loadSettings() — reads from localStorage on mount (fast, no network)
- *   2. Re-applies theme whenever settings change
- *   3. initAuth() — refreshes access token via httpOnly cookie on page load
- *   4. syncFromBackend() — fetches backend settings after auth confirmed valid
- *      so device-switching (e.g. login on mobile) gets correct theme/preferences
- */
+function pickBackendSettings(settings: Record<string, unknown>): Partial<AppSettings> {
+  return BACKEND_SETTINGS_KEYS.reduce((acc, key) => {
+    const val = settings[key as string];
+    if (val !== undefined) (acc as Record<string, unknown>)[key as string] = val;
+    return acc;
+  }, {} as Partial<AppSettings>);
+}
+
 function AppInitializer({ children }: { children: React.ReactNode }) {
+  const queryClient = useQueryClient();
+  const pathname = usePathname();
   const { isAuthenticated } = useAuthStore();
   const { loadSettings, syncFromBackend, settings, isLoaded } = useSettingsStore();
   const hasSyncedRef = useRef(false);
-  // Block rendering until auth verification completes (prevents flash-to-login on refresh)
-  const [authReady, setAuthReady] = useState(false);
 
-  // Step 1: Load settings from localStorage (synchronous, instant)
   useEffect(() => {
     loadSettings();
   }, [loadSettings]);
 
-  // Step 2: Re-apply theme whenever it changes (handles system preference toggle)
   useEffect(() => {
     if (isLoaded) applyTheme(settings.theme);
   }, [isLoaded, settings.theme]);
 
-  // Step 3: Verify token + sync backend settings on every page load/refresh
-  // BLOCKS children rendering until complete to prevent race conditions
   useEffect(() => {
+    const isPublicRoute =
+      pathname === '/' ||
+      pathname.startsWith('/auth/') ||
+      pathname.startsWith('/pricing') ||
+      pathname.startsWith('/privacy') ||
+      pathname.startsWith('/terms') ||
+      pathname.startsWith('/resources');
+
     const run = async () => {
-      const zustandIsAuth = useAuthStore.getState().isAuthenticated;
-      if (!zustandIsAuth) {
-        setAuthReady(true);
-        return;
-      }
-
-      hasSyncedRef.current = true;
-
-      // Verify token is still valid (refresh via httpOnly cookie)
-      const tokenValid = await initAuth();
-      if (!tokenValid) {
+      if (isPublicRoute && !hasSessionHint()) {
         hasSyncedRef.current = false;
-        setAuthReady(true);
+        useAuthStore.setState({
+          bootstrap: null,
+          user: null,
+          isAuthenticated: false,
+          isLoading: false,
+          _hasHydrated: true,
+        });
         return;
       }
 
-      // Token is valid — fetch backend settings and merge
+      useAuthStore.getState().setLoading(true);
       try {
-        const backendSettings = await usersApi.getSettings();
-        const picked = BACKEND_SETTINGS_KEYS.reduce((acc, key) => {
-          const val = (backendSettings as unknown as Record<string, unknown>)[key as string];
-          if (val !== undefined) (acc as Record<string, unknown>)[key as string] = val;
-          return acc;
-        }, {} as Partial<AppSettings>);
-        syncFromBackend(picked);
-      } catch {
-        // Backend unavailable — continue with localStorage values
-      }
+        const tokenValid = await initAuth();
+        if (!tokenValid) {
+          hasSyncedRef.current = false;
+          useAuthStore.setState({
+            bootstrap: null,
+            user: null,
+            isAuthenticated: false,
+            isLoading: false,
+            _hasHydrated: true,
+          });
+          return;
+        }
 
-      setAuthReady(true);
+        const bootstrap = await authApi.bootstrap();
+        setSessionHint();
+        hasSyncedRef.current = true;
+        useAuthStore.getState().setBootstrap(bootstrap);
+        queryClient.setQueryData(subscriptionKeys.me(), bootstrap.subscription);
+        queryClient.setQueryData(['xp'], bootstrap.xp);
+        queryClient.setQueryData(notifKeys.unread(), bootstrap.unreadCount);
+        syncFromBackend(pickBackendSettings(bootstrap.settings));
+      } catch (error) {
+        if (error instanceof ApiError && error.status === 401) {
+          clearTokens();
+          clearSessionHint();
+        }
+        hasSyncedRef.current = false;
+        useAuthStore.setState({
+          bootstrap: null,
+          user: null,
+          isAuthenticated: false,
+        });
+      } finally {
+        const state = useAuthStore.getState();
+        state.setLoading(false);
+        state.setHasHydrated(true);
+      }
     };
 
     run();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Only on mount
+  }, [pathname, queryClient, syncFromBackend]);
 
-  // Step 4: When user logs in during the session, also sync backend settings.
   useEffect(() => {
     if (!isAuthenticated || hasSyncedRef.current) return;
     hasSyncedRef.current = true;
-    usersApi.getSettings()
-      .then((backendSettings) => {
-        const picked = BACKEND_SETTINGS_KEYS.reduce((acc, key) => {
-          const val = (backendSettings as unknown as Record<string, unknown>)[key as string];
-          if (val !== undefined) (acc as Record<string, unknown>)[key as string] = val;
-          return acc;
-        }, {} as Partial<AppSettings>);
-        syncFromBackend(picked);
+    authApi.bootstrap()
+      .then((bootstrap) => {
+        setSessionHint();
+        useAuthStore.getState().setBootstrap(bootstrap);
+        queryClient.setQueryData(subscriptionKeys.me(), bootstrap.subscription);
+        queryClient.setQueryData(['xp'], bootstrap.xp);
+        queryClient.setQueryData(notifKeys.unread(), bootstrap.unreadCount);
+        syncFromBackend(pickBackendSettings(bootstrap.settings));
       })
       .catch(() => {});
-  }, [isAuthenticated, syncFromBackend]);
-
-  // Don't render children until auth verification is done
-  // This prevents pages from firing API calls before the access token is refreshed
-  if (!authReady) return (
-    <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--theme-bg-body)' }}>
-      <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #6366F1, #8B5CF6)' }}>
-        <svg className="animate-spin" width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2.5} strokeLinecap="round"><path d="M21 12a9 9 0 1 1-6.219-8.56" /></svg>
-      </div>
-    </div>
-  );
+  }, [isAuthenticated, queryClient, syncFromBackend]);
 
   return <>{children}</>;
+}
+
+function AuthRecaptchaGate({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const recaptchaKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
+  const needsRecaptcha =
+    pathname === '/auth/login' ||
+    pathname === '/auth/register' ||
+    pathname === '/auth/forgot-password' ||
+    pathname === '/auth/reset-password';
+
+  if (!recaptchaKey || !needsRecaptcha) return <>{children}</>;
+
+  return (
+    <GoogleReCaptchaProvider reCaptchaKey={recaptchaKey}>
+      {children}
+    </GoogleReCaptchaProvider>
+  );
 }
 
 export function Providers({ children }: { children: React.ReactNode }) {
@@ -145,31 +169,22 @@ export function Providers({ children }: { children: React.ReactNode }) {
       })
   );
 
-  const recaptchaKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
-
-  const inner = (
+  return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
-        <AppInitializer>
-          <WordHighlightProvider>
-            <DictionaryProvider>
-              <GrammarAnalyzerProvider>
-                {children}
-                <AchievementToastProvider />
-              </GrammarAnalyzerProvider>
-            </DictionaryProvider>
-          </WordHighlightProvider>
-        </AppInitializer>
+        <AuthRecaptchaGate>
+          <AppInitializer>
+            <WordHighlightProvider>
+              <DictionaryProvider>
+                <GrammarAnalyzerProvider>
+                  {children}
+                  <AchievementToastProvider />
+                </GrammarAnalyzerProvider>
+              </DictionaryProvider>
+            </WordHighlightProvider>
+          </AppInitializer>
+        </AuthRecaptchaGate>
       </QueryClientProvider>
     </ErrorBoundary>
-  );
-
-  // Only wrap with reCAPTCHA if site key is configured
-  if (!recaptchaKey) return inner;
-
-  return (
-    <GoogleReCaptchaProvider reCaptchaKey={recaptchaKey}>
-      {inner}
-    </GoogleReCaptchaProvider>
   );
 }

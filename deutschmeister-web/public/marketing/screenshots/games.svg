@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760" role="img" aria-label="Deutschmeister games hub preview">
+  <defs><linearGradient id="orange" x1="0" x2="1"><stop stop-color="#F59E0B"/><stop offset="1" stop-color="#F97316"/></linearGradient><linearGradient id="blue" x1="0" x2="1"><stop stop-color="#3B82F6"/><stop offset="1" stop-color="#6366F1"/></linearGradient></defs>
+  <rect width="1200" height="760" rx="36" fill="#111827"/>
+  <rect x="74" y="54" width="1052" height="652" rx="30" fill="#F9FAFB"/>
+  <text x="122" y="122" fill="#111827" font-family="Inter,Arial" font-size="34" font-weight="900">Trò chơi luyện từ</text>
+  <text x="122" y="156" fill="#6B7280" font-family="Inter,Arial" font-size="17">Phiên ngắn để luyện mạo từ, nghĩa, nghe từ và chính tả.</text>
+  <rect x="122" y="194" width="956" height="66" rx="20" fill="#EFF6FF" stroke="#BFDBFE"/>
+  <text x="158" y="234" fill="#2563EB" font-family="Inter,Arial" font-size="18" font-weight="900">Trình độ: B1 · Phạm vi từ vựng A1, A2, B1</text>
+  <text x="122" y="322" fill="#111827" font-family="Inter,Arial" font-size="22" font-weight="900">Gợi ý chơi ngay</text>
+  <g font-family="Inter,Arial">
+    <rect x="122" y="354" width="300" height="146" rx="22" fill="#FFF7ED" stroke="#FED7AA"/><circle cx="166" cy="400" r="22" fill="url(#orange)"/><text x="204" y="394" fill="#D97706" font-size="13" font-weight="900">Khởi động nhanh</text><text x="204" y="426" fill="#111827" font-size="22" font-weight="900">Mạo từ der/die/das</text><text x="204" y="462" fill="#6B7280" font-size="14">Chọn mạo từ đúng cho từng danh từ.</text>
+    <rect x="450" y="354" width="300" height="146" rx="22" fill="#F0FDF4" stroke="#BBF7D0"/><circle cx="494" cy="400" r="22" fill="#22C55E"/><text x="532" y="394" fill="#16A34A" font-size="13" font-weight="900">Phù hợp hôm nay</text><text x="532" y="426" fill="#111827" font-size="22" font-weight="900">Thẻ ghi nhớ</text><text x="532" y="462" fill="#6B7280" font-size="14">Ôn nghĩa, mạo từ và ví dụ bằng thẻ.</text>
+    <rect x="778" y="354" width="300" height="146" rx="22" fill="#EEF2FF" stroke="#C7D2FE"/><circle cx="822" cy="400" r="22" fill="url(#blue)"/><text x="860" y="394" fill="#4F46E5" font-size="13" font-weight="900">Thử thách</text><text x="860" y="426" fill="#111827" font-size="22" font-weight="900">Tốc độ</text><text x="860" y="462" fill="#6B7280" font-size="14">Trả lời nhanh trong thời gian giới hạn.</text>
+  </g>
+  <text x="122" y="562" fill="#111827" font-family="Inter,Arial" font-size="22" font-weight="900">Tất cả trò chơi</text>
+  <g fill="#FFFFFF" stroke="#E5E7EB"><rect x="122" y="590" width="160" height="64" rx="18"/><rect x="300" y="590" width="160" height="64" rx="18"/><rect x="478" y="590" width="160" height="64" rx="18"/><rect x="656" y="590" width="160" height="64" rx="18"/><rect x="834" y="590" width="160" height="64" rx="18"/></g>
+  <g fill="#111827" font-family="Inter,Arial" font-size="15" font-weight="900"><text x="154" y="630">Gender Quiz</text><text x="334" y="630">Flashcards</text><text x="512" y="630">SRS Review</text><text x="696" y="630">Spelling</text><text x="880" y="630">Typing</text></g>
+</svg>

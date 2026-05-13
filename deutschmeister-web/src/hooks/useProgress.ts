@@ -11,6 +11,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { progressApi } from '@/lib/api/progress';
+import { ApiError } from '@/lib/api/client';
 import { Progress, ReviewRating } from '@/types';
 
 // ============================================
@@ -47,10 +48,11 @@ export function useDueCards(limit = 20) {
 }
 
 /** Get SRS stats */
-export function useProgressStats() {
+export function useProgressStats(enabled = true) {
   return useQuery({
     queryKey: progressKeys.stats(),
     queryFn: () => progressApi.getStats(),
+    enabled,
     staleTime: 60 * 1000,
   });
 }
@@ -87,6 +89,13 @@ export function useReviewCard() {
       );
       queryClient.invalidateQueries({ queryKey: progressKeys.stats(), refetchType: 'none' });
       queryClient.invalidateQueries({ queryKey: ['dashboard'], refetchType: 'none' });
+    },
+    onError: (error, variables) => {
+      if (error instanceof ApiError && error.status === 409) {
+        queryClient.invalidateQueries({ queryKey: progressKeys.due(100) });
+        queryClient.invalidateQueries({ queryKey: progressKeys.preview(variables.wordId) });
+        queryClient.invalidateQueries({ queryKey: progressKeys.stats() });
+      }
     },
   });
 }

@@ -2,13 +2,15 @@
 
 import { ReactNode, useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
+import dynamic from 'next/dynamic';
 import { Sidebar, SIDEBAR_WIDTH, SIDEBAR_COLLAPSED_WIDTH } from './Sidebar';
 import { Header } from './Header';
 import { BottomTabBar } from './BottomTabBar';
 import { GuestBanner } from './GuestBanner';
-import { CommandPalette, useCommandPalette } from './CommandPalette';
 import { Breadcrumb } from '@/components/ui';
 import { GRADIENT } from '@/lib/tokens';
+
+const CommandPalette = dynamic(() => import('./CommandPalette').then((mod) => mod.CommandPalette), { ssr: false });
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -23,7 +25,7 @@ export function MainLayout({ children }: MainLayoutProps) {
   const pathname = usePathname();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const { open: paletteOpen, setOpen: setPaletteOpen } = useCommandPalette();
+  const [paletteOpen, setPaletteOpen] = useState(false);
 
   const isBareRoute = BARE_ROUTES.some(
     (route) => pathname === route || pathname.startsWith(route + '/')

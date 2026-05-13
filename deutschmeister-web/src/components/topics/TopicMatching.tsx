@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useReducer, useEffect, useCallback, useRef } from 'react';
 import { ACCENT, STATUS } from '@/lib/tokens';
@@ -46,7 +46,7 @@ interface MatchItem {
 
 const ROUND_SIZE = 6;
 
-// ─── State management ───
+// â”€â”€â”€ State management â”€â”€â”€
 
 type MatchState = {
   leftItems: MatchItem[];
@@ -136,15 +136,16 @@ function buildRound(pool: TopicWord[]): { roundWords: TopicWord[]; left: MatchIt
   return { roundWords, left, right };
 }
 
-// ─── Component ───
+// â”€â”€â”€ Component â”€â”€â”€
 
 interface Props {
   words: TopicWord[];
   topicColor: string;
   onMarkLearned?: (wordId: string) => void;
+  hideIcons?: boolean;
 }
 
-export function TopicMatching({ words, topicColor, onMarkLearned }: Props) {
+export function TopicMatching({ words, topicColor, onMarkLearned, hideIcons = false }: Props) {
   const [state, dispatch] = useReducer(matchReducer, EMPTY_STATE);
   const { leftItems, rightItems, selectedLeft, selectedRight, matched, wrongPair, attempts, isFinished, startTime, elapsed, roundWords } = state;
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -172,7 +173,7 @@ export function TopicMatching({ words, topicColor, onMarkLearned }: Props) {
     dispatch({ type: 'start', ...round, startTime: Date.now() });
   }, [words]);
 
-  // Match logic runs in click handlers — no effect needed
+  // Match logic runs in click handlers â€” no effect needed
   const runMatch = useCallback((leftId: string, rightId: string, leftWordId: string, rightWordId: string) => {
     if (leftWordId === rightWordId) {
       dispatch({ type: 'correct', wordId: leftWordId });
@@ -219,49 +220,49 @@ export function TopicMatching({ words, topicColor, onMarkLearned }: Props) {
   if (words.length < 3) {
     return (
       <div className="text-center py-12">
-        <div className="text-4xl mb-3">🔗</div>
+        {!hideIcons && <div className="text-4xl mb-3">🔗</div>}
         <p style={{ color: 'var(--theme-text-muted)' }}>
-          Cần ít nhất 3 từ để chơi nối từ. Chủ đề này có {words.length} từ.
+          Cáº§n Ã­t nháº¥t 3 tá»« Ä‘á»ƒ chÆ¡i ná»‘i tá»«. Chá»§ Ä‘á» nÃ y cÃ³ {words.length} tá»«.
         </p>
       </div>
     );
   }
 
-  // ─── Finished ───
+  // â”€â”€â”€ Finished â”€â”€â”€
   if (isFinished) {
     const accuracy = attempts > 0 ? Math.round((roundWords.length / attempts) * 100) : 100;
     const stars = accuracy >= 90 ? 3 : accuracy >= 70 ? 2 : 1;
     return (
       <div className="text-center py-10">
-        <div className="text-5xl mb-3">{'⭐'.repeat(stars)}</div>
+        {!hideIcons && <div className="text-5xl mb-3">{'⭐'.repeat(stars)}</div>}
         <h3 className="text-xl font-bold mb-1" style={{ color: 'var(--theme-text-primary)' }}>
-          Hoàn thành!
+          HoÃ n thÃ nh!
         </h3>
         <div className="flex justify-center gap-6 mb-6 mt-4">
           <div className="text-center">
             <div className="text-2xl font-bold" style={{ color: topicColor }}>{roundWords.length}</div>
-            <div className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>Cặp từ</div>
+            <div className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>Cáº·p tá»«</div>
           </div>
           <div className="text-center">
             <div className="text-2xl font-bold" style={{ color: 'var(--theme-text-primary)' }}>{attempts}</div>
-            <div className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>Lần thử</div>
+            <div className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>Láº§n thá»­</div>
           </div>
           <div className="text-center">
             <div className="text-2xl font-bold" style={{ color: STATUS.success }}>{formatTime(elapsed)}</div>
-            <div className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>Thời gian</div>
+            <div className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>Thá»i gian</div>
           </div>
           <div className="text-center">
             <div className="text-2xl font-bold" style={{ color: accuracy >= 70 ? STATUS.success : ACCENT.xp }}>
               {accuracy}%
             </div>
-            <div className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>Chính xác</div>
+            <div className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>ChÃ­nh xÃ¡c</div>
           </div>
         </div>
         <div className="flex justify-center gap-3">
           <button onClick={() => startRound()}
             className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-body font-semibold transition-all hover:-translate-y-0.5"
             style={{ background: `${topicColor}15`, color: topicColor }}>
-            <IconRotateCcw size={15} /> Chơi lại
+            {!hideIcons && <IconRotateCcw size={15} />} ChÆ¡i láº¡i
           </button>
         </div>
       </div>
@@ -274,14 +275,14 @@ export function TopicMatching({ words, topicColor, onMarkLearned }: Props) {
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-3">
           <span className="text-body font-medium" style={{ color: 'var(--theme-text-muted)' }}>
-            Nối: {matched.size}/{roundWords.length}
+            Ná»‘i: {matched.size}/{roundWords.length}
           </span>
           <span className="text-xs px-2 py-0.5 rounded-md" style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }}>
-            Thử: {attempts}
+            Thá»­: {attempts}
           </span>
         </div>
         <div className="flex items-center gap-1.5 text-body" style={{ color: 'var(--theme-text-muted)' }}>
-          <IconClock size={14} />
+          {!hideIcons && <IconClock size={14} />}
           {formatTime(elapsed)}
         </div>
       </div>
@@ -299,7 +300,7 @@ export function TopicMatching({ words, topicColor, onMarkLearned }: Props) {
         <div className="space-y-2.5">
           <div className="text-caption font-bold uppercase tracking-wide mb-2"
             style={{ color: 'var(--theme-text-muted)' }}>
-            🇩🇪 Tiếng Đức
+            Tiếng Đức
           </div>
           {leftItems.map(item => {
             const isMatched = matched.has(item.wordId);
@@ -341,7 +342,7 @@ export function TopicMatching({ words, topicColor, onMarkLearned }: Props) {
                 className={`w-full p-3.5 rounded-xl border-2 text-sm font-semibold text-center transition-all
                   ${!isMatched ? 'cursor-pointer hover:-translate-y-0.5' : ''}`}
                 style={style}>
-                {isMatched ? '✓ ' : ''}{item.text}
+                {hideIcons || !isMatched ? '' : '✓ '}{item.text}
               </button>
             );
           })}
@@ -351,7 +352,7 @@ export function TopicMatching({ words, topicColor, onMarkLearned }: Props) {
         <div className="space-y-2.5">
           <div className="text-caption font-bold uppercase tracking-wide mb-2"
             style={{ color: 'var(--theme-text-muted)' }}>
-            🇻🇳 Tiếng Việt
+            Tiếng Việt
           </div>
           {rightItems.map(item => {
             const isMatched = matched.has(item.wordId);
@@ -393,7 +394,7 @@ export function TopicMatching({ words, topicColor, onMarkLearned }: Props) {
                 className={`w-full p-3.5 rounded-xl border-2 text-sm font-medium text-center transition-all
                   ${!isMatched ? 'cursor-pointer hover:-translate-y-0.5' : ''}`}
                 style={style}>
-                {isMatched ? '✓ ' : ''}{item.text}
+                {hideIcons || !isMatched ? '' : '✓ '}{item.text}
               </button>
             );
           })}
@@ -402,7 +403,7 @@ export function TopicMatching({ words, topicColor, onMarkLearned }: Props) {
 
       {/* Hint */}
       <div className="text-center mt-5 text-xs" style={{ color: 'var(--theme-text-muted)' }}>
-        Chọn 1 từ bên trái → chọn nghĩa bên phải để nối
+        Chá»n 1 tá»« bÃªn trÃ¡i â†’ chá»n nghÄ©a bÃªn pháº£i Ä‘á»ƒ ná»‘i
       </div>
     </div>
   );

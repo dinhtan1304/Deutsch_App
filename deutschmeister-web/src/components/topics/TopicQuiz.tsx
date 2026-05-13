@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useReducer, useEffect, useCallback } from 'react';
 import { ACCENT, STATUS, GRADIENT } from '@/lib/tokens';
@@ -88,7 +88,7 @@ function generateQuestions(words: TopicWord[], count: number): Question[] {
   return questions;
 }
 
-// ─── State management ───
+// â”€â”€â”€ State management â”€â”€â”€
 
 type QuizState = {
   questions: Question[];
@@ -126,17 +126,18 @@ function quizReducer(state: QuizState, action: QuizAction): QuizState {
 
 const QUIZ_SIZE = 10;
 
-// ─── Component ───
+// â”€â”€â”€ Component â”€â”€â”€
 
 interface Props {
   words: TopicWord[];
   topicColor: string;
   onMarkLearned?: (wordId: string) => void;
+  hideIcons?: boolean;
 }
 
 const monoGradient = (color: string) => `linear-gradient(135deg, ${color}, ${color}cc)`;
 
-export function TopicQuiz({ words, topicColor, onMarkLearned }: Props) {
+export function TopicQuiz({ words, topicColor, onMarkLearned, hideIcons = false }: Props) {
   const [state, dispatch] = useReducer(quizReducer, {
     questions: [], currentIndex: 0, selectedOption: null,
     isAnswered: false, score: 0, wrongWords: new Set<string>(), isFinished: false,
@@ -188,26 +189,26 @@ export function TopicQuiz({ words, topicColor, onMarkLearned }: Props) {
   if (words.length < 4) {
     return (
       <div className="text-center py-12">
-        <div className="text-4xl mb-3">📝</div>
+        {!hideIcons && <div className="text-4xl mb-3">📝</div>}
         <p style={{ color: 'var(--theme-text-muted)' }}>
-          Cần ít nhất 4 từ để tạo quiz. Chủ đề này có {words.length} từ.
+          Cáº§n Ã­t nháº¥t 4 tá»« Ä‘á»ƒ táº¡o quiz. Chá»§ Ä‘á» nÃ y cÃ³ {words.length} tá»«.
         </p>
       </div>
     );
   }
 
-  // ─── Finished ───
+  // â”€â”€â”€ Finished â”€â”€â”€
   if (isFinished) {
     const pct = total > 0 ? Math.round((score / total) * 100) : 0;
     const scoreGradient = pct >= 80 ? GRADIENT.readingGreenH : pct >= 50 ? GRADIENT.xpGoldH : GRADIENT.dangerSolidH;
     return (
       <div className="text-center py-10">
-        <div className="text-5xl mb-4">{pct >= 80 ? '🏆' : pct >= 50 ? '👍' : '📖'}</div>
+        {!hideIcons && <div className="text-5xl mb-4">{pct >= 80 ? 'Xuất sắc!' : pct >= 50 ? 'Khá tốt, tiếp tục cố gắng!' : 'Cần ôn lại thêm nhé!'}</div>}
         <h3 className="text-xl font-bold mb-1" style={{ color: 'var(--theme-text-primary)' }}>
-          Kết quả: {score}/{total}
+          Káº¿t quáº£: {score}/{total}
         </h3>
         <p className="text-sm mb-6" style={{ color: 'var(--theme-text-muted)' }}>
-          {pct >= 80 ? 'Xuất sắc! 🎉' : pct >= 50 ? 'Khá tốt, tiếp tục cố gắng!' : 'Cần ôn lại thêm nhé!'}
+          {pct >= 80 ? 'Xuất sắc!' : pct >= 50 ? 'Khá tốt, tiếp tục cố gắng!' : 'Cần ôn lại thêm nhé!'}
         </p>
 
         {/* Score bar */}
@@ -224,7 +225,7 @@ export function TopicQuiz({ words, topicColor, onMarkLearned }: Props) {
           <div className="max-w-sm mx-auto mb-6 text-left p-4 rounded-xl"
             style={{ backgroundColor: 'rgba(239,68,68,.06)', border: '1px solid rgba(239,68,68,.15)' }}>
             <div className="text-xs font-bold mb-2" style={{ color: STATUS.danger }}>
-              Từ cần ôn lại ({wrongWords.size}):
+              Tá»« cáº§n Ã´n láº¡i ({wrongWords.size}):
             </div>
             <div className="space-y-1.5">
               {words.filter(w => wrongWords.has(w.id)).map(w => (
@@ -232,7 +233,7 @@ export function TopicQuiz({ words, topicColor, onMarkLearned }: Props) {
                   <span className="font-semibold" style={{ color: ArticleColor[w.article] || ACCENT.gray }}>
                     {w.article} {w.word}
                   </span>
-                  <span style={{ color: 'var(--theme-text-muted)' }}>—</span>
+                  <span style={{ color: 'var(--theme-text-muted)' }}>â€”</span>
                   <span style={{ color: 'var(--theme-text-secondary)' }}>
                     {w.translationVi || w.translationEn}
                   </span>
@@ -250,13 +251,13 @@ export function TopicQuiz({ words, topicColor, onMarkLearned }: Props) {
             }}
               className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-body font-semibold transition-all hover:-translate-y-0.5"
               style={{ background: 'rgba(239,68,68,.1)', color: STATUS.danger }}>
-              <IconRotateCcw size={15} /> Ôn từ sai
+              {!hideIcons && <IconRotateCcw size={15} />} Ã”n tá»« sai
             </button>
           )}
           <button onClick={() => startQuiz()}
             className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-body font-semibold transition-all hover:-translate-y-0.5"
             style={{ background: `${topicColor}15`, color: topicColor }}>
-            <IconRotateCcw size={15} /> Quiz mới
+            {!hideIcons && <IconRotateCcw size={15} />} Quiz má»›i
           </button>
         </div>
       </div>
@@ -267,20 +268,20 @@ export function TopicQuiz({ words, topicColor, onMarkLearned }: Props) {
 
   const ac = ArticleColor[current.word.article] || ACCENT.gray;
   const questionLabel = current.mode === 'de-to-vi'
-    ? 'Nghĩa của từ này?'
+    ? 'NghÄ©a cá»§a tá»« nÃ y?'
     : current.mode === 'vi-to-de'
-    ? 'Từ tiếng Đức nào đúng?'
-    : 'Article nào đúng?';
+    ? 'Tá»« tiáº¿ng Äá»©c nÃ o Ä‘Ãºng?'
+    : 'Article nÃ o Ä‘Ãºng?';
 
   return (
     <div>
       {/* Progress */}
       <div className="flex items-center justify-between mb-3">
         <span className="text-body font-medium" style={{ color: 'var(--theme-text-muted)' }}>
-          Câu {currentIndex + 1}/{total}
+          CÃ¢u {currentIndex + 1}/{total}
         </span>
         <span className="text-body font-bold" style={{ color: topicColor }}>
-          Điểm: {score}/{currentIndex + (isAnswered ? 1 : 0)}
+          Äiá»ƒm: {score}/{currentIndex + (isAnswered ? 1 : 0)}
         </span>
       </div>
       <div className="h-1.5 rounded-full overflow-hidden mb-6"
@@ -310,7 +311,7 @@ export function TopicQuiz({ words, topicColor, onMarkLearned }: Props) {
             <button onClick={() => playAudio(`${current.word.article || ''} ${current.word.word}`)}
               className="w-9 h-9 rounded-lg flex items-center justify-center transition-all hover:scale-110"
               style={{ backgroundColor: `${ac}15`, color: ac }}>
-              <IconVolume size={16} />
+              {hideIcons ? 'Nghe' : <IconVolume size={16} />}
             </button>
           </div>
         ) : (
@@ -365,12 +366,12 @@ export function TopicQuiz({ words, topicColor, onMarkLearned }: Props) {
         <div className="flex items-center justify-between">
           <div className="text-sm font-semibold"
             style={{ color: selectedOption === current.correctIndex ? STATUS.success : STATUS.danger }}>
-            {selectedOption === current.correctIndex ? '✓ Chính xác!' : '✗ Sai rồi!'}
+            {selectedOption === current.correctIndex ? 'Chính xác!' : 'Sai rồi!'}
           </div>
           <button onClick={handleNext}
             className="px-5 py-2.5 rounded-xl text-body font-semibold text-white transition-all hover:-translate-y-0.5"
             style={{ background: monoGradient(topicColor) }}>
-            {currentIndex < total - 1 ? 'Câu tiếp → Enter' : 'Xem kết quả'}
+            {currentIndex < total - 1 ? 'CÃ¢u tiáº¿p â†’ Enter' : 'Xem káº¿t quáº£'}
           </button>
         </div>
       )}

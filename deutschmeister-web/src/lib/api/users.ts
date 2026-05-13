@@ -47,13 +47,15 @@ export interface Settings {
   // preferredLevel: stored in DB, synced to backend
   preferredLevel: 'A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C2' | 'all';
   showVietnamese: boolean;
+  dailyReminder: boolean;
+  weeklyEmailEnabled: boolean;
   createdAt: string;
   updatedAt: string;
 }
 
 // Fields synced to backend (exist in DB schema)
 export const BACKEND_SYNCED_SETTINGS: (keyof Settings)[] = [
-  'theme', 'soundEnabled', 'dailyGoal', 'preferredLevel', 'showVietnamese',
+  'theme', 'soundEnabled', 'dailyGoal', 'preferredLevel', 'showVietnamese', 'dailyReminder', 'weeklyEmailEnabled',
 ];
 
 export interface UserStats {

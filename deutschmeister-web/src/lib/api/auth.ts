@@ -1,4 +1,5 @@
 import { apiPost, apiGet, api, setAccessToken, clearTokens } from './client';
+import { clearSessionHint, setSessionHint } from '@/lib/auth/sessionHint';
 
 /**
  * Auth response from server
@@ -49,6 +50,27 @@ export interface User {
   };
 }
 
+export interface AuthBootstrap {
+  user: User;
+  settings: Record<string, unknown>;
+  subscription: NonNullable<User['subscription']>;
+  xp: {
+    xp: number;
+    level: number;
+    name: string;
+    nameVi: string;
+    cefr: string;
+    cefrLabel: string;
+    nextLevelXp: number;
+    currentLevelXp: number;
+    xpInLevel: number;
+    xpNeeded: number;
+    progress: number;
+  };
+  unreadCount: { count: number };
+  streak: number;
+}
+
 export const authApi = {
   register: async (data: RegisterDto): Promise<MessageResponse> => {
     return apiPost<MessageResponse>('/auth/register', data);
@@ -57,6 +79,7 @@ export const authApi = {
   login: async (data: LoginDto): Promise<AuthResponse> => {
     const response = await apiPost<AuthResponse>('/auth/login', data);
     setAccessToken(response.accessToken);
+    setSessionHint();
     return response;
   },
 
@@ -81,10 +104,15 @@ export const authApi = {
       await apiPost('/auth/logout');
     } finally {
       clearTokens();
+      clearSessionHint();
     }
   },
 
   getMe: async (): Promise<User> => {
     return apiGet<User>('/auth/me');
+  },
+
+  bootstrap: async (): Promise<AuthBootstrap> => {
+    return apiGet<AuthBootstrap>('/auth/bootstrap');
   },
 };

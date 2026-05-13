@@ -1,3 +1,5 @@
+import { clearSessionHint } from '@/lib/auth/sessionHint';
+
 /**
  * API Client with secure token handling
  *
@@ -111,8 +113,11 @@ async function refreshAccessToken(): Promise<string | null> {
 
       if (!response.ok) {
         console.warn('[Auth] Refresh failed:', response.status, await response.text().catch(() => ''));
-        clearTokens();
-        onAuthExpiredCallback?.();
+        if (response.status === 401) {
+          clearTokens();
+          clearSessionHint();
+          onAuthExpiredCallback?.();
+        }
         return null;
       }
 
@@ -122,8 +127,6 @@ async function refreshAccessToken(): Promise<string | null> {
       return data.accessToken;
     } catch (err) {
       console.warn('[Auth] Refresh error:', err);
-      clearTokens();
-      onAuthExpiredCallback?.();
       return null;
     } finally {
       isRefreshing = false;
@@ -174,6 +177,7 @@ export async function api<T>(
       // If STILL 401 after successful refresh → token/session truly invalid
       if (response.status === 401) {
         clearTokens();
+        clearSessionHint();
         onAuthExpiredCallback?.();
       }
     }
@@ -252,6 +256,7 @@ export async function apiUpload<T>(endpoint: string, formData: FormData): Promis
 
   if (response.status === 401) {
     clearTokens();
+    clearSessionHint();
     onAuthExpiredCallback?.();
     throw new ApiError(401, 'Phiên đăng nhập hết hạn');
   }
