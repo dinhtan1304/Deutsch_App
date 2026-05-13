@@ -3,7 +3,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { authApi, LoginDto, RegisterDto, MessageResponse, User } from '@/lib/api/auth';
-import { clearTokens, getAccessToken, onAuthExpired, setAccessToken } from '@/lib/api/client';
+import { clearTokens, initAuth, onAuthExpired, setAccessToken } from '@/lib/api/client';
 
 interface AuthState {
   user: User | null;
@@ -80,13 +80,13 @@ export const useAuthStore = create<AuthState>()(
       },
 
       fetchUser: async () => {
-        const token = getAccessToken();
-        if (!token) {
-          set({ user: null, isAuthenticated: false });
-          return;
-        }
         set({ isLoading: true });
         try {
+          const hasToken = await initAuth();
+          if (!hasToken) {
+            set({ user: null, isAuthenticated: false, isLoading: false });
+            return;
+          }
           const user = await authApi.getMe();
           set({ user, isAuthenticated: true, isLoading: false });
         } catch {
