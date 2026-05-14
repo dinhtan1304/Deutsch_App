@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { IconChevronRight, IconChevronLeft } from '@/components/ui/Icons';
 import { useXp } from '@/hooks/useXp';
-import { useAuthStore } from '@/stores/authStore';
+import { useAuthUser, useIsAuthenticated, useAuthBootstrap } from '@/stores/authStore';
 import { useSRSStats } from '@/hooks/usePersonalWords';
 import { useProgressStats } from '@/hooks/useProgress';
 import { PremiumLockIcon } from '@/components/subscription/UpsellTrigger';
@@ -24,7 +24,9 @@ interface SidebarProps {
 
 export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
   const pathname = usePathname();
-  const { user, isAuthenticated, bootstrap } = useAuthStore();
+  const user = useAuthUser();
+  const isAuthenticated = useIsAuthenticated();
+  const bootstrap = useAuthBootstrap();
   const { data: xpQuery } = useXp(isAuthenticated && !bootstrap?.xp);
   const xpInfo = bootstrap?.xp ?? xpQuery;
   const { data: srsStats } = useSRSStats(isAuthenticated);

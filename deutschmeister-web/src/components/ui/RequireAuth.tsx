@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuthStore } from '@/stores/authStore';
 
@@ -11,8 +11,9 @@ interface RequireAuthProps {
 export function RequireAuth({ children }: RequireAuthProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const { _hasHydrated, isAuthenticated, isLoading, fetchUser } = useAuthStore();
-  const [checked, setChecked] = useState(false);
+  const _hasHydrated = useAuthStore((s) => s._hasHydrated);
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const isLoading = useAuthStore((s) => s.isLoading);
 
   const returnTo = useMemo(() => {
     if (typeof window === 'undefined') return pathname;
@@ -20,26 +21,11 @@ export function RequireAuth({ children }: RequireAuthProps) {
   }, [pathname]);
 
   useEffect(() => {
-    if (!_hasHydrated) return;
-
-    let cancelled = false;
-    setChecked(false);
-
-    fetchUser().finally(() => {
-      if (!cancelled) setChecked(true);
-    });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [_hasHydrated, fetchUser]);
-
-  useEffect(() => {
-    if (!_hasHydrated || !checked || isLoading || isAuthenticated) return;
+    if (!_hasHydrated || isLoading || isAuthenticated) return;
     router.replace(`/auth/login?returnTo=${encodeURIComponent(returnTo)}`);
-  }, [_hasHydrated, checked, isAuthenticated, isLoading, returnTo, router]);
+  }, [_hasHydrated, isLoading, isAuthenticated, returnTo, router]);
 
-  if (!_hasHydrated || !checked || isLoading || !isAuthenticated) {
+  if (!_hasHydrated || isLoading) {
     return (
       <div
         className="min-h-[60vh] flex items-center justify-center px-4 text-sm"
@@ -49,6 +35,8 @@ export function RequireAuth({ children }: RequireAuthProps) {
       </div>
     );
   }
+
+  if (!isAuthenticated) return null;
 
   return <>{children}</>;
 }

@@ -6,7 +6,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
-import { useAuthStore } from '@/stores/authStore';
+import { useAuthUser, useIsAuthenticated, useAuthBootstrap, useAuthLogout } from '@/stores/authStore';
 import { IconSearch, IconUser, IconSettings, IconLogOut, IconMessageCircle, IconStar, IconZap, IconDiscord } from '@/components/ui/Icons';
 import { useIsPremium } from '@/hooks/useSubscription';
 import { useXp } from '@/hooks/useXp';
@@ -25,7 +25,10 @@ interface HeaderProps {
 
 export function Header({ sidebarCollapsed, onOpenPalette }: HeaderProps) {
   const router = useRouter();
-  const { user, isAuthenticated, logout, bootstrap } = useAuthStore();
+  const user = useAuthUser();
+  const isAuthenticated = useIsAuthenticated();
+  const bootstrap = useAuthBootstrap();
+  const logout = useAuthLogout();
   const isPremiumQuery = useIsPremium(isAuthenticated && !bootstrap?.subscription);
   const isPremium = bootstrap?.subscription
     ? (bootstrap.subscription.plan === 'premium' || bootstrap.subscription.plan === 'lifetime') && bootstrap.subscription.status === 'active'
@@ -33,9 +36,8 @@ export function Header({ sidebarCollapsed, onOpenPalette }: HeaderProps) {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
   const [showNotifs, setShowNotifs] = useState(false);
-  const [pollUnread, setPollUnread] = useState(false);
   const qc = useQueryClient();
-  const { data: unreadData } = useUnreadCount(isAuthenticated && !bootstrap?.unreadCount, pollUnread);
+  const { data: unreadData } = useUnreadCount(isAuthenticated && !bootstrap?.unreadCount, isAuthenticated);
   const unreadCount = bootstrap?.unreadCount.count ?? unreadData?.count ?? 0;
   const { data: xpQuery } = useXp(isAuthenticated && !bootstrap?.xp);
   const xpInfo = bootstrap?.xp ?? xpQuery;
@@ -58,14 +60,6 @@ export function Header({ sidebarCollapsed, onOpenPalette }: HeaderProps) {
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
   }, [showUserMenu]);
-
-  useEffect(() => {
-    if (!isAuthenticated) {
-      return;
-    }
-    const timer = window.setTimeout(() => setPollUnread(true), 45_000);
-    return () => window.clearTimeout(timer);
-  }, [isAuthenticated]);
 
   return (
     <>

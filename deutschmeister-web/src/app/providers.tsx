@@ -2,7 +2,7 @@
 
 import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query';
 import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { ErrorBoundary } from '@/components/ui';
 import { ApiError, clearTokens, initAuth } from '@/lib/api/client';
@@ -34,10 +34,7 @@ function pickBackendSettings(settings: Record<string, unknown>): Partial<AppSett
 
 function AppInitializer({ children }: { children: React.ReactNode }) {
   const queryClient = useQueryClient();
-  const pathname = usePathname();
-  const { isAuthenticated } = useAuthStore();
   const { loadSettings, syncFromBackend, settings, isLoaded } = useSettingsStore();
-  const hasSyncedRef = useRef(false);
 
   useEffect(() => {
     loadSettings();
@@ -48,17 +45,8 @@ function AppInitializer({ children }: { children: React.ReactNode }) {
   }, [isLoaded, settings.theme]);
 
   useEffect(() => {
-    const isPublicRoute =
-      pathname === '/' ||
-      pathname.startsWith('/auth/') ||
-      pathname.startsWith('/pricing') ||
-      pathname.startsWith('/privacy') ||
-      pathname.startsWith('/terms') ||
-      pathname.startsWith('/resources');
-
     const run = async () => {
-      if (isPublicRoute && !hasSessionHint()) {
-        hasSyncedRef.current = false;
+      if (!hasSessionHint()) {
         useAuthStore.setState({
           bootstrap: null,
           user: null,
@@ -73,20 +61,16 @@ function AppInitializer({ children }: { children: React.ReactNode }) {
       try {
         const tokenValid = await initAuth();
         if (!tokenValid) {
-          hasSyncedRef.current = false;
           useAuthStore.setState({
             bootstrap: null,
             user: null,
             isAuthenticated: false,
-            isLoading: false,
-            _hasHydrated: true,
           });
           return;
         }
 
         const bootstrap = await authApi.bootstrap();
         setSessionHint();
-        hasSyncedRef.current = true;
         useAuthStore.getState().setBootstrap(bootstrap);
         queryClient.setQueryData(subscriptionKeys.me(), bootstrap.subscription);
         queryClient.setQueryData(['xp'], bootstrap.xp);
@@ -97,7 +81,6 @@ function AppInitializer({ children }: { children: React.ReactNode }) {
           clearTokens();
           clearSessionHint();
         }
-        hasSyncedRef.current = false;
         useAuthStore.setState({
           bootstrap: null,
           user: null,
@@ -111,22 +94,8 @@ function AppInitializer({ children }: { children: React.ReactNode }) {
     };
 
     run();
-  }, [pathname, queryClient, syncFromBackend]);
-
-  useEffect(() => {
-    if (!isAuthenticated || hasSyncedRef.current) return;
-    hasSyncedRef.current = true;
-    authApi.bootstrap()
-      .then((bootstrap) => {
-        setSessionHint();
-        useAuthStore.getState().setBootstrap(bootstrap);
-        queryClient.setQueryData(subscriptionKeys.me(), bootstrap.subscription);
-        queryClient.setQueryData(['xp'], bootstrap.xp);
-        queryClient.setQueryData(notifKeys.unread(), bootstrap.unreadCount);
-        syncFromBackend(pickBackendSettings(bootstrap.settings));
-      })
-      .catch(() => {});
-  }, [isAuthenticated, queryClient, syncFromBackend]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return <>{children}</>;
 }

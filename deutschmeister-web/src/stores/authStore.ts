@@ -108,6 +108,14 @@ export const useAuthStore = create<AuthState>()((set) => ({
   setBootstrap: (bootstrap) => set({ bootstrap, user: bootstrap?.user ?? null, isAuthenticated: !!bootstrap }),
 }));
 
+// Field-scoped selector hooks — Header/Sidebar dùng những hook này để chỉ
+// re-render khi field cụ thể đổi, thay vì mỗi `setState` (loading, bootstrap…)
+// đều buộc cả tree re-render.
+export const useAuthUser = () => useAuthStore((s) => s.user);
+export const useIsAuthenticated = () => useAuthStore((s) => s.isAuthenticated);
+export const useAuthBootstrap = () => useAuthStore((s) => s.bootstrap);
+export const useAuthLogout = () => useAuthStore((s) => s.logout);
+
 if (typeof window !== 'undefined') {
   localStorage.removeItem('auth-storage');
 }
