@@ -26,8 +26,8 @@ export function useTypingSentences(
     queryKey: ['typing-practice', 'sentences', level, category, limit],
     queryFn: () => typingPracticeApi.getSentences(level!, category!, limit),
     enabled: !!level && !!category,
-    staleTime: 0,
-    gcTime: 0,
+    staleTime: 30 * 1000,
+    gcTime: 5 * 60 * 1000,
   });
 }
 

@@ -41,7 +41,6 @@ export function useFullDashboard() {
     queryKey: dashboardKeys.full(),
     queryFn: getFullDashboard,
     staleTime: 2 * 60 * 1000, // 2 minutes
-    refetchOnWindowFocus: true,
   });
 }
 
@@ -136,7 +135,6 @@ export function useDailyPath(enabled = true) {
     queryFn: getDailyPath,
     enabled,
     staleTime: 2 * 60 * 1000,
-    refetchOnWindowFocus: true,
   });
 }
 
@@ -149,6 +147,5 @@ export function useNextAction(enabled = true) {
     queryFn: getNextAction,
     enabled,
     staleTime: 2 * 60 * 1000,
-    refetchOnWindowFocus: true,
   });
 }

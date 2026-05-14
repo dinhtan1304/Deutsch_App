@@ -13,7 +13,7 @@ export function useNotifications(page = 1) {
   return useQuery<NotificationsPage>({
     queryKey: notifKeys.list(page),
     queryFn: () => notificationsApi.list(page),
-    staleTime: 0,
+    staleTime: 30 * 1000,
     retry: 2,
   });
 }
