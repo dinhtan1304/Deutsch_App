@@ -20,5 +20,6 @@ export { StatGrid } from './StatGrid';
 export type { StatItem } from './StatGrid';
 export { ScoreRing } from './ScoreRing';
 export { AuthGate } from './AuthGate';
+export { RequireAuth } from './RequireAuth';
 export { Switch } from './Switch';
 export type { SwitchProps } from './Switch';

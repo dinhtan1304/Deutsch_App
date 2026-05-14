@@ -201,8 +201,11 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                       >
                         <span className="shrink-0 w-4 h-4 flex items-center justify-center"><ChildIcon size={16} /></span>
                         <span className="min-w-0 truncate flex-1">{child.label}</span>
-                        {AUTH_HREFS.has(child.href) && !isAuthenticated && <LockIcon />}
-                        {!AUTH_HREFS.has(child.href) && PREMIUM_HREFS.has(child.href) && <PremiumLockIcon size={12} />}
+                        {AUTH_HREFS.has(child.href) && !isAuthenticated ? (
+                          <LockIcon />
+                        ) : (
+                          PREMIUM_HREFS.has(child.href) && <PremiumLockIcon size={12} />
+                        )}
                         {childBadge > 0 && (
                           <span className="shrink-0 text-caption font-bold px-1.5 py-0.5 rounded-full leading-none text-white text-center"
                             style={{ background: STATUS.danger, minWidth: 18 }}>
@@ -237,6 +240,7 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                 <span className="flex-1 text-[13.5px] font-medium whitespace-nowrap">{item.label}</span>
               )}
               {!isCollapsed && AUTH_HREFS.has(item.href) && !isAuthenticated && <LockIcon />}
+              {!isCollapsed && (isAuthenticated || !AUTH_HREFS.has(item.href)) && PREMIUM_HREFS.has(item.href) && <PremiumLockIcon size={12} />}
               {badge > 0 && (
                 isCollapsed ? (
                   <span className="absolute top-1.5 right-2 w-2 h-2 rounded-full" style={{ background: STATUS.danger }} />

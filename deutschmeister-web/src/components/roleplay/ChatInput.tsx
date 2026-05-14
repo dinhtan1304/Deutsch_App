@@ -1,22 +1,42 @@
-import { useState, KeyboardEvent, useRef, useCallback } from 'react';
+import { useState, KeyboardEvent, useRef, useCallback, useEffect } from 'react';
 /* eslint-disable no-restricted-syntax */
 
 interface Props {
   onSend: (text: string) => void;
+  onTypingChange?: (isTyping: boolean) => void;
   disabled?: boolean;
   placeholder?: string;
 }
 
 const SPECIAL_CHARS = ['ä', 'ö', 'ü', 'ß', 'Ä', 'Ö', 'Ü'];
 
-export function ChatInput({ onSend, disabled, placeholder = 'Viết câu trả lời bằng tiếng Đức...' }: Props) {
+export function ChatInput({ onSend, onTypingChange, disabled, placeholder = 'Viết câu trả lời bằng tiếng Đức...' }: Props) {
   const [text, setText] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const stopTypingSoon = useCallback(() => {
+    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+    typingTimeoutRef.current = setTimeout(() => {
+      onTypingChange?.(false);
+      typingTimeoutRef.current = null;
+    }, 1500);
+  }, [onTypingChange]);
+
+  useEffect(() => {
+    return () => {
+      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+      onTypingChange?.(false);
+    };
+  }, [onTypingChange]);
 
   const handleSend = () => {
     const trimmed = text.trim();
     if (!trimmed || disabled) return;
     onSend(trimmed);
+    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+    typingTimeoutRef.current = null;
+    onTypingChange?.(false);
     setText('');
   };
 
@@ -28,13 +48,18 @@ export function ChatInput({ onSend, disabled, placeholder = 'Viết câu trả l
   };
 
   const insertSpecial = useCallback((char: string) => {
+    if (disabled) return;
     if (!textareaRef.current) {
       setText(prev => prev + char);
+      onTypingChange?.(true);
+      stopTypingSoon();
       return;
     }
     const { selectionStart, selectionEnd } = textareaRef.current;
     const newText = text.substring(0, selectionStart) + char + text.substring(selectionEnd);
     setText(newText);
+    onTypingChange?.(true);
+    stopTypingSoon();
     
     setTimeout(() => {
       if (textareaRef.current) {
@@ -42,7 +67,20 @@ export function ChatInput({ onSend, disabled, placeholder = 'Viết câu trả l
         textareaRef.current.setSelectionRange(selectionStart + 1, selectionStart + 1);
       }
     }, 0);
-  }, [text]);
+  }, [disabled, onTypingChange, stopTypingSoon, text]);
+
+  const handleChange = (next: string) => {
+    setText(next);
+    if (disabled) return;
+    if (next.trim()) {
+      onTypingChange?.(true);
+      stopTypingSoon();
+    } else {
+      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+      typingTimeoutRef.current = null;
+      onTypingChange?.(false);
+    }
+  };
 
   return (
     <div className="flex flex-col gap-2">
@@ -71,7 +109,7 @@ export function ChatInput({ onSend, disabled, placeholder = 'Viết câu trả l
         <textarea
           ref={textareaRef}
           value={text}
-          onChange={(e) => setText(e.target.value)}
+          onChange={(e) => handleChange(e.target.value)}
           onKeyDown={handleKey}
           rows={1}
           placeholder={placeholder}

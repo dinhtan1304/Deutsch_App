@@ -1,5 +1,19 @@
 import type { NextConfig } from "next";
 
+// Derive HTTP + WebSocket origins for connect-src so Socket.IO can upgrade to
+// ws:// (or wss:// in production) on the same API host.
+function apiConnectOrigins(): string {
+  if (!process.env.NEXT_PUBLIC_API_URL) return '';
+  try {
+    const u = new URL(process.env.NEXT_PUBLIC_API_URL);
+    const httpOrigin = u.origin;
+    const wsOrigin = `${u.protocol === 'https:' ? 'wss:' : 'ws:'}//${u.host}`;
+    return `${httpOrigin} ${wsOrigin}`;
+  } catch {
+    return '';
+  }
+}
+
 const securityHeaders = [
   { key: 'X-Content-Type-Options', value: 'nosniff' },
   { key: 'X-Frame-Options', value: 'DENY' },
@@ -15,7 +29,7 @@ const securityHeaders = [
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "img-src 'self' data: blob: https: http:",
       "font-src 'self' https://fonts.gstatic.com",
-      `connect-src 'self' ${process.env.NEXT_PUBLIC_API_URL ? new URL(process.env.NEXT_PUBLIC_API_URL).origin : ''} https://*.deutschmeister.com https://*.railway.app https://www.google.com https://www.googleapis.com`,
+      `connect-src 'self' ${apiConnectOrigins()} https://*.deutschmeister.com https://*.railway.app wss://*.railway.app https://www.google.com https://www.googleapis.com`,
       "frame-src 'self' https://www.google.com https://www.youtube.com",
       "media-src 'self' blob: data:",
       "object-src 'none'",

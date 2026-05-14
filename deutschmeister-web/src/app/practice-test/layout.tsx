@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { RequireAuth } from '@/components/ui';
 
 export const metadata: Metadata = {
   title: 'Luyện thi tiếng Đức Goethe & TELC — Đề chuẩn AI chấm | DeutschMeister',
@@ -23,5 +24,5 @@ export const metadata: Metadata = {
 };
 
 export default function PracticeTestLayout({ children }: { children: React.ReactNode }) {
-  return children;
+  return <RequireAuth>{children}</RequireAuth>;
 }
