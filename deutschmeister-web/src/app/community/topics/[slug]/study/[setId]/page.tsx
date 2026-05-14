@@ -17,36 +17,32 @@ import type { TopicWord } from '@/types/topic';
 
 type Mode = 'flashcard' | 'quiz' | 'matching';
 
-const MODES: Array<{ v: Mode; label: string; icon: string }> = [
-  { v: 'flashcard', label: 'Flashcard', icon: '🎴' },
-  { v: 'quiz', label: 'Quiz', icon: '❓' },
-  { v: 'matching', label: 'Ghép cặp', icon: '🔗' },
+const MODES: Array<{ v: Mode; label: string }> = [
+  { v: 'flashcard', label: 'Flashcard' },
+  { v: 'quiz', label: 'Quiz' },
+  { v: 'matching', label: 'Ghép cặp' },
 ];
 
-/**
- * Map a UserTopicCard snapshot to the TopicWord shape used by existing
- * study components. Gender is inferred from the article when present.
- */
-function adaptCard(c: UserTopicCard, idx: number): TopicWord {
+function adaptCard(card: UserTopicCard, idx: number): TopicWord {
   const gender: TopicWord['gender'] =
-    c.article === 'der'
+    card.article === 'der'
       ? 'masculine'
-      : c.article === 'die'
+      : card.article === 'die'
         ? 'feminine'
-        : c.article === 'das'
+        : card.article === 'das'
           ? 'neuter'
           : 'masculine';
   return {
-    id: c.id,
-    word: c.word,
-    article: c.article ?? '',
+    id: card.id,
+    word: card.word,
+    article: card.article ?? '',
     gender,
-    plural: c.plural ?? undefined,
-    pronunciation: c.pronunciation ?? undefined,
-    translationEn: c.translationEn ?? '',
-    translationVi: c.translationVi ?? undefined,
-    imageUrl: c.imageUrl ?? undefined,
-    examples: c.examples,
+    plural: card.plural ?? undefined,
+    pronunciation: card.pronunciation ?? undefined,
+    translationEn: card.translationEn ?? '',
+    translationVi: card.translationVi ?? undefined,
+    imageUrl: card.imageUrl ?? undefined,
+    examples: card.examples,
     tips: undefined,
     isCore: false,
     order: idx,
@@ -68,7 +64,6 @@ export default function CommunityStudyPage() {
     [setData],
   );
 
-  // Fire study event once when the user starts studying.
   useEffect(() => {
     if (!topic?.id || !setData || adaptedWords.length === 0 || studyEventSent) return;
     setStudyEventSent(true);
@@ -92,10 +87,11 @@ export default function CommunityStudyPage() {
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6">
         <PageHeader
           backHref={`/community/topics/${slug}`}
+          hideBackIcon
           title={setData.set.title}
           accent="vocab"
         />
-        <EmptyState icon="📭" title="Bộ thẻ này chưa có thẻ nào" />
+        <EmptyState icon={null} title="Bộ thẻ này chưa có thẻ nào" />
       </div>
     );
   }
@@ -106,19 +102,19 @@ export default function CommunityStudyPage() {
     <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6">
       <PageHeader
         backHref={`/community/topics/${slug}`}
+        hideBackIcon
         title={setData.set.title}
-        subtitle={`${adaptedWords.length} thẻ${topic ? ` · từ "${topic.title}"` : ''}`}
+        subtitle={`${adaptedWords.length} thẻ${topic ? ` | từ "${topic.title}"` : ''}`}
         accent="vocab"
       />
 
-      {/* Mode switcher */}
       <div className="flex gap-2 mb-5 flex-wrap">
-        {MODES.map((m) => {
-          const active = mode === m.v;
+        {MODES.map((item) => {
+          const active = mode === item.v;
           return (
             <button
-              key={m.v}
-              onClick={() => setMode(m.v)}
+              key={item.v}
+              onClick={() => setMode(item.v)}
               className="px-4 py-2 rounded-xl text-sm font-bold transition-all"
               style={{
                 backgroundColor: active ? `${topicColor}18` : 'var(--theme-bg-card)',
@@ -126,20 +122,20 @@ export default function CommunityStudyPage() {
                 border: active ? `2px solid ${topicColor}` : '1px solid var(--theme-border)',
               }}
             >
-              {m.icon} {m.label}
+              {item.label}
             </button>
           );
         })}
       </div>
 
       {mode === 'flashcard' && (
-        <TopicFlashcard words={adaptedWords} topicColor={topicColor} />
+        <TopicFlashcard words={adaptedWords} topicColor={topicColor} hideIcons />
       )}
       {mode === 'quiz' && (
-        <TopicQuiz words={adaptedWords} topicColor={topicColor} />
+        <TopicQuiz words={adaptedWords} topicColor={topicColor} hideIcons />
       )}
       {mode === 'matching' && (
-        <TopicMatching words={adaptedWords} topicColor={topicColor} />
+        <TopicMatching words={adaptedWords} topicColor={topicColor} hideIcons />
       )}
 
       <div className="mt-6 flex justify-end">
@@ -147,7 +143,7 @@ export default function CommunityStudyPage() {
           variant="ghost"
           onClick={() => router.push(`/community/topics/${slug}`)}
         >
-          ← Quay lại bộ chủ đề
+          Quay lại bộ chủ đề
         </Button>
       </div>
     </div>

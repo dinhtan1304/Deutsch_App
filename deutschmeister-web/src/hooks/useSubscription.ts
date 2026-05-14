@@ -35,10 +35,11 @@ export function usePlans() {
   });
 }
 
-export function useMySubscription() {
+export function useMySubscription(enabled = true) {
   return useQuery<MySubscription>({
     queryKey: subscriptionKeys.me(),
     queryFn: () => subscriptionsApi.getMySubscription(),
+    enabled,
     staleTime: 60 * 1000,
   });
 }
@@ -99,8 +100,8 @@ export function useBetaStatus() {
 
 // ── Helpers ──
 
-export function useIsPremium(): boolean {
-  const { data } = useMySubscription();
+export function useIsPremium(enabled = true): boolean {
+  const { data } = useMySubscription(enabled);
   return (
     (data?.plan === 'premium' || data?.plan === 'lifetime') &&
     data?.status === 'active'

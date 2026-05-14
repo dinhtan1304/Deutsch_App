@@ -119,8 +119,9 @@ export default function HomePage() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  // Show nothing while hydrating to avoid flash
-  if (!_hasHydrated || isAuthenticated) {
+  // Public landing should render immediately; authenticated users redirect once
+  // the background session bootstrap finishes.
+  if (_hasHydrated && isAuthenticated) {
     return <div style={{ background: '#0a0f1e', minHeight: '100vh' }} />;
   }
 
@@ -187,7 +188,7 @@ export default function HomePage() {
       }}>
         <div style={{ maxWidth: 1200, margin: '0 auto', display: 'flex', alignItems: 'center', height: 64 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1 }}>
-            <Image src="/logo.png" width={36} height={36} alt="Deutschmeister" priority style={{ borderRadius: 10 }} />
+            <Image src="/logo-48.png" width={36} height={36} alt="Deutschmeister" priority style={{ borderRadius: 10 }} />
             <span style={{ fontWeight: 800, fontSize: 17, color: 'white', letterSpacing: '-0.3px' }}>Deutschmeister</span>
           </div>
           <div className="hide-mobile" style={{ display: 'flex', alignItems: 'center', gap: 32, marginRight: 32 }}>
@@ -223,11 +224,7 @@ export default function HomePage() {
 
       <main>
       {/* ─── Hero ───────────────────────────────────────────────────────────── */}
-      <section style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '120px 24px 80px', position: 'relative', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', top: '15%', left: '10%', width: 500, height: 500, borderRadius: '50%', background: 'radial-gradient(circle, rgba(99,102,241,.18) 0%, transparent 70%)', pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', top: '30%', right: '5%', width: 400, height: 400, borderRadius: '50%', background: 'radial-gradient(circle, rgba(167,139,250,.12) 0%, transparent 70%)', pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', bottom: '20%', left: '20%', width: 300, height: 300, borderRadius: '50%', background: 'radial-gradient(circle, rgba(236,72,153,.1) 0%, transparent 70%)', pointerEvents: 'none' }} />
-
+      <section style={{ minHeight: '92vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '116px 24px 56px', position: 'relative', overflow: 'hidden' }}>
         <div className="fade-up shimmer-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 14px', borderRadius: 100, marginBottom: 24, fontSize: 13, fontWeight: 600 }}>
           <IconSparkles /><span>Chuẩn Goethe/TELC</span>
         </div>
@@ -240,7 +237,7 @@ export default function HomePage() {
           Nền tảng luyện thi tiếng Đức toàn diện — từ từ vựng cơ bản đến đề thi Goethe/TELC A1·A2·B1. AI sinh đề từ kho đề thi thật (RAG), chấm điểm và nhận xét chi tiết bằng tiếng Việt.
         </p>
 
-        <div className="fade-up-3" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, marginBottom: 64 }}>
+        <div className="fade-up-3" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, marginBottom: 42 }}>
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
             <Link href="/words" className="btn-glow" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '14px 28px', borderRadius: 14, background: 'linear-gradient(135deg, #6366F1, #8B5CF6)', color: 'white', fontWeight: 700, fontSize: 15, textDecoration: 'none', boxShadow: '0 8px 32px rgba(99,102,241,.45)' }}>
               Học miễn phí ngay<IconArrow />
@@ -254,7 +251,7 @@ export default function HomePage() {
           </p>
         </div>
 
-        <div className="fade-up-4" style={{ display: 'flex', gap: 10, flexWrap: 'wrap', justifyContent: 'center', maxWidth: 840 }}>
+        <div className="fade-up-4" style={{ display: 'flex', gap: 10, flexWrap: 'wrap', justifyContent: 'center', maxWidth: 840, marginBottom: 36 }}>
           {[
             { label: '5000+ từ vựng', color: STATUS.success, bg: 'rgba(34,197,94,.1)' },
             { label: '8 trò chơi', color: ACCENT.vocab, bg: 'rgba(139,92,246,.1)' },
@@ -266,9 +263,26 @@ export default function HomePage() {
           ))}
         </div>
 
-        <div style={{ position: 'absolute', bottom: 32, left: '50%', transform: 'translateX(-50%)' }} className="float">
-          <div style={{ width: 24, height: 40, border: '2px solid rgba(255,255,255,.2)', borderRadius: 12, display: 'flex', justifyContent: 'center', padding: '6px 0' }}>
-            <div style={{ width: 3, height: 8, borderRadius: 2, background: 'rgba(255,255,255,.4)', animation: 'float 1.5s ease-in-out infinite' }} />
+        <div className="fade-up-4" style={{ width: 'min(100%, 1040px)', position: 'relative' }}>
+          <div style={{ borderRadius: 24, overflow: 'hidden', border: '1px solid rgba(255,255,255,.12)', boxShadow: '0 28px 80px rgba(0,0,0,.35)', background: 'rgba(255,255,255,.04)' }}>
+            <Image
+              src="/marketing/screenshots/dashboard.svg"
+              alt="Ảnh xem trước dashboard Deutschmeister"
+              width={1200}
+              height={760}
+              priority
+              style={{ display: 'block', width: '100%', height: 'auto' }}
+            />
+          </div>
+          <div className="hide-mobile" style={{ position: 'absolute', right: 24, bottom: -34, display: 'flex', gap: 14 }}>
+            {[
+              { src: '/marketing/screenshots/practice.svg', alt: 'Ảnh xem trước luyện kỹ năng' },
+              { src: '/marketing/screenshots/games.svg', alt: 'Ảnh xem trước trò chơi luyện từ' },
+            ].map((shot) => (
+              <div key={shot.src} style={{ width: 220, borderRadius: 18, overflow: 'hidden', border: '1px solid rgba(255,255,255,.14)', boxShadow: '0 18px 48px rgba(0,0,0,.28)', background: '#111827' }}>
+                <Image src={shot.src} alt={shot.alt} width={1200} height={760} style={{ display: 'block', width: '100%', height: 'auto' }} />
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -325,7 +339,7 @@ export default function HomePage() {
         <div style={{ maxWidth: 1200, margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: 64 }}>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 14px', borderRadius: 100, background: 'rgba(245,158,11,.12)', border: '1px solid rgba(245,158,11,.3)', fontSize: 12.5, fontWeight: 700, color: '#fbbf24', marginBottom: 16 }}>
-              <IconSparkles /> POWERED BY GEMINI AI
+              <IconSparkles /> AI hỗ trợ luyện thi
             </div>
             <h2 className="section-title" style={{ fontSize: '2.25rem', fontWeight: 900, letterSpacing: '-1px', marginBottom: 12 }}>AI làm thầy giáo <span className="gradient-text-amber">24/7 của bạn</span></h2>
             <p style={{ color: 'rgba(255,255,255,.5)', fontSize: 15, maxWidth: 600, margin: '0 auto', lineHeight: 1.7 }}>Sinh đề từ kho đề thi thật bằng RAG — phân tích, chấm điểm và nhận xét chi tiết bằng tiếng Việt giúp bạn cải thiện từng ngày.</p>

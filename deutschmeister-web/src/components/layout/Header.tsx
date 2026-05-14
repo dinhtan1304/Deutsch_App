@@ -5,16 +5,18 @@ import { useState, useEffect, useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import dynamic from 'next/dynamic';
 import { useAuthStore } from '@/stores/authStore';
 import { IconSearch, IconUser, IconSettings, IconLogOut, IconMessageCircle, IconStar, IconZap, IconDiscord } from '@/components/ui/Icons';
 import { useIsPremium } from '@/hooks/useSubscription';
 import { useXp } from '@/hooks/useXp';
 import { useDashboardStats } from '@/hooks/useDashboard';
 import { SIDEBAR_WIDTH, SIDEBAR_COLLAPSED_WIDTH } from './Sidebar';
-import { FeedbackModal } from './FeedbackModal';
-import { NotificationDrawer } from './NotificationDrawer';
 import { useUnreadCount, notifKeys } from '@/hooks/useNotifications';
 import { STATUS, ACCENT, GRADIENT } from '@/lib/tokens';
+
+const FeedbackModal = dynamic(() => import('./FeedbackModal').then((mod) => mod.FeedbackModal), { ssr: false });
+const NotificationDrawer = dynamic(() => import('./NotificationDrawer').then((mod) => mod.NotificationDrawer), { ssr: false });
 
 interface HeaderProps {
   sidebarCollapsed: boolean;
@@ -23,17 +25,22 @@ interface HeaderProps {
 
 export function Header({ sidebarCollapsed, onOpenPalette }: HeaderProps) {
   const router = useRouter();
-  const { user, isAuthenticated, logout } = useAuthStore();
-  const isPremium = useIsPremium();
+  const { user, isAuthenticated, logout, bootstrap } = useAuthStore();
+  const isPremiumQuery = useIsPremium(isAuthenticated && !bootstrap?.subscription);
+  const isPremium = bootstrap?.subscription
+    ? (bootstrap.subscription.plan === 'premium' || bootstrap.subscription.plan === 'lifetime') && bootstrap.subscription.status === 'active'
+    : isPremiumQuery;
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
   const [showNotifs, setShowNotifs] = useState(false);
+  const [pollUnread, setPollUnread] = useState(false);
   const qc = useQueryClient();
-  const { data: unreadData } = useUnreadCount();
-  const unreadCount = unreadData?.count ?? 0;
-  const { data: xpInfo } = useXp();
-  const { data: stats } = useDashboardStats();
-  const streak = stats?.streak ?? 0;
+  const { data: unreadData } = useUnreadCount(isAuthenticated && !bootstrap?.unreadCount, pollUnread);
+  const unreadCount = bootstrap?.unreadCount.count ?? unreadData?.count ?? 0;
+  const { data: xpQuery } = useXp(isAuthenticated && !bootstrap?.xp);
+  const xpInfo = bootstrap?.xp ?? xpQuery;
+  const { data: stats } = useDashboardStats(isAuthenticated && !bootstrap);
+  const streak = bootstrap?.streak ?? stats?.streak ?? 0;
 
   const toggleNotifs = useCallback(() => {
     setShowNotifs(prev => {
@@ -51,6 +58,14 @@ export function Header({ sidebarCollapsed, onOpenPalette }: HeaderProps) {
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
   }, [showUserMenu]);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      return;
+    }
+    const timer = window.setTimeout(() => setPollUnread(true), 45_000);
+    return () => window.clearTimeout(timer);
+  }, [isAuthenticated]);
 
   return (
     <>
@@ -197,7 +212,7 @@ export function Header({ sidebarCollapsed, onOpenPalette }: HeaderProps) {
                           </p>
                           <div className="flex items-center gap-2">
                             <span className={`px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-widest ${isPremium ? 'bg-indigo-500 text-white' : 'bg-black/5 dark:bg-white/10 text-muted'}`}>
-                              {isPremium ? 'Premium' : 'Free Plan'}
+                              {isPremium ? 'Premium' : 'Miễn phí'}
                             </span>
                           </div>
                         </div>
@@ -240,7 +255,7 @@ export function Header({ sidebarCollapsed, onOpenPalette }: HeaderProps) {
                       {[
                         { href: '/profile', icon: IconUser, label: 'Hồ sơ cá nhân', color: ACCENT.writing },
                         { href: '/settings', icon: IconSettings, label: 'Thiết lập tài khoản', color: ACCENT.vocab },
-                        { href: 'https://discord.gg/NfztBxtxh', icon: IconDiscord, label: 'Tham gia Discord', color: '#5865F2' },
+                        { href: 'https://discord.gg/NfztBxtxh', icon: IconDiscord, label: 'Tham gia Discord', color: ACCENT.srs },
                         { action: 'feedback', icon: IconMessageCircle, label: 'Phản hồi & Báo lỗi', color: ACCENT.emerald },
                       ].map((item, idx) => {
                         const ItemIcon = item.icon;

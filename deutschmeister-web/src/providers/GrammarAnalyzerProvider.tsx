@@ -1,9 +1,17 @@
 'use client';
 
 import { useEffect, useCallback, ReactNode } from 'react';
+import dynamic from 'next/dynamic';
 import { useGrammarAnalyzerStore } from '@/stores/grammarAnalyzerStore';
-import { FloatingAnalyzeButton } from '@/components/grammar-analyzer/FloatingAnalyzeButton';
-import { GrammarAnalysisPopup } from '@/components/grammar-analyzer/GrammarAnalysisPopup';
+
+const FloatingAnalyzeButton = dynamic(
+  () => import('@/components/grammar-analyzer/FloatingAnalyzeButton').then((mod) => mod.FloatingAnalyzeButton),
+  { ssr: false },
+);
+const GrammarAnalysisPopup = dynamic(
+  () => import('@/components/grammar-analyzer/GrammarAnalysisPopup').then((mod) => mod.GrammarAnalysisPopup),
+  { ssr: false },
+);
 
 /**
  * Minimum số từ để hiện nút phân tích ngữ pháp.

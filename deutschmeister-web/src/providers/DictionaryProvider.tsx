@@ -1,9 +1,14 @@
 'use client';
 
 import { useEffect, useCallback, ReactNode } from 'react';
+import dynamic from 'next/dynamic';
 import { usePathname } from 'next/navigation';
 import { useDictionaryPopupStore } from '@/stores/dictionaryPopupStore';
-import { DictionaryPopup } from '@/components/dictionary-popup/DictionaryPopup';
+
+const DictionaryPopup = dynamic(
+  () => import('@/components/dictionary-popup/DictionaryPopup').then((mod) => mod.DictionaryPopup),
+  { ssr: false },
+);
 
 const EXCLUDED_PATHS = ['/dictionary', '/word-bank'];
 

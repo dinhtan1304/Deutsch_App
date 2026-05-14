@@ -43,7 +43,6 @@ export default function CommunityTopicDetailPage() {
   const ownerName = topic.owner.name || 'Ẩn danh';
   const ownerInitial = ownerName.charAt(0).toUpperCase();
   const levelColor = LEVEL_COLOR[topic.level] ?? ACCENT.vocab;
-  const cover = topic.coverEmoji || '📚';
 
   const handleFollow = async () => {
     try {
@@ -77,31 +76,32 @@ export default function CommunityTopicDetailPage() {
     <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6">
       <PageHeader
         backHref="/community/topics"
+        hideBackIcon
         title={topic.title}
         accent="vocab"
       />
 
       {topic.visibility === 'UNLISTED' && (
         <div
-          className="mb-4 px-4 py-2 rounded-xl text-sm flex items-center gap-2"
+          className="mb-4 px-4 py-2 rounded-xl text-sm"
           style={{ backgroundColor: `${ACCENT.cyan}18`, color: ACCENT.cyan }}
         >
-          🔗 Đây là link riêng tư — chỉ người có link mới xem được
+          Đây là link riêng tư. Chỉ người có link mới xem được.
         </div>
       )}
 
-      {/* Hero */}
       <Card variant="default" className="mb-5" style={{ border: '1px solid var(--theme-border)' }}>
         <div className="flex flex-col sm:flex-row gap-4">
           <div
-            className="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl shrink-0"
+            className="w-16 h-16 rounded-2xl flex items-center justify-center text-base font-black shrink-0"
             style={{
               background: topic.coverColor
                 ? `${topic.coverColor}22`
                 : `${levelColor}18`,
+              color: topic.coverColor || levelColor,
             }}
           >
-            {cover}
+            {topic.level}
           </div>
 
           <div className="flex-1 min-w-0">
@@ -128,7 +128,6 @@ export default function CommunityTopicDetailPage() {
               </p>
             )}
 
-            {/* Owner row */}
             <div className="flex items-center gap-2 mb-3">
               {topic.owner.avatar ? (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -149,7 +148,6 @@ export default function CommunityTopicDetailPage() {
               </span>
             </div>
 
-            {/* Stats */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               <Stat label="Bộ thẻ" value={topic.setCount} color={ACCENT.vocab} />
               <Stat label="Thẻ từ" value={topic.wordCount} color={ACCENT.srs} />
@@ -159,7 +157,6 @@ export default function CommunityTopicDetailPage() {
           </div>
         </div>
 
-        {/* Action row */}
         <div className="flex flex-wrap gap-2 mt-5 pt-4" style={{ borderTop: '1px solid var(--theme-border)' }}>
           <Button
             variant="game"
@@ -168,7 +165,7 @@ export default function CommunityTopicDetailPage() {
             disabled={topic.sets.length === 0}
             onClick={handleStudy}
           >
-            📚 Học ngay
+            Học ngay
           </Button>
           <Button
             variant={topic.isFollowing ? 'secondary' : 'outline'}
@@ -176,10 +173,10 @@ export default function CommunityTopicDetailPage() {
             isLoading={followMut.isPending || unfollowMut.isPending}
             onClick={handleFollow}
           >
-            {topic.isFollowing ? '✓ Đang theo dõi' : '+ Theo dõi'}
+            {topic.isFollowing ? 'Đang theo dõi' : 'Theo dõi'}
           </Button>
           <Button variant="outline" size="lg" onClick={() => setShowForkDialog(true)}>
-            ⎘ Sao chép vào của tôi
+            Sao chép vào của tôi
           </Button>
           <button
             onClick={() => {
@@ -192,7 +189,7 @@ export default function CommunityTopicDetailPage() {
               border: '2px solid var(--theme-border)',
             }}
           >
-            🔗 Sao chép link
+            Sao chép link
           </button>
         </div>
       </Card>
@@ -206,13 +203,12 @@ export default function CommunityTopicDetailPage() {
         </div>
       )}
 
-      {/* Sets list */}
       <h2 className="text-h3 font-bold mb-3" style={{ color: 'var(--theme-text-primary)' }}>
         Các bộ thẻ
       </h2>
 
       {topic.sets.length === 0 ? (
-        <EmptyState icon="📁" title="Chưa có bộ thẻ" description="Tác giả chưa thêm bộ thẻ nào." />
+        <EmptyState icon={null} title="Chưa có bộ thẻ" description="Tác giả chưa thêm bộ thẻ nào." />
       ) : (
         <div className="space-y-3">
           {topic.sets.map((set) => (
@@ -257,19 +253,13 @@ function CommunitySetRow({ slug, set }: { slug: string; set: UserTopicSetWithCar
       style={{ border: '1px solid var(--theme-border)' }}
     >
       <div className="flex items-center gap-3">
-        <div
-          className="w-10 h-10 rounded-lg flex items-center justify-center text-xl"
-          style={{ backgroundColor: `${ACCENT.vocab}18` }}
-        >
-          📁
-        </div>
         <div className="flex-1 min-w-0">
           <h3 className="text-base font-bold truncate" style={{ color: 'var(--theme-text-primary)' }}>
             {set.title}
           </h3>
           <p className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>
             {set.wordCount} thẻ
-            {set.cards.length > 0 && ' · ' + set.cards.slice(0, 5).map((c) => c.word).join(', ')}
+            {set.cards.length > 0 && ' | ' + set.cards.slice(0, 5).map((card) => card.word).join(', ')}
             {set.cards.length === 5 && set.wordCount > 5 ? '...' : ''}
           </p>
         </div>
@@ -310,7 +300,7 @@ function ForkDialog({
           Sao chép vào kho của tôi
         </h3>
         <p className="text-sm mb-4" style={{ color: 'var(--theme-text-muted)' }}>
-          Tạo bản sao riêng (Riêng tư) — bạn có thể chỉnh sửa, thêm/xoá thẻ tự do.
+          Tạo bản sao riêng tư. Bạn có thể chỉnh sửa, thêm hoặc xóa thẻ tự do.
         </p>
 
         <label
@@ -342,7 +332,7 @@ function ForkDialog({
 
         <div className="flex justify-end gap-2">
           <Button variant="ghost" onClick={onClose}>
-            Huỷ
+            Hủy
           </Button>
           <Button
             variant="game"

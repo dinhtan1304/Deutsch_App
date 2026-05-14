@@ -74,3 +74,44 @@ export interface PublicStats {
   totalTopics: number;
   totalUsers: number;
 }
+
+export interface DailyTask {
+  missionKey?: string;
+  type: string;
+  title: string;
+  description: string;
+  href: string;
+  completed: boolean;
+  current?: number;
+  target?: number;
+  unit?: string;
+  progressLabel?: string;
+  xpReward?: number;
+}
+
+export interface DailyPath {
+  tasks: DailyTask[];
+  completedCount: number;
+  totalCount: number;
+  srsDueCount: number;
+}
+
+export interface NextAction {
+  priority: 'srs_urgent' | 'srs_normal' | 'study_plan' | 'streak_risk' | 'weak_skill' | 'explore';
+  title: string;
+  subtitle: string;
+  ctaText: string;
+  href: string;
+  icon: string;
+  gradient: string;
+  badge?: string;
+}
+
+export interface DashboardOverview {
+  stats: DashboardStats;
+  dailyPath: DailyPath;
+  nextAction: NextAction;
+  activityToday: boolean;
+  weeklyProgress: WeeklyProgress[];
+  topicProgress: TopicProgress[];
+}

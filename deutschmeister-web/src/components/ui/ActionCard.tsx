@@ -25,15 +25,6 @@ export interface ActionCardProps {
   className?: string;
 }
 
-/**
- * Hero "do this next" card for the dashboard. Consolidates the patterns from
- * HeroActionCard and TodayFocusCard — one primitive that can show any of:
- * - single action with CTA (default)
- * - action + progress bar
- * - action + task checklist
- *
- * Phase 3 will migrate dashboard usages to this primitive.
- */
 export function ActionCard({
   icon,
   title,
@@ -52,26 +43,20 @@ export function ActionCard({
   return (
     <div
       className={cn(
-        'group relative overflow-hidden rounded-2xl p-6 text-white shadow-lg transition-all duration-500 hover:-translate-y-1.5 hover:shadow-xl',
+        'group relative overflow-hidden rounded-2xl p-6 text-white shadow-lifted transition-all duration-200 hover:-translate-y-0.5',
         className,
       )}
       style={{ background: gradient }}
     >
-      {/* Decorative 3D orbs & glassmorphic blooms */}
       <div
         aria-hidden
-        className="pointer-events-none absolute -right-12 -top-12 h-48 w-48 rounded-full opacity-30 mix-blend-overlay transition-transform duration-700 group-hover:scale-110 group-hover:-rotate-12"
-        style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 70%)' }}
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -left-16 -bottom-16 h-48 w-48 rounded-full opacity-20 mix-blend-overlay transition-transform duration-700 group-hover:scale-125"
-        style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0) 70%)' }}
+        className="pointer-events-none absolute inset-0 opacity-15"
+        style={{ backgroundColor: 'rgba(255,255,255,.08)' }}
       />
 
       <div className="relative flex flex-col sm:flex-row items-start sm:items-center gap-4">
         <div
-          className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl backdrop-blur-md shadow-sm transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3"
+          className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl backdrop-blur-md shadow-sm"
           style={{ background: 'rgba(255,255,255,0.2)', border: '1px solid rgba(255,255,255,0.3)' }}
         >
           {icon}
@@ -82,11 +67,11 @@ export function ActionCard({
             <h3 className="text-xl font-bold leading-tight tracking-tight drop-shadow-sm">{title}</h3>
             {badge && (
               <span
-                className="rounded-full px-2 py-0.5 text-[10px] font-black uppercase tracking-widest shadow-sm animate-pulse"
+                className="rounded-full px-2 py-0.5 text-[10px] font-black uppercase tracking-widest shadow-sm"
                 style={{
                   background: badge.tone === 'urgent' ? 'rgba(239,68,68,0.95)' : 'rgba(255,255,255,0.25)',
                   color: 'white',
-                  backdropFilter: 'blur(4px)'
+                  backdropFilter: 'blur(4px)',
                 }}
               >
                 {badge.label}
@@ -94,7 +79,7 @@ export function ActionCard({
             )}
           </div>
           {subtitle && (
-             <p className="mt-0.5 text-sm font-medium opacity-90 drop-shadow-sm max-w-xl">{subtitle}</p>
+            <p className="mt-0.5 text-sm font-medium opacity-90 drop-shadow-sm max-w-xl">{subtitle}</p>
           )}
         </div>
       </div>
@@ -115,7 +100,7 @@ export function ActionCard({
               className="h-full rounded-full transition-all duration-1000 ease-out relative overflow-hidden"
               style={{ width: `${progressPct}%`, background: 'white' }}
             >
-               <div className="absolute inset-0 bg-white opacity-50 blur-sm animate-pulse" />
+              <div className="absolute inset-0 bg-white opacity-50 blur-sm animate-pulse" />
             </div>
           </div>
         </div>
@@ -128,7 +113,7 @@ export function ActionCard({
               <span
                 className={cn(
                   'inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-all shadow-sm',
-                  task.done ? 'opacity-50' : 'hover:-translate-y-0.5 hover:shadow-md',
+                  task.done ? 'opacity-50' : 'hover:bg-white/25 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white',
                 )}
                 style={{
                   background: task.done ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.2)',
@@ -153,7 +138,7 @@ export function ActionCard({
       <div className="relative mt-6 flex flex-wrap items-center gap-3">
         <Link
           href={cta.href}
-          className="inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-black uppercase tracking-wider transition-all hover:scale-105 shadow-md hover:shadow-lg"
+          className="inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-black uppercase tracking-wider transition-all hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white shadow-md"
           style={{ background: 'white', color: ACCENT[accent] }}
         >
           {cta.label}

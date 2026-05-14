@@ -11,6 +11,7 @@ interface PageHeaderProps {
   subtitle?: string;
   accent?: AccentKey;
   right?: ReactNode;
+  hideBackIcon?: boolean;
 }
 
 function BackIcon() {
@@ -21,7 +22,7 @@ function BackIcon() {
   );
 }
 
-export function PageHeader({ backHref, onBack, title, subtitle, accent, right }: PageHeaderProps) {
+export function PageHeader({ backHref, onBack, title, subtitle, accent, right, hideBackIcon }: PageHeaderProps) {
   const accentColor = accent ? ACCENT[accent] : 'var(--theme-text-muted)';
   const showBack = Boolean(backHref || onBack);
 
@@ -31,7 +32,7 @@ export function PageHeader({ backHref, onBack, title, subtitle, accent, right }:
       style={{ color: accentColor }}
       aria-label="Quay lại"
     >
-      <BackIcon />
+      {!hideBackIcon && <BackIcon />}
       Quay lại
     </span>
   );

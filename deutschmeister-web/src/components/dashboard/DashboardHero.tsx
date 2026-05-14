@@ -2,26 +2,17 @@
 
 import { useNextAction, useDailyPath } from '@/hooks/useDashboard';
 import { ActionCard, type ActionCardTask } from '@/components/ui/ActionCard';
-import type { NextAction } from '@/lib/api/dashboard';
+import type { DailyPath, NextAction } from '@/lib/api/dashboard';
 import type { AccentKey } from '@/lib/tokens';
-
-/**
- * Dashboard hero — merges HeroActionCard (single recommendation) with
- * TodayFocusCard (task checklist + progress) into one ActionCard.
- *
- * Data:
- *  - useNextAction() — headline recommendation (priority, title, subtitle, CTA)
- *  - useDailyPath()  — task chips + progress bar
- */
 
 function priorityAccent(priority: NextAction['priority']): AccentKey {
   switch (priority) {
-    case 'srs_urgent':  return 'speaking';   // rose — urgent tone
-    case 'srs_normal':  return 'writing';    // indigo
-    case 'study_plan':  return 'vocab';      // violet
-    case 'streak_risk': return 'games';      // orange
-    case 'weak_skill':  return 'reading';    // green
-    default:            return 'brand';
+    case 'srs_urgent': return 'speaking';
+    case 'srs_normal': return 'writing';
+    case 'study_plan': return 'vocab';
+    case 'streak_risk': return 'games';
+    case 'weak_skill': return 'reading';
+    default: return 'brand';
   }
 }
 
@@ -49,12 +40,16 @@ function taskIcon(type: string) {
   const props = { width: 12, height: 12, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 2.5, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const };
   switch (type) {
     case 'learn_words':
+    case 'learn_word':
       return <svg {...props}><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" /></svg>;
     case 'review':
+    case 'review_word':
       return <svg {...props}><polyline points="23 4 23 10 17 10" /><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" /></svg>;
     case 'quiz':
+    case 'game_session':
       return <svg {...props}><circle cx="12" cy="12" r="10" /><circle cx="12" cy="12" r="6" /><circle cx="12" cy="12" r="2" /></svg>;
     case 'reading':
+    case 'reading_session':
       return <svg {...props}><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>;
     default:
       return <svg {...props}><circle cx="12" cy="12" r="10" /></svg>;
@@ -78,20 +73,29 @@ function HeroSkeleton() {
   );
 }
 
-export function DashboardHero() {
-  const { data: next, isLoading: nextLoading } = useNextAction();
-  const { data: daily } = useDailyPath();
+interface DashboardHeroProps {
+  nextAction?: NextAction;
+  dailyPath?: DailyPath;
+  isLoading?: boolean;
+}
 
-  if (nextLoading || !next) return <HeroSkeleton />;
+export function DashboardHero({ nextAction, dailyPath, isLoading = false }: DashboardHeroProps) {
+  const shouldFetch = !nextAction;
+  const { data: fetchedNext, isLoading: nextLoading } = useNextAction(shouldFetch);
+  const { data: fetchedDaily } = useDailyPath(!dailyPath);
+  const next = nextAction ?? fetchedNext;
+  const daily = dailyPath ?? fetchedDaily;
+
+  if (isLoading || nextLoading || !next) return <HeroSkeleton />;
 
   const accent = priorityAccent(next.priority);
   const isUrgent = next.priority === 'srs_urgent';
 
-  const tasks: ActionCardTask[] | undefined = daily?.tasks.map(t => ({
-    icon: taskIcon(t.type),
-    label: t.title,
-    done: t.completed,
-    href: t.href,
+  const tasks: ActionCardTask[] | undefined = daily?.tasks.map((task) => ({
+    icon: taskIcon(task.type),
+    label: task.progressLabel ? `${task.title} · ${task.progressLabel}` : task.title,
+    done: task.completed,
+    href: task.href,
   }));
 
   const progress = daily && daily.totalCount > 0

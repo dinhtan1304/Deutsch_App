@@ -9,8 +9,15 @@ import { ACCENT } from '@/lib/tokens';
 import type { CreateUserTopicDto } from '@/types/user-topic';
 import { getApiErrorMessage } from '@/lib/api/client';
 
-const COVER_EMOJIS = ['📚', '✈️', '🍽️', '⚽', '🎵', '💼', '🏥', '🛒', '🌍', '🎨', '💻', '🏠'];
-const COVER_COLORS = ['#6366F1', '#22C55E', '#F59E0B', '#EC4899', '#A855F7', '#06B6D4', '#EF4444'];
+const COVER_COLORS = [
+  ACCENT.vocab,
+  ACCENT.reading,
+  ACCENT.xp,
+  ACCENT.listening,
+  ACCENT.examWriting,
+  ACCENT.cyan,
+  ACCENT.speaking,
+];
 const LEVELS = ['A1', 'A2', 'B1', 'B2'] as const;
 
 export default function NewUserTopicPage() {
@@ -18,15 +25,12 @@ export default function NewUserTopicPage() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [level, setLevel] = useState<string>('A1');
-  const [coverEmoji, setCoverEmoji] = useState(COVER_EMOJIS[0]);
   const [coverColor, setCoverColor] = useState(COVER_COLORS[0]);
   const [firstSetTitle, setFirstSetTitle] = useState('Bộ thẻ #1');
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
   const createTopic = useCreateUserTopic();
-  // Hard re-entry guard — protects against double-click that lands before React
-  // re-renders the disabled button (busy state flip is async).
   const submittingRef = useRef(false);
 
   const handleSubmit = async () => {
@@ -44,13 +48,9 @@ export default function NewUserTopicPage() {
         title: title.trim(),
         description: description.trim() || undefined,
         level,
-        coverEmoji,
         coverColor,
       };
       const topic = await createTopic.mutateAsync(dto);
-      // Use direct API call so the freshly-returned topic.id is used. The
-      // useCreateSet hook captures topicId in a closure at render time, which
-      // is stale here because the set state update hasn't flushed yet.
       if (firstSetTitle.trim()) {
         await createSetApi(topic.id, { title: firstSetTitle.trim() });
       }
@@ -66,8 +66,9 @@ export default function NewUserTopicPage() {
     <div className="max-w-2xl mx-auto px-4 sm:px-6 py-6">
       <PageHeader
         backHref="/my-topics"
+        hideBackIcon
         title="Tạo bộ chủ đề mới"
-        subtitle="Đặt tên, chọn cấp độ và bộ thẻ đầu tiên — sau đó thêm từ ở bước tiếp theo"
+        subtitle="Đặt tên, chọn cấp độ và bộ thẻ đầu tiên. Sau đó bạn có thể thêm từ ở bước tiếp theo."
         accent="vocab"
       />
 
@@ -79,14 +80,14 @@ export default function NewUserTopicPage() {
           <Input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="VD: Từ vựng nhà hàng & món ăn"
+            placeholder="VD: Từ vựng nhà hàng và món ăn"
             maxLength={120}
           />
         </div>
 
         <div>
           <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--theme-text-secondary)' }}>
-            Mô tả (tuỳ chọn)
+            Mô tả (tùy chọn)
           </label>
           <textarea
             value={description}
@@ -108,43 +109,18 @@ export default function NewUserTopicPage() {
             Cấp độ
           </label>
           <div className="flex gap-2">
-            {LEVELS.map((l) => (
+            {LEVELS.map((item) => (
               <button
-                key={l}
-                onClick={() => setLevel(l)}
+                key={item}
+                onClick={() => setLevel(item)}
                 className="px-4 py-2 rounded-xl text-sm font-bold transition-all"
                 style={{
-                  backgroundColor: level === l ? ACCENT.vocab : 'var(--theme-bg-secondary)',
-                  color: level === l ? '#fff' : 'var(--theme-text-secondary)',
+                  backgroundColor: level === item ? ACCENT.vocab : 'var(--theme-bg-secondary)',
+                  color: level === item ? 'white' : 'var(--theme-text-secondary)',
                   border: '1px solid var(--theme-border)',
                 }}
               >
-                {l}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div>
-          <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--theme-text-secondary)' }}>
-            Biểu tượng bìa
-          </label>
-          <div className="flex flex-wrap gap-2">
-            {COVER_EMOJIS.map((emoji) => (
-              <button
-                key={emoji}
-                onClick={() => setCoverEmoji(emoji)}
-                className="w-10 h-10 rounded-xl text-xl transition-all"
-                style={{
-                  backgroundColor:
-                    coverEmoji === emoji ? `${coverColor}33` : 'var(--theme-bg-secondary)',
-                  border:
-                    coverEmoji === emoji
-                      ? `2px solid ${coverColor}`
-                      : '1px solid var(--theme-border)',
-                }}
-              >
-                {emoji}
+                {item}
               </button>
             ))}
           </div>
@@ -166,7 +142,7 @@ export default function NewUserTopicPage() {
                     coverColor === color ? `3px solid var(--theme-bg-card)` : 'none',
                   boxShadow: coverColor === color ? `0 0 0 2px ${color}` : 'none',
                 }}
-                aria-label={color}
+                aria-label={`Chọn màu ${color}`}
               />
             ))}
           </div>
@@ -198,7 +174,7 @@ export default function NewUserTopicPage() {
 
         <div className="flex gap-3 justify-end pt-2">
           <Button variant="ghost" onClick={() => router.push('/my-topics')}>
-            Huỷ
+            Hủy
           </Button>
           <Button
             variant="game"
@@ -207,14 +183,13 @@ export default function NewUserTopicPage() {
             disabled={busy}
             onClick={handleSubmit}
           >
-            Tạo & tiếp tục
+            Tạo và tiếp tục
           </Button>
         </div>
       </Card>
 
       <p className="text-xs mt-4 text-center" style={{ color: 'var(--theme-text-muted)' }}>
-        Bộ chủ đề mới sẽ ở chế độ <strong>Riêng tư</strong> cho đến khi bạn chuyển sang
-        Có link hoặc Công khai.
+        Bộ chủ đề mới sẽ ở chế độ <strong>Riêng tư</strong> cho đến khi bạn chuyển sang Có link hoặc Công khai.
       </p>
     </div>
   );

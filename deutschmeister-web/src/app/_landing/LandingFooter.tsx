@@ -62,7 +62,7 @@ export function LandingFooter() {
         {/* Brand */}
         <div style={{ gridColumn: 'span 1' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-            <Image src="/logo.png" width={38} height={38} alt="Deutschmeister" style={{ borderRadius: 11, flexShrink: 0 }} />
+            <Image src="/logo-48.png" width={38} height={38} alt="Deutschmeister" style={{ borderRadius: 11, flexShrink: 0 }} />
             <span style={{ fontWeight: 800, fontSize: 16, color: 'white' }}>Deutschmeister</span>
           </div>
           <p style={{ fontSize: 13, color: 'rgba(255,255,255,.6)', lineHeight: 1.7, marginBottom: 20, maxWidth: 240 }}>

@@ -7,6 +7,10 @@ import type {
   TopicProgress,
   RecentActivity,
   PublicStats,
+  DashboardOverview,
+  DailyPath,
+  DailyTask,
+  NextAction,
 } from '@/types/dashboard';
 
 const BASE_URL = '/dashboard';
@@ -16,6 +20,10 @@ const BASE_URL = '/dashboard';
  */
 export async function getFullDashboard(): Promise<FullDashboard> {
   return apiGet<FullDashboard>(BASE_URL);
+}
+
+export async function getDashboardOverview(): Promise<DashboardOverview> {
+  return apiGet<DashboardOverview>(`${BASE_URL}/overview`);
 }
 
 /**
@@ -65,30 +73,5 @@ export async function getPublicStats(): Promise<PublicStats> {
  */
 export const getDailyPath = () => apiGet<DailyPath>('/dashboard/daily-path');
 
-export interface DailyTask {
-  type: string;
-  title: string;
-  description: string;
-  href: string;
-  completed: boolean;
-}
-
-export interface DailyPath {
-  tasks: DailyTask[];
-  completedCount: number;
-  totalCount: number;
-  srsDueCount: number;
-}
-
-export interface NextAction {
-  priority: 'srs_urgent' | 'srs_normal' | 'study_plan' | 'streak_risk' | 'weak_skill' | 'explore';
-  title: string;
-  subtitle: string;
-  ctaText: string;
-  href: string;
-  icon: string;
-  gradient: string;
-  badge?: string;
-}
-
 export const getNextAction = () => apiGet<NextAction>('/dashboard/next-action');
+export type { DailyPath, DailyTask, NextAction, DashboardOverview } from '@/types/dashboard';

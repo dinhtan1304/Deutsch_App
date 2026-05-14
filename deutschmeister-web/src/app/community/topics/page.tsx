@@ -44,10 +44,10 @@ export default function CommunityTopicsPage() {
         right={
           <Link
             href="/my-topics/new"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all"
-            style={{ background: `linear-gradient(135deg, ${ACCENT.vocab}, ${ACCENT.examWriting})`, color: '#fff' }}
+            className="inline-flex items-center px-4 py-2 rounded-xl text-sm font-bold transition-all"
+            style={{ background: `linear-gradient(135deg, ${ACCENT.vocab}, ${ACCENT.examWriting})`, color: 'white' }}
           >
-            + Tạo bộ của bạn
+            Tạo bộ của bạn
           </Link>
         }
       />
@@ -57,7 +57,7 @@ export default function CommunityTopicsPage() {
           type="text"
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder="Tìm chủ đề, chủ đề..."
+          placeholder="Tìm chủ đề..."
           className="flex-1 px-4 py-2.5 rounded-xl text-sm outline-none"
           style={{
             backgroundColor: 'var(--theme-bg-card)',
@@ -66,34 +66,34 @@ export default function CommunityTopicsPage() {
           }}
         />
         <div className="flex gap-2 flex-wrap">
-          {LEVELS.map((l) => (
+          {LEVELS.map((item) => (
             <button
-              key={l}
-              onClick={() => setLevel(l)}
+              key={item}
+              onClick={() => setLevel(item)}
               className="px-3 py-2 rounded-xl text-xs font-bold uppercase tracking-wider"
               style={{
-                backgroundColor: level === l ? `${ACCENT.vocab}18` : 'var(--theme-bg-card)',
-                color: level === l ? ACCENT.vocab : 'var(--theme-text-muted)',
+                backgroundColor: level === item ? `${ACCENT.vocab}18` : 'var(--theme-bg-card)',
+                color: level === item ? ACCENT.vocab : 'var(--theme-text-muted)',
                 border: '1px solid var(--theme-border)',
               }}
             >
-              {l === 'all' ? 'Tất cả' : l}
+              {item === 'all' ? 'Tất cả' : item}
             </button>
           ))}
         </div>
         <div className="flex gap-2 flex-wrap">
-          {SORT_OPTIONS.map((s) => (
+          {SORT_OPTIONS.map((item) => (
             <button
-              key={s.v}
-              onClick={() => setSort(s.v)}
+              key={item.v}
+              onClick={() => setSort(item.v)}
               className="px-3 py-2 rounded-xl text-xs font-bold uppercase tracking-wider"
               style={{
-                backgroundColor: sort === s.v ? `${ACCENT.brand}18` : 'var(--theme-bg-card)',
-                color: sort === s.v ? ACCENT.brand : 'var(--theme-text-muted)',
+                backgroundColor: sort === item.v ? `${ACCENT.brand}18` : 'var(--theme-bg-card)',
+                color: sort === item.v ? ACCENT.brand : 'var(--theme-text-muted)',
                 border: '1px solid var(--theme-border)',
               }}
             >
-              {s.label}
+              {item.label}
             </button>
           ))}
         </div>
@@ -107,15 +107,15 @@ export default function CommunityTopicsPage() {
         </div>
       ) : items.length === 0 ? (
         <EmptyState
-          icon="🔍"
+          icon={null}
           title="Chưa có bộ chủ đề công khai nào"
           description="Hãy là người đầu tiên tạo và chia sẻ bộ chủ đề của mình với cộng đồng."
           action={{ label: 'Tạo ngay', href: '/my-topics/new' }}
         />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {items.map((t) => (
-            <CommunityTopicCard key={t.id} topic={t} />
+          {items.map((topic) => (
+            <CommunityTopicCard key={topic.id} topic={topic} />
           ))}
         </div>
       )}
@@ -125,7 +125,6 @@ export default function CommunityTopicsPage() {
 
 function CommunityTopicCard({ topic }: { topic: UserTopicWithOwner }) {
   const levelColor = LEVEL_COLOR[topic.level] ?? ACCENT.vocab;
-  const cover = topic.coverEmoji || '📚';
   const ownerName = topic.owner.name || 'Ẩn danh';
   const ownerInitial = ownerName.charAt(0).toUpperCase();
 
@@ -141,14 +140,15 @@ function CommunityTopicCard({ topic }: { topic: UserTopicWithOwner }) {
       >
         <div className="flex items-start gap-3 mb-3">
           <div
-            className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl shrink-0"
+            className="w-12 h-12 rounded-xl flex items-center justify-center text-sm font-black shrink-0"
             style={{
               background: topic.coverColor
                 ? `${topic.coverColor}22`
                 : `${levelColor}18`,
+              color: topic.coverColor || levelColor,
             }}
           >
-            {cover}
+            {topic.level}
           </div>
           <div className="flex-1 min-w-0">
             <span
@@ -195,10 +195,10 @@ function CommunityTopicCard({ topic }: { topic: UserTopicWithOwner }) {
           style={{ color: 'var(--theme-text-muted)', borderTop: '1px solid var(--theme-border)' }}
         >
           <span>{topic.wordCount} từ</span>
-          <span>·</span>
-          <span>👥 {topic.followerCount}</span>
-          <span>·</span>
-          <span>📚 {topic.studyCount}</span>
+          <span>|</span>
+          <span>{topic.followerCount} follower</span>
+          <span>|</span>
+          <span>{topic.studyCount} đang học</span>
         </div>
       </Card>
     </Link>

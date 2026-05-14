@@ -18,12 +18,13 @@ export function useNotifications(page = 1) {
   });
 }
 
-export function useUnreadCount() {
+export function useUnreadCount(enabled = true, pollingEnabled = false) {
   return useQuery<UnreadCount>({
     queryKey: notifKeys.unread(),
     queryFn: () => notificationsApi.unreadCount(),
+    enabled,
     staleTime: 60 * 1000,
-    refetchInterval: 60 * 1000,
+    refetchInterval: enabled && pollingEnabled ? 60 * 1000 : false,
   });
 }
 

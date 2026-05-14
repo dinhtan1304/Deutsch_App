@@ -95,7 +95,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         {/* Logo */}
         <div style={{ padding: '20px 16px 16px', display: 'flex', alignItems: 'center', gap: 10, borderBottom: '1px solid var(--theme-border)' }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.png" width={32} height={32} alt="Deutschmeister" style={{ borderRadius: 8, flexShrink: 0 }} />
+          <img src="/logo-32.png" width={32} height={32} alt="Deutschmeister" style={{ borderRadius: 8, flexShrink: 0 }} />
           {sidebarOpen && (
             <div>
               <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--theme-text-primary)', lineHeight: 1 }}>Admin</p>

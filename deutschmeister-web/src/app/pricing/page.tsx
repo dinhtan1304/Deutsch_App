@@ -108,7 +108,7 @@ export default function PricingPage() {
         {/* Header Section */}
         <div className="text-center mb-12 animate-[slideUp_0.4s_ease-out_both]">
           <div className="flex flex-col items-center mb-8">
-            <Image src="/logo.png" width={48} height={48} alt="Logo" priority className="rounded-2xl shadow-2xl mb-3" />
+            <Image src="/logo-48.png" width={48} height={48} alt="Logo" priority className="rounded-2xl shadow-2xl mb-3" />
             <span className="text-[10px] font-black uppercase tracking-[0.3em] opacity-60">DeutschMeister</span>
           </div>
           

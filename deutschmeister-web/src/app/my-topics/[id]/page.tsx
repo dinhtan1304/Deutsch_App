@@ -59,28 +59,28 @@ export default function MyTopicDetailPage() {
     <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6">
       <PageHeader
         backHref="/my-topics"
+        hideBackIcon
         title={topic.title}
         subtitle={topic.description ?? undefined}
         accent="vocab"
         right={
           topic.visibility !== 'PRIVATE' ? (
             <Link href={`/community/topics/${topic.slug}`} target="_blank">
-              <Button variant="outline" size="md">Xem trang công khai →</Button>
+              <Button variant="outline" size="md">Xem trang công khai</Button>
             </Link>
           ) : null
         }
       />
 
-      {/* Visibility selector */}
       <Card variant="default" className="mb-5" style={{ border: '1px solid var(--theme-border)' }}>
         <h3 className="text-sm font-bold mb-3" style={{ color: 'var(--theme-text-secondary)' }}>
           Mức hiển thị
         </h3>
         <VisibilitySelector
           value={topic.visibility}
-          onChange={async (v) => {
+          onChange={async (value) => {
             try {
-              await updateVisibility.mutateAsync(v);
+              await updateVisibility.mutateAsync(value);
             } catch (e) {
               setError(getApiErrorMessage(e));
             }
@@ -88,7 +88,6 @@ export default function MyTopicDetailPage() {
         />
       </Card>
 
-      {/* Sets section */}
       <div className="mb-5 flex items-center justify-between">
         <h2 className="text-h3 font-bold" style={{ color: 'var(--theme-text-primary)' }}>
           Bộ thẻ ({topic.sets.length})
@@ -97,7 +96,7 @@ export default function MyTopicDetailPage() {
 
       {topic.sets.length === 0 ? (
         <EmptyState
-          icon="📁"
+          icon={null}
           title="Chưa có bộ thẻ nào"
           description="Tạo bộ thẻ đầu tiên để bắt đầu thêm từ vựng."
         />
@@ -109,7 +108,7 @@ export default function MyTopicDetailPage() {
               topicId={id}
               set={set}
               onDelete={async () => {
-                if (!confirm(`Xoá bộ thẻ "${set.title}"?`)) return;
+                if (!confirm(`Xóa bộ thẻ "${set.title}"?`)) return;
                 try {
                   await deleteSet.mutateAsync(set.id);
                 } catch (e) {
@@ -121,7 +120,6 @@ export default function MyTopicDetailPage() {
         </div>
       )}
 
-      {/* Add new set */}
       <Card variant="default" style={{ border: '1px dashed var(--theme-border)' }}>
         <div className="flex gap-2">
           <input
@@ -147,7 +145,7 @@ export default function MyTopicDetailPage() {
             disabled={!newSetTitle.trim()}
             onClick={handleAddSet}
           >
-            + Thêm bộ thẻ
+            Thêm bộ thẻ
           </Button>
         </div>
       </Card>
@@ -161,14 +159,13 @@ export default function MyTopicDetailPage() {
         </div>
       )}
 
-      {/* Danger zone */}
       <div className="mt-10 pt-5" style={{ borderTop: '1px solid var(--theme-border)' }}>
         <h3 className="text-sm font-bold mb-2" style={{ color: ACCENT.speaking }}>
           Vùng nguy hiểm
         </h3>
         {!showDeleteConfirm ? (
           <Button variant="outline" onClick={() => setShowDeleteConfirm(true)}>
-            Xoá bộ chủ đề
+            Xóa bộ chủ đề
           </Button>
         ) : (
           <div className="flex gap-2">
@@ -177,10 +174,10 @@ export default function MyTopicDetailPage() {
               isLoading={deleteTopic.isPending}
               onClick={handleDelete}
             >
-              Xác nhận xoá vĩnh viễn
+              Xác nhận xóa vĩnh viễn
             </Button>
             <Button variant="ghost" onClick={() => setShowDeleteConfirm(false)}>
-              Huỷ
+              Hủy
             </Button>
           </div>
         )}
@@ -194,31 +191,30 @@ function VisibilitySelector({
   onChange,
 }: {
   value: UserTopicVisibility;
-  onChange: (v: UserTopicVisibility) => void;
+  onChange: (value: UserTopicVisibility) => void;
 }) {
   const options: Array<{
     value: UserTopicVisibility;
     label: string;
     desc: string;
-    icon: string;
   }> = [
-    { value: 'PRIVATE', label: 'Riêng tư', desc: 'Chỉ bạn xem được', icon: '🔒' },
-    { value: 'UNLISTED', label: 'Có link', desc: 'Ai có link đều xem được. Không hiển thị trong khám phá.', icon: '🔗' },
-    { value: 'PUBLIC', label: 'Công khai', desc: 'Hiển thị trong trang Khám phá cộng đồng.', icon: '🌍' },
+    { value: 'PRIVATE', label: 'Riêng tư', desc: 'Chỉ bạn xem được' },
+    { value: 'UNLISTED', label: 'Có link', desc: 'Ai có link đều xem được. Không hiển thị trong khám phá.' },
+    { value: 'PUBLIC', label: 'Công khai', desc: 'Hiển thị trong trang Khám phá cộng đồng.' },
   ];
   return (
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-      {options.map((o) => {
-        const active = value === o.value;
+      {options.map((option) => {
+        const active = value === option.value;
         return (
           <button
-            key={o.value}
+            key={option.value}
             onClick={() => {
               if (active) return;
-              if (o.value === 'PUBLIC') {
+              if (option.value === 'PUBLIC') {
                 if (!confirm('Bộ chủ đề sẽ xuất hiện công khai. Tiếp tục?')) return;
               }
-              onChange(o.value);
+              onChange(option.value);
             }}
             className="text-left p-3 rounded-xl transition-all"
             style={{
@@ -226,17 +222,14 @@ function VisibilitySelector({
               border: active ? `2px solid ${ACCENT.vocab}` : '1px solid var(--theme-border)',
             }}
           >
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-lg">{o.icon}</span>
-              <span
-                className="text-sm font-bold"
-                style={{ color: active ? ACCENT.vocab : 'var(--theme-text-primary)' }}
-              >
-                {o.label}
-              </span>
-            </div>
-            <p className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>
-              {o.desc}
+            <span
+              className="text-sm font-bold"
+              style={{ color: active ? ACCENT.vocab : 'var(--theme-text-primary)' }}
+            >
+              {option.label}
+            </span>
+            <p className="text-xs mt-1" style={{ color: 'var(--theme-text-muted)' }}>
+              {option.desc}
             </p>
           </button>
         );
@@ -261,19 +254,13 @@ function SetRow({
       style={{ border: '1px solid var(--theme-border)' }}
     >
       <div className="flex items-center gap-4">
-        <div
-          className="w-10 h-10 rounded-lg flex items-center justify-center text-xl"
-          style={{ backgroundColor: `${ACCENT.vocab}18` }}
-        >
-          📁
-        </div>
         <div className="flex-1 min-w-0">
           <h3 className="text-base font-bold truncate" style={{ color: 'var(--theme-text-primary)' }}>
             {set.title}
           </h3>
           <p className="text-xs mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>
             {set.wordCount} thẻ
-            {set.description ? ` · ${set.description}` : ''}
+            {set.description ? ` | ${set.description}` : ''}
           </p>
         </div>
         <Link href={`/my-topics/${topicId}/sets/${set.id}`}>
@@ -283,9 +270,9 @@ function SetRow({
           onClick={onDelete}
           className="text-xs font-bold px-2 py-1 rounded-md"
           style={{ color: ACCENT.speaking }}
-          aria-label="Xoá set"
+          aria-label="Xóa set"
         >
-          ✕
+          Xóa
         </button>
       </div>
     </Card>

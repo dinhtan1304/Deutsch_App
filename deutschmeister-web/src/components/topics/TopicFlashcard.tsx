@@ -1,11 +1,11 @@
-'use client';
+﻿'use client';
 
 import { useReducer, useCallback, useEffect } from 'react';
 import { ACCENT, STATUS } from '@/lib/tokens';
 import type { TopicWord } from '@/types/topic';
 import { speakGerman } from '@/lib/utils';
 
-// ─── Icons ───
+// â”€â”€â”€ Icons â”€â”€â”€
 function IconVolume({ size = 16 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -81,7 +81,7 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
-// ─── State management ───
+// â”€â”€â”€ State management â”€â”€â”€
 
 type FlashState = {
   deck: TopicWord[];
@@ -144,15 +144,16 @@ function initFlash(words: TopicWord[]): FlashState {
   return { deck: shuffle(words), currentIndex: 0, isFlipped: false, known: new Set(), unknown: new Set(), isFinished: false };
 }
 
-// ─── Component ───
+// â”€â”€â”€ Component â”€â”€â”€
 
 interface Props {
   words: TopicWord[];
   topicColor: string;
   onMarkLearned?: (wordId: string) => void;
+  hideIcons?: boolean;
 }
 
-export function TopicFlashcard({ words, topicColor, onMarkLearned }: Props) {
+export function TopicFlashcard({ words, topicColor, onMarkLearned, hideIcons = false }: Props) {
   const [state, dispatch] = useReducer(flashReducer, words, initFlash);
   const { deck, currentIndex, isFlipped, known, unknown, isFinished } = state;
 
@@ -199,27 +200,27 @@ export function TopicFlashcard({ words, topicColor, onMarkLearned }: Props) {
 
   if (!currentWord && !isFinished) return null;
 
-  // ─── Finished screen ───
+  // â”€â”€â”€ Finished screen â”€â”€â”€
   if (isFinished) {
     const pct = total > 0 ? Math.round((known.size / total) * 100) : 0;
     return (
       <div className="text-center py-10">
-        <div className="text-5xl mb-4">{pct >= 80 ? '🎉' : pct >= 50 ? '💪' : '📚'}</div>
+        {!hideIcons && <div className="text-5xl mb-4">{pct >= 80 ? '🎉' : pct >= 50 ? '💪' : '📚'}</div>}
         <h3 className="text-xl font-bold mb-2" style={{ color: 'var(--theme-text-primary)' }}>
-          Hoàn thành!
+          HoÃ n thÃ nh!
         </h3>
         <div className="flex justify-center gap-6 mb-6">
           <div className="text-center">
             <div className="text-2xl font-bold" style={{ color: STATUS.success }}>{known.size}</div>
-            <div className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>Đã biết</div>
+            <div className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>ÄÃ£ biáº¿t</div>
           </div>
           <div className="text-center">
             <div className="text-2xl font-bold" style={{ color: STATUS.danger }}>{unknown.size}</div>
-            <div className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>Cần ôn</div>
+            <div className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>Cáº§n Ã´n</div>
           </div>
           <div className="text-center">
             <div className="text-2xl font-bold" style={{ color: topicColor }}>{pct}%</div>
-            <div className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>Chính xác</div>
+            <div className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>ChÃ­nh xÃ¡c</div>
           </div>
         </div>
         <div className="flex justify-center gap-3">
@@ -227,13 +228,13 @@ export function TopicFlashcard({ words, topicColor, onMarkLearned }: Props) {
             <button onClick={() => restart(true)}
               className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-body font-semibold transition-all hover:-translate-y-0.5"
               style={{ background: 'rgba(239,68,68,.1)', color: STATUS.danger }}>
-              <IconRotateCcw size={15} /> Ôn {unknown.size} từ chưa biết
+              {!hideIcons && <IconRotateCcw size={15} />} Ã”n {unknown.size} tá»« chÆ°a biáº¿t
             </button>
           )}
           <button onClick={() => restart(false)}
             className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-body font-semibold transition-all hover:-translate-y-0.5"
             style={{ background: `${topicColor}15`, color: topicColor }}>
-            <IconShuffle size={15} /> Học lại tất cả
+            {!hideIcons && <IconShuffle size={15} />} Há»c láº¡i táº¥t cáº£
           </button>
         </div>
       </div>
@@ -251,8 +252,8 @@ export function TopicFlashcard({ words, topicColor, onMarkLearned }: Props) {
           {currentIndex + 1} / {total}
         </span>
         <div className="flex items-center gap-3 text-xs">
-          <span style={{ color: STATUS.success }}>✓ {known.size}</span>
-          <span style={{ color: STATUS.danger }}>✗ {unknown.size}</span>
+          <span style={{ color: STATUS.success }}>{hideIcons ? `Đã biết ${known.size}` : `✓ ${known.size}`}</span>
+          <span style={{ color: STATUS.danger }}>{hideIcons ? `Cần ôn ${unknown.size}` : `✕ ${unknown.size}`}</span>
         </div>
       </div>
       <div className="h-1.5 rounded-full overflow-hidden mb-6"
@@ -299,10 +300,10 @@ export function TopicFlashcard({ words, topicColor, onMarkLearned }: Props) {
                 onClick={(e) => { e.stopPropagation(); playAudio(`${currentWord.article} ${currentWord.word}`); }}
                 className="w-10 h-10 rounded-xl flex items-center justify-center transition-all hover:scale-110"
                 style={{ backgroundColor: `${ac}15`, color: ac }}>
-                <IconVolume size={20} />
+                {hideIcons ? 'Nghe' : <IconVolume size={20} />}
               </button>
               <div className="absolute bottom-4 text-caption" style={{ color: 'var(--theme-text-muted)' }}>
-                Nhấn để lật · Space
+                Nháº¥n Ä‘á»ƒ láº­t Â· Space
               </div>
             </div>
 
@@ -316,7 +317,7 @@ export function TopicFlashcard({ words, topicColor, onMarkLearned }: Props) {
               }}>
               <div className="text-caption font-bold uppercase mb-4 px-3 py-1 rounded-lg tracking-wide"
                 style={{ backgroundColor: `${topicColor}15`, color: topicColor }}>
-                Nghĩa
+                NghÄ©a
               </div>
               {currentWord.translationVi && (
                 <div className="text-2xl font-bold mb-1" style={{ color: 'var(--theme-text-primary)' }}>
@@ -330,12 +331,12 @@ export function TopicFlashcard({ words, topicColor, onMarkLearned }: Props) {
                 <div className="w-full mt-2 px-4">
                   <div className="text-xs italic text-center py-2 rounded-lg"
                     style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-secondary)' }}>
-                    „{currentWord.examples[0]}&quot;
+                    â€ž{currentWord.examples[0]}&quot;
                   </div>
                 </div>
               )}
               <div className="absolute bottom-4 text-caption" style={{ color: 'var(--theme-text-muted)' }}>
-                Nhấn để lật · Space
+                Nháº¥n Ä‘á»ƒ láº­t Â· Space
               </div>
             </div>
           </div>
@@ -347,12 +348,12 @@ export function TopicFlashcard({ words, topicColor, onMarkLearned }: Props) {
         <button onClick={handleUnknown}
           className="flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold transition-all hover:-translate-y-0.5 hover:shadow-md"
           style={{ background: 'rgba(239,68,68,.1)', color: STATUS.danger, border: '1px solid rgba(239,68,68,.2)' }}>
-          <IconX size={18} /> Chưa biết · ←
+          {!hideIcons && <IconX size={18} />} ChÆ°a biáº¿t Â· â†
         </button>
         <button onClick={handleKnown}
           className="flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold transition-all hover:-translate-y-0.5 hover:shadow-md"
           style={{ background: 'rgba(34,197,94,.1)', color: STATUS.success, border: '1px solid rgba(34,197,94,.2)' }}>
-          <IconCheck size={18} /> Đã biết · →
+          {!hideIcons && <IconCheck size={18} />} ÄÃ£ biáº¿t Â· â†’
         </button>
       </div>
 
@@ -362,18 +363,18 @@ export function TopicFlashcard({ words, topicColor, onMarkLearned }: Props) {
           disabled={currentIndex === 0}
           className="p-2 rounded-lg transition-all disabled:opacity-30"
           style={{ color: 'var(--theme-text-muted)' }}>
-          <IconChevronLeft size={20} />
+          {hideIcons ? 'Trước' : <IconChevronLeft size={20} />}
         </button>
         <button onClick={() => restart(false)}
           className="p-2 rounded-lg transition-all hover:opacity-70"
-          style={{ color: 'var(--theme-text-muted)' }} title="Xáo trộn lại">
-          <IconShuffle size={18} />
+          style={{ color: 'var(--theme-text-muted)' }} title="XÃ¡o trá»™n láº¡i">
+          {hideIcons ? 'Trộn' : <IconShuffle size={18} />}
         </button>
         <button onClick={() => dispatch({ type: 'next' })}
           disabled={currentIndex >= total - 1}
           className="p-2 rounded-lg transition-all disabled:opacity-30"
           style={{ color: 'var(--theme-text-muted)' }}>
-          <IconChevronRight size={20} />
+          {hideIcons ? 'Sau' : <IconChevronRight size={20} />}
         </button>
       </div>
     </div>

@@ -19,7 +19,7 @@ export function GuideContent({ initialTab }: { initialTab: ExamTab }) {
         style={{ color: 'var(--theme-text-muted)' }}
       >
         <IconArrowLeft size={14} />
-        Quay lại Luyện Test
+        Quay lại Luyện thi & kỹ năng
       </Link>
 
       <GuideHeader />

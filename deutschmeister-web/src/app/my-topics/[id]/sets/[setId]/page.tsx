@@ -27,7 +27,7 @@ export default function SetEditorPage() {
   const [tab, setTab] = useState<AddTab>('manual');
   const [error, setError] = useState<string | null>(null);
 
-  const set = useMemo(() => topic?.sets.find((s) => s.id === setId), [topic, setId]);
+  const set = useMemo(() => topic?.sets.find((item) => item.id === setId), [topic, setId]);
 
   if (isLoading || !topic) {
     return (
@@ -40,13 +40,13 @@ export default function SetEditorPage() {
   if (!set) {
     return (
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6">
-        <EmptyState icon="❓" title="Không tìm thấy bộ thẻ" />
+        <EmptyState icon={null} title="Không tìm thấy bộ thẻ" />
       </div>
     );
   }
 
   const handleDelete = async (cardId: string) => {
-    if (!confirm('Xoá thẻ này?')) return;
+    if (!confirm('Xóa thẻ này?')) return;
     try {
       await deleteCards.mutateAsync({ setId, cardIds: [cardId] });
     } catch (e) {
@@ -58,33 +58,33 @@ export default function SetEditorPage() {
     <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6">
       <PageHeader
         backHref={`/my-topics/${id}`}
+        hideBackIcon
         title={set.title}
-        subtitle={`${set.wordCount} thẻ · trong bộ "${topic.title}"`}
+        subtitle={`${set.wordCount} thẻ | trong bộ "${topic.title}"`}
         accent="vocab"
       />
 
-      {/* Add cards section */}
       <Card variant="default" className="mb-5" style={{ border: '1px solid var(--theme-border)' }}>
         <h3 className="text-sm font-bold mb-3" style={{ color: 'var(--theme-text-secondary)' }}>
           Thêm thẻ
         </h3>
         <div className="flex gap-2 mb-4 flex-wrap">
           {([
-            { v: 'manual', label: '✍️ Tạo thủ công' },
-            { v: 'system', label: '📚 Từ hệ thống' },
-            { v: 'personal', label: '🗂️ Word Bank' },
-          ] as Array<{ v: AddTab; label: string }>).map((t) => (
+            { v: 'manual', label: 'Tạo thủ công' },
+            { v: 'system', label: 'Từ hệ thống' },
+            { v: 'personal', label: 'Word Bank' },
+          ] as Array<{ v: AddTab; label: string }>).map((item) => (
             <button
-              key={t.v}
-              onClick={() => setTab(t.v)}
+              key={item.v}
+              onClick={() => setTab(item.v)}
               className="px-3 py-2 rounded-xl text-sm font-bold"
               style={{
-                backgroundColor: tab === t.v ? `${ACCENT.vocab}18` : 'var(--theme-bg-secondary)',
-                color: tab === t.v ? ACCENT.vocab : 'var(--theme-text-secondary)',
-                border: tab === t.v ? `1px solid ${ACCENT.vocab}` : '1px solid var(--theme-border)',
+                backgroundColor: tab === item.v ? `${ACCENT.vocab}18` : 'var(--theme-bg-secondary)',
+                color: tab === item.v ? ACCENT.vocab : 'var(--theme-text-secondary)',
+                border: tab === item.v ? `1px solid ${ACCENT.vocab}` : '1px solid var(--theme-border)',
               }}
             >
-              {t.label}
+              {item.label}
             </button>
           ))}
         </div>
@@ -141,13 +141,12 @@ export default function SetEditorPage() {
         </div>
       )}
 
-      {/* Cards list */}
       <h2 className="text-h3 font-bold mb-3" style={{ color: 'var(--theme-text-primary)' }}>
         Thẻ trong bộ ({set.cards.length})
       </h2>
       {set.cards.length === 0 ? (
         <EmptyState
-          icon="📝"
+          icon={null}
           title="Chưa có thẻ nào"
           description="Thêm thẻ từ vựng đầu tiên qua một trong 3 cách ở trên."
         />
@@ -172,8 +171,6 @@ export default function SetEditorPage() {
     </div>
   );
 }
-
-// ─── Manual entry form ───────────────────────────────────────────────────
 
 function ManualCardForm({
   onSubmit,
@@ -246,21 +243,19 @@ function ManualCardForm({
                 translationVi: translationVi.trim() || undefined,
                 examples: examples
                   .split('\n')
-                  .map((s) => s.trim())
+                  .map((item) => item.trim())
                   .filter(Boolean),
               },
             ]);
             reset();
           }}
         >
-          + Thêm thẻ
+          Thêm thẻ
         </Button>
       </div>
     </div>
   );
 }
-
-// ─── System word picker ──────────────────────────────────────────────────
 
 interface SystemWordRow {
   id: string;
@@ -282,7 +277,7 @@ function SystemWordPicker({
   const [picked, setPicked] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(false);
 
-  const search$ = async () => {
+  const searchWords = async () => {
     setLoading(true);
     try {
       const data = await wordsApi.search({
@@ -290,12 +285,12 @@ function SystemWordPicker({
         limit: 30,
       });
       setResults(
-        data.data.map((w) => ({
-          id: w.id,
-          word: w.word,
-          article: w.article,
-          translationVi: w.translationVi ?? null,
-          level: w.level,
+        data.data.map((word) => ({
+          id: word.id,
+          word: word.word,
+          article: word.article,
+          translationVi: word.translationVi ?? null,
+          level: word.level,
         })),
       );
     } finally {
@@ -317,7 +312,7 @@ function SystemWordPicker({
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && search$()}
+          onKeyDown={(e) => e.key === 'Enter' && searchWords()}
           placeholder="Tìm từ trong vocabulary hệ thống..."
           className="flex-1 px-4 py-2 rounded-xl text-sm outline-none"
           style={{
@@ -326,7 +321,7 @@ function SystemWordPicker({
             color: 'var(--theme-text-primary)',
           }}
         />
-        <Button variant="secondary" onClick={search$} isLoading={loading}>
+        <Button variant="secondary" onClick={searchWords} isLoading={loading}>
           Tìm
         </Button>
       </div>
@@ -337,12 +332,12 @@ function SystemWordPicker({
             className="max-h-72 overflow-y-auto rounded-xl"
             style={{ border: '1px solid var(--theme-border)' }}
           >
-            {results.map((w) => {
-              const checked = picked.has(w.id);
+            {results.map((word) => {
+              const checked = picked.has(word.id);
               return (
                 <button
-                  key={w.id}
-                  onClick={() => toggle(w.id)}
+                  key={word.id}
+                  onClick={() => toggle(word.id)}
                   className="w-full flex items-center gap-3 px-3 py-2 text-left transition-colors"
                   style={{
                     backgroundColor: checked ? `${ACCENT.vocab}18` : 'transparent',
@@ -350,16 +345,16 @@ function SystemWordPicker({
                 >
                   <input type="checkbox" checked={checked} readOnly />
                   <span className="font-bold text-sm" style={{ color: 'var(--theme-text-primary)' }}>
-                    {w.article} {w.word}
+                    {word.article} {word.word}
                   </span>
                   <span className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>
-                    {w.translationVi}
+                    {word.translationVi}
                   </span>
                   <span
                     className="ml-auto text-[10px] font-bold uppercase px-2 py-0.5 rounded"
                     style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }}
                   >
-                    {w.level}
+                    {word.level}
                   </span>
                 </button>
               );
@@ -376,7 +371,7 @@ function SystemWordPicker({
                 setPicked(new Set());
               }}
             >
-              + Thêm {picked.size} thẻ
+              Thêm {picked.size} thẻ
             </Button>
           </div>
         </>
@@ -384,8 +379,6 @@ function SystemWordPicker({
     </div>
   );
 }
-
-// ─── Personal word picker ─────────────────────────────────────────────────
 
 function PersonalWordPicker({
   onAdd,
@@ -437,12 +430,12 @@ function PersonalWordPicker({
             Word Bank của bạn đang trống.
           </div>
         ) : (
-          items.map((p) => {
-            const checked = picked.has(p.id);
+          items.map((word) => {
+            const checked = picked.has(word.id);
             return (
               <button
-                key={p.id}
-                onClick={() => toggle(p.id)}
+                key={word.id}
+                onClick={() => toggle(word.id)}
                 className="w-full flex items-center gap-3 px-3 py-2 text-left transition-colors"
                 style={{
                   backgroundColor: checked ? `${ACCENT.vocab}18` : 'transparent',
@@ -450,10 +443,10 @@ function PersonalWordPicker({
               >
                 <input type="checkbox" checked={checked} readOnly />
                 <span className="font-bold text-sm" style={{ color: 'var(--theme-text-primary)' }}>
-                  {p.word}
+                  {word.word}
                 </span>
                 <span className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>
-                  {p.translationVi}
+                  {word.translationVi}
                 </span>
               </button>
             );
@@ -471,14 +464,12 @@ function PersonalWordPicker({
             setPicked(new Set());
           }}
         >
-          + Thêm {picked.size} thẻ
+          Thêm {picked.size} thẻ
         </Button>
       </div>
     </div>
   );
 }
-
-// ─── Card row (display + edit) ────────────────────────────────────────────
 
 function CardRow({
   card,
@@ -537,7 +528,7 @@ function CardRow({
           />
           <div className="sm:col-span-3 flex gap-2 justify-end">
             <Button variant="ghost" size="sm" onClick={() => setEditing(false)}>
-              Huỷ
+              Hủy
             </Button>
             <Button
               variant="game"
@@ -562,7 +553,7 @@ function CardRow({
             className="text-xs font-bold uppercase px-2 py-0.5 rounded shrink-0"
             style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }}
           >
-            {card.article || '—'}
+            {card.article || '-'}
           </span>
           <span className="font-bold" style={{ color: 'var(--theme-text-primary)' }}>
             {card.word}
@@ -588,7 +579,7 @@ function CardRow({
             className="text-xs font-bold px-2 py-1 rounded-md"
             style={{ color: ACCENT.speaking }}
           >
-            ✕
+            Xóa
           </button>
         </div>
       )}

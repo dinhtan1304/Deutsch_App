@@ -23,7 +23,7 @@ export default function TermsPage() {
       }}>
         <div style={{ maxWidth: 800, margin: '0 auto', padding: '16px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
-            <Image src="/logo.png" width={32} height={32} alt="" priority style={{ borderRadius: 8 }} />
+            <Image src="/logo-32.png" width={32} height={32} alt="" priority style={{ borderRadius: 8 }} />
             <span style={{ fontWeight: 800, fontSize: 15, color: 'white' }}>Deutschmeister</span>
           </Link>
           <Link href="/" style={{ fontSize: 13, color: 'rgba(255,255,255,.5)', textDecoration: 'none' }}>

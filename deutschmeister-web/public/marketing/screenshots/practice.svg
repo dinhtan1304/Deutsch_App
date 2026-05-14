@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760" role="img" aria-label="Deutschmeister practice hub preview">
+  <defs><linearGradient id="g" x1="0" x2="1"><stop stop-color="#6366F1"/><stop offset="1" stop-color="#8B5CF6"/></linearGradient><linearGradient id="a" x1="0" x2="1"><stop stop-color="#F59E0B"/><stop offset="1" stop-color="#EF4444"/></linearGradient></defs>
+  <rect width="1200" height="760" rx="36" fill="#0A0F1E"/>
+  <rect x="70" y="58" width="1060" height="644" rx="30" fill="#F9FAFB"/>
+  <text x="118" y="126" fill="#111827" font-family="Inter,Arial" font-size="34" font-weight="900">Luyện thi &amp; kỹ năng</text>
+  <text x="118" y="160" fill="#6B7280" font-family="Inter,Arial" font-size="17">Chọn hướng luyện phù hợp: kỹ năng, AI bổ trợ hoặc đề chuẩn.</text>
+  <g>
+    <rect x="118" y="202" width="300" height="108" rx="22" fill="#FFFFFF" stroke="#E5E7EB"/><circle cx="158" cy="242" r="20" fill="url(#g)"/><text x="194" y="240" fill="#111827" font-family="Inter,Arial" font-size="18" font-weight="900">Luyện kỹ năng</text><text x="194" y="268" fill="#6B7280" font-family="Inter,Arial" font-size="14">Đọc, nghe, viết, nói</text>
+    <rect x="450" y="202" width="300" height="108" rx="22" fill="#FFFFFF" stroke="#E5E7EB"/><circle cx="490" cy="242" r="20" fill="url(#a)"/><text x="526" y="240" fill="#111827" font-family="Inter,Arial" font-size="18" font-weight="900">Thi thử</text><text x="526" y="268" fill="#6B7280" font-family="Inter,Arial" font-size="14">Goethe/TELC A1-B1</text>
+    <rect x="782" y="202" width="300" height="108" rx="22" fill="#FFFFFF" stroke="#E5E7EB"/><circle cx="822" cy="242" r="20" fill="#EC4899"/><text x="858" y="240" fill="#111827" font-family="Inter,Arial" font-size="18" font-weight="900">Giao tiếp AI</text><text x="858" y="268" fill="#6B7280" font-family="Inter,Arial" font-size="14">Roleplay, phát âm</text>
+  </g>
+  <text x="118" y="372" fill="#111827" font-family="Inter,Arial" font-size="22" font-weight="900">Luyện kỹ năng</text>
+  <g font-family="Inter,Arial">
+    <rect x="118" y="402" width="230" height="154" rx="22" fill="#FFFFFF" stroke="#E5E7EB"/><text x="146" y="448" fill="#22C55E" font-size="13" font-weight="900">Leseübung</text><text x="146" y="480" fill="#111827" font-size="22" font-weight="900">Luyện Đọc</text><text x="146" y="520" fill="#6B7280" font-size="14">Tạo bài đọc và trả lời câu hỏi.</text>
+    <rect x="374" y="402" width="230" height="154" rx="22" fill="#FFFFFF" stroke="#E5E7EB"/><text x="402" y="448" fill="#EC4899" font-size="13" font-weight="900">Hörübung</text><text x="402" y="480" fill="#111827" font-size="22" font-weight="900">Luyện Nghe</text><text x="402" y="520" fill="#6B7280" font-size="14">Nghe audio theo cấp độ.</text>
+    <rect x="630" y="402" width="230" height="154" rx="22" fill="#FFFFFF" stroke="#E5E7EB"/><text x="658" y="448" fill="#6366F1" font-size="13" font-weight="900">Schreibübung</text><text x="658" y="480" fill="#111827" font-size="22" font-weight="900">Luyện Viết</text><text x="658" y="520" fill="#6B7280" font-size="14">AI chấm và sửa lỗi.</text>
+    <rect x="886" y="402" width="196" height="154" rx="22" fill="#FFFFFF" stroke="#E5E7EB"/><text x="914" y="448" fill="#F59E0B" font-size="13" font-weight="900">Sprechübung</text><text x="914" y="480" fill="#111827" font-size="22" font-weight="900">Luyện Nói</text><text x="914" y="520" fill="#6B7280" font-size="14">Ghi âm trả lời.</text>
+  </g>
+  <rect x="118" y="600" width="964" height="58" rx="18" fill="#FFF7ED" stroke="#FED7AA"/><text x="148" y="637" fill="#D97706" font-family="Inter,Arial" font-size="18" font-weight="900">Đề chuẩn Goethe/TELC luôn nằm trong cùng hub, không đổi route.</text>
+</svg>

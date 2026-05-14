@@ -50,14 +50,15 @@ export function FormLayout({
         className={cn('relative min-h-screen w-full overflow-hidden', className)}
         style={{ backgroundColor: 'var(--marketing-bg)' }}
       >
-        {/* Floating orbs + grid — pure decoration */}
+        {/* Subtle marketing backdrop — decorative only, kept behind the form. */}
         <div aria-hidden className="pointer-events-none absolute inset-0 z-0">
           <div
             className="absolute"
             style={{
               top: '-15%', right: '-5%', width: 600, height: 600, borderRadius: '50%',
               background: 'var(--marketing-orb-1)',
-              animation: 'marketingFloat1 9s ease-in-out infinite',
+              opacity: 0.65,
+              animation: 'marketingFloat1 14s ease-in-out infinite',
             }}
           />
           <div
@@ -65,15 +66,8 @@ export function FormLayout({
             style={{
               bottom: '-20%', left: '-8%', width: 500, height: 500, borderRadius: '50%',
               background: 'var(--marketing-orb-2)',
-              animation: 'marketingFloat2 11s ease-in-out infinite',
-            }}
-          />
-          <div
-            className="absolute"
-            style={{
-              top: '50%', left: '40%', width: 350, height: 350, borderRadius: '50%',
-              background: 'var(--marketing-orb-3)',
-              animation: 'marketingFloat3 13s ease-in-out infinite',
+              opacity: 0.5,
+              animation: 'marketingFloat2 16s ease-in-out infinite',
             }}
           />
           <div

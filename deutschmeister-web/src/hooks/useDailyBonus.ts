@@ -41,8 +41,10 @@ export function useAutoDailyBonus(enabled: boolean) {
     onSuccess: (data) => {
       if (data.claimed) {
         setBonus(data);
-        // Invalidate dashboard stats + xp so streak/xp refresh
-        qc.invalidateQueries({ queryKey: dashboardKeys.all });
+        qc.setQueriesData({ queryKey: dashboardKeys.overview() }, (old: any) => old
+          ? { ...old, stats: { ...old.stats, streak: data.streak } }
+          : old);
+        qc.invalidateQueries({ queryKey: ['xp'] });
         qc.invalidateQueries({ queryKey: ['streak', 'status'] });
       }
       // Always mark today as attempted to prevent retry loops

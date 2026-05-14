@@ -29,11 +29,11 @@ interface SettingsState {
   updateSetting: <K extends keyof AppSettings>(key: K, value: AppSettings[K]) => void;
   resetSettings: () => void;
   loadSettings: () => void;
-  /** Called after fetching backend settings — merges into local store */
+  /** Called after fetching backend settings - merges into local store */
   syncFromBackend: (backendSettings: Partial<AppSettings>) => void;
 }
 
-const defaultSettings: AppSettings = {
+export const defaultSettings: AppSettings = {
   theme: 'system',
   showVietnamese: true,
   showPronunciation: true,
@@ -61,7 +61,12 @@ function loadFromStorage(): AppSettings | null {
   if (typeof window !== 'undefined') {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
-      return { ...defaultSettings, ...JSON.parse(stored) };
+      try {
+        return { ...defaultSettings, ...JSON.parse(stored) };
+      } catch {
+        localStorage.removeItem(STORAGE_KEY);
+        return null;
+      }
     }
   }
   return null;

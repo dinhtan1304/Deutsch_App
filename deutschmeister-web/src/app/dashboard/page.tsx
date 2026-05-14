@@ -18,14 +18,26 @@ import { UpsellTrigger } from '@/components/subscription/UpsellTrigger';
 import { QuickReviewWidget } from '@/components/dashboard/QuickReviewWidget';
 import { DashboardHero } from '@/components/dashboard/DashboardHero';
 import { StatusPill } from '@/components/ui/StatusPill';
-import { useFullDashboard } from '@/hooks/useDashboard';
+import {
+  useActivityHeatmap,
+  useDashboardOverview,
+  useRecentActivity,
+} from '@/hooks/useDashboard';
 import { useXp } from '@/hooks/useXp';
 import { useMilestoneCheck } from '@/hooks/useMilestones';
 import { useAutoDailyBonus } from '@/hooks/useDailyBonus';
 import { useAuthStore } from '@/stores/authStore';
-import { AuthGate } from '@/components/ui';
+import { AppPageShell, AuthGate, SectionHeader, SurfaceCard } from '@/components/ui';
 import { GRADIENT } from '@/lib/tokens';
-import { IconBook } from '@/components/ui/Icons';
+import {
+  IconBook,
+  IconBrain,
+  IconClock,
+  IconGamepad,
+  IconRefresh,
+  IconTarget,
+} from '@/components/ui/Icons';
+import Link from 'next/link';
 import type {
   FullDashboard,
   DashboardStats,
@@ -79,16 +91,61 @@ function DashboardSkeleton() {
 
 type DashboardTab = 'overview' | 'detailed';
 
-export default function DashboardPage() {
-  const { isAuthenticated, isLoading: authLoading, user, _hasHydrated } = useAuthStore();
-  const router = useRouter();
-  const { data, isLoading } = useFullDashboard();
-  const { data: xpInfo } = useXp();
-  useMilestoneCheck();
-  const { bonus, dismiss } = useAutoDailyBonus(
-    _hasHydrated && isAuthenticated && user?.onboardingCompleted !== false,
+function MiniAction({
+  href,
+  icon,
+  title,
+  subtitle,
+  cta,
+}: {
+  href: string;
+  icon: React.ReactNode;
+  title: string;
+  subtitle: string;
+  cta: string;
+}) {
+  return (
+    <Link href={href} className="block">
+      <SurfaceCard variant="interactive" className="h-full">
+        <div className="flex h-full items-start gap-3">
+          <div
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
+            style={{ background: 'var(--theme-bg-secondary)', color: 'var(--theme-text-secondary)' }}
+          >
+            {icon}
+          </div>
+          <div className="min-w-0 flex-1">
+            <h3 className="text-body font-bold" style={{ color: 'var(--theme-text-primary)' }}>
+              {title}
+            </h3>
+            <p className="mt-0.5 text-caption leading-relaxed" style={{ color: 'var(--theme-text-muted)' }}>
+              {subtitle}
+            </p>
+            <span className="mt-3 inline-flex text-caption font-bold" style={{ color: 'var(--color-accent-brand)' }}>
+              {cta} →
+            </span>
+          </div>
+        </div>
+      </SurfaceCard>
+    </Link>
   );
+}
+
+export default function DashboardPage() {
+  const { isAuthenticated, isLoading: authLoading, user, _hasHydrated, bootstrap } = useAuthStore();
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<DashboardTab>('overview');
+  const [deferWidgets, setDeferWidgets] = useState(true);
+  const dashboardEnabled = _hasHydrated && isAuthenticated;
+  const { data: overview, isLoading: overviewLoading } = useDashboardOverview(dashboardEnabled);
+  const { data: heatmap } = useActivityHeatmap(dashboardEnabled && activeTab === 'detailed');
+  const { data: recentActivity } = useRecentActivity(dashboardEnabled && activeTab === 'detailed');
+  const { data: xpQuery } = useXp(dashboardEnabled && !bootstrap?.xp);
+  const xpInfo = bootstrap?.xp ?? xpQuery;
+  useMilestoneCheck(dashboardEnabled && !!overview);
+  const { bonus, dismiss } = useAutoDailyBonus(
+    dashboardEnabled && !!overview && user?.onboardingCompleted !== false,
+  );
 
   const todayLabel = useMemo(() => new Date().toLocaleDateString('vi-VN', {
     weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
@@ -101,7 +158,23 @@ export default function DashboardPage() {
     }
   }, [_hasHydrated, isAuthenticated, user, router]);
 
-  if (authLoading || isLoading || !_hasHydrated) return (
+  useEffect(() => {
+    if (!overview) return;
+    const scheduleIdle =
+      typeof window !== 'undefined' && 'requestIdleCallback' in window
+        ? window.requestIdleCallback
+        : (cb: IdleRequestCallback) => window.setTimeout(cb, 1200);
+    const cancelIdle =
+      typeof window !== 'undefined' && 'cancelIdleCallback' in window
+        ? window.cancelIdleCallback
+        : (id: number) => window.clearTimeout(id);
+    const id = scheduleIdle(() => setDeferWidgets(false));
+    return () => cancelIdle(id as number);
+  }, [overview]);
+
+  const isOverviewLoading = overviewLoading;
+
+  if (authLoading || isOverviewLoading || !_hasHydrated) return (
     <div className="max-w-7xl mx-auto px-4 py-6">
       <DashboardSkeleton />
     </div>
@@ -117,47 +190,29 @@ export default function DashboardPage() {
   );
 
   const dashboardData: FullDashboard = {
-    stats: data?.stats ?? getEmptyStats(),
-    heatmap: data?.heatmap ?? getEmptyHeatmap(),
-    weeklyProgress: data?.weeklyProgress ?? getEmptyWeeklyProgress(),
-    topicProgress: data?.topicProgress ?? [],
-    recentActivity: data?.recentActivity ?? [],
+    stats: overview?.stats ?? getEmptyStats(),
+    heatmap: heatmap ?? getEmptyHeatmap(),
+    weeklyProgress: overview?.weeklyProgress ?? getEmptyWeeklyProgress(),
+    topicProgress: overview?.topicProgress ?? [],
+    recentActivity: recentActivity ?? [],
   };
 
   const { stats } = dashboardData;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 pb-8 space-y-6 lg:space-y-8">
-
-      {/* ═══ Sticky Header Area ═══ */}
-      <div
-        className="sticky top-16 z-20 px-4 py-3 rounded-2xl border"
-        style={{
-          backgroundColor: 'var(--theme-bg-card)',
-          borderColor: 'var(--theme-border)',
-          boxShadow: 'var(--shadow-soft, 0 2px 8px rgba(0,0,0,0.06))',
-        }}
-      >
-        <div className="flex items-center justify-between gap-4 flex-wrap">
-          <div className="min-w-0">
-            <h1 className="text-h2 font-bold leading-tight" style={{ color: 'var(--theme-text-primary)' }}>
-              Hallo, {user?.name || 'Freund'}!
-            </h1>
-            <p className="text-caption mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>{todayLabel}</p>
-          </div>
-          <div className="flex items-center gap-2 flex-wrap">
-            {stats.streak > 0 && (
-              <StatusPill type="streak" value={stats.streak} label="ngày" size="sm" />
-            )}
-            {xpInfo && (
-              <StatusPill type="xp" value={xpInfo.xp.toLocaleString('vi-VN')} label="XP" size="sm" />
-            )}
-            {xpInfo && (
-              <StatusPill type="level" value={`Lv.${xpInfo.level}`} label={xpInfo.nameVi} size="sm" />
-            )}
-          </div>
+    <AppPageShell
+      title={`Hallo, ${user?.name || 'Freund'}!`}
+      subtitle={todayLabel}
+      icon={<IconTarget size={22} />}
+      right={(
+        <div className="flex flex-wrap items-center gap-2">
+          {stats.streak > 0 && <StatusPill type="streak" value={stats.streak} label="ngày" size="sm" />}
+          {xpInfo && <StatusPill type="xp" value={xpInfo.xp.toLocaleString('vi-VN')} label="XP" size="sm" />}
+          {xpInfo && <StatusPill type="level" value={`Lv.${xpInfo.level}`} label={xpInfo.nameVi} size="sm" />}
         </div>
-      </div>
+      )}
+    >
+      <div className="space-y-6 lg:space-y-8">
 
       <StreakWarningBanner />
 
@@ -199,13 +254,40 @@ export default function DashboardPage() {
 
           {/* Main Content (8 cols) */}
           <div className="lg:col-span-8 flex flex-col gap-6">
-            <DashboardHero />
+            <SectionHeader
+              title="Hôm nay nên làm gì?"
+              subtitle="Một hành động chính để giữ đà học, các mục phụ nằm ngay bên dưới."
+              icon={<IconBrain size={18} />}
+              accent="srs"
+            />
+            <DashboardHero
+              nextAction={overview?.nextAction}
+              dailyPath={overview?.dailyPath}
+              isLoading={overviewLoading}
+            />
 
-            <div className="space-y-4">
-              <h2 className="text-h4 font-bold px-1" style={{ color: 'var(--theme-text-primary)' }}>
-                Tổng quan học tập
-              </h2>
-              <StatsCards stats={dashboardData.stats} />
+            <div className="grid gap-3 md:grid-cols-3">
+              <MiniAction
+                href={stats.wordsToReview > 0 ? '/review' : '/word-bank'}
+                icon={<IconRefresh size={18} />}
+                title={stats.wordsToReview > 0 ? `${stats.wordsToReview} từ cần ôn` : 'Sổ tay từ vựng'}
+                subtitle={stats.wordsToReview > 0 ? 'Ôn nhanh để không mất nhịp SRS.' : 'Thêm từ mới hoặc xem lại từ đã lưu.'}
+                cta={stats.wordsToReview > 0 ? 'Ôn ngay' : 'Mở sổ tay'}
+              />
+              <MiniAction
+                href="/study-plan"
+                icon={<IconClock size={18} />}
+                title="Kế hoạch học"
+                subtitle="Theo dõi lộ trình Goethe/TELC và việc cần làm trong tuần."
+                cta="Xem kế hoạch"
+              />
+              <MiniAction
+                href="/games"
+                icon={<IconGamepad size={18} />}
+                title="Luyện từ nhanh"
+                subtitle="Chơi một phiên ngắn nếu bạn chỉ có vài phút."
+                cta="Chơi 5 phút"
+              />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -216,9 +298,15 @@ export default function DashboardPage() {
 
           {/* Sidebar (4 cols) */}
           <div className="lg:col-span-4 flex flex-col gap-6">
-            <QuickReviewWidget />
-            <StudyPlanWidget />
-            <WeeklyChallengesWidget />
+            {deferWidgets ? (
+              <div className="h-72 rounded-2xl animate-pulse" style={{ backgroundColor: 'var(--theme-bg-secondary)' }} />
+            ) : (
+              <>
+                <QuickReviewWidget />
+                <StudyPlanWidget />
+                <WeeklyChallengesWidget />
+              </>
+            )}
           </div>
         </div>
       )}
@@ -228,6 +316,17 @@ export default function DashboardPage() {
 
           {/* Main Content (8 cols) */}
           <div className="lg:col-span-8 flex flex-col gap-6">
+            <SectionHeader
+              title="Tổng quan học tập"
+              subtitle="Số liệu chi tiết, lịch sử hoạt động và tiến độ theo tuần."
+              icon={<IconBook size={18} />}
+              accent="vocab"
+            />
+            <StatsCards stats={dashboardData.stats} />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <WeeklyChart data={dashboardData.weeklyProgress} />
+              <TopicProgressList data={dashboardData.topicProgress} limit={6} />
+            </div>
             <ActivityHeatmap data={dashboardData.heatmap} />
             <RecentActivityFeed
               data={dashboardData.recentActivity}
@@ -237,9 +336,15 @@ export default function DashboardPage() {
 
           {/* Sidebar (4 cols) */}
           <div className="lg:col-span-4 flex flex-col gap-6">
-            <QuickReviewWidget />
-            <StudyPlanWidget />
-            <WeeklyChallengesWidget />
+            {deferWidgets ? (
+              <div className="h-72 rounded-2xl animate-pulse" style={{ backgroundColor: 'var(--theme-bg-secondary)' }} />
+            ) : (
+              <>
+                <QuickReviewWidget />
+                <StudyPlanWidget />
+                <WeeklyChallengesWidget />
+              </>
+            )}
           </div>
         </div>
       )}
@@ -255,6 +360,7 @@ export default function DashboardPage() {
 
       <CelebrationModal />
       <DailyBonusToast bonus={bonus} onDismiss={dismiss} />
-    </div>
+      </div>
+    </AppPageShell>
   );
 }

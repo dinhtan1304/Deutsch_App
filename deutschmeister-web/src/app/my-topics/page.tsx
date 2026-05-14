@@ -35,7 +35,7 @@ export default function MyTopicsPage() {
         accent="vocab"
         right={
           <Link href="/my-topics/new">
-            <Button variant="game" accent="vocab" size="lg">+ Tạo bộ chủ đề</Button>
+            <Button variant="game" accent="vocab" size="lg">Tạo bộ chủ đề</Button>
           </Link>
         }
       />
@@ -83,15 +83,15 @@ export default function MyTopicsPage() {
         </div>
       ) : items.length === 0 ? (
         <EmptyState
-          icon="📚"
+          icon={null}
           title="Chưa có bộ chủ đề nào"
-          description="Bắt đầu bằng cách tạo bộ chủ đề đầu tiên — gom các bộ từ vựng thành chủ đề riêng của bạn."
+          description="Bắt đầu bằng cách tạo bộ chủ đề đầu tiên, rồi gom các bộ từ vựng thành chủ đề riêng của bạn."
           action={{ label: 'Tạo bộ chủ đề đầu tiên', href: '/my-topics/new' }}
         />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {items.map((t) => (
-            <MyTopicCard key={t.id} topic={t} />
+          {items.map((topic) => (
+            <MyTopicCard key={topic.id} topic={topic} />
           ))}
         </div>
       )}
@@ -102,7 +102,6 @@ export default function MyTopicsPage() {
 function MyTopicCard({ topic }: { topic: UserTopic }) {
   const vis = VISIBILITY_LABEL[topic.visibility];
   const levelColor = LEVEL_COLOR[topic.level] ?? ACCENT.vocab;
-  const cover = topic.coverEmoji || '📚';
 
   return (
     <Link href={`/my-topics/${topic.id}`} className="block">
@@ -116,14 +115,15 @@ function MyTopicCard({ topic }: { topic: UserTopic }) {
       >
         <div className="flex items-start gap-4">
           <div
-            className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl shrink-0"
+            className="w-12 h-12 rounded-xl flex items-center justify-center text-sm font-black shrink-0"
             style={{
               background: topic.coverColor
                 ? `${topic.coverColor}22`
                 : `${levelColor}18`,
+              color: topic.coverColor || levelColor,
             }}
           >
-            {cover}
+            {topic.level}
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1.5 flex-wrap">
@@ -159,13 +159,13 @@ function MyTopicCard({ topic }: { topic: UserTopic }) {
               style={{ color: 'var(--theme-text-muted)' }}
             >
               <span>{topic.setCount} bộ thẻ</span>
-              <span>·</span>
+              <span>|</span>
               <span>{topic.wordCount} từ</span>
               {topic.visibility !== 'PRIVATE' && (
                 <>
-                  <span>·</span>
+                  <span>|</span>
                   <span>{topic.followerCount} follower</span>
-                  <span>·</span>
+                  <span>|</span>
                   <span>{topic.studyCount} đang học</span>
                 </>
               )}
