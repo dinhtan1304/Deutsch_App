@@ -9,6 +9,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { useSRSStats } from '@/hooks/usePersonalWords';
 import { useProgressStats } from '@/hooks/useProgress';
 import { PremiumLockIcon } from '@/components/subscription/UpsellTrigger';
+import { BetaBadge } from '@/components/ui/BetaBadge';
 import { PRIMARY_NAV, PREMIUM_HREFS, AUTH_HREFS, NAV_FLAT, type NavItem } from '@/config/navigation';
 import { STATUS, ACCENT, GRADIENT } from '@/lib/tokens';
 
@@ -206,6 +207,7 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                         ) : (
                           PREMIUM_HREFS.has(child.href) && <PremiumLockIcon size={12} />
                         )}
+                        {child.beta && <BetaBadge size="sm" />}
                         {childBadge > 0 && (
                           <span className="shrink-0 text-caption font-bold px-1.5 py-0.5 rounded-full leading-none text-white text-center"
                             style={{ background: STATUS.danger, minWidth: 18 }}>
@@ -241,6 +243,7 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
               )}
               {!isCollapsed && AUTH_HREFS.has(item.href) && !isAuthenticated && <LockIcon />}
               {!isCollapsed && (isAuthenticated || !AUTH_HREFS.has(item.href)) && PREMIUM_HREFS.has(item.href) && <PremiumLockIcon size={12} />}
+              {!isCollapsed && item.beta && <BetaBadge size="sm" />}
               {badge > 0 && (
                 isCollapsed ? (
                   <span className="absolute top-1.5 right-2 w-2 h-2 rounded-full" style={{ background: STATUS.danger }} />

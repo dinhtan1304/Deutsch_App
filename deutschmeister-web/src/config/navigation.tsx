@@ -19,7 +19,7 @@ import {
   IconPenLine, IconRefresh, IconSettings,
   IconZap, IconBrain, IconTarget, IconBookOpen,
   IconHeadphones, IconMic, IconLink, IconUser, IconStar, IconClock,
-  IconTrophy, IconBarChart,
+  IconTrophy, IconBarChart, IconFlame,
 } from '@/components/ui/Icons';
 
 export interface NavItem {
@@ -29,6 +29,7 @@ export interface NavItem {
   icon: ComponentType<{ size?: number; className?: string }>;
   children?: NavItem[];
   premium?: boolean;                              // show crown icon for free users
+  beta?: boolean;                                 // show BETA pill in sidebar (expanded only)
   badge?: 'srs-due' | 'builtin-due';              // runtime counts wired in Sidebar
 }
 
@@ -77,7 +78,8 @@ export const PRIMARY_NAV: NavItem[] = [
       { key: 'listening',   label: 'Nghe',        href: '/practice-test/listening', icon: IconHeadphones, premium: true },
       { key: 'writing',     label: 'Viết',        href: '/practice-test/writing',  icon: IconPenLine, premium: true },
       { key: 'speaking',    label: 'Nói',         href: '/practice-test/speaking',   icon: IconMic, premium: true },
-      { key: 'speaking-rooms', label: 'Phòng nói', href: '/practice-test/speaking-rooms', icon: IconMic },
+      { key: 'speaking-rooms', label: 'Phòng nói', href: '/practice-test/speaking-rooms', icon: IconMic, beta: true },
+      { key: 'arena',       label: 'Đấu trường',  href: '/arena',                   icon: IconFlame, beta: true },
       { key: 'dictation',   label: 'Chép chính tả', href: '/practice-test/dictation', icon: IconHeadphones },
       { key: 'study-plan',  label: 'Kế hoạch',    href: '/study-plan',               icon: IconTarget },
     ],
@@ -146,6 +148,7 @@ export const AUTH_HREFS: ReadonlySet<string> = new Set([
   '/practice-test/writing',
   '/practice-test/speaking',
   '/practice-test/speaking-rooms',
+  '/arena',
   '/practice-test/dictation',
   '/study-plan',
 ]);

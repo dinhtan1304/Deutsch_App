@@ -5,11 +5,23 @@ import { useRouter } from 'next/navigation';
 import { PageHeader } from '@/components/ui';
 import { ACCENT, GRADIENT } from '@/lib/tokens';
 import { useAuthStore } from '@/stores/authStore';
+import { useSettingsStore } from '@/stores/settingsStore';
 import { useCreateSpeakingRoom, useSpeakingRoomStats } from '@/hooks/useSpeakingRooms';
 import { SpeakingRoomStatsCard, SpeakingRoomsActivityBar } from '@/components/speaking-rooms/SpeakingRoomStatsPanel';
 import { getApiErrorMessage } from '@/lib/api/client';
 
 const LEVELS = ['A1', 'A2', 'B1', 'B2'] as const;
+type SpeakingRoomLevel = (typeof LEVELS)[number];
+
+/**
+ * Map the user's preferred CEFR level to one of the supported speaking-room
+ * levels. C1/C2 clamp to B2 (highest supported); 'all' / unknown → B1.
+ */
+function resolveDefaultLevel(preferred: string): SpeakingRoomLevel {
+  if ((LEVELS as readonly string[]).includes(preferred)) return preferred as SpeakingRoomLevel;
+  if (preferred === 'C1' || preferred === 'C2') return 'B2';
+  return 'B1';
+}
 const SUGGESTED_TOPICS = [
   'Du lịch', 'Gia đình', 'Công việc', 'Sở thích', 'Mua sắm',
   'Sức khỏe', 'Ẩm thực', 'Học tập', 'Cuộc sống hằng ngày',
@@ -18,7 +30,8 @@ const SUGGESTED_TOPICS = [
 export default function NewSpeakingRoomPage() {
   const router = useRouter();
   const user = useAuthStore((s) => s.user);
-  const [cefrLevel, setCefrLevel] = useState<string>('B1');
+  const preferredLevel = useSettingsStore((s) => s.settings.preferredLevel);
+  const [cefrLevel, setCefrLevel] = useState<string>(() => resolveDefaultLevel(preferredLevel));
   const [topic, setTopic] = useState<string>('Du lịch');
   const [title, setTitle] = useState<string>('');
   const [visibility, setVisibility] = useState<'PUBLIC' | 'PRIVATE'>('PUBLIC');

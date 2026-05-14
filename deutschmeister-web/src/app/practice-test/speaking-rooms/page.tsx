@@ -3,7 +3,8 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { PageHeader } from '@/components/ui';
+import { PageHeader, BetaBadge } from '@/components/ui';
+import { FeedbackModal } from '@/components/layout/FeedbackModal';
 import { ACCENT, GRADIENT } from '@/lib/tokens';
 import { useAuthStore } from '@/stores/authStore';
 import { useSpeakingRoomsList, useSpeakingRoomQuota, useSpeakingRoomStats, useJoinSpeakingRoom, useJoinByCode } from '@/hooks/useSpeakingRooms';
@@ -20,6 +21,7 @@ export default function SpeakingRoomsListPage() {
   const [level, setLevel] = useState<string | undefined>(undefined);
   const [code, setCode] = useState('');
   const [codeError, setCodeError] = useState('');
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
 
   const { data: rooms, isLoading } = useSpeakingRoomsList({ cefrLevel: level });
   const { data: quota } = useSpeakingRoomQuota();
@@ -54,6 +56,26 @@ export default function SpeakingRoomsListPage() {
         title="Phòng Luyện Nói"
         subtitle="Ghép cặp với người học khác để luyện nói tiếng Đức trực tiếp"
         accent="speaking"
+        right={
+          <div className="flex items-center gap-3 flex-wrap">
+            <BetaBadge size="md" />
+            <button
+              type="button"
+              onClick={() => setFeedbackOpen(true)}
+              className="text-caption underline-offset-2 hover:underline opacity-80 hover:opacity-100"
+              style={{ color: 'var(--theme-text-muted)' }}
+            >
+              🐞 Báo lỗi · Góp ý
+            </button>
+            <Link
+              href="/community/rules"
+              className="text-caption underline-offset-2 hover:underline opacity-80 hover:opacity-100"
+              style={{ color: 'var(--theme-text-muted)' }}
+            >
+              📜 Quy tắc cộng đồng
+            </Link>
+          </div>
+        }
       />
 
       <QuotaBanner quota={quota} />
@@ -150,6 +172,8 @@ export default function SpeakingRoomsListPage() {
           <RoomCard key={room.id} room={room} onJoin={() => handleJoin(room.id)} loading={joinMut.isPending} />
         ))}
       </div>
+
+      {feedbackOpen && <FeedbackModal onClose={() => setFeedbackOpen(false)} />}
     </div>
   );
 }

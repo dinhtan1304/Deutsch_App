@@ -16,6 +16,7 @@ import { ChatPanel } from '@/components/speaking-rooms/ChatPanel';
 import { ChatInput } from '@/components/roleplay/ChatInput';
 import { SuggestionsPanel } from '@/components/speaking-rooms/SuggestionsPanel';
 import { VoiceCallPanel } from '@/components/speaking-rooms/VoiceCallPanel';
+import { ReportUserModal } from '@/components/common/ReportUserModal';
 
 export default function SpeakingRoomDetailPage() {
   const params = useParams<{ id: string }>();
@@ -26,6 +27,7 @@ export default function SpeakingRoomDetailPage() {
   const { data: room, isLoading } = useSpeakingRoom(params.id);
   const leaveMut = useLeaveSpeakingRoom();
   const initialMessages = useMemo(() => room?.messages ?? [], [room?.id]);
+  const [reportOpen, setReportOpen] = useState(false);
 
   const { socket, messages, sendText, setTyping, typingUserIds, connected } =
     useSpeakingRoomSocket(room ? room.id : null, initialMessages);
@@ -110,6 +112,17 @@ export default function SpeakingRoomDetailPage() {
                 {inviteCopied ? '✓ Đã copy' : 'Copy link mời'}
               </button>
             )}
+            {remotePeer && (
+              <button
+                type="button"
+                onClick={() => setReportOpen(true)}
+                className="px-3 py-2 rounded-lg text-sm font-bold border"
+                title={`Báo cáo ${remotePeer.name}`}
+                style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)' }}
+              >
+                🚩 Báo cáo
+              </button>
+            )}
             <button
               type="button"
               onClick={handleLeave}
@@ -154,6 +167,15 @@ export default function SpeakingRoomDetailPage() {
         </div>
       </div>
 
+      {reportOpen && remotePeer && (
+        <ReportUserModal
+          reportedUserId={remotePeer.userId}
+          reportedUserName={remotePeer.name}
+          context="speaking_room"
+          contextId={room.id}
+          onClose={() => setReportOpen(false)}
+        />
+      )}
     </div>
   );
 }

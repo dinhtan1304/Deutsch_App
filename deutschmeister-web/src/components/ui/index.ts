@@ -23,3 +23,4 @@ export { AuthGate } from './AuthGate';
 export { RequireAuth } from './RequireAuth';
 export { Switch } from './Switch';
 export type { SwitchProps } from './Switch';
+export { BetaBadge } from './BetaBadge';
