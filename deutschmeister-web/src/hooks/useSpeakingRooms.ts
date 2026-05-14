@@ -31,7 +31,7 @@ export function useSpeakingRoomsList(filter?: { cefrLevel?: string; topic?: stri
     queryKey: speakingRoomKeys.list(filter),
     queryFn: () => speakingRoomsApi.list(filter),
     staleTime: 15 * 1000,
-    refetchInterval: 15 * 1000,
+    refetchInterval: 30 * 1000,
   });
 }
 
