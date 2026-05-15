@@ -47,13 +47,35 @@ export function usePronunciation() {
         window.speechSynthesis.speak(utterance);
     }, [settings.speechRate]);
 
-    const speak = useCallback(async (text: string, lang = 'de-DE') => {
+    /**
+     * Pronounce a German phrase.
+     *
+     * Default path: backend Coqui Thorsten (better German accent, ~300-800ms
+     * cold round-trip, instant on cache hit). Used by word/topic/listening
+     * features where voice quality matters.
+     *
+     * Fast path: pass `{ fast: true }` to skip the backend entirely and use
+     * the browser's Web Speech API directly. Latency drops to ~0ms — the
+     * trade-off is OS-dependent accent quality. Use for time-critical UI
+     * (Vocabulary Arena round reveals, where the next word may flip before
+     * a backend fetch returns).
+     */
+    const speak = useCallback(async (
+        text: string,
+        lang = 'de-DE',
+        opts?: { fast?: boolean },
+    ) => {
         if (typeof window === 'undefined') return;
         if (!settings.soundEnabled) return;
         const trimmed = text.trim();
         if (!trimmed) return;
 
         stop();
+
+        if (opts?.fast) {
+            speakBrowser(trimmed, lang);
+            return;
+        }
 
         const key = cacheKey(trimmed, 'thorsten-vits');
 

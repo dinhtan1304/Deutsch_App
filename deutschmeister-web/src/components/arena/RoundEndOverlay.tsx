@@ -41,7 +41,7 @@ function ExampleWithHighlight({ example, target }: { example: string; target: st
 }
 
 export function RoundEndOverlay({ reveal, myUserId }: RoundEndOverlayProps) {
-  const { speak } = usePronunciation();
+  const { speak, stop } = usePronunciation();
   const { wordReveal } = reveal;
   const headline =
     reveal.winnerUserId === null
@@ -57,11 +57,25 @@ export function RoundEndOverlay({ reveal, myUserId }: RoundEndOverlayProps) {
         : STATUS.danger;
 
   useEffect(() => {
+    // Track whether this effect run is still the "current" word. If the
+    // round flips before the TTS fetch returns (Coqui can take 300-800ms
+    // cold), we used to play stale audio over the next word's reveal. Now
+    // both the setTimeout AND any in-flight fetch / playing audio are
+    // cancelled in cleanup.
+    let cancelled = false;
     const t = setTimeout(() => {
-      speak(wordReveal.word, 'de-DE');
+      if (cancelled) return;
+      // Fast path: arena rounds flip in 2-5s so we sacrifice Coqui's better
+      // accent for instant Web Speech API playback (~0ms vs 300-800ms cold
+      // backend round-trip). The reveal audio never lags into the next word.
+      speak(wordReveal.word, 'de-DE', { fast: true });
     }, 250);
-    return () => clearTimeout(t);
-  }, [wordReveal.word, speak]);
+    return () => {
+      cancelled = true;
+      clearTimeout(t);
+      stop();
+    };
+  }, [wordReveal.word, speak, stop]);
 
   return (
     <div
@@ -109,7 +123,7 @@ export function RoundEndOverlay({ reveal, myUserId }: RoundEndOverlayProps) {
             <button
               type="button"
               aria-label="Phát âm lại"
-              onClick={() => speak(wordReveal.word, 'de-DE')}
+              onClick={() => speak(wordReveal.word, 'de-DE', { fast: true })}
               className="ml-1 w-9 h-9 rounded-full flex items-center justify-center transition-transform hover:scale-110"
               style={{ background: 'rgba(255,255,255,0.2)', color: '#fff' }}
             >
