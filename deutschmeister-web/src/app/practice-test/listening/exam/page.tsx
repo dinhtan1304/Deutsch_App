@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useExamListeningHistory, useExamListeningStats, useDeleteExamListening } from '@/hooks/useExamListening';
 import { ExamListeningHistoryItem, TeilScore } from '@/lib/api/examListening';
-import { PageHeader, GridSkeleton } from '@/components/ui';
+import { PracticePageShell, GridSkeleton } from '@/components/ui';
 import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 
 // ─── Local Icons ─────────────────────────────────────────────────────────────
@@ -148,21 +148,20 @@ export default function ExamListeningListPage() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-8 pb-32">
-      <PageHeader
-        backHref="/practice-test/listening"
-        title="Luyện Nghe Theo Đề Chuẩn"
-        subtitle="Goethe & TELC · A1 / A2 / B1 · Đầy đủ tất cả Teile"
-        accent="listening"
-        right={
-          <Link href="/practice-test/listening/exam/new"
-            className="flex items-center gap-2 px-7 py-3.5 rounded-xl text-sm font-black text-white transition-all hover:scale-[1.02] active:scale-95 shadow-xl shadow-blue-500/30"
-            style={{ background: GRADIENT.listening }}>
-            <IconPlus size={20} /> Làm bài mới
-          </Link>
-        }
-      />
-
+    <PracticePageShell
+      backHref="/practice-test/listening"
+      title="Luyện Nghe Theo Đề Chuẩn"
+      subtitle="Goethe & TELC · A1 / A2 / B1 · Đầy đủ tất cả Teile"
+      accent="listening"
+      className="pb-32"
+      right={
+        <Link href="/practice-test/listening/exam/new"
+          className="flex items-center gap-2 px-7 py-3.5 rounded-xl text-sm font-black text-white transition-all hover:scale-[1.02] active:scale-95 shadow-xl shadow-blue-500/30"
+          style={{ background: GRADIENT.listening }}>
+          <IconPlus size={20} /> Làm bài mới
+        </Link>
+      }
+    >
       {/* Stats Dashboard */}
       {stats && stats.total > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
@@ -282,6 +281,6 @@ export default function ExamListeningListPage() {
           </button>
         </div>
       )}
-    </div>
+    </PracticePageShell>
   );
 }

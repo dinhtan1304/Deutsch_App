@@ -299,9 +299,10 @@ export default function ExamWritingPage() {
 
   return (
     <div className="min-h-screen pb-10" style={{ backgroundColor: 'var(--theme-bg-primary)' }}>
+     <div className="max-w-5xl mx-auto px-4">
 
       {/* Immersive Header */}
-      <div className="relative -mx-6 px-6 pt-8 pb-12 mb-6 overflow-hidden">
+      <div className="relative -mx-4 px-4 pt-8 pb-12 mb-6 overflow-hidden">
         <div className="absolute inset-0 opacity-10 pointer-events-none"
           style={{ background: GRADIENT.examWriting, maskImage: 'radial-gradient(circle at top right, white, transparent)' }} />
 
@@ -344,7 +345,7 @@ export default function ExamWritingPage() {
       </div>
 
       {/* Teil tabs */}
-      <div className="max-w-2xl mx-auto px-4 mb-6">
+      <div className="max-w-2xl mx-auto mb-6">
         <div className="flex gap-1.5 overflow-x-auto no-scrollbar">
           {teile.map((teil, i) => {
             const filled = (userTexts[`teil_${teil.number}`] ?? '').trim().length > 0;
@@ -366,7 +367,7 @@ export default function ExamWritingPage() {
       </div>
 
       {/* ── Content ── */}
-      <div className="px-6 pb-24">
+      <div className="pb-24">
         {/* Mobile-only tab switcher between task and editor */}
         <MobileSplitTabs
           view={mobileView}
@@ -495,6 +496,7 @@ export default function ExamWritingPage() {
           </div>
         )}
       </div>
+     </div>
     </div>
   );
 }

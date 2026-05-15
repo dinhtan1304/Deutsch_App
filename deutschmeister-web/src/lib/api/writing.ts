@@ -58,6 +58,8 @@ export interface CriterionScores {
   kohaerenz: number;
 }
 
+import type { GradingInsights } from './types/grading-insights';
+
 export interface WritingSession {
   id: string;
   topic: string;
@@ -77,6 +79,7 @@ export interface WritingSession {
   feedbackVi: string | null;
   strengths: string[] | null;
   improvements: string[] | null;
+  insights: GradingInsights | null;
   errors: WritingError[];
   status: 'DRAFT' | 'SUBMITTED' | 'GRADING' | 'GRADED' | 'ERROR';
   createdAt: string;

@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useExamListeningSession } from '@/hooks/useExamListening';
 import { ExamListeningTeil, TeilGradingDetail, ExamListeningQuestion } from '@/lib/api/examListening';
+import { InsightsPanel } from '@/components/grading/InsightsPanel';
+import { coalesceInsights } from '@/lib/api/utils/insights-fallback';
 import { PageHeader, FixedActionBar } from '@/components/ui';
 import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 import { speakGerman as speakText } from '@/lib/utils';
@@ -257,7 +259,7 @@ export default function ExamListeningResultPage() {
   const teilScoreMap = Object.fromEntries(teilScores.map(ts => [ts.teil, ts]));
 
   return (
-    <div className="py-6">
+    <div className="max-w-5xl mx-auto px-4 py-6">
       <PageHeader
         backHref="/practice-test/listening/exam"
         title="Kết quả bài nghe theo đề"
@@ -343,6 +345,10 @@ export default function ExamListeningResultPage() {
             })}
           </div>
         )}
+      </div>
+
+      <div className="mb-5">
+        <InsightsPanel insights={coalesceInsights({ insights: session.insights })} />
       </div>
 
       <div>

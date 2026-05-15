@@ -1,7 +1,9 @@
 'use client';
 
 import { forwardRef, InputHTMLAttributes, useId } from 'react';
+import { motion, useReducedMotion } from 'motion/react';
 import { STATUS } from '@/lib/tokens';
+import { shake } from '@/lib/motion-presets';
 import { cn } from '@/lib/utils';
 
 export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
@@ -14,6 +16,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
     const generatedId = useId();
     const inputId = id ?? generatedId;
     const errorId = error ? `${inputId}-error` : undefined;
+    const reduce = useReducedMotion();
     return (
       <div className="w-full">
         {label && (
@@ -22,25 +25,30 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             {label}
           </label>
         )}
-        <input
-          ref={ref}
-          id={inputId}
-          type={type}
-          aria-invalid={error ? true : undefined}
-          aria-describedby={errorId}
-          className={cn(
-            'w-full px-4 py-2.5 rounded-xl border text-sm transition-colors',
-            'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-            className
-          )}
-          style={{
-            backgroundColor: 'var(--theme-bg-secondary)',
-            borderColor: error ? STATUS.danger : 'var(--theme-border)',
-            color: 'var(--theme-text-primary)',
-            ...style,
-          }}
-          {...props}
-        />
+        <motion.div
+          variants={reduce ? undefined : shake}
+          animate={reduce ? undefined : (error ? 'shake' : 'idle')}
+        >
+          <input
+            ref={ref}
+            id={inputId}
+            type={type}
+            aria-invalid={error ? true : undefined}
+            aria-describedby={errorId}
+            className={cn(
+              'w-full px-4 py-2.5 rounded-xl border text-sm transition-colors',
+              'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+              className
+            )}
+            style={{
+              backgroundColor: 'var(--theme-bg-secondary)',
+              borderColor: error ? STATUS.danger : 'var(--theme-border)',
+              color: 'var(--theme-text-primary)',
+              ...style,
+            }}
+            {...props}
+          />
+        </motion.div>
         {error && (
           <p id={errorId} role="alert" className="mt-1 text-xs" style={{ color: STATUS.danger }}>{error}</p>
         )}

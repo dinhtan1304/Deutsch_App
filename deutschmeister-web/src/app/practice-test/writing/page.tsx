@@ -4,7 +4,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useWritingHistory, useWritingStats, useDeleteWriting } from '@/hooks/useWriting';
-import { PageHeader, GridSkeleton } from '@/components/ui';
+import { PracticePageShell, GridSkeleton } from '@/components/ui';
 import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 
 // ─── Local Icons ─────────────────────────────────────────────────────────────
@@ -88,35 +88,34 @@ export default function WritingListPage() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-8 pb-32">
-      <PageHeader
-        backHref="/practice-test"
-        title="Luyện Viết"
-        subtitle="AI tạo đề bài tiếng Đức — Viết và nhận phản hồi chi tiết"
-        accent="writing"
-        right={
-          <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-            <Link href="/practice-test/writing/exam"
-              className="px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-black border transition-all hover:bg-black/3 dark:hover:bg-white/5 whitespace-nowrap"
-              style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-primary)' }}>
-              Theo đề chuẩn →
-            </Link>
-            <Link href="/practice-test/writing/new"
-              className="flex items-center gap-2 px-4 sm:px-7 py-2.5 sm:py-3.5 rounded-xl text-xs sm:text-sm font-black text-white transition-all hover:scale-[1.02] active:scale-95 shadow-xl shadow-indigo-500/30 whitespace-nowrap"
-              style={{ background: GRADIENT.writing }}>
-              <IconPlus size={18} /> Bài viết mới
-            </Link>
-          </div>
-        }
-      />
-
+    <PracticePageShell
+      backHref="/practice-test"
+      title="Luyện Viết"
+      subtitle="AI tạo đề bài tiếng Đức — Viết và nhận phản hồi chi tiết"
+      accent="writing"
+      className="pb-32"
+      right={
+        <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+          <Link href="/practice-test/writing/exam"
+            className="px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-black border transition-all hover:bg-black/3 dark:hover:bg-white/5 whitespace-nowrap"
+            style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-primary)' }}>
+            Theo đề chuẩn →
+          </Link>
+          <Link href="/practice-test/writing/new"
+            className="flex items-center gap-2 px-4 sm:px-7 py-2.5 sm:py-3.5 rounded-xl text-xs sm:text-sm font-black text-white transition-all hover:scale-[1.02] active:scale-95 shadow-xl shadow-indigo-500/30 whitespace-nowrap"
+            style={{ background: GRADIENT.writing }}>
+            <IconPlus size={18} /> Bài viết mới
+          </Link>
+        </div>
+      }
+    >
       {/* Stats Dashboard */}
       {stats && stats.totalSessions > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
           {[
             { label: 'Tổng bài viết', value: stats.totalSessions, color: ACCENT.writing, icon: <IconPenLine size={20} /> },
-            { label: 'TB điểm số', value: stats.averageScore ? `${stats.averageScore}%` : '—', color: ACCENT.xp, icon: <IconDice size={20} /> },
-            { label: 'Thành tích cao', value: stats.totalErrors ? `${stats.totalErrors}%` : '—', color: STATUS.success, icon: <IconCheck size={20} /> },
+            { label: 'TB điểm số', value: stats.averageScore ? `${Math.round(stats.averageScore)}%` : '—', color: ACCENT.xp, icon: <IconDice size={20} /> },
+            { label: 'Thành tích cao', value: stats.totalErrors ? `${Math.round(stats.totalErrors)}%` : '—', color: STATUS.success, icon: <IconCheck size={20} /> },
           ].map((s, i) => (
             <div key={i} className="relative overflow-hidden rounded-2xl px-5 py-4 border shadow-sm backdrop-blur-xl flex items-center gap-4 transition-all duration-300 hover:-translate-y-1"
               style={{
@@ -290,6 +289,6 @@ export default function WritingListPage() {
           </button>
         </div>
       )}
-    </div>
+    </PracticePageShell>
   );
 }

@@ -145,7 +145,7 @@ export default function DictationPlayPage() {
   const unansweredCount = session.totalBlanks - answeredCount;
 
   return (
-    <div className="pb-24">
+    <div className="max-w-5xl mx-auto px-4 pb-24">
       {/* Header Container — sentinel for collapse */}
       <div ref={sentinelRef} className="pt-2">
         <PageHeader

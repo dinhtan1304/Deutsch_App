@@ -29,7 +29,7 @@ const securityHeaders = [
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "img-src 'self' data: blob: https: http:",
       "font-src 'self' https://fonts.gstatic.com",
-      `connect-src 'self' ${apiConnectOrigins()} https://*.deutschmeister.com https://*.railway.app wss://*.railway.app https://www.google.com https://www.googleapis.com`,
+      `connect-src 'self' ${apiConnectOrigins()} https://*.deutschmeister.com https://*.railway.app wss://*.railway.app https://www.google.com https://www.googleapis.com https://translate.googleapis.com https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://stats.g.doubleclick.net`,
       "frame-src 'self' https://www.google.com https://www.youtube.com",
       "media-src 'self' blob: data:",
       "object-src 'none'",

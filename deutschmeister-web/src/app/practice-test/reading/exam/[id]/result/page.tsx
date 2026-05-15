@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useExamReadingSession } from '@/hooks/useExamReading';
 import { ExamReadingTeil, TeilGradingDetail, ExamTeilQuestion } from '@/lib/api/examReading';
+import { InsightsPanel } from '@/components/grading/InsightsPanel';
+import { coalesceInsights } from '@/lib/api/utils/insights-fallback';
 import {
   PageHeader, ScoreRing, StatGrid, FixedActionBar, type StatItem,
 } from '@/components/ui';
@@ -233,7 +235,7 @@ export default function ExamReadingResultPage() {
   ];
 
   return (
-    <div className="py-6">
+    <div className="max-w-5xl mx-auto px-4 py-6">
       <PageHeader
         backHref="/practice-test/reading/exam"
         title="Kết quả bài đọc theo đề"
@@ -270,6 +272,10 @@ export default function ExamReadingResultPage() {
             <StatGrid items={stats} columns={2} className="w-full" />
           </div>
         </div>
+      </div>
+
+      <div className="mb-5">
+        <InsightsPanel insights={coalesceInsights({ insights: session.insights })} />
       </div>
 
       {/* ── Per-Teil review ── */}

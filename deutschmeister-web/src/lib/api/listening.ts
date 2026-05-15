@@ -1,4 +1,5 @@
 import { apiGet, apiPost, api } from './client';
+import type { GradingInsights } from './types/grading-insights';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -23,6 +24,7 @@ export interface ListeningSession {
   score?: number;
   correctCount: number;
   totalQ: number;
+  insights?: GradingInsights | null;
   status: 'DRAFT' | 'GRADED';
   submittedAt?: string;
   createdAt: string;

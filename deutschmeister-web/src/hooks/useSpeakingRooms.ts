@@ -82,7 +82,7 @@ export function useMyQueueEntry(enabled = true) {
     queryKey: speakingRoomKeys.myQueue(),
     queryFn: () => speakingRoomsApi.getMyQueueEntry(),
     enabled,
-    refetchInterval: 5_000,
+    refetchInterval: 10_000,
   });
 }
 

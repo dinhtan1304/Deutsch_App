@@ -4,7 +4,7 @@ import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/reac
 import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3';
 import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
-import { ErrorBoundary } from '@/components/ui';
+import { ErrorBoundary, ToastProvider } from '@/components/ui';
 import { ApiError, clearTokens, initAuth } from '@/lib/api/client';
 import { authApi } from '@/lib/api/auth';
 import { clearSessionHint, hasSessionHint, setSessionHint } from '@/lib/auth/sessionHint';
@@ -146,8 +146,10 @@ export function Providers({ children }: { children: React.ReactNode }) {
             <WordHighlightProvider>
               <DictionaryProvider>
                 <GrammarAnalyzerProvider>
-                  {children}
-                  <AchievementToastProvider />
+                  <ToastProvider>
+                    {children}
+                    <AchievementToastProvider />
+                  </ToastProvider>
                 </GrammarAnalyzerProvider>
               </DictionaryProvider>
             </WordHighlightProvider>

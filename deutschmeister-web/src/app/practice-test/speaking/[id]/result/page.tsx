@@ -7,6 +7,8 @@ import { useFreeSpeakingSession } from '@/hooks/useFreeSpeaking';
 import { PageHeader, FixedActionBar, ScoreRing } from '@/components/ui';
 import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 import { synthesizeAudio } from '@/lib/utils';
+import { InsightsPanel } from '@/components/grading/InsightsPanel';
+import { coalesceInsights } from '@/lib/api/utils/insights-fallback';
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
 function IconMic({ size = 18, style }: { size?: number; style?: React.CSSProperties }) {
@@ -212,7 +214,7 @@ export default function FreeSpeakingResultPage() {
   const strengths = grading.strengths || [];
 
   return (
-    <div className="py-6 pb-28">
+    <div className="max-w-5xl mx-auto px-4 py-6 pb-28">
       <PageHeader
         backHref="/practice-test/speaking"
         title="Kết quả luyện nói"
@@ -401,6 +403,14 @@ export default function FreeSpeakingResultPage() {
               </p>
             </div>
           )}
+
+          <InsightsPanel
+            insights={coalesceInsights({
+              insights: grading.insights,
+              strengths: grading.strengths,
+              feedbackVi: grading.feedbackVi,
+            })}
+          />
         </div>
       </div>
 

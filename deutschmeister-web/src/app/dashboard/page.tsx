@@ -27,7 +27,7 @@ import { useXp } from '@/hooks/useXp';
 import { useMilestoneCheck } from '@/hooks/useMilestones';
 import { useAutoDailyBonus } from '@/hooks/useDailyBonus';
 import { useAuthStore } from '@/stores/authStore';
-import { AppPageShell, AuthGate, SectionHeader, SurfaceCard } from '@/components/ui';
+import { AppPageShell, AuthGate, SectionHeader, StaggerList, SurfaceCard } from '@/components/ui';
 import { GRADIENT } from '@/lib/tokens';
 import {
   IconBook,
@@ -266,7 +266,7 @@ export default function DashboardPage() {
               isLoading={overviewLoading}
             />
 
-            <div className="grid gap-3 md:grid-cols-3">
+            <StaggerList className="grid gap-3 md:grid-cols-3">
               <MiniAction
                 href={stats.wordsToReview > 0 ? '/review' : '/word-bank'}
                 icon={<IconRefresh size={18} />}
@@ -288,7 +288,7 @@ export default function DashboardPage() {
                 subtitle="Chơi một phiên ngắn nếu bạn chỉ có vài phút."
                 cta="Chơi 5 phút"
               />
-            </div>
+            </StaggerList>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <WeeklyChart data={dashboardData.weeklyProgress} />

@@ -1,6 +1,6 @@
 'use client';
 
-import { ReactNode, useState, useEffect } from 'react';
+import { ReactNode, useCallback, useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { Sidebar, SIDEBAR_WIDTH, SIDEBAR_COLLAPSED_WIDTH } from './Sidebar';
@@ -42,6 +42,17 @@ export function MainLayout({ children }: MainLayoutProps) {
     }
   }, [isBareRoute]);
 
+  const toggleSidebar = useCallback(() => {
+    setSidebarCollapsed((prev) => {
+      const next = !prev;
+      localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(next));
+      return next;
+    });
+  }, []);
+
+  const openPalette = useCallback(() => setPaletteOpen(true), []);
+  const closePalette = useCallback(() => setPaletteOpen(false), []);
+
   // ─── Auth/landing pages: full-screen, no chrome ───
   if (isBareRoute) {
     return (
@@ -65,12 +76,6 @@ export function MainLayout({ children }: MainLayoutProps) {
     );
   }
 
-  const toggleSidebar = () => {
-    const newState = !sidebarCollapsed;
-    setSidebarCollapsed(newState);
-    localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(newState));
-  };
-
   const sidebarMl = `${sidebarCollapsed ? SIDEBAR_COLLAPSED_WIDTH : SIDEBAR_WIDTH}px`;
 
   // ─── Normal pages: sidebar + header + bottom tab bar ───
@@ -81,7 +86,7 @@ export function MainLayout({ children }: MainLayoutProps) {
         <Sidebar isCollapsed={sidebarCollapsed} onToggle={toggleSidebar} />
       </div>
 
-      <Header sidebarCollapsed={sidebarCollapsed} onOpenPalette={() => setPaletteOpen(true)} />
+      <Header sidebarCollapsed={sidebarCollapsed} onOpenPalette={openPalette} />
 
       {/* Skip-to-content link for keyboard users (visible on focus only) */}
       <a
@@ -107,7 +112,7 @@ export function MainLayout({ children }: MainLayoutProps) {
       <BottomTabBar />
 
       {/* Global command palette — Cmd/Ctrl+K */}
-      <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />
+      <CommandPalette open={paletteOpen} onClose={closePalette} />
     </div>
   );
 }

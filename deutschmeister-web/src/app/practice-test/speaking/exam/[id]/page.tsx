@@ -297,7 +297,7 @@ export default function ExamSpeakingSessionPage() {
   }
 
   return (
-    <div className="py-6 pb-28">
+    <div className="max-w-5xl mx-auto px-4 py-6 pb-28">
       <PageHeader
         backHref="/practice-test/speaking/exam"
         title="Luyện Nói Theo Đề"

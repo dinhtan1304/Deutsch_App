@@ -6,6 +6,8 @@ import Link from 'next/link';
 import { useExamWritingSession } from '@/hooks/useExamWriting';
 import { ExamWritingTeil, TeilGrading } from '@/lib/api/examWriting';
 import { CriterionRadar } from '@/components/writing/CriterionRadar';
+import { InsightsPanel } from '@/components/grading/InsightsPanel';
+import { coalesceInsights } from '@/lib/api/utils/insights-fallback';
 import { PageHeader, FixedActionBar } from '@/components/ui';
 import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 
@@ -116,6 +118,14 @@ function TeilGradingCard({
               </p>
             </div>
           )}
+          <InsightsPanel
+            insights={coalesceInsights({
+              insights: grading.insights,
+              strengths: grading.strengths,
+              improvements: grading.improvements,
+              feedbackVi: grading.feedback,
+            })}
+          />
           {grading.strengths?.length > 0 && (
             <div>
               <p className="text-caption font-bold uppercase tracking-wide mb-1.5" style={{ color: STATUS.success }}>Stärken</p>
@@ -267,7 +277,7 @@ export default function ExamWritingResultPage() {
   const userTexts = session.userTexts ?? {};
 
   return (
-    <div className="py-6">
+    <div className="max-w-5xl mx-auto px-4 py-6">
       <PageHeader
         backHref="/practice-test/writing/exam"
         title="Kết quả bài viết theo đề"

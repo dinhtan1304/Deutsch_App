@@ -5,12 +5,15 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useReadingSession } from '@/hooks/useReading';
 import { ReadingQuestion, GradingDetail } from '@/lib/api/reading';
+import { InsightsPanel } from '@/components/grading/InsightsPanel';
+import { coalesceInsights } from '@/lib/api/utils/insights-fallback';
 import { IconCheck, IconX, IconLoader, IconShare, IconSparkles } from '../../icons';
 import {
   PageHeader,
   ScoreRing,
   StatGrid,
   FixedActionBar,
+  StaggerList,
   type StatItem,
 } from '@/components/ui';
 import { ACCENT, STATUS, GRADIENT } from '@/lib/tokens';
@@ -169,7 +172,7 @@ export default function ReadingResultPage() {
   ];
 
   return (
-    <div className="py-6">
+    <div className="max-w-5xl mx-auto px-4 py-6">
       <PageHeader
         backHref="/practice-test/reading"
         title="Kết quả bài đọc"
@@ -208,6 +211,10 @@ export default function ReadingResultPage() {
         </div>
       </div>
 
+      <div className="mb-5">
+        <InsightsPanel insights={coalesceInsights({ insights: session.insights })} />
+      </div>
+
       <div className="space-y-3">
         <div className="flex items-center justify-between mb-1">
           <h3 className="text-body font-bold uppercase tracking-wider" style={{ color: 'var(--theme-text-muted)' }}>
@@ -239,13 +246,15 @@ export default function ReadingResultPage() {
             <p className="text-sm">Không có câu nào</p>
           </div>
         ) : (
-          filteredQuestions.map(q => {
-            const detail = gradingDetails.find(d => d.questionId === q.id);
-            const originalIndex = questions.findIndex(orig => orig.id === q.id);
-            return (
-              <QuestionItem key={q.id} question={q} detail={detail} index={originalIndex} />
-            );
-          })
+          <StaggerList className="space-y-3">
+            {filteredQuestions.map(q => {
+              const detail = gradingDetails.find(d => d.questionId === q.id);
+              const originalIndex = questions.findIndex(orig => orig.id === q.id);
+              return (
+                <QuestionItem key={q.id} question={q} detail={detail} index={originalIndex} />
+              );
+            })}
+          </StaggerList>
         )}
       </div>
 

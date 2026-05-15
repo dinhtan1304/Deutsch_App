@@ -12,6 +12,7 @@
  */
 
 import { apiGet, apiPost, apiDelete } from './client';
+import type { GradingInsights } from './types/grading-insights';
 
 // ── Types ──
 
@@ -54,6 +55,7 @@ export interface ReadingSession {
   totalQuestions: number;
   correctCount: number;
   gradingDetails: GradingDetail[] | null;
+  insights: GradingInsights | null;
   status: 'DRAFT' | 'GRADED';
   createdAt: string;
   submittedAt: string | null;

@@ -1,4 +1,5 @@
 import { apiGet, apiPost, api } from './client';
+import type { GradingInsights } from './types/grading-insights';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -27,6 +28,7 @@ export interface TeilGrading {
   feedbackDe: string;
   corrections: string[];
   strengths: string[];
+  insights?: GradingInsights | null;
 }
 
 export interface ExamSpeakingSession {

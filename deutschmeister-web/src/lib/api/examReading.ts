@@ -1,4 +1,5 @@
 import { apiGet, apiPost, apiDelete, api } from './client';
+import type { GradingInsights } from './types/grading-insights';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -61,6 +62,7 @@ export interface ExamReadingSession {
   userAnswers?: Record<string, Record<string, string>>;
   teilScores?: TeilScore[];
   gradingDetails?: Record<string, TeilGradingDetail[]>;
+  insights?: GradingInsights | null;
   score?: number;
   totalQuestions: number;
   correctCount: number;

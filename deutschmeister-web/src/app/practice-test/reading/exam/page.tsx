@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useExamReadingHistory, useExamReadingStats, useDeleteExamReading } from '@/hooks/useExamReading';
 import { ExamReadingHistoryItem, TeilScore } from '@/lib/api/examReading';
-import { PageHeader, GridSkeleton } from '@/components/ui';
+import { PracticePageShell, GridSkeleton } from '@/components/ui';
 import { ACCENT, STATUS, GRADIENT } from '@/lib/tokens';
 
 // ─── Local Icons ─────────────────────────────────────────────────────────────
@@ -146,21 +146,20 @@ export default function ExamReadingListPage() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-8 pb-32">
-      <PageHeader
-        backHref="/practice-test/reading"
-        title="Luyện Đọc Theo Đề Chuẩn"
-        subtitle="Goethe & TELC · A1 / A2 / B1 · Đầy đủ tất cả Teile"
-        accent="reading"
-        right={
-          <Link href="/practice-test/reading/exam/new"
-            className="flex items-center gap-2 px-7 py-3.5 rounded-xl text-sm font-black text-white transition-all hover:scale-[1.02] active:scale-95 shadow-xl shadow-green-500/30"
-            style={{ background: GRADIENT.reading }}>
-            <IconPlus size={20} /> Làm bài mới
-          </Link>
-        }
-      />
-
+    <PracticePageShell
+      backHref="/practice-test/reading"
+      title="Luyện Đọc Theo Đề Chuẩn"
+      subtitle="Goethe & TELC · A1 / A2 / B1 · Đầy đủ tất cả Teile"
+      accent="reading"
+      className="pb-32"
+      right={
+        <Link href="/practice-test/reading/exam/new"
+          className="flex items-center gap-2 px-7 py-3.5 rounded-xl text-sm font-black text-white transition-all hover:scale-[1.02] active:scale-95 shadow-xl shadow-green-500/30"
+          style={{ background: GRADIENT.reading }}>
+          <IconPlus size={20} /> Làm bài mới
+        </Link>
+      }
+    >
       {/* Stats Dashboard */}
       {stats && stats.total > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
@@ -267,6 +266,6 @@ export default function ExamReadingListPage() {
           </button>
         </div>
       )}
-    </div>
+    </PracticePageShell>
   );
 }

@@ -73,3 +73,8 @@ export const useWordBankUI = create<WordBankUIState>((set, get) => ({
     return params;
   },
 }));
+
+// ─── Granular selectors — prefer these over destructuring the whole store ───
+export const useWordBankFilters = () => useWordBankUI((s) => s.filters);
+export const useWordBankPage = () => useWordBankUI((s) => s.page);
+export const useWordBankLimit = () => useWordBankUI((s) => s.limit);

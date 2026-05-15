@@ -124,3 +124,8 @@ export const useSRSStore = create<SRSState>((set, get) => ({
     };
   },
 }));
+
+// ─── Granular selectors — prefer these over destructuring the whole store ───
+export const useSRSCards = () => useSRSStore((s) => s.cards);
+export const useSRSIsLoaded = () => useSRSStore((s) => s.isLoaded);
+export const useSRSIsLoading = () => useSRSStore((s) => s.isLoading);

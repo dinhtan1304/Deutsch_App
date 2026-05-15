@@ -7,6 +7,8 @@ import { useWritingSession, useExplainError } from '@/hooks/useWriting';
 import { useAuthStore } from '@/stores/authStore';
 import type { WritingError, GrammarAnalysis } from '@/lib/api/writing';
 import { CriterionRadar } from '@/components/writing/CriterionRadar';
+import { InsightsPanel } from '@/components/grading/InsightsPanel';
+import { coalesceInsights } from '@/lib/api/utils/insights-fallback';
 import { getErrorTip } from '@/data/error-tips';
 import { IconChevronDown, IconPenLine, IconShare, IconSparkles } from '../../icons';
 import { PageHeader, FixedActionBar } from '@/components/ui';
@@ -279,7 +281,7 @@ export default function WritingResultPage() {
   const overallScore = session.overallScore || 0;
 
   return (
-    <div className="py-6">
+    <div className="max-w-5xl mx-auto px-4 py-6">
       <PageHeader
         backHref="/practice-test/writing"
         title="Kết quả bài viết"
@@ -319,32 +321,19 @@ export default function WritingResultPage() {
         </div>
       </div>
 
-      {/* Strengths & Improvements */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5">
-        <div className="rounded-xl border p-4" style={{ borderColor: `${STATUS.success}33`, backgroundColor: `${STATUS.success}0A` }}>
-          <h3 className="text-xs font-bold uppercase tracking-wider mb-2" style={{ color: STATUS.success }}>
-            Stärken / Điểm mạnh
-          </h3>
-          <ul className="space-y-1.5">
-            {(session.strengths as string[] || []).map((s, i) => (
-              <li key={i} className="text-xs flex items-start gap-1.5" style={{ color: 'var(--theme-text-secondary)' }}>
-                <span style={{ color: STATUS.success }}>•</span>{s}
-              </li>
-            ))}
-          </ul>
-        </div>
-        <div className="rounded-xl border p-4" style={{ borderColor: `${STATUS.warning}33`, backgroundColor: `${STATUS.warning}0A` }}>
-          <h3 className="text-xs font-bold uppercase tracking-wider mb-2" style={{ color: STATUS.warning }}>
-            Verbesserungen / Cần cải thiện
-          </h3>
-          <ul className="space-y-1.5">
-            {(session.improvements as string[] || []).map((s, i) => (
-              <li key={i} className="text-xs flex items-start gap-1.5" style={{ color: 'var(--theme-text-secondary)' }}>
-                <span style={{ color: STATUS.warning }}>•</span>{s}
-              </li>
-            ))}
-          </ul>
-        </div>
+      {/* Detailed AI insights — supersedes the simple strengths/improvements
+          blocks below for sessions graded after Phase A. The fallback helper
+          builds a degraded view from legacy strengths/improvements when
+          insights is null so older rows still render. */}
+      <div className="mb-5">
+        <InsightsPanel
+          insights={coalesceInsights({
+            insights: session.insights,
+            strengths: session.strengths as string[] | null,
+            improvements: session.improvements as string[] | null,
+            feedbackVi: session.feedbackVi,
+          })}
+        />
       </div>
 
       {/* General Feedback */}

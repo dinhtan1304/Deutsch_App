@@ -165,6 +165,22 @@ export const THEME_VAR = {
   overlayStrong: 'var(--theme-overlay-strong)',
 } as const;
 
+export const MOTION = {
+  duration: { instant: 0.1, fast: 0.18, base: 0.28, slow: 0.45, celebrate: 0.7 },
+  ease: {
+    standard: [0.4, 0, 0.2, 1] as const,
+    decelerate: [0, 0, 0.2, 1] as const,
+    accelerate: [0.4, 0, 1, 1] as const,
+  },
+  spring: {
+    soft: { type: 'spring', stiffness: 220, damping: 26 } as const,
+    snappy: { type: 'spring', stiffness: 380, damping: 28 } as const,
+    bouncy: { type: 'spring', stiffness: 500, damping: 18 } as const,
+  },
+  stagger: { tight: 0.04, base: 0.07, loose: 0.12 },
+} as const;
+
 export type AccentKey = keyof typeof ACCENT;
 export type StatusKey = keyof typeof STATUS;
 export type GradientKey = keyof typeof GRADIENT;
+export type MotionDurationKey = keyof typeof MOTION.duration;

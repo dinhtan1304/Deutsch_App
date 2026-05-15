@@ -5,7 +5,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useListeningHistory, useListeningStats, useDeleteListening } from '@/hooks/useListening';
 import { ListeningHistoryItem } from '@/lib/api/listening';
-import { PageHeader, GridSkeleton } from '@/components/ui';
+import { PracticePageShell, GridSkeleton } from '@/components/ui';
 import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 
 // ─── Local Icons ─────────────────────────────────────────────────────────────
@@ -149,35 +149,34 @@ export default function ListeningListPage() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-8 pb-32">
-      <PageHeader
-        backHref="/practice-test"
-        title="Luyện Nghe"
-        subtitle="AI tạo bài nghe tiếng Đức — Luyện kỹ năng nghe hiểu Goethe/TELC"
-        accent="listening"
-        right={
-          <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-            <Link href="/practice-test/listening/exam"
-              className="px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-black border transition-all hover:bg-black/3 dark:hover:bg-white/5 whitespace-nowrap"
-              style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-primary)' }}>
-              Theo đề chuẩn →
-            </Link>
-            <Link href="/practice-test/listening/new"
-              className="flex items-center gap-2 px-4 sm:px-7 py-2.5 sm:py-3.5 rounded-xl text-xs sm:text-sm font-black text-white transition-all hover:scale-[1.02] active:scale-95 shadow-xl shadow-blue-500/30 whitespace-nowrap"
-              style={{ background: GRADIENT.listening }}>
-              <IconPlus size={18} /> Bài nghe mới
-            </Link>
-          </div>
-        }
-      />
-
+    <PracticePageShell
+      backHref="/practice-test"
+      title="Luyện Nghe"
+      subtitle="AI tạo bài nghe tiếng Đức — Luyện kỹ năng nghe hiểu Goethe/TELC"
+      accent="listening"
+      className="pb-32"
+      right={
+        <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+          <Link href="/practice-test/listening/exam"
+            className="px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-black border transition-all hover:bg-black/3 dark:hover:bg-white/5 whitespace-nowrap"
+            style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-primary)' }}>
+            Theo đề chuẩn →
+          </Link>
+          <Link href="/practice-test/listening/new"
+            className="flex items-center gap-2 px-4 sm:px-7 py-2.5 sm:py-3.5 rounded-xl text-xs sm:text-sm font-black text-white transition-all hover:scale-[1.02] active:scale-95 shadow-xl shadow-blue-500/30 whitespace-nowrap"
+            style={{ background: GRADIENT.listening }}>
+            <IconPlus size={18} /> Bài nghe mới
+          </Link>
+        </div>
+      }
+    >
       {/* Stats Dashboard */}
       {stats && stats.total > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
           {[
             { label: 'Tổng bài nghe', value: stats.total, color: ACCENT.listening, icon: <IconHeadphones size={20} /> },
-            { label: 'TB điểm số', value: stats.avgScore ? `${stats.avgScore}%` : '—', color: ACCENT.xp, icon: <IconDice size={20} /> },
-            { label: 'Thành tích cao', value: stats.bestScore ? `${stats.bestScore}%` : '—', color: STATUS.success, icon: <IconCheck size={20} /> },
+            { label: 'TB điểm số', value: stats.avgScore ? `${Math.round(stats.avgScore)}%` : '—', color: ACCENT.xp, icon: <IconDice size={20} /> },
+            { label: 'Thành tích cao', value: stats.bestScore ? `${Math.round(stats.bestScore)}%` : '—', color: STATUS.success, icon: <IconCheck size={20} /> },
           ].map((s, i) => (
             <div key={i} className="relative overflow-hidden rounded-2xl px-5 py-4 border shadow-sm backdrop-blur-xl flex items-center gap-4 transition-all duration-300 hover:-translate-y-1"
               style={{
@@ -289,6 +288,6 @@ export default function ListeningListPage() {
           </button>
         </div>
       )}
-    </div>
+    </PracticePageShell>
   );
 }

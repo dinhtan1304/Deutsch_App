@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import * as DictationHooks from '@/hooks/useDictation';
 import { DictationHistoryItem, dictationApi } from '@/lib/api/dictation';
-import { PageHeader, GridSkeleton } from '@/components/ui';
+import { PracticePageShell, GridSkeleton } from '@/components/ui';
 import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 
 // ─── Local Icons ─────────────────────────────────────────────────────────────
@@ -196,28 +196,27 @@ export default function DictationListPage() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-8 pb-32">
-      <PageHeader
-        backHref="/practice-test"
-        title="Chép Chính Tả"
-        subtitle="Luyện nghe và viết tiếng Đức qua video YouTube thực tế"
-        accent="listening"
-        right={
-          <div className="flex items-center gap-3">
-            <Link href="/practice-test/dictation/shadow"
-              className="flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-black border transition-all hover:bg-black/3 dark:hover:bg-white/5"
-              style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-primary)' }}>
-              🎤 Luyện shadowing
-            </Link>
-            <Link href="/practice-test/dictation/library"
-              className="flex items-center gap-2 px-7 py-3.5 rounded-xl text-sm font-black text-white transition-all hover:scale-[1.02] active:scale-95 shadow-xl shadow-cyan-500/30"
-              style={{ background: GRADIENT.dictation }}>
-              <IconLibrary size={20} /> Bài mới
-            </Link>
-          </div>
-        }
-      />
-
+    <PracticePageShell
+      backHref="/practice-test"
+      title="Chép Chính Tả"
+      subtitle="Luyện nghe và viết tiếng Đức qua video YouTube thực tế"
+      accent="listening"
+      className="pb-32"
+      right={
+        <div className="flex items-center gap-3">
+          <Link href="/practice-test/dictation/shadow"
+            className="flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-black border transition-all hover:bg-black/3 dark:hover:bg-white/5"
+            style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-primary)' }}>
+            🎤 Luyện shadowing
+          </Link>
+          <Link href="/practice-test/dictation/library"
+            className="flex items-center gap-2 px-7 py-3.5 rounded-xl text-sm font-black text-white transition-all hover:scale-[1.02] active:scale-95 shadow-xl shadow-cyan-500/30"
+            style={{ background: GRADIENT.dictation }}>
+            <IconLibrary size={20} /> Bài mới
+          </Link>
+        </div>
+      }
+    >
       {/* Quick Start */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
 
@@ -492,6 +491,6 @@ export default function DictationListPage() {
           </button>
         </div>
       )}
-    </div>
+    </PracticePageShell>
   );
 }

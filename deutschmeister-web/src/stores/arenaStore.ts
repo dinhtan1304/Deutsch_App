@@ -387,3 +387,16 @@ export const useArenaStore = create<ArenaStoreState>((set, get) => ({
 
   reset: () => set({ ...INITIAL }),
 }));
+
+// ─── Granular selectors — prefer these over destructuring the whole store ───
+export const useArenaPhase = () => useArenaStore((s) => s.phase);
+export const useArenaConnectionStatus = () => useArenaStore((s) => s.connectionStatus);
+export const useArenaMatch = () => useArenaStore((s) => s.match);
+export const useArenaScores = () => useArenaStore((s) => s.scores);
+export const useArenaCurrentClue = () => useArenaStore((s) => s.currentClue);
+export const useArenaRoundReveal = () => useArenaStore((s) => s.roundReveal);
+export const useArenaMatchResult = () => useArenaStore((s) => s.matchResult);
+export const useArenaLastError = () => useArenaStore((s) => s.lastError);
+export const useArenaAnnouncement = () => useArenaStore((s) => s.announcement);
+export const useArenaCurrentRoomId = () => useArenaStore((s) => s.currentRoomId);
+export const useArenaQueuedMode = () => useArenaStore((s) => s.queuedMode);

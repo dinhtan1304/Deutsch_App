@@ -1,4 +1,5 @@
 import { apiGet, apiPost, apiDelete } from './client';
+import type { GradingInsights } from './types/grading-insights';
 
 export interface FreeSpeakingGrading {
   score: number;
@@ -12,6 +13,7 @@ export interface FreeSpeakingGrading {
   feedbackDe: string;
   corrections: string[];
   strengths: string[];
+  insights?: GradingInsights | null;
 }
 
 export interface FreeSpeakingSession {

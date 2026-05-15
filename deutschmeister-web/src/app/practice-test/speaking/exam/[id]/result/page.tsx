@@ -8,6 +8,8 @@ import { ExamSpeakingTeil, TeilGrading } from '@/lib/api/examSpeaking';
 import { PageHeader, FixedActionBar } from '@/components/ui';
 import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 import { synthesizeAudio } from '@/lib/utils';
+import { InsightsPanel } from '@/components/grading/InsightsPanel';
+import { coalesceInsights } from '@/lib/api/utils/insights-fallback';
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
 function IconLoader({ size = 24, style }: { size?: number; style?: React.CSSProperties }) {
@@ -347,6 +349,14 @@ function TeilDetailCard({ teil, grading, transcript }: {
                     </p>
                   </div>
                 )}
+
+                <InsightsPanel
+                  insights={coalesceInsights({
+                    insights: grading.insights,
+                    strengths: grading.strengths,
+                    feedbackVi: grading.feedbackVi,
+                  })}
+                />
               </>
             ) : (
               <p className="text-body" style={{ color: 'var(--theme-text-muted)' }}>Không có kết quả chấm điểm.</p>
@@ -399,7 +409,7 @@ export default function ExamSpeakingResultPage() {
   const grade = getGrade(totalScore);
 
   return (
-    <div className="py-6">
+    <div className="max-w-5xl mx-auto px-4 py-6">
 
       <PageHeader
         backHref="/practice-test/speaking/exam"

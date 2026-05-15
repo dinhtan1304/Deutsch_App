@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { PageHeader, BetaBadge } from '@/components/ui';
+import { PracticePageShell, BetaBadge } from '@/components/ui';
 import { FeedbackModal } from '@/components/layout/FeedbackModal';
 import { ACCENT, GRADIENT } from '@/lib/tokens';
 import { useAuthStore } from '@/stores/authStore';
@@ -51,33 +51,31 @@ export default function SpeakingRoomsListPage() {
   };
 
   return (
-    <div className="py-6">
-      <PageHeader
-        title="Phòng Luyện Nói"
-        subtitle="Ghép cặp với người học khác để luyện nói tiếng Đức trực tiếp"
-        accent="speaking"
-        right={
-          <div className="flex items-center gap-3 flex-wrap">
-            <BetaBadge size="md" />
-            <button
-              type="button"
-              onClick={() => setFeedbackOpen(true)}
-              className="text-caption underline-offset-2 hover:underline opacity-80 hover:opacity-100"
-              style={{ color: 'var(--theme-text-muted)' }}
-            >
-              🐞 Báo lỗi · Góp ý
-            </button>
-            <Link
-              href="/community/rules"
-              className="text-caption underline-offset-2 hover:underline opacity-80 hover:opacity-100"
-              style={{ color: 'var(--theme-text-muted)' }}
-            >
-              📜 Quy tắc cộng đồng
-            </Link>
-          </div>
-        }
-      />
-
+    <PracticePageShell
+      title="Phòng Luyện Nói"
+      subtitle="Ghép cặp với người học khác để luyện nói tiếng Đức trực tiếp"
+      accent="speaking"
+      right={
+        <div className="flex items-center gap-3 flex-wrap">
+          <BetaBadge size="md" />
+          <button
+            type="button"
+            onClick={() => setFeedbackOpen(true)}
+            className="text-caption underline-offset-2 hover:underline opacity-80 hover:opacity-100"
+            style={{ color: 'var(--theme-text-muted)' }}
+          >
+            🐞 Báo lỗi · Góp ý
+          </button>
+          <Link
+            href="/community/rules"
+            className="text-caption underline-offset-2 hover:underline opacity-80 hover:opacity-100"
+            style={{ color: 'var(--theme-text-muted)' }}
+          >
+            📜 Quy tắc cộng đồng
+          </Link>
+        </div>
+      }
+    >
       <QuotaBanner quota={quota} />
 
       <div className="flex gap-3 my-4">
@@ -174,6 +172,6 @@ export default function SpeakingRoomsListPage() {
       </div>
 
       {feedbackOpen && <FeedbackModal onClose={() => setFeedbackOpen(false)} />}
-    </div>
+    </PracticePageShell>
   );
 }

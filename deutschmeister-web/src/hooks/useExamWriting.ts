@@ -40,7 +40,7 @@ export function useExamWritingSession(id: string) {
     // Poll while grading
     refetchInterval: (query) => {
       const data = query.state.data;
-      return data?.status === 'GRADING' ? 3000 : false;
+      return data?.status === 'GRADING' ? 6000 : false;
     },
   });
 }

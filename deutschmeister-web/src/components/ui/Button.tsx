@@ -2,12 +2,28 @@
 /* eslint-disable no-restricted-syntax */
 
 import { forwardRef, ButtonHTMLAttributes, ReactNode } from 'react';
+import { motion, useReducedMotion } from 'motion/react';
 import { cn } from '@/lib/utils';
 import { ACCENT, GRADIENT, type AccentKey } from '@/lib/tokens';
 
 export type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger' | 'game';
 
-export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+type NativeButtonProps = Omit<
+  ButtonHTMLAttributes<HTMLButtonElement>,
+  | 'onDrag'
+  | 'onDragStart'
+  | 'onDragEnd'
+  | 'onDragEnter'
+  | 'onDragExit'
+  | 'onDragLeave'
+  | 'onDragOver'
+  | 'onDrop'
+  | 'onAnimationStart'
+  | 'onAnimationEnd'
+  | 'onAnimationIteration'
+>;
+
+export interface ButtonProps extends NativeButtonProps {
   variant?: ButtonVariant;
   size?: 'sm' | 'md' | 'lg';
   accent?: AccentKey;
@@ -28,6 +44,7 @@ function gameVariantStyle(accent: AccentKey): React.CSSProperties {
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant = 'primary', size = 'md', accent, isLoading, disabled, fullWidth, leftIcon, rightIcon, children, style, ...props }, ref) => {
+    const reduce = useReducedMotion();
     const baseStyles = 'inline-flex items-center justify-center gap-2 font-semibold rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed';
 
     const variantStyles: Record<ButtonVariant, React.CSSProperties> = {
@@ -46,11 +63,12 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     };
 
     return (
-      <button
+      <motion.button
         ref={ref}
         className={cn(baseStyles, sizes[size], 'hover:-translate-y-0.5', fullWidth && 'w-full', className)}
         style={{ ...variantStyles[variant], ...style }}
         disabled={disabled || isLoading}
+        whileTap={reduce || disabled || isLoading ? undefined : { scale: 0.97 }}
         {...props}
       >
         {isLoading && (
@@ -62,7 +80,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         {!isLoading && leftIcon}
         {children}
         {rightIcon}
-      </button>
+      </motion.button>
     );
   }
 );

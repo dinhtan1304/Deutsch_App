@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { memo, useState, useEffect, useCallback } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { IconChevronRight, IconChevronLeft } from '@/components/ui/Icons';
@@ -22,7 +23,7 @@ interface SidebarProps {
   onToggle: () => void;
 }
 
-export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
+function SidebarComponent({ isCollapsed, onToggle }: SidebarProps) {
   const pathname = usePathname();
   const user = useAuthUser();
   const isAuthenticated = useIsAuthenticated();
@@ -110,14 +111,14 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
             {isCollapsed ? (
               <Link
                 href={item.href}
-                className="group relative flex items-center justify-center py-2.5 rounded-xl"
+                className="sb-nav-link group relative flex items-center justify-center py-2.5 rounded-xl"
+                data-active={active ? 'true' : 'false'}
                 style={{
                   color: active ? ACCENT.srs : 'var(--theme-text-secondary)',
                   backgroundColor: active ? `${ACCENT.srs}14` : undefined,
-                  transition: 'background-color .2s, color .2s',
                 }}
-                onMouseEnter={e => { if (!active) e.currentTarget.style.backgroundColor = 'var(--theme-bg-secondary)'; showTooltip(item.key, e.currentTarget); }}
-                onMouseLeave={e => { if (!active) e.currentTarget.style.backgroundColor = ''; hideTooltip(); }}
+                onMouseEnter={e => showTooltip(item.key, e.currentTarget)}
+                onMouseLeave={hideTooltip}
               >
                 {active && <ActiveBar />}
                 <IconWrap active={active}><Icon size={20} /></IconWrap>
@@ -128,14 +129,12 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
             ) : (
               <button
                 onClick={() => toggleExpand(item.key)}
-                className="group relative w-full flex items-center gap-3 px-3 py-2.5 rounded-xl outline-none"
+                className="sb-nav-link group relative w-full flex items-center gap-3 px-3 py-2.5 rounded-xl outline-none"
+                data-active={active ? 'true' : 'false'}
                 style={{
                   color: active ? ACCENT.srs : 'var(--theme-text-secondary)',
                   backgroundColor: active ? `${ACCENT.srs}14` : undefined,
-                  transition: 'background-color .2s, color .2s',
                 }}
-                onMouseEnter={e => !active && (e.currentTarget.style.backgroundColor = 'var(--theme-bg-secondary)')}
-                onMouseLeave={e => !active && (e.currentTarget.style.backgroundColor = '')}
               >
                 {active && <ActiveBar />}
                 <IconWrap active={active}><Icon size={20} /></IconWrap>
@@ -173,13 +172,12 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
               </div>
             )}
 
-            {/* Children submenu (animated) */}
+            {/* Children submenu — display swap + GPU-accelerated transform animation (no layout thrash) */}
             <div
               style={{
-                maxHeight: !isCollapsed && expanded ? '480px' : '0',
-                opacity: !isCollapsed && expanded ? 1 : 0,
+                display: !isCollapsed && expanded ? 'block' : 'none',
                 overflow: 'hidden',
-                transition: 'max-height .3s cubic-bezier(.4,0,.2,1), opacity .25s',
+                animation: !isCollapsed && expanded ? 'sbSubmenuIn .2s ease-out' : undefined,
               }}
             >
               <ul className="mt-0.5 ml-5 pl-3 space-y-0.5" style={{ borderLeft: '1.5px solid var(--theme-border)' }}>
@@ -192,15 +190,13 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                       <Link
                         href={child.href}
                         aria-current={childActive ? 'page' : undefined}
-                        className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-body"
+                        className="sb-nav-link flex items-center gap-2.5 px-3 py-2 rounded-lg text-body"
+                        data-active={childActive ? 'true' : 'false'}
                         style={{
                           color: childActive ? ACCENT.srs : 'var(--theme-text-muted)',
                           fontWeight: childActive ? 600 : 400,
                           backgroundColor: childActive ? `${ACCENT.srs}14` : undefined,
-                          transition: 'background-color .2s, color .15s',
                         }}
-                        onMouseEnter={e => !childActive && (e.currentTarget.style.backgroundColor = 'var(--theme-bg-secondary)')}
-                        onMouseLeave={e => !childActive && (e.currentTarget.style.backgroundColor = '')}
                       >
                         <span className="shrink-0 w-4 h-4 flex items-center justify-center"><ChildIcon size={16} /></span>
                         <span className="min-w-0 truncate flex-1">{child.label}</span>
@@ -229,14 +225,14 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
               href={item.href}
               aria-current={active ? 'page' : undefined}
               aria-label={isCollapsed ? item.label : undefined}
-              className={`group relative flex items-center ${isCollapsed ? 'justify-center' : 'gap-3 px-3'} py-2.5 rounded-xl`}
+              className={`sb-nav-link group relative flex items-center ${isCollapsed ? 'justify-center' : 'gap-3 px-3'} py-2.5 rounded-xl`}
+              data-active={active ? 'true' : 'false'}
               style={{
                 color: active ? ACCENT.srs : 'var(--theme-text-secondary)',
                 backgroundColor: active ? `${ACCENT.srs}14` : undefined,
-                transition: 'background-color .2s, color .2s',
               }}
-              onMouseEnter={e => { if (!active) e.currentTarget.style.backgroundColor = 'var(--theme-bg-secondary)'; showTooltip(item.key, e.currentTarget); }}
-              onMouseLeave={e => { if (!active) e.currentTarget.style.backgroundColor = ''; hideTooltip(); }}
+              onMouseEnter={e => showTooltip(item.key, e.currentTarget)}
+              onMouseLeave={hideTooltip}
             >
               {active && <ActiveBar />}
               <IconWrap active={active}><Icon size={20} /></IconWrap>
@@ -301,9 +297,15 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
         .sidebar-nav::-webkit-scrollbar-track { background: transparent; }
         .sidebar-nav::-webkit-scrollbar-thumb { background: transparent; border-radius: 4px; }
         .sidebar-nav:hover::-webkit-scrollbar-thumb { background: var(--theme-border); }
+        .sb-nav-link { transition: background-color .2s, color .2s; }
+        .sb-nav-link:hover:not([data-active="true"]) { background-color: var(--theme-bg-secondary); }
         @keyframes tooltipIn {
           from { opacity: 0; transform: translate(-4px, -50%); }
           to { opacity: 1; transform: translate(0, -50%); }
+        }
+        @keyframes sbSubmenuIn {
+          from { opacity: 0; transform: translateY(-4px); }
+          to { opacity: 1; transform: translateY(0); }
         }
       `}</style>
 
@@ -328,8 +330,7 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
 
       {/* ─── Logo ─── */}
       <div className="h-16 flex items-center gap-3 px-5 shrink-0 overflow-hidden">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/logo-48.png" width={36} height={36} alt="Deutschmeister" className="rounded-xl shrink-0" />
+        <Image src="/logo-48.png" width={36} height={36} alt="Deutschmeister" className="rounded-xl shrink-0" priority />
         <span
           className="font-bold text-[15px] tracking-tight whitespace-nowrap"
           style={{
@@ -438,6 +439,8 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
     </aside>
   );
 }
+
+export const Sidebar = memo(SidebarComponent);
 
 // ─── Helpers ───
 function hasChildAnyBadge(item: NavItem, count: (b?: NavItem['badge']) => number): boolean {

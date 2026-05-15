@@ -5,6 +5,8 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useListeningSession } from '@/hooks/useListening';
 import { ListeningQuestion } from '@/lib/api/listening';
+import { InsightsPanel } from '@/components/grading/InsightsPanel';
+import { coalesceInsights } from '@/lib/api/utils/insights-fallback';
 import { PageHeader, FixedActionBar } from '@/components/ui';
 import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 import { speakGerman as speakText } from '@/lib/utils';
@@ -208,7 +210,7 @@ export default function ListeningResultPage() {
   ];
 
   return (
-    <div className="py-6">
+    <div className="max-w-5xl mx-auto px-4 py-6">
       <PageHeader
         backHref="/practice-test/listening"
         title="Kết quả bài nghe"
@@ -240,6 +242,10 @@ export default function ListeningResultPage() {
             <StatGrid correct={correct} total={total} />
           </div>
         </div>
+      </div>
+
+      <div className="mb-5">
+        <InsightsPanel insights={coalesceInsights({ insights: session.insights })} />
       </div>
 
       <div className="rounded-2xl border mb-5 overflow-hidden"

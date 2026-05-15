@@ -1,7 +1,7 @@
 'use client';
 // UI_REFRESH_FORCE_SYNC: 2026-05-01_v2
 
-import { useState, useEffect, useCallback } from 'react';
+import { memo, useState, useEffect, useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -23,7 +23,7 @@ interface HeaderProps {
   onOpenPalette: () => void;
 }
 
-export function Header({ sidebarCollapsed, onOpenPalette }: HeaderProps) {
+function HeaderComponent({ sidebarCollapsed, onOpenPalette }: HeaderProps) {
   const router = useRouter();
   const user = useAuthUser();
   const isAuthenticated = useIsAuthenticated();
@@ -46,7 +46,11 @@ export function Header({ sidebarCollapsed, onOpenPalette }: HeaderProps) {
 
   const toggleNotifs = useCallback(() => {
     setShowNotifs(prev => {
-      if (!prev) qc.invalidateQueries({ queryKey: notifKeys.all });
+      // Only refetch the unread badge + first page of the list — don't bust the whole notifications cache.
+      if (!prev) {
+        qc.refetchQueries({ queryKey: notifKeys.unread(), exact: true });
+        qc.refetchQueries({ queryKey: notifKeys.list(1), exact: true });
+      }
       return !prev;
     });
   }, [qc]);
@@ -336,3 +340,5 @@ export function Header({ sidebarCollapsed, onOpenPalette }: HeaderProps) {
     </>
   );
 }
+
+export const Header = memo(HeaderComponent);

@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import * as XLSX from 'xlsx';
 import { ImportRow, ImportResult, ImportValidationError, WordType, WordTypeInfo } from '@/types/personalWord';
 import { IconDownload, IconX, IconLoader, IconCheck, IconUpload } from '@/components/ui/Icons';
 import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
@@ -86,8 +85,9 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
-  // Parse Excel file
-  const parseExcel = (data: ArrayBuffer): ImportRow[] => {
+  // Parse Excel file (xlsx loaded lazily — keeps ~70 kB out of the main bundle)
+  const parseExcel = async (data: ArrayBuffer): Promise<ImportRow[]> => {
+    const XLSX = await import('xlsx');
     const workbook = XLSX.read(data, { type: 'array' });
     const sheetName = workbook.SheetNames[0]!;
     const worksheet = workbook.Sheets[sheetName]!;
@@ -148,10 +148,10 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
     setImportError(null);
 
     const reader = new FileReader();
-    reader.onload = (ev) => {
+    reader.onload = async (ev) => {
       try {
         const data = ev.target?.result as ArrayBuffer;
-        const rows = parseExcel(data);
+        const rows = await parseExcel(data);
 
         if (rows.length === 0) {
           setImportError('File không có dữ liệu hoặc định dạng không đúng.');
@@ -189,8 +189,9 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
     }
   };
 
-  // Download template
-  const downloadTemplate = () => {
+  // Download template (xlsx loaded lazily)
+  const downloadTemplate = async () => {
+    const XLSX = await import('xlsx');
     const headers = ['word', 'wordType', 'article', 'plural', 'partizipII', 'hilfsverb', 'translationEn', 'translationVi', 'examples', 'level', 'category', 'notes'];
     const sampleData = [
       ['Haus', 'nomen', 'das', 'Häuser', '', '', 'house', 'ngôi nhà', 'Das Haus ist groß.', 'A1', 'Wohnen', ''],

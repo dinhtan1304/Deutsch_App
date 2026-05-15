@@ -251,7 +251,7 @@ export default function FreeSpeakingSessionPage() {
   }
 
   return (
-    <div className="py-6 pb-32">
+    <div className="max-w-5xl mx-auto px-4 py-6 pb-32">
       <PageHeader
         backHref="/practice-test/speaking"
         title="Luyện Nói"

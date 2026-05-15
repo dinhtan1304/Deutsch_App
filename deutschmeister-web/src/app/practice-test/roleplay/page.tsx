@@ -12,7 +12,7 @@ import {
 } from '@/hooks/useRoleplay';
 import { useCheckQuota } from '@/hooks/useSubscription';
 import { ScenarioCard } from '@/components/roleplay/ScenarioCard';
-import { PageHeader, GridSkeleton } from '@/components/ui';
+import { PracticePageShell, GridSkeleton } from '@/components/ui';
 import { UpgradeModal } from '@/components/subscription/UpgradeModal';
 import type { RoleplayLevel, RoleplayScenario } from '@/lib/api/roleplay';
 
@@ -75,27 +75,26 @@ export default function RoleplayPage() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8 pb-32">
-      <PageHeader
-        backHref="/practice-test"
-        title="Roleplay AI"
-        subtitle="Luyện hội thoại tiếng Đức với AI theo các tình huống thực tế"
-        accent="speaking"
-        right={
-          quota && (
-            <div className="flex items-center gap-3 px-4 py-2 rounded-2xl border backdrop-blur-md"
-              style={{ 
-                backgroundColor: quotaExhausted ? 'rgba(239,68,68,0.05)' : 'rgba(34,197,94,0.05)',
-                borderColor: quotaExhausted ? 'rgba(239,68,68,0.2)' : 'rgba(34,197,94,0.2)',
-                color: quotaExhausted ? STATUS.danger : STATUS.success 
-              }}>
-              <div className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: 'currentColor' }} />
-              <span className="text-xs font-black uppercase tracking-widest">{quota.used}/{quota.limit} lượt / tuần</span>
-            </div>
-          )
-        }
-      />
-
+    <PracticePageShell
+      backHref="/practice-test"
+      title="Roleplay AI"
+      subtitle="Luyện hội thoại tiếng Đức với AI theo các tình huống thực tế"
+      accent="speaking"
+      className="pb-32"
+      right={
+        quota && (
+          <div className="flex items-center gap-3 px-4 py-2 rounded-2xl border backdrop-blur-md"
+            style={{
+              backgroundColor: quotaExhausted ? 'rgba(239,68,68,0.05)' : 'rgba(34,197,94,0.05)',
+              borderColor: quotaExhausted ? 'rgba(239,68,68,0.2)' : 'rgba(34,197,94,0.2)',
+              color: quotaExhausted ? STATUS.danger : STATUS.success
+            }}>
+            <div className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: 'currentColor' }} />
+            <span className="text-xs font-black uppercase tracking-widest">{quota.used}/{quota.limit} lượt / tuần</span>
+          </div>
+        )
+      }
+    >
       {/* Level filter */}
       <div className="flex gap-2.5 mb-10 overflow-x-auto no-scrollbar">
         {LEVELS.map((lv) => {
@@ -215,6 +214,6 @@ export default function RoleplayPage() {
       )}
 
       <UpgradeModal open={upgradeOpen} onClose={() => setUpgradeOpen(false)} />
-    </div>
+    </PracticePageShell>
   );
 }

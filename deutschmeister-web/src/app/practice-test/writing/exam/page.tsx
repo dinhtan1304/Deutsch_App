@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useExamWritingHistory, useExamWritingStats, useDeleteExamWriting } from '@/hooks/useExamWriting';
 import { ExamWritingHistoryItem } from '@/lib/api/examWriting';
-import { PageHeader, GridSkeleton } from '@/components/ui';
+import { PracticePageShell, GridSkeleton } from '@/components/ui';
 import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 
 // ─── Local Icons ─────────────────────────────────────────────────────────────
@@ -148,21 +148,20 @@ export default function ExamWritingListPage() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-8 pb-32">
-      <PageHeader
-        backHref="/practice-test/writing"
-        title="Luyện Viết Theo Đề Chuẩn"
-        subtitle="Goethe & TELC · A1 / A2 / B1 · AI chấm bài"
-        accent="writing"
-        right={
-          <Link href="/practice-test/writing/exam/new"
-            className="flex items-center gap-2 px-7 py-3.5 rounded-xl text-sm font-black text-white transition-all hover:scale-[1.02] active:scale-95 shadow-xl shadow-purple-500/30"
-            style={{ background: GRADIENT.examWriting }}>
-            <IconPlus size={20} /> Làm bài mới
-          </Link>
-        }
-      />
-
+    <PracticePageShell
+      backHref="/practice-test/writing"
+      title="Luyện Viết Theo Đề Chuẩn"
+      subtitle="Goethe & TELC · A1 / A2 / B1 · AI chấm bài"
+      accent="writing"
+      className="pb-32"
+      right={
+        <Link href="/practice-test/writing/exam/new"
+          className="flex items-center gap-2 px-7 py-3.5 rounded-xl text-sm font-black text-white transition-all hover:scale-[1.02] active:scale-95 shadow-xl shadow-purple-500/30"
+          style={{ background: GRADIENT.examWriting }}>
+          <IconPlus size={20} /> Làm bài mới
+        </Link>
+      }
+    >
       {/* Stats Dashboard */}
       {stats && stats.total > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
@@ -283,6 +282,6 @@ export default function ExamWritingListPage() {
           </button>
         </div>
       )}
-    </div>
+    </PracticePageShell>
   );
 }

@@ -9,7 +9,7 @@ import {
 import { useIsExamUnlocked } from '@/hooks/useSubscription';
 import { UpgradeModal } from '@/components/subscription/UpgradeModal';
 import { ACCENT, GRADIENT, type AccentKey } from '@/lib/tokens';
-import { AppPageShell, SectionHeader, SurfaceCard } from '@/components/ui';
+import { PracticePageShell, SectionHeader, SurfaceCard } from '@/components/ui';
 import { ChooseExam } from './_sections/ChooseExam';
 
 type PracticeCard = {
@@ -296,7 +296,7 @@ export default function PracticeTestPage() {
   const [upgradeOpen, setUpgradeOpen] = useState(false);
 
   return (
-    <AppPageShell
+    <PracticePageShell
       title="Luyện thi & kỹ năng"
       subtitle="Chọn hướng luyện phù hợp: củng cố kỹ năng hằng ngày, luyện giao tiếp với AI, hoặc làm đề chuẩn Goethe/TELC."
       icon={<IconGraduationCap size={22} />}
@@ -376,6 +376,6 @@ export default function PracticeTestPage() {
       </div>
 
       <UpgradeModal open={upgradeOpen} onClose={() => setUpgradeOpen(false)} defaultPeriod="yearly" />
-    </AppPageShell>
+    </PracticePageShell>
   );
 }

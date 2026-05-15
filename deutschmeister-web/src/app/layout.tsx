@@ -59,6 +59,12 @@ export default function RootLayout({
   return (
     <html lang="vi" suppressHydrationWarning>
       <body className={inter.className} suppressHydrationWarning>
+        {/* Blocking theme script — runs before paint to prevent FOUC. Mirrors applyTheme() in settingsStore.ts. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var s=localStorage.getItem('deutschmeister-settings');var t='system';if(s){try{t=(JSON.parse(s).theme||'system');}catch(e){}}var r=t==='system'?(window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'):t;var h=document.documentElement;h.setAttribute('data-theme',r);h.classList.remove('light','dark');h.classList.add(r);h.style.colorScheme=r;}catch(e){}})();`,
+          }}
+        />
         <Script
           src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
           strategy="afterInteractive"
