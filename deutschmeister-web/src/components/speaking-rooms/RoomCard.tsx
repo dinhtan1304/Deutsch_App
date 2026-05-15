@@ -1,17 +1,46 @@
 'use client';
 
-import type { SpeakingRoom } from '@/lib/api/speakingRooms';
+import type { SpeakingRoom, SpeakingRoomStatus } from '@/lib/api/speakingRooms';
 import { ACCENT } from '@/lib/tokens';
 
 interface Props {
   room: SpeakingRoom;
-  onJoin: () => void;
+  onJoin?: () => void;
+  onReopen?: () => void;
   loading?: boolean;
+  variant?: 'public' | 'mine';
 }
 
-export function RoomCard({ room, onJoin, loading }: Props) {
+const STATUS_STYLE: Record<SpeakingRoomStatus, { label: string; bg: string; color: string }> = {
+  WAITING: { label: 'Đang chờ', bg: '#22C55E1A', color: '#16A34A' },
+  ACTIVE: { label: 'Đang nói', bg: '#A855F71A', color: '#9333EA' },
+  CLOSED: { label: 'Đã đóng', bg: '#9CA3AF1A', color: '#6B7280' },
+};
+
+export function RoomCard({ room, onJoin, onReopen, loading, variant = 'public' }: Props) {
   const activeCount = room.participants.filter((p) => !p.leftAt).length;
   const isFull = activeCount >= room.maxSeats;
+  const isClosed = room.status === 'CLOSED';
+  const showStatusBadge = variant === 'mine';
+  const status = STATUS_STYLE[room.status];
+
+  const handleClick = () => {
+    if (isClosed && onReopen) {
+      onReopen();
+    } else if (onJoin) {
+      onJoin();
+    }
+  };
+
+  const buttonLabel = isClosed
+    ? 'Mở lại phòng'
+    : variant === 'mine'
+      ? 'Vào lại'
+      : isFull
+        ? 'Đầy'
+        : 'Vào phòng';
+
+  const buttonDisabled = loading || (!isClosed && isFull) || (isClosed ? !onReopen : !onJoin);
 
   return (
     <div
@@ -19,10 +48,11 @@ export function RoomCard({ room, onJoin, loading }: Props) {
       style={{
         backgroundColor: 'var(--theme-bg-card)',
         borderColor: 'var(--theme-border)',
+        opacity: isClosed ? 0.85 : 1,
       }}
     >
       <div
-        className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0"
+        className="w-12 h-12 rounded-full flex items-center justify-center shrink-0"
         style={{ backgroundColor: `${ACCENT.speaking}1A`, color: ACCENT.speaking }}
       >
         <svg width={24} height={24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
@@ -32,13 +62,21 @@ export function RoomCard({ room, onJoin, loading }: Props) {
         </svg>
       </div>
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 mb-1">
+        <div className="flex items-center gap-2 mb-1 flex-wrap">
           <span
             className="px-2 py-0.5 rounded text-xs font-bold"
             style={{ backgroundColor: `${ACCENT.speaking}1A`, color: ACCENT.speaking }}
           >
             {room.cefrLevel}
           </span>
+          {showStatusBadge && (
+            <span
+              className="px-2 py-0.5 rounded text-xs font-bold"
+              style={{ backgroundColor: status.bg, color: status.color }}
+            >
+              {status.label}
+            </span>
+          )}
           <span className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>
             {activeCount}/{room.maxSeats} người
           </span>
@@ -51,12 +89,12 @@ export function RoomCard({ room, onJoin, loading }: Props) {
         </p>
       </div>
       <button
-        onClick={onJoin}
-        disabled={loading || isFull}
+        onClick={handleClick}
+        disabled={buttonDisabled}
         className="px-4 py-2 rounded-lg font-bold text-sm text-white disabled:opacity-50 whitespace-nowrap"
         style={{ backgroundColor: ACCENT.speaking }}
       >
-        {isFull ? 'Đầy' : 'Vào phòng'}
+        {buttonLabel}
       </button>
     </div>
   );

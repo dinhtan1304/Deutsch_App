@@ -7,7 +7,15 @@ import { PracticePageShell, BetaBadge } from '@/components/ui';
 import { FeedbackModal } from '@/components/layout/FeedbackModal';
 import { ACCENT, GRADIENT } from '@/lib/tokens';
 import { useAuthStore } from '@/stores/authStore';
-import { useSpeakingRoomsList, useSpeakingRoomQuota, useSpeakingRoomStats, useJoinSpeakingRoom, useJoinByCode } from '@/hooks/useSpeakingRooms';
+import {
+  useSpeakingRoomsList,
+  useSpeakingRoomQuota,
+  useSpeakingRoomStats,
+  useJoinSpeakingRoom,
+  useJoinByCode,
+  useMySpeakingRooms,
+  useReopenSpeakingRoom,
+} from '@/hooks/useSpeakingRooms';
 import { QuotaBanner } from '@/components/speaking-rooms/QuotaBanner';
 import { RoomCard } from '@/components/speaking-rooms/RoomCard';
 import { SpeakingRoomStatsCard, SpeakingRoomsActivityBar } from '@/components/speaking-rooms/SpeakingRoomStatsPanel';
@@ -24,14 +32,25 @@ export default function SpeakingRoomsListPage() {
   const [feedbackOpen, setFeedbackOpen] = useState(false);
 
   const { data: rooms, isLoading } = useSpeakingRoomsList({ cefrLevel: level });
+  const { data: myRooms } = useMySpeakingRooms(!!user);
   const { data: quota } = useSpeakingRoomQuota();
   const { data: stats } = useSpeakingRoomStats();
   const joinMut = useJoinSpeakingRoom();
   const joinByCodeMut = useJoinByCode();
+  const reopenMut = useReopenSpeakingRoom();
 
   const handleJoin = async (id: string) => {
     try {
       const room = await joinMut.mutateAsync({ id });
+      router.push(`/practice-test/speaking-rooms/${room.id}`);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleReopen = async (id: string) => {
+    try {
+      const room = await reopenMut.mutateAsync({ id });
       router.push(`/practice-test/speaking-rooms/${room.id}`);
     } catch (e) {
       console.error(e);
@@ -159,7 +178,32 @@ export default function SpeakingRoomsListPage() {
         </div>
       </div>
 
+      {myRooms && myRooms.length > 0 && (
+        <section className="my-4">
+          <p className="text-xs font-bold uppercase tracking-wider mb-2" style={{ color: 'var(--theme-text-muted)' }}>
+            Phòng của tôi
+          </p>
+          <div className="space-y-3">
+            {myRooms.map((room) => (
+              <RoomCard
+                key={room.id}
+                room={room}
+                variant="mine"
+                onJoin={room.status === 'CLOSED' ? undefined : () => handleJoin(room.id)}
+                onReopen={room.status === 'CLOSED' ? () => handleReopen(room.id) : undefined}
+                loading={joinMut.isPending || reopenMut.isPending}
+              />
+            ))}
+          </div>
+        </section>
+      )}
+
       <div className="space-y-3">
+        {(myRooms?.length ?? 0) > 0 && (
+          <p className="text-xs font-bold uppercase tracking-wider mb-2" style={{ color: 'var(--theme-text-muted)' }}>
+            Phòng công khai
+          </p>
+        )}
         {isLoading && <p style={{ color: 'var(--theme-text-muted)' }}>Đang tải...</p>}
         {!isLoading && rooms && rooms.length === 0 && (
           <div className="py-8 text-center rounded-2xl" style={{ backgroundColor: 'var(--theme-bg-card)', border: '1px dashed var(--theme-border)' }}>

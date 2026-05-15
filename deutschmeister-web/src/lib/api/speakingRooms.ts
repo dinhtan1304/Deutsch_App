@@ -123,11 +123,13 @@ export const speakingRoomsApi = {
     const qs = params.toString();
     return apiGet<SpeakingRoom[]>(`/speaking-rooms${qs ? `?${qs}` : ''}`);
   },
+  listMine: () => apiGet<SpeakingRoom[]>('/speaking-rooms/my'),
   get: (id: string) => apiGet<SpeakingRoomDetail>(`/speaking-rooms/${id}`),
   create: (dto: CreateRoomDto) => apiPost<SpeakingRoom>('/speaking-rooms', dto),
   join: (id: string) => apiPost<SpeakingRoom>(`/speaking-rooms/${id}/join`, {}),
   joinByCode: (code: string) => apiPost<SpeakingRoom>('/speaking-rooms/join-by-code', { code: parseSpeakingRoomInviteCode(code) }),
   leave: (id: string) => apiPost<{ success: boolean }>(`/speaking-rooms/${id}/leave`, {}),
+  reopen: (id: string) => apiPost<SpeakingRoom>(`/speaking-rooms/${id}/reopen`, {}),
   enqueueMatch: (dto: EnqueueMatchDto) => apiPost<MatchResult>('/speaking-rooms/match/enqueue', dto),
   dequeueMatch: () => apiDelete<{ success: boolean }>('/speaking-rooms/match/dequeue'),
   getMyQueueEntry: () => apiGet<{ id: string; cefrLevel: string; topic: string; enqueuedAt: string } | null>('/speaking-rooms/match/me'),
