@@ -266,10 +266,10 @@ export default function HomePage() {
         <div className="fade-up-4" style={{ width: 'min(100%, 1040px)', position: 'relative' }}>
           <div style={{ borderRadius: 24, overflow: 'hidden', border: '1px solid rgba(255,255,255,.12)', boxShadow: '0 28px 80px rgba(0,0,0,.35)', background: 'rgba(255,255,255,.04)' }}>
             <Image
-              src="/marketing/screenshots/dashboard.svg"
+              src="/marketing/screenshots/dashboard.png"
               alt="Ảnh xem trước dashboard Deutschmeister"
-              width={1200}
-              height={760}
+              width={1869}
+              height={911}
               priority
               style={{ display: 'block', width: '100%', height: 'auto' }}
             />
