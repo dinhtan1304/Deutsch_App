@@ -64,6 +64,7 @@ export const PRIMARY_NAV: NavItem[] = [
       { key: 'topics',        label: 'Chủ đề',       href: '/topics',             icon: IconLayers },
       { key: 'my-topics',     label: 'Bộ của tôi',   href: '/my-topics',          icon: IconNotebook },
       { key: 'community-topics', label: 'Khám phá cộng đồng', href: '/community/topics', icon: IconLayers },
+      { key: 'ipa-chart',     label: 'Bảng IPA',     href: '/learn/ipa',          icon: IconMic },
     ],
   },
   {

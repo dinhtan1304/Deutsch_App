@@ -58,7 +58,7 @@ export default function NewSpeakingRoomPage() {
   };
 
   return (
-    <div className="py-6">
+    <div className="max-w-5xl mx-auto px-4 py-6">
       <PageHeader
         backHref="/practice-test/speaking-rooms"
         title="Tạo phòng luyện nói"

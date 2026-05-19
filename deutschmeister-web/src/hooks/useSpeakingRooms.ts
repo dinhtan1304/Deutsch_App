@@ -18,6 +18,7 @@ export const speakingRoomKeys = {
   all: ['speaking-rooms'] as const,
   list: (filter?: { cefrLevel?: string; topic?: string }) =>
     [...speakingRoomKeys.all, 'list', filter ?? {}] as const,
+  mine: () => [...speakingRoomKeys.all, 'mine'] as const,
   detail: (id: string) => [...speakingRoomKeys.all, 'detail', id] as const,
   suggestions: (id: string) => [...speakingRoomKeys.all, 'suggestions', id] as const,
   quota: () => [...speakingRoomKeys.all, 'quota'] as const,
@@ -30,6 +31,16 @@ export function useSpeakingRoomsList(filter?: { cefrLevel?: string; topic?: stri
   return useQuery<SpeakingRoom[]>({
     queryKey: speakingRoomKeys.list(filter),
     queryFn: () => speakingRoomsApi.list(filter),
+    staleTime: 15 * 1000,
+    refetchInterval: 30 * 1000,
+  });
+}
+
+export function useMySpeakingRooms(enabled = true) {
+  return useQuery<SpeakingRoom[]>({
+    queryKey: speakingRoomKeys.mine(),
+    queryFn: () => speakingRoomsApi.listMine(),
+    enabled,
     staleTime: 15 * 1000,
     refetchInterval: 30 * 1000,
   });
@@ -124,6 +135,18 @@ export function useLeaveSpeakingRoom() {
     onSuccess: (_, { id }) => {
       qc.invalidateQueries({ queryKey: speakingRoomKeys.detail(id) });
       qc.invalidateQueries({ queryKey: speakingRoomKeys.all });
+    },
+  });
+}
+
+export function useReopenSpeakingRoom() {
+  const qc = useQueryClient();
+  return useMutation<SpeakingRoom, Error, { id: string }>({
+    mutationFn: ({ id }) => speakingRoomsApi.reopen(id),
+    onSuccess: (_, { id }) => {
+      qc.invalidateQueries({ queryKey: speakingRoomKeys.detail(id) });
+      qc.invalidateQueries({ queryKey: speakingRoomKeys.all });
+      qc.invalidateQueries({ queryKey: speakingRoomKeys.quota() });
     },
   });
 }

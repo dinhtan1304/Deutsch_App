@@ -87,14 +87,14 @@ export default function SpeakingRoomDetailPage() {
 
   if (isLoading || !room) {
     return (
-      <div className="py-6">
+      <div className="max-w-5xl mx-auto px-4 py-6">
         <p style={{ color: 'var(--theme-text-muted)' }}>Đang tải phòng...</p>
       </div>
     );
   }
 
   return (
-    <div className="py-6 flex flex-col" style={{ minHeight: 'calc(100vh - 120px)' }}>
+    <div className="max-w-5xl mx-auto px-4 py-6 flex flex-col" style={{ minHeight: 'calc(100vh - 120px)' }}>
       <PageHeader
         backHref="/practice-test/speaking-rooms"
         title={room.title}

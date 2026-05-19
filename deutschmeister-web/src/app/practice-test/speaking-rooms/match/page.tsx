@@ -99,7 +99,7 @@ export default function MatchmakingPage() {
 
   if (searching) {
     return (
-      <div className="py-6">
+      <div className="max-w-5xl mx-auto px-4 py-6">
         <PageHeader title="Đang tìm partner..." accent="speaking" />
         <div className="my-8 flex flex-col items-center">
           <div
@@ -132,7 +132,7 @@ export default function MatchmakingPage() {
   }
 
   return (
-    <div className="py-6">
+    <div className="max-w-5xl mx-auto px-4 py-6">
       <PageHeader
         backHref="/practice-test/speaking-rooms"
         title="Tìm partner luyện nói"

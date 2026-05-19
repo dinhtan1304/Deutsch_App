@@ -29,7 +29,7 @@ export default function JoinByCodePage() {
   }, [params.code]);
 
   return (
-    <div className="py-6">
+    <div className="max-w-5xl mx-auto px-4 py-6">
       <PageHeader title="Vào phòng riêng" accent="speaking" backHref="/practice-test/speaking-rooms" />
       {joining && <p style={{ color: 'var(--theme-text-muted)' }}>Đang vào phòng...</p>}
       {errorMsg && (
