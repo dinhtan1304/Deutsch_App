@@ -1,5 +1,12 @@
-import { apiGet } from './client';
+import { apiGet, apiUpload } from './client';
 import { Word, PaginatedResponse, SearchWordsParams } from '@/types';
+
+export interface ImportWordsResult {
+  total: number;
+  created: number;
+  updated: number;
+  files: number;
+}
 
 export const wordsApi = {
   search: async (params?: SearchWordsParams): Promise<PaginatedResponse<Word>> => {
@@ -48,5 +55,11 @@ export const wordsApi = {
     byLevel: { level: string; count: number }[];
   }> => {
     return apiGet('/words/stats');
+  },
+
+  importFromJsonFiles: async (files: File[]): Promise<ImportWordsResult> => {
+    const fd = new FormData();
+    files.forEach((f) => fd.append('files', f, f.name));
+    return apiUpload<ImportWordsResult>('/words/import', fd);
   },
 };

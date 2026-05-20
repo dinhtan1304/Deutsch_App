@@ -26,6 +26,9 @@ function IconTrash({ size = 14 }: { size?: number }) {
 function IconLoader({ size = 16 }: { size?: number }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="animate-spin" style={{ display: 'block' }}><path d="M21 12a9 9 0 1 1-6.219-8.56" /></svg>;
 }
+function IconUpload({ size = 14 }: { size?: number }) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" /></svg>;
+}
 
 interface WordListResponse {
   data: AdminWordItem[];
@@ -84,10 +87,16 @@ export default function AdminWordsPage() {
           <h1 style={{ fontSize: 20, fontWeight: 800, color: 'var(--theme-text-primary)', marginBottom: 2 }}>Từ vựng</h1>
           <p style={{ fontSize: 12, color: 'var(--theme-text-muted)' }}>{data ? `${data.total} từ` : '...'}</p>
         </div>
-        <Link href="/admin/words/new"
-          style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 8, backgroundColor: '#6366F1', color: '#fff', fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>
-          <IconPlus size={14} /> Thêm từ
-        </Link>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <Link href="/admin/words/import"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 8, backgroundColor: 'transparent', border: '1px solid #6366F1', color: '#6366F1', fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>
+            <IconUpload size={14} /> Import JSON
+          </Link>
+          <Link href="/admin/words/new"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 8, backgroundColor: '#6366F1', color: '#fff', fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>
+            <IconPlus size={14} /> Thêm từ
+          </Link>
+        </div>
       </div>
 
       {/* Filters */}

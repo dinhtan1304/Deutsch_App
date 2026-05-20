@@ -1,6 +1,6 @@
 'use client';
 
-import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
+import { useQuery, useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { wordsApi } from '@/lib/api/words';
 import { useAuthStore } from '@/stores/authStore';
 import { SearchWordsParams } from '@/types';
@@ -56,5 +56,15 @@ export function useWordStats() {
     queryKey: ['words', 'stats'],
     queryFn: () => wordsApi.getStats(),
     staleTime: 10 * 60 * 1000, // 10 minutes
+  });
+}
+
+export function useImportWords() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (files: File[]) => wordsApi.importFromJsonFiles(files),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['words'] });
+    },
   });
 }
