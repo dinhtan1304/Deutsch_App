@@ -58,7 +58,7 @@ export default function GenderQuizPage() {
   const wrongRef = useRef(0);
 
   const questionsCount = isLoaded ? settings.questionsPerGame : 20;
-  const { data: globalWords, refetch, isLoading: globalLoading } = useRandomWords(questionsCount, {});
+  const { data: globalWords, refetch, isLoading: globalLoading } = useRandomWords(questionsCount, { nounsOnly: true });
   const wbData = useWordBankGameWords({ collectionId, enabled: isWordBankMode });
   const words = isWordBankMode ? wbGameWords : (globalWords ?? []);
   const isLoading = isWordBankMode ? wbData.isLoading : globalLoading;

@@ -85,7 +85,7 @@ export default function TimedChallengePage() {
     if (isFetchingRef.current) return;
     isFetchingRef.current = true;
     try {
-      const batch = await wordsApi.getGameWords(BATCH_SIZE, {});
+      const batch = await wordsApi.getGameWords(BATCH_SIZE, { nounsOnly: true });
       setWords(prev => [...prev, ...batch]);
     } catch {
       // Silently ignore prefetch failures — user still has remaining words to answer
@@ -123,7 +123,7 @@ export default function TimedChallengePage() {
       } else {
       // Fetch initial batch — much faster than ORDER BY RANDOM() LIMIT 200
       isFetchingRef.current = true;
-      const firstBatch = await wordsApi.getGameWords(BATCH_SIZE, {});
+      const firstBatch = await wordsApi.getGameWords(BATCH_SIZE, { nounsOnly: true });
       isFetchingRef.current = false;
 
       if (!firstBatch.length) { setLoadError('Không có từ vựng! Vui lòng thêm từ hoặc seed database.'); setStarting(false); return; }

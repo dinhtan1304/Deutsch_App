@@ -69,6 +69,7 @@ export default function FillBlankScreen() {
   const { data: words, isLoading, refetch } = useRandomWords(totalQuestions, {
     category: category || undefined,
     levels: difficultyLevels[difficulty] || ['A1', 'A2'],
+    nounsOnly: true,
   });
 
   const session = useGameSession('fill-blank', difficulty as Difficulty);

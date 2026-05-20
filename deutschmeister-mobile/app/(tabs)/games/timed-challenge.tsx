@@ -66,6 +66,7 @@ export default function TimedChallengeScreen() {
     {
       category: category || undefined,
       levels: difficultyLevels[difficulty] || ['A1', 'A2'],
+      nounsOnly: true,
     },
   );
 

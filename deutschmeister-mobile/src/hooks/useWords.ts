@@ -18,7 +18,7 @@ export function useWord(id: string) {
   });
 }
 
-export function useRandomWords(count = 10, params?: { gender?: string; category?: string; levels?: string[] }) {
+export function useRandomWords(count = 10, params?: { gender?: string; category?: string; levels?: string[]; nounsOnly?: boolean }) {
   return useQuery({
     queryKey: ['words', 'random', count, params],
     queryFn: () => wordsApi.getRandom(count, params),

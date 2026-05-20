@@ -53,7 +53,7 @@ export default function QuickQuizPage() {
   const correctRef = useRef(0);
   const wrongRef = useRef(0);
 
-  const { data: globalWords, refetch, isLoading: globalLoading } = useRandomWords(TOTAL_QUESTIONS, {});
+  const { data: globalWords, refetch, isLoading: globalLoading } = useRandomWords(TOTAL_QUESTIONS, { nounsOnly: true });
   const wbData = useWordBankGameWords({ collectionId, enabled: isWordBankMode });
   const words = isWordBankMode ? wbGameWords : (globalWords ?? []);
   const isLoading = isWordBankMode ? wbData.isLoading : globalLoading;

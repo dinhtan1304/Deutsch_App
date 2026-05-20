@@ -59,7 +59,7 @@ export default function FillBlankPage() {
 
   const questionsCount = isLoaded ? settings.questionsPerGame : 20;
   const [wbGameWords, setWbGameWords] = useState<Word[]>([]);
-  const { data: globalWords, refetch, isLoading: globalLoading } = useRandomWords(questionsCount, {});
+  const { data: globalWords, refetch, isLoading: globalLoading } = useRandomWords(questionsCount, { nounsOnly: true });
   const wbData = useWordBankGameWords({ collectionId, enabled: isWordBankMode });
   const words = isWordBankMode ? wbGameWords : (globalWords ?? []);
   const isLoading = isWordBankMode ? wbData.isLoading : globalLoading;

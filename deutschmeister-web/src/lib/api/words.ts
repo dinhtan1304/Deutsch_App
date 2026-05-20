@@ -26,12 +26,13 @@ export const wordsApi = {
     return apiGet<Word>(`/words/${id}`);
   },
 
-  getRandom: async (count = 10, params?: { gender?: string; category?: string; levels?: string[] }): Promise<Word[]> => {
+  getRandom: async (count = 10, params?: { gender?: string; category?: string; levels?: string[]; nounsOnly?: boolean }): Promise<Word[]> => {
     const searchParams = new URLSearchParams();
     searchParams.set('count', count.toString());
     if (params?.gender) searchParams.set('gender', params.gender);
     if (params?.category) searchParams.set('category', params.category);
     if (params?.levels) params.levels.forEach(l => searchParams.append('levels', l));
+    if (params?.nounsOnly) searchParams.set('nounsOnly', 'true');
 
     return apiGet<Word[]>(`/words/random?${searchParams.toString()}`);
   },
@@ -39,11 +40,12 @@ export const wordsApi = {
   // Authenticated: returns words prioritized by user's personal study path
   // (70% from their Progress table, 30% fresh at their preferred level).
   // Falls back server-side to random if the user has no progress yet.
-  getGameWords: async (count = 10, params?: { gender?: string; category?: string }): Promise<Word[]> => {
+  getGameWords: async (count = 10, params?: { gender?: string; category?: string; nounsOnly?: boolean }): Promise<Word[]> => {
     const searchParams = new URLSearchParams();
     searchParams.set('count', count.toString());
     if (params?.gender) searchParams.set('gender', params.gender);
     if (params?.category) searchParams.set('category', params.category);
+    if (params?.nounsOnly) searchParams.set('nounsOnly', 'true');
 
     return apiGet<Word[]>(`/words/game?${searchParams.toString()}`);
   },

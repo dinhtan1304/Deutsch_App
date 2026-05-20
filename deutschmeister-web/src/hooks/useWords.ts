@@ -35,7 +35,7 @@ export function useWord(id: string) {
   });
 }
 
-export function useRandomWords(count = 10, params?: { gender?: string; category?: string; levels?: string[] }) {
+export function useRandomWords(count = 10, params?: { gender?: string; category?: string; levels?: string[]; nounsOnly?: boolean }) {
   // When the user is authenticated, use the personalized game-words endpoint
   // which prioritizes words from their Progress table and their preferred
   // CEFR level. Anonymous users fall back to the public random endpoint.
@@ -44,7 +44,7 @@ export function useRandomWords(count = 10, params?: { gender?: string; category?
     queryKey: ['words', 'random', isAuthenticated ? 'personalized' : 'public', count, params],
     queryFn: () =>
       isAuthenticated
-        ? wordsApi.getGameWords(count, { gender: params?.gender, category: params?.category })
+        ? wordsApi.getGameWords(count, { gender: params?.gender, category: params?.category, nounsOnly: params?.nounsOnly })
         : wordsApi.getRandom(count, params),
     staleTime: 0, // Always fetch fresh random words
     refetchOnWindowFocus: false,

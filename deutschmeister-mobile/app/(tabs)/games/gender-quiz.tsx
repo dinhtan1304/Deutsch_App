@@ -46,6 +46,7 @@ export default function GenderQuizScreen() {
   const { data: words, isLoading, refetch } = useRandomWords(totalQuestions, {
     category: category || undefined,
     levels: difficultyLevels[difficulty] || ['A1', 'A2'],
+    nounsOnly: true,
   });
 
   const session = useGameSession('gender-quiz', difficulty as Difficulty);
