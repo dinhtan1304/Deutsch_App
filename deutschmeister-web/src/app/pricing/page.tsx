@@ -67,8 +67,7 @@ const COMPARISON: Row[] = [
   { feature: 'Ngữ pháp A1–A2', free: true, lite: true, premium: true, lifetime: true },
   { feature: 'Ngữ pháp B1–B2', free: 'Xem 30%', lite: true, premium: true, lifetime: true },
   { feature: 'Streak & Leaderboard', free: true, lite: true, premium: true, lifetime: true },
-  { feature: 'AI Writing & Speaking', free: '2/tuần', lite: 'Không giới hạn', premium: 'Không giới hạn', lifetime: 'Không giới hạn' },
-  { feature: 'AI Reading & Listening', free: '3/tuần', lite: 'Không giới hạn', premium: 'Không giới hạn', lifetime: 'Không giới hạn' },
+  { feature: 'AI Nghe / Nói / Đọc / Viết', free: '2/tuần mỗi kỹ năng', lite: 'Không giới hạn', premium: 'Không giới hạn', lifetime: 'Không giới hạn' },
   { feature: 'Phát âm AI', free: '5/tuần', lite: 'Không giới hạn', premium: 'Không giới hạn', lifetime: 'Không giới hạn' },
   { feature: 'Shadowing AI', free: '3/tuần', lite: 'Không giới hạn', premium: 'Không giới hạn', lifetime: 'Không giới hạn' },
   { feature: 'Roleplay hội thoại AI', free: '1/tuần', lite: '20/tháng', premium: 'Không giới hạn', lifetime: 'Không giới hạn' },
@@ -202,11 +201,11 @@ export default function PricingPage() {
               ))}
               <li className="flex items-start gap-2 text-xs font-medium opacity-70">
                 <IconCheck size={14} style={{ color: 'var(--theme-text-muted)', marginTop: '2px', flexShrink: 0 }} />
-                AI Writing/Speaking 2/tuần
+                AI Nghe/Nói/Đọc/Viết — 2/tuần mỗi kỹ năng
               </li>
               <li className="flex items-start gap-2 text-xs font-medium opacity-70">
                 <IconCheck size={14} style={{ color: 'var(--theme-text-muted)', marginTop: '2px', flexShrink: 0 }} />
-                Reading/Listening 3/tuần
+                Roleplay AI — 1 lượt/tuần
               </li>
             </ul>
             <button disabled={!isAuthenticated || isPremium}
