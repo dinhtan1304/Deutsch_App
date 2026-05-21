@@ -85,7 +85,7 @@ const aiCards: PracticeCard[] = [
 
 const examCards: PracticeCard[] = [
   {
-    title: 'Đọc theo đề',
+    title: 'Đọc',
     titleDe: 'Prüfungslesen',
     description: 'Goethe & TELC A1/A2/B1, đủ các Teile như đề thật.',
     icon: IconBookOpen,
@@ -93,7 +93,7 @@ const examCards: PracticeCard[] = [
     accent: 'reading',
   },
   {
-    title: 'Nghe theo đề',
+    title: 'Nghe',
     titleDe: 'Prüfungshören',
     description: 'Audio và câu hỏi theo định dạng thi Goethe/TELC.',
     icon: IconHeadphones,
@@ -101,7 +101,7 @@ const examCards: PracticeCard[] = [
     accent: 'listening',
   },
   {
-    title: 'Viết theo đề',
+    title: 'Viết',
     titleDe: 'Prüfungsschreiben',
     description: 'Schreiben theo prompt chuẩn, chấm theo tiêu chí chính thức.',
     icon: IconPenLine,
@@ -109,7 +109,7 @@ const examCards: PracticeCard[] = [
     accent: 'examWriting',
   },
   {
-    title: 'Nói theo đề',
+    title: 'Nói',
     titleDe: 'Prüfungssprechen',
     description: 'Luyện đủ phần Sprechen theo format Goethe/TELC.',
     icon: IconMic,
@@ -198,6 +198,13 @@ function PracticeActionCard({
       accent={card.accent}
       className="relative flex h-full flex-col"
     >
+      {locked && (
+        <div className="mb-2 flex justify-end">
+          <span className="rounded-full px-2 py-0.5 text-[10px] font-black text-white" style={{ background: GRADIENT.xp }}>
+            PREMIUM
+          </span>
+        </div>
+      )}
       <div className="flex items-start gap-3">
         <div
           className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-white shadow-soft"
@@ -213,11 +220,6 @@ function PracticeActionCard({
             {card.title}
           </h3>
         </div>
-        {locked && (
-          <span className="rounded-full px-2 py-1 text-[10px] font-black text-white" style={{ background: GRADIENT.xp }}>
-            PREMIUM
-          </span>
-        )}
       </div>
       <p className="mt-4 flex-1 text-body leading-relaxed" style={{ color: 'var(--theme-text-secondary)' }}>
         {card.description}
