@@ -7,7 +7,7 @@ import { usePlans, useLifetimeRemaining } from '@/hooks/useSubscription';
 import { useAuthStore } from '@/stores/authStore';
 import { UpgradeModal } from '@/components/subscription/UpgradeModal';
 import type { BillingPeriod } from '@/lib/api/subscriptions';
-import { IconChevronLeft, IconCheck, IconZap, IconStar, IconMessageCircle } from '@/components/ui/Icons';
+import { IconChevronLeft, IconCheck, IconZap, IconStar, IconMessageCircle, IconUser } from '@/components/ui/Icons';
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -42,7 +42,6 @@ const PREMIUM_EXTRA = [
   'Mock exam full-length 4 kỹ năng',
   'AI chấm điểm theo rubric Goethe',
   'Roleplay AI — Không giới hạn',
-  'Export PDF certificate',
 ];
 
 const EXAM_BUNDLE_EXTRA = [
@@ -83,6 +82,22 @@ const COMPARISON: Row[] = [
 
 function formatVND(n: number) {
   return n.toLocaleString('vi-VN') + 'đ';
+}
+
+function ReferralRate({ label, pct, amount, highlight = false }: { label: string; pct: number; amount: string; highlight?: boolean }) {
+  return (
+    <div
+      className="p-3 rounded-2xl text-center transition"
+      style={{
+        background: highlight ? 'rgba(99,102,241,0.12)' : 'var(--theme-bg-secondary)',
+        border: `1px solid ${highlight ? 'rgba(99,102,241,0.35)' : 'var(--theme-border)'}`,
+      }}
+    >
+      <div className="text-[10px] font-bold uppercase tracking-widest opacity-60">{label}</div>
+      <div className="text-2xl font-black mt-1" style={{ color: ACCENT.brand }}>{pct}%</div>
+      <div className="text-[10px] opacity-60 font-medium mt-0.5">{amount}</div>
+    </div>
+  );
 }
 
 type PremiumPeriod = 'monthly' | 'quarterly' | 'yearly';
@@ -379,6 +394,59 @@ export default function PricingPage() {
           </div>
         </div>
 
+        {/* Referral Program Banner */}
+        <div className="mb-20 animate-[slideUp_0.6s_ease-out_0.28s_both]">
+          <div className="rounded-4xl border p-6 md:p-8 bg-theme-bg-card relative overflow-hidden"
+            style={{ borderColor: '#6366F133' }}>
+            <div className="absolute -top-20 -right-20 w-60 h-60 rounded-full opacity-30 blur-3xl"
+              style={{ background: 'radial-gradient(circle, #6366F1, transparent 70%)' }} />
+            <div className="relative flex flex-col md:flex-row items-start md:items-center gap-6">
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-9 h-9 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-500">
+                    <IconUser size={18} />
+                  </div>
+                  <div className="text-[11px] font-black uppercase tracking-widest text-indigo-500">
+                    Giới thiệu bạn — cùng có lợi
+                  </div>
+                </div>
+                <h2 className="text-xl md:text-2xl font-black mb-2" style={{ color: 'var(--theme-text-primary)' }}>
+                  Bạn được giảm 10% · Bạn bè giúp bạn kiếm hoa hồng tới 15%
+                </h2>
+                <p className="text-xs md:text-sm opacity-60 font-medium leading-relaxed mb-4 max-w-2xl">
+                  Khi bạn bè đăng ký bằng mã của bạn, họ được giảm 10% lần đầu mua bất kỳ gói nào. Khi họ mua gói Premium dài hạn, bạn nhận hoa hồng vào số dư — có thể rút tiền mặt qua chuyển khoản.
+                </p>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+                  <ReferralRate label="Premium 3 tháng" pct={5} amount="từ 5.355đ" />
+                  <ReferralRate label="Premium 1 năm" pct={10} amount="từ 33.210đ" />
+                  <ReferralRate label="Premium trọn đời" pct={15} amount="từ 202.365đ" highlight />
+                </div>
+
+                <div className="text-[11px] opacity-50 font-medium">
+                  * Hoa hồng tính trên số tiền thực thu sau giảm giá. Gói tháng, gói Lite và gói luyện thi 90 ngày không tính hoa hồng.
+                </div>
+              </div>
+
+              <div className="w-full md:w-auto md:min-w-50">
+                {!isAuthenticated ? (
+                  <Link href="/auth/register"
+                    className="w-full block py-3 px-6 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all text-white text-center shadow-xl shadow-indigo-500/20 hover:scale-[1.02]"
+                    style={{ background: 'linear-gradient(135deg, #6366F1, #4F46E5)' }}>
+                    Tạo tài khoản & nhận mã
+                  </Link>
+                ) : (
+                  <Link href="/referral"
+                    className="w-full block py-3 px-6 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all text-white text-center shadow-xl shadow-indigo-500/20 hover:scale-[1.02]"
+                    style={{ background: 'linear-gradient(135deg, #6366F1, #4F46E5)' }}>
+                    Lấy mã giới thiệu
+                  </Link>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Comparison Table Section */}
         <div className="mb-24 animate-[slideUp_0.6s_ease-out_0.3s_both]">
           <div className="text-center mb-10">
@@ -433,6 +501,9 @@ export default function PricingPage() {
               { q: 'Quyền lợi của gói Lifetime là gì?', a: 'Bạn chỉ cần thanh toán một lần duy nhất và sở hữu trọn đời mọi tính năng Premium hiện tại và tương lai. Ngoài ra, bạn còn nhận được danh hiệu Early Backer độc quyền.' },
               { q: 'Chính sách hoàn tiền như thế nào?', a: 'Chúng tôi cam kết hoàn tiền 100% trong vòng 7 ngày đầu tiên nếu bạn không hài lòng với dịch vụ và chưa sử dụng quá 10 lượt luyện tập AI.' },
               { q: 'Nếu dùng hết lượt AI ở bản Free?', a: 'Bạn vẫn có thể học từ vựng, ngữ pháp và chơi mini-games bình thường. Các lượt luyện tập AI sẽ được làm mới vào mỗi thứ Hai hàng tuần.' },
+              { q: 'Hoa hồng giới thiệu bạn bè hoạt động thế nào?', a: 'Mỗi tài khoản có một mã giới thiệu riêng (xem tại trang Giới thiệu bạn). Khi bạn bè đăng ký bằng mã của bạn và thanh toán gói Premium 3 tháng, 1 năm hoặc trọn đời, bạn nhận hoa hồng tương ứng 5% / 10% / 15% vào số dư. Gói tháng, gói Lite và gói luyện thi không tính hoa hồng.' },
+              { q: 'Làm sao để nhận hoa hồng ra tiền mặt?', a: 'Vào trang Giới thiệu bạn, bấm "Rút tiền", nhập số tài khoản ngân hàng và số tiền muốn rút (tối thiểu 50.000đ). Admin sẽ duyệt và chuyển khoản trong vòng 1-3 ngày làm việc.' },
+              { q: 'Mã giới thiệu giảm giá thế nào cho người mới?', a: 'Khi bạn nhập mã giới thiệu lúc đăng ký, bạn được giảm 10% cho lần đầu tiên mua bất kỳ gói trả phí nào (Lite / Premium / Lifetime / Exam Bundle). Ưu đãi này chỉ áp dụng một lần và không cộng dồn với mã khuyến mãi khác.' },
             ].map(({ q, a }) => (
               <details key={q} className="group rounded-4xl border border-theme-border bg-theme-bg-card p-6 transition-all hover:bg-white/2">
                 <summary className="text-sm font-bold cursor-pointer list-none flex items-center justify-between opacity-80 group-open:opacity-100 group-open:mb-4">

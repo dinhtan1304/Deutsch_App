@@ -107,6 +107,7 @@ export const PRIMARY_NAV: NavItem[] = [
       { key: 'settings',   label: 'Cài đặt',   href: '/settings',  icon: IconSettings },
       { key: 'resources',  label: 'Tài nguyên', href: '/resources', icon: IconLink },
       { key: 'pricing',    label: 'Nâng cấp',  href: '/pricing',   icon: IconStar },
+      { key: 'referral',   label: 'Giới thiệu bạn', href: '/referral', icon: IconUser },
     ],
   },
 ];
@@ -152,4 +153,5 @@ export const AUTH_HREFS: ReadonlySet<string> = new Set([
   '/arena',
   '/practice-test/dictation',
   '/study-plan',
+  '/referral',
 ]);

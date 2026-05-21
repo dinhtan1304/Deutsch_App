@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 import { useAuthStore } from '@/stores/authStore';
 import { trackEvent } from '@/lib/analytics';
@@ -14,6 +14,7 @@ import {
 import { FormLayout } from '@/components/ui/FormLayout';
 import { FormField } from '@/components/ui/FormField';
 import { ACCENT, STATUS } from '@/lib/tokens';
+import { useValidateReferralCode } from '@/hooks/useReferral';
 
 const HIGHLIGHTS = [
   { icon: <IconBook size={18} />,    text: '140+ từ vựng A1 chuẩn Goethe' },
@@ -81,6 +82,7 @@ function PasswordStrength({ password }: { password: string }) {
 
 export default function RegisterPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { register, isLoading, isAuthenticated, _hasHydrated } = useAuthStore();
   const { executeRecaptcha } = useGoogleReCaptcha();
   const [name, setName] = useState('');
@@ -89,6 +91,25 @@ export default function RegisterPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPw, setShowPw] = useState(false);
   const [error, setError] = useState('');
+  // Pre-fill referral fields from ?ref= URL param (sharing link target).
+  // Lazy init reads searchParams once on mount — sidestepping the
+  // `react-hooks/set-state-in-effect` rule which forbids syncing URL → state
+  // through a useEffect.
+  const initialRef = (searchParams.get('ref') || '').toUpperCase();
+  const [referralCode, setReferralCode] = useState(initialRef);
+  const [referralExpanded, setReferralExpanded] = useState(initialRef.length > 0);
+  const [debouncedReferral, setDebouncedReferral] = useState(initialRef);
+
+  // Debounce referral code lookup so we don't hammer /validate on every keystroke.
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedReferral(referralCode.trim().toUpperCase()), 400);
+    return () => clearTimeout(t);
+  }, [referralCode]);
+
+  const refValidation = useValidateReferralCode(
+    debouncedReferral,
+    debouncedReferral.length >= 4,
+  );
 
   useEffect(() => {
     if (_hasHydrated && isAuthenticated) router.replace('/dashboard');
@@ -108,14 +129,21 @@ export default function RegisterPage() {
     if (password !== confirmPassword) { setError('Mật khẩu xác nhận không khớp'); return; }
     try {
       const captchaToken = executeRecaptcha ? await executeRecaptcha('register') : undefined;
-      await register({ name: name.trim(), email, password, captchaToken });
+      const ref = referralCode.trim().toUpperCase();
+      await register({
+        name: name.trim(),
+        email,
+        password,
+        captchaToken,
+        ...(ref.length >= 4 ? { referralCode: ref } : {}),
+      });
       trackEvent('sign_up', { method: 'email' });
       router.push(`/auth/verify-email?email=${encodeURIComponent(email)}`);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
       setError(msg || 'Đăng ký thất bại. Vui lòng thử lại.');
     }
-  }, [executeRecaptcha, name, email, password, confirmPassword, isPasswordValid, register, router]);
+  }, [executeRecaptcha, name, email, password, confirmPassword, isPasswordValid, register, router, referralCode]);
 
   if (!_hasHydrated || isAuthenticated) {
     return <div className="min-h-screen" style={{ backgroundColor: 'var(--marketing-bg)' }} />;
@@ -249,6 +277,40 @@ export default function RegisterPage() {
           required
           error={confirmPassword.length > 0 && confirmPassword !== password ? 'Mật khẩu không khớp' : undefined}
         />
+
+        {!referralExpanded ? (
+          <button
+            type="button"
+            onClick={() => setReferralExpanded(true)}
+            className="text-caption text-left hover:opacity-80"
+            style={{ color: 'var(--marketing-dim)' }}
+          >
+            + Có mã giới thiệu?
+          </button>
+        ) : (
+          <div>
+            <FormField
+              variant="marketing"
+              label="Mã giới thiệu (tùy chọn)"
+              type="text"
+              name="referralCode"
+              placeholder="VD: ABCD1234"
+              value={referralCode}
+              onChange={e => setReferralCode(e.target.value.toUpperCase())}
+              maxLength={16}
+              autoCapitalize="characters"
+            />
+            {debouncedReferral.length >= 4 && (
+              <div className="mt-1.5 text-caption" style={{ color: refValidation.data?.valid ? STATUS.success : STATUS.danger }}>
+                {refValidation.isLoading
+                  ? 'Đang kiểm tra...'
+                  : refValidation.data?.valid
+                    ? `✓ Bạn sẽ được giảm ${refValidation.data.discountPct}% lần đầu mua gói`
+                    : 'Mã giới thiệu không hợp lệ'}
+              </div>
+            )}
+          </div>
+        )}
 
         <button
           type="submit"

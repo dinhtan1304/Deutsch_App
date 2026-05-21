@@ -30,6 +30,7 @@ export interface RegisterDto {
   password: string;
   name?: string;
   captchaToken?: string;
+  referralCode?: string;
 }
 
 export interface User {

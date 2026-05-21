@@ -55,7 +55,6 @@ export const FEATURE_GATES: Record<string, FeatureGate> = {
   examAnalytics: 'exam',
   mockExam: 'exam',
   aiPartnerVoice: 'exam',
-  examCertificate: 'exam',
   customStudyPlanAi: 'exam',
 };
 
