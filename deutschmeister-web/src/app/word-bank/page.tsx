@@ -2,8 +2,11 @@
 
 import { useState, useCallback } from 'react';
 import dynamic from 'next/dynamic';
+import { useQuery } from '@tanstack/react-query';
 import { useAuthStore } from '@/stores/authStore';
 import { AuthGate } from '@/components/ui';
+import { CapacityBanner } from '@/components/subscription/CapacityBanner';
+import { aiVocabApi } from '@/lib/api/personal-words';
 import { ACCENT, GRADIENT } from '@/lib/tokens';
 import { speakGerman } from '@/lib/utils';
 import { WordBankCard } from '@/components/word-bank/WordBankCard';
@@ -58,6 +61,12 @@ export default function WordBankPage() {
   const importMutation = useImportPersonalWords();
   const exportMutation = useExportPersonalWords();
   const { data: srsStats } = useSRSStats();
+  const { data: capacity } = useQuery({
+    queryKey: ['word-bank-capacity'],
+    queryFn: () => aiVocabApi.getCapacity(),
+    enabled: isAuthenticated,
+    staleTime: 30 * 1000,
+  });
 
   const words = wordsData?.data ?? [];
   const total = wordsData?.total ?? 0;
@@ -155,6 +164,17 @@ export default function WordBankPage() {
             </button>
           </div>
         </div>
+
+        {/* ─── Free-tier capacity counter ─── */}
+        {capacity && !capacity.isPaid && (
+          <CapacityBanner
+            used={capacity.used}
+            limit={capacity.limit}
+            isPaid={capacity.isPaid}
+            label="Word Bank"
+            featureContext="word-bank-capacity"
+          />
+        )}
 
         {/* ─── SRS Banner ─── */}
         {statTotal > 0 && srsStats && (

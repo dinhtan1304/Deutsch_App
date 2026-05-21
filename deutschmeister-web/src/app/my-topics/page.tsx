@@ -2,8 +2,12 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Button, Card, EmptyState, PageHeader } from '@/components/ui';
 import { useMyTopics } from '@/hooks/useUserTopics';
+import { CapacityBanner } from '@/components/subscription/CapacityBanner';
+import { getTopicCapacity } from '@/lib/api/user-topics';
+import { useAuthStore } from '@/stores/authStore';
 import { ACCENT } from '@/lib/tokens';
 import type { UserTopic, UserTopicVisibility } from '@/types/user-topic';
 
@@ -21,9 +25,16 @@ const VISIBILITY_LABEL: Record<UserTopicVisibility, { label: string; color: stri
 };
 
 export default function MyTopicsPage() {
+  const { isAuthenticated } = useAuthStore();
   const [q, setQ] = useState('');
   const [visibility, setVisibility] = useState<'all' | UserTopicVisibility>('all');
   const { data, isLoading } = useMyTopics({ q: q || undefined, visibility, sort: 'updated' });
+  const { data: capacity } = useQuery({
+    queryKey: ['my-topics-capacity'],
+    queryFn: () => getTopicCapacity(),
+    enabled: isAuthenticated,
+    staleTime: 30 * 1000,
+  });
 
   const items = data?.items ?? [];
 
@@ -39,6 +50,16 @@ export default function MyTopicsPage() {
           </Link>
         }
       />
+
+      {capacity && !capacity.isPaid && (
+        <CapacityBanner
+          used={capacity.used}
+          limit={capacity.limit}
+          isPaid={capacity.isPaid}
+          label="Bộ chủ đề"
+          featureContext="my-topics-capacity"
+        />
+      )}
 
       <div className="flex flex-col sm:flex-row gap-3 mb-5">
         <input

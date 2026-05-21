@@ -19,10 +19,11 @@ const IconX = ({ size = 16 }: { size?: number }) => (
 );
 
 const FREE_FEATURES = [
-  'Từ vựng, Word Bank & SRS không giới hạn',
+  'Word Bank cá nhân — tối đa 10 từ',
+  'Bộ chủ đề cá nhân — tối đa 10 bộ',
   'Tất cả mini-games & Vocabulary Arena',
   'Ngữ pháp A1–A2 đầy đủ',
-  'Chủ đề & Topics cộng đồng',
+  'Topics cộng đồng (xem không giới hạn)',
   'Dictionary click-to-lookup',
   'Streak & Leaderboard',
 ];
@@ -63,10 +64,12 @@ const LIFETIME_EXTRA = [
 type Val = boolean | string;
 type Row = { feature: string; free: Val; lite: Val; premium: Val; lifetime: Val };
 const COMPARISON: Row[] = [
-  { feature: 'Từ vựng, SRS & mini-games', free: true, lite: true, premium: true, lifetime: true },
+  { feature: 'Mini-games & SRS', free: true, lite: true, premium: true, lifetime: true },
   { feature: 'Ngữ pháp A1–A2', free: true, lite: true, premium: true, lifetime: true },
   { feature: 'Ngữ pháp B1–B2', free: 'Xem 30%', lite: true, premium: true, lifetime: true },
   { feature: 'Streak & Leaderboard', free: true, lite: true, premium: true, lifetime: true },
+  { feature: 'Word Bank cá nhân', free: '10 từ', lite: 'Không giới hạn', premium: 'Không giới hạn', lifetime: 'Không giới hạn' },
+  { feature: 'Bộ chủ đề cá nhân', free: '10 bộ', lite: 'Không giới hạn', premium: 'Không giới hạn', lifetime: 'Không giới hạn' },
   { feature: 'AI Nghe / Nói / Đọc / Viết', free: '2/tuần mỗi kỹ năng', lite: 'Không giới hạn', premium: 'Không giới hạn', lifetime: 'Không giới hạn' },
   { feature: 'Phát âm AI', free: '5/tuần', lite: 'Không giới hạn', premium: 'Không giới hạn', lifetime: 'Không giới hạn' },
   { feature: 'Shadowing AI', free: '3/tuần', lite: 'Không giới hạn', premium: 'Không giới hạn', lifetime: 'Không giới hạn' },

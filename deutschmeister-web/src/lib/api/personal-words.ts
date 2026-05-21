@@ -339,10 +339,24 @@ export interface AIVocabQuota {
   isPremium: boolean;
 }
 
+/**
+ * Free-tier word-bank capacity. limit/remaining are -1 for paid users
+ * (paid users are unlimited).
+ */
+export interface WordBankCapacity {
+  used: number;
+  limit: number;
+  remaining: number;
+  isPaid: boolean;
+}
+
 export const aiVocabApi = {
   generate: (dto: AiGenerateVocabularyDto): Promise<AIGenerateResponse> =>
     apiPost('/personal-words/ai-generate', dto),
 
   getQuota: (): Promise<AIVocabQuota> =>
     apiGet('/personal-words/ai-generate/quota'),
+
+  getCapacity: (): Promise<WordBankCapacity> =>
+    apiGet('/personal-words/capacity'),
 };

@@ -40,6 +40,20 @@ export function getMineTopic(id: string) {
   return apiGet<UserTopicDetail>(`${BASE}/mine/${id}`);
 }
 
+/**
+ * Free-tier topic capacity. limit/remaining are -1 for paid users.
+ */
+export interface TopicCapacity {
+  used: number;
+  limit: number;
+  remaining: number;
+  isPaid: boolean;
+}
+
+export function getTopicCapacity() {
+  return apiGet<TopicCapacity>(`${BASE}/capacity`);
+}
+
 export function createUserTopic(dto: CreateUserTopicDto) {
   return apiPost<UserTopic>(BASE, dto);
 }
