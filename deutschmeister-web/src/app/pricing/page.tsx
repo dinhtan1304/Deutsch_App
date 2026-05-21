@@ -19,21 +19,21 @@ const IconX = ({ size = 16 }: { size?: number }) => (
 );
 
 const FREE_FEATURES = [
-  'Từ vựng & Word Bank',
-  'Tất cả mini-games ôn tập',
-  'Ngữ pháp cơ bản',
-  'Chủ đề & Topics',
+  'Từ vựng, Word Bank & SRS không giới hạn',
+  'Tất cả mini-games & Vocabulary Arena',
+  'Ngữ pháp A1–A2 đầy đủ',
+  'Chủ đề & Topics cộng đồng',
   'Dictionary click-to-lookup',
   'Streak & Leaderboard',
 ];
 
 const PREMIUM_EXTRA = [
-  'Luyện tập không giới hạn',
-  'Thi thử Goethe/TELC chuẩn',
-  'AI chấm điểm Writing',
-  'AI chấm điểm Speaking',
-  'Luyện nghe theo đề thi',
-  'Giải thích lỗi tiếng Việt',
+  'Luyện AI không giới hạn (Writing, Speaking, Reading, Listening, Roleplay)',
+  'Thi thử Goethe/TELC chuẩn (A1–B2)',
+  'AI chấm điểm chi tiết 4 tiêu chí',
+  'Phát âm + Shadowing không giới hạn',
+  'Speaking Rooms hội thoại nhóm',
+  'Giải thích lỗi bằng tiếng Việt',
 ];
 
 const LIFETIME_EXTRA = [
@@ -46,11 +46,16 @@ const LIFETIME_EXTRA = [
 
 type Val = boolean | string;
 const COMPARISON: { feature: string; free: Val; premium: Val; lifetime: Val }[] = [
-  { feature: 'Từ vựng & mini-games', free: true, premium: true, lifetime: true },
-  { feature: 'Ngữ pháp & chủ đề', free: true, premium: true, lifetime: true },
+  { feature: 'Từ vựng, SRS & mini-games', free: true, premium: true, lifetime: true },
+  { feature: 'Ngữ pháp A1–A2', free: true, premium: true, lifetime: true },
+  { feature: 'Ngữ pháp B1–B2', free: 'Xem 30%', premium: true, lifetime: true },
   { feature: 'Streak & Leaderboard', free: true, premium: true, lifetime: true },
-  { feature: 'Luyện viết / nói (AI)', free: '3 lần/tuần', premium: 'Không giới hạn', lifetime: 'Không giới hạn' },
-  { feature: 'Roleplay hội thoại AI', free: '3 lần/tuần', premium: 'Không giới hạn', lifetime: 'Không giới hạn' },
+  { feature: 'AI Writing & Speaking', free: '2 lần/tuần', premium: 'Không giới hạn', lifetime: 'Không giới hạn' },
+  { feature: 'AI Reading & Listening', free: '3 lần/tuần', premium: 'Không giới hạn', lifetime: 'Không giới hạn' },
+  { feature: 'Phát âm AI', free: '5 lần/tuần', premium: 'Không giới hạn', lifetime: 'Không giới hạn' },
+  { feature: 'Shadowing AI', free: '3 lần/tuần', premium: 'Không giới hạn', lifetime: 'Không giới hạn' },
+  { feature: 'Roleplay hội thoại AI', free: '1 lần/tuần', premium: 'Không giới hạn', lifetime: 'Không giới hạn' },
+  { feature: 'Speaking Rooms', free: '1 lần/tuần', premium: 'Không giới hạn', lifetime: 'Không giới hạn' },
   { feature: 'Đề thi Goethe/TELC (A1-B2)', free: false, premium: true, lifetime: true },
   { feature: 'AI chấm điểm & giải thích', free: false, premium: true, lifetime: true },
   { feature: 'Thời hạn sử dụng', free: '∞', premium: 'Gói đăng ký', lifetime: 'Mãi mãi' },
@@ -165,7 +170,15 @@ export default function PricingPage() {
               ))}
               <li className="flex items-start gap-3 text-[13px] font-medium opacity-70">
                 <IconCheck size={16} style={{ color: 'var(--theme-text-muted)', marginTop: '2px' }} />
-                AI — 3 lượt/tuần
+                AI Writing/Speaking — 2 lượt/tuần
+              </li>
+              <li className="flex items-start gap-3 text-[13px] font-medium opacity-70">
+                <IconCheck size={16} style={{ color: 'var(--theme-text-muted)', marginTop: '2px' }} />
+                AI Reading/Listening — 3 lượt/tuần
+              </li>
+              <li className="flex items-start gap-3 text-[13px] font-medium opacity-70">
+                <IconCheck size={16} style={{ color: 'var(--theme-text-muted)', marginTop: '2px' }} />
+                Roleplay AI — 1 lượt/tuần
               </li>
             </ul>
             <button disabled={!isAuthenticated || isPremium}

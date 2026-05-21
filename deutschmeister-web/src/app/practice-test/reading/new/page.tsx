@@ -5,6 +5,7 @@ import { ACCENT, STATUS } from '@/lib/tokens';
 import { useRouter } from 'next/navigation';
 import { useReadingTopics, useGenerateReading } from '@/hooks/useReading';
 import { QuotaPaywall } from '@/components/subscription/QuotaPaywall';
+import { QuotaBanner } from '@/components/subscription/QuotaBanner';
 import { IconLoader, IconRobot } from '../icons';
 import { PageHeader } from '@/components/ui';
 
@@ -47,6 +48,8 @@ export default function NewReadingPage() {
   return (
     <QuotaPaywall feature="reading">
     <div className="py-6">
+
+      <QuotaBanner feature="reading" label="Lượt Reading AI" featureContext="reading-new" />
 
       <PageHeader
         backHref="/practice-test/reading"

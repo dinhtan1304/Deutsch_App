@@ -111,8 +111,10 @@ export interface QuotaInfo {
   allowed: boolean;
   used: number;
   limit: number;
-  /** 'daily' for shadowing, 'weekly' for everything else. */
+  /** 'daily' or 'weekly' depending on feature. */
   window: 'daily' | 'weekly';
+  /** ISO timestamp of when the quota window resets. */
+  resetsAt: string;
 }
 
 export interface BetaStatus {

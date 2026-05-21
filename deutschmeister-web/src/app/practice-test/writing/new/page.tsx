@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useWritingTopics, useGeneratePrompt } from '@/hooks/useWriting';
 import { QuotaPaywall } from '@/components/subscription/QuotaPaywall';
+import { QuotaBanner } from '@/components/subscription/QuotaBanner';
 import { IconLoader, IconRobot } from '../icons';
 import { PageHeader } from '@/components/ui';
 import { ACCENT, STATUS } from '@/lib/tokens';
@@ -50,6 +51,8 @@ export default function NewWritingPage() {
   return (
     <QuotaPaywall feature="writing">
       <div className="py-6">
+
+        <QuotaBanner feature="writing" label="Lượt Writing AI" featureContext="writing-new" />
 
         <PageHeader
           backHref="/practice-test/writing"

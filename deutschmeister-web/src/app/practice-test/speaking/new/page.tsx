@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useGenerateFreeSpeaking } from '@/hooks/useFreeSpeaking';
 import { QuotaPaywall } from '@/components/subscription/QuotaPaywall';
+import { QuotaBanner } from '@/components/subscription/QuotaBanner';
 import { PageHeader } from '@/components/ui';
 import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 
@@ -46,6 +47,8 @@ export default function FreeSpeakingNewPage() {
   return (
     <QuotaPaywall feature="freeSpeaking">
     <div className="py-6">
+      <QuotaBanner feature="freeSpeaking" label="Lượt Speaking AI" featureContext="speaking-new" />
+
       <PageHeader
         backHref="/practice-test/speaking"
         title="Tạo bài Luyện Nói"

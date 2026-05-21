@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useGenerateListening } from '@/hooks/useListening';
 import { QuotaPaywall } from '@/components/subscription/QuotaPaywall';
+import { QuotaBanner } from '@/components/subscription/QuotaBanner';
 import { PageHeader } from '@/components/ui';
 import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 
@@ -46,6 +47,8 @@ export default function NewListeningPage() {
   return (
     <QuotaPaywall feature="listening">
     <div className="py-6 max-w-lg mx-auto">
+      <QuotaBanner feature="listening" label="Lượt Listening AI" featureContext="listening-new" />
+
       <PageHeader
         backHref="/practice-test/listening"
         title="Tạo Bài Nghe Mới"
