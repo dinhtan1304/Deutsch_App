@@ -7,6 +7,8 @@ interface SectionHeaderProps {
   title: string;
   subtitle?: string;
   badge?: string;
+  /** Extra ReactNode rendered after the standard badge (e.g. a PREMIUM chip). */
+  extraBadge?: ReactNode;
   icon?: ReactNode;
   accent?: AccentKey;
   className?: string;
@@ -16,6 +18,7 @@ export function SectionHeader({
   title,
   subtitle,
   badge,
+  extraBadge,
   icon,
   accent = 'brand',
   className,
@@ -48,6 +51,7 @@ export function SectionHeader({
                 {badge}
               </span>
             )}
+            {extraBadge}
           </div>
           {subtitle && (
             <p className="mt-0.5 text-body leading-relaxed" style={{ color: 'var(--theme-text-muted)' }}>

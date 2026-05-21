@@ -198,13 +198,6 @@ function PracticeActionCard({
       accent={card.accent}
       className="relative flex h-full flex-col"
     >
-      {locked && (
-        <div className="mb-2 flex justify-end">
-          <span className="rounded-full px-2 py-0.5 text-[10px] font-black text-white" style={{ background: GRADIENT.xp }}>
-            PREMIUM
-          </span>
-        </div>
-      )}
       <div className="flex items-start gap-3">
         <div
           className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-white shadow-soft"
@@ -275,6 +268,7 @@ function Section({
   icon,
   accent,
   badge,
+  extraBadge,
   children,
 }: {
   id: string;
@@ -283,11 +277,12 @@ function Section({
   icon: ReactNode;
   accent: AccentKey;
   badge?: string;
+  extraBadge?: ReactNode;
   children: ReactNode;
 }) {
   return (
     <section id={id} className="scroll-mt-24">
-      <SectionHeader title={title} subtitle={subtitle} icon={icon} accent={accent} badge={badge} />
+      <SectionHeader title={title} subtitle={subtitle} icon={icon} accent={accent} badge={badge} extraBadge={extraBadge} />
       {children}
     </section>
   );
@@ -348,6 +343,11 @@ export default function PracticeTestPage() {
           icon={<IconGraduationCap size={18} />}
           accent="xp"
           badge="Đề chuẩn"
+          extraBadge={!examUnlocked && (
+            <span className="rounded-full px-2.5 py-1 text-caption font-black text-white" style={{ background: GRADIENT.xp }}>
+              PREMIUM
+            </span>
+          )}
         >
           <CardGrid cards={examCards} locked={!examUnlocked} onLockedClick={() => setUpgradeOpen(true)} />
         </Section>
