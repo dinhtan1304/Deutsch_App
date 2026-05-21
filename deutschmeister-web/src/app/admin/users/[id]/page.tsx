@@ -197,28 +197,37 @@ export default function AdminUserDetailPage() {
             </button>
             {(() => {
               const sub = user.subscription;
-              const isPremium = (sub?.plan === 'premium' || sub?.plan === 'lifetime') && sub?.status === 'active' &&
-                (!sub?.expiresAt || new Date(sub.expiresAt) > new Date());
-              const isLifetime = sub?.plan === 'lifetime' && sub?.status === 'active';
-              return isPremium ? (
+              const PAID = ['premium_lite', 'premium', 'lifetime', 'exam_bundle'];
+              const isPaid = sub && PAID.includes(sub.plan) && sub.status === 'active' &&
+                (!sub.expiresAt || new Date(sub.expiresAt) > new Date());
+              if (!isPaid) {
+                return (
+                  <span style={{
+                    fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 6,
+                    backgroundColor: 'rgba(100,116,139,.1)', color: 'var(--theme-text-muted)',
+                  }}>
+                    FREE
+                  </span>
+                );
+              }
+              const PLAN_LABEL: Record<string, { label: string; bg: string; color: string }> = {
+                lifetime:     { label: '👑 LIFETIME',    bg: 'rgba(245,158,11,.15)',  color: '#F59E0B' },
+                premium:      { label: '⭐ PREMIUM',     bg: 'rgba(99,102,241,.15)',  color: '#818CF8' },
+                premium_lite: { label: '🌱 LITE',        bg: 'rgba(16,185,129,.15)',  color: '#10B981' },
+                exam_bundle:  { label: '🎯 EXAM BUNDLE', bg: 'rgba(168,85,247,.15)',  color: '#A855F7' },
+              };
+              const meta = PLAN_LABEL[sub!.plan] ?? { label: sub!.plan.toUpperCase(), bg: 'rgba(99,102,241,.15)', color: '#818CF8' };
+              return (
                 <span style={{
                   fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 6,
-                  backgroundColor: isLifetime ? 'rgba(245,158,11,.15)' : 'rgba(99,102,241,.15)',
-                  color: isLifetime ? '#F59E0B' : '#818CF8',
+                  backgroundColor: meta.bg, color: meta.color,
                 }}>
-                  {isLifetime ? '👑 LIFETIME' : '⭐ PREMIUM'}
-                  {sub?.expiresAt && (
+                  {meta.label}
+                  {sub?.expiresAt && sub.plan !== 'lifetime' && (
                     <span style={{ fontWeight: 400, marginLeft: 4 }}>
                       · hết {new Date(sub.expiresAt).toLocaleDateString('vi-VN')}
                     </span>
                   )}
-                </span>
-              ) : (
-                <span style={{
-                  fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 6,
-                  backgroundColor: 'rgba(100,116,139,.1)', color: 'var(--theme-text-muted)',
-                }}>
-                  FREE
                 </span>
               );
             })()}

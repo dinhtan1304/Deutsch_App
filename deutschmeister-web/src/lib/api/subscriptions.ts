@@ -163,7 +163,7 @@ export const adminSubscriptionsApi = {
     if (params?.page) qs.set('page', String(params.page));
     return apiGet<{ items: AdminSubscription[]; total: number; totalPages: number }>(`/subscriptions/admin/list?${qs}`);
   },
-  grantPremium: (userId: string, period: 'monthly' | 'quarterly' | 'yearly' | 'lifetime', note?: string) =>
+  grantPremium: (userId: string, period: BillingPeriod, note?: string) =>
     apiPost(`/subscriptions/admin/grant/${userId}`, { period, note }),
   revokePremium: (userId: string) =>
     apiPost(`/subscriptions/admin/revoke/${userId}`, {}),

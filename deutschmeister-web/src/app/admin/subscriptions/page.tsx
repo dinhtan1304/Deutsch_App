@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { adminSubscriptionsApi, type AdminPayment, type AdminSubscription } from '@/lib/api/subscriptions';
+import { adminSubscriptionsApi, type AdminPayment, type AdminSubscription, type BillingPeriod } from '@/lib/api/subscriptions';
 
 function IconLoader({ size = 14 }: { size?: number }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="animate-spin" style={{ display: 'block' }}><path d="M21 12a9 9 0 1 1-6.219-8.56" /></svg>;
@@ -18,11 +18,32 @@ const PAYMENT_STATUS_LABELS: Record<string, string> = {
   confirmed: 'Đã xác nhận',
   rejected: 'Từ chối',
 };
-const PLAN_COLORS: Record<string, string> = {
-  free: 'var(--theme-text-muted)',
-  premium: '#6366F1',
-  lifetime: '#F59E0B',
+
+const PLAN_META: Record<string, { color: string; label: string }> = {
+  free:         { color: 'var(--theme-text-muted)', label: 'Free' },
+  premium_lite: { color: '#10B981',                 label: '🌱 Lite' },
+  premium:      { color: '#6366F1',                 label: '⭐ Premium' },
+  exam_bundle:  { color: '#A855F7',                 label: '🎯 Exam Bundle' },
+  lifetime:     { color: '#F59E0B',                 label: '👑 Lifetime' },
 };
+
+const PERIOD_LABELS: Record<string, string> = {
+  monthly:        '1 tháng',
+  quarterly:      '3 tháng',
+  yearly:         '1 năm',
+  lite_monthly:   'Lite · 1 tháng',
+  lite_quarterly: 'Lite · 3 tháng',
+  exam_bundle:    '90 ngày',
+  lifetime:       'Trọn đời',
+};
+
+const GRANT_PERIODS: BillingPeriod[] = [
+  'lite_monthly', 'lite_quarterly',
+  'monthly', 'quarterly', 'yearly',
+  'exam_bundle', 'lifetime',
+];
+
+const PAID_PLANS = new Set(['premium_lite', 'premium', 'exam_bundle', 'lifetime']);
 
 export default function AdminSubscriptionsPage() {
   const [tab, setTab] = useState<'payments' | 'subs'>('payments');
@@ -33,7 +54,7 @@ export default function AdminSubscriptionsPage() {
   const [actionNote, setActionNote] = useState('');
   const [actionTarget, setActionTarget] = useState<{ type: 'confirm' | 'reject'; id: string } | null>(null);
   const [grantTarget, setGrantTarget] = useState<AdminSubscription | null>(null);
-  const [grantPeriod, setGrantPeriod] = useState<'monthly' | 'quarterly' | 'yearly' | 'lifetime'>('monthly');
+  const [grantPeriod, setGrantPeriod] = useState<BillingPeriod>('lite_monthly');
   const [grantNote, setGrantNote] = useState('');
 
   const queryClient = useQueryClient();
@@ -69,7 +90,7 @@ export default function AdminSubscriptionsPage() {
   });
 
   const grantMut = useMutation({
-    mutationFn: ({ userId, period, note }: { userId: string; period: 'monthly' | 'quarterly' | 'yearly' | 'lifetime'; note?: string }) =>
+    mutationFn: ({ userId, period, note }: { userId: string; period: BillingPeriod; note?: string }) =>
       adminSubscriptionsApi.grantPremium(userId, period, note),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-subs'] });
@@ -143,8 +164,8 @@ export default function AdminSubscriptionsPage() {
                         <p style={{ fontWeight: 600, color: 'var(--theme-text-primary)' }}>{p.user.name || '—'}</p>
                         <p style={{ fontSize: 11, color: 'var(--theme-text-muted)' }}>{p.user.email}</p>
                       </td>
-                      <td style={{ padding: '10px 14px', color: '#818CF8', fontWeight: 600 }}>{p.plan}</td>
-                      <td style={{ padding: '10px 14px', color: 'var(--theme-text-secondary)' }}>{p.period === 'monthly' ? 'Tháng' : 'Năm'}</td>
+                      <td style={{ padding: '10px 14px', color: PLAN_META[p.plan]?.color ?? '#818CF8', fontWeight: 600 }}>{PLAN_META[p.plan]?.label ?? p.plan}</td>
+                      <td style={{ padding: '10px 14px', color: 'var(--theme-text-secondary)' }}>{PERIOD_LABELS[p.period] ?? p.period}</td>
                       <td style={{ padding: '10px 14px', color: 'var(--theme-text-primary)', fontWeight: 600 }}>{p.amount.toLocaleString('vi-VN')}đ</td>
                       <td style={{ padding: '10px 14px', color: 'var(--theme-text-muted)', whiteSpace: 'nowrap' }}>{new Date(p.createdAt).toLocaleDateString('vi-VN')}</td>
                       <td style={{ padding: '10px 14px' }}>
@@ -193,8 +214,8 @@ export default function AdminSubscriptionsPage() {
       {/* SUBSCRIPTIONS TAB */}
       {tab === 'subs' && (
         <div>
-          <div style={{ display: 'flex', gap: 6, marginBottom: 16 }}>
-            {['', 'free', 'premium'].map(s => (
+          <div style={{ display: 'flex', gap: 6, marginBottom: 16, flexWrap: 'wrap' }}>
+            {['', 'free', 'premium_lite', 'premium', 'exam_bundle', 'lifetime'].map(s => (
               <button key={s} onClick={() => { setPlanFilter(s); setSubsPage(1); }}
                 style={{
                   padding: '0 12px', height: 30, borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: 'pointer',
@@ -202,7 +223,7 @@ export default function AdminSubscriptionsPage() {
                   backgroundColor: planFilter === s ? 'rgba(99,102,241,.15)' : 'var(--theme-bg-card)',
                   color: planFilter === s ? '#818CF8' : 'var(--theme-text-muted)',
                 }}>
-                {s || 'Tất cả'}
+                {s ? (PLAN_META[s]?.label ?? s) : 'Tất cả'}
               </button>
             ))}
           </div>
@@ -229,13 +250,17 @@ export default function AdminSubscriptionsPage() {
                         <p style={{ fontSize: 11, color: 'var(--theme-text-muted)' }}>{s.user.email}</p>
                       </td>
                       <td style={{ padding: '10px 14px' }}>
-                        <span style={{
-                          fontSize: 12, fontWeight: 700, padding: '2px 8px', borderRadius: 6,
-                          backgroundColor: `${PLAN_COLORS[s.plan] || 'var(--theme-text-muted)'}20`,
-                          color: PLAN_COLORS[s.plan] || 'var(--theme-text-muted)',
-                        }}>
-                          {s.plan === 'lifetime' ? '👑 Lifetime' : s.plan === 'premium' ? '⭐ Premium' : 'Free'}
-                        </span>
+                        {(() => {
+                          const meta = PLAN_META[s.plan] ?? PLAN_META.free!;
+                          return (
+                            <span style={{
+                              fontSize: 12, fontWeight: 700, padding: '2px 8px', borderRadius: 6,
+                              backgroundColor: `${meta.color}20`, color: meta.color,
+                            }}>
+                              {meta.label}
+                            </span>
+                          );
+                        })()}
                       </td>
                       <td style={{ padding: '10px 14px', color: 'var(--theme-text-muted)', fontSize: 12 }}>{s.status}</td>
                       <td style={{ padding: '10px 14px', color: 'var(--theme-text-muted)', fontSize: 12 }}>
@@ -245,9 +270,9 @@ export default function AdminSubscriptionsPage() {
                         <div style={{ display: 'flex', gap: 6 }}>
                           <button onClick={() => setGrantTarget(s)}
                             style={{ padding: '4px 10px', borderRadius: 6, border: 'none', backgroundColor: '#6366F1', color: '#fff', fontSize: 11, fontWeight: 700, cursor: 'pointer' }}>
-                            Cấp Premium
+                            Cấp gói
                           </button>
-                          {(s.plan === 'premium' || s.plan === 'lifetime') && (
+                          {PAID_PLANS.has(s.plan) && (
                             <button onClick={() => revokeMut.mutate(s.userId)} disabled={revokeMut.isPending}
                               style={{ padding: '4px 10px', borderRadius: 6, border: '1px solid #EF4444', backgroundColor: 'transparent', color: '#EF4444', fontSize: 11, fontWeight: 700, cursor: 'pointer' }}>
                               Thu hồi
@@ -302,17 +327,23 @@ export default function AdminSubscriptionsPage() {
       {grantTarget && (
         <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}>
           <div style={{ backgroundColor: 'var(--theme-bg-card)', borderRadius: 12, padding: 24, maxWidth: 380, width: '90%', border: '1px solid var(--theme-border)' }}>
-            <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--theme-text-primary)', marginBottom: 4 }}>Cấp Premium thủ công</h3>
+            <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--theme-text-primary)', marginBottom: 4 }}>Cấp gói thủ công</h3>
             <p style={{ fontSize: 13, color: 'var(--theme-text-muted)', marginBottom: 16 }}>{grantTarget.user.email}</p>
             <div style={{ marginBottom: 14 }}>
-              <label style={{ fontSize: 11, color: 'var(--theme-text-muted)', display: 'block', marginBottom: 6 }}>Thời hạn</label>
-              <div style={{ display: 'flex', gap: 8 }}>
-                {(['monthly', 'quarterly', 'yearly', 'lifetime'] as const).map(p => (
-                  <button key={p} onClick={() => setGrantPeriod(p)}
-                    style={{ flex: 1, padding: '7px 0', borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: 'pointer', border: grantPeriod === p ? 'none' : '1px solid var(--theme-border)', backgroundColor: grantPeriod === p ? '#6366F1' : 'transparent', color: grantPeriod === p ? '#fff' : 'var(--theme-text-muted)' }}>
-                    {p === 'monthly' ? '1 tháng' : p === 'quarterly' ? '3 tháng' : p === 'yearly' ? '1 năm' : 'Vĩnh viễn'}
-                  </button>
-                ))}
+              <label style={{ fontSize: 11, color: 'var(--theme-text-muted)', display: 'block', marginBottom: 6 }}>Gói &amp; thời hạn</label>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
+                {GRANT_PERIODS.map(p => {
+                  const active = grantPeriod === p;
+                  const isLite = p.startsWith('lite_');
+                  const isOneTime = p === 'exam_bundle' || p === 'lifetime';
+                  const accent = isLite ? '#10B981' : isOneTime && p === 'exam_bundle' ? '#A855F7' : isOneTime ? '#F59E0B' : '#6366F1';
+                  return (
+                    <button key={p} onClick={() => setGrantPeriod(p)}
+                      style={{ padding: '7px 8px', borderRadius: 8, fontSize: 11, fontWeight: 600, cursor: 'pointer', border: active ? 'none' : '1px solid var(--theme-border)', backgroundColor: active ? accent : 'transparent', color: active ? '#fff' : 'var(--theme-text-muted)' }}>
+                      {PERIOD_LABELS[p] ?? p}
+                    </button>
+                  );
+                })}
               </div>
             </div>
             <div style={{ marginBottom: 16 }}>
@@ -326,7 +357,7 @@ export default function AdminSubscriptionsPage() {
               <button disabled={grantMut.isPending}
                 onClick={() => grantMut.mutate({ userId: grantTarget.userId, period: grantPeriod, note: grantNote })}
                 style={{ padding: '8px 16px', borderRadius: 8, border: 'none', backgroundColor: '#6366F1', color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
-                {grantMut.isPending && <IconLoader size={14} />} Cấp Premium
+                {grantMut.isPending && <IconLoader size={14} />} Cấp gói
               </button>
             </div>
           </div>

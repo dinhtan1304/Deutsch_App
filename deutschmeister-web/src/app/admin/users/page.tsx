@@ -21,9 +21,11 @@ function IconLoader({ size = 16 }: { size?: number }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="animate-spin" style={{ display: 'block' }}><path d="M21 12a9 9 0 1 1-6.219-8.56" /></svg>;
 }
 
-function isPremiumActive(u: AdminUserItem): boolean {
+const PAID_PLANS = new Set(['premium_lite', 'premium', 'lifetime', 'exam_bundle']);
+
+function isPaidActive(u: AdminUserItem): boolean {
   const sub = u.subscription;
-  if (!sub || (sub.plan !== 'premium' && sub.plan !== 'lifetime') || sub.status !== 'active') return false;
+  if (!sub || !PAID_PLANS.has(sub.plan) || sub.status !== 'active') return false;
   if (sub.expiresAt && new Date(sub.expiresAt) <= new Date()) return false;
   return true;
 }
@@ -33,57 +35,52 @@ function isLifetimeActive(u: AdminUserItem): boolean {
   return !!sub && sub.plan === 'lifetime' && sub.status === 'active';
 }
 
+interface PlanStyle { label: string; bg: string; color: string; border: string }
+const PLAN_STYLES: Record<string, PlanStyle> = {
+  lifetime:     { label: '👑 Lifetime',    bg: 'linear-gradient(90deg, rgba(245,158,11,.25), rgba(234,179,8,.2))', color: '#FCD34D', border: 'rgba(245,158,11,.3)' },
+  premium:      { label: '⭐ Premium',     bg: 'linear-gradient(90deg, rgba(99,102,241,.25), rgba(139,92,246,.2))', color: '#A5B4FC', border: 'rgba(99,102,241,.3)' },
+  premium_lite: { label: '🌱 Lite',        bg: 'linear-gradient(90deg, rgba(16,185,129,.25), rgba(20,184,166,.2))', color: '#6EE7B7', border: 'rgba(16,185,129,.3)' },
+  exam_bundle:  { label: '🎯 Exam Bundle', bg: 'linear-gradient(90deg, rgba(168,85,247,.25), rgba(217,70,239,.2))', color: '#D8B4FE', border: 'rgba(168,85,247,.3)' },
+};
+
 function PlanBadge({ user }: { user: AdminUserItem }) {
-  const premium = isPremiumActive(user);
-  const lifetime = isLifetimeActive(user);
   const sub = user.subscription;
-  if (lifetime) {
+  if (!isPaidActive(user)) {
     return (
       <span style={{
-        display: 'inline-flex', alignItems: 'center', gap: 4,
-        fontSize: 11, fontWeight: 800, padding: '3px 9px', borderRadius: 20,
-        background: 'linear-gradient(90deg, rgba(245,158,11,.25), rgba(234,179,8,.2))',
-        color: '#FCD34D', border: '1px solid rgba(245,158,11,.3)',
-        whiteSpace: 'nowrap',
+        fontSize: 11, fontWeight: 600, padding: '3px 9px', borderRadius: 20,
+        backgroundColor: 'rgba(71,85,105,.15)', color: 'var(--theme-text-muted)',
+        border: '1px solid var(--theme-border)',
       }}>
-        👑 Lifetime
+        Free
       </span>
     );
   }
-  if (premium) {
-    return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-        <span style={{
-          display: 'inline-flex', alignItems: 'center', gap: 4,
-          fontSize: 11, fontWeight: 800, padding: '3px 9px', borderRadius: 20,
-          background: 'linear-gradient(90deg, rgba(99,102,241,.25), rgba(139,92,246,.2))',
-          color: '#A5B4FC', border: '1px solid rgba(99,102,241,.3)',
-          whiteSpace: 'nowrap',
-        }}>
-          ⭐ Premium
-        </span>
-        {sub?.expiresAt && (
-          <span style={{ fontSize: 10, color: '#6366F1', paddingLeft: 2 }}>
-            hết {new Date(sub.expiresAt).toLocaleDateString('vi-VN')}
-          </span>
-        )}
-      </div>
-    );
-  }
+  const style = PLAN_STYLES[sub!.plan] ?? PLAN_STYLES.premium!;
   return (
-    <span style={{
-      fontSize: 11, fontWeight: 600, padding: '3px 9px', borderRadius: 20,
-      backgroundColor: 'rgba(71,85,105,.15)', color: 'var(--theme-text-muted)',
-      border: '1px solid var(--theme-border)',
-    }}>
-      Free
-    </span>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+      <span style={{
+        display: 'inline-flex', alignItems: 'center', gap: 4,
+        fontSize: 11, fontWeight: 800, padding: '3px 9px', borderRadius: 20,
+        background: style.bg, color: style.color, border: `1px solid ${style.border}`,
+        whiteSpace: 'nowrap',
+      }}>
+        {style.label}
+      </span>
+      {sub?.expiresAt && sub.plan !== 'lifetime' && (
+        <span style={{ fontSize: 10, color: style.color, opacity: 0.85, paddingLeft: 2 }}>
+          hết {new Date(sub.expiresAt).toLocaleDateString('vi-VN')}
+        </span>
+      )}
+    </div>
   );
 }
 
 const FILTER_OPTS = [
   { value: '', label: 'Tất cả' },
+  { value: 'premium_lite', label: '🌱 Lite' },
   { value: 'premium', label: '⭐ Premium' },
+  { value: 'exam_bundle', label: '🎯 Exam Bundle' },
   { value: 'lifetime', label: '👑 Lifetime' },
   { value: 'admin', label: 'Admin' },
   { value: 'inactive', label: 'Không hoạt động' },
@@ -98,7 +95,7 @@ export default function AdminUsersPage() {
 
   const roleFilter = filter === 'admin' ? 'admin' : undefined;
   const isActiveFilter = filter === 'inactive' ? 'false' : undefined;
-  const planFilter = filter === 'premium' ? 'premium' : filter === 'lifetime' ? 'lifetime' : undefined;
+  const planFilter = ['premium_lite', 'premium', 'lifetime', 'exam_bundle'].includes(filter) ? filter : undefined;
 
   const { data, isLoading, isFetching, isError, error, refetch } = useAdminUsers({
     search: search || undefined,
@@ -139,8 +136,9 @@ export default function AdminUsersPage() {
   }
 
   const totalPages = data?.totalPages ?? 1;
-  const premiumCount = data?.items?.filter(isPremiumActive).length ?? 0;
+  const paidCount = data?.items?.filter(isPaidActive).length ?? 0;
   const lifetimeCount = data?.items?.filter(isLifetimeActive).length ?? 0;
+  const filterStyle = planFilter ? PLAN_STYLES[planFilter] : undefined;
 
   return (
     <div>
@@ -152,10 +150,10 @@ export default function AdminUsersPage() {
             {data ? (
               <>
                 {data.total} người dùng
-                {planFilter === 'premium' && premiumCount > 0 && (
-                  <span style={{ marginLeft: 8, color: '#818CF8', fontWeight: 600 }}>· {premiumCount} Premium</span>
+                {planFilter && paidCount > 0 && filterStyle && (
+                  <span style={{ marginLeft: 8, color: filterStyle.color, fontWeight: 600 }}>· {paidCount} {filterStyle.label.replace(/^[^\s]+\s/, '')}</span>
                 )}
-                {planFilter === 'lifetime' && lifetimeCount > 0 && (
+                {planFilter === 'lifetime' && lifetimeCount > 0 && lifetimeCount !== paidCount && (
                   <span style={{ marginLeft: 8, color: '#FCD34D', fontWeight: 600 }}>· {lifetimeCount} Lifetime</span>
                 )}
               </>
@@ -232,13 +230,13 @@ export default function AdminUsersPage() {
             </thead>
             <tbody>
               {data.items.map((u) => {
-                const premium = isPremiumActive(u);
-                const lifetime = isLifetimeActive(u);
+                const paid = isPaidActive(u);
+                const planStyle = paid && u.subscription ? PLAN_STYLES[u.subscription.plan] : undefined;
                 return (
                   <tr key={u.id} style={{
                     borderTop: '1px solid var(--theme-border)',
-                    backgroundColor: lifetime ? 'rgba(245,158,11,.05)' : premium ? 'rgba(99,102,241,.04)' : 'transparent',
-                    borderLeft: lifetime ? '3px solid #F59E0B' : premium ? '3px solid #6366F1' : '3px solid transparent',
+                    backgroundColor: planStyle ? `${planStyle.color}0F` : 'transparent',
+                    borderLeft: planStyle ? `3px solid ${planStyle.color}` : '3px solid transparent',
                   }}>
                     {/* Name */}
                     <td style={{ padding: '10px 14px' }}>
