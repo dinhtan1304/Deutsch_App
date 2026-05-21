@@ -100,12 +100,38 @@ export function useBetaStatus() {
 
 // ── Helpers ──
 
+function isSubActive(sub: MySubscription | undefined): boolean {
+  if (!sub || sub.status !== 'active') return false;
+  if (!sub.expiresAt) return true; // lifetime
+  return new Date(sub.expiresAt) > new Date();
+}
+
+/**
+ * True when the user has ANY active paid plan: premium_lite, premium, lifetime,
+ * exam_bundle. Use this for gates that any paid user should bypass (e.g.
+ * practice-quota counters in the UI).
+ */
 export function useIsPremium(enabled = true): boolean {
   const { data } = useMySubscription(enabled);
-  return (
-    (data?.plan === 'premium' || data?.plan === 'lifetime') &&
-    data?.status === 'active'
-  );
+  if (!isSubActive(data)) return false;
+  return ['premium_lite', 'premium', 'lifetime', 'exam_bundle'].includes(data!.plan);
+}
+
+/** Specifically Premium Lite (entry tier). */
+export function useIsPremiumLite(enabled = true): boolean {
+  const { data } = useMySubscription(enabled);
+  return isSubActive(data) && data!.plan === 'premium_lite';
+}
+
+/**
+ * "Full" premium parity — premium, lifetime, or exam_bundle. NOT premium_lite.
+ * Use this to gate features that Lite does NOT include (exam mode, AI Partner
+ * Voice, premium analytics).
+ */
+export function useHasExamAccess(enabled = true): boolean {
+  const { data } = useMySubscription(enabled);
+  if (!isSubActive(data)) return false;
+  return ['premium', 'lifetime', 'exam_bundle'].includes(data!.plan);
 }
 
 export function useBetaOpen(): boolean {
@@ -114,11 +140,12 @@ export function useBetaOpen(): boolean {
 }
 
 /**
- * Exam "đề chuẩn" features are unlocked either when the user is Premium
- * or when the backend has BETA_OPEN=true. Use this hook to gate exam UI.
+ * Exam "đề chuẩn" features are unlocked either when the user has exam access
+ * (premium/lifetime/exam_bundle) or when the backend has BETA_OPEN=true.
+ * Premium Lite does NOT unlock exam routes — they hit PremiumGuard.
  */
 export function useIsExamUnlocked(): boolean {
-  const isPremium = useIsPremium();
+  const hasAccess = useHasExamAccess();
   const betaOpen = useBetaOpen();
-  return isPremium || betaOpen;
+  return hasAccess || betaOpen;
 }

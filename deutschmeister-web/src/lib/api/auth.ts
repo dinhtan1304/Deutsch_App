@@ -44,7 +44,7 @@ export interface User {
   createdAt: string;
   onboardingCompleted?: boolean;
   subscription?: {
-    plan: 'free' | 'premium' | 'lifetime';
+    plan: 'free' | 'premium_lite' | 'premium' | 'lifetime' | 'exam_bundle';
     status: string;
     expiresAt: string | null;
   };

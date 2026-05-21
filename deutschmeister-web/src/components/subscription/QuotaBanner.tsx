@@ -115,7 +115,7 @@ export function QuotaBanner({ feature, label, featureContext }: Props) {
       <UpgradeModal
         open={upgradeOpen}
         onClose={() => setUpgradeOpen(false)}
-        defaultPeriod="monthly"
+        defaultPeriod="lite_monthly"
         featureContext={featureContext ?? label}
       />
     </>

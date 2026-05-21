@@ -1,21 +1,30 @@
 import { apiGet, apiPost } from './client';
 
+export type PlanCode = 'free' | 'premium_lite' | 'premium' | 'lifetime' | 'exam_bundle';
+
 export interface Plan {
-  code: string;
+  code: PlanCode;
   name: string;
   nameVi: string;
   monthlyPrice?: number;
   quarterlyPrice?: number;
   yearlyPrice?: number;
-  price?: number;          // for lifetime
+  price?: number;          // for lifetime / exam_bundle (one-time)
   features: string[];
   limits: { practicePerWeek: number };
 }
 
-export type BillingPeriod = 'monthly' | 'quarterly' | 'yearly' | 'lifetime';
+export type BillingPeriod =
+  | 'monthly'
+  | 'quarterly'
+  | 'yearly'
+  | 'lifetime'
+  | 'lite_monthly'
+  | 'lite_quarterly'
+  | 'exam_bundle';
 
 export interface MySubscription {
-  plan: 'free' | 'premium' | 'lifetime';
+  plan: PlanCode;
   status: string;
   expiresAt: string | null;
   updatedAt?: string | null;

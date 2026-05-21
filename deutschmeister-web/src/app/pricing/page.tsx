@@ -27,13 +27,29 @@ const FREE_FEATURES = [
   'Streak & Leaderboard',
 ];
 
-const PREMIUM_EXTRA = [
-  'Luyện AI không giới hạn (Writing, Speaking, Reading, Listening, Roleplay)',
-  'Thi thử Goethe/TELC chuẩn (A1–B2)',
-  'AI chấm điểm chi tiết 4 tiêu chí',
+const LITE_EXTRA = [
+  'Luyện AI không giới hạn (Writing, Speaking, Reading, Listening)',
   'Phát âm + Shadowing không giới hạn',
   'Speaking Rooms hội thoại nhóm',
-  'Giải thích lỗi bằng tiếng Việt',
+  'Roleplay AI — 20 sessions/tháng',
+  'Không bao gồm đề thi Goethe/TELC',
+];
+
+const PREMIUM_EXTRA = [
+  'Tất cả tính năng Premium Lite',
+  'Thi thử Goethe/TELC chuẩn (A1–B2)',
+  'Mock exam full-length 4 kỹ năng',
+  'AI chấm điểm theo rubric Goethe',
+  'Roleplay AI — Không giới hạn',
+  'Export PDF certificate',
+];
+
+const EXAM_BUNDLE_EXTRA = [
+  'Toàn bộ tính năng Premium',
+  'Hiệu lực 90 ngày — đủ cho 1 kỳ thi',
+  'Dành cho người sắp thi A1–B2',
+  'Mua một lần, không tự gia hạn',
+  'Tự động về Free sau 90 ngày',
 ];
 
 const LIFETIME_EXTRA = [
@@ -45,21 +61,22 @@ const LIFETIME_EXTRA = [
 ];
 
 type Val = boolean | string;
-const COMPARISON: { feature: string; free: Val; premium: Val; lifetime: Val }[] = [
-  { feature: 'Từ vựng, SRS & mini-games', free: true, premium: true, lifetime: true },
-  { feature: 'Ngữ pháp A1–A2', free: true, premium: true, lifetime: true },
-  { feature: 'Ngữ pháp B1–B2', free: 'Xem 30%', premium: true, lifetime: true },
-  { feature: 'Streak & Leaderboard', free: true, premium: true, lifetime: true },
-  { feature: 'AI Writing & Speaking', free: '2 lần/tuần', premium: 'Không giới hạn', lifetime: 'Không giới hạn' },
-  { feature: 'AI Reading & Listening', free: '3 lần/tuần', premium: 'Không giới hạn', lifetime: 'Không giới hạn' },
-  { feature: 'Phát âm AI', free: '5 lần/tuần', premium: 'Không giới hạn', lifetime: 'Không giới hạn' },
-  { feature: 'Shadowing AI', free: '3 lần/tuần', premium: 'Không giới hạn', lifetime: 'Không giới hạn' },
-  { feature: 'Roleplay hội thoại AI', free: '1 lần/tuần', premium: 'Không giới hạn', lifetime: 'Không giới hạn' },
-  { feature: 'Speaking Rooms', free: '1 lần/tuần', premium: 'Không giới hạn', lifetime: 'Không giới hạn' },
-  { feature: 'Đề thi Goethe/TELC (A1-B2)', free: false, premium: true, lifetime: true },
-  { feature: 'AI chấm điểm & giải thích', free: false, premium: true, lifetime: true },
-  { feature: 'Thời hạn sử dụng', free: '∞', premium: 'Gói đăng ký', lifetime: 'Mãi mãi' },
-  { feature: 'Early Backer badge', free: false, premium: false, lifetime: true },
+type Row = { feature: string; free: Val; lite: Val; premium: Val; lifetime: Val };
+const COMPARISON: Row[] = [
+  { feature: 'Từ vựng, SRS & mini-games', free: true, lite: true, premium: true, lifetime: true },
+  { feature: 'Ngữ pháp A1–A2', free: true, lite: true, premium: true, lifetime: true },
+  { feature: 'Ngữ pháp B1–B2', free: 'Xem 30%', lite: true, premium: true, lifetime: true },
+  { feature: 'Streak & Leaderboard', free: true, lite: true, premium: true, lifetime: true },
+  { feature: 'AI Writing & Speaking', free: '2/tuần', lite: 'Không giới hạn', premium: 'Không giới hạn', lifetime: 'Không giới hạn' },
+  { feature: 'AI Reading & Listening', free: '3/tuần', lite: 'Không giới hạn', premium: 'Không giới hạn', lifetime: 'Không giới hạn' },
+  { feature: 'Phát âm AI', free: '5/tuần', lite: 'Không giới hạn', premium: 'Không giới hạn', lifetime: 'Không giới hạn' },
+  { feature: 'Shadowing AI', free: '3/tuần', lite: 'Không giới hạn', premium: 'Không giới hạn', lifetime: 'Không giới hạn' },
+  { feature: 'Roleplay hội thoại AI', free: '1/tuần', lite: '20/tháng', premium: 'Không giới hạn', lifetime: 'Không giới hạn' },
+  { feature: 'Speaking Rooms', free: '1/tuần', lite: 'Không giới hạn', premium: 'Không giới hạn', lifetime: 'Không giới hạn' },
+  { feature: 'Đề thi Goethe/TELC (A1-B2)', free: false, lite: false, premium: true, lifetime: true },
+  { feature: 'AI chấm điểm & giải thích', free: false, lite: false, premium: true, lifetime: true },
+  { feature: 'Thời hạn sử dụng', free: '∞', lite: 'Gói đăng ký', premium: 'Gói đăng ký', lifetime: 'Mãi mãi' },
+  { feature: 'Early Backer badge', free: false, lite: false, premium: false, lifetime: true },
 ];
 
 function formatVND(n: number) {
@@ -76,24 +93,39 @@ export default function PricingPage() {
   const [defaultPeriod, setDefaultPeriod] = useState<BillingPeriod>('yearly');
   const [activePeriod, setActivePeriod] = useState<PremiumPeriod>('yearly');
 
-  const isPremium = (user?.subscription?.plan === 'premium' || user?.subscription?.plan === 'lifetime') && user?.subscription?.status === 'active';
-  const isLifetime = user?.subscription?.plan === 'lifetime';
+  const userPlan = user?.subscription?.plan;
+  const isPremium = (userPlan === 'premium' || userPlan === 'lifetime' || userPlan === 'premium_lite' || userPlan === 'exam_bundle') && user?.subscription?.status === 'active';
+  const isLifetime = userPlan === 'lifetime';
+  const isExamBundle = userPlan === 'exam_bundle';
+  const isPremiumLite = userPlan === 'premium_lite';
 
+  const litePlan = plans?.find((p) => p.code === 'premium_lite');
   const premiumPlan = plans?.find((p) => p.code === 'premium');
+  const examBundlePlan = plans?.find((p) => p.code === 'exam_bundle');
   const lifetimePlan = plans?.find((p) => p.code === 'lifetime');
   const priceReady = !plansLoading && !!plans;
+
   const monthlyPrice = premiumPlan?.monthlyPrice ?? 0;
   const quarterlyPrice = premiumPlan?.quarterlyPrice ?? 0;
   const yearlyPrice = premiumPlan?.yearlyPrice ?? 0;
+  const liteMonthlyPrice = litePlan?.monthlyPrice ?? 0;
+  const liteQuarterlyPrice = litePlan?.quarterlyPrice ?? 0;
+  const examBundlePrice = examBundlePlan?.price ?? 0;
   const lifetimePrice = lifetimePlan?.price ?? 0;
 
   const savePctYearly = priceReady && monthlyPrice > 0 ? Math.round((1 - yearlyPrice / (monthlyPrice * 12)) * 100) : 0;
   const savePctQuarterly = priceReady && monthlyPrice > 0 ? Math.round((1 - quarterlyPrice / (monthlyPrice * 3)) * 100) : 0;
+  const savePctLiteQuarterly = priceReady && liteMonthlyPrice > 0 ? Math.round((1 - liteQuarterlyPrice / (liteMonthlyPrice * 3)) * 100) : 0;
   const lifetimeSoldOut = lifetimeInfo ? lifetimeInfo.remaining <= 0 : false;
 
   const currentPrice = activePeriod === 'monthly' ? monthlyPrice : activePeriod === 'quarterly' ? quarterlyPrice : yearlyPrice;
   const perMonthPrice = activePeriod === 'monthly' ? null : activePeriod === 'quarterly' ? Math.round(quarterlyPrice / 3) : Math.round(yearlyPrice / 12);
   const periodLabel = activePeriod === 'monthly' ? '/tháng' : activePeriod === 'quarterly' ? '/3 tháng' : '/năm';
+
+  // Lite doesn't have a yearly plan — when period toggle is "yearly", show quarterly price for Lite.
+  const liteEffectivePeriod: 'lite_monthly' | 'lite_quarterly' = activePeriod === 'monthly' ? 'lite_monthly' : 'lite_quarterly';
+  const liteCurrentPrice = liteEffectivePeriod === 'lite_monthly' ? liteMonthlyPrice : liteQuarterlyPrice;
+  const litePeriodLabel = liteEffectivePeriod === 'lite_monthly' ? '/tháng' : '/3 tháng';
 
   const PERIOD_OPTIONS: { key: PremiumPeriod; label: string; savePct?: number }[] = [
     { key: 'monthly', label: '1 Tháng' },
@@ -152,123 +184,196 @@ export default function PricingPage() {
           </div>
         </div>
 
-        {/* Plan Cards */}
-        <div className="grid md:grid-cols-3 gap-6 mb-20 animate-[slideUp_0.6s_ease-out_0.2s_both] items-stretch">
+        {/* Plan Cards — Free / Premium Lite / Premium / Exam Bundle */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5 mb-12 animate-[slideUp_0.6s_ease-out_0.2s_both] items-stretch">
           {/* Free Plan */}
-          <div className="group relative flex flex-col p-8 rounded-4xl border bg-theme-bg-card transition-all duration-500 hover:-translate-y-1" style={{ borderColor: 'var(--theme-border)' }}>
-            <div className="mb-8">
-              <div className="text-[11px] font-black uppercase tracking-widest opacity-60 mb-2">Essential</div>
-              <div className="text-3xl font-black mb-1">Miễn phí</div>
-              <div className="text-xs opacity-60 font-medium">Cơ bản & ôn tập nhẹ nhàng</div>
+          <div className="group relative flex flex-col p-6 rounded-4xl border bg-theme-bg-card transition-all duration-500 hover:-translate-y-1" style={{ borderColor: 'var(--theme-border)' }}>
+            <div className="mb-6">
+              <div className="text-[10px] font-black uppercase tracking-widest opacity-60 mb-2">Essential</div>
+              <div className="text-2xl font-black mb-1">Miễn phí</div>
+              <div className="text-xs opacity-60 font-medium">Cơ bản & ôn tập</div>
             </div>
-            <ul className="space-y-4 mb-8 flex-1">
-              {FREE_FEATURES.map((f, i) => (
-                <li key={i} className="flex items-start gap-3 text-[13px] font-medium opacity-70">
-                  <IconCheck size={16} style={{ color: 'var(--theme-text-muted)', marginTop: '2px' }} />
+            <ul className="space-y-3 mb-6 flex-1">
+              {FREE_FEATURES.slice(0, 4).map((f, i) => (
+                <li key={i} className="flex items-start gap-2 text-xs font-medium opacity-70">
+                  <IconCheck size={14} style={{ color: 'var(--theme-text-muted)', marginTop: '2px', flexShrink: 0 }} />
                   {f}
                 </li>
               ))}
-              <li className="flex items-start gap-3 text-[13px] font-medium opacity-70">
-                <IconCheck size={16} style={{ color: 'var(--theme-text-muted)', marginTop: '2px' }} />
-                AI Writing/Speaking — 2 lượt/tuần
+              <li className="flex items-start gap-2 text-xs font-medium opacity-70">
+                <IconCheck size={14} style={{ color: 'var(--theme-text-muted)', marginTop: '2px', flexShrink: 0 }} />
+                AI Writing/Speaking 2/tuần
               </li>
-              <li className="flex items-start gap-3 text-[13px] font-medium opacity-70">
-                <IconCheck size={16} style={{ color: 'var(--theme-text-muted)', marginTop: '2px' }} />
-                AI Reading/Listening — 3 lượt/tuần
-              </li>
-              <li className="flex items-start gap-3 text-[13px] font-medium opacity-70">
-                <IconCheck size={16} style={{ color: 'var(--theme-text-muted)', marginTop: '2px' }} />
-                Roleplay AI — 1 lượt/tuần
+              <li className="flex items-start gap-2 text-xs font-medium opacity-70">
+                <IconCheck size={14} style={{ color: 'var(--theme-text-muted)', marginTop: '2px', flexShrink: 0 }} />
+                Reading/Listening 3/tuần
               </li>
             </ul>
             <button disabled={!isAuthenticated || isPremium}
-              className={`w-full py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all ${isPremium ? 'opacity-20 cursor-not-allowed' : 'bg-theme-bg-secondary hover:bg-theme-border opacity-60'}`}>
-              {isPremium ? 'Gói hiện tại: Premium' : 'Gói hiện tại'}
+              className="w-full py-3 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all bg-theme-bg-secondary hover:bg-theme-border opacity-60">
+              {isPremium ? 'Đã nâng cấp' : 'Gói hiện tại'}
             </button>
           </div>
 
-          {/* Premium Plan - Featured */}
-          <div className="group relative flex flex-col p-8 rounded-4xl border bg-theme-bg-card transition-all duration-500 hover:-translate-y-2 scale-105 z-10"
-            style={{ borderColor: ACCENT.writing, boxShadow: '0 20px 50px -12px rgba(99,102,241,0.15)' }}>
-            <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full bg-indigo-500 text-white text-[10px] font-black uppercase tracking-widest shadow-lg">
-              Phổ biến nhất
-            </div>
-            <div className="mb-8">
+          {/* Premium Lite Plan — entry tier */}
+          <div className="group relative flex flex-col p-6 rounded-4xl border bg-theme-bg-card transition-all duration-500 hover:-translate-y-1"
+            style={{ borderColor: 'var(--theme-border)' }}>
+            <div className="mb-6">
               <div className="flex items-center gap-2 mb-2">
-                <div className="text-[11px] font-black uppercase tracking-widest text-indigo-500">Professional</div>
-                {activePeriod !== 'monthly' && (
-                  <span className="px-2 py-0.5 rounded-md bg-indigo-500/10 text-indigo-500 text-[9px] font-black">TIẾT KIỆM {activePeriod === 'quarterly' ? savePctQuarterly : savePctYearly}%</span>
+                <div className="text-[10px] font-black uppercase tracking-widest text-emerald-500">Lite</div>
+                {liteEffectivePeriod === 'lite_quarterly' && savePctLiteQuarterly > 0 && (
+                  <span className="px-1.5 py-0.5 rounded-md bg-emerald-500/10 text-emerald-500 text-[9px] font-black">-{savePctLiteQuarterly}%</span>
                 )}
               </div>
               <div className="flex items-baseline gap-1">
-                <div className="text-4xl font-black text-indigo-500">
+                <div className="text-3xl font-black text-emerald-500">
+                  {priceReady ? formatVND(liteCurrentPrice) : <span className="opacity-60">—</span>}
+                </div>
+                <div className="text-xs opacity-60 font-medium">{litePeriodLabel}</div>
+              </div>
+              <div className="text-[11px] opacity-60 font-medium mt-1">Practice AI không giới hạn</div>
+            </div>
+            <ul className="space-y-3 mb-6 flex-1">
+              {LITE_EXTRA.map((f, i) => (
+                <li key={i} className="flex items-start gap-2 text-xs font-bold">
+                  <IconCheck size={14} className="text-emerald-500" style={{ marginTop: '2px', flexShrink: 0 }} />
+                  {f}
+                </li>
+              ))}
+            </ul>
+            {!isAuthenticated ? (
+              <Link href="/auth/login?returnTo=/pricing"
+                className="w-full py-3 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 hover:bg-emerald-500/20 flex items-center justify-center">
+                Đăng nhập để mua
+              </Link>
+            ) : (
+              <button onClick={() => openUpgrade(liteEffectivePeriod)}
+                className="w-full py-3 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 hover:bg-emerald-500/20 hover:scale-[1.02] active:scale-95">
+                {isPremiumLite ? 'Gói của bạn' : 'Bắt đầu Lite'}
+              </button>
+            )}
+          </div>
+
+          {/* Premium Full - Featured */}
+          <div className="group relative flex flex-col p-6 rounded-4xl border bg-theme-bg-card transition-all duration-500 hover:-translate-y-2 lg:scale-105 z-10"
+            style={{ borderColor: ACCENT.writing, boxShadow: '0 20px 50px -12px rgba(99,102,241,0.15)' }}>
+            <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full bg-indigo-500 text-white text-[10px] font-black uppercase tracking-widest shadow-lg whitespace-nowrap">
+              Phổ biến nhất
+            </div>
+            <div className="mb-6">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="text-[10px] font-black uppercase tracking-widest text-indigo-500">Professional</div>
+                {activePeriod !== 'monthly' && (
+                  <span className="px-1.5 py-0.5 rounded-md bg-indigo-500/10 text-indigo-500 text-[9px] font-black">-{activePeriod === 'quarterly' ? savePctQuarterly : savePctYearly}%</span>
+                )}
+              </div>
+              <div className="flex items-baseline gap-1">
+                <div className="text-3xl font-black text-indigo-500">
                   {priceReady ? formatVND(currentPrice) : <span className="opacity-60">—</span>}
                 </div>
                 <div className="text-xs opacity-60 font-medium">{periodLabel}</div>
               </div>
               {priceReady && perMonthPrice ? <div className="text-[11px] opacity-60 font-medium mt-1">Chỉ {formatVND(perMonthPrice)}/tháng</div> : null}
             </div>
-            <ul className="space-y-4 mb-8 flex-1">
+            <ul className="space-y-3 mb-6 flex-1">
               {PREMIUM_EXTRA.map((f, i) => (
-                <li key={i} className="flex items-start gap-3 text-[13px] font-bold">
-                  <IconZap size={16} className="text-indigo-500" style={{ marginTop: '2px' }} />
+                <li key={i} className="flex items-start gap-2 text-xs font-bold">
+                  <IconZap size={14} className="text-indigo-500" style={{ marginTop: '2px', flexShrink: 0 }} />
                   {f}
                 </li>
               ))}
-              <li className="flex items-start gap-3 text-[13px] font-bold opacity-60">
-                <IconCheck size={16} style={{ marginTop: '2px' }} />
-                Bao gồm mọi tính năng Free
-              </li>
             </ul>
             {!isAuthenticated ? (
               <Link href="/auth/login?returnTo=/pricing"
-                className="w-full py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all text-white shadow-xl shadow-indigo-500/20 hover:scale-[1.02] active:scale-95 flex items-center justify-center"
+                className="w-full py-3 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all text-white shadow-xl shadow-indigo-500/20 hover:scale-[1.02] active:scale-95 flex items-center justify-center"
                 style={{ background: 'linear-gradient(135deg, #6366F1, #4F46E5)' }}>
                 Đăng nhập để mua
               </Link>
             ) : (
               <button onClick={() => openUpgrade(activePeriod)}
-                className="w-full py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all text-white shadow-xl shadow-indigo-500/20 hover:scale-[1.02] active:scale-95"
+                className="w-full py-3 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all text-white shadow-xl shadow-indigo-500/20 hover:scale-[1.02] active:scale-95"
                 style={{ background: 'linear-gradient(135deg, #6366F1, #4F46E5)' }}>
-                {isPremium ? 'Gói của bạn' : 'Nâng cấp ngay'}
+                {userPlan === 'premium' ? 'Gói của bạn' : 'Nâng cấp ngay'}
               </button>
             )}
           </div>
 
-          {/* Lifetime Plan */}
-          <div className="group relative flex flex-col p-8 rounded-4xl border bg-theme-bg-card transition-all duration-500 hover:-translate-y-1" 
-            style={{ borderColor: '#EC489933' }}>
-            <div className="mb-8">
+          {/* Exam Bundle — one-time 90-day */}
+          <div className="group relative flex flex-col p-6 rounded-4xl border bg-theme-bg-card transition-all duration-500 hover:-translate-y-1"
+            style={{ borderColor: '#A855F744' }}>
+            <div className="mb-6">
               <div className="flex items-center gap-2 mb-2">
-                <div className="text-[11px] font-black uppercase tracking-widest text-pink-500">Elite</div>
-                {lifetimeInfo && !lifetimeSoldOut && (
-                  <span className="px-2 py-0.5 rounded-md bg-pink-500/10 text-pink-500 text-[9px] font-black">CÒN {lifetimeInfo.remaining} SUẤT</span>
-                )}
+                <div className="text-[10px] font-black uppercase tracking-widest text-purple-500">Exam Bundle</div>
+                <span className="px-1.5 py-0.5 rounded-md bg-purple-500/10 text-purple-500 text-[9px] font-black">90 NGÀY</span>
               </div>
-              <div className="text-3xl font-black text-pink-500">
-                {priceReady ? formatVND(lifetimePrice) : <span className="opacity-60">—</span>}
+              <div className="flex items-baseline gap-1">
+                <div className="text-3xl font-black text-purple-500">
+                  {priceReady ? formatVND(examBundlePrice) : <span className="opacity-60">—</span>}
+                </div>
               </div>
-              <div className="text-xs opacity-60 font-medium">Mua một lần - Dùng mãi mãi</div>
+              <div className="text-[11px] opacity-60 font-medium mt-1">Một lần — đủ cho 1 kỳ thi</div>
             </div>
-            <ul className="space-y-4 mb-8 flex-1">
-              {LIFETIME_EXTRA.map((f, i) => (
-                <li key={i} className="flex items-start gap-3 text-[13px] font-medium text-pink-500/80">
-                  <IconStar size={16} className="text-pink-500" style={{ marginTop: '2px' }} />
+            <ul className="space-y-3 mb-6 flex-1">
+              {EXAM_BUNDLE_EXTRA.map((f, i) => (
+                <li key={i} className="flex items-start gap-2 text-xs font-bold">
+                  <IconStar size={14} className="text-purple-500" style={{ marginTop: '2px', flexShrink: 0 }} />
                   {f}
                 </li>
               ))}
             </ul>
             {!isAuthenticated ? (
               <Link href="/auth/login?returnTo=/pricing"
-                className="w-full py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all shadow-lg bg-pink-500/10 text-pink-500 border border-pink-500/20 hover:bg-pink-500/20 hover:scale-[1.02] flex items-center justify-center">
+                className="w-full py-3 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all bg-purple-500/10 text-purple-600 border border-purple-500/20 hover:bg-purple-500/20 flex items-center justify-center">
                 Đăng nhập để mua
               </Link>
             ) : (
-              <button onClick={() => openUpgrade('lifetime')} disabled={lifetimeSoldOut}
-                className={`w-full py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all shadow-lg ${lifetimeSoldOut ? 'bg-theme-bg-secondary opacity-60 cursor-not-allowed' : 'bg-pink-500/10 text-pink-500 border border-pink-500/20 hover:bg-pink-500/20 hover:scale-[1.02]'}`}>
-                {isLifetime ? 'Đã kích hoạt' : lifetimeSoldOut ? 'Hết suất ưu đãi' : 'Mua trọn đời'}
+              <button onClick={() => openUpgrade('exam_bundle')}
+                className="w-full py-3 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all bg-purple-500/10 text-purple-600 border border-purple-500/20 hover:bg-purple-500/20 hover:scale-[1.02] active:scale-95">
+                {isExamBundle ? 'Đang dùng Bundle' : 'Mua Exam Bundle'}
               </button>
             )}
+          </div>
+        </div>
+
+        {/* Lifetime — banner section below the main cards */}
+        <div className="mb-20 animate-[slideUp_0.6s_ease-out_0.25s_both]">
+          <div className="rounded-4xl border p-6 md:p-8 bg-theme-bg-card flex flex-col md:flex-row items-start md:items-center gap-6"
+            style={{ borderColor: '#EC489933' }}>
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="text-[11px] font-black uppercase tracking-widest text-pink-500">Lifetime · Elite</div>
+                {lifetimeInfo && !lifetimeSoldOut && (
+                  <span className="px-2 py-0.5 rounded-md bg-pink-500/10 text-pink-500 text-[9px] font-black">CÒN {lifetimeInfo.remaining} SUẤT</span>
+                )}
+              </div>
+              <div className="flex items-baseline gap-3 mb-2">
+                <div className="text-3xl md:text-4xl font-black text-pink-500">
+                  {priceReady ? formatVND(lifetimePrice) : <span className="opacity-60">—</span>}
+                </div>
+                <div className="text-sm opacity-60 font-medium">Mua một lần · Dùng mãi mãi</div>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-3">
+                {LIFETIME_EXTRA.map((f, i) => (
+                  <div key={i} className="flex items-start gap-2 text-xs font-medium text-pink-500/80">
+                    <IconStar size={14} className="text-pink-500" style={{ marginTop: '2px', flexShrink: 0 }} />
+                    {f}
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="w-full md:w-auto md:min-w-50">
+              {!isAuthenticated ? (
+                <Link href="/auth/login?returnTo=/pricing"
+                  className="w-full block py-3 px-6 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all bg-pink-500/10 text-pink-500 border border-pink-500/20 hover:bg-pink-500/20 text-center">
+                  Đăng nhập để mua
+                </Link>
+              ) : (
+                <button onClick={() => openUpgrade('lifetime')} disabled={lifetimeSoldOut}
+                  className={`w-full py-3 px-6 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all ${lifetimeSoldOut ? 'bg-theme-bg-secondary opacity-60 cursor-not-allowed' : 'bg-pink-500/10 text-pink-500 border border-pink-500/20 hover:bg-pink-500/20 hover:scale-[1.02]'}`}>
+                  {isLifetime ? 'Đã kích hoạt' : lifetimeSoldOut ? 'Hết suất ưu đãi' : 'Mua trọn đời'}
+                </button>
+              )}
+            </div>
           </div>
         </div>
 
@@ -278,28 +383,32 @@ export default function PricingPage() {
             <h2 className="text-2xl font-black mb-2">So sánh chi tiết</h2>
             <p className="text-xs opacity-60 font-medium uppercase tracking-widest">Lựa chọn thông minh cho lộ trình của bạn</p>
           </div>
-          <div className="rounded-4xl border overflow-hidden backdrop-blur-xl bg-theme-bg-card/50" style={{ borderColor: 'var(--theme-border)' }}>
-            <table className="w-full">
+          <div className="rounded-4xl border overflow-x-auto backdrop-blur-xl bg-theme-bg-card/50" style={{ borderColor: 'var(--theme-border)' }}>
+            <table className="w-full min-w-180">
               <thead>
                 <tr className="bg-theme-bg-secondary/50">
-                  <th className="text-left py-6 px-8 text-[11px] font-black uppercase tracking-widest opacity-60">Tính năng</th>
-                  <th className="text-center py-6 px-6 text-[11px] font-black uppercase tracking-widest opacity-60 w-28">Free</th>
-                  <th className="text-center py-6 px-6 text-[11px] font-black uppercase tracking-widest text-indigo-500 w-28">Premium</th>
-                  <th className="text-center py-6 px-6 text-[11px] font-black uppercase tracking-widest text-pink-500 w-28">Lifetime</th>
+                  <th className="text-left py-5 px-6 text-[11px] font-black uppercase tracking-widest opacity-60">Tính năng</th>
+                  <th className="text-center py-5 px-3 text-[11px] font-black uppercase tracking-widest opacity-60 w-24">Free</th>
+                  <th className="text-center py-5 px-3 text-[11px] font-black uppercase tracking-widest text-emerald-500 w-24">Lite</th>
+                  <th className="text-center py-5 px-3 text-[11px] font-black uppercase tracking-widest text-indigo-500 w-24">Premium</th>
+                  <th className="text-center py-5 px-3 text-[11px] font-black uppercase tracking-widest text-pink-500 w-24">Lifetime</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/3">
                 {COMPARISON.map((row) => (
                   <tr key={row.feature} className="hover:bg-white/1 transition-colors">
-                    <td className="py-4 px-8 text-[13px] font-bold opacity-80">{row.feature}</td>
-                    <td className="text-center py-4 px-6">
-                      {row.free === true ? <div className="flex justify-center"><IconCheck size={16} className="opacity-60" /></div> : row.free === false ? <div className="flex justify-center"><IconX size={16} /></div> : <span className="text-[10px] font-black opacity-60">{row.free}</span>}
+                    <td className="py-3 px-6 text-xs font-bold opacity-80">{row.feature}</td>
+                    <td className="text-center py-3 px-3">
+                      {row.free === true ? <div className="flex justify-center"><IconCheck size={14} className="opacity-60" /></div> : row.free === false ? <div className="flex justify-center"><IconX size={14} /></div> : <span className="text-[10px] font-black opacity-60">{row.free}</span>}
                     </td>
-                    <td className="text-center py-4 px-6">
-                      {row.premium === true ? <div className="flex justify-center"><IconZap size={16} className="text-indigo-500" /></div> : row.premium === false ? <div className="flex justify-center"><IconX size={16} /></div> : <span className="text-[10px] font-black text-indigo-500">{row.premium}</span>}
+                    <td className="text-center py-3 px-3">
+                      {row.lite === true ? <div className="flex justify-center"><IconCheck size={14} className="text-emerald-500" /></div> : row.lite === false ? <div className="flex justify-center"><IconX size={14} /></div> : <span className="text-[10px] font-black text-emerald-500">{row.lite}</span>}
                     </td>
-                    <td className="text-center py-4 px-6">
-                      {row.lifetime === true ? <div className="flex justify-center"><IconStar size={16} className="text-pink-500" /></div> : row.lifetime === false ? <div className="flex justify-center"><IconX size={16} /></div> : <span className="text-[10px] font-black text-pink-500">{row.lifetime}</span>}
+                    <td className="text-center py-3 px-3">
+                      {row.premium === true ? <div className="flex justify-center"><IconZap size={14} className="text-indigo-500" /></div> : row.premium === false ? <div className="flex justify-center"><IconX size={14} /></div> : <span className="text-[10px] font-black text-indigo-500">{row.premium}</span>}
+                    </td>
+                    <td className="text-center py-3 px-3">
+                      {row.lifetime === true ? <div className="flex justify-center"><IconStar size={14} className="text-pink-500" /></div> : row.lifetime === false ? <div className="flex justify-center"><IconX size={14} /></div> : <span className="text-[10px] font-black text-pink-500">{row.lifetime}</span>}
                     </td>
                   </tr>
                 ))}

@@ -11,7 +11,7 @@ import {
 import { useAuthStore } from '@/stores/authStore';
 import { useModalA11y } from '@/hooks/useModalA11y';
 import { trackEvent } from '@/lib/analytics';
-import type { UpgradeResponse, BillingPeriod } from '@/lib/api/subscriptions';
+import type { UpgradeResponse, BillingPeriod, Plan } from '@/lib/api/subscriptions';
 import { ACCENT, STATUS } from '@/lib/tokens';
 
 interface Props {
@@ -95,14 +95,22 @@ function getBankBin(bankName: string): string {
   return bankName;
 }
 
-function priceForPeriod(p: BillingPeriod, plans?: any[]): number {
-  const premium = plans?.find((plan: any) => plan.code === 'premium');
-  const lifetime = plans?.find((plan: any) => plan.code === 'lifetime');
+function priceForPeriod(p: BillingPeriod, plans?: Plan[]): number {
+  const lite = plans?.find((plan) => plan.code === 'premium_lite');
+  const premium = plans?.find((plan) => plan.code === 'premium');
+  const examBundle = plans?.find((plan) => plan.code === 'exam_bundle');
+  const lifetime = plans?.find((plan) => plan.code === 'lifetime');
 
-  if (p === 'lifetime') return lifetime?.price ?? 0;
-  if (p === 'yearly') return premium?.yearlyPrice ?? 0;
-  if (p === 'quarterly') return premium?.quarterlyPrice ?? 0;
-  return premium?.monthlyPrice ?? 0;
+  switch (p) {
+    case 'lite_monthly':   return lite?.monthlyPrice ?? 0;
+    case 'lite_quarterly': return lite?.quarterlyPrice ?? 0;
+    case 'exam_bundle':    return examBundle?.price ?? 0;
+    case 'lifetime':       return lifetime?.price ?? 0;
+    case 'yearly':         return premium?.yearlyPrice ?? 0;
+    case 'quarterly':      return premium?.quarterlyPrice ?? 0;
+    case 'monthly':
+    default:               return premium?.monthlyPrice ?? 0;
+  }
 }
 
 export function UpgradeModal({ open, onClose, defaultPeriod = 'yearly', featureContext }: Props) {
@@ -212,58 +220,112 @@ export function UpgradeModal({ open, onClose, defaultPeriod = 'yearly', featureC
               </p>
             )}
 
-            {/* Period toggle */}
-            <div className="grid grid-cols-4 gap-2 mb-5">
-              {(['monthly', 'quarterly', 'yearly', 'lifetime'] as const).map((p) => {
-                const disabled = p === 'lifetime' && lifetimeSoldOut;
-                const isActive = period === p;
-                return (
-                  <button
-                    key={p}
-                    onClick={() => { if (!disabled) { setPeriod(p); setPromoApplied(null); setPromoError(null); } }}
-                    disabled={disabled}
-                    className="relative py-3 px-2 rounded-xl text-xs font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                    style={{
-                      color: isActive ? '#fff' : 'var(--theme-text-primary)',
-                      background: isActive
-                        ? 'linear-gradient(135deg, #6366F1, #8B5CF6)'
-                        : 'var(--theme-bg-secondary)',
-                      border: isActive ? 'none' : '1px solid var(--theme-border)',
-                    }}
-                  >
-                    <div className="text-caption opacity-90">
-                      {p === 'monthly' ? 'Tháng' : p === 'quarterly' ? '3 Tháng' : p === 'yearly' ? 'Năm' : 'Trọn đời'}
-                    </div>
-                    <div className="text-body font-bold mt-0.5">
-                      {plansLoading ? '...' : formatVND(priceForPeriod(p, plans))}
-                    </div>
-                    {p === 'quarterly' && (
-                      <div
-                        className="absolute -top-2 left-1/2 -translate-x-1/2 px-1.5 py-0.5 rounded-full text-[9px] font-bold whitespace-nowrap"
-                        style={{ backgroundColor: ACCENT.writing, color: '#fff' }}
-                      >
-                        -16%
+            {/* Period selector — grouped by tier */}
+            <div className="mb-5">
+              {/* Premium Lite row */}
+              <div className="text-[10px] font-black uppercase tracking-widest mb-2 text-emerald-500">
+                Premium Lite — Không có exam mode
+              </div>
+              <div className="grid grid-cols-2 gap-2 mb-3">
+                {(['lite_monthly', 'lite_quarterly'] as const).map((p) => {
+                  const isActive = period === p;
+                  return (
+                    <button
+                      key={p}
+                      onClick={() => { setPeriod(p); setPromoApplied(null); setPromoError(null); }}
+                      className="relative py-2.5 px-2 rounded-xl text-xs font-semibold transition-all"
+                      style={{
+                        color: isActive ? '#fff' : 'var(--theme-text-primary)',
+                        background: isActive ? 'linear-gradient(135deg, #10B981, #14B8A6)' : 'var(--theme-bg-secondary)',
+                        border: isActive ? 'none' : '1px solid var(--theme-border)',
+                      }}
+                    >
+                      <div className="text-caption opacity-90">
+                        {p === 'lite_monthly' ? 'Lite · Tháng' : 'Lite · 3 Tháng'}
                       </div>
-                    )}
-                    {p === 'yearly' && (
-                      <div
-                        className="absolute -top-2 left-1/2 -translate-x-1/2 px-1.5 py-0.5 rounded-full text-[9px] font-bold whitespace-nowrap"
-                        style={{ backgroundColor: ACCENT.xp, color: '#fff' }}
-                      >
-                        -17%
+                      <div className="text-body font-bold mt-0.5">
+                        {plansLoading ? '...' : formatVND(priceForPeriod(p, plans))}
                       </div>
-                    )}
-                    {p === 'lifetime' && lifetimeInfo && lifetimeInfo.remaining > 0 && (
-                      <div
-                        className="absolute -top-2 left-1/2 -translate-x-1/2 px-1.5 py-0.5 rounded-full text-[9px] font-bold whitespace-nowrap"
-                        style={{ backgroundColor: ACCENT.listening, color: '#fff' }}
-                      >
-                        HOT
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Premium Full row */}
+              <div className="text-[10px] font-black uppercase tracking-widest mb-2 text-indigo-500">
+                Premium — Đầy đủ + Exam mode
+              </div>
+              <div className="grid grid-cols-3 gap-2 mb-3">
+                {(['monthly', 'quarterly', 'yearly'] as const).map((p) => {
+                  const isActive = period === p;
+                  return (
+                    <button
+                      key={p}
+                      onClick={() => { setPeriod(p); setPromoApplied(null); setPromoError(null); }}
+                      className="relative py-2.5 px-2 rounded-xl text-xs font-semibold transition-all"
+                      style={{
+                        color: isActive ? '#fff' : 'var(--theme-text-primary)',
+                        background: isActive ? 'linear-gradient(135deg, #6366F1, #8B5CF6)' : 'var(--theme-bg-secondary)',
+                        border: isActive ? 'none' : '1px solid var(--theme-border)',
+                      }}
+                    >
+                      <div className="text-caption opacity-90">
+                        {p === 'monthly' ? 'Tháng' : p === 'quarterly' ? '3 Tháng' : 'Năm'}
                       </div>
-                    )}
-                  </button>
-                );
-              })}
+                      <div className="text-body font-bold mt-0.5">
+                        {plansLoading ? '...' : formatVND(priceForPeriod(p, plans))}
+                      </div>
+                      {p === 'quarterly' && (
+                        <div className="absolute -top-2 left-1/2 -translate-x-1/2 px-1.5 py-0.5 rounded-full text-[9px] font-bold whitespace-nowrap" style={{ backgroundColor: ACCENT.writing, color: '#fff' }}>
+                          -16%
+                        </div>
+                      )}
+                      {p === 'yearly' && (
+                        <div className="absolute -top-2 left-1/2 -translate-x-1/2 px-1.5 py-0.5 rounded-full text-[9px] font-bold whitespace-nowrap" style={{ backgroundColor: ACCENT.xp, color: '#fff' }}>
+                          -17%
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Exam Bundle + Lifetime row */}
+              <div className="text-[10px] font-black uppercase tracking-widest mb-2" style={{ color: 'var(--theme-text-muted)' }}>
+                Một lần thanh toán
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                {(['exam_bundle', 'lifetime'] as const).map((p) => {
+                  const disabled = p === 'lifetime' && lifetimeSoldOut;
+                  const isActive = period === p;
+                  const accent = p === 'exam_bundle' ? '#A855F7' : '#EC4899';
+                  return (
+                    <button
+                      key={p}
+                      onClick={() => { if (!disabled) { setPeriod(p); setPromoApplied(null); setPromoError(null); } }}
+                      disabled={disabled}
+                      className="relative py-2.5 px-2 rounded-xl text-xs font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                      style={{
+                        color: isActive ? '#fff' : 'var(--theme-text-primary)',
+                        background: isActive ? `linear-gradient(135deg, ${accent}, ${accent}cc)` : 'var(--theme-bg-secondary)',
+                        border: isActive ? 'none' : '1px solid var(--theme-border)',
+                      }}
+                    >
+                      <div className="text-caption opacity-90">
+                        {p === 'exam_bundle' ? 'Exam Bundle · 90 ngày' : 'Lifetime · Trọn đời'}
+                      </div>
+                      <div className="text-body font-bold mt-0.5">
+                        {plansLoading ? '...' : formatVND(priceForPeriod(p, plans))}
+                      </div>
+                      {p === 'lifetime' && lifetimeInfo && lifetimeInfo.remaining > 0 && (
+                        <div className="absolute -top-2 left-1/2 -translate-x-1/2 px-1.5 py-0.5 rounded-full text-[9px] font-bold whitespace-nowrap" style={{ backgroundColor: ACCENT.listening, color: '#fff' }}>
+                          HOT
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
             {/* Lifetime remaining */}
