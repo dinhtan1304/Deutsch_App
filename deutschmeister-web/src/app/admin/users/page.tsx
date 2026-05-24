@@ -78,6 +78,7 @@ function PlanBadge({ user }: { user: AdminUserItem }) {
 
 const FILTER_OPTS = [
   { value: '', label: 'Tất cả' },
+  { value: 'free', label: 'Free' },
   { value: 'premium_lite', label: '🌱 Lite' },
   { value: 'premium', label: '⭐ Premium' },
   { value: 'exam_bundle', label: '🎯 Exam Bundle' },
@@ -95,7 +96,7 @@ export default function AdminUsersPage() {
 
   const roleFilter = filter === 'admin' ? 'admin' : undefined;
   const isActiveFilter = filter === 'inactive' ? 'false' : undefined;
-  const planFilter = ['premium_lite', 'premium', 'lifetime', 'exam_bundle'].includes(filter) ? filter : undefined;
+  const planFilter = ['free', 'premium_lite', 'premium', 'lifetime', 'exam_bundle'].includes(filter) ? filter : undefined;
 
   const { data, isLoading, isFetching, isError, error, refetch } = useAdminUsers({
     search: search || undefined,
