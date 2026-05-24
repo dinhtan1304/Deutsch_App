@@ -71,6 +71,11 @@ export default function AdminSubscriptionsPage() {
     enabled: tab === 'subs',
   });
 
+  const showError = (err: any, fallback: string) => {
+    const msg = err?.response?.data?.message ?? err?.message ?? fallback;
+    alert(Array.isArray(msg) ? msg.join('\n') : msg);
+  };
+
   const confirmMut = useMutation({
     mutationFn: ({ id, note }: { id: string; note?: string }) =>
       adminSubscriptionsApi.confirmPayment(id, note),
@@ -78,6 +83,7 @@ export default function AdminSubscriptionsPage() {
       queryClient.invalidateQueries({ queryKey: ['admin-payments'] });
       setActionTarget(null); setActionNote('');
     },
+    onError: (err) => showError(err, 'Không xác nhận được thanh toán'),
   });
 
   const rejectMut = useMutation({
@@ -87,6 +93,7 @@ export default function AdminSubscriptionsPage() {
       queryClient.invalidateQueries({ queryKey: ['admin-payments'] });
       setActionTarget(null); setActionNote('');
     },
+    onError: (err) => showError(err, 'Không từ chối được thanh toán'),
   });
 
   const grantMut = useMutation({
@@ -96,11 +103,13 @@ export default function AdminSubscriptionsPage() {
       queryClient.invalidateQueries({ queryKey: ['admin-subs'] });
       setGrantTarget(null); setGrantNote('');
     },
+    onError: (err) => showError(err, 'Không cấp gói được'),
   });
 
   const revokeMut = useMutation({
     mutationFn: (userId: string) => adminSubscriptionsApi.revokePremium(userId),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin-subs'] }),
+    onError: (err) => showError(err, 'Không thu hồi được gói'),
   });
 
   return (
