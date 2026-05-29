@@ -1,0 +1,60 @@
+{
+  "search": {
+    "placeholderShort": "Tìm kiếm...",
+    "placeholderLong": "Tìm kiếm, điều hướng, dịch câu...",
+    "ariaOpenPalette": "Mở command palette"
+  },
+  "streak": {
+    "title": "Streak: {count} ngày liên tiếp"
+  },
+  "notifications": {
+    "title": "Thông báo",
+    "ariaLabel": "Thông báo"
+  },
+  "userBadge": {
+    "premium": "Premium",
+    "free": "Miễn phí"
+  },
+  "userMenu": {
+    "profile": "Hồ sơ cá nhân",
+    "settings": "Thiết lập tài khoản",
+    "discord": "Tham gia Discord",
+    "feedback": "Phản hồi & Báo lỗi",
+    "logout": "Đăng xuất"
+  },
+  "guest": {
+    "login": "Đăng nhập",
+    "register": "Đăng ký"
+  },
+  "feedback": {
+    "title": "Phản hồi",
+    "subtitle": "Giúp chúng tôi cải thiện DeutschMeister",
+    "closeAria": "Đóng",
+    "types": {
+      "bug": "Báo cáo lỗi",
+      "suggestion": "Góp ý / Đề xuất",
+      "other": "Khác"
+    },
+    "placeholders": {
+      "bug": "Mô tả lỗi bạn gặp phải — xảy ra ở đâu, làm gì thì bị lỗi...",
+      "suggestion": "Bạn muốn thêm tính năng gì hoặc cải thiện điều gì...",
+      "other": "Chia sẻ suy nghĩ của bạn về ứng dụng..."
+    },
+    "minChars": "{count}/10 ký tự tối thiểu",
+    "addScreenshot": "Thêm ảnh chụp màn hình ({current}/{max})",
+    "imageAlt": "Ảnh {index}",
+    "submit": "Gửi phản hồi",
+    "submitting": "Đang gửi...",
+    "success": {
+      "title": "Cảm ơn bạn!",
+      "description": "Phản hồi của bạn đã được ghi nhận và sẽ giúp chúng tôi cải thiện ứng dụng.",
+      "close": "Đóng"
+    },
+    "errors": {
+      "tooManyImages": "Tối đa {max} ảnh",
+      "notImage": "Chỉ chấp nhận file ảnh",
+      "tooLarge": "Ảnh tối đa {max}MB",
+      "processFailed": "Không thể xử lý ảnh"
+    }
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "search": {
+    "placeholderShort": "Suchen...",
+    "placeholderLong": "Suchen, navigieren, Sätze übersetzen...",
+    "ariaOpenPalette": "Befehlspalette öffnen"
+  },
+  "streak": {
+    "title": "Serie: {count} Tage in Folge"
+  },
+  "notifications": {
+    "title": "Benachrichtigungen",
+    "ariaLabel": "Benachrichtigungen"
+  },
+  "userBadge": {
+    "premium": "Premium",
+    "free": "Kostenlos"
+  },
+  "userMenu": {
+    "profile": "Mein Profil",
+    "settings": "Kontoeinstellungen",
+    "discord": "Discord beitreten",
+    "feedback": "Feedback & Fehlerbericht",
+    "logout": "Abmelden"
+  },
+  "guest": {
+    "login": "Anmelden",
+    "register": "Registrieren"
+  },
+  "feedback": {
+    "title": "Feedback",
+    "subtitle": "Hilf uns, DeutschMeister zu verbessern",
+    "closeAria": "Schließen",
+    "types": {
+      "bug": "Fehlerbericht",
+      "suggestion": "Vorschlag",
+      "other": "Sonstiges"
+    },
+    "placeholders": {
+      "bug": "Beschreibe den Fehler — wo er auftritt und was du gemacht hast...",
+      "suggestion": "Welches Feature möchtest du, oder was sollten wir verbessern...",
+      "other": "Teile uns deine Meinung zur App mit..."
+    },
+    "minChars": "{count}/10 Zeichen Minimum",
+    "addScreenshot": "Screenshot hinzufügen ({current}/{max})",
+    "imageAlt": "Bild {index}",
+    "submit": "Feedback senden",
+    "submitting": "Wird gesendet...",
+    "success": {
+      "title": "Vielen Dank!",
+      "description": "Dein Feedback wurde erfasst und hilft uns, die App zu verbessern.",
+      "close": "Schließen"
+    },
+    "errors": {
+      "tooManyImages": "Höchstens {max} Bilder",
+      "notImage": "Nur Bilddateien werden akzeptiert",
+      "tooLarge": "Bild max. {max}MB",
+      "processFailed": "Bild konnte nicht verarbeitet werden"
+    }
+  }
+}

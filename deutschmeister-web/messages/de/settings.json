@@ -1,0 +1,108 @@
+{
+  "header": {
+    "title": "Einstellungen",
+    "subtitle": "Passe dein Erlebnis an"
+  },
+  "tabs": {
+    "display": "Anzeige",
+    "sound": "Sound",
+    "learning": "Lernen",
+    "notification": "Benachrichtigungen",
+    "account": "Konto"
+  },
+  "toasts": {
+    "saved": "Gespeichert!",
+    "saveFailed": "Einstellungen konnten nicht gespeichert werden. Bitte später erneut versuchen.",
+    "reset": "Zurückgesetzt!",
+    "resetConfirm": "Alle Einstellungen zurücksetzen?"
+  },
+  "display": {
+    "themeLabel": "Design",
+    "themes": {
+      "light": "Hell",
+      "dark": "Dunkel",
+      "system": "System"
+    },
+    "showVietnamese": {
+      "label": "Vietnamesische Bedeutung",
+      "desc": "Vietnamesische Bedeutung in Wortlisten und Beispielen anzeigen"
+    },
+    "showPronunciation": {
+      "label": "IPA-Lautschrift",
+      "desc": "IPA-Lautschrift für den Wortschatz anzeigen"
+    },
+    "showExamples": {
+      "label": "Beispielsätze",
+      "desc": "Beispielverwendung für jedes Wort anzeigen"
+    }
+  },
+  "sound": {
+    "soundEnabled": {
+      "label": "Soundeffekte",
+      "desc": "Sounds bei richtigen Antworten und abgeschlossenen Lektionen abspielen"
+    },
+    "autoPlaySound": {
+      "label": "Automatische Aussprache",
+      "desc": "Aussprache automatisch abspielen, wenn ein Wort angezeigt wird"
+    },
+    "speechRate": {
+      "label": "Sprechgeschwindigkeit",
+      "slow": "Langsam",
+      "normal": "Normal",
+      "fast": "Schnell"
+    }
+  },
+  "learning": {
+    "dailyGoal": "Tagesziel",
+    "dailyGoalUnit": "Wörter",
+    "questionsPerGame": "Fragen pro Spiel",
+    "questionsPerGameUnit": "Fragen",
+    "timedChallenge": "Zeitherausforderung",
+    "timedChallengeUnit": "Sekunden",
+    "preferredLevel": {
+      "label": "Bevorzugtes Niveau",
+      "desc": "Wörter in Spielen werden von A1 bis zu diesem Niveau zufällig ausgewählt",
+      "options": {
+        "all": "Alle Niveaus",
+        "A1": "A1 - Anfänger",
+        "A2": "A2 - Grundkenntnisse",
+        "B1": "B1 - Mittelstufe",
+        "B2": "B2 - Obere Mittelstufe",
+        "C1": "C1 - Fortgeschritten",
+        "C2": "C2 - Kompetenz"
+      }
+    }
+  },
+  "notification": {
+    "dailyReminder": {
+      "label": "Tägliche Erinnerung",
+      "desc": "E-Mail-Erinnerung um 19 Uhr, falls du dein Tagesziel noch nicht erreicht hast"
+    },
+    "weeklyEmail": {
+      "label": "Wöchentlicher Bericht",
+      "desc": "Wöchentliche Lernzusammenfassung am Sonntagabend"
+    }
+  },
+  "account": {
+    "fallbackName": "Benutzer",
+    "currentPlanLabel": "Aktueller Plan",
+    "planNames": {
+      "free": "Kostenloser Plan",
+      "premium": "Premium-Plan",
+      "lifetime": "Lifetime-Plan"
+    },
+    "expiresOn": "Läuft ab: {date}",
+    "basicFeatures": "Grundfunktionen",
+    "lifetimeBenefits": "Lifetime-Vorteile",
+    "upgrade": "Jetzt upgraden",
+    "managePlan": "Plan verwalten",
+    "logout": "Abmelden",
+    "guestPrompt": "Bitte anmelden",
+    "guestLogin": "Anmelden",
+    "supportText": "Technischer Support:"
+  },
+  "footer": {
+    "reset": "Auf Standard zurücksetzen",
+    "backHome": "Zur Startseite"
+  }
+}

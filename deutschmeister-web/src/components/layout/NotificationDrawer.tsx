@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import type { ComponentType } from 'react';
+import { useTranslations, useFormatter } from 'next-intl';
 import { ACCENT, STATUS } from '@/lib/tokens';
 import Link from 'next/link';
 import { useNotifications, useMarkRead, useMarkAllRead } from '@/hooks/useNotifications';
@@ -23,20 +24,28 @@ const TYPE_CONFIG: Record<string, { icon: ComponentType<{ size?: number }>; colo
   level_up:    { icon: IconStar,   color: ACCENT.xp,      bg: `${ACCENT.xp}1a` },
 };
 
-function timeAgo(dateStr: string): string {
-  const diff = Date.now() - new Date(dateStr).getTime();
-  const mins = Math.floor(diff / 60000);
-  if (mins < 1) return 'Vừa xong';
-  if (mins < 60) return `${mins} phút trước`;
-  const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours} giờ trước`;
-  const days = Math.floor(hours / 24);
-  if (days < 7) return `${days} ngày trước`;
-  return new Date(dateStr).toLocaleDateString('vi-VN');
+// Resolve a relative-time label using next-intl's ICU-backed translator
+// + the active locale's date format for older items. Kept inline (not a
+// utility) because it needs the t/formatter hooks from this component.
+function useTimeAgo() {
+  const t = useTranslations('common');
+  const formatter = useFormatter();
+  return (dateStr: string): string => {
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return t('time.justNow');
+    if (mins < 60) return t('time.minutesAgo', { count: mins });
+    const hours = Math.floor(mins / 60);
+    if (hours < 24) return t('time.hoursAgo', { count: hours });
+    const days = Math.floor(hours / 24);
+    if (days < 7) return t('time.daysAgo', { count: days });
+    return formatter.dateTime(new Date(dateStr));
+  };
 }
 
 export function NotificationDrawer({ open, onClose }: Props) {
   const drawerRef = useModalA11y(open, onClose);
+  const timeAgo = useTimeAgo();
   const [page] = useState(1);
   const { data, isLoading, isError, refetch } = useNotifications(page);
   const markRead = useMarkRead();

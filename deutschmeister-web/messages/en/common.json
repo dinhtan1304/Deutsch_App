@@ -1,0 +1,36 @@
+{
+  "actions": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "continue": "Continue",
+    "back": "Back",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "submit": "Submit",
+    "retry": "Try again",
+    "next": "Next",
+    "previous": "Previous"
+  },
+  "state": {
+    "loading": "Loading…",
+    "error": "Something went wrong",
+    "empty": "No data",
+    "saving": "Saving…",
+    "saved": "Saved"
+  },
+  "time": {
+    "justNow": "Just now",
+    "minutesAgo": "{count, plural, =0 {just now} one {# minute ago} other {# minutes ago}}",
+    "hoursAgo": "{count, plural, one {# hour ago} other {# hours ago}}",
+    "daysAgo": "{count, plural, one {# day ago} other {# days ago}}"
+  },
+  "language": {
+    "label": "Language",
+    "description": "Choose the interface language",
+    "vi": "Tiếng Việt",
+    "en": "English",
+    "de": "Deutsch"
+  }
+}

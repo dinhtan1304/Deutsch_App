@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations, useFormatter } from 'next-intl';
 import type { DashboardStats } from '@/types/dashboard';
 import {
   IconFlame, IconBookOpen, IconTarget,
@@ -12,71 +13,65 @@ interface StatsCardsProps {
   stats: DashboardStats;
 }
 
+// Stable id per card — used for grid-span logic and label lookup. Decouples
+// the rendered label (locale-dependent) from the structural identity.
+type CardId = 'streak' | 'wordsLearned' | 'accuracy' | 'studyTime' | 'topicsDone' | 'grammar' | 'needsReview';
+
 interface StatCardConfig {
+  id: CardId;
   icon: React.ComponentType<{ size?: number; className?: string }>;
-  label: string;
   getValue: (s: DashboardStats) => string | number;
-  getSubValue: (s: DashboardStats) => string;
   accent: AccentKey;
 }
 
+// Order is intentional (matches the previous 7-card layout). Labels resolved
+// per-locale in StatsCards via useTranslations('dashboard.stats').
 const cardConfigs: StatCardConfig[] = [
   {
+    id: 'streak',
     icon: IconFlame,
-    label: 'Streak liên tiếp',
     getValue: s => s.streak,
-    getSubValue: s => s.streak > 0 ? 'ngày liên tiếp' : 'Bắt đầu hôm nay!',
     accent: 'games',
   },
   {
+    id: 'wordsLearned',
     icon: IconBookOpen,
-    label: 'Từ đã học',
     getValue: s => s.totalWordsLearned,
-    getSubValue: s => `/ ${s.totalWords} từ`,
     accent: 'srs',
   },
   {
+    id: 'accuracy',
     icon: IconTarget,
-    label: 'Độ chính xác',
     getValue: s => `${s.accuracy}%`,
-    getSubValue: s => `${s.gamesPlayed} game đã chơi`,
     accent: 'emerald',
   },
   {
+    id: 'studyTime',
     icon: IconClock,
-    label: 'Thời gian học',
     getValue: s => {
       if (s.totalMinutes < 60) return `${s.totalMinutes}m`;
       const h = Math.floor(s.totalMinutes / 60);
       const m = s.totalMinutes % 60;
       return m > 0 ? `${h}h ${m}m` : `${h}h`;
     },
-    getSubValue: s => {
-      // Parse YYYY-MM-DD safely (avoid UTC timezone shift with new Date())
-      const parts = s.startedAt.split('-').map(Number);
-      return `Từ ${new Date(parts[0]!, parts[1]! - 1, parts[2]!).toLocaleDateString('vi-VN')}`;
-    },
     accent: 'vocab',
   },
   {
+    id: 'topicsDone',
     icon: IconLayers,
-    label: 'Chủ đề hoàn thành',
     getValue: s => s.topicsCompleted,
-    getSubValue: s => `/ ${s.totalTopics} chủ đề`,
     accent: 'listening',
   },
   {
+    id: 'grammar',
     icon: IconGraduationCap,
-    label: 'Ngữ pháp',
     getValue: s => s.grammarCompleted ?? 0,
-    getSubValue: s => `/ ${s.grammarTotal ?? 0} bài học`,
     accent: 'xp',
   },
   {
+    id: 'needsReview',
     icon: IconBrain,
-    label: 'Cần ôn tập',
     getValue: s => s.wordsToReview,
-    getSubValue: s => s.wordsToReview > 0 ? 'từ hôm nay' : 'Tuyệt vời!',
     accent: 'cyan',
   },
 ];
@@ -93,14 +88,47 @@ const statGradient: Partial<Record<AccentKey, string>> = {
 };
 
 export function StatsCards({ stats }: StatsCardsProps) {
+  const t = useTranslations('dashboard.stats');
+  const formatter = useFormatter();
+
+  // Resolve per-card label + sub-label from id. Kept in one place so the
+  // config above stays focused on data shape, not copy.
+  const labelFor = (id: CardId): string => {
+    switch (id) {
+      case 'streak': return t('streak');
+      case 'wordsLearned': return t('wordsLearned');
+      case 'accuracy': return t('accuracy');
+      case 'studyTime': return t('studyTime');
+      case 'topicsDone': return t('topicsDone');
+      case 'grammar': return t('grammar');
+      case 'needsReview': return t('needsReview');
+    }
+  };
+  const subFor = (id: CardId): string => {
+    switch (id) {
+      case 'streak': return stats.streak > 0 ? t('streakActive') : t('streakStart');
+      case 'wordsLearned': return t('wordsLearnedUnit', { total: stats.totalWords });
+      case 'accuracy': return t('accuracyGames', { count: stats.gamesPlayed });
+      case 'studyTime': {
+        const parts = stats.startedAt.split('-').map(Number);
+        const date = new Date(parts[0]!, parts[1]! - 1, parts[2]!);
+        return t('studyTimeSince', { date: formatter.dateTime(date, { dateStyle: 'medium' }) });
+      }
+      case 'topicsDone': return t('topicsDoneUnit', { total: stats.totalTopics });
+      case 'grammar': return t('grammarUnit', { total: stats.grammarTotal ?? 0 });
+      case 'needsReview': return stats.wordsToReview > 0 ? t('needsReviewActive') : t('needsReviewEmpty');
+    }
+  };
+
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-      {cardConfigs.map((card, i) => {
+      {cardConfigs.map((card) => {
         const Icon = card.icon;
         const value = card.getValue(stats);
-        const sub = card.getSubValue(stats);
-        const isStreakCard = card.label === 'Streak liên tiếp';
-        const isReviewCard = card.label === 'Cần ôn tập';
+        const sub = subFor(card.id);
+        const label = labelFor(card.id);
+        const isStreakCard = card.id === 'streak';
+        const isReviewCard = card.id === 'needsReview';
 
         // Balance the 7-item grid:
         // md & xl (4 cols): Streak takes 2 cols, others 1 col (2+1+1 + 1+1+1+1 = 8 slots = 2 rows)
@@ -114,7 +142,7 @@ export function StatsCards({ stats }: StatsCardsProps) {
 
         return (
           <SurfaceCard
-            key={i}
+            key={card.id}
             variant="featured"
             accent={card.accent}
             className={`relative overflow-hidden cursor-default ${colSpanClass}`}
@@ -129,7 +157,7 @@ export function StatsCards({ stats }: StatsCardsProps) {
                   border: '1px solid rgba(59,130,246,.3)',
                   backdropFilter: 'blur(4px)'
                 }}
-                title={`${stats.streakFreezesAvailable} streak freeze — bảo vệ streak nếu bạn lỡ 1 ngày`}
+                title={t('streakFreezeTitle', { count: stats.streakFreezesAvailable })}
               >
                 ❄️ {stats.streakFreezesAvailable}
               </div>
@@ -156,7 +184,7 @@ export function StatsCards({ stats }: StatsCardsProps) {
 
             {/* Label */}
             <div className="text-body font-medium" style={{ color: 'var(--theme-text-secondary)' }}>
-              {card.label}
+              {label}
             </div>
 
             {/* Sub value */}

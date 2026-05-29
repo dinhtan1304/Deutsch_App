@@ -1,0 +1,26 @@
+{
+  "siteName": "Deutschmeister",
+  "rootTitle": "Deutschmeister — Learn German with AI | Goethe & TELC exam prep",
+  "rootDescription": "A complete German learning platform. 5,000+ words, 8 games, AI grading for all 4 skills, full Goethe/TELC A1-B1 mock exams.",
+  "twitterDescription": "5,000+ words, 8 games, AI grading for all 4 skills, full Goethe/TELC A1-B1 mock exams.",
+  "ogImageAlt": "Deutschmeister — Learn German with AI",
+  "pages": {
+    "grammar": {
+      "title": "German grammar",
+      "description": "Learn German grammar from A1 to B1: cases, articles, conjugation, modal verbs and 50+ detailed lessons with clear explanations.",
+      "ogTitle": "German grammar — Deutschmeister",
+      "ogDescription": "50+ German grammar lessons A1-B1. Cases, articles, modal verbs and much more."
+    },
+    "guideB1": {
+      "title": "B1 exam prep guide for Goethe & TELC — structure, roadmap, templates | DeutschMeister",
+      "description": "A complete guide to the German B1 exam: Goethe-Zertifikat B1 & TELC Deutsch B1 structure, a 12-week roadmap from A2 to B1, Schreiben templates, Sprechen Redemittel, Sprachbausteine, and key B1 grammar & vocabulary.",
+      "keywords": "B1 guide, B1 exam prep, Goethe B1 exam, TELC B1 exam, Goethe-Zertifikat B1, TELC Deutsch B1, B1 exam structure, Sprachbausteine TELC, B1 Schreiben template, B1 Sprechen Redemittel, German B1 roadmap, B1 grammar, B1 vocabulary by topic",
+      "ogTitle": "B1 exam prep guide for Goethe & TELC — DeutschMeister",
+      "ogDescription": "Detailed exam structure, a 12-week roadmap, Schreiben templates, Sprechen Redemittel — all on one page.",
+      "twitterTitle": "B1 exam prep guide for Goethe & TELC",
+      "twitterDescription": "Exam structure, 12-week roadmap, Schreiben & Sprechen templates.",
+      "jsonLdName": "German B1 exam prep (Goethe & TELC)",
+      "jsonLdDescription": "Guide and mock exams for both Goethe-Zertifikat B1 and TELC Deutsch B1: exam structure, a 12-week roadmap, AI grading for Schreiben/Sprechen, key grammar & vocabulary."
+    }
+  }
+}

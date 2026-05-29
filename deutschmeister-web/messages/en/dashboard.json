@@ -1,0 +1,218 @@
+{
+  "authGate": {
+    "title": "Sign in to view the dashboard",
+    "description": "Track your streak, XP and learning progress."
+  },
+  "greeting": "Hallo, {name}!",
+  "statusPills": {
+    "dayUnit": "day",
+    "xpUnit": "XP",
+    "levelPrefix": "Lv."
+  },
+  "viewMode": {
+    "ariaLabel": "Dashboard view mode",
+    "overview": "Overview",
+    "detailed": "Detailed"
+  },
+  "todayHero": {
+    "title": "What should you do today?",
+    "subtitle": "One primary action to keep your momentum — secondary items below."
+  },
+  "miniActions": {
+    "review": {
+      "titleWithCount": "{count, plural, one {# word to review} other {# words to review}}",
+      "titleEmpty": "Word bank",
+      "subtitleWithCount": "Review quickly to keep your SRS rhythm.",
+      "subtitleEmpty": "Add new words or browse saved ones.",
+      "ctaWithCount": "Review now",
+      "ctaEmpty": "Open word bank"
+    },
+    "studyPlan": {
+      "title": "Study plan",
+      "subtitle": "Track your Goethe/TELC roadmap and weekly tasks.",
+      "cta": "View plan"
+    },
+    "quickGame": {
+      "title": "Quick practice",
+      "subtitle": "Play a short session if you only have a few minutes.",
+      "cta": "Play 5 min"
+    }
+  },
+  "detailed": {
+    "title": "Learning overview",
+    "subtitle": "Detailed metrics, activity history, and weekly progress."
+  },
+  "upsell": {
+    "title": "Goethe & TELC mock exams are waiting",
+    "description": "Timed 4-skill mock exams · AI grading for Writing & Speaking · Unlimited attempts",
+    "ctaLabel": "Upgrade to Premium"
+  },
+  "stats": {
+    "streak": "Current streak",
+    "streakActive": "days in a row",
+    "streakStart": "Start today!",
+    "wordsLearned": "Words learned",
+    "wordsLearnedUnit": "/ {total} words",
+    "accuracy": "Accuracy",
+    "accuracyGames": "{count} games played",
+    "studyTime": "Study time",
+    "studyTimeSince": "Since {date}",
+    "topicsDone": "Topics completed",
+    "topicsDoneUnit": "/ {total} topics",
+    "grammar": "Grammar",
+    "grammarUnit": "/ {total} lessons",
+    "needsReview": "To review",
+    "needsReviewActive": "words today",
+    "needsReviewEmpty": "All clear!",
+    "streakFreezeTitle": "{count} streak freezes — protect your streak if you miss a day"
+  },
+  "heroAction": {
+    "weakSkill": "Skill to improve"
+  },
+  "dailyPath": {
+    "title": "Today's lesson",
+    "allDone": "Done! See you tomorrow",
+    "progress": "{completed}/{total} done"
+  },
+  "hero": {
+    "todayGoalLabel": "Today's goal"
+  },
+  "quickReview": {
+    "rating": {
+      "again": "Forgot",
+      "hard": "Hard",
+      "good": "Good",
+      "easy": "Easy"
+    },
+    "doneTitle": "Quick review done!",
+    "doneRemaining": "{count} words still pending — keep going to stay in rhythm",
+    "doneCleared": "Cleared for today. See you tomorrow!",
+    "continueLink": "Review {count} more →",
+    "saveError": "Couldn't save the review. Try again.",
+    "title": "Quick review {count} words",
+    "subtitle": "{total} words due in total — one tap to finish",
+    "viewAll": "View all →",
+    "tapToReveal": "Tap to reveal meaning"
+  },
+  "studyPlanWidget": {
+    "ctaTitle": "Schedule your study plan",
+    "ctaSubtitle": "Auto-generate a Goethe / TELC roadmap",
+    "pausedTitle": "Roadmap paused",
+    "pausedSubtitle": "{exam} {level} · Resume now",
+    "daysUntilExam": "{days} days left"
+  },
+  "weeklyChallenges": {
+    "title": "Weekly challenges",
+    "details": "Details",
+    "loading": "Loading..."
+  },
+  "streakWarning": {
+    "title": "Your {days}-day streak is at risk!",
+    "description": "Do at least one lesson today to keep your streak. End of day (VN) and it's lost",
+    "cta": "Learn now"
+  },
+  "weeklyChart": {
+    "title": "Last 7 days progress",
+    "wordsAxis": "Vocabulary",
+    "wordsUnit": "{count} words",
+    "totals": {
+      "words": "Words learned",
+      "games": "Games played",
+      "time": "Study time"
+    }
+  },
+  "topicProgress": {
+    "title": "Topic progress",
+    "viewAll": "View all",
+    "totalProgress": "Total progress",
+    "completed": "Completed",
+    "wordsCount": "{learned}/{total} words",
+    "emptyTitle": "Start learning by topic",
+    "emptySubtitle": "Pick a topic to learn vocabulary systematically",
+    "emptyCta": "Explore topics"
+  },
+  "activityHeatmap": {
+    "title": "Activity this year",
+    "streakLabel": "days in a row",
+    "daysActiveLabel": "active days",
+    "less": "Less",
+    "more": "More",
+    "activityCount": "{count} activities"
+  },
+  "recentActivity": {
+    "title": "Recent activity",
+    "emptyTitle": "No activity yet",
+    "emptySubtitle": "Start learning to see progress!",
+    "collapse": "Collapse",
+    "viewMore": "Show {count} more activities",
+    "labels": {
+      "word": "Vocabulary",
+      "topic": "Topic",
+      "review": "Review",
+      "grammar": "Grammar",
+      "writing": "Writing practice",
+      "reading": "Reading practice",
+      "listening": "Listening practice",
+      "exam_reading": "Reading exam",
+      "exam_writing": "Writing exam",
+      "exam_speaking": "Speaking exam",
+      "free_speaking": "Speaking practice"
+    }
+  },
+  "dailyBonus": {
+    "streakLabel": "{days}-day streak — keep going!",
+    "welcomeBack": "Welcome back!"
+  },
+  "quickActions": {
+    "title": "Quick actions",
+    "reviewNow": "Review now!",
+    "reviewCount": "{count} words to review",
+    "actions": {
+      "topics": { "label": "Topics", "description": "12 A1 topics" },
+      "dictionary": { "label": "Dictionary", "description": "Look up vocabulary" },
+      "practice": { "label": "Mock exam", "description": "Goethe & TELC" },
+      "srs": { "label": "SRS", "description": "Flashcard review" }
+    }
+  },
+  "todayFocus": {
+    "title": "Today's goal",
+    "allDone": "All done! See you tomorrow",
+    "progress": "{completed}/{total} tasks",
+    "progressWithSrs": "{completed}/{total} tasks · {srs} cards due"
+  },
+  "leaderboardWidget": {
+    "title": "This week's leaderboard",
+    "viewAll": "View all",
+    "loading": "Loading...",
+    "empty": "No data for this week yet"
+  },
+  "firstDayJourney": {
+    "title": "First-day journey",
+    "subtitle": "Complete 3 steps to start {level}",
+    "steps": {
+      "topics": "Explore topics & learn 5 words",
+      "game": "Play 1 game to review",
+      "grammar": "Study 1 grammar lesson"
+    }
+  },
+  "errorPatterns": {
+    "title": "Common mistakes",
+    "loading": "Loading...",
+    "emptyTitle": "Finish a writing task to see error analysis",
+    "emptyCta": "Practice writing →",
+    "occurrences": "{count} times ({percentage}%)",
+    "reviewAction": "Review",
+    "categories": {
+      "article": "Articles (der/die/das)",
+      "conjugation": "Verb conjugation",
+      "word_order": "Word order",
+      "case": "Case (Nom/Akk/Dat)",
+      "spelling": "Spelling",
+      "preposition": "Prepositions",
+      "plural": "Plural nouns",
+      "adjective_ending": "Adjective endings",
+      "tense": "Tense",
+      "vocabulary": "Vocabulary"
+    }
+  }
+}

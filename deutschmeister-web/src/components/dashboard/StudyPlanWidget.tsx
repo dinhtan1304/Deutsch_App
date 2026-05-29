@@ -1,11 +1,13 @@
 'use client';
 
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { ACCENT, STATUS, GRADIENT } from '@/lib/tokens';
 import { useStudyPlan } from '@/hooks/useStudyPlan';
-import { IconRocket, IconCalendar } from '@/app/study-plan/icons';
+import { IconRocket, IconCalendar } from '@/app/[locale]/study-plan/icons';
 
 export function StudyPlanWidget() {
+  const t = useTranslations('dashboard.studyPlanWidget');
   const { data, isLoading } = useStudyPlan();
 
   if (isLoading) return (
@@ -31,10 +33,10 @@ export function StudyPlanWidget() {
         </div>
         <div className="flex-1 min-w-0">
           <div className="text-sm font-black tracking-tight" style={{ color: 'var(--theme-text-primary)' }}>
-            Lên lịch học cá nhân
+            {t('ctaTitle')}
           </div>
           <div className="text-[11px] font-medium opacity-60 truncate" style={{ color: 'var(--theme-text-muted)' }}>
-            Tự động tạo lộ trình Goethe / TELC
+            {t('ctaSubtitle')}
           </div>
         </div>
         <div className="w-8 h-8 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all transform translate-x-2 group-hover:translate-x-0">
@@ -65,10 +67,10 @@ export function StudyPlanWidget() {
         </div>
         <div className="flex-1 min-w-0">
           <div className="text-sm font-black tracking-tight" style={{ color: ACCENT.games }}>
-            Lộ trình đang tạm nghỉ
+            {t('pausedTitle')}
           </div>
           <div className="text-[11px] font-medium opacity-60 truncate" style={{ color: 'var(--theme-text-muted)' }}>
-            {plan.examFormat} {plan.targetLevel} · Tiếp tục ngay
+            {t('pausedSubtitle', { exam: plan.examFormat, level: plan.targetLevel })}
           </div>
         </div>
       </Link>
@@ -113,7 +115,7 @@ export function StudyPlanWidget() {
           </div>
           <div className="text-[11px] font-medium mt-0.5 opacity-60 flex items-center gap-1.5" style={{ color: 'var(--theme-text-muted)' }}>
             <IconCalendar size={10} />
-            <span>Còn {daysUntilExam} ngày</span>
+            <span>{t('daysUntilExam', { days: daysUntilExam })}</span>
             {totalToday > 0 && (
               <>
                 <span className="opacity-30">•</span>

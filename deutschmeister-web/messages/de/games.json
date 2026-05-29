@@ -1,0 +1,312 @@
+{
+  "landing": {
+    "title": "Wortschatzspiele",
+    "subtitle": "Übe Artikel, Bedeutungen, Hören und Rechtschreibung in kurzen Einheiten.",
+    "srsCta": "SRS-Wiederholung",
+    "levelBanner": {
+      "levelLabel": "Niveau:",
+      "vocabRange": "Wortschatzbereich:",
+      "rangeNote": "Spiele bevorzugen 70% bekannte Wörter und 30% neue."
+    },
+    "recommendations": {
+      "title": "Jetzt spielen",
+      "subtitleDue": "Du hast {count} Wörter zu wiederholen. Beginne mit SRS, um sie frisch zu halten.",
+      "subtitleDefault": "Drei kurze Einheiten zum Aufwärmen heute.",
+      "reasonDue": "{count} Wörter zu wiederholen",
+      "reasonStart": "Schneller Start",
+      "reasonFit": "Heute passend",
+      "startCta": "Starten"
+    },
+    "allGames": {
+      "title": "Alle Spiele",
+      "subtitle": "Wähle ein Format, das zu deiner Zeit und deiner Zielkompetenz passt.",
+      "playNow": "Jetzt spielen"
+    },
+    "tips": {
+      "title": "Tipps für effektives Spielen",
+      "subtitle": "Spiele sind kurze Wiederholungen — sie ersetzen SRS nicht.",
+      "hotkeys": {
+        "title": "Tastenkürzel",
+        "text": "Nutze <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd>, um schnell zu antworten."
+      },
+      "combo": {
+        "title": "Combo",
+        "text": "Antworte mehrmals richtig in Folge, um Rhythmus und Punkte zu halten."
+      },
+      "preReview": {
+        "title": "Erst wiederholen",
+        "text": "Eine SRS-Sitzung vorher macht Wortschatzspiele effektiver."
+      }
+    }
+  },
+  "levels": {
+    "A1": "Anfänger",
+    "A2": "Grundkenntnisse",
+    "B1": "Mittelstufe",
+    "B2": "Obere Mittelstufe",
+    "C1": "Fortgeschritten",
+    "C2": "Kompetenz",
+    "all": "Alle Niveaus"
+  },
+  "definitions": {
+    "gender-quiz":      { "nameVi": "der/die/das-Artikel",   "description": "Wähle den richtigen Artikel für jedes Nomen." },
+    "timed-challenge":  { "nameVi": "Zeitherausforderung",   "description": "Antworte schnell innerhalb des Zeitlimits." },
+    "fill-blank":       { "nameVi": "Lückentext",            "description": "Setze den fehlenden Artikel oder das Wort ein." },
+    "flashcards":       { "nameVi": "Karteikarten",          "description": "Wiederhole Bedeutung, Artikel und Beispiel mit Karten." },
+    "srs-review":       { "nameVi": "SRS-Wiederholung",      "description": "Intelligente Wiederholung mit dem SM-2-Algorithmus." },
+    "word-match":       { "nameVi": "Wort-Match",            "description": "Ordne deutsche Wörter ihrer Bedeutung zu." },
+    "listening":        { "nameVi": "Hören",                  "description": "Höre einen Audioclip und wähle das richtige Wort." },
+    "spelling":         { "nameVi": "Rechtschreibung",       "description": "Tippe das deutsche Wort korrekt." },
+    "typing":           { "nameVi": "Tipp-Geschwindigkeit",  "description": "60 Sekunden Übung für WPM und Genauigkeit." }
+  },
+  "common": {
+    "loading": "Wird geladen…",
+    "noQuestions": "Noch keine Fragen",
+    "checkAnswer": "Prüfen",
+    "next": "Weiter",
+    "skip": "Überspringen",
+    "submit": "Senden",
+    "restart": "Erneut spielen",
+    "exit": "Beenden",
+    "exitConfirm": "Möchtest du wirklich beenden?",
+    "correct": "Richtig!",
+    "incorrect": "Falsch",
+    "score": "Punkte",
+    "streak": "Serie",
+    "combo": "Combo",
+    "time": "Zeit",
+    "wordsLearned": "Gelernte Wörter",
+    "accuracy": "Genauigkeit",
+    "tryAgain": "Erneut versuchen",
+    "backToGames": "Zurück zu den Spielen",
+    "secondsUnit": "s",
+    "questionsUnit": "Fragen",
+    "questionOf": "Frage {current} / {total}",
+    "start": "Starten",
+    "back": "Zurück",
+    "menu": "Menü",
+    "completed": "Geschafft!",
+    "correctLabel": "Richtig",
+    "wrongLabel": "Falsch",
+    "questionLabel": "F",
+    "settingsHint": "(Anzahl der Fragen in Einstellungen → Lernen ändern)",
+    "errors": {
+      "minNounsWordBank": "Benötigt mindestens 4 Nomen mit Artikeln in dieser Sammlung",
+      "noVocab": "Kein Wortschatz! Bitte füge Wörter hinzu oder seede die Datenbank.",
+      "minWords": "Benötigt mindestens {count} Wörter in dieser Sammlung",
+      "minNouns": "Benötigt mindestens {count} Nomen mit Artikeln in dieser Sammlung"
+    },
+    "feedback": {
+      "correctMark": "✓ Richtig!",
+      "wrongMark": "✗ Antwort: {answer}"
+    },
+    "hotkeyHint": "Tastenkürzel: <kbd>1</kbd> der · <kbd>2</kbd> die · <kbd>3</kbd> das",
+    "result": "Ergebnis",
+    "scoreUnit": "Punkte",
+    "bestCombo": "Beste Combo",
+    "soundLabel": "Ton: {state}",
+    "soundOn": "An",
+    "soundOff": "Aus",
+    "answerLabel": "Antwort: {answer}"
+  },
+  "quickQuiz": {
+    "title": "Quick Quiz",
+    "description": "Wähle den richtigen Artikel für <emphasis>{count} deutsche Wörter</emphasis>",
+    "info": {
+      "click": "Klicken oder Tastenkürzel verwenden, um zu antworten",
+      "hotkeys": "Tasten: <kbd>1</kbd> der, <kbd>2</kbd> die, <kbd>3</kbd> das",
+      "feedback": "Sofortige Rückmeldung nach jeder Frage"
+    },
+    "resultSummary": "Du hast {correct} von {total} richtig"
+  },
+  "genderQuiz": {
+    "title": "Gender Quiz",
+    "description": "Wähle den richtigen Artikel für <emphasis>{count} Wörter</emphasis>",
+    "result": "Ergebnis",
+    "scoreUnit": "Punkte",
+    "bestCombo": "Beste Combo",
+    "info": {
+      "scoring": "10 P. pro Richtig · Combo bis x4",
+      "sound": "Ton: {state}",
+      "soundOn": "An",
+      "soundOff": "Aus"
+    },
+    "answer": "Antwort:"
+  },
+  "typing": {
+    "title": "Tipp-Übung",
+    "description": "Steigere deine Tippgeschwindigkeit in <emphasis>{seconds} Sekunden</emphasis>",
+    "metricHint": "Gemessen in WPM (Wörter/Minute) und Genauigkeit",
+    "levelLabel": "Niveau",
+    "categoryLabel": "Kategorie",
+    "info": {
+      "duration": "Dauer: {seconds} Sekunden · Bis zu 40 Sätze",
+      "controls": "Direkt tippen · <kbd>Space</kbd>, um ein Wort zu überspringen · Satzzeichen zählen",
+      "umlautHint": "Umlaut-Tipp: {hint}"
+    },
+    "loadingSentences": "Sätze werden geladen...",
+    "startCta": "Start →",
+    "errors": {
+      "noSentences": "Keine Sätze für diese Konfiguration. Bitte eine andere Kategorie versuchen.",
+      "loadFailed": "Sätze konnten nicht geladen werden. Verbindung prüfen und erneut versuchen."
+    },
+    "countdownReady": "Bereit für {count} Sätze...",
+    "newBest": "★ Neuer Bestwert",
+    "stats": {
+      "wpm": "WPM",
+      "accuracy": "Genauigkeit",
+      "sentencesCompleted": "Sätze fertig",
+      "errorsLabel": "Fehler",
+      "sentenceShort": "Sätze"
+    },
+    "changeConfig": "Konfiguration ändern",
+    "playAgain": "Erneut spielen",
+    "bestByCategory": "Bestes WPM nach Kategorie",
+    "play": {
+      "satzLabel": "SATZ · {current} / {total} · {category}",
+      "tapToFocus": "Tippe auf den Bildschirm, um die Tastatur zu öffnen · ",
+      "controls": "Direkt tippen · Space zum Überspringen · {seconds}s · Satzzeichen zählen · ",
+      "ariaInput": "Tipp-Übungs-Eingabe"
+    }
+  },
+  "flashcards": {
+    "title": "Karteikarten",
+    "description": "Wiederhole <emphasis>{count} Wörter</emphasis> mit Karteikarten",
+    "cardsHint": "(Anzahl der Karten in Einstellungen → Lernen ändern)",
+    "info": {
+      "flip": "Klicke die Karte oder drücke <kbd>Space</kbd> zum Umdrehen",
+      "keys": "<kbd>←</kbd> Nicht gewusst · <kbd>→</kbd> Gewusst",
+      "audio": "Drücke 🔊, um die deutsche Aussprache zu hören"
+    },
+    "errors": {
+      "minWords2": "Benötigt mindestens 2 Wörter in dieser Sammlung"
+    },
+    "restudy": "Erneut lernen",
+    "stats": {
+      "known": "Gewusst",
+      "needReview": "Wiederholen",
+      "bestStreak": "Beste Serie",
+      "card": "Karte"
+    },
+    "reviewListTitle": "Zu wiederholende Wörter ({count})",
+    "front": {
+      "label": "Deutsches Wort",
+      "pluralPrefix": "Pl. {plural}",
+      "flipHint": "Klicken zum Umdrehen · <kbd>Space</kbd>"
+    },
+    "back": {
+      "answerLabel": "Antwort",
+      "unknownGender": "Unbekannt"
+    },
+    "buttons": {
+      "dontKnow": "Nicht gewusst",
+      "know": "Gewusst",
+      "flip": "Umdrehen (Space)"
+    },
+    "nav": {
+      "prev": "Vorherige Karte",
+      "speak": "Aussprache",
+      "shuffle": "Mischen",
+      "next": "Nächste Karte"
+    }
+  },
+  "timeChallenge": {
+    "title": "Zeitherausforderung",
+    "description": "Antworte schnell in <emphasis>{seconds} Sekunden</emphasis>!",
+    "settingsHint": "(In Einstellungen → Lernen ändern)",
+    "info": {
+      "scoring": "10 P./Richtig · Combo bis x4 · Falsch = Combo verloren",
+      "hotkeys": "Tasten: <kbd>1</kbd> der, <kbd>2</kbd> die, <kbd>3</kbd> das",
+      "sound": "Ton: {state}"
+    },
+    "errors": {
+      "minNouns10": "Benötigt mindestens 10 Nomen mit Artikeln in dieser Sammlung",
+      "loadFailed": "Wortschatz konnte nicht geladen werden! Bitte erneut versuchen."
+    },
+    "getReady": "Bereit machen!",
+    "timeUp": "Zeit abgelaufen!",
+    "speedLabel": "Tempo: {wpm} Wörter/Min",
+    "comboLabel": "🔥 Combo x{mult}"
+  },
+  "spelling": {
+    "title": "Spelling Bee",
+    "description": "Schreibe <emphasis>{count} deutsche Wörter</emphasis> richtig",
+    "info": {
+      "scoring": "15 P./Richtig · Combo bis x4",
+      "enterToConfirm": "zum Bestätigen der Antwort",
+      "specialChars": "Buttons für Sonderzeichen verfügbar"
+    },
+    "errors": {
+      "minWords4": "Benötigt mindestens 4 Wörter in dieser Sammlung"
+    },
+    "articleLabel": "Artikel:",
+    "answerLabel": "Antwort:",
+    "placeholder": "Deutsches Wort tippen...",
+    "umlautTooltip": "Tipp: {hint}",
+    "orType": "oder tippe <code>{hint}</code>",
+    "confirm": "Bestätigen"
+  },
+  "listening": {
+    "title": "Hör-Quiz",
+    "description": "Höre und wähle <emphasis>{count} deutsche Wörter</emphasis> richtig",
+    "info": {
+      "scoring": "1. Hören: +15 · 2.: +10 · 3.+: +5",
+      "maxReplays": "Bis zu {max} Wiederholungen pro Frage",
+      "speech": "Verwendet Web Speech API (Browser-/Netzwerkunterstützung nötig)"
+    },
+    "errors": {
+      "minWords4": "Benötigt mindestens 4 Wörter in dieser Sammlung"
+    },
+    "playing": "Wird abgespielt...",
+    "tapToListen": "Tippen, um das Wort zu hören",
+    "replayCount": "Wiederholen ({current}/{max})",
+    "pointHint": {
+      "first": "+15 Punkte, wenn beim ersten Versuch richtig",
+      "second": "+10 Punkte, wenn richtig",
+      "third": "+5 Punkte, wenn richtig"
+    },
+    "correctMark": "✓ Richtig!",
+    "wrongMark": "✗ Falsch",
+    "answerLabel": "Antwort:",
+    "pickPrompt": "Wähle das gehörte Wort:"
+  },
+  "fillBlank": {
+    "title": "Lückentext",
+    "description": "Setze den richtigen Artikel für <emphasis>{count} Wörter</emphasis> ein",
+    "info": {
+      "click": "Tippen oder Button klicken, um den Artikel zu setzen",
+      "enter": "Drücke <kbd>Enter</kbd> zum Bestätigen",
+      "sound": "Ton: {state}"
+    },
+    "hintToggle": "Hinweis zeigen",
+    "hintFallback": "???",
+    "correctMark": "✓ Richtig!",
+    "wrongMark": "✗ Antwort: \"{answer}\"",
+    "emptyAnswer": "(leer)",
+    "placeholder": "Tippe der, die oder das...",
+    "check": "Prüfen",
+    "viewResult": "Ergebnis ansehen",
+    "nextQuestion": "Nächste Frage →"
+  },
+  "wordMatch": {
+    "title": "Wort-Match",
+    "description": "Ordne <emphasis>{count} Paare</emphasis> ihrer Bedeutung zu",
+    "subtitle": "Klicke ein Wort links, dann die passende Bedeutung rechts",
+    "info": {
+      "scoring": "10 P./richtiges Paar · Combo bis x4",
+      "speedBonus": "Tempo-Bonus: +50 Punkte, wenn in 60 Sekunden fertig"
+    },
+    "errors": {
+      "minWords4": "Benötigt mindestens 4 Wörter in dieser Sammlung"
+    },
+    "stats": {
+      "pairs": "Paare",
+      "wrong": "Falsch"
+    },
+    "timeLabel": "Zeit: {time}",
+    "hints": {
+      "selectLeft": "Klicke ein Wort links, um zu beginnen",
+      "selectRight": "Wähle nun die passende Bedeutung rechts →"
+    }
+  }
+}

@@ -1,0 +1,218 @@
+{
+  "authGate": {
+    "title": "Đăng nhập để xem trang chính",
+    "description": "Theo dõi streak, XP và tiến trình học tập của bạn."
+  },
+  "greeting": "Hallo, {name}!",
+  "statusPills": {
+    "dayUnit": "ngày",
+    "xpUnit": "XP",
+    "levelPrefix": "Lv."
+  },
+  "viewMode": {
+    "ariaLabel": "Chế độ xem dashboard",
+    "overview": "Tổng quan",
+    "detailed": "Chi tiết"
+  },
+  "todayHero": {
+    "title": "Hôm nay nên làm gì?",
+    "subtitle": "Một hành động chính để giữ đà học, các mục phụ nằm ngay bên dưới."
+  },
+  "miniActions": {
+    "review": {
+      "titleWithCount": "{count, plural, one {# từ cần ôn} other {# từ cần ôn}}",
+      "titleEmpty": "Sổ tay từ vựng",
+      "subtitleWithCount": "Ôn nhanh để không mất nhịp SRS.",
+      "subtitleEmpty": "Thêm từ mới hoặc xem lại từ đã lưu.",
+      "ctaWithCount": "Ôn ngay",
+      "ctaEmpty": "Mở sổ tay"
+    },
+    "studyPlan": {
+      "title": "Kế hoạch học",
+      "subtitle": "Theo dõi lộ trình Goethe/TELC và việc cần làm trong tuần.",
+      "cta": "Xem kế hoạch"
+    },
+    "quickGame": {
+      "title": "Luyện từ nhanh",
+      "subtitle": "Chơi một phiên ngắn nếu bạn chỉ có vài phút.",
+      "cta": "Chơi 5 phút"
+    }
+  },
+  "detailed": {
+    "title": "Tổng quan học tập",
+    "subtitle": "Số liệu chi tiết, lịch sử hoạt động và tiến độ theo tuần."
+  },
+  "upsell": {
+    "title": "Đề chuẩn Goethe & TELC đang chờ bạn",
+    "description": "Thi thử 4 kỹ năng có tính giờ · AI chấm bài Writing & Speaking · Không giới hạn lượt luyện",
+    "ctaLabel": "Nâng cấp Premium"
+  },
+  "stats": {
+    "streak": "Streak liên tiếp",
+    "streakActive": "ngày liên tiếp",
+    "streakStart": "Bắt đầu hôm nay!",
+    "wordsLearned": "Từ đã học",
+    "wordsLearnedUnit": "/ {total} từ",
+    "accuracy": "Độ chính xác",
+    "accuracyGames": "{count} game đã chơi",
+    "studyTime": "Thời gian học",
+    "studyTimeSince": "Từ {date}",
+    "topicsDone": "Chủ đề hoàn thành",
+    "topicsDoneUnit": "/ {total} chủ đề",
+    "grammar": "Ngữ pháp",
+    "grammarUnit": "/ {total} bài học",
+    "needsReview": "Cần ôn tập",
+    "needsReviewActive": "từ hôm nay",
+    "needsReviewEmpty": "Tuyệt vời!",
+    "streakFreezeTitle": "{count} streak freeze — bảo vệ streak nếu bạn lỡ 1 ngày"
+  },
+  "heroAction": {
+    "weakSkill": "Kỹ năng cần cải thiện"
+  },
+  "dailyPath": {
+    "title": "Bài học hôm nay",
+    "allDone": "Hoàn thành! Hẹn ngày mai",
+    "progress": "{completed}/{total} hoàn thành"
+  },
+  "hero": {
+    "todayGoalLabel": "Mục tiêu hôm nay"
+  },
+  "quickReview": {
+    "rating": {
+      "again": "Quên",
+      "hard": "Khó",
+      "good": "Được",
+      "easy": "Dễ"
+    },
+    "doneTitle": "Ôn nhanh xong!",
+    "doneRemaining": "Còn {count} từ chờ ôn — tiếp tục để giữ đà",
+    "doneCleared": "Đã ôn hết hôm nay. Hẹn ngày mai!",
+    "continueLink": "Ôn tiếp {count} từ →",
+    "saveError": "Không thể lưu kết quả ôn. Thử lại.",
+    "title": "Ôn nhanh {count} từ",
+    "subtitle": "Tổng {total} từ chờ ôn — bấm 1 lần là xong",
+    "viewAll": "Xem tất cả →",
+    "tapToReveal": "Nhấn để xem nghĩa"
+  },
+  "studyPlanWidget": {
+    "ctaTitle": "Lên lịch học cá nhân",
+    "ctaSubtitle": "Tự động tạo lộ trình Goethe / TELC",
+    "pausedTitle": "Lộ trình đang tạm nghỉ",
+    "pausedSubtitle": "{exam} {level} · Tiếp tục ngay",
+    "daysUntilExam": "Còn {days} ngày"
+  },
+  "weeklyChallenges": {
+    "title": "Thử thách tuần",
+    "details": "Chi tiết",
+    "loading": "Đang tải..."
+  },
+  "streakWarning": {
+    "title": "Streak {days} ngày của bạn đang gặp nguy hiểm!",
+    "description": "Hãy học ít nhất 1 bài hôm nay để giữ streak. Hết ngày (VN) là mất đấy",
+    "cta": "Học ngay"
+  },
+  "weeklyChart": {
+    "title": "Tiến độ 7 ngày qua",
+    "wordsAxis": "Từ vựng",
+    "wordsUnit": "{count} từ",
+    "totals": {
+      "words": "Từ đã học",
+      "games": "Games đã chơi",
+      "time": "Thời gian học"
+    }
+  },
+  "topicProgress": {
+    "title": "Tiến độ theo chủ đề",
+    "viewAll": "Xem tất cả",
+    "totalProgress": "Tổng tiến độ",
+    "completed": "Hoàn thành",
+    "wordsCount": "{learned}/{total} từ",
+    "emptyTitle": "Bắt đầu học theo chủ đề",
+    "emptySubtitle": "Chọn một chủ đề để học từ vựng có hệ thống",
+    "emptyCta": "Khám phá chủ đề"
+  },
+  "activityHeatmap": {
+    "title": "Hoạt động trong năm",
+    "streakLabel": "ngày liên tiếp",
+    "daysActiveLabel": "ngày hoạt động",
+    "less": "Ít",
+    "more": "Nhiều",
+    "activityCount": "{count} hoạt động"
+  },
+  "recentActivity": {
+    "title": "Hoạt động gần đây",
+    "emptyTitle": "Chưa có hoạt động nào",
+    "emptySubtitle": "Bắt đầu học để thấy tiến độ!",
+    "collapse": "Thu gọn",
+    "viewMore": "Xem thêm {count} hoạt động",
+    "labels": {
+      "word": "Từ vựng",
+      "topic": "Chủ đề",
+      "review": "Ôn tập",
+      "grammar": "Ngữ pháp",
+      "writing": "Luyện viết",
+      "reading": "Luyện đọc",
+      "listening": "Luyện nghe",
+      "exam_reading": "Thi đọc",
+      "exam_writing": "Thi viết",
+      "exam_speaking": "Thi nói",
+      "free_speaking": "Luyện nói"
+    }
+  },
+  "dailyBonus": {
+    "streakLabel": "Streak {days} ngày — tiếp tục nhé!",
+    "welcomeBack": "Chào mừng quay lại!"
+  },
+  "quickActions": {
+    "title": "Hành động nhanh",
+    "reviewNow": "Ôn tập ngay!",
+    "reviewCount": "{count} từ cần ôn tập",
+    "actions": {
+      "topics": { "label": "Học chủ đề", "description": "12 chủ đề A1" },
+      "dictionary": { "label": "Từ điển", "description": "Tra cứu từ vựng" },
+      "practice": { "label": "Luyện đề", "description": "Goethe & TELC" },
+      "srs": { "label": "SRS", "description": "Ôn tập thẻ nhớ" }
+    }
+  },
+  "todayFocus": {
+    "title": "Mục tiêu hôm nay",
+    "allDone": "Hoàn thành tất cả! Hẹn ngày mai",
+    "progress": "{completed}/{total} nhiệm vụ",
+    "progressWithSrs": "{completed}/{total} nhiệm vụ · {srs} thẻ cần ôn"
+  },
+  "leaderboardWidget": {
+    "title": "BXH tuần này",
+    "viewAll": "Xem tất cả",
+    "loading": "Đang tải...",
+    "empty": "Chưa có dữ liệu tuần này"
+  },
+  "firstDayJourney": {
+    "title": "Hành trình ngày đầu tiên",
+    "subtitle": "Hoàn thành 3 bước để bắt đầu {level}",
+    "steps": {
+      "topics": "Khám phá chủ đề & học 5 từ",
+      "game": "Chơi 1 trò chơi để ôn tập",
+      "grammar": "Học 1 bài ngữ pháp"
+    }
+  },
+  "errorPatterns": {
+    "title": "Lỗi thường gặp",
+    "loading": "Đang tải...",
+    "emptyTitle": "Hoàn thành bài viết để xem phân tích lỗi",
+    "emptyCta": "Luyện viết ngay →",
+    "occurrences": "{count} lần ({percentage}%)",
+    "reviewAction": "Ôn tập",
+    "categories": {
+      "article": "Quán từ (der/die/das)",
+      "conjugation": "Chia động từ",
+      "word_order": "Trật tự từ",
+      "case": "Cách (Nom/Akk/Dat)",
+      "spelling": "Chính tả",
+      "preposition": "Giới từ",
+      "plural": "Danh từ số nhiều",
+      "adjective_ending": "Đuôi tính từ",
+      "tense": "Thì",
+      "vocabulary": "Từ vựng"
+    }
+  }
+}

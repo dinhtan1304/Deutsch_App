@@ -1,6 +1,7 @@
 ﻿'use client';
 
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { ACCENT, GRADIENT } from '@/lib/tokens';
 import type { TopicProgress } from '@/types/dashboard';
 import { IconLayers, IconArrowRight } from '@/components/ui/Icons';
@@ -13,6 +14,7 @@ interface TopicProgressListProps {
 }
 
 export function TopicProgressList({ data, limit }: TopicProgressListProps) {
+  const t = useTranslations('dashboard.topicProgress');
   const sortedData = [...data].sort((a, b) => {
     if (b.percent !== a.percent) return b.percent - a.percent;
     return a.nameDe.localeCompare(b.nameDe);
@@ -37,14 +39,14 @@ export function TopicProgressList({ data, limit }: TopicProgressListProps) {
             style={{ background: GRADIENT.listeningIconBg }}>
             <IconLayers size={15} style={{ color: ACCENT.listening }} />
           </span>
-          Tiến độ theo chủ đề
+          {t('title')}
         </h3>
         <Link
           href="/topics"
           className="flex items-center gap-1 text-xs font-medium transition-colors hover:opacity-80"
           style={{ color: ACCENT.srs }}
         >
-          Xem tất cả
+          {t('viewAll')}
           <IconArrowRight size={13} />
         </Link>
       </div>
@@ -53,7 +55,7 @@ export function TopicProgressList({ data, limit }: TopicProgressListProps) {
       <div className="flex items-center gap-4 mb-4 pb-4" style={{ borderBottom: '1px solid var(--theme-border)' }}>
         <div className="flex-1">
           <div className="flex items-center justify-between text-xs mb-1.5">
-            <span style={{ color: 'var(--theme-text-muted)' }}>Tổng tiến độ</span>
+            <span style={{ color: 'var(--theme-text-muted)' }}>{t('totalProgress')}</span>
             <span className="font-bold" style={{ color: 'var(--theme-text-primary)' }}>
               {overallProgress}%
             </span>
@@ -71,7 +73,7 @@ export function TopicProgressList({ data, limit }: TopicProgressListProps) {
         </div>
         <div className="text-center px-3">
           <div className="text-xl font-extrabold" style={{ color: ACCENT.emerald }}>{completedCount}</div>
-          <div className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>Hoàn thành</div>
+          <div className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>{t('completed')}</div>
         </div>
       </div>
 
@@ -110,7 +112,7 @@ export function TopicProgressList({ data, limit }: TopicProgressListProps) {
                   )}
                 </div>
                 <div className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>
-                  {topic.wordsLearned}/{topic.totalWords} từ
+                  {t('wordsCount', { learned: topic.wordsLearned, total: topic.totalWords })}
                 </div>
               </div>
 
@@ -146,17 +148,17 @@ export function TopicProgressList({ data, limit }: TopicProgressListProps) {
             <IconLayers size={28} style={{ color: ACCENT.listening }} />
           </div>
           <p className="text-body font-semibold mb-1" style={{ color: 'var(--theme-text-primary)' }}>
-            Bắt đầu học theo chủ đề
+            {t('emptyTitle')}
           </p>
           <p className="text-caption mb-4" style={{ color: 'var(--theme-text-muted)' }}>
-            Chọn một chủ đề để học từ vựng có hệ thống
+            {t('emptySubtitle')}
           </p>
           <Link
             href="/topics"
             className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-body font-semibold text-white transition-all hover:-translate-y-0.5"
             style={{ background: GRADIENT.listening }}
           >
-            Khám phá chủ đề
+            {t('emptyCta')}
             <IconArrowRight size={14} />
           </Link>
         </div>

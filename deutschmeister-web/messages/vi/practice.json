@@ -1,0 +1,1281 @@
+{
+  "landing": {
+    "title": "Luyện thi & kỹ năng",
+    "subtitle": "Chọn hướng luyện phù hợp: củng cố kỹ năng hằng ngày, luyện giao tiếp với AI, hoặc làm đề chuẩn Goethe/TELC.",
+    "quickStart": {
+      "title": "Bắt đầu nhanh",
+      "subtitle": "Chọn mục tiêu trước, rồi đi vào bài luyện phù hợp.",
+      "skill": {
+        "title": "Tôi muốn luyện kỹ năng",
+        "subtitle": "Đọc, nghe, viết, nói với bài tự do."
+      },
+      "exam": {
+        "title": "Tôi muốn thi thử",
+        "subtitle": "Đề chuẩn Goethe/TELC A1-B1."
+      },
+      "ai": {
+        "title": "Tôi muốn luyện giao tiếp",
+        "subtitle": "Roleplay, phát âm và chép chính tả."
+      }
+    },
+    "skills": {
+      "title": "Luyện kỹ năng",
+      "subtitle": "Các bài luyện tự do để duy trì nhịp học và cải thiện từng kỹ năng.",
+      "reading": {
+        "title": "Luyện Đọc",
+        "titleDe": "Leseübung",
+        "description": "Tạo bài đọc tiếng Đức và kiểm tra mức hiểu bài."
+      },
+      "listening": {
+        "title": "Luyện Nghe",
+        "titleDe": "Hörübung",
+        "description": "Nghe audio tiếng Đức và trả lời câu hỏi theo cấp độ."
+      },
+      "writing": {
+        "title": "Luyện Viết",
+        "titleDe": "Schreibübung",
+        "description": "Viết bài, nhận điểm và gợi ý sửa lỗi bằng tiếng Việt."
+      },
+      "speaking": {
+        "title": "Luyện Nói",
+        "titleDe": "Sprechübung",
+        "description": "Ghi âm câu trả lời, nhận đánh giá phát âm và nội dung."
+      }
+    },
+    "ai": {
+      "title": "AI bổ trợ",
+      "subtitle": "Dùng AI cho các tình huống khó tự luyện một mình: hội thoại, phát âm và nghe chép.",
+      "roleplay": {
+        "title": "Roleplay AI",
+        "titleDe": "Rollenspiel",
+        "description": "Luyện hội thoại thực tế: bác sĩ, phỏng vấn, thuê nhà."
+      },
+      "pronunciation": {
+        "title": "Phát âm AI",
+        "titleDe": "Aussprachetraining",
+        "description": "Ghi âm từng từ và nhận phản hồi phát âm chi tiết."
+      },
+      "dictation": {
+        "title": "Chép chính tả",
+        "titleDe": "Diktat",
+        "description": "Nghe video tiếng Đức và điền từ còn thiếu theo câu."
+      }
+    },
+    "exam": {
+      "title": "Đề chuẩn Goethe/TELC",
+      "subtitleUnlocked": "Làm đề A1/A2/B1 theo format thi thật và xem lại kết quả chi tiết.",
+      "subtitleLocked": "Các đề chuẩn yêu cầu Premium. Bạn vẫn có thể luyện kỹ năng tự do ở trên.",
+      "badge": "Đề chuẩn",
+      "premiumBadge": "PREMIUM",
+      "reading": {
+        "title": "Đọc",
+        "titleDe": "Prüfungslesen",
+        "description": "Goethe & TELC A1/A2/B1, đủ các Teile như đề thật."
+      },
+      "listening": {
+        "title": "Nghe",
+        "titleDe": "Prüfungshören",
+        "description": "Audio và câu hỏi theo định dạng thi Goethe/TELC."
+      },
+      "writing": {
+        "title": "Viết",
+        "titleDe": "Prüfungsschreiben",
+        "description": "Schreiben theo prompt chuẩn, chấm theo tiêu chí chính thức."
+      },
+      "speaking": {
+        "title": "Nói",
+        "titleDe": "Prüfungssprechen",
+        "description": "Luyện đủ phần Sprechen theo format Goethe/TELC."
+      }
+    },
+    "cta": {
+      "start": "Bắt đầu",
+      "viewPremium": "Xem gói Premium"
+    },
+    "guideB1Card": {
+      "title": "Cẩm nang luyện thi B1",
+      "description": "Cấu trúc đề, lộ trình 12 tuần, mẫu Schreiben, Redemittel Sprechen, ngữ pháp và FAQ.",
+      "cta": "Mở cẩm nang"
+    }
+  },
+  "guideB1": {
+    "back": "Quay lại Luyện thi & kỹ năng",
+    "header": {
+      "title": "Cẩm nang luyện thi B1",
+      "subtitle": "Mọi thông tin về Goethe-Zertifikat B1 và TELC Deutsch B1 — cấu trúc đề, lộ trình 12 tuần, mẫu Schreiben, Redemittel Sprechen, ngữ pháp & từ vựng quan trọng nhất.",
+      "navAria": "Mục lục cẩm nang B1",
+      "navChooseExam": "Chọn chứng chỉ",
+      "navStructure": "Cấu trúc đề",
+      "navRoadmap": "Lộ trình 12 tuần",
+      "navSkills": "Cẩm nang kỹ năng",
+      "navFaq": "FAQ"
+    },
+    "choose": {
+      "title": "Chọn chứng chỉ phù hợp",
+      "subtitle": "Goethe và TELC đều được công nhận quốc tế. Chọn theo điểm mạnh của bạn.",
+      "viewStructure": "Xem chi tiết cấu trúc đề",
+      "compareTitle": "So sánh Goethe B1 vs TELC B1",
+      "colCriterion": "Tiêu chí",
+      "recognizedNote": "Cả hai chứng chỉ đều được công nhận quốc tế và dùng được cho visa định cư tại Đức.",
+      "whyTitle": "Vì sao luyện B1 trên DeutschMeister?"
+    },
+    "structure": {
+      "title": "Cấu trúc đề thi",
+      "subtitle": "Chi tiết từng kỹ năng, thời gian, số Teile và mẹo làm bài.",
+      "tabAria": "Chọn loại đề thi",
+      "practiceCta": "Luyện kỹ năng này ngay"
+    },
+    "roadmap": {
+      "title": "Lộ trình 12 tuần — từ A2 lên B1",
+      "subtitle": "Học đều 1–2 tiếng/ngày, có thể đi thi sau 3 tháng. Phù hợp cho người đi làm hoặc đi học."
+    },
+    "skill": {
+      "title": "Cẩm nang luyện kỹ năng",
+      "subtitle": "Mẫu Schreiben, Redemittel Sprechen, mẹo Lesen và ngữ pháp Sprachbausteine — học một lần, dùng cho cả Goethe và TELC.",
+      "tabAria": "Chọn kỹ năng",
+      "mistakesTitle": "Lỗi hay gặp",
+      "telcEmailTitle": "TELC B1 — Email/Thư",
+      "telcEmailSub": "80–100 từ · 1 nhiệm vụ",
+      "goetheT1Title": "Goethe B1 Teil 1 — Phản hồi",
+      "goetheT1Sub": "~80 từ · trả lời 3 yêu cầu",
+      "goetheT2Title": "Goethe B1 Teil 2 — Bình luận",
+      "goetheT2Sub": "~80 từ · pro/contra/ý kiến",
+      "goetheCriteriaTitle": "Goethe — 4 tiêu chí chấm",
+      "telcTeileTitle": "TELC — 3 Teil Mündliche Prüfung",
+      "sprachHintLabel": "Lưu ý:",
+      "sprachHintBody": "Sprachbausteine chỉ có trong đề <b>TELC</b> (Goethe không có). Ôn kỹ 4 nhóm dưới đây để ăn điểm."
+    },
+    "grammarVocab": {
+      "title": "Ngữ pháp & Từ vựng B1 trọng tâm",
+      "subtitle": "6 cấu trúc ngữ pháp hay xuất hiện nhất + 6 chủ đề từ vựng phổ biến trong đề thi.",
+      "grammarTitle": "6 cấu trúc ngữ pháp quan trọng nhất",
+      "colStructure": "Cấu trúc",
+      "colExample": "Ví dụ",
+      "colUsage": "Ứng dụng",
+      "vocabTitle": "Từ vựng B1 theo chủ đề",
+      "viewAllTopics": "Xem tất cả chủ đề"
+    },
+    "faq": {
+      "title": "Câu hỏi thường gặp về thi B1",
+      "subtitle": "Tổng hợp các thắc mắc phổ biến nhất khi chuẩn bị thi Goethe & TELC B1."
+    },
+    "cta": {
+      "readyTitle": "Sẵn sàng luyện đề?",
+      "readyBody": "Chọn loại đề bạn muốn bắt đầu — AI sẽ tạo bài thi đầy đủ Teile theo chuẩn Goethe hoặc TELC, kèm chấm điểm chi tiết.",
+      "lesenBtn": "Luyện đề Lesen B1",
+      "schreibenBtn": "Luyện đề Schreiben B1",
+      "startTitle": "Bắt đầu luyện B1 — miễn phí",
+      "startBody": "Đăng ký 30 giây để mở khoá đề thi thử Goethe & TELC, AI chấm Schreiben/Sprechen, flashcard và tracking tiến độ.",
+      "registerBtn": "Đăng ký miễn phí",
+      "loginBtn": "Đã có tài khoản? Đăng nhập"
+    }
+  },
+  "common": {
+    "allLevels": "Tất cả trình độ",
+    "allStatuses": "Tất cả trạng thái",
+    "all": "Tất cả",
+    "previous": "TRƯỚC",
+    "next": "SAU",
+    "delete": "Xóa",
+    "cancel": "Hủy",
+    "deletePermanently": "Xóa vĩnh viễn",
+    "confirmDelete": "Xác nhận xóa?",
+    "cannotUndo": "Hành động này không thể hoàn tác.",
+    "share": "Chia sẻ",
+    "newSession": "Bài mới",
+    "shareTitle": "DeutschMeister",
+    "status": {
+      "DRAFT": "Chưa làm",
+      "GRADED": "Đã chấm",
+      "SUBMITTED": "Đã nộp",
+      "GRADING": "Đang chấm…",
+      "ERROR": "Lỗi",
+      "draftWriting": "Nháp",
+      "gradingShort": "Đang chấm"
+    }
+  },
+  "reading": {
+    "list": {
+      "title": "Luyện Đọc",
+      "subtitle": "AI tạo bài đọc tiếng Đức — Luyện kỹ năng đọc hiểu Goethe/TELC",
+      "examLink": "Theo đề chuẩn →",
+      "newSession": "Bài đọc mới",
+      "stats": {
+        "totalSessions": "Tổng bài đọc",
+        "averageScore": "TB điểm số",
+        "bestScore": "Thành tích cao"
+      },
+      "confirmDeleteTitle": "Xác nhận xóa?",
+      "confirmDeleteSubtitle": "Hành động này không thể hoàn tác.",
+      "emptyTitle": "Chưa có bài đọc nào",
+      "emptySubtitle": "Bạn chưa thực hiện bài luyện đọc nào. Hãy bắt đầu ngay nhé!",
+      "emptyCta": "Bắt đầu ngay",
+      "questionsCount": "{count} câu hỏi",
+      "correctCount": "{correct}/{total} đúng",
+      "textTypes": {
+        "anzeige": "Thông báo",
+        "kurznachricht": "Tin nhắn",
+        "brief": "Thư/Email",
+        "artikel": "Bài báo",
+        "dialog": "Hội thoại"
+      }
+    },
+    "setup": {
+      "quotaLabel": "Lượt Reading AI",
+      "title": "Tạo bài đọc mới",
+      "subtitle": "AI tạo bài đọc hiểu tiếng Đức theo cấu hình của bạn",
+      "stepLevel": "1. Trình độ CEFR",
+      "stepTopic": "2. Chủ đề",
+      "stepTextType": "3. Loại văn bản",
+      "stepQuestionCount": "4. Số câu hỏi",
+      "customTopicPlaceholder": "Hoặc nhập chủ đề tùy chỉnh...",
+      "customLabel": "Tùy chỉnh ✓",
+      "summary": "Tóm tắt cấu hình",
+      "summaryLevel": "Trình độ:",
+      "summaryTopic": "Chủ đề:",
+      "summaryTextType": "Loại văn bản:",
+      "summaryQuestionCount": "Số câu hỏi:",
+      "questionsUnit": "{count} câu",
+      "notSelected": "Chưa chọn",
+      "generating": "AI đang tạo bài đọc...",
+      "generate": "Tạo bài đọc",
+      "generateError": "Không thể tạo bài đọc. Vui lòng thử lại."
+    },
+    "answering": {
+      "loading": "Đang tải bài đọc...",
+      "notFound": "Không tìm thấy bài đọc.",
+      "backToList": "Quay lại danh sách",
+      "title": "Luyện Đọc",
+      "readingTime": "~{minutes} phút đọc",
+      "wordCount": "{count} từ",
+      "answeredCount": "{answered}/{total} câu đã làm",
+      "tabTask": "Passage / Bài đọc",
+      "tabEditor": "Fragen / Câu hỏi",
+      "vocabHighlights": "Từ vựng quan trọng",
+      "questionsTitle": "Câu hỏi ({count})",
+      "progressLabel": "Tiến độ: {answered}/{total}",
+      "grading": "Đang chấm...",
+      "submit": "Nộp bài"
+    },
+    "result": {
+      "loading": "Đang tải kết quả...",
+      "notFound": "Không tìm thấy kết quả.",
+      "backToList": "Quay lại danh sách",
+      "title": "Kết quả bài đọc",
+      "grades": {
+        "excellent": "Xuất sắc!",
+        "veryGood": "Rất tốt! 👏",
+        "good": "Khá tốt!",
+        "needsWork": "Cần cố gắng thêm",
+        "keepPracticing": "Hãy ôn luyện thêm"
+      },
+      "stats": {
+        "correct": "Đúng",
+        "wrong": "Sai",
+        "time": "Thời gian",
+        "score": "Điểm"
+      },
+      "reviewTitle": "Xem lại từng câu",
+      "tabAll": "Tất cả",
+      "tabWrong": "Sai",
+      "tabCorrect": "Đúng",
+      "noQuestions": "Không có câu nào",
+      "questionLabel": "Câu {index}:",
+      "correctAnswer": "Đáp án đúng: {answer}",
+      "explanation": "Giải thích:",
+      "shareText": "Tôi vừa hoàn thành bài luyện đọc!"
+    }
+  },
+  "writing": {
+    "list": {
+      "title": "Luyện Viết",
+      "subtitle": "AI tạo đề bài tiếng Đức — Viết và nhận phản hồi chi tiết",
+      "examLink": "Theo đề chuẩn →",
+      "newSession": "Bài viết mới",
+      "stats": {
+        "totalSessions": "Tổng bài viết",
+        "averageScore": "TB điểm số",
+        "bestScore": "Thành tích cao"
+      },
+      "confirmDeleteTitle": "Xác nhận xóa?",
+      "confirmDeleteSubtitle": "Bạn sẽ không thể khôi phục lại kết quả luyện tập này.",
+      "emptyTitle": "Chưa có bài viết nào",
+      "emptySubtitle": "Bạn chưa thực hiện bài luyện viết nào. Hãy bắt đầu ngay nhé!",
+      "emptyCta": "Bắt đầu ngay",
+      "typeLabel": "Loại: {type}",
+      "gradedLabel": "Đã chấm điểm",
+      "writingTypes": {
+        "email": "Email",
+        "brief": "Thư",
+        "beschreibung": "Mô tả",
+        "tagebuch": "Nhật ký",
+        "dialog": "Hội thoại",
+        "aufsatz": "Bài luận",
+        "einladung": "Thư mời",
+        "beschwerde": "Khiếu nại",
+        "bewerbung": "Xin việc",
+        "formular": "Mẫu đơn"
+      }
+    },
+    "setup": {
+      "quotaLabel": "Lượt Writing AI",
+      "title": "Tạo đề bài mới",
+      "subtitle": "Chọn cấu hình để AI tạo đề bài viết tiếng Đức",
+      "stepLevel": "1. Trình độ CEFR",
+      "stepTopic": "2. Chủ đề",
+      "stepWritingType": "3. Dạng bài",
+      "stepWordCount": "4. Độ dài bài viết",
+      "customTopicPlaceholder": "Hoặc nhập chủ đề tùy chỉnh...",
+      "customLabel": "Tùy chỉnh ✓",
+      "summary": "Tóm tắt cấu hình",
+      "summaryLevel": "Trình độ:",
+      "summaryTopic": "Chủ đề:",
+      "summaryWritingType": "Dạng bài:",
+      "summaryWordCount": "Độ dài:",
+      "notSelected": "Chưa chọn",
+      "noneDash": "—",
+      "generating": "AI đang tạo đề bài...",
+      "generate": "Tạo đề bài",
+      "generateError": "Không thể tạo đề bài. Vui lòng thử lại."
+    },
+    "answering": {
+      "notFound": "Không tìm thấy bài viết",
+      "backToList": "Quay lại danh sách",
+      "backShort": "← Luyện Viết",
+      "saving": "Đang lưu...",
+      "savedAt": "Đã lưu {time}",
+      "ctrlSHint": "Ctrl+S để lưu",
+      "tabTask": "Aufgabe / Đề bài",
+      "tabEditor": "Schreiben / Viết",
+      "wordsShort": "{count} W",
+      "promptHeader": "Aufgabe / Đề bài",
+      "hideHints": "Ẩn gợi ý",
+      "showHints": "Hiện gợi ý",
+      "vocabHints": "Vokabelhilfe / Từ vựng",
+      "grammarHints": "Grammatik / Ngữ pháp",
+      "editorLabel": "Bài viết của bạn",
+      "wordCountLabel": "{count} / {min}–{max} từ",
+      "specialCharsLabel": "Ký tự:",
+      "orType": "hoặc gõ",
+      "textareaPlaceholder": "Schreiben Sie hier Ihren Text...\n\nViết bài của bạn ở đây... ({min}–{max} từ)",
+      "umlautTip": "Mẹo: {hint}",
+      "saveDraft": "Lưu nháp",
+      "submitting": "AI đang chấm bài...",
+      "submit": "Nộp bài & Chấm điểm",
+      "submitError": "Không thể chấm bài. Vui lòng thử lại.",
+      "needMoreWords": "Cần thêm {count} từ nữa để nộp bài",
+      "alertMinWords": "Bài viết cần ít nhất {min} từ. Hiện tại: {current} từ.",
+      "confirmSubmit": "Bạn có chắc muốn nộp bài? AI sẽ chấm và sửa lỗi cho bạn."
+    },
+    "result": {
+      "title": "Kết quả bài viết",
+      "notFound": "Không tìm thấy kết quả",
+      "stillGrading": "Bài viết đang được chấm... Vui lòng đợi.",
+      "backToList": "← Quay lại danh sách",
+      "grades": {
+        "excellent": "Xuất sắc!",
+        "veryGood": "Rất tốt!",
+        "good": "Tốt!",
+        "satisfactory": "Khá",
+        "sufficient": "Đạt",
+        "keepPracticing": "Cần cố gắng thêm!"
+      },
+      "scoreOf": "/100",
+      "noCriteria": "Keine detaillierten Kriterien",
+      "feedbackDe": "Feedback auf Deutsch",
+      "feedbackVi": "Nhận xét tiếng Việt",
+      "essayTitle": "Bài viết",
+      "tabOriginal": "Bài gốc",
+      "tabCorrected": "Bài đã sửa",
+      "errorsTitle": "Chi tiết lỗi ({count})",
+      "filterAll": "Tất cả ({count})",
+      "noErrors": "Không có lỗi nào!",
+      "analysis": {
+        "title": "Phân tích ngữ pháp",
+        "tense": "Thì:",
+        "sentenceType": "Loại câu:",
+        "correctedSentence": "Câu đúng",
+        "grammarRules": "Quy tắc ngữ pháp",
+        "explanation": "Giải thích",
+        "tip": "Mẹo:"
+      },
+      "error": {
+        "deutsch": "Deutsch",
+        "vietnamese": "Tiếng Việt",
+        "tip": "Mẹo:",
+        "learnLesson": "Học bài: {title} →",
+        "explainAi": "Giải thích chi tiết bằng AI",
+        "explainPremium": "Giải thích chi tiết (Premium)"
+      },
+      "errorTypes": {
+        "article": "Mạo từ",
+        "grammar": "Ngữ pháp",
+        "word_order": "Trật tự từ",
+        "conjugation": "Chia động từ",
+        "case": "Cách",
+        "spelling": "Chính tả",
+        "vocabulary": "Từ vựng"
+      },
+      "severity": {
+        "error": "Lỗi",
+        "warning": "Cảnh báo",
+        "suggestion": "Gợi ý"
+      },
+      "shareText": "Tôi đạt {score}/100 bài viết tiếng Đức!"
+    }
+  },
+  "listening": {
+    "list": {
+      "title": "Luyện Nghe",
+      "subtitle": "AI tạo bài nghe tiếng Đức — Luyện kỹ năng nghe hiểu Goethe/TELC",
+      "examLink": "Theo đề chuẩn →",
+      "newSession": "Bài nghe mới",
+      "stats": {
+        "total": "Tổng bài nghe",
+        "averageScore": "TB điểm số",
+        "bestScore": "Thành tích cao"
+      },
+      "statusGraded": "Đã chấm",
+      "statusDraft": "Chưa nộp",
+      "audioFormat": "Audio AI Format",
+      "emptyTitle": "Chưa có bài nghe nào",
+      "emptySubtitle": "Bạn chưa thực hiện bài luyện nghe nào. Hãy bắt đầu ngay nhé!",
+      "emptyCta": "Bắt đầu ngay",
+      "scriptTypes": {
+        "dialogue": "Dialog",
+        "monologue": "Monolog",
+        "announcement": "Ansage",
+        "interview": "Interview",
+        "radio": "Radio"
+      }
+    },
+    "setup": {
+      "quotaLabel": "Lượt Listening AI",
+      "title": "Tạo Bài Nghe Mới",
+      "subtitle": "AI tạo audio script + câu hỏi",
+      "stepLevel": "Trình độ",
+      "stepScriptType": "Loại bài nghe",
+      "levels": {
+        "A1": "Hội thoại đơn giản · 80-120 từ",
+        "A2": "Tình huống hàng ngày · 130-180 từ",
+        "B1": "Nội dung phong phú · 200-280 từ"
+      },
+      "scriptTypes": {
+        "dialogue": { "label": "Dialog", "desc": "Hội thoại 2 người" },
+        "monologue": { "label": "Monolog", "desc": "Bài nói một người" },
+        "announcement": { "label": "Ansage", "desc": "Thông báo / Quảng cáo" },
+        "interview": { "label": "Interview", "desc": "Phỏng vấn" },
+        "radio": { "label": "Radio", "desc": "Bản tin radio" }
+      },
+      "generating": "Đang tạo bài nghe...",
+      "generate": "🎧 Tạo Bài Nghe",
+      "generateError": "Không thể tạo bài nghe. Vui lòng thử lại."
+    },
+    "answering": {
+      "loading": "Đang tải bài nghe...",
+      "notFound": "Không tìm thấy bài nghe.",
+      "backToList": "Quay lại",
+      "title": "Luyện Nghe",
+      "answeredCount": "{answered}/{total} câu hoàn thành",
+      "questionsTitle": "Câu hỏi ({count})",
+      "submit": "Nộp bài",
+      "submitError": "Không thể nộp bài. Vui lòng thử lại.",
+      "questionTooltip": "Câu {index}",
+      "ttsPlaying": "🎧 Đang phát...",
+      "ttsTitle": "Deutsch Listening",
+      "ttsReady": "Sẵn sàng để luyện nghe",
+      "ttsPlayCount": "Đã nghe {count} lần",
+      "ttsAudioLabel": "Audio · de-DE",
+      "ttsSpeedLabel": "Tốc độ phát",
+      "ttsTip": "* Gợi ý: Hãy nghe ít nhất 2 lần trước khi chọn đáp án cuối cùng. Transcript sẽ hiện ở trang kết quả."
+    },
+    "result": {
+      "loading": "Đang tải kết quả...",
+      "notFound": "Không tìm thấy kết quả.",
+      "backToList": "Quay lại danh sách",
+      "title": "Kết quả bài nghe",
+      "sessionTitle": "Bài nghe: {title}",
+      "grades": {
+        "excellent": "Xuất sắc!",
+        "veryGood": "Rất tốt! 👏",
+        "good": "Khá tốt!",
+        "needsWork": "Cần cố gắng thêm",
+        "keepPracticing": "Hãy ôn luyện thêm"
+      },
+      "stats": {
+        "correct": "Đúng",
+        "wrong": "Sai",
+        "score": "Điểm",
+        "questions": "Câu hỏi"
+      },
+      "transcriptToggle": "Transcript (Văn bản audio)",
+      "transcriptListenAgain": "Nghe lại",
+      "reviewTitle": "Xem lại từng câu",
+      "tabAll": "Tất cả",
+      "tabWrong": "Sai",
+      "tabCorrect": "Đúng",
+      "noQuestions": "Không có câu nào",
+      "questionLabel": "Câu {index}: {question}",
+      "correctAnswer": "Đáp án đúng: {answer}",
+      "yourAnswer": "Bạn trả lời: ",
+      "explanation": "Giải thích:",
+      "share": "Chia sẻ",
+      "newSession": "Bài mới",
+      "shareText": "Tôi đạt {score}% bài nghe tiếng Đức!"
+    }
+  },
+  "speaking": {
+    "list": {
+      "title": "Luyện Nói",
+      "subtitle": "AI tạo prompt tiếng Đức, ghi âm và nhận phản hồi chi tiết (v3)",
+      "examLink": "Theo đề chuẩn →",
+      "newSession": "Bài nói mới",
+      "stats": {
+        "total": "Tổng bài nói",
+        "accuracy": "Độ chính xác",
+        "best": "Cao nhất"
+      },
+      "statusGraded": "Đã chấm",
+      "statusGrading": "Đang chấm...",
+      "statusDraft": "Chưa nộp",
+      "goetheTelcFormat": "Goethe/TELC Format",
+      "filterStatuses": {
+        "DRAFT": "Chưa nộp",
+        "GRADING": "Đang chấm",
+        "GRADED": "Đã chấm"
+      },
+      "confirmDeleteTitle": "Xác nhận xóa?",
+      "confirmDeleteSubtitle": "Bạn sẽ không thể khôi phục lại kết quả luyện tập này.",
+      "cancel": "Hủy bỏ",
+      "emptyTitle": "Chưa có bài luyện tập nào",
+      "emptySubtitle": "Hãy tạo bài nói đầu tiên để AI bắt đầu chấm điểm và nhận xét cho bạn nhé!",
+      "emptyCta": "Bắt đầu ngay",
+      "topics": {
+        "sich_vorstellen": "Sich vorstellen",
+        "alltag": "Alltag & Freizeit",
+        "wohnen": "Wohnen",
+        "arbeit": "Arbeit & Beruf",
+        "familie": "Familie & Freunde",
+        "reisen": "Reisen",
+        "einkaufen": "Einkaufen",
+        "gesundheit": "Gesundheit & Sport",
+        "meinung": "Meinungen"
+      }
+    },
+    "setup": {
+      "quotaLabel": "Lượt Speaking AI",
+      "title": "Tạo bài Luyện Nói",
+      "subtitle": "AI tạo prompt tiếng Đức → bạn ghi âm → AI chấm điểm chi tiết",
+      "stepLevel": "Bước 1 — Trình độ (CEFR)",
+      "stepTopic": "Bước 2 — Chủ đề",
+      "topics": {
+        "sich_vorstellen": { "de": "Sich vorstellen", "vi": "Giới thiệu bản thân" },
+        "alltag": { "de": "Alltag & Freizeit", "vi": "Cuộc sống & Giải trí" },
+        "wohnen": { "de": "Wohnen", "vi": "Nhà ở" },
+        "arbeit": { "de": "Arbeit & Beruf", "vi": "Công việc & Nghề nghiệp" },
+        "familie": { "de": "Familie & Freunde", "vi": "Gia đình & Bạn bè" },
+        "reisen": { "de": "Reisen", "vi": "Đi lại & Du lịch" },
+        "einkaufen": { "de": "Einkaufen", "vi": "Mua sắm" },
+        "gesundheit": { "de": "Gesundheit & Sport", "vi": "Sức khỏe & Thể thao" },
+        "meinung": { "de": "Meinungen äußern", "vi": "Bày tỏ quan điểm" }
+      },
+      "info": "Yêu cầu: microphone + Chrome/Edge. AI sẽ tạo ngẫu nhiên một câu hỏi/prompt, bạn ghi âm trả lời, Gemini chấm điểm từ audio + transcript.",
+      "generating": "Đang tạo prompt...",
+      "generate": "Tạo bài nói",
+      "generateError": "Không thể tạo bài nói. Vui lòng thử lại."
+    },
+    "answering": {
+      "loading": "Đang tải bài nói...",
+      "notFound": "Không tìm thấy bài nói.",
+      "backToList": "← Danh sách",
+      "title": "Luyện Nói",
+      "promptHeader": "Đề bài / Prompt",
+      "suggestionsHeader": "Gợi ý nên đề cập",
+      "recordReady": "Sẵn sàng ghi âm",
+      "recordListening": "Đang lắng nghe...",
+      "recordDone": "Đã ghi âm xong",
+      "rec": "REC",
+      "transcriptLive": "Transcript trực tiếp (Live)",
+      "transcriptDone": "Nội dung nhận diện",
+      "transcriptCompleted": "Đã hoàn thành",
+      "transcriptPromptSay": "Hãy nói điều gì đó...",
+      "transcriptEmpty": "Không có dữ liệu transcript",
+      "recordedOk": "Ghi âm thành công ({seconds}s)",
+      "noSpeechWarn": "Trình duyệt của bạn không hỗ trợ hiển thị transcript trực tiếp. Đừng lo, AI vẫn sẽ nhận được file ghi âm của bạn và chấm điểm bình thường.",
+      "startRecord": "BẮT ĐẦU GHI ÂM",
+      "stopRecord": "DỪNG GHI ÂM ({seconds}s)",
+      "retake": "Ghi lại",
+      "submit": "NỘP BÀI & CHẤM ĐIỂM",
+      "grading": "AI đang chấm điểm...",
+      "gradingSubtitle": "Gemini đang phân tích giọng nói và nội dung của bạn. Quá trình này mất khoảng 15-30 giây.",
+      "micError": "Không thể truy cập microphone. Vui lòng cấp quyền.",
+      "submitError": "Không thể nộp bài. Vui lòng thử lại."
+    },
+    "result": {
+      "loading": "Đang tải kết quả...",
+      "title": "Kết quả luyện nói",
+      "backToList": "← Quay lại danh sách",
+      "grading": "AI đang chấm điểm...",
+      "gradingSubtitle": "Gemini đang phân tích âm thanh và nội dung bài nói của bạn. Vui lòng chờ trong giây lát.",
+      "errorTitle": "Chấm điểm thất bại. Vui lòng thử lại sau.",
+      "criteriaTitle": "Chi tiết tiêu chí",
+      "yourVoice": "Giọng nói của bạn",
+      "nativeSample": "Mẫu phát âm chuẩn",
+      "transcriptTitle": "Transcript & Sửa lỗi",
+      "correctionTypeGrammar": "Ngữ pháp",
+      "correctionTypePronunciation": "Phát âm",
+      "strengths": "Điểm mạnh",
+      "needsImprovement": "Cần cải thiện",
+      "defaultStrength": "Cách diễn đạt tự nhiên",
+      "defaultImprovement": "Hãy chú ý các âm cuối",
+      "feedback": "Nhận xét từ AI",
+      "totalScore": "Điểm tổng kết",
+      "wordCount": "Số lượng từ",
+      "completedAt": "Hoàn thành vào: {date}",
+      "completedJustNow": "Vừa xong",
+      "share": "Chia sẻ",
+      "newSession": "BÀI NÓI MỚI",
+      "shareTitle": "Kết quả luyện nói",
+      "shareText": "Tôi đạt {score}/100 điểm!",
+      "grades": {
+        "excellent": { "badge": "Xuất sắc", "title": "Hoàn hảo! 🎉" },
+        "veryGood": { "badge": "Tốt lắm", "title": "Bạn nói rất tốt! 👏" },
+        "good": { "badge": "Khá tốt", "title": "Tiến bộ rồi đấy! 💪" },
+        "needsWork": { "badge": "Cố lên", "title": "Tiếp tục luyện tập! 🤗" },
+        "keepPracticing": { "badge": "Cần luyện", "title": "Đừng bỏ cuộc nhé! 📚" }
+      }
+    }
+  },
+  "dictation": {
+    "list": {
+      "title": "Chép Chính Tả",
+      "subtitle": "Luyện nghe và viết tiếng Đức qua video YouTube thực tế",
+      "shadowingLink": "🎤 Luyện shadowing",
+      "newSession": "Bài mới",
+      "statusGraded": "Đã chấm",
+      "statusDraft": "Chưa nộp",
+      "defaultTopic": "Chép chính tả",
+      "blanksCount": "{count} chỗ trống",
+      "stats": {
+        "total": "Tổng bài luyện",
+        "accuracy": "Độ chính xác",
+        "best": "Thành tích cao"
+      },
+      "emptyTitle": "Chưa có bài luyện tập nào",
+      "emptySubtitle": "Khám phá thư viện video YouTube và bắt đầu thử thách chép chính tả ngay nhé!",
+      "emptyCta": "Khám phá thư viện",
+      "quickStart": {
+        "urlTitle": "Nhập URL YouTube",
+        "urlSubtitle": "Luyện từ bất kỳ video nào",
+        "randomTitle": "Ngẫu nhiên từ thư viện",
+        "randomSubtitle": "Chọn cấp độ rồi thử vận may",
+        "randomDescription": "Hệ thống sẽ chọn ngẫu nhiên một video từ thư viện phù hợp với cấp độ bạn chọn.",
+        "urlPlaceholder": "https://youtube.com/watch?v=...",
+        "urlMissing": "Vui lòng nhập URL YouTube.",
+        "urlInvalid": "URL không hợp lệ. Vui lòng dùng link YouTube.",
+        "urlGenericError": "Không thể xử lý video này. Vui lòng thử URL khác.",
+        "randomNotFound": "Không tìm thấy video phù hợp. Thử cấp độ khác!",
+        "processing": "Đang xử lý...",
+        "searching": "Đang tìm video...",
+        "start": "Bắt đầu →",
+        "startRandom": "Làm bài ngẫu nhiên",
+        "allLevels": "Tất cả"
+      },
+      "requests": {
+        "title": "Yêu cầu của tôi",
+        "pending": "Chờ duyệt",
+        "approved": "Đã duyệt",
+        "rejected": "Từ chối",
+        "reason": "Lý do: {reason}",
+        "start": "Bắt đầu →"
+      }
+    },
+    "session": {
+      "loading": "Đang tải bài...",
+      "notFound": "Không tìm thấy phiên làm bài.",
+      "title": "Chép chính tả",
+      "subtitle": "Nghe video và điền các từ còn thiếu trong phụ đề",
+      "speedLabel": "Tốc độ",
+      "autoPause": "Tự động dừng sau mỗi câu",
+      "nextSegment": "Câu tiếp theo",
+      "warnUnansweredTitle": "Còn {count} ô chưa hoàn thành",
+      "warnUnansweredSubtitle": "Những ô này sẽ tính là không chính xác. Bạn có muốn nộp bài?",
+      "continueWriting": "Tiếp tục viết",
+      "submitNow": "Nộp ngay"
+    },
+    "result": {
+      "title": "Kết quả luyện tập",
+      "notFound": "Không tìm thấy phiên shadowing.",
+      "grades": {
+        "excellent": "Xuất sắc!",
+        "veryGood": "Rất tốt!",
+        "good": "Đạt yêu cầu!",
+        "needsWork": "Cần cố gắng thêm",
+        "keepPracticing": "Hãy ôn luyện thêm"
+      },
+      "mistakesTitle": "Lỗi cần ôn luyện",
+      "skipped": "(bỏ qua)",
+      "reviewTitle": "Xem lại từng câu",
+      "noDetail": "Không có dữ liệu chi tiết cho bài này.",
+      "filterAll": "Tất cả ({count})",
+      "filterWrong": "Chỉ câu sai ({count})",
+      "noErrors": "✓ Tuyệt vời! Bạn không sai câu nào.",
+      "segmentCorrect": "{correct}/{total} đúng",
+      "retry": "Làm lại bài này",
+      "library": "Chọn bài khác",
+      "shadowVideo": "Luyện shadowing video này"
+    },
+    "library": {
+      "titleDictation": "Thư viện video",
+      "titleShadowing": "Thư viện cho Shadowing",
+      "subtitleDictation": "Chọn từ hàng trăm video được tuyển chọn để bắt đầu hành trình chinh phục tiếng Đức",
+      "subtitleShadowing": "Chọn 1 video để bắt đầu luyện shadowing — nghe câu mẫu và nói theo",
+      "allLevels": "Tất cả trình độ",
+      "allTopics": "Tất cả chủ đề",
+      "previewUnavailable": "Preview Unavailable",
+      "defaultTopic": "General",
+      "defaultChannel": "YouTube",
+      "ctaDictation": "Luyện tập →",
+      "ctaShadowing": "🎤 Shadowing →",
+      "empty": "Không tìm thấy video phù hợp",
+      "page": "Trang {page} / {total}"
+    },
+    "shadow": {
+      "title": "Luyện Shadowing",
+      "subtitle": "Nghe câu mẫu và nói theo để bắt chước phát âm + ngữ điệu native",
+      "chooseVideo": "Chọn video",
+      "statusSubmitted": "Đã hoàn tất",
+      "statusDraft": "Đang luyện",
+      "segmentsCount": "{completed} / {total} câu",
+      "filterStatuses": {
+        "DRAFT": "Đang luyện",
+        "SUBMITTED": "Đã hoàn tất"
+      },
+      "stats": {
+        "total": "Phiên đã luyện",
+        "averageScore": "Điểm trung bình",
+        "bestScore": "Điểm cao nhất"
+      },
+      "urlTitle": "Nhập URL YouTube",
+      "urlAiBadge": "AI fallback",
+      "urlSubtitle": "Nếu video không có phụ đề tiếng Đức, AI sẽ tự transcribe (giới hạn 15 phút).",
+      "urlPlaceholder": "https://youtube.com/watch?v=...",
+      "urlMissing": "Vui lòng nhập URL YouTube.",
+      "urlInvalid": "URL không hợp lệ. Vui lòng dùng link YouTube.",
+      "urlGenericError": "Không thể xử lý video này. Vui lòng thử URL khác.",
+      "processing": "Đang xử lý...",
+      "start": "Bắt đầu →",
+      "chooseShadowVideoTitle": "Chọn video shadowing",
+      "chooseShadowVideoSubtitle": "Mở thư viện và chọn video phù hợp",
+      "chooseShadowVideoDesc": "Tất cả video trong thư viện dictation đều có thể luyện shadowing — chỉ cần chọn 1 video bạn thích.",
+      "openLibrary": "Mở thư viện →",
+      "randomTitle": "Ngẫu nhiên từ thư viện",
+      "randomSubtitle": "Chọn cấp độ rồi thử vận may",
+      "randomError": "Không tìm thấy video phù hợp. Thử cấp độ khác!",
+      "randomSearching": "Đang tìm video...",
+      "randomStart": "Làm bài ngẫu nhiên",
+      "allLevels": "Tất cả",
+      "emptyTitle": "Chưa có phiên shadowing nào",
+      "emptySubtitle": "Chọn 1 video từ thư viện và bắt đầu luyện phát âm theo native ngay nhé!",
+      "emptyCta": "Mở thư viện",
+      "session": {
+        "title": "Tập nói Shadowing",
+        "notFound": "Không tìm thấy phiên shadowing.",
+        "tip": "Tạm dừng và đọc to. Tập trung vào nhịp điệu và phát âm, không cần hoàn hảo. Bắt đầu chậm rồi tăng tốc dần.",
+        "dismiss": "Đóng",
+        "subtitleSourceLabel": "Phụ đề:",
+        "subtitleSourceAi": "✨ Tạo bởi AI",
+        "subtitleSourceYoutube": "Lấy từ Youtube",
+        "autoPause": "Tự động dừng",
+        "replaySample": "Nghe lại câu mẫu",
+        "grading": "Đang chấm điểm…",
+        "ready": "Sẵn sàng ghi âm",
+        "readyHint": "Nhấn nút phía trên để bắt đầu",
+        "headphoneTip": "Nên dùng tai nghe để đạt hiệu quả tốt hơn",
+        "retryHint": "Bấm mic để thử lại",
+        "nextSegment": "Câu tiếp theo",
+        "progress": "Tiến độ",
+        "submit": "Hoàn tất →",
+        "submitting": "Đang xử lý...",
+        "warnNoAttempts": "Hãy luyện ít nhất 1 câu trước khi hoàn thành.",
+        "warnSubmitError": "Không thể hoàn tất phiên.",
+        "attemptCount": "Lần thử {count}",
+        "feedbackTipPrefix": "💡"
+      },
+      "result": {
+        "title": "Kết quả Shadowing",
+        "notFound": "Không tìm thấy phiên shadowing.",
+        "overallLabel": "Điểm tổng quát",
+        "summary": "Bạn đã luyện {completed} / {total} câu trong video này.",
+        "retry": "🔄 Luyện lại video này",
+        "retryPending": "Đang tạo...",
+        "backList": "Về trang shadowing",
+        "filterLabel": "Lọc câu",
+        "filterAll": "Tất cả ({count})",
+        "filterWeak": "Cần cải thiện ({count})",
+        "attemptTries": "{count} lần thử",
+        "youSaid": "Bạn đã nói: \"{text}\"",
+        "noFiltered": "Không có câu nào khớp bộ lọc.",
+        "grades": {
+          "excellent": { "label": "Tuyệt vời", "emoji": "🌟" },
+          "veryGood": { "label": "Rất tốt", "emoji": "✨" },
+          "good": { "label": "Khá tốt", "emoji": "👍" },
+          "needsWork": { "label": "Cần cố gắng", "emoji": "💪" },
+          "keepPracticing": { "label": "Tiếp tục luyện", "emoji": "🔄" }
+        }
+      }
+    }
+  },
+  "pronunciation": {
+    "landing": {
+      "title": "Luyện Phát Âm",
+      "back": "← Luyện thi",
+      "subtitle": "Ghi âm và nhận đánh giá phát âm từng từ bằng AI",
+      "quotaLabel": "{used}/{limit} lượt/tuần",
+      "drillCta": {
+        "title": "Drill âm khó cho người Việt",
+        "subtitle": "ü, ö, ch, r, ß, ei/ie — luyện chuyên sâu từng âm"
+      },
+      "stats": {
+        "totalAttempts": "Lần luyện",
+        "averageScore": "Điểm TB",
+        "levels": "Level đã luyện"
+      },
+      "allLevels": "Tất cả",
+      "recent": "Luyện tập gần đây"
+    },
+    "session": {
+      "title": "Luyện Phát Âm",
+      "subtitle": "Aussprache · AI Analysis",
+      "instruction": "Nói câu này:",
+      "overallScore": "Điểm tổng quát",
+      "wordAnalysis": "Phân tích từng từ",
+      "recordReady": "Sẵn sàng ghi âm",
+      "recordListening": "Đang lắng nghe...",
+      "recordDone": "Đã ghi âm",
+      "suggestions": "Gợi ý cải thiện",
+      "startRecord": "BẮT ĐẦU GHI ÂM",
+      "stopRecord": "DỪNG GHI ÂM",
+      "retry": "GHI LẠI",
+      "score": "CHẤM ĐIỂM",
+      "tryAgain": "THỬ LẠI",
+      "nextSentence": "CÂU TIẾP THEO",
+      "analyzing": "ĐANG PHÂN TÍCH...",
+      "micError": "Không thể truy cập microphone. Vui lòng cấp quyền.",
+      "scoreError": "Chấm điểm thất bại"
+    },
+    "drills": {
+      "back": "← Luyện phát âm",
+      "title": "Drill âm khó cho người Việt",
+      "subtitle": "Tập trung luyện từng âm mà người Việt thường phát âm sai — ü, ö, ch, r và hơn nữa",
+      "difficulty": {
+        "high": "Khó",
+        "medium": "Trung bình",
+        "low": "Dễ"
+      },
+      "attemptsLabel": "{count} lần",
+      "bestScore": "Best: {score}",
+      "averageScore": "TB: {score}",
+      "notPracticed": "Chưa luyện — Bắt đầu →",
+      "drillBack": "← Tất cả drill",
+      "minimalPairs": "Cặp tối thiểu (Minimal Pairs)",
+      "practiceWords": "Từ luyện tập — chọn để đọc",
+      "practiceSentences": "Câu luyện tập — chọn để đọc",
+      "record": "🎙️ Ghi âm",
+      "stop": "⏹ Dừng",
+      "retry": "Ghi lại",
+      "score": "Chấm điểm",
+      "analyzing": "AI đang phân tích...",
+      "suggestionsTitle": "Gợi ý",
+      "tryAgain": "Thử lại",
+      "micError": "Không thể truy cập microphone. Vui lòng cấp quyền.",
+      "scoreError": "Chấm điểm thất bại"
+    }
+  },
+  "roleplay": {
+    "list": {
+      "title": "Roleplay AI",
+      "subtitle": "Luyện hội thoại tiếng Đức với AI theo các tình huống thực tế",
+      "quotaLabel": "{used}/{limit} lượt / tuần",
+      "allLevels": "Tất cả",
+      "scenariosTitle": "Tình huống luyện tập",
+      "confirmDeleteTitle": "Xóa hội thoại?",
+      "confirmDeleteSubtitle": "Lịch sử trò chuyện này sẽ bị gỡ bỏ vĩnh viễn.",
+      "cancel": "Hủy bỏ",
+      "deletePermanently": "Xóa vĩnh viễn",
+      "historyTitle": "Lịch sử gần đây",
+      "statusCompleted": "Hoàn thành",
+      "statusActive": "Đang chat"
+    },
+    "session": {
+      "loading": "Đang tải…",
+      "notFound": "Không tìm thấy cuộc hội thoại",
+      "backToList": "Quay lại danh sách",
+      "backAria": "Quay lại",
+      "endButton": "Kết thúc",
+      "ending": "Đang chấm…",
+      "endConfirm": "Kết thúc cuộc hội thoại và xem đánh giá?",
+      "endError": "Không thể kết thúc",
+      "sendError": "Gửi thất bại",
+      "tipsHeader": "💡 GỢI Ý",
+      "newScenario": "Luyện scenario khác",
+      "inputHint": "Nhấn Enter để gửi • Shift+Enter để xuống dòng"
+    }
+  },
+  "examCommon": {
+    "examLabel": "{examType} · {cefrLevel}",
+    "questionsCount": "{count} câu hỏi",
+    "teilLabel": "T{teil}: {correct}/{total}",
+    "newSession": "Làm bài mới",
+    "startNow": "Bắt đầu ngay",
+    "statusGraded": "Đã chấm",
+    "statusDraft": "Chưa nộp",
+    "statusGrading": "Đang chấm",
+    "statusError": "Lỗi",
+    "stats": {
+      "total": "Tổng bài thi",
+      "averageScore": "TB điểm số",
+      "bestScore": "Thành tích cao"
+    },
+    "filterAllStatuses": "Tất cả trạng thái",
+    "filterDraft": "Chưa nộp",
+    "filterGraded": "Đã chấm",
+    "emptyTitle": "Chưa có bài thi nào",
+    "setup": {
+      "step1Label": "Bước 1 — Loại đề thi",
+      "step2Label": "Bước 2 — Trình độ (CEFR)",
+      "goetheLabel": "Goethe-Zertifikat",
+      "goetheDesc": "Chứng chỉ Goethe-Institut",
+      "telcLabel": "TELC Deutsch",
+      "telcDesc": "The European Language Certificates",
+      "naBadge": "N/A",
+      "teile": "Teile",
+      "questions": "Câu hỏi",
+      "timeLabel": "Thời gian",
+      "minutesAbbr": "ph",
+      "maxPoints": "Điểm tối đa",
+      "teilLine": "Teil {i}",
+      "createExam": "Tạo đề thi"
+    },
+    "answering": {
+      "loadingExam": "Đang tải bài thi...",
+      "examNotFound": "Không tìm thấy bài thi.",
+      "back": "Quay lại",
+      "submitError": "Không thể nộp bài. Vui lòng thử lại.",
+      "submit": "Nộp bài",
+      "answeredCount": "{done}/{total} câu đã làm",
+      "unsupportedQuestion": "Loại câu hỏi không được hỗ trợ.",
+      "anweisungLabel": "Anweisung / Hướng dẫn",
+      "fragenLabel": "Fragen ({n})",
+      "bitteWahlen": "— Bitte wählen / Vui lòng chọn —",
+      "keinePasst": "X — Keine passt / Không có đáp án phù hợp",
+      "teilXofY": "Teil {n} / {total}"
+    },
+    "result": {
+      "loadingResult": "Đang tải kết quả...",
+      "shareBtn": "Chia sẻ",
+      "newExam": "Bài mới",
+      "reviewDetails": "Xem lại chi tiết",
+      "reviewTeile": "Xem lại từng Teil",
+      "correctLabel": "Đúng",
+      "wrongLabel": "Sai",
+      "totalLabel": "Tổng câu",
+      "pointsLabel": "Điểm",
+      "youAnswered": "Bạn trả lời:",
+      "correctAnswerLabel": "Đúng:",
+      "skipped": "(bỏ qua)",
+      "userVsCorrect": "Bạn: {user} · Đáp án: {correct}",
+      "questionLabel": "Câu {n}: {text}",
+      "explanation": "Giải thích:",
+      "emDash": "—",
+      "xKeinePasst": "X (Keine passt)",
+      "bestanden": "Bestanden!",
+      "nichtBestanden": "Nicht bestanden",
+      "bestandenShort": "Bestanden",
+      "nichtBestandenShort": "Nicht b.",
+      "gesamtergebnis": "Gesamtergebnis",
+      "richtigSuffix": "richtig",
+      "punkteJeTeil": "Punkte je Teil",
+      "ergebnisseJeTeil": "Ergebnisse je Teil",
+      "gradeExcellent": "Xuất sắc!",
+      "gradeVeryGood": "Rất tốt! 👏",
+      "gradeBestanden": "Bestanden! 💪",
+      "gradeMoreEffort": "Cần cố gắng thêm",
+      "gradeStudyMore": "Hãy ôn luyện thêm",
+      "shareTitle": "DeutschMeister"
+    }
+  },
+  "examReading": {
+    "list": {
+      "title": "Luyện Đọc Theo Đề Chuẩn",
+      "subtitle": "Goethe & TELC · A1 / A2 / B1 · Đầy đủ tất cả Teile",
+      "cardLine": "Luyện Đọc Theo Đề Chuẩn",
+      "emptySubtitle": "Bắt đầu làm bài luyện đọc theo đề chuẩn Goethe/TELC ngay nhé!"
+    },
+    "paywall": {
+      "title": "Đề chuẩn Reading",
+      "description": "Luyện theo đề thi Goethe & TELC A1–B1 với Premium",
+      "featureContext": "Đề đọc hiểu chuẩn format Goethe/TELC với giải thích đáp án chi tiết — chỉ dành cho Premium."
+    },
+    "new": {
+      "pageTitle": "Tạo đề Luyện Đọc",
+      "pageSubtitle": "Chọn loại đề và trình độ để AI tạo bài thi đầy đủ các Teil",
+      "skillLabel": "Lesen",
+      "errorCreate": "Không thể tạo đề thi. Vui lòng thử lại.",
+      "loadingLong": "Đang tạo đề (có thể mất 20-40 giây)...",
+      "loadingHint": "AI đang tạo song song tất cả các Teil..."
+    },
+    "answering": {
+      "pageTitle": "Luyện Đọc Theo Đề",
+      "listen": "Nghe",
+      "byAuthor": "von {author}",
+      "wortliste": "Wortliste",
+      "themaLabel": "THEMA",
+      "zuordnungNoteIntro": "Lưu ý:",
+      "zuordnungNoteBody": "Có thể có yêu cầu KHÔNG khớp với quảng cáo nào — chọn",
+      "zuordnungNoteXBadge": "X",
+      "zuordnungNoteTail": "cho trường hợp đó.",
+      "richtigLabel": "Richtig ✓",
+      "falschLabel": "Falsch ✗",
+      "jaLabel": "Ja — Dafür ✓",
+      "neinLabel": "Nein — Dagegen ✗"
+    },
+    "result": {
+      "pageTitle": "Kết quả bài đọc theo đề",
+      "shareText": "Tôi đạt {score}% bài đọc {examType} {cefrLevel}!",
+      "showPassage": "Xem lại văn bản",
+      "hidePassage": "Ẩn văn bản",
+      "correctOfTotalDone": "{correct}/{total} đúng · {pct}%",
+      "taskTypes": {
+        "richtig_falsch": "Richtig / Falsch",
+        "multiple_choice": "Multiple Choice",
+        "zuordnung": "Zuordnung",
+        "ja_nein": "Ja / Nein",
+        "sprachbausteine": "Sprachbausteine"
+      }
+    }
+  },
+  "examWriting": {
+    "list": {
+      "title": "Luyện Viết Theo Đề Chuẩn",
+      "subtitle": "Goethe & TELC · A1 / A2 / B1 · AI chấm bài",
+      "cardLine": "Luyện Viết Theo Đề Chuẩn",
+      "emptySubtitle": "Bắt đầu làm bài luyện viết theo đề chuẩn Goethe/TELC ngay nhé!",
+      "gradedAt": "Chấm lúc {time}"
+    },
+    "paywall": {
+      "title": "Đề chuẩn Writing",
+      "description": "Luyện viết theo đề thi Goethe & TELC A1–B1 với Premium",
+      "featureContext": "AI chấm bài Writing theo đề Goethe/TELC — giải thích từng lỗi bằng tiếng Việt và tiếng Đức. Chỉ dành cho Premium."
+    },
+    "new": {
+      "pageTitle": "Tạo đề Luyện Viết",
+      "pageSubtitle": "Chọn loại đề và trình độ để AI tạo bài thi đầy đủ các Teil",
+      "skillLabel": "Schreiben",
+      "errorCreate": "Không thể tạo đề thi. Vui lòng thử lại.",
+      "loadingShort": "Đang tạo đề thi...",
+      "loadingHint": "AI đang tạo các tình huống viết..."
+    },
+    "answering": {
+      "pageTitleBack": "← Luyện Viết Theo Đề",
+      "subtitle": "Schreiben · Đề chuẩn Goethe/TELC",
+      "saving": "Speichern…",
+      "saved": "Gespeichert",
+      "situationLabel": "Situation",
+      "situationLabelVi": "Situation / Ngữ cảnh",
+      "aufgabeLabel": "Aufgabe",
+      "aufgabeLabelVi": "Aufgabe / Nhiệm vụ",
+      "meinText": "Mein Text",
+      "specialCharsLabel": "Ký tự:",
+      "umlautOrType": "hoặc gõ",
+      "writeHint": "Schreiben Sie ca. {min}–{max} Wörter · max. {points} Punkte",
+      "writePlaceholder": "Schreiben Sie hier Ihren Text…",
+      "umlautTip": "Mẹo: {hint}",
+      "wordsLabel": "{count} Wörter",
+      "tooLong": "zu lang",
+      "stillNeed": "noch {n} fehlend",
+      "previousBtn": "Trước",
+      "nextBtn": "Tiếp theo",
+      "gradingBtn": "Đang chấm...",
+      "submitBtn": "Nộp bài",
+      "doneCounter": "Đã xong",
+      "confirmTitle": "Nộp bài thi?",
+      "confirmBody": "AI sẽ bắt đầu chấm điểm bài viết của bạn theo tiêu chuẩn {examType}. Quá trình này mất khoảng 30 giây.",
+      "cancelBtn": "Hủy",
+      "confirmBtn": "Xác nhận",
+      "mobileTaskLabel": "Aufgabe / Đề bài",
+      "mobileEditorLabel": "Schreiben / Viết",
+      "taskTypes": {
+        "form_fill": "Formular ausfüllen",
+        "informal_email": "E-Mail (informell)",
+        "formal_email": "E-Mail (formell)",
+        "sms": "SMS / Kurznachricht",
+        "forum_comment": "Forumsbeitrag"
+      }
+    },
+    "result": {
+      "pageTitle": "Kết quả bài viết theo đề",
+      "shareText": "Tôi đạt {score}% bài viết {examType} {cefrLevel}!",
+      "examNotFound": "Không tìm thấy bài thi.",
+      "gradingError": "Lỗi chấm bài",
+      "gradingErrorBody": "AI gặp sự cố khi chấm bài. Vui lòng thử lại.",
+      "backToWriting": "Quay lại bài viết",
+      "aiGrading": "AI đang chấm bài...",
+      "aiGradingBody": "Hệ thống đang đánh giá bài viết theo tiêu chí Goethe/TELC. Thường mất 10–30 giây.",
+      "subtitle": "{examType} · {cefrLevel} · SCHREIBEN",
+      "gradedRecently": "Gerade eben",
+      "congratsPassed": "Herzlichen Glückwunsch! Du hast die Prüfung bestanden. Schau dir die Details an.",
+      "congratsFailed": "Leider hat es diesmal nicht gereicht. Đọc kỹ phần Korrekturen để cải thiện.",
+      "detailsByTeil": "Chi tiết từng Teil",
+      "punkteSuffix": "Punkte",
+      "bewertung": "Bewertung",
+      "staerken": "Stärken",
+      "verbesserungen": "Verbesserungen",
+      "korrekturen": "Korrekturen",
+      "showText": "Xem lại bài viết của bạn",
+      "hideText": "Ẩn bài viết",
+      "taskTypes": {
+        "form_fill": "Formular",
+        "informal_email": "E-Mail (informell)",
+        "formal_email": "E-Mail (formell)",
+        "sms": "SMS / Kurznachricht",
+        "forum_comment": "Forumsbeitrag"
+      }
+    }
+  },
+  "examListening": {
+    "list": {
+      "title": "Luyện Nghe Theo Đề Chuẩn",
+      "subtitle": "Goethe & TELC · A1 / A2 / B1 · Đầy đủ các Teile Hören",
+      "cardLine": "Luyện Nghe Theo Đề Chuẩn",
+      "emptySubtitle": "Bắt đầu làm bài luyện nghe theo đề chuẩn Goethe/TELC ngay nhé!"
+    },
+    "paywall": {
+      "title": "Đề chuẩn Listening",
+      "description": "Luyện nghe theo đề thi Goethe & TELC A1–B1 với Premium",
+      "featureContext": "Thi thử Nghe có tính giờ chuẩn Goethe/TELC chỉ dành cho Premium — nâng cấp để luyện không giới hạn với countdown timer như thi thật."
+    },
+    "new": {
+      "pageTitle": "Tạo đề Luyện Nghe",
+      "pageSubtitle": "Chọn loại đề và trình độ để AI tạo bài nghe đầy đủ các Teil",
+      "skillLabel": "Hören",
+      "errorCreate": "Không thể tạo đề nghe. Vui lòng thử lại.",
+      "loadingLong": "Đang tạo đề (có thể mất 20-40 giây)...",
+      "loadingHint": "AI đang tạo song song tất cả các Teil Hören..."
+    },
+    "answering": {
+      "pageTitle": "Luyện Nghe Theo Đề",
+      "audioExam": "Audio Exam · de-DE",
+      "playing": "🎧 Đang phát bài thi...",
+      "audioReady": "Prüfung Audio",
+      "playedNTimes": "Đã nghe {n} lần",
+      "readyToListen": "Bắt đầu nghe khi sẵn sàng",
+      "speedLabel": "Tốc độ phát",
+      "listeningWarning": "* Lưu ý: Trong phòng thi thực tế, bạn chỉ được nghe một số bài 1-2 lần tùy theo yêu cầu của Teil."
+    },
+    "result": {
+      "pageTitle": "Kết quả bài nghe theo đề",
+      "shareText": "Tôi đạt {score}% bài nghe {examType} {cefrLevel}!",
+      "subtitle": "{examType} · Deutsch {cefrLevel} · Hören",
+      "showTranscript": "Xem transcript (audio text)",
+      "hideTranscript": "Ẩn transcript",
+      "listenAgain": "Nghe lại",
+      "teilFallback": "Teil {n}",
+      "correctOfTotalDone": "{correct}/{total} richtig · {pct}%",
+      "taskTypes": {
+        "richtig_falsch": "Richtig / Falsch",
+        "multiple_choice": "Multiple Choice",
+        "zuordnung": "Zuordnung"
+      }
+    }
+  },
+  "examSpeaking": {
+    "list": {
+      "title": "Luyện Nói Theo Đề Chuẩn",
+      "subtitle": "Goethe & TELC · A1 / A2 / B1 · Mündliche Prüfung đầy đủ Teile",
+      "cardLine": "Luyện Nói Theo Đề Chuẩn",
+      "emptySubtitle": "Bắt đầu làm bài luyện nói theo đề chuẩn Goethe/TELC ngay nhé!"
+    },
+    "paywall": {
+      "title": "Đề chuẩn Speaking",
+      "description": "Luyện nói theo đề thi Goethe & TELC A1–B1 với Premium",
+      "featureContext": "AI chấm điểm phần thi nói theo tiêu chí Goethe/TELC — có timer chuẩn thi, transcript tự động. Chỉ dành cho Premium."
+    },
+    "new": {
+      "pageTitle": "Tạo đề Luyện Nói",
+      "pageSubtitle": "Chọn loại đề và trình độ để AI tạo bài nói đầy đủ các Teil Sprechen",
+      "skillLabel": "Sprechen",
+      "errorCreate": "Không thể tạo đề nói. Vui lòng thử lại.",
+      "loadingShort": "Đang tạo đề (20-40 giây)...",
+      "loadingHint": "AI đang tạo song song tất cả các Teil Sprechen...",
+      "requirements": "Yêu cầu: microphone + Chrome/Edge (Web Speech API). Gemini sẽ chấm điểm từ audio và transcript."
+    },
+    "answering": {
+      "pageTitle": "Luyện Nói Theo Đề",
+      "subtitle": "Sprechen · Exam Practice",
+      "micError": "Không thể truy cập microphone. Vui lòng kiểm tra quyền truy cập.",
+      "submitError": "Nộp bài thất bại. Vui lòng thử lại.",
+      "gradingTitle": "AI đang chấm điểm...",
+      "gradingBody": "Gemini đang phân tích audio và transcript của bạn. Có thể mất 20–40 giây.",
+      "wordCardsLabel": "Thẻ từ gợi ý",
+      "partnerLabel": "Partner / Prüfer",
+      "statusIdle": "Sẵn sàng",
+      "statusPrep": "Đang chuẩn bị...",
+      "statusRecording": "Đang ghi âm...",
+      "statusDone": "Đã xong",
+      "recBadge": "REC",
+      "transcriptLabel": "Transcript",
+      "listeningHint": "Đang nghe...",
+      "noData": "Không có dữ liệu",
+      "startPrep": "BẮT ĐẦU CHUẨN BỊ",
+      "startRecord": "BẮT ĐẦU GHI ÂM",
+      "skipPrep": "BỎ QUA CHUẨN BỊ →",
+      "stopRecord": "DỪNG GHI ÂM",
+      "retake": "GHI LẠI",
+      "nextTeil": "TIẾP THEO: TEIL {n}",
+      "submitExam": "NỘP BÀI THI"
+    },
+    "result": {
+      "pageTitle": "Kết quả luyện nói theo đề",
+      "shareText": "Tôi đạt {score}% trong bài thi {examType} {cefrLevel}!",
+      "shareTitle": "Kết quả luyện nói",
+      "examNotFound": "Không tìm thấy bài thi.",
+      "backToList": "← Danh sách",
+      "loadingResult": "Đang tải kết quả...",
+      "aiGrading": "AI đang chấm điểm...",
+      "aiGradingBody": "Có thể mất 20–40 giây. Vui lòng chờ.",
+      "kicker": "Kết quả luyện nói theo đề",
+      "headerSkill": "{examType} Deutsch · {cefrLevel} · Sprechen",
+      "teileCount": "{count} Teile · {cefrLevel}",
+      "perTeil": "Kết quả từng Teil",
+      "teilLine": "Teil {n}",
+      "criteriaTitle": "Chi tiết theo tiêu chí",
+      "youSaid": "Bạn đã nói",
+      "nativeSpeaker": "Native speaker",
+      "transcriptHeader": "📄 Transcript",
+      "errorPronunciation": "Lỗi phát âm",
+      "errorGrammar": "Lỗi ngữ pháp",
+      "strengthsTitle": "🌿 Điểm mạnh",
+      "improvementsTitle": "⚠️ Cần cải thiện",
+      "defaultStrength": "Đã hoàn thành Teil",
+      "defaultImprovement": "Hãy luyện tập thêm!",
+      "noGrading": "Không có kết quả chấm điểm.",
+      "gradeBadgeExcellent": "Xuất sắc",
+      "gradeBadgeGood": "Tốt lắm",
+      "gradeBadgePassed": "Đạt",
+      "gradeBadgeKeepTrying": "Cố gắng",
+      "gradeBadgeFailed": "Chưa đạt",
+      "gradeTitleExcellent": "Ausgezeichnet! 🎉",
+      "gradeTitleGood": "Sehr gut! 👏",
+      "gradeTitlePassed": "Bestanden! 💪",
+      "gradeTitleKeepTrying": "Weiter üben! 🤗",
+      "gradeTitleFailed": "Nicht aufgeben! 📚",
+      "criteriaLabels": {
+        "aufgabe": "Aufgabe",
+        "grammatik": "Grammatik",
+        "aussprache": "Aussprache",
+        "wortschatz": "Wortschatz"
+      }
+    }
+  }
+}

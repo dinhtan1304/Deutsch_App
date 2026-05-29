@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { useNextAction, useDailyPath } from '@/hooks/useDashboard';
 import { ActionCard, type ActionCardTask } from '@/components/ui/ActionCard';
 import type { DailyPath, NextAction } from '@/lib/api/dashboard';
@@ -80,6 +81,7 @@ interface DashboardHeroProps {
 }
 
 export function DashboardHero({ nextAction, dailyPath, isLoading = false }: DashboardHeroProps) {
+  const t = useTranslations('dashboard.hero');
   const shouldFetch = !nextAction;
   const { data: fetchedNext, isLoading: nextLoading } = useNextAction(shouldFetch);
   const { data: fetchedDaily } = useDailyPath(!dailyPath);
@@ -99,7 +101,7 @@ export function DashboardHero({ nextAction, dailyPath, isLoading = false }: Dash
   }));
 
   const progress = daily && daily.totalCount > 0
-    ? { current: daily.completedCount, total: daily.totalCount, label: 'Mục tiêu hôm nay' }
+    ? { current: daily.completedCount, total: daily.totalCount, label: t('todayGoalLabel') }
     : undefined;
 
   return (

@@ -1,0 +1,70 @@
+{
+  "welcome": {
+    "greeting": "Chào mừng bạn!",
+    "intro": "Hãy làm bài kiểm tra nhanh để chúng mình đánh giá trình độ của bạn",
+    "startBtn": "Bắt đầu làm bài",
+    "skipBtn": "Bỏ qua, vào Dashboard →"
+  },
+  "quiz": {
+    "hintFormat": "{level} — {hint}",
+    "progressFormat": "{current} / {total}",
+    "skip": "Bỏ qua →"
+  },
+  "result": {
+    "levelLabel": "Trình độ: {level} — {label}",
+    "msgExcellent": "Xuất sắc! Bạn có nền tảng tiếng Đức rất tốt.",
+    "msgGood": "Không tồi! Bạn đã có kiến thức cơ bản.",
+    "msgBeginner": "Không sao, chúng mình sẽ bắt đầu từ cơ bản!",
+    "continueBtn": "Tiếp tục"
+  },
+  "goal": {
+    "title": "Mục tiêu học mỗi ngày?",
+    "subtitle": "Bạn muốn học bao nhiêu từ mỗi ngày?",
+    "label10": "10 từ",
+    "sub10": "~5 phút",
+    "label20": "20 từ",
+    "sub20": "~10 phút",
+    "label30": "30 từ",
+    "sub30": "~15 phút",
+    "continueBtn": "Tiếp tục",
+    "skipBtn": "Bỏ qua →"
+  },
+  "summary": {
+    "title": "Sẵn sàng học!",
+    "subtitle": "Đây là thông tin của bạn",
+    "levelLabel": "Trình độ",
+    "levelValue": "{level} — {label}",
+    "goalLabel": "Mục tiêu hàng ngày",
+    "goalValue": "{count} từ / ngày",
+    "goalEmpty": "--- từ / ngày",
+    "quizLabel": "Bài kiểm tra",
+    "quizValue": "{correct}/{total} câu đúng",
+    "savingBtn": "Đang lưu...",
+    "startBtn": "Bắt đầu học ngay!"
+  },
+  "levelA1": "Sơ cấp",
+  "levelA2": "Sơ cấp cao",
+  "levelB1": "Trung cấp",
+  "placement": {
+    "introTitle": "Kiểm tra trình độ",
+    "introSubtitle": "15 câu hỏi ngữ pháp — mỗi 5 câu cho A1, A2, B1",
+    "introNote": "Kết quả sẽ cập nhật level gợi ý của bạn. Mất khoảng 3-5 phút.",
+    "currentLevel": "Level hiện tại: {level}",
+    "back": "Quay lại",
+    "start": "Bắt đầu",
+    "progressFormat": "{current}/{total}",
+    "resultTitle": "Kết quả",
+    "resultScore": "{correct}/15 câu đúng",
+    "estimatedLevel": "Trình độ ước tính",
+    "estimateNote": "Ước tính dựa trên 15 câu ngữ pháp — không thay thế bài thi chính thức.",
+    "keepCurrent": "Giữ nguyên",
+    "saving": "Đang lưu...",
+    "updateTo": "Cập nhật → {level}",
+    "sublevelA1Foundation": "A1.2 — Nền tảng vững",
+    "sublevelA1Begin": "A1.1 — Bắt đầu",
+    "sublevelA2Upper": "A2.2 — Trên sơ cấp",
+    "sublevelA2Lower": "A2.1 — Sơ cấp",
+    "sublevelB1Upper": "B1.2 — Trung cấp vững",
+    "sublevelB1Lower": "B1.1 — Trung cấp thấp"
+  }
+}

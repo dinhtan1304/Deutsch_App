@@ -5,6 +5,7 @@ import { memo, useState, useEffect, useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useTranslations, useFormatter } from 'next-intl';
 import dynamic from 'next/dynamic';
 import { useAuthUser, useIsAuthenticated, useAuthBootstrap, useAuthLogout } from '@/stores/authStore';
 import { IconSearch, IconUser, IconSettings, IconLogOut, IconMessageCircle, IconStar, IconZap, IconDiscord } from '@/components/ui/Icons';
@@ -25,6 +26,8 @@ interface HeaderProps {
 
 function HeaderComponent({ sidebarCollapsed, onOpenPalette }: HeaderProps) {
   const router = useRouter();
+  const t = useTranslations('header');
+  const formatter = useFormatter();
   const user = useAuthUser();
   const isAuthenticated = useIsAuthenticated();
   const bootstrap = useAuthBootstrap();
@@ -85,11 +88,11 @@ function HeaderComponent({ sidebarCollapsed, onOpenPalette }: HeaderProps) {
             borderColor: 'var(--theme-border)',
             color: 'var(--theme-text-muted)',
           }}
-          aria-label="Mở command palette"
+          aria-label={t('search.ariaOpenPalette')}
         >
           <IconSearch size={16} />
-          <span className="flex-1 text-body truncate sm:hidden">Tìm kiếm...</span>
-          <span className="flex-1 text-body truncate hidden sm:block">Tìm kiếm, điều hướng, dịch câu...</span>
+          <span className="flex-1 text-body truncate sm:hidden">{t('search.placeholderShort')}</span>
+          <span className="flex-1 text-body truncate hidden sm:block">{t('search.placeholderLong')}</span>
           <kbd
             className="shrink-0 rounded-sm px-1.5 py-0.5 text-caption font-semibold hidden sm:inline-flex"
             style={{ backgroundColor: 'var(--theme-bg-tertiary)', color: 'var(--theme-text-muted)' }}
@@ -106,7 +109,7 @@ function HeaderComponent({ sidebarCollapsed, onOpenPalette }: HeaderProps) {
             <div
               className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-body font-bold select-none"
               style={{ background: `${ACCENT.games}1F`, color: ACCENT.games }}
-              title={`Streak: ${streak} ngày liên tiếp`}
+              title={t('streak.title', { count: streak })}
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill={ACCENT.games} stroke="none">
                 <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" />
@@ -123,8 +126,8 @@ function HeaderComponent({ sidebarCollapsed, onOpenPalette }: HeaderProps) {
               style={{ color: 'var(--theme-text-muted)' }}
               onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'var(--theme-bg-secondary)'; e.currentTarget.style.color = STATUS.info; }}
               onMouseLeave={e => { e.currentTarget.style.backgroundColor = ''; e.currentTarget.style.color = 'var(--theme-text-muted)'; }}
-              title="Thông báo"
-              aria-label="Thông báo"
+              title={t('notifications.title')}
+              aria-label={t('notifications.ariaLabel')}
             >
               <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
                 <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
@@ -210,7 +213,7 @@ function HeaderComponent({ sidebarCollapsed, onOpenPalette }: HeaderProps) {
                           </p>
                           <div className="flex items-center gap-2">
                             <span className={`px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-widest ${isPremium ? 'bg-indigo-500 text-white' : 'bg-black/5 dark:bg-white/10 text-muted'}`}>
-                              {isPremium ? 'Premium' : 'Miễn phí'}
+                              {isPremium ? t('userBadge.premium') : t('userBadge.free')}
                             </span>
                           </div>
                         </div>
@@ -226,7 +229,7 @@ function HeaderComponent({ sidebarCollapsed, onOpenPalette }: HeaderProps) {
                               <IconZap size={14} className="animate-pulse" />
                             </div>
                             <span className="text-sm font-black tracking-tight" style={{ color: 'var(--theme-text-primary)' }}>
-                              {xpInfo.xp.toLocaleString('vi-VN')} <span className="opacity-40 text-[10px]">XP</span>
+                              {formatter.number(xpInfo.xp)} <span className="opacity-40 text-[10px]">XP</span>
                             </span>
                           </div>
                           <div className="px-2 py-0.5 rounded-lg bg-black/5 dark:bg-white/10">
@@ -251,10 +254,10 @@ function HeaderComponent({ sidebarCollapsed, onOpenPalette }: HeaderProps) {
                     {/* Menu Items */}
                     <div className="space-y-1 px-1">
                       {[
-                        { href: '/profile', icon: IconUser, label: 'Hồ sơ cá nhân', color: ACCENT.writing },
-                        { href: '/settings', icon: IconSettings, label: 'Thiết lập tài khoản', color: ACCENT.vocab },
-                        { href: 'https://discord.gg/NfztBxtxh', icon: IconDiscord, label: 'Tham gia Discord', color: ACCENT.srs },
-                        { action: 'feedback', icon: IconMessageCircle, label: 'Phản hồi & Báo lỗi', color: ACCENT.emerald },
+                        { href: '/profile', icon: IconUser, label: t('userMenu.profile'), color: ACCENT.writing },
+                        { href: '/settings', icon: IconSettings, label: t('userMenu.settings'), color: ACCENT.vocab },
+                        { href: 'https://discord.gg/NfztBxtxh', icon: IconDiscord, label: t('userMenu.discord'), color: ACCENT.srs },
+                        { action: 'feedback', icon: IconMessageCircle, label: t('userMenu.feedback'), color: ACCENT.emerald },
                       ].map((item, idx) => {
                         const ItemIcon = item.icon;
                         const isAction = 'action' in item;
@@ -304,7 +307,7 @@ function HeaderComponent({ sidebarCollapsed, onOpenPalette }: HeaderProps) {
                           <IconLogOut size={18} />
                         </div>
                         <span className="text-[13px] font-bold text-red-500 opacity-80 group-hover:opacity-100 whitespace-nowrap">
-                          Đăng xuất
+                          {t('userMenu.logout')}
                         </span>
                       </button>
                     </div>
@@ -320,7 +323,7 @@ function HeaderComponent({ sidebarCollapsed, onOpenPalette }: HeaderProps) {
                 hover:bg-(--theme-bg-secondary)"
                 style={{ color: 'var(--theme-text-secondary)' }}
               >
-                Đăng nhập
+                {t('guest.login')}
               </Link>
               <Link
                 href="/auth/register"
@@ -328,7 +331,7 @@ function HeaderComponent({ sidebarCollapsed, onOpenPalette }: HeaderProps) {
                 hover:shadow-md hover:-translate-y-0.5"
                 style={{ background: GRADIENT.brand }}
               >
-                Đăng ký
+                {t('guest.register')}
               </Link>
             </div>
           )}

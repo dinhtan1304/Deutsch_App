@@ -2,6 +2,8 @@
 
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import Link from 'next/link';
+import { useTranslations, useLocale } from 'next-intl';
+import { pickField, pickLocale } from '@/i18n/pickLocale';
 import { Exercise, SubmitResult, GrammarLesson } from '@/types/grammar';
 import { HighlightedText } from '@/components/word-highlight/HighlightedText';
 import { usePronunciation } from '@/hooks/usePronunciation';
@@ -16,6 +18,8 @@ const SPECIAL_CHARS = ['ä', 'ö', 'ü', 'Ä', 'Ö', 'Ü', 'ß'];
 interface NextLesson {
     slug: string;
     titleVi: string;
+    titleEn?: string;
+    titleDe?: string;
     level: GrammarLesson['level'];
 }
 
@@ -26,19 +30,19 @@ interface ExerciseListProps {
     nextLesson?: NextLesson | null;
 }
 
-const TYPE_META: Record<string, { label: string; color: string; icon: string }> = {
-    mcq:           { label: 'Trắc nghiệm', color: ACCENT.srs,    icon: '🎯' },
-    fill_blank:    { label: 'Điền từ',     color: ACCENT.vocab,  icon: '✏️' },
-    reorder:       { label: 'Sắp xếp',     color: ACCENT.xp,     icon: '🔀' },
+const TYPE_META: Record<string, { labelKey: string; color: string; icon: string }> = {
+    mcq:           { labelKey: 'typeMcq',          color: ACCENT.srs,    icon: '🎯' },
+    fill_blank:    { labelKey: 'typeFillBlank',    color: ACCENT.vocab,  icon: '✏️' },
+    reorder:       { labelKey: 'typeReorder',      color: ACCENT.xp,     icon: '🔀' },
     // eslint-disable-next-line no-restricted-syntax
-    translate:     { label: 'Dịch',        color: '#10B981',     icon: '🌐' },
-    error_correct: { label: 'Sửa lỗi',     color: STATUS.danger, icon: '🔧' },
+    translate:     { labelKey: 'typeTranslate',    color: '#10B981',     icon: '🌐' },
+    error_correct: { labelKey: 'typeErrorCorrect', color: STATUS.danger, icon: '🔧' },
 };
 
-function difficultyFromPoints(pts: number): { label: string; color: string } {
-    if (pts <= 1) return { label: 'Dễ',        color: STATUS.success };
-    if (pts <= 2) return { label: 'Trung bình', color: ACCENT.xp };
-    return            { label: 'Khó',       color: STATUS.danger };
+function difficultyFromPoints(pts: number): { labelKey: string; color: string } {
+    if (pts <= 1) return { labelKey: 'diffEasy',   color: STATUS.success };
+    if (pts <= 2) return { labelKey: 'diffMedium', color: ACCENT.xp };
+    return            { labelKey: 'diffHard',  color: STATUS.danger };
 }
 
 const OPTION_COLORS = [ACCENT.srs, ACCENT.vocab, ACCENT.reading, ACCENT.xp];
@@ -251,6 +255,7 @@ function TextInput({ value, onChange, disabled, placeholder, multiline, onEnter,
 function ReorderInput({ words, value, onChange, disabled }: {
     words: string[]; value: string[]; onChange: (v: string[]) => void; disabled: boolean;
 }) {
+    const t = useTranslations('vocabulary.grammar.exercise');
     const available = (() => {
         const remaining = [...words];
         for (const w of value) { const i = remaining.indexOf(w); if (i !== -1) remaining.splice(i, 1); }
@@ -261,7 +266,7 @@ function ReorderInput({ words, value, onChange, disabled }: {
         <div className="space-y-4">
             <div className="min-h-14 p-3 rounded-xl border-2 border-dashed flex flex-wrap gap-2 items-center"
                 style={{ borderColor: value.length > 0 ? ACCENT.vocab : 'var(--theme-border)', backgroundColor: `${ACCENT.vocab}08` }}>
-                {value.length === 0 && <span className="text-body italic" style={{ color: 'var(--theme-text-muted)' }}>Nhấn vào từ bên dưới để sắp xếp...</span>}
+                {value.length === 0 && <span className="text-body italic" style={{ color: 'var(--theme-text-muted)' }}>{t('reorderPrompt')}</span>}
                 {value.map((w, i) => (
                     <button key={i} onClick={() => { if (!disabled) { const n=[...value]; n.splice(i,1); onChange(n); } }} disabled={disabled}
                         className="px-3.5 py-2 rounded-lg text-sm font-semibold transition-all hover:scale-105"
@@ -270,7 +275,7 @@ function ReorderInput({ words, value, onChange, disabled }: {
                     </button>
                 ))}
                 {value.length > 0 && !disabled && (
-                    <button onClick={() => onChange([])} className="ml-auto px-2 py-1 rounded-md text-caption font-medium" style={{ color: 'var(--theme-text-muted)' }}>Xóa hết</button>
+                    <button onClick={() => onChange([])} className="ml-auto px-2 py-1 rounded-md text-caption font-medium" style={{ color: 'var(--theme-text-muted)' }}>{t('clearAll')}</button>
                 )}
             </div>
             {available.length > 0 && !disabled && (
@@ -288,11 +293,12 @@ function ReorderInput({ words, value, onChange, disabled }: {
     );
 }
 
-// ─── Feedback panel (shown after "Kiểm tra") ────────────────────────────────
+// ─── Feedback panel (shown after Check) ─────────────────────────────────────
 
 function FeedbackPanel({ correct, correctAnswer, explanation }: {
     correct: boolean; correctAnswer?: string; explanation?: string;
 }) {
+    const t = useTranslations('vocabulary.grammar.exercise');
     return (
         <div className="mx-5 mb-4 rounded-xl overflow-hidden border"
             style={{ borderColor: correct ? `${STATUS.success}40` : `${STATUS.danger}40` }}>
@@ -306,14 +312,14 @@ function FeedbackPanel({ correct, correctAnswer, explanation }: {
                         : <IconX size={11} style={{ color: 'white' }} />}
                 </div>
                 <span className="text-sm font-bold" style={{ color: correct ? STATUS.success : STATUS.danger }}>
-                    {correct ? 'Chính xác!' : 'Chưa đúng'}
+                    {correct ? t('correct') : t('incorrect')}
                 </span>
             </div>
             {/* Body */}
             <div className="px-4 py-3 space-y-2" style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
                 {!correct && correctAnswer && (
                     <p className="text-sm font-medium" style={{ color: 'var(--theme-text-primary)' }}>
-                        <span style={{ color: 'var(--theme-text-muted)' }}>Đáp án đúng: </span>
+                        <span style={{ color: 'var(--theme-text-muted)' }}>{t('correctAnswerPrefix')}</span>
                         <span className="font-bold" style={{ color: STATUS.success }}>{correctAnswer}</span>
                     </p>
                 )}
@@ -332,6 +338,8 @@ function FeedbackPanel({ correct, correctAnswer, explanation }: {
 function ResultScreen({ result, exercises, onRetry, nextLesson }: {
     result: SubmitResult; exercises: Exercise[]; onRetry: () => void; nextLesson?: NextLesson | null;
 }) {
+    const t = useTranslations('vocabulary.grammar.exercise');
+    const locale = useLocale();
     const accuracy = result.totalQuestions > 0 ? Math.round((result.correctCount / result.totalQuestions) * 100) : 0;
     // eslint-disable-next-line no-restricted-syntax
     const gradient = result.passed ? GRADIENT.writing : accuracy >= 50 ? GRADIENT.action : GRADIENT.vocab;
@@ -343,16 +351,16 @@ function ResultScreen({ result, exercises, onRetry, nextLesson }: {
                     <IconTrophy size={28} style={{ color: 'white' }} />
                 </div>
                 <h2 className="text-2xl font-bold mb-1" style={{ color: 'var(--theme-text-primary)' }}>
-                    {result.passed ? 'Xuất sắc!' : accuracy >= 50 ? 'Cố gắng thêm!' : 'Cần luyện thêm'}
+                    {result.passed ? t('excellent') : accuracy >= 50 ? t('tryHarder') : t('needPractice')}
                 </h2>
                 <p className="text-sm mb-6" style={{ color: 'var(--theme-text-muted)' }}>
-                    {result.passed ? 'Bạn đã hoàn thành bài học này' : 'Cần đạt 80% để hoàn thành'}
+                    {result.passed ? t('passedMsg') : t('needScoreMsg')}
                 </p>
                 <div className="grid grid-cols-3 gap-3 mb-6">
                     {[
-                        { value: result.score,                                label: 'Điểm',     color: ACCENT.vocab,   bg: 'rgba(139,92,246,' },
-                        { value: `${result.correctCount}/${result.totalQuestions}`, label: 'Đúng',  color: STATUS.success, bg: 'rgba(34,197,94,' },
-                        { value: `${accuracy}%`,                              label: 'Chính xác', color: ACCENT.srs,     bg: 'rgba(59,130,246,' },
+                        { value: result.score,                                label: t('statScore'),    color: ACCENT.vocab,   bg: 'rgba(139,92,246,' },
+                        { value: `${result.correctCount}/${result.totalQuestions}`, label: t('statCorrect'),  color: STATUS.success, bg: 'rgba(34,197,94,' },
+                        { value: `${accuracy}%`,                              label: t('statAccuracy'), color: ACCENT.srs,     bg: 'rgba(59,130,246,' },
                     ].map((s, i) => (
                         <div key={i} className="rounded-xl p-3" style={{ background: `linear-gradient(135deg, ${s.bg}.1), ${s.bg}.05))` }}>
                             <div className="text-2xl font-extrabold" style={{ color: s.color }}>{s.value}</div>
@@ -365,14 +373,14 @@ function ResultScreen({ result, exercises, onRetry, nextLesson }: {
                     <button onClick={onRetry}
                         className="inline-flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-semibold text-white transition-all hover:-translate-y-0.5"
                         style={{ background: GRADIENT.history, boxShadow: `0 4px 12px ${ACCENT.vocab}40` }}>
-                        <IconRefresh size={16} style={{ color: 'white' }} /> Làm lại
+                        <IconRefresh size={16} style={{ color: 'white' }} /> {t('retry')}
                     </button>
 
                     {result.passed && nextLesson && (
                         <Link href={`/grammar/${nextLesson.slug}`}
                             className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold text-white transition-all hover:-translate-y-0.5 hover:scale-[1.02] shadow-xl"
                             style={{ background: GRADIENT.writing, boxShadow: '0 8px 20px rgba(99,102,241,0.35)' }}>
-                            Bài tiếp theo: {nextLesson.titleVi}
+                            {t('nextLesson', { title: pickField(nextLesson, 'title', locale) })}
                             <IconArrowRight size={14} style={{ color: 'white' }} />
                         </Link>
                     )}
@@ -382,13 +390,13 @@ function ResultScreen({ result, exercises, onRetry, nextLesson }: {
             <div className="rounded-2xl border overflow-hidden" style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
                 <div className="px-5 py-4 border-b flex items-center gap-2" style={{ borderColor: 'var(--theme-border)' }}>
                     <IconLightbulb size={16} style={{ color: ACCENT.xp }} />
-                    <h3 className="text-[15px] font-bold" style={{ color: 'var(--theme-text-primary)' }}>Chi tiết câu trả lời</h3>
+                    <h3 className="text-[15px] font-bold" style={{ color: 'var(--theme-text-primary)' }}>{t('answerDetails')}</h3>
                 </div>
                 <div className="divide-y" style={{ borderColor: 'var(--theme-border)' }}>
                     {exercises.map((ex, i) => {
                         const fb = result.feedback.find(f => f.exerciseId === ex.id);
                         if (!fb) return null;
-                        const t = TYPE_META[ex.exerciseType] || { label: ex.exerciseType, color: 'var(--theme-text-muted)', icon: '' };
+                        const tm = TYPE_META[ex.exerciseType] || { labelKey: '', color: 'var(--theme-text-muted)', icon: '' };
                         return (
                             <div key={i} className="px-5 py-3 flex items-start gap-3"
                                 style={{ background: fb.correct ? 'rgba(34,197,94,.03)' : 'rgba(239,68,68,.03)' }}>
@@ -398,15 +406,14 @@ function ResultScreen({ result, exercises, onRetry, nextLesson }: {
                                 </span>
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2 mb-0.5">
-                                        <span className="text-caption font-bold px-1.5 py-0.5 rounded" style={{ backgroundColor: `${t.color}15`, color: t.color }}>
-                                            {t.label}
+                                        <span className="text-caption font-bold px-1.5 py-0.5 rounded" style={{ backgroundColor: `${tm.color}15`, color: tm.color }}>
+                                            {tm.labelKey ? t(tm.labelKey as 'typeMcq') : ex.exerciseType}
                                         </span>
-                                        <span className="text-body font-medium truncate" style={{ color: 'var(--theme-text-primary)' }}>{ex.questionVi}</span>
+                                        <span className="text-body font-medium truncate" style={{ color: 'var(--theme-text-primary)' }}>{pickField(ex, 'question', locale)}</span>
                                     </div>
                                     {fb.explanation && (
                                         <p className="text-xs mt-1" style={{ color: fb.correct ? STATUS.success : STATUS.danger }}>
-                                            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                                            💡 {(fb.explanation as any)?.vi || (fb.explanation as any)?.en || ''}
+                                            💡 {pickLocale<string>(fb.explanation as Record<string, string>, locale) || ''}
                                         </p>
                                     )}
                                 </div>
@@ -422,6 +429,8 @@ function ResultScreen({ result, exercises, onRetry, nextLesson }: {
 // ─── Main ────────────────────────────────────────────────────────────────────
 
 export const ExerciseList = ({ exercises, onSubmit, nextLesson }: ExerciseListProps) => {
+    const t = useTranslations('vocabulary.grammar.exercise');
+    const locale = useLocale();
     const [index, setIndex]                   = useState(0);
     const [answers, setAnswers]               = useState<Record<number, string | string[]>>({});
     const [currentAnswer, setCurrentAnswer]   = useState<string | string[]>('');
@@ -438,7 +447,7 @@ export const ExerciseList = ({ exercises, onSubmit, nextLesson }: ExerciseListPr
 
     const exercise  = exercises[index]!;
     const isLast    = index === exercises.length - 1;
-    const typeMeta  = exercise ? TYPE_META[exercise.exerciseType] || { label: exercise.exerciseType, color: 'var(--theme-text-muted)', icon: '' } : null;
+    const typeMeta  = exercise ? TYPE_META[exercise.exerciseType] || { labelKey: '', color: 'var(--theme-text-muted)', icon: '' } : null;
     const difficulty = exercise ? difficultyFromPoints(exercise.points) : null;
 
     const shuffledMap = useMemo(() => {
@@ -461,7 +470,7 @@ export const ExerciseList = ({ exercises, onSubmit, nextLesson }: ExerciseListPr
         return Array.isArray(currentAnswer) && currentAnswer.length > 0;
     }, [currentAnswer]);
 
-    // "Kiểm tra" — reveal feedback for current question
+    // Check — reveal feedback for current question
     const handleCheck = useCallback(() => {
         const correct = checkClientSide(exercise, currentAnswer);
         setQuestionCorrect(correct);
@@ -478,7 +487,7 @@ export const ExerciseList = ({ exercises, onSubmit, nextLesson }: ExerciseListPr
         }
     }, [exercise, currentAnswer, index]);
 
-    // "Tiếp tục" — advance to next after reveal
+    // Continue — advance to next after reveal
     const handleNext = useCallback(() => {
         setAnswers(prev => ({ ...prev, [exercise.order]: currentAnswer }));
         setCurrentAnswer('');
@@ -497,8 +506,8 @@ export const ExerciseList = ({ exercises, onSubmit, nextLesson }: ExerciseListPr
             const res = await onSubmit(final);
             setResult(res);
         } catch (err: unknown) {
-            const msg = (err as { message?: string })?.message || 'Có lỗi khi nộp bài.';
-            setSubmitError(typeof msg === 'string' ? msg : 'Có lỗi khi nộp bài.');
+            const msg = (err as { message?: string })?.message || t('submitError');
+            setSubmitError(typeof msg === 'string' ? msg : t('submitError'));
         } finally {
             setIsSubmitting(false);
         }
@@ -553,9 +562,11 @@ export const ExerciseList = ({ exercises, onSubmit, nextLesson }: ExerciseListPr
 
     if (!exercise || !typeMeta || !difficulty) return null;
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const explanationText = (exercise as any).explanation?.vi || (exercise as any).explanation?.en || '';
+    const explanationText = pickLocale<string>(
+        (exercise as { explanation?: Record<string, string> }).explanation, locale,
+    ) || '';
     const correctAnswerLabel = getCorrectAnswerLabel(exercise);
+    const questionText = pickField(exercise, 'question', locale);
 
     return (
         <div className="max-w-2xl mx-auto space-y-4">
@@ -565,12 +576,12 @@ export const ExerciseList = ({ exercises, onSubmit, nextLesson }: ExerciseListPr
                 style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
                 <div className="flex items-center justify-between text-xs">
                     <span className="font-semibold" style={{ color: 'var(--theme-text-primary)' }}>
-                        Câu {index + 1} / {exercises.length}
+                        {t('questionProgress', { current: index + 1, total: exercises.length })}
                     </span>
                     {combo >= 2 && (
                         <span className="flex items-center gap-1 font-bold px-2.5 py-1 rounded-lg text-caption"
                             style={{ background: `${ACCENT.games}1F`, color: ACCENT.games }}>
-                            🔥 Combo x{combo}
+                            🔥 {t('comboLabel', { count: combo })}
                         </span>
                     )}
                 </div>
@@ -591,16 +602,16 @@ export const ExerciseList = ({ exercises, onSubmit, nextLesson }: ExerciseListPr
                         </div>
                         <span className="flex items-center gap-1 text-caption font-bold px-2.5 py-1 rounded-lg"
                             style={{ backgroundColor: `${typeMeta.color}14`, color: typeMeta.color }}>
-                            {typeMeta.icon} {typeMeta.label}
+                            {typeMeta.icon} {typeMeta.labelKey ? t(typeMeta.labelKey as 'typeMcq') : exercise.exerciseType}
                         </span>
                         <span className="flex items-center gap-1 text-caption font-semibold px-2 py-1 rounded-lg"
                             style={{ backgroundColor: `${difficulty.color}12`, color: difficulty.color }}>
-                            ● {difficulty.label}
+                            ● {t(difficulty.labelKey as 'diffEasy')}
                         </span>
                     </div>
                     <span className="flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-lg shrink-0"
                         style={{ background: `${ACCENT.xp}1F`, color: ACCENT.xp }}>
-                        ⭐ {exercise.points} điểm
+                        ⭐ {t('points', { points: exercise.points })}
                     </span>
                 </div>
 
@@ -608,13 +619,13 @@ export const ExerciseList = ({ exercises, onSubmit, nextLesson }: ExerciseListPr
                 <div className="px-5 pt-5 pb-4">
                     <div className="flex items-start gap-2.5 mb-1.5">
                         <h3 className="flex-1 text-[17px] font-bold leading-snug" style={{ color: 'var(--theme-text-primary)' }}>
-                            {exercise.questionVi}
+                            {questionText}
                         </h3>
                         {exercise.questionDe && (
                             <button onClick={() => speak(exercise.questionDe!)}
                                 className="shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-all hover:scale-110 mt-0.5"
                                 style={{ background: `${ACCENT.srs}1A`, color: ACCENT.srs }}
-                                title="Phát âm câu hỏi">
+                                title={t('speakQuestion')}>
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                                     <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
                                     <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
@@ -622,7 +633,7 @@ export const ExerciseList = ({ exercises, onSubmit, nextLesson }: ExerciseListPr
                             </button>
                         )}
                     </div>
-                    {exercise.questionDe && exercise.questionDe !== exercise.questionVi && (
+                    {exercise.questionDe && exercise.questionDe !== questionText && (
                         <p className="text-body italic" style={{ color: 'var(--theme-text-muted)' }}>
                             <HighlightedText text={exercise.questionDe} />
                         </p>
@@ -643,17 +654,17 @@ export const ExerciseList = ({ exercises, onSubmit, nextLesson }: ExerciseListPr
                     )}
                     {exercise.exerciseType === 'fill_blank' && (
                         <TextInput value={typeof currentAnswer === 'string' ? currentAnswer : ''} onChange={v => setCurrentAnswer(v)}
-                            disabled={revealed} placeholder="Điền câu trả lời..."
+                            disabled={revealed} placeholder={t('placeholderFill')}
                             onEnter={revealed ? handleNextOrSubmit : handleCheck} showSpecialChars />
                     )}
                     {exercise.exerciseType === 'translate' && (
                         <TextInput value={typeof currentAnswer === 'string' ? currentAnswer : ''} onChange={v => setCurrentAnswer(v)}
-                            disabled={revealed} multiline placeholder="Nhập bản dịch..."
+                            disabled={revealed} multiline placeholder={t('placeholderTranslate')}
                             onEnter={revealed ? handleNextOrSubmit : handleCheck} showSpecialChars />
                     )}
                     {exercise.exerciseType === 'error_correct' && (
                         <TextInput value={typeof currentAnswer === 'string' ? currentAnswer : ''} onChange={v => setCurrentAnswer(v)}
-                            disabled={revealed} multiline placeholder="Nhập câu đã sửa..."
+                            disabled={revealed} multiline placeholder={t('placeholderCorrect')}
                             onEnter={revealed ? handleNextOrSubmit : handleCheck} showSpecialChars />
                     )}
                     {exercise.exerciseType === 'reorder' && (
@@ -677,12 +688,11 @@ export const ExerciseList = ({ exercises, onSubmit, nextLesson }: ExerciseListPr
                     <div className="mx-5 mb-4 rounded-xl overflow-hidden" style={{ border: `1.5px solid ${ACCENT.xp}59` }}>
                         <div className="px-3.5 py-2 flex items-center gap-2" style={{ background: GRADIENT.xp }}>
                             <IconLightbulb size={14} style={{ color: 'white' }} />
-                            <span className="text-xs font-bold text-white tracking-wide">Gợi ý</span>
+                            <span className="text-xs font-bold text-white tracking-wide">{t('hint')}</span>
                         </div>
                         <div className="px-4 py-3" style={{ background: `${ACCENT.xp}0F` }}>
                             <p className="text-[13.5px] leading-relaxed" style={{ color: 'var(--theme-text-primary)' }}>
-                                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                                {(exercise as any).hint || (exercise as any).hintVi || 'Xem lại phần lý thuyết để tìm câu trả lời.'}
+                                {(exercise as { hint?: string; hintVi?: string }).hint || (exercise as { hintVi?: string }).hintVi || t('defaultHint')}
                             </p>
                         </div>
                     </div>
@@ -708,7 +718,7 @@ export const ExerciseList = ({ exercises, onSubmit, nextLesson }: ExerciseListPr
                                 style={showHint
                                     ? { background: GRADIENT.xp, color: 'white' }
                                     : { background: `${ACCENT.xp}1A`, color: ACCENT.xp, border: `1px solid ${ACCENT.xp}40` }}>
-                                <IconLightbulb size={13} /> Gợi ý
+                                <IconLightbulb size={13} /> {t('hint')}
                             </button>
                         )}
                     </div>
@@ -722,7 +732,7 @@ export const ExerciseList = ({ exercises, onSubmit, nextLesson }: ExerciseListPr
                                 color: hasAnswer() ? 'white' : 'var(--theme-text-muted)',
                                 boxShadow: hasAnswer() ? `0 4px 12px ${ACCENT.srs}4D` : 'none',
                             }}>
-                            {!hasAnswer() ? 'Chọn đáp án' : <><IconCheck size={14} /> Kiểm tra</>}
+                            {!hasAnswer() ? t('chooseAnswer') : <><IconCheck size={14} /> {t('check')}</>}
                         </button>
                     ) : (
                         <button onClick={handleNextOrSubmit} disabled={isSubmitting}
@@ -733,11 +743,11 @@ export const ExerciseList = ({ exercises, onSubmit, nextLesson }: ExerciseListPr
                                 boxShadow: `0 4px 12px ${ACCENT.srs}4D`,
                             }}>
                             {isSubmitting ? (
-                                <><IconLoader size={14} /> Đang chấm...</>
+                                <><IconLoader size={14} /> {t('grading')}</>
                             ) : isLast ? (
-                                <><IconCheck size={14} /> Nộp bài</>
+                                <><IconCheck size={14} /> {t('submit')}</>
                             ) : (
-                                <>Tiếp tục <IconArrowRight size={14} /></>
+                                <>{t('continue')} <IconArrowRight size={14} /></>
                             )}
                         </button>
                     )}
@@ -747,22 +757,22 @@ export const ExerciseList = ({ exercises, onSubmit, nextLesson }: ExerciseListPr
             {/* ── Keyboard shortcuts hint ── */}
             {!revealed && (
                 <div className="text-center text-caption space-x-2" style={{ color: 'var(--theme-text-muted)' }}>
-                    <span>Phím tắt:</span>
+                    <span>{t('shortcuts')}</span>
                     {exercise.exerciseType === 'mcq' && (
                         <span>
                             <kbd className="px-1.5 py-0.5 rounded text-caption font-bold" style={{ background: 'var(--theme-bg-secondary)', border: '1px solid var(--theme-border)' }}>
                                 1–{exercise.answerData.options?.length ?? 4}
                             </kbd>
-                            {' '}chọn ·
+                            {' '}{t('shortcutSelect')} ·
                         </span>
                     )}
                     <span>
                         <kbd className="px-1.5 py-0.5 rounded text-caption font-bold" style={{ background: 'var(--theme-bg-secondary)', border: '1px solid var(--theme-border)' }}>Enter</kbd>
-                        {' '}kiểm tra ·
+                        {' '}{t('shortcutCheck')} ·
                     </span>
                     <span>
                         <kbd className="px-1.5 py-0.5 rounded text-caption font-bold" style={{ background: 'var(--theme-bg-secondary)', border: '1px solid var(--theme-border)' }}>Space</kbd>
-                        {' '}phát âm
+                        {' '}{t('shortcutSpeak')}
                     </span>
                 </div>
             )}

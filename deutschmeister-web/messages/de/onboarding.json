@@ -1,0 +1,70 @@
+{
+  "welcome": {
+    "greeting": "Willkommen!",
+    "intro": "Mache einen kurzen Test, damit wir dein Niveau einschätzen können",
+    "startBtn": "Test starten",
+    "skipBtn": "Überspringen, zum Dashboard →"
+  },
+  "quiz": {
+    "hintFormat": "{level} — {hint}",
+    "progressFormat": "{current} / {total}",
+    "skip": "Überspringen →"
+  },
+  "result": {
+    "levelLabel": "Niveau: {level} — {label}",
+    "msgExcellent": "Ausgezeichnet! Du hast ein starkes Deutsch-Fundament.",
+    "msgGood": "Nicht schlecht! Du hast die Grundlagen.",
+    "msgBeginner": "Kein Problem, wir beginnen mit den Grundlagen!",
+    "continueBtn": "Weiter"
+  },
+  "goal": {
+    "title": "Tägliches Lernziel?",
+    "subtitle": "Wie viele Wörter möchtest du täglich lernen?",
+    "label10": "10 Wörter",
+    "sub10": "~5 Min",
+    "label20": "20 Wörter",
+    "sub20": "~10 Min",
+    "label30": "30 Wörter",
+    "sub30": "~15 Min",
+    "continueBtn": "Weiter",
+    "skipBtn": "Überspringen →"
+  },
+  "summary": {
+    "title": "Bereit zum Lernen!",
+    "subtitle": "Hier sind deine Daten",
+    "levelLabel": "Niveau",
+    "levelValue": "{level} — {label}",
+    "goalLabel": "Tagesziel",
+    "goalValue": "{count} Wörter / Tag",
+    "goalEmpty": "--- Wörter / Tag",
+    "quizLabel": "Test",
+    "quizValue": "{correct}/{total} richtig",
+    "savingBtn": "Speichern...",
+    "startBtn": "Jetzt loslernen!"
+  },
+  "levelA1": "Anfänger",
+  "levelA2": "Aufstrebender Anfänger",
+  "levelB1": "Mittelstufe",
+  "placement": {
+    "introTitle": "Einstufungstest",
+    "introSubtitle": "15 Grammatikfragen — je 5 für A1, A2, B1",
+    "introNote": "Das Ergebnis aktualisiert dein empfohlenes Niveau. Dauer ca. 3–5 Minuten.",
+    "currentLevel": "Aktuelles Niveau: {level}",
+    "back": "Zurück",
+    "start": "Starten",
+    "progressFormat": "{current}/{total}",
+    "resultTitle": "Ergebnis",
+    "resultScore": "{correct}/15 richtig",
+    "estimatedLevel": "Geschätztes Niveau",
+    "estimateNote": "Schätzung basiert auf 15 Grammatikfragen — ersetzt keine offizielle Prüfung.",
+    "keepCurrent": "Beibehalten",
+    "saving": "Speichern...",
+    "updateTo": "Aktualisieren → {level}",
+    "sublevelA1Foundation": "A1.2 — Solide Grundlage",
+    "sublevelA1Begin": "A1.1 — Erste Schritte",
+    "sublevelA2Upper": "A2.2 — Obere Grundstufe",
+    "sublevelA2Lower": "A2.1 — Grundstufe",
+    "sublevelB1Upper": "B1.2 — Solide Mittelstufe",
+    "sublevelB1Lower": "B1.1 — Untere Mittelstufe"
+  }
+}

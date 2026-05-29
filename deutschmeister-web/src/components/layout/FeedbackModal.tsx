@@ -2,6 +2,7 @@
 /* eslint-disable no-restricted-syntax */
 
 import { useState, useRef, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import { ACCENT, STATUS } from '@/lib/tokens';
 import { useMutation } from '@tanstack/react-query';
 import { feedbackApi, FeedbackType } from '@/lib/api/feedback';
@@ -15,10 +16,12 @@ interface FeedbackModalProps {
 const MAX_IMAGES = 3;
 const MAX_SIZE_MB = 2;
 
-const TYPES: { value: FeedbackType; label: string; icon: React.ComponentType<{ size?: number; className?: string }>; color: string; bg: string }[] = [
-  { value: 'bug',        label: 'Báo cáo lỗi',  icon: IconBug,           color: STATUS.danger, bg: 'rgba(239,68,68,.12)'  },
-  { value: 'suggestion', label: 'Góp ý / Đề xuất', icon: IconLightbulb,  color: ACCENT.xp, bg: 'rgba(245,158,11,.12)' },
-  { value: 'other',      label: 'Khác',          icon: IconMessageCircle, color: ACCENT.writing, bg: 'rgba(99,102,241,.12)' },
+// Visual config only — `header.feedback.types.<value>` provides the label,
+// `header.feedback.placeholders.<value>` provides the textarea placeholder.
+const TYPES: { value: FeedbackType; icon: React.ComponentType<{ size?: number; className?: string }>; color: string; bg: string }[] = [
+  { value: 'bug',        icon: IconBug,           color: STATUS.danger, bg: 'rgba(239,68,68,.12)'  },
+  { value: 'suggestion', icon: IconLightbulb,     color: ACCENT.xp,     bg: 'rgba(245,158,11,.12)' },
+  { value: 'other',      icon: IconMessageCircle, color: ACCENT.writing, bg: 'rgba(99,102,241,.12)' },
 ];
 
 /** Compress image to JPEG, max 1200px wide, quality 0.7 → base64 data URI */
@@ -56,6 +59,7 @@ function IconCamera({ size = 16 }: { size?: number }) {
 }
 
 export function FeedbackModal({ onClose }: FeedbackModalProps) {
+  const t = useTranslations('header.feedback');
   const dialogRef = useModalA11y(true, onClose);
   const [type, setType] = useState<FeedbackType>('bug');
   const [content, setContent] = useState('');
@@ -80,28 +84,28 @@ export function FeedbackModal({ onClose }: FeedbackModalProps) {
 
     const remaining = MAX_IMAGES - images.length;
     if (remaining <= 0) {
-      setImgError(`Tối đa ${MAX_IMAGES} ảnh`);
+      setImgError(t('errors.tooManyImages', { max: MAX_IMAGES }));
       return;
     }
 
     const toProcess = Array.from(files).slice(0, remaining);
     for (const file of toProcess) {
       if (!file.type.startsWith('image/')) {
-        setImgError('Chỉ chấp nhận file ảnh');
+        setImgError(t('errors.notImage'));
         continue;
       }
       if (file.size > MAX_SIZE_MB * 1024 * 1024) {
-        setImgError(`Ảnh tối đa ${MAX_SIZE_MB}MB`);
+        setImgError(t('errors.tooLarge', { max: MAX_SIZE_MB }));
         continue;
       }
       try {
         const dataUri = await compressImage(file);
         setImages(prev => [...prev, dataUri]);
       } catch {
-        setImgError('Không thể xử lý ảnh');
+        setImgError(t('errors.processFailed'));
       }
     }
-  }, [images.length]);
+  }, [images.length, t]);
 
   const removeImage = (index: number) => {
     setImages(prev => prev.filter((_, i) => i !== index));
@@ -128,12 +132,12 @@ export function FeedbackModal({ onClose }: FeedbackModalProps) {
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b shrink-0" style={{ borderColor: 'var(--theme-border)' }}>
           <div>
-            <p id="feedback-modal-title" className="font-bold text-[15px]" style={{ color: 'var(--theme-text-primary)' }}>Phản hồi</p>
-            <p className="text-caption mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>Giúp chúng tôi cải thiện DeutschMeister</p>
+            <p id="feedback-modal-title" className="font-bold text-[15px]" style={{ color: 'var(--theme-text-primary)' }}>{t('title')}</p>
+            <p className="text-caption mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>{t('subtitle')}</p>
           </div>
           <button
             onClick={onClose}
-            aria-label="Đóng"
+            aria-label={t('closeAria')}
             className="w-7 h-7 rounded-lg flex items-center justify-center transition-colors"
             style={{ color: 'var(--theme-text-muted)' }}
             onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'var(--theme-bg-secondary)')}
@@ -150,39 +154,39 @@ export function FeedbackModal({ onClose }: FeedbackModalProps) {
               style={{ backgroundColor: 'rgba(34,197,94,.15)' }}>
               <IconCheck size={28} className="text-green-400" />
             </div>
-            <p className="font-bold text-[15px] mb-1" style={{ color: 'var(--theme-text-primary)' }}>Cảm ơn bạn!</p>
+            <p className="font-bold text-[15px] mb-1" style={{ color: 'var(--theme-text-primary)' }}>{t('success.title')}</p>
             <p className="text-[12.5px]" style={{ color: 'var(--theme-text-muted)' }}>
-              Phản hồi của bạn đã được ghi nhận và sẽ giúp chúng tôi cải thiện ứng dụng.
+              {t('success.description')}
             </p>
             <button
               onClick={onClose}
               className="mt-5 px-5 py-2 rounded-xl text-body font-semibold text-white"
               style={{ background: 'linear-gradient(135deg, #6366F1, #8B5CF6)' }}
             >
-              Đóng
+              {t('success.close')}
             </button>
           </div>
         ) : (
           <div className="p-5 overflow-y-auto">
             {/* Type selector */}
             <div className="grid grid-cols-3 gap-2 mb-4">
-              {TYPES.map(t => {
-                const Icon = t.icon;
-                const active = type === t.value;
+              {TYPES.map(ft => {
+                const Icon = ft.icon;
+                const active = type === ft.value;
                 return (
                   <button
-                    key={t.value}
-                    onClick={() => setType(t.value)}
+                    key={ft.value}
+                    onClick={() => setType(ft.value)}
                     className="flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl border transition-all duration-150 text-center"
                     style={{
-                      borderColor: active ? t.color : 'var(--theme-border)',
-                      backgroundColor: active ? t.bg : 'transparent',
+                      borderColor: active ? ft.color : 'var(--theme-border)',
+                      backgroundColor: active ? ft.bg : 'transparent',
                     }}
                   >
-                    <span style={{ color: active ? t.color : 'var(--theme-text-muted)', display: 'flex' }}><Icon size={17} /></span>
+                    <span style={{ color: active ? ft.color : 'var(--theme-text-muted)', display: 'flex' }}><Icon size={17} /></span>
                     <span className="text-caption font-semibold leading-tight"
-                      style={{ color: active ? t.color : 'var(--theme-text-secondary)' }}>
-                      {t.label}
+                      style={{ color: active ? ft.color : 'var(--theme-text-secondary)' }}>
+                      {t(`types.${ft.value}` as 'types.bug')}
                     </span>
                   </button>
                 );
@@ -194,13 +198,7 @@ export function FeedbackModal({ onClose }: FeedbackModalProps) {
               value={content}
               onChange={e => setContent(e.target.value)}
               rows={4}
-              placeholder={
-                type === 'bug'
-                  ? 'Mô tả lỗi bạn gặp phải — xảy ra ở đâu, làm gì thì bị lỗi...'
-                  : type === 'suggestion'
-                  ? 'Bạn muốn thêm tính năng gì hoặc cải thiện điều gì...'
-                  : 'Chia sẻ suy nghĩ của bạn về ứng dụng...'
-              }
+              placeholder={t(`placeholders.${type}` as 'placeholders.bug')}
               className="w-full rounded-xl border px-4 py-3 text-body resize-none focus:outline-none focus:ring-2 transition-all"
               style={{
                 backgroundColor: 'var(--theme-bg-secondary)',
@@ -210,7 +208,7 @@ export function FeedbackModal({ onClose }: FeedbackModalProps) {
               } as React.CSSProperties}
             />
             <p className="text-caption mt-1 text-right" style={{ color: content.trim().length < 10 ? STATUS.danger : 'var(--theme-text-muted)' }}>
-              {content.trim().length}/10 ký tự tối thiểu
+              {t('minChars', { count: content.trim().length })}
             </p>
 
             {/* Image upload */}
@@ -232,7 +230,7 @@ export function FeedbackModal({ onClose }: FeedbackModalProps) {
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={src}
-                        alt={`Ảnh ${i + 1}`}
+                        alt={t('imageAlt', { index: i + 1 })}
                         className="w-full h-full object-cover rounded-lg border"
                         style={{ borderColor: 'var(--theme-border)' }}
                       />
@@ -262,7 +260,7 @@ export function FeedbackModal({ onClose }: FeedbackModalProps) {
                   onMouseLeave={e => (e.currentTarget.style.borderColor = 'var(--theme-border)')}
                 >
                   <IconCamera size={14} />
-                  Thêm ảnh chụp màn hình ({images.length}/{MAX_IMAGES})
+                  {t('addScreenshot', { current: images.length, max: MAX_IMAGES })}
                 </button>
               )}
 
@@ -283,7 +281,7 @@ export function FeedbackModal({ onClose }: FeedbackModalProps) {
               }}
             >
               {isPending ? <IconLoader size={15} className="animate-spin" /> : null}
-              {isPending ? 'Đang gửi...' : 'Gửi phản hồi'}
+              {isPending ? t('submitting') : t('submit')}
             </button>
           </div>
         )}

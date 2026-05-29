@@ -2,8 +2,8 @@
 
 import { memo, useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { Link, usePathname } from '@/i18n/navigation';
 import { IconChevronRight, IconChevronLeft } from '@/components/ui/Icons';
 import { useXp } from '@/hooks/useXp';
 import { useAuthUser, useIsAuthenticated, useAuthBootstrap } from '@/stores/authStore';
@@ -25,6 +25,7 @@ interface SidebarProps {
 
 function SidebarComponent({ isCollapsed, onToggle }: SidebarProps) {
   const pathname = usePathname();
+  const tNav = useTranslations('nav');
   const user = useAuthUser();
   const isAuthenticated = useIsAuthenticated();
   const bootstrap = useAuthBootstrap();
@@ -138,7 +139,7 @@ function SidebarComponent({ isCollapsed, onToggle }: SidebarProps) {
               >
                 {active && <ActiveBar />}
                 <IconWrap active={active}><Icon size={20} /></IconWrap>
-                <span className="flex-1 text-left text-[13.5px] font-medium whitespace-nowrap">{item.label}</span>
+                <span className="flex-1 text-left text-[13.5px] font-medium whitespace-nowrap">{tNav(item.labelKey)}</span>
                 <span
                   className="shrink-0 w-3.5 h-3.5 flex items-center justify-center"
                   style={{ transform: expanded ? 'rotate(90deg)' : 'rotate(0)', transition: 'transform .25s cubic-bezier(.4,0,.2,1)' }}
@@ -163,10 +164,10 @@ function SidebarComponent({ isCollapsed, onToggle }: SidebarProps) {
                   animation: 'tooltipIn .15s ease-out forwards',
                 }}
               >
-                {item.label}
+                {tNav(item.labelKey)}
                 <div className="mt-1.5 pt-1.5 space-y-0.5" style={{ borderTop: '1px solid var(--theme-border)' }}>
                   {item.children!.map(c => (
-                    <div key={c.key} className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>{c.label}</div>
+                    <div key={c.key} className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>{tNav(c.labelKey)}</div>
                   ))}
                 </div>
               </div>
@@ -199,7 +200,7 @@ function SidebarComponent({ isCollapsed, onToggle }: SidebarProps) {
                         }}
                       >
                         <span className="shrink-0 w-4 h-4 flex items-center justify-center"><ChildIcon size={16} /></span>
-                        <span className="min-w-0 truncate flex-1">{child.label}</span>
+                        <span className="min-w-0 truncate flex-1">{tNav(child.labelKey)}</span>
                         {AUTH_HREFS.has(child.href) && !isAuthenticated ? (
                           <LockIcon />
                         ) : (
@@ -224,7 +225,7 @@ function SidebarComponent({ isCollapsed, onToggle }: SidebarProps) {
             <Link
               href={item.href}
               aria-current={active ? 'page' : undefined}
-              aria-label={isCollapsed ? item.label : undefined}
+              aria-label={isCollapsed ? tNav(item.labelKey) : undefined}
               className={`sb-nav-link group relative flex items-center ${isCollapsed ? 'justify-center' : 'gap-3 px-3'} py-2.5 rounded-xl`}
               data-active={active ? 'true' : 'false'}
               style={{
@@ -237,7 +238,7 @@ function SidebarComponent({ isCollapsed, onToggle }: SidebarProps) {
               {active && <ActiveBar />}
               <IconWrap active={active}><Icon size={20} /></IconWrap>
               {!isCollapsed && (
-                <span className="flex-1 text-[13.5px] font-medium whitespace-nowrap">{item.label}</span>
+                <span className="flex-1 text-[13.5px] font-medium whitespace-nowrap">{tNav(item.labelKey)}</span>
               )}
               {!isCollapsed && AUTH_HREFS.has(item.href) && !isAuthenticated && <LockIcon />}
               {!isCollapsed && (isAuthenticated || !AUTH_HREFS.has(item.href)) && PREMIUM_HREFS.has(item.href) && <PremiumLockIcon size={12} />}
@@ -269,7 +270,7 @@ function SidebarComponent({ isCollapsed, onToggle }: SidebarProps) {
                   animation: 'tooltipIn .15s ease-out forwards',
                 }}
               >
-                {item.label}
+                {tNav(item.labelKey)}
               </div>
             )}
           </>

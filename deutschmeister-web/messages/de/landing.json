@@ -1,0 +1,242 @@
+{
+  "navMenu": {
+    "features": "Funktionen",
+    "ai": "KI",
+    "exam": "Prüfungsvorbereitung",
+    "story": "Geschichte",
+    "pricing": "Preise",
+    "openMenu": "Menü öffnen",
+    "closeMenu": "Menü schließen",
+    "signIn": "Anmelden",
+    "startNow": "Jetzt starten",
+    "startFree": "Kostenlos starten"
+  },
+  "hero": {
+    "badge": "Goethe/TELC Standard",
+    "titleStart": "Deutsch lernen",
+    "titleAccent": "intelligent",
+    "titleEnd": "mit KI",
+    "subtitle": "Eine umfassende Plattform zum Deutschlernen — vom Grundwortschatz bis zur Goethe/TELC A1·A2·B1-Prüfungsvorbereitung. KI generiert Prüfungen aus echten Korpora (RAG), bewertet und gibt detailliertes Feedback auf Vietnamesisch.",
+    "ctaPrimary": "Kostenlos starten",
+    "ctaSecondary": "Premium-Pakete ansehen",
+    "ctaNote": "Keine Kreditkarte · Für immer kostenlos · 3 KI-Funktionen/Woche",
+    "chipWords": "5000+ Wörter",
+    "chipGames": "8 Spiele",
+    "chipPronunciation": "KI-Aussprachebewertung",
+    "chipRag": "RAG aus echten Prüfungen",
+    "chipSrs": "Smartes SRS",
+    "dashboardAlt": "Deutschmeister-Dashboard Vorschau",
+    "practiceAlt": "Vorschau Kompetenzübung",
+    "gamesAlt": "Vorschau Wortschatzspiele"
+  },
+  "stats": {
+    "wordsLabel": "Wörter",
+    "wordsSub": "Goethe-konform",
+    "gamesLabel": "Spiele",
+    "gamesSub": "gamifizierter Wortschatz",
+    "skillsLabel": "Kompetenzen",
+    "skillsSub": "Hören · Sprechen · Lesen · Schreiben"
+  },
+  "coreFeatures": {
+    "kicker": "KERNFUNKTIONEN",
+    "titleStart": "Alles, was du brauchst, um",
+    "titleAccent": "Deutsch zu lernen",
+    "subtitle": "Vom Wortschatz-Fundament bis zur offiziellen Prüfungsvorbereitung — alles in einer Plattform.",
+    "dictionary": {
+      "title": "Wörterbuch & Themen",
+      "badge": "12+ Themen",
+      "desc": "5000+ Goethe-konforme Wörter. Lerne nach Themen: Familie, Beruf, Reisen, Wohnen...",
+      "point1": "5000+ Goethe-Standard-Wörter",
+      "point2": "12+ Themen",
+      "point3": "Zweisprachige Grammatikerklärungen"
+    },
+    "games": {
+      "title": "8 Wortschatzspiele",
+      "badge": "Gamification",
+      "desc": "Vokabeln machen Spaß mit 8 abwechslungsreichen Mini-Spielen: Quiz, Karteikarten, Lückentext, Wortpaare...",
+      "point1": "Quick Quiz — schnelles Multiple Choice",
+      "point2": "Gender Quiz — Der/Die/Das",
+      "point3": "Timed Challenge — Zeitdruck"
+    },
+    "srs": {
+      "title": "SRS-Wiederholung",
+      "badge": "Spaced Repetition",
+      "desc": "Smartes Wiederholungssystem auf Basis von Spaced Repetition — dauerhaftes Behalten.",
+      "point1": "SRS-Algorithmus optimiert die Wiederholung",
+      "point2": "Tägliche Erinnerungen zur richtigen Zeit",
+      "point3": "Fortschritt pro Wort verfolgen"
+    },
+    "exam": {
+      "title": "Standardprüfungs-Übung",
+      "badge": "Goethe & TELC",
+      "desc": "KI generiert Prüfungen aus echtem Korpus (RAG) — richtiges Format, richtige Schwierigkeit, richtige Teile wie in offiziellen Goethe- & TELC-Prüfungen.",
+      "point1": "RAG aus echten Goethe/TELC-Prüfungen",
+      "point2": "A1 · A2 · B1 — alle vier Kompetenzen",
+      "point3": "KI bewertet nach offiziellen Kriterien"
+    }
+  },
+  "aiSection": {
+    "kicker": "KI-Prüfungstutor",
+    "titleStart": "KI als dein",
+    "titleAccent": "24/7-Lehrer",
+    "subtitle": "Generiert Prüfungen aus echtem Korpus über RAG — analysiert, bewertet und gibt detailliertes Feedback auf Vietnamesisch.",
+    "geminiTitle": "Gemini AI",
+    "geminiSub": "Multimodale KI-Engine",
+    "listen": {
+      "skill": "Hören",
+      "title": "KI generiert deutsche Hörverstehensaufgaben",
+      "desc": "Gemini erzeugt natürliches deutsches Audio auf deinem Niveau. Hören und Verständnisfragen beantworten.",
+      "badge": "Frei + Goethe/TELC + hochwertiges Audio"
+    },
+    "write": {
+      "skill": "Schreiben",
+      "title": "Detaillierte KI-Bewertung",
+      "desc": "Reiche einen deutschen Text ein — Gemini analysiert Grammatik, Wortschatz, Satzbau und bewertet nach offiziellen Kriterien.",
+      "badge": "Frei + Goethe/TELC + Deutsch-Vietnamesisch-Feedback"
+    },
+    "speak": {
+      "skill": "Sprechen",
+      "title": "KI bewertet Aussprache & Grammatik",
+      "desc": "Nimm deine Antwort auf Deutsch auf — Gemini analysiert Audio + Transkript multimodal und bewertet 4 Kriterien.",
+      "badge": "Frei + Goethe/TELC + Aussprache · Grammatik · Wortschatz · Inhalt"
+    },
+    "read": {
+      "skill": "Lesen",
+      "title": "KI generiert aus echten Prüfungen (RAG)",
+      "desc": "KI lernt aus echten Goethe/TELC-Prüfungen und generiert neue mit gleichem Format, gleicher Schwierigkeit und gleichen Fragetypen.",
+      "badge": "RAG aus echten Prüfungen + Frei + Goethe/TELC"
+    }
+  },
+  "examSection": {
+    "kicker": "PRÜFUNGSVORBEREITUNG",
+    "titleStart": "Prüfungen",
+    "titleAccent": "Goethe & TELC",
+    "titleEnd": "aus echtem Korpus",
+    "subtitle": "KI lernt aus einem echten Goethe/TELC-Korpus (RAG) und generiert neue Prüfungen in richtigem Format, Schwierigkeit und Teilen über alle 4 Kompetenzen: Hören · Lesen · Schreiben · Sprechen.",
+    "levelA1Desc": "Anfänger — Grundkommunikation, Vorstellung, Einkaufen",
+    "levelA2Desc": "Grundstufe — Alltag, Beruf, Familie",
+    "levelB1Desc": "Mittelstufe — Meinungen, Ansichten, soziale Themen",
+    "levelMeta": "{teile} Kompetenzen · {time} Min",
+    "skillLevels": "A1 · A2 · B1",
+    "skill4Read": "Lesen",
+    "skill4ReadDesc": "Vollständige Lesen-Teile",
+    "skill4Listen": "Hören",
+    "skill4ListenDesc": "Hören im Standardformat",
+    "skill4Write": "Schreiben",
+    "skill4WriteDesc": "Schreiben mit KI-Bewertung",
+    "skill4Speak": "Sprechen",
+    "skill4SpeakDesc": "Sprechen mit KI-Audioanalyse"
+  },
+  "gamesSection": {
+    "kicker": "8 WORTSCHATZSPIELE",
+    "titleStart": "Lernen, als ob du",
+    "titleAccent": "spielst",
+    "subtitle": "8 abwechslungsreiche Mini-Spiele wiederholen Wortschatz natürlich und ohne Langeweile.",
+    "quickQuiz": "Multiple Choice",
+    "genderQuiz": "Der/Die/Das",
+    "flashcards": "Karteikarten",
+    "fillBlank": "Lückentext",
+    "timedChallenge": "Challenge",
+    "wordMatch": "Wortpaare",
+    "listening": "Wort hören",
+    "spelling": "Rechtschreibung"
+  },
+  "demoSection": {
+    "kicker": "JETZT AUSPROBIEREN",
+    "titleStart": "Der, Die oder",
+    "titleAccent": "Das",
+    "titleSuffix": "?",
+    "subtitle": "Probiere 10 deutsche Artikelfragen — keine Anmeldung erforderlich."
+  },
+  "jsonLd": {
+    "description": "Umfassende Deutschlernplattform für vietnamesische Lerner. 5000+ Wörter, 8 Spiele, KI-Bewertung für 4 Kompetenzen, Goethe/TELC A1-B1-Prüfungen."
+  },
+  "demoQuiz": {
+    "loading": "Lädt...",
+    "start": "Starten · 10 Fragen",
+    "questionProgress": "Frage {current} / {total}",
+    "resultExcellent": "Hervorragend!",
+    "resultGood": "Ganz gut!",
+    "resultKeepGoing": "Weiter üben!",
+    "accuracy": "{pct}% korrekt",
+    "registerCta": "Kostenlos registrieren · 5000+ Wörter lernen →",
+    "playAgain": "Nochmal spielen"
+  },
+  "footer": {
+    "brandDesc": "Eine umfassende Deutschlernplattform — von den Grundlagen bis zur Goethe/TELC-Prüfungsvorbereitung.",
+    "geminiTitle": "Gemini AI",
+    "geminiSub": "Multimodale KI-Engine",
+    "colLearning": "Lernen",
+    "colExam": "Prüfung",
+    "colCommunity": "Community",
+    "colAccount": "Konto",
+    "colPolicy": "Richtlinien",
+    "learnDictionary": "Vokabel-Wörterbuch",
+    "learnGames": "8 Wortschatzspiele",
+    "learnSrs": "Smarte SRS-Wiederholung",
+    "learnGrammar": "Zweisprachige Grammatik",
+    "examReading": "Lesen",
+    "examListening": "Hören",
+    "examWriting": "Schreiben",
+    "examSpeaking": "Sprechen",
+    "examLevels": "Goethe & TELC A1/A2/B1",
+    "discord": "Deutschmeister Discord",
+    "accountRegister": "Kostenlos registrieren",
+    "accountLogin": "Anmelden",
+    "startNow": "Jetzt starten",
+    "policyPrivacy": "Datenschutzrichtlinie",
+    "policyTerms": "Nutzungsbedingungen",
+    "copyright": "© 2025 – 2026 Deutschmeister · Made with Yuii in Vietnam",
+    "bottomPrivacy": "Datenschutz",
+    "bottomTerms": "Bedingungen"
+  },
+  "finalCta": {
+    "titleStart": "Bereit, deine",
+    "titleAccent": "Reise",
+    "titleEnd": "zu beginnen?",
+    "subtitle": "Beginne heute Deutsch zu lernen mit KI-Unterstützung.",
+    "createAccount": "Konto erstellen",
+    "badgeAi": "KI",
+    "badgeStandard": "Goethe/TELC-Standard"
+  },
+  "faq": {
+    "kicker": "HÄUFIGE FRAGEN",
+    "titleStart": "Worüber",
+    "titleAccent": "wunderst",
+    "titleEnd": "du dich?",
+    "viewPricing": "Detaillierte Preise ansehen →",
+    "q1": "Ist die App wirklich kostenlos?",
+    "a1": "Ja. Alle Vokabeln, Mini-Spiele, Grammatik und Themen sind für immer kostenlos. Nur erweiterte KI-Funktionen (Goethe/TELC-Prüfungsvorbereitung, Schreib-/Sprechbewertung) brauchen Premium — mit einem Limit von 3/Woche für Free.",
+    "q2": "Muss ich zahlen, um Goethe/TELC zu üben?",
+    "a2": "Free-Nutzer haben 3 Nutzungen/Woche für alle KI-Funktionen inkl. Prüfungsvorbereitung. Premium schaltet unbegrenzte A1/A2/B1-Prüfungen, KI-Bewertung und KI-Fehlererklärungen auf Vietnamesisch frei.",
+    "q3": "Ist die KI-Bewertung für Deutsch genau?",
+    "a3": "Deutschmeister nutzt Googles Gemini AI — trainiert mit riesigen Sprachdaten. Sie bewertet nach Goethe/TELC-Kriterien: Grammatik, Wortschatz, Satzbau, Inhalt. Jeder Fehler hat eine ausführliche vietnamesische Erklärung.",
+    "q4": "Wie bezahle ich Premium?",
+    "a4": "Banküberweisung oder VietQR scannen. Nach der Überweisung mit korrektem Verwendungszweck bestätigt der Admin innerhalb weniger Stunden (max. 24h) und Premium wird automatisch aktiviert. Details auf der Preisseite.",
+    "q5": "Welche Niveaus unterstützt die App?",
+    "a5": "A1 (Anfänger), A2 (Grundstufe), B1 (Mittelstufe) — alle 4 Kompetenzen Hören/Sprechen/Lesen/Schreiben im Goethe-Zertifikat- und TELC-Deutsch-Format. Geeignet von Anfängern bis zu Prüfungskandidaten.",
+    "q6": "Muss ich etwas installieren? Gibt es eine mobile App?",
+    "a6": "Keine Installation — läuft komplett im Browser. Eine mobile App (Android/iOS) ist in Entwicklung und kommt bald. Konten werden über Web und Mobil geteilt.",
+    "q7": "Was ist der Lifetime-Deal?",
+    "a7": "Einmal zahlen, für immer nutzen — keine monatliche/jährliche Verlängerung. Das ist ein Early-Bird-Deal, begrenzt auf die ersten 500 Plätze. Du erhältst ein Early-Backer-Abzeichen und Priorität bei neuen Funktionen. Sind die 500 Plätze weg, öffnet es nicht wieder."
+  },
+  "story": {
+    "kicker": "UNSERE GESCHICHTE",
+    "titleStart": "Vom Schmerz",
+    "titleAccent": "zu Deutschmeister",
+    "item1Label": "Der Anfang — echter Schmerz",
+    "item1Para1": "Ich begann Deutsch bei null — ich kannte nur \"Hallo\" und \"Danke\". Ich schlug das Buch auf und wurde von <b>der, die, das</b> getroffen — drei Genera, die es im Vietnamesischen nicht gibt. Der Tisch ist \"der Tisch\", der Stuhl auch \"der Stuhl\", aber die Tür ist \"die Tür\". Keine Regel.",
+    "item1Para2": "Ich nutzte Duolingo, Anki, Google Translate — von allem etwas, aber nichts reichte. Duolingo erklärt keine Grammatik für Vietnamesen. Anki ist zu trocken. Vietnamesische Materialien waren rar, verstreut und unsystematisch.",
+    "item2Label": "Die harte Realität",
+    "item2Para1": "Als ich mich auf Goethe A1 vorbereitete, wurde mir klar: <b>kein Tool erstellt Goethe-Format-Prüfungen auf Vietnamesisch</b>. Lesen Teil 1 üben? Man muss alte Prüfungen online suchen, kopieren, selbst bewerten. Schreiben üben? Nach dem Schreiben korrigiert niemand — du weißt nicht, was falsch ist.",
+    "item2Para2": "Sprechen war noch schwerer — kein Lernpartner, Angst vor Fehlern, beim Öffnen des Mundes nur \"Ich heiße...\" und dann Blackout. Ich lernte allein, manchmal so frustriert, dass ich aufgeben wollte.",
+    "item3Label": "Die Idee entsteht",
+    "item3Para1": "Ich fragte mich: <i>\"Was wäre, wenn es eine App gäbe, die Wörter lehrt, Wiederholungsspiele bietet, Goethe-Format-Prüfungen erstellt und KI-Bewertung für Schreiben und Sprechen hat — alles auf Vietnamesisch?\"</i>",
+    "item3Para2": "Ich bin Entwickler und beschloss, das zu bauen, was ich brauchte. Nicht für ein Geschäft, sondern weil kein passendes Tool existierte. Jede Funktion in Deutschmeister entstand aus echtem Schmerz: Genera nicht merken → Gender Quiz. Niemand korrigiert das Schreiben → KI-Bewertung. Wörter sofort vergessen → SRS-Erinnerungen.",
+    "finalLabel": "Deutschmeister entsteht",
+    "finalPara1": "Deutschmeister ist kein Produkt einer großen Firma. Es ist das Produkt <b>eines Deutschlerners, gebaut für Deutschlerner</b>. Jede Codezeile, jede Funktion begann mit einer Frage: \"Hilft mir das, besser zu lernen?\"",
+    "finalPara2": "Ich weiß, der Weg zum Deutschlernen ist lang und manchmal einsam. Aber ich hoffe, mit Deutschmeister hast du einen Begleiter — nicht perfekt, aber immer da, 24/7, bereit, Prüfungen zum Üben zu erstellen, deine Arbeit zu korrigieren und dich täglich ans Wiederholen zu erinnern.",
+    "quote": "\"Deutsch ist schwer, aber nicht unlernbar. Du brauchst nur die richtigen Werkzeuge und genug Geduld.\"",
+    "quoteAuthor": "— Yuii, Developer & German Learner"
+  }
+}

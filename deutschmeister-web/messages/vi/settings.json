@@ -1,0 +1,108 @@
+{
+  "header": {
+    "title": "Cài đặt",
+    "subtitle": "Tùy chỉnh trải nghiệm của bạn"
+  },
+  "tabs": {
+    "display": "Hiển thị",
+    "sound": "Âm thanh",
+    "learning": "Học tập",
+    "notification": "Thông báo",
+    "account": "Tài khoản"
+  },
+  "toasts": {
+    "saved": "Đã lưu!",
+    "saveFailed": "Không lưu được cài đặt. Thử lại sau.",
+    "reset": "Đã đặt lại!",
+    "resetConfirm": "Đặt lại toàn bộ cài đặt?"
+  },
+  "display": {
+    "themeLabel": "Giao diện",
+    "themes": {
+      "light": "Sáng",
+      "dark": "Tối",
+      "system": "Hệ thống"
+    },
+    "showVietnamese": {
+      "label": "Nghĩa tiếng Việt",
+      "desc": "Hiển thị nghĩa tiếng Việt trong danh sách từ và ví dụ"
+    },
+    "showPronunciation": {
+      "label": "Phiên âm IPA",
+      "desc": "Hiển thị phiên âm IPA cho từ vựng"
+    },
+    "showExamples": {
+      "label": "Câu ví dụ",
+      "desc": "Hiển thị ví dụ sử dụng cho mỗi từ"
+    }
+  },
+  "sound": {
+    "soundEnabled": {
+      "label": "Hiệu ứng âm thanh",
+      "desc": "Phát âm thanh khi trả lời đúng và hoàn thành bài"
+    },
+    "autoPlaySound": {
+      "label": "Tự động phát âm",
+      "desc": "Tự động phát phiên âm khi hiển thị từ"
+    },
+    "speechRate": {
+      "label": "Tốc độ đọc",
+      "slow": "Chậm",
+      "normal": "Bình thường",
+      "fast": "Nhanh"
+    }
+  },
+  "learning": {
+    "dailyGoal": "Mục tiêu hàng ngày",
+    "dailyGoalUnit": "từ",
+    "questionsPerGame": "Số câu mỗi game",
+    "questionsPerGameUnit": "câu",
+    "timedChallenge": "Thời gian thử thách",
+    "timedChallengeUnit": "giây",
+    "preferredLevel": {
+      "label": "Trình độ ưu tiên",
+      "desc": "Từ trong các game sẽ random trong phạm vi từ A1 đến trình độ này",
+      "options": {
+        "all": "Tất cả trình độ",
+        "A1": "A1 - Sơ cấp",
+        "A2": "A2 - Cơ bản",
+        "B1": "B1 - Trung cấp",
+        "B2": "B2 - Trung cấp cao",
+        "C1": "C1 - Nâng cao",
+        "C2": "C2 - Thành thạo"
+      }
+    }
+  },
+  "notification": {
+    "dailyReminder": {
+      "label": "Nhắc nhở hàng ngày",
+      "desc": "Email nhắc nhở lúc 19:00 nếu chưa đạt mục tiêu trong ngày"
+    },
+    "weeklyEmail": {
+      "label": "Báo cáo hàng tuần",
+      "desc": "Tổng kết tiến độ học tập vào tối Chủ Nhật hàng tuần"
+    }
+  },
+  "account": {
+    "fallbackName": "Người dùng",
+    "currentPlanLabel": "Gói dịch vụ hiện tại",
+    "planNames": {
+      "free": "Gói Miễn phí",
+      "premium": "Gói Premium",
+      "lifetime": "Gói Vĩnh viễn"
+    },
+    "expiresOn": "Hết hạn: {date}",
+    "basicFeatures": "Tính năng cơ bản",
+    "lifetimeBenefits": "Quyền lợi trọn đời",
+    "upgrade": "Nâng cấp ngay",
+    "managePlan": "Quản lý gói",
+    "logout": "Đăng xuất tài khoản",
+    "guestPrompt": "Vui lòng đăng nhập",
+    "guestLogin": "Đăng nhập",
+    "supportText": "Hỗ trợ kỹ thuật:"
+  },
+  "footer": {
+    "reset": "Đặt lại mặc định",
+    "backHome": "Về trang chủ"
+  }
+}

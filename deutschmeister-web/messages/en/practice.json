@@ -1,0 +1,1281 @@
+{
+  "landing": {
+    "title": "Practice & Exam Prep",
+    "subtitle": "Choose your path: build daily skills, practice conversation with AI, or take official Goethe/TELC mock exams.",
+    "quickStart": {
+      "title": "Quick start",
+      "subtitle": "Pick a goal first, then jump into the right practice.",
+      "skill": {
+        "title": "I want to practice skills",
+        "subtitle": "Free-form reading, listening, writing, and speaking."
+      },
+      "exam": {
+        "title": "I want to take a mock exam",
+        "subtitle": "Goethe/TELC A1–B1 official-format tests."
+      },
+      "ai": {
+        "title": "I want to practice conversation",
+        "subtitle": "Roleplay, pronunciation, and dictation."
+      }
+    },
+    "skills": {
+      "title": "Practice skills",
+      "subtitle": "Free-form practice to stay consistent and improve each skill.",
+      "reading": {
+        "title": "Reading",
+        "titleDe": "Leseübung",
+        "description": "Generate German reading passages and test your comprehension."
+      },
+      "listening": {
+        "title": "Listening",
+        "titleDe": "Hörübung",
+        "description": "Listen to German audio and answer questions by level."
+      },
+      "writing": {
+        "title": "Writing",
+        "titleDe": "Schreibübung",
+        "description": "Write essays, get scores and detailed correction suggestions."
+      },
+      "speaking": {
+        "title": "Speaking",
+        "titleDe": "Sprechübung",
+        "description": "Record answers and receive pronunciation and content feedback."
+      }
+    },
+    "ai": {
+      "title": "AI assistants",
+      "subtitle": "Use AI for what's hard to practice alone: dialogue, pronunciation, and dictation.",
+      "roleplay": {
+        "title": "Roleplay AI",
+        "titleDe": "Rollenspiel",
+        "description": "Real-world dialogues: doctor visits, interviews, renting an apartment."
+      },
+      "pronunciation": {
+        "title": "Pronunciation AI",
+        "titleDe": "Aussprachetraining",
+        "description": "Record words and receive detailed pronunciation feedback."
+      },
+      "dictation": {
+        "title": "Dictation",
+        "titleDe": "Diktat",
+        "description": "Listen to German videos and fill in the missing words."
+      }
+    },
+    "exam": {
+      "title": "Official Goethe/TELC Tests",
+      "subtitleUnlocked": "Take A1/A2/B1 mock exams in the real format and review detailed results.",
+      "subtitleLocked": "Official mock exams require Premium. You can still practice freely above.",
+      "badge": "Mock exam",
+      "premiumBadge": "PREMIUM",
+      "reading": {
+        "title": "Reading",
+        "titleDe": "Prüfungslesen",
+        "description": "Goethe & TELC A1/A2/B1 with all Teile like the real test."
+      },
+      "listening": {
+        "title": "Listening",
+        "titleDe": "Prüfungshören",
+        "description": "Audio and questions in the Goethe/TELC exam format."
+      },
+      "writing": {
+        "title": "Writing",
+        "titleDe": "Prüfungsschreiben",
+        "description": "Write to official prompts, graded by official criteria."
+      },
+      "speaking": {
+        "title": "Speaking",
+        "titleDe": "Prüfungssprechen",
+        "description": "Practice the full Sprechen section in Goethe/TELC format."
+      }
+    },
+    "cta": {
+      "start": "Start",
+      "viewPremium": "View Premium"
+    },
+    "guideB1Card": {
+      "title": "B1 Exam Guide",
+      "description": "Test structure, 12-week roadmap, Schreiben samples, Sprechen Redemittel, grammar, and FAQ.",
+      "cta": "Open guide"
+    }
+  },
+  "guideB1": {
+    "back": "Back to Practice & Exam Prep",
+    "header": {
+      "title": "B1 exam prep guide",
+      "subtitle": "Everything about Goethe-Zertifikat B1 and TELC Deutsch B1 — exam structure, a 12-week roadmap, Schreiben templates, Sprechen Redemittel, and the most important grammar & vocabulary.",
+      "navAria": "B1 guide contents",
+      "navChooseExam": "Choose a certificate",
+      "navStructure": "Exam structure",
+      "navRoadmap": "12-week roadmap",
+      "navSkills": "Skill manual",
+      "navFaq": "FAQ"
+    },
+    "choose": {
+      "title": "Choose the right certificate",
+      "subtitle": "Goethe and TELC are both internationally recognised. Choose based on your strengths.",
+      "viewStructure": "See exam structure details",
+      "compareTitle": "Goethe B1 vs TELC B1 compared",
+      "colCriterion": "Criterion",
+      "recognizedNote": "Both certificates are internationally recognised and valid for a residence visa in Germany.",
+      "whyTitle": "Why prep for B1 on DeutschMeister?"
+    },
+    "structure": {
+      "title": "Exam structure",
+      "subtitle": "Each skill in detail — timing, number of Teile and exam tips.",
+      "tabAria": "Choose exam type",
+      "practiceCta": "Practice this skill now"
+    },
+    "roadmap": {
+      "title": "12-week roadmap — from A2 to B1",
+      "subtitle": "Study 1–2 hours a day and you can take the exam after 3 months. Great for working people or students."
+    },
+    "skill": {
+      "title": "Skill practice manual",
+      "subtitle": "Schreiben templates, Sprechen Redemittel, Lesen tips and Sprachbausteine grammar — learn once, use for both Goethe and TELC.",
+      "tabAria": "Choose a skill",
+      "mistakesTitle": "Common mistakes",
+      "telcEmailTitle": "TELC B1 — Email/Letter",
+      "telcEmailSub": "80–100 words · 1 task",
+      "goetheT1Title": "Goethe B1 Teil 1 — Reply",
+      "goetheT1Sub": "~80 words · answer 3 prompts",
+      "goetheT2Title": "Goethe B1 Teil 2 — Comment",
+      "goetheT2Sub": "~80 words · pro/contra/opinion",
+      "goetheCriteriaTitle": "Goethe — 4 grading criteria",
+      "telcTeileTitle": "TELC — 3-part Mündliche Prüfung",
+      "sprachHintLabel": "Note:",
+      "sprachHintBody": "Sprachbausteine only appear in the <b>TELC</b> exam (not Goethe). Study the 4 groups below to score points."
+    },
+    "grammarVocab": {
+      "title": "Key B1 grammar & vocabulary",
+      "subtitle": "The 6 most frequent grammar structures + 6 common vocabulary topics in the exam.",
+      "grammarTitle": "The 6 most important grammar structures",
+      "colStructure": "Structure",
+      "colExample": "Example",
+      "colUsage": "Usage",
+      "vocabTitle": "B1 vocabulary by topic",
+      "viewAllTopics": "View all topics"
+    },
+    "faq": {
+      "title": "Frequently asked questions about the B1 exam",
+      "subtitle": "The most common questions when preparing for the Goethe & TELC B1 exams."
+    },
+    "cta": {
+      "readyTitle": "Ready to practice?",
+      "readyBody": "Pick the exam type you want to start with — AI generates a full exam with all Teile in Goethe or TELC format, plus detailed grading.",
+      "lesenBtn": "Practice Lesen B1",
+      "schreibenBtn": "Practice Schreiben B1",
+      "startTitle": "Start practicing B1 — free",
+      "startBody": "Sign up in 30 seconds to unlock Goethe & TELC mock exams, AI grading for Schreiben/Sprechen, flashcards and progress tracking.",
+      "registerBtn": "Sign up free",
+      "loginBtn": "Already have an account? Log in"
+    }
+  },
+  "common": {
+    "allLevels": "All levels",
+    "allStatuses": "All statuses",
+    "all": "All",
+    "previous": "PREV",
+    "next": "NEXT",
+    "delete": "Delete",
+    "cancel": "Cancel",
+    "deletePermanently": "Delete permanently",
+    "confirmDelete": "Confirm delete?",
+    "cannotUndo": "This action cannot be undone.",
+    "share": "Share",
+    "newSession": "New",
+    "shareTitle": "DeutschMeister",
+    "status": {
+      "DRAFT": "Not started",
+      "GRADED": "Graded",
+      "SUBMITTED": "Submitted",
+      "GRADING": "Grading…",
+      "ERROR": "Error",
+      "draftWriting": "Draft",
+      "gradingShort": "Grading"
+    }
+  },
+  "reading": {
+    "list": {
+      "title": "Reading Practice",
+      "subtitle": "AI-generated German passages — practice Goethe/TELC reading comprehension",
+      "examLink": "Mock exam →",
+      "newSession": "New passage",
+      "stats": {
+        "totalSessions": "Total passages",
+        "averageScore": "Avg. score",
+        "bestScore": "Best score"
+      },
+      "confirmDeleteTitle": "Confirm delete?",
+      "confirmDeleteSubtitle": "This action cannot be undone.",
+      "emptyTitle": "No reading sessions yet",
+      "emptySubtitle": "You haven't done any reading practice yet. Let's start now!",
+      "emptyCta": "Start now",
+      "questionsCount": "{count} questions",
+      "correctCount": "{correct}/{total} correct",
+      "textTypes": {
+        "anzeige": "Notice",
+        "kurznachricht": "Short message",
+        "brief": "Letter/Email",
+        "artikel": "Article",
+        "dialog": "Dialogue"
+      }
+    },
+    "setup": {
+      "quotaLabel": "Reading AI quota",
+      "title": "Create new passage",
+      "subtitle": "AI generates a German reading comprehension based on your config",
+      "stepLevel": "1. CEFR level",
+      "stepTopic": "2. Topic",
+      "stepTextType": "3. Text type",
+      "stepQuestionCount": "4. Number of questions",
+      "customTopicPlaceholder": "Or enter a custom topic...",
+      "customLabel": "Custom ✓",
+      "summary": "Config summary",
+      "summaryLevel": "Level:",
+      "summaryTopic": "Topic:",
+      "summaryTextType": "Text type:",
+      "summaryQuestionCount": "Questions:",
+      "questionsUnit": "{count} questions",
+      "notSelected": "Not selected",
+      "generating": "AI is generating the passage...",
+      "generate": "Generate passage",
+      "generateError": "Couldn't generate the passage. Please try again."
+    },
+    "answering": {
+      "loading": "Loading passage...",
+      "notFound": "Passage not found.",
+      "backToList": "Back to list",
+      "title": "Reading Practice",
+      "readingTime": "~{minutes} min read",
+      "wordCount": "{count} words",
+      "answeredCount": "{answered}/{total} answered",
+      "tabTask": "Passage",
+      "tabEditor": "Questions",
+      "vocabHighlights": "Key vocabulary",
+      "questionsTitle": "Questions ({count})",
+      "progressLabel": "Progress: {answered}/{total}",
+      "grading": "Grading...",
+      "submit": "Submit"
+    },
+    "result": {
+      "loading": "Loading results...",
+      "notFound": "Results not found.",
+      "backToList": "Back to list",
+      "title": "Reading Result",
+      "grades": {
+        "excellent": "Excellent!",
+        "veryGood": "Very good! 👏",
+        "good": "Good!",
+        "needsWork": "Needs more work",
+        "keepPracticing": "Keep practicing"
+      },
+      "stats": {
+        "correct": "Correct",
+        "wrong": "Wrong",
+        "time": "Time",
+        "score": "Score"
+      },
+      "reviewTitle": "Review each question",
+      "tabAll": "All",
+      "tabWrong": "Wrong",
+      "tabCorrect": "Correct",
+      "noQuestions": "No questions",
+      "questionLabel": "Q{index}:",
+      "correctAnswer": "Correct answer: {answer}",
+      "explanation": "Explanation:",
+      "shareText": "I just finished a reading practice!"
+    }
+  },
+  "writing": {
+    "list": {
+      "title": "Writing Practice",
+      "subtitle": "AI-generated German prompts — write and get detailed feedback",
+      "examLink": "Mock exam →",
+      "newSession": "New essay",
+      "stats": {
+        "totalSessions": "Total essays",
+        "averageScore": "Avg. score",
+        "bestScore": "Best score"
+      },
+      "confirmDeleteTitle": "Confirm delete?",
+      "confirmDeleteSubtitle": "You won't be able to recover this practice session.",
+      "emptyTitle": "No writing sessions yet",
+      "emptySubtitle": "You haven't done any writing practice yet. Let's start now!",
+      "emptyCta": "Start now",
+      "typeLabel": "Type: {type}",
+      "gradedLabel": "Graded",
+      "writingTypes": {
+        "email": "Email",
+        "brief": "Letter",
+        "beschreibung": "Description",
+        "tagebuch": "Diary",
+        "dialog": "Dialogue",
+        "aufsatz": "Essay",
+        "einladung": "Invitation",
+        "beschwerde": "Complaint",
+        "bewerbung": "Job application",
+        "formular": "Form"
+      }
+    },
+    "setup": {
+      "quotaLabel": "Writing AI quota",
+      "title": "Create new prompt",
+      "subtitle": "Choose config to let AI generate a German writing prompt",
+      "stepLevel": "1. CEFR level",
+      "stepTopic": "2. Topic",
+      "stepWritingType": "3. Format",
+      "stepWordCount": "4. Length",
+      "customTopicPlaceholder": "Or enter a custom topic...",
+      "customLabel": "Custom ✓",
+      "summary": "Config summary",
+      "summaryLevel": "Level:",
+      "summaryTopic": "Topic:",
+      "summaryWritingType": "Format:",
+      "summaryWordCount": "Length:",
+      "notSelected": "Not selected",
+      "noneDash": "—",
+      "generating": "AI is generating the prompt...",
+      "generate": "Generate prompt",
+      "generateError": "Couldn't generate the prompt. Please try again."
+    },
+    "answering": {
+      "notFound": "Essay not found",
+      "backToList": "Back to list",
+      "backShort": "← Writing",
+      "saving": "Saving...",
+      "savedAt": "Saved {time}",
+      "ctrlSHint": "Ctrl+S to save",
+      "tabTask": "Aufgabe / Prompt",
+      "tabEditor": "Schreiben / Write",
+      "wordsShort": "{count} W",
+      "promptHeader": "Aufgabe / Prompt",
+      "hideHints": "Hide hints",
+      "showHints": "Show hints",
+      "vocabHints": "Vokabelhilfe / Vocabulary",
+      "grammarHints": "Grammatik / Grammar",
+      "editorLabel": "Your essay",
+      "wordCountLabel": "{count} / {min}–{max} words",
+      "specialCharsLabel": "Chars:",
+      "orType": "or type",
+      "textareaPlaceholder": "Schreiben Sie hier Ihren Text...\n\nWrite your essay here... ({min}–{max} words)",
+      "umlautTip": "Tip: {hint}",
+      "saveDraft": "Save draft",
+      "submitting": "AI is grading...",
+      "submit": "Submit & grade",
+      "submitError": "Couldn't grade the essay. Please try again.",
+      "needMoreWords": "{count} more words needed to submit",
+      "alertMinWords": "Essay needs at least {min} words. Currently: {current} words.",
+      "confirmSubmit": "Are you sure you want to submit? AI will grade and correct your essay."
+    },
+    "result": {
+      "title": "Writing Result",
+      "notFound": "Result not found",
+      "stillGrading": "Essay is being graded... Please wait.",
+      "backToList": "← Back to list",
+      "grades": {
+        "excellent": "Excellent!",
+        "veryGood": "Very good!",
+        "good": "Good!",
+        "satisfactory": "Satisfactory",
+        "sufficient": "Sufficient",
+        "keepPracticing": "Keep practicing!"
+      },
+      "scoreOf": "/100",
+      "noCriteria": "Keine detaillierten Kriterien",
+      "feedbackDe": "Feedback auf Deutsch",
+      "feedbackVi": "Feedback (English)",
+      "essayTitle": "Essay",
+      "tabOriginal": "Original",
+      "tabCorrected": "Corrected",
+      "errorsTitle": "Error details ({count})",
+      "filterAll": "All ({count})",
+      "noErrors": "No errors!",
+      "analysis": {
+        "title": "Grammar analysis",
+        "tense": "Tense:",
+        "sentenceType": "Sentence type:",
+        "correctedSentence": "Correct sentence",
+        "grammarRules": "Grammar rules",
+        "explanation": "Explanation",
+        "tip": "Tip:"
+      },
+      "error": {
+        "deutsch": "Deutsch",
+        "vietnamese": "English",
+        "tip": "Tip:",
+        "learnLesson": "Learn: {title} →",
+        "explainAi": "Explain in detail with AI",
+        "explainPremium": "Explain in detail (Premium)"
+      },
+      "errorTypes": {
+        "article": "Article",
+        "grammar": "Grammar",
+        "word_order": "Word order",
+        "conjugation": "Conjugation",
+        "case": "Case",
+        "spelling": "Spelling",
+        "vocabulary": "Vocabulary"
+      },
+      "severity": {
+        "error": "Error",
+        "warning": "Warning",
+        "suggestion": "Suggestion"
+      },
+      "shareText": "I scored {score}/100 on a German essay!"
+    }
+  },
+  "listening": {
+    "list": {
+      "title": "Listening Practice",
+      "subtitle": "AI-generated German listening — Build Goethe/TELC listening skills",
+      "examLink": "Mock exam →",
+      "newSession": "New listening",
+      "stats": {
+        "total": "Total sessions",
+        "averageScore": "Avg. score",
+        "bestScore": "Best score"
+      },
+      "statusGraded": "Graded",
+      "statusDraft": "Not submitted",
+      "audioFormat": "AI Audio format",
+      "emptyTitle": "No listening sessions yet",
+      "emptySubtitle": "You haven't practiced listening yet. Let's get started!",
+      "emptyCta": "Start now",
+      "scriptTypes": {
+        "dialogue": "Dialog",
+        "monologue": "Monolog",
+        "announcement": "Ansage",
+        "interview": "Interview",
+        "radio": "Radio"
+      }
+    },
+    "setup": {
+      "quotaLabel": "Listening AI credits",
+      "title": "New Listening Session",
+      "subtitle": "AI generates an audio script + questions",
+      "stepLevel": "Level",
+      "stepScriptType": "Audio type",
+      "levels": {
+        "A1": "Simple dialogue · 80-120 words",
+        "A2": "Everyday situations · 130-180 words",
+        "B1": "Rich content · 200-280 words"
+      },
+      "scriptTypes": {
+        "dialogue": { "label": "Dialog", "desc": "Dialogue between two people" },
+        "monologue": { "label": "Monolog", "desc": "Monologue by one speaker" },
+        "announcement": { "label": "Ansage", "desc": "Announcement / ad" },
+        "interview": { "label": "Interview", "desc": "Interview" },
+        "radio": { "label": "Radio", "desc": "Radio news" }
+      },
+      "generating": "Generating listening...",
+      "generate": "🎧 Generate listening",
+      "generateError": "Couldn't generate the session. Please try again."
+    },
+    "answering": {
+      "loading": "Loading session...",
+      "notFound": "Session not found.",
+      "backToList": "Back",
+      "title": "Listening Practice",
+      "answeredCount": "{answered}/{total} questions done",
+      "questionsTitle": "Questions ({count})",
+      "submit": "Submit",
+      "submitError": "Couldn't submit. Please try again.",
+      "questionTooltip": "Question {index}",
+      "ttsPlaying": "🎧 Playing...",
+      "ttsTitle": "Deutsch Listening",
+      "ttsReady": "Ready to practice",
+      "ttsPlayCount": "Played {count} times",
+      "ttsAudioLabel": "Audio · de-DE",
+      "ttsSpeedLabel": "Playback speed",
+      "ttsTip": "* Tip: Listen at least twice before choosing your final answer. The transcript appears on the result page."
+    },
+    "result": {
+      "loading": "Loading results...",
+      "notFound": "Result not found.",
+      "backToList": "Back to list",
+      "title": "Listening Results",
+      "sessionTitle": "Session: {title}",
+      "grades": {
+        "excellent": "Excellent!",
+        "veryGood": "Very good! 👏",
+        "good": "Not bad!",
+        "needsWork": "Needs work",
+        "keepPracticing": "Keep practicing"
+      },
+      "stats": {
+        "correct": "Correct",
+        "wrong": "Wrong",
+        "score": "Score",
+        "questions": "Questions"
+      },
+      "transcriptToggle": "Transcript (audio text)",
+      "transcriptListenAgain": "Listen again",
+      "reviewTitle": "Review each question",
+      "tabAll": "All",
+      "tabWrong": "Wrong",
+      "tabCorrect": "Correct",
+      "noQuestions": "No questions",
+      "questionLabel": "Q{index}: {question}",
+      "correctAnswer": "Correct answer: {answer}",
+      "yourAnswer": "Your answer: ",
+      "explanation": "Explanation:",
+      "share": "Share",
+      "newSession": "New session",
+      "shareText": "I scored {score}% on a German listening exercise!"
+    }
+  },
+  "speaking": {
+    "list": {
+      "title": "Speaking Practice",
+      "subtitle": "AI generates German prompts — record and get detailed feedback (v3)",
+      "examLink": "Mock exam →",
+      "newSession": "New speaking",
+      "stats": {
+        "total": "Total sessions",
+        "accuracy": "Accuracy",
+        "best": "Best"
+      },
+      "statusGraded": "Graded",
+      "statusGrading": "Grading...",
+      "statusDraft": "Not submitted",
+      "goetheTelcFormat": "Goethe/TELC Format",
+      "filterStatuses": {
+        "DRAFT": "Not submitted",
+        "GRADING": "Grading",
+        "GRADED": "Graded"
+      },
+      "confirmDeleteTitle": "Confirm delete?",
+      "confirmDeleteSubtitle": "You won't be able to restore this practice session.",
+      "cancel": "Cancel",
+      "emptyTitle": "No practice sessions yet",
+      "emptySubtitle": "Create your first speaking session so AI can grade and give you feedback!",
+      "emptyCta": "Start now",
+      "topics": {
+        "sich_vorstellen": "Sich vorstellen",
+        "alltag": "Alltag & Freizeit",
+        "wohnen": "Wohnen",
+        "arbeit": "Arbeit & Beruf",
+        "familie": "Familie & Freunde",
+        "reisen": "Reisen",
+        "einkaufen": "Einkaufen",
+        "gesundheit": "Gesundheit & Sport",
+        "meinung": "Meinungen"
+      }
+    },
+    "setup": {
+      "quotaLabel": "Speaking AI credits",
+      "title": "New Speaking Session",
+      "subtitle": "AI generates a German prompt → you record → AI grades it in detail",
+      "stepLevel": "Step 1 — CEFR level",
+      "stepTopic": "Step 2 — Topic",
+      "topics": {
+        "sich_vorstellen": { "de": "Sich vorstellen", "vi": "Introduce yourself" },
+        "alltag": { "de": "Alltag & Freizeit", "vi": "Everyday life & leisure" },
+        "wohnen": { "de": "Wohnen", "vi": "Housing" },
+        "arbeit": { "de": "Arbeit & Beruf", "vi": "Work & career" },
+        "familie": { "de": "Familie & Freunde", "vi": "Family & friends" },
+        "reisen": { "de": "Reisen", "vi": "Travel" },
+        "einkaufen": { "de": "Einkaufen", "vi": "Shopping" },
+        "gesundheit": { "de": "Gesundheit & Sport", "vi": "Health & sport" },
+        "meinung": { "de": "Meinungen äußern", "vi": "Express opinions" }
+      },
+      "info": "Requirements: microphone + Chrome/Edge. AI generates a random question/prompt, you record your answer, and Gemini grades it from audio + transcript.",
+      "generating": "Generating prompt...",
+      "generate": "Create speaking",
+      "generateError": "Couldn't create the session. Please try again."
+    },
+    "answering": {
+      "loading": "Loading session...",
+      "notFound": "Session not found.",
+      "backToList": "← List",
+      "title": "Speaking Practice",
+      "promptHeader": "Prompt",
+      "suggestionsHeader": "Suggested points to cover",
+      "recordReady": "Ready to record",
+      "recordListening": "Listening...",
+      "recordDone": "Recording done",
+      "rec": "REC",
+      "transcriptLive": "Live transcript",
+      "transcriptDone": "Recognised content",
+      "transcriptCompleted": "Done",
+      "transcriptPromptSay": "Say something...",
+      "transcriptEmpty": "No transcript data",
+      "recordedOk": "Recording succeeded ({seconds}s)",
+      "noSpeechWarn": "Your browser doesn't support live transcripts. Don't worry — AI will still receive your audio and grade it normally.",
+      "startRecord": "START RECORDING",
+      "stopRecord": "STOP RECORDING ({seconds}s)",
+      "retake": "Retake",
+      "submit": "SUBMIT & GRADE",
+      "grading": "AI is grading...",
+      "gradingSubtitle": "Gemini is analysing your voice and content. This usually takes 15-30 seconds.",
+      "micError": "Couldn't access microphone. Please grant permission.",
+      "submitError": "Couldn't submit. Please try again."
+    },
+    "result": {
+      "loading": "Loading results...",
+      "title": "Speaking Results",
+      "backToList": "← Back to list",
+      "grading": "AI is grading...",
+      "gradingSubtitle": "Gemini is analysing your audio and content. Please wait a moment.",
+      "errorTitle": "Grading failed. Please try again later.",
+      "criteriaTitle": "Criteria breakdown",
+      "yourVoice": "Your voice",
+      "nativeSample": "Native sample",
+      "transcriptTitle": "Transcript & corrections",
+      "correctionTypeGrammar": "Grammar",
+      "correctionTypePronunciation": "Pronunciation",
+      "strengths": "Strengths",
+      "needsImprovement": "Needs work",
+      "defaultStrength": "Natural delivery",
+      "defaultImprovement": "Watch ending sounds",
+      "feedback": "AI feedback",
+      "totalScore": "Total score",
+      "wordCount": "Word count",
+      "completedAt": "Completed: {date}",
+      "completedJustNow": "Just now",
+      "share": "Share",
+      "newSession": "NEW SPEAKING",
+      "shareTitle": "Speaking result",
+      "shareText": "I scored {score}/100!",
+      "grades": {
+        "excellent": { "badge": "Excellent", "title": "Perfect! 🎉" },
+        "veryGood": { "badge": "Great", "title": "You spoke very well! 👏" },
+        "good": { "badge": "Good", "title": "Making progress! 💪" },
+        "needsWork": { "badge": "Hang in", "title": "Keep practicing! 🤗" },
+        "keepPracticing": { "badge": "Needs work", "title": "Don't give up! 📚" }
+      }
+    }
+  },
+  "dictation": {
+    "list": {
+      "title": "Dictation",
+      "subtitle": "Practice German listening & writing with real YouTube videos",
+      "shadowingLink": "🎤 Shadowing",
+      "newSession": "New",
+      "statusGraded": "Graded",
+      "statusDraft": "Not submitted",
+      "defaultTopic": "Dictation",
+      "blanksCount": "{count} blanks",
+      "stats": {
+        "total": "Total sessions",
+        "accuracy": "Accuracy",
+        "best": "Best score"
+      },
+      "emptyTitle": "No practice sessions yet",
+      "emptySubtitle": "Explore the YouTube video library and start your dictation challenge!",
+      "emptyCta": "Open library",
+      "quickStart": {
+        "urlTitle": "Paste a YouTube URL",
+        "urlSubtitle": "Practice with any video",
+        "randomTitle": "Random from library",
+        "randomSubtitle": "Pick a level and try your luck",
+        "randomDescription": "We'll pick a random video from the library that matches your chosen level.",
+        "urlPlaceholder": "https://youtube.com/watch?v=...",
+        "urlMissing": "Please paste a YouTube URL.",
+        "urlInvalid": "Invalid URL. Please use a YouTube link.",
+        "urlGenericError": "Couldn't process this video. Try another URL.",
+        "randomNotFound": "No matching video found. Try another level!",
+        "processing": "Processing...",
+        "searching": "Finding video...",
+        "start": "Start →",
+        "startRandom": "Random session",
+        "allLevels": "All"
+      },
+      "requests": {
+        "title": "My requests",
+        "pending": "Pending",
+        "approved": "Approved",
+        "rejected": "Rejected",
+        "reason": "Reason: {reason}",
+        "start": "Start →"
+      }
+    },
+    "session": {
+      "loading": "Loading session...",
+      "notFound": "Session not found.",
+      "title": "Dictation",
+      "subtitle": "Listen and fill in the missing words in the subtitles",
+      "speedLabel": "Speed",
+      "autoPause": "Auto-pause after each line",
+      "nextSegment": "Next segment",
+      "warnUnansweredTitle": "{count} blanks left unanswered",
+      "warnUnansweredSubtitle": "These will count as incorrect. Submit anyway?",
+      "continueWriting": "Keep writing",
+      "submitNow": "Submit now"
+    },
+    "result": {
+      "title": "Practice result",
+      "notFound": "Session not found.",
+      "grades": {
+        "excellent": "Excellent!",
+        "veryGood": "Very good!",
+        "good": "Pass!",
+        "needsWork": "Needs work",
+        "keepPracticing": "Keep practicing"
+      },
+      "mistakesTitle": "Mistakes to review",
+      "skipped": "(skipped)",
+      "reviewTitle": "Review each line",
+      "noDetail": "No detailed data for this session.",
+      "filterAll": "All ({count})",
+      "filterWrong": "Only wrong ({count})",
+      "noErrors": "✓ Great! You didn't miss a single one.",
+      "segmentCorrect": "{correct}/{total} correct",
+      "retry": "Retry this session",
+      "library": "Pick another",
+      "shadowVideo": "Shadow this video"
+    },
+    "library": {
+      "titleDictation": "Video library",
+      "titleShadowing": "Shadowing library",
+      "subtitleDictation": "Pick from hundreds of curated videos to start your German journey",
+      "subtitleShadowing": "Pick a video to start shadowing — listen to the model and repeat",
+      "allLevels": "All levels",
+      "allTopics": "All topics",
+      "previewUnavailable": "Preview unavailable",
+      "defaultTopic": "General",
+      "defaultChannel": "YouTube",
+      "ctaDictation": "Practice →",
+      "ctaShadowing": "🎤 Shadow →",
+      "empty": "No matching videos",
+      "page": "Page {page} / {total}"
+    },
+    "shadow": {
+      "title": "Shadowing Practice",
+      "subtitle": "Listen to the model and repeat to mimic native pronunciation + intonation",
+      "chooseVideo": "Pick a video",
+      "statusSubmitted": "Done",
+      "statusDraft": "In progress",
+      "segmentsCount": "{completed} / {total} lines",
+      "filterStatuses": {
+        "DRAFT": "In progress",
+        "SUBMITTED": "Done"
+      },
+      "stats": {
+        "total": "Sessions practiced",
+        "averageScore": "Average score",
+        "bestScore": "Best score"
+      },
+      "urlTitle": "Paste a YouTube URL",
+      "urlAiBadge": "AI fallback",
+      "urlSubtitle": "If the video has no German subtitles, AI will auto-transcribe (15-min limit).",
+      "urlPlaceholder": "https://youtube.com/watch?v=...",
+      "urlMissing": "Please paste a YouTube URL.",
+      "urlInvalid": "Invalid URL. Please use a YouTube link.",
+      "urlGenericError": "Couldn't process this video. Try another URL.",
+      "processing": "Processing...",
+      "start": "Start →",
+      "chooseShadowVideoTitle": "Choose a shadowing video",
+      "chooseShadowVideoSubtitle": "Open the library and pick a suitable video",
+      "chooseShadowVideoDesc": "Every video in the dictation library can be shadowed — just pick one you like.",
+      "openLibrary": "Open library →",
+      "randomTitle": "Random from library",
+      "randomSubtitle": "Pick a level and try your luck",
+      "randomError": "No matching video found. Try another level!",
+      "randomSearching": "Finding video...",
+      "randomStart": "Random session",
+      "allLevels": "All",
+      "emptyTitle": "No shadowing sessions yet",
+      "emptySubtitle": "Pick a video from the library and start mimicking a native speaker!",
+      "emptyCta": "Open library",
+      "session": {
+        "title": "Shadowing Session",
+        "notFound": "Shadowing session not found.",
+        "tip": "Pause and read aloud. Focus on rhythm and pronunciation, not perfection. Start slow, then speed up.",
+        "dismiss": "Dismiss",
+        "subtitleSourceLabel": "Subtitles:",
+        "subtitleSourceAi": "✨ AI generated",
+        "subtitleSourceYoutube": "From YouTube",
+        "autoPause": "Auto-pause",
+        "replaySample": "Replay sample",
+        "grading": "Grading…",
+        "ready": "Ready to record",
+        "readyHint": "Press the button above to start",
+        "headphoneTip": "Headphones recommended for best results",
+        "retryHint": "Tap the mic to retry",
+        "nextSegment": "Next segment",
+        "progress": "Progress",
+        "submit": "Done →",
+        "submitting": "Processing...",
+        "warnNoAttempts": "Practice at least one line before finishing.",
+        "warnSubmitError": "Couldn't finish the session.",
+        "attemptCount": "Attempt {count}",
+        "feedbackTipPrefix": "💡"
+      },
+      "result": {
+        "title": "Shadowing Result",
+        "notFound": "Shadowing session not found.",
+        "overallLabel": "Overall score",
+        "summary": "You practiced {completed} / {total} lines in this video.",
+        "retry": "🔄 Practice this video again",
+        "retryPending": "Creating...",
+        "backList": "Back to shadowing",
+        "filterLabel": "Filter",
+        "filterAll": "All ({count})",
+        "filterWeak": "Needs work ({count})",
+        "attemptTries": "{count} attempts",
+        "youSaid": "You said: \"{text}\"",
+        "noFiltered": "No lines match this filter.",
+        "grades": {
+          "excellent": { "label": "Excellent", "emoji": "🌟" },
+          "veryGood": { "label": "Very good", "emoji": "✨" },
+          "good": { "label": "Not bad", "emoji": "👍" },
+          "needsWork": { "label": "Keep trying", "emoji": "💪" },
+          "keepPracticing": { "label": "Keep practicing", "emoji": "🔄" }
+        }
+      }
+    }
+  },
+  "pronunciation": {
+    "landing": {
+      "title": "Pronunciation Practice",
+      "back": "← Practice",
+      "subtitle": "Record words and get AI pronunciation feedback for each one",
+      "quotaLabel": "{used}/{limit} runs/week",
+      "drillCta": {
+        "title": "Drill tough sounds for Vietnamese speakers",
+        "subtitle": "ü, ö, ch, r, ß, ei/ie — focused per-sound practice"
+      },
+      "stats": {
+        "totalAttempts": "Attempts",
+        "averageScore": "Avg. score",
+        "levels": "Levels practiced"
+      },
+      "allLevels": "All",
+      "recent": "Recent practice"
+    },
+    "session": {
+      "title": "Pronunciation Practice",
+      "subtitle": "Aussprache · AI Analysis",
+      "instruction": "Say this:",
+      "overallScore": "Overall score",
+      "wordAnalysis": "Per-word analysis",
+      "recordReady": "Ready to record",
+      "recordListening": "Listening...",
+      "recordDone": "Recorded",
+      "suggestions": "Improvement tips",
+      "startRecord": "START RECORDING",
+      "stopRecord": "STOP RECORDING",
+      "retry": "RECORD AGAIN",
+      "score": "SCORE IT",
+      "tryAgain": "TRY AGAIN",
+      "nextSentence": "NEXT",
+      "analyzing": "ANALYSING...",
+      "micError": "Couldn't access microphone. Please grant permission.",
+      "scoreError": "Scoring failed"
+    },
+    "drills": {
+      "back": "← Pronunciation",
+      "title": "Drill tough sounds for Vietnamese speakers",
+      "subtitle": "Focus on the sounds Vietnamese learners often mispronounce — ü, ö, ch, r, and more",
+      "difficulty": {
+        "high": "Hard",
+        "medium": "Medium",
+        "low": "Easy"
+      },
+      "attemptsLabel": "{count} attempts",
+      "bestScore": "Best: {score}",
+      "averageScore": "Avg: {score}",
+      "notPracticed": "Not yet — Start →",
+      "drillBack": "← All drills",
+      "minimalPairs": "Minimal pairs",
+      "practiceWords": "Practice words — tap to read",
+      "practiceSentences": "Practice sentences — tap to read",
+      "record": "🎙️ Record",
+      "stop": "⏹ Stop",
+      "retry": "Record again",
+      "score": "Score it",
+      "analyzing": "AI is analysing...",
+      "suggestionsTitle": "Tips",
+      "tryAgain": "Try again",
+      "micError": "Couldn't access microphone. Please grant permission.",
+      "scoreError": "Scoring failed"
+    }
+  },
+  "roleplay": {
+    "list": {
+      "title": "Roleplay AI",
+      "subtitle": "Practice German conversations with AI across real-world situations",
+      "quotaLabel": "{used}/{limit} runs / week",
+      "allLevels": "All",
+      "scenariosTitle": "Practice scenarios",
+      "confirmDeleteTitle": "Delete chat?",
+      "confirmDeleteSubtitle": "This chat history will be permanently removed.",
+      "cancel": "Cancel",
+      "deletePermanently": "Delete permanently",
+      "historyTitle": "Recent history",
+      "statusCompleted": "Completed",
+      "statusActive": "In progress"
+    },
+    "session": {
+      "loading": "Loading…",
+      "notFound": "Chat not found",
+      "backToList": "Back to list",
+      "backAria": "Back",
+      "endButton": "End",
+      "ending": "Grading…",
+      "endConfirm": "End the chat and view feedback?",
+      "endError": "Couldn't end the chat",
+      "sendError": "Send failed",
+      "tipsHeader": "💡 TIPS",
+      "newScenario": "Try another scenario",
+      "inputHint": "Enter to send • Shift+Enter for newline"
+    }
+  },
+  "examCommon": {
+    "examLabel": "{examType} · {cefrLevel}",
+    "questionsCount": "{count} questions",
+    "teilLabel": "T{teil}: {correct}/{total}",
+    "newSession": "New session",
+    "startNow": "Start now",
+    "statusGraded": "Graded",
+    "statusDraft": "Not submitted",
+    "statusGrading": "Grading",
+    "statusError": "Error",
+    "stats": {
+      "total": "Total exams",
+      "averageScore": "Avg. score",
+      "bestScore": "Best score"
+    },
+    "filterAllStatuses": "All statuses",
+    "filterDraft": "Not submitted",
+    "filterGraded": "Graded",
+    "emptyTitle": "No exam sessions yet",
+    "setup": {
+      "step1Label": "Step 1 — Exam type",
+      "step2Label": "Step 2 — Level (CEFR)",
+      "goetheLabel": "Goethe-Zertifikat",
+      "goetheDesc": "Goethe-Institut certificate",
+      "telcLabel": "TELC Deutsch",
+      "telcDesc": "The European Language Certificates",
+      "naBadge": "N/A",
+      "teile": "Teile",
+      "questions": "Questions",
+      "timeLabel": "Time",
+      "minutesAbbr": "min",
+      "maxPoints": "Max points",
+      "teilLine": "Teil {i}",
+      "createExam": "Create exam"
+    },
+    "answering": {
+      "loadingExam": "Loading exam...",
+      "examNotFound": "Exam not found.",
+      "back": "Back",
+      "submitError": "Could not submit. Please try again.",
+      "submit": "Submit",
+      "answeredCount": "{done}/{total} answered",
+      "unsupportedQuestion": "Question type not supported.",
+      "anweisungLabel": "Anweisung / Instruction",
+      "fragenLabel": "Questions ({n})",
+      "bitteWahlen": "— Bitte wählen / Please select —",
+      "keinePasst": "X — Keine passt / None matches",
+      "teilXofY": "Teil {n} / {total}"
+    },
+    "result": {
+      "loadingResult": "Loading result...",
+      "shareBtn": "Share",
+      "newExam": "New exam",
+      "reviewDetails": "Review details",
+      "reviewTeile": "Review by Teil",
+      "correctLabel": "Correct",
+      "wrongLabel": "Wrong",
+      "totalLabel": "Total",
+      "pointsLabel": "Score",
+      "youAnswered": "You answered:",
+      "correctAnswerLabel": "Correct:",
+      "skipped": "(skipped)",
+      "userVsCorrect": "You: {user} · Correct: {correct}",
+      "questionLabel": "Q{n}: {text}",
+      "explanation": "Explanation:",
+      "emDash": "—",
+      "xKeinePasst": "X (Keine passt)",
+      "bestanden": "Bestanden!",
+      "nichtBestanden": "Nicht bestanden",
+      "bestandenShort": "Bestanden",
+      "nichtBestandenShort": "Nicht b.",
+      "gesamtergebnis": "Gesamtergebnis",
+      "richtigSuffix": "correct",
+      "punkteJeTeil": "Points per Teil",
+      "ergebnisseJeTeil": "Results per Teil",
+      "gradeExcellent": "Excellent!",
+      "gradeVeryGood": "Very good! 👏",
+      "gradeBestanden": "Bestanden! 💪",
+      "gradeMoreEffort": "Keep trying",
+      "gradeStudyMore": "Study more",
+      "shareTitle": "DeutschMeister"
+    }
+  },
+  "examReading": {
+    "list": {
+      "title": "Reading — Standard Exam",
+      "subtitle": "Goethe & TELC · A1 / A2 / B1 · All Teile included",
+      "cardLine": "Standard reading exam",
+      "emptySubtitle": "Start a Goethe/TELC-format reading exam now."
+    },
+    "paywall": {
+      "title": "Reading — Standard Exam",
+      "description": "Practice Goethe & TELC A1–B1 exam papers with Premium",
+      "featureContext": "Goethe/TELC-format reading comprehension with detailed answer explanations — Premium only."
+    },
+    "new": {
+      "pageTitle": "Create Reading exam",
+      "pageSubtitle": "Pick exam type and level — AI generates a full Teile paper",
+      "skillLabel": "Lesen",
+      "errorCreate": "Could not create the exam. Please try again.",
+      "loadingLong": "Generating exam (this may take 20–40 seconds)...",
+      "loadingHint": "AI is generating all Teile in parallel..."
+    },
+    "answering": {
+      "pageTitle": "Reading exam practice",
+      "listen": "Listen",
+      "byAuthor": "by {author}",
+      "wortliste": "Wortliste",
+      "themaLabel": "THEMA",
+      "zuordnungNoteIntro": "Note:",
+      "zuordnungNoteBody": "Some questions may NOT match any ad — choose",
+      "zuordnungNoteXBadge": "X",
+      "zuordnungNoteTail": "for that case.",
+      "richtigLabel": "Richtig ✓",
+      "falschLabel": "Falsch ✗",
+      "jaLabel": "Ja — In favour ✓",
+      "neinLabel": "Nein — Against ✗"
+    },
+    "result": {
+      "pageTitle": "Reading exam result",
+      "shareText": "I scored {score}% on the {examType} {cefrLevel} reading exam!",
+      "showPassage": "Show passage",
+      "hidePassage": "Hide passage",
+      "correctOfTotalDone": "{correct}/{total} correct · {pct}%",
+      "taskTypes": {
+        "richtig_falsch": "Richtig / Falsch",
+        "multiple_choice": "Multiple Choice",
+        "zuordnung": "Zuordnung",
+        "ja_nein": "Ja / Nein",
+        "sprachbausteine": "Sprachbausteine"
+      }
+    }
+  },
+  "examWriting": {
+    "list": {
+      "title": "Writing — Standard Exam",
+      "subtitle": "Goethe & TELC · A1 / A2 / B1 · AI grades Schreiben Teile",
+      "cardLine": "Standard writing exam",
+      "emptySubtitle": "Start a Goethe/TELC-format writing exam now.",
+      "gradedAt": "Graded at {time}"
+    },
+    "paywall": {
+      "title": "Writing — Standard Exam",
+      "description": "Practice writing Goethe & TELC A1–B1 papers with Premium",
+      "featureContext": "AI grades your Writing against Goethe/TELC rubric — error-by-error explanations in Vietnamese and German. Premium only."
+    },
+    "new": {
+      "pageTitle": "Create Writing exam",
+      "pageSubtitle": "Pick exam type and level — AI generates a full Teile paper",
+      "skillLabel": "Schreiben",
+      "errorCreate": "Could not create the exam. Please try again.",
+      "loadingShort": "Generating exam...",
+      "loadingHint": "AI is generating the writing prompts..."
+    },
+    "answering": {
+      "pageTitleBack": "← Writing exam practice",
+      "subtitle": "Schreiben · Goethe/TELC standard",
+      "saving": "Speichern…",
+      "saved": "Gespeichert",
+      "situationLabel": "Situation",
+      "situationLabelVi": "Situation / Context",
+      "aufgabeLabel": "Aufgabe",
+      "aufgabeLabelVi": "Aufgabe / Task",
+      "meinText": "Mein Text",
+      "specialCharsLabel": "Chars:",
+      "umlautOrType": "or type",
+      "writeHint": "Schreiben Sie ca. {min}–{max} Wörter · max. {points} Punkte",
+      "writePlaceholder": "Schreiben Sie hier Ihren Text…",
+      "umlautTip": "Tip: {hint}",
+      "wordsLabel": "{count} Wörter",
+      "tooLong": "too long",
+      "stillNeed": "{n} more needed",
+      "previousBtn": "Prev",
+      "nextBtn": "Next",
+      "gradingBtn": "Grading...",
+      "submitBtn": "Submit",
+      "doneCounter": "Done",
+      "confirmTitle": "Submit exam?",
+      "confirmBody": "AI will start grading your writing against the {examType} rubric. This usually takes ~30 seconds.",
+      "cancelBtn": "Cancel",
+      "confirmBtn": "Confirm",
+      "mobileTaskLabel": "Aufgabe / Task",
+      "mobileEditorLabel": "Schreiben / Write",
+      "taskTypes": {
+        "form_fill": "Formular ausfüllen",
+        "informal_email": "E-Mail (informell)",
+        "formal_email": "E-Mail (formell)",
+        "sms": "SMS / Kurznachricht",
+        "forum_comment": "Forumsbeitrag"
+      }
+    },
+    "result": {
+      "pageTitle": "Writing exam result",
+      "shareText": "I scored {score}% on the {examType} {cefrLevel} writing exam!",
+      "examNotFound": "Exam not found.",
+      "gradingError": "Grading error",
+      "gradingErrorBody": "AI grading failed. Please try again.",
+      "backToWriting": "Back to writing",
+      "aiGrading": "AI is grading your text...",
+      "aiGradingBody": "The system is evaluating your writing against Goethe/TELC criteria. Usually 10–30 seconds.",
+      "subtitle": "{examType} · {cefrLevel} · SCHREIBEN",
+      "gradedRecently": "Just now",
+      "congratsPassed": "Congratulations! You passed. Check the details below.",
+      "congratsFailed": "Not quite this time. Read the Korrekturen carefully to improve.",
+      "detailsByTeil": "Details per Teil",
+      "punkteSuffix": "Punkte",
+      "bewertung": "Bewertung",
+      "staerken": "Stärken",
+      "verbesserungen": "Verbesserungen",
+      "korrekturen": "Korrekturen",
+      "showText": "Show your text",
+      "hideText": "Hide your text",
+      "taskTypes": {
+        "form_fill": "Formular",
+        "informal_email": "E-Mail (informell)",
+        "formal_email": "E-Mail (formell)",
+        "sms": "SMS / Kurznachricht",
+        "forum_comment": "Forumsbeitrag"
+      }
+    }
+  },
+  "examListening": {
+    "list": {
+      "title": "Listening — Standard Exam",
+      "subtitle": "Goethe & TELC · A1 / A2 / B1 · All Hören Teile",
+      "cardLine": "Standard listening exam",
+      "emptySubtitle": "Start a Goethe/TELC-format listening exam now."
+    },
+    "paywall": {
+      "title": "Listening — Standard Exam",
+      "description": "Practice listening to Goethe & TELC A1–B1 papers with Premium",
+      "featureContext": "Timed Hören mock tests in Goethe/TELC format — Premium only. Upgrade for unlimited practice with real-exam countdown timer."
+    },
+    "new": {
+      "pageTitle": "Create Listening exam",
+      "pageSubtitle": "Pick exam type and level — AI generates a full Teile listening paper",
+      "skillLabel": "Hören",
+      "errorCreate": "Could not create the listening exam. Please try again.",
+      "loadingLong": "Generating exam (this may take 20–40 seconds)...",
+      "loadingHint": "AI is generating all Hören Teile in parallel..."
+    },
+    "answering": {
+      "pageTitle": "Listening exam practice",
+      "audioExam": "Audio Exam · de-DE",
+      "playing": "🎧 Playing exam audio...",
+      "audioReady": "Prüfung Audio",
+      "playedNTimes": "Played {n} times",
+      "readyToListen": "Start when you're ready",
+      "speedLabel": "Playback speed",
+      "listeningWarning": "* Note: In the real exam, some passages can only be played 1–2 times depending on the Teil."
+    },
+    "result": {
+      "pageTitle": "Listening exam result",
+      "shareText": "I scored {score}% on the {examType} {cefrLevel} listening exam!",
+      "subtitle": "{examType} · Deutsch {cefrLevel} · Hören",
+      "showTranscript": "Show transcript (audio text)",
+      "hideTranscript": "Hide transcript",
+      "listenAgain": "Listen again",
+      "teilFallback": "Teil {n}",
+      "correctOfTotalDone": "{correct}/{total} correct · {pct}%",
+      "taskTypes": {
+        "richtig_falsch": "Richtig / Falsch",
+        "multiple_choice": "Multiple Choice",
+        "zuordnung": "Zuordnung"
+      }
+    }
+  },
+  "examSpeaking": {
+    "list": {
+      "title": "Speaking — Standard Exam",
+      "subtitle": "Goethe & TELC · A1 / A2 / B1 · Mündliche Prüfung with all Teile",
+      "cardLine": "Standard speaking exam",
+      "emptySubtitle": "Start a Goethe/TELC-format speaking exam now."
+    },
+    "paywall": {
+      "title": "Speaking — Standard Exam",
+      "description": "Practice speaking Goethe & TELC A1–B1 papers with Premium",
+      "featureContext": "AI grades the Mündliche Prüfung against Goethe/TELC rubric — exam-grade timer, automatic transcript. Premium only."
+    },
+    "new": {
+      "pageTitle": "Create Speaking exam",
+      "pageSubtitle": "Pick exam type and level — AI generates a full Sprechen Teile paper",
+      "skillLabel": "Sprechen",
+      "errorCreate": "Could not create the speaking exam. Please try again.",
+      "loadingShort": "Generating exam (20–40 seconds)...",
+      "loadingHint": "AI is generating all Sprechen Teile in parallel...",
+      "requirements": "Requirements: microphone + Chrome/Edge (Web Speech API). Gemini grades from audio and transcript."
+    },
+    "answering": {
+      "pageTitle": "Speaking exam practice",
+      "subtitle": "Sprechen · Exam Practice",
+      "micError": "Cannot access microphone. Please check permissions.",
+      "submitError": "Submission failed. Please try again.",
+      "gradingTitle": "AI is grading...",
+      "gradingBody": "Gemini is analysing your audio and transcript. This may take 20–40 seconds.",
+      "wordCardsLabel": "Suggested word cards",
+      "partnerLabel": "Partner / Prüfer",
+      "statusIdle": "Ready",
+      "statusPrep": "Preparing...",
+      "statusRecording": "Recording...",
+      "statusDone": "Done",
+      "recBadge": "REC",
+      "transcriptLabel": "Transcript",
+      "listeningHint": "Listening...",
+      "noData": "No data",
+      "startPrep": "START PREP",
+      "startRecord": "START RECORDING",
+      "skipPrep": "SKIP PREP →",
+      "stopRecord": "STOP RECORDING",
+      "retake": "RETAKE",
+      "nextTeil": "NEXT: TEIL {n}",
+      "submitExam": "SUBMIT EXAM"
+    },
+    "result": {
+      "pageTitle": "Speaking exam result",
+      "shareText": "I scored {score}% on the {examType} {cefrLevel} speaking exam!",
+      "shareTitle": "Speaking exam result",
+      "examNotFound": "Exam not found.",
+      "backToList": "← Back to list",
+      "loadingResult": "Loading result...",
+      "aiGrading": "AI is grading...",
+      "aiGradingBody": "May take 20–40 seconds. Please wait.",
+      "kicker": "Speaking exam result",
+      "headerSkill": "{examType} Deutsch · {cefrLevel} · Sprechen",
+      "teileCount": "{count} Teile · {cefrLevel}",
+      "perTeil": "Per-Teil result",
+      "teilLine": "Teil {n}",
+      "criteriaTitle": "Criteria details",
+      "youSaid": "You said",
+      "nativeSpeaker": "Native speaker",
+      "transcriptHeader": "📄 Transcript",
+      "errorPronunciation": "Pronunciation error",
+      "errorGrammar": "Grammar error",
+      "strengthsTitle": "🌿 Strengths",
+      "improvementsTitle": "⚠️ Improvements",
+      "defaultStrength": "Completed Teil",
+      "defaultImprovement": "Keep practising!",
+      "noGrading": "No grading available.",
+      "gradeBadgeExcellent": "Excellent",
+      "gradeBadgeGood": "Great",
+      "gradeBadgePassed": "Passed",
+      "gradeBadgeKeepTrying": "Keep trying",
+      "gradeBadgeFailed": "Not yet",
+      "gradeTitleExcellent": "Ausgezeichnet! 🎉",
+      "gradeTitleGood": "Sehr gut! 👏",
+      "gradeTitlePassed": "Bestanden! 💪",
+      "gradeTitleKeepTrying": "Weiter üben! 🤗",
+      "gradeTitleFailed": "Nicht aufgeben! 📚",
+      "criteriaLabels": {
+        "aufgabe": "Aufgabe",
+        "grammatik": "Grammatik",
+        "aussprache": "Aussprache",
+        "wortschatz": "Wortschatz"
+      }
+    }
+  }
+}

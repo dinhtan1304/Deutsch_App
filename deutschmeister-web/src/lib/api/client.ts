@@ -57,11 +57,17 @@ export const clearTokens = () => {
   // Note: Refresh token cookie will be cleared by server on logout
 };
 
+// Stable, locale-independent error codes. UI layers translate these via the
+// `errors` namespace (see useApiErrorMessage). The string message stays as a
+// Vietnamese fallback for non-React contexts and legacy callers.
+export type ApiErrorCode = 'AUTH_EXPIRED' | 'AUTH_REQUIRED';
+
 export class ApiError extends Error {
   constructor(
     public status: number,
     message: string,
-    public data?: unknown
+    public data?: unknown,
+    public code?: ApiErrorCode,
   ) {
     super(message);
     this.name = 'ApiError';
@@ -244,7 +250,7 @@ export async function apiUpload<T>(endpoint: string, formData: FormData): Promis
   }
   if (!token) {
     onAuthExpiredCallback?.();
-    throw new ApiError(401, 'Vui lòng đăng nhập lại');
+    throw new ApiError(401, 'Vui lòng đăng nhập lại', undefined, 'AUTH_REQUIRED');
   }
 
   const response = await fetch(url, {
@@ -258,7 +264,7 @@ export async function apiUpload<T>(endpoint: string, formData: FormData): Promis
     clearTokens();
     clearSessionHint();
     onAuthExpiredCallback?.();
-    throw new ApiError(401, 'Phiên đăng nhập hết hạn');
+    throw new ApiError(401, 'Phiên đăng nhập hết hạn', undefined, 'AUTH_EXPIRED');
   }
 
   if (!response.ok) {

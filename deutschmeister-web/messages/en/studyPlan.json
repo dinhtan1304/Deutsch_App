@@ -1,0 +1,101 @@
+{
+  "dayNames": {
+    "sun": "Sun",
+    "mon": "Mon",
+    "tue": "Tue",
+    "wed": "Wed",
+    "thu": "Thu",
+    "fri": "Fri",
+    "sat": "Sat"
+  },
+  "empty": {
+    "title": "No study plan yet",
+    "subtitle": "Create a personalized study schedule to prepare for the Goethe/TELC exam",
+    "create": "Create study plan"
+  },
+  "header": {
+    "weekProgress": "Week {current}/{total}",
+    "daysUntilExam": "{days} days until exam",
+    "resume": "Resume",
+    "pause": "Pause",
+    "pausedBanner": "Plan is paused. Click \"Resume\" to continue learning."
+  },
+  "progress": {
+    "label": "Progress",
+    "completed": "complete",
+    "totalWeeks": "{weeks}-week plan"
+  },
+  "sidebar": {
+    "title": "Learning path",
+    "week": "Week {n}"
+  },
+  "phase": {
+    "label": "Phase: {name}",
+    "weekSub": "Week {week} — {nameEn}"
+  },
+  "today": {
+    "title": "Today's tasks · {day}",
+    "doneBadge": "{done}/{total} Done"
+  },
+  "week": {
+    "details": "Week {week} details",
+    "allDays": "ALL"
+  },
+  "delete": {
+    "title": "Delete study plan?",
+    "confirm": "Are you sure you want to delete this plan? This action cannot be undone.",
+    "cancel": "Cancel",
+    "deleting": "Deleting...",
+    "submit": "Delete"
+  },
+  "setup": {
+    "stepLabel": "Step {current} of {total}",
+    "step0": {
+      "title": "Your personal roadmap",
+      "subtitle": "We'll personalize your schedule based on your certificate goal."
+    },
+    "step1": {
+      "title": "Your target",
+      "subtitle": "Reaching level {level} usually takes 2–4 months of practice.",
+      "subtitleEmpty": "Reaching level ... usually takes 2–4 months of practice.",
+      "back": "Back to previous step"
+    },
+    "step2": {
+      "title": "Finish line",
+      "subtitle": "{exam} {level} — Pick your exam date.",
+      "dateLabel": "Planned exam date",
+      "weeksLeft": "{weeks} weeks of practice",
+      "tooSoon": "Tight schedule! You'll need high focus to reach your goal.",
+      "tooFar": "You have plenty of time. Study steadily every day.",
+      "ideal": "Ideal window to level up.",
+      "submit": "Start now",
+      "submitting": "Creating plan...",
+      "back": "Back",
+      "errorDefault": "Something went wrong"
+    },
+    "exams": {
+      "goethe": {
+        "name": "Goethe-Zertifikat",
+        "description": "The most respected certificate from the Goethe-Institut"
+      },
+      "telc": {
+        "name": "TELC Deutsch",
+        "description": "Widely recognized certificate across Europe"
+      }
+    },
+    "levels": {
+      "a1": {
+        "label": "A1 — Beginner",
+        "desc": "Basic conversation: greetings, self-introduction"
+      },
+      "a2": {
+        "label": "A2 — Elementary",
+        "desc": "Understand and exchange familiar information"
+      },
+      "b1": {
+        "label": "B1 — Intermediate",
+        "desc": "Communicate at work, while traveling, and in study"
+      }
+    }
+  }
+}

@@ -11,6 +11,9 @@
  * Route renames are NOT performed here — hrefs map to existing routes.
  * Future phases may rename routes (e.g. /words → /vocabulary/lookup), but
  * nav config changes and route renames should land separately.
+ *
+ * i18n: `labelKey` is a `nav` namespace key. Resolve via
+ * `useTranslations('nav')(item.labelKey)` in renderers.
  */
 
 import type { ComponentType } from 'react';
@@ -21,10 +24,15 @@ import {
   IconHeadphones, IconMic, IconLink, IconUser, IconStar, IconClock,
   IconTrophy, IconBarChart, IconFlame,
 } from '@/components/ui/Icons';
+// Constrain labelKey to the actual nav namespace keys. vi is the source of truth
+// for shape; en/de mirror these keys (and fall back to vi if missing).
+import type navMessagesVi from '../../messages/vi/nav.json';
+
+export type NavLabelKey = keyof typeof navMessagesVi;
 
 export interface NavItem {
   key: string;
-  label: string;                                 // Vietnamese (chrome is VN-first)
+  labelKey: NavLabelKey;                          // key into messages/<locale>/nav.json
   href: string;
   icon: ComponentType<{ size?: number; className?: string }>;
   children?: NavItem[];
@@ -47,67 +55,67 @@ function IconMore({ size = 20 }: { size?: number; className?: string }) {
 export const PRIMARY_NAV: NavItem[] = [
   {
     key: 'home',
-    label: 'Trang chủ',
+    labelKey: 'home',
     href: '/dashboard',
     icon: IconHome,
   },
   {
     key: 'vocabulary',
-    label: 'Từ vựng',
+    labelKey: 'vocabulary',
     href: '/words',
     icon: IconBook,
     children: [
-      { key: 'words',         label: 'Từ điển',      href: '/words',              icon: IconBook },
-      { key: 'word-bank',     label: 'Sổ tay',       href: '/word-bank',          icon: IconNotebook },
-      { key: 'word-bank-srs', label: 'Ôn SRS',       href: '/word-bank/review',   icon: IconBrain, badge: 'srs-due' },
-      { key: 'review-sm2',    label: 'Ôn tập',       href: '/review',             icon: IconRefresh, badge: 'builtin-due' },
-      { key: 'topics',        label: 'Chủ đề',       href: '/topics',             icon: IconLayers },
-      { key: 'my-topics',     label: 'Bộ của tôi',   href: '/my-topics',          icon: IconNotebook },
-      { key: 'community-topics', label: 'Khám phá cộng đồng', href: '/community/topics', icon: IconLayers },
-      { key: 'ipa-chart',     label: 'Bảng IPA',     href: '/learn/ipa',          icon: IconMic },
+      { key: 'words',         labelKey: 'words',           href: '/words',              icon: IconBook },
+      { key: 'word-bank',     labelKey: 'wordBank',        href: '/word-bank',          icon: IconNotebook },
+      { key: 'word-bank-srs', labelKey: 'wordBankSrs',     href: '/word-bank/review',   icon: IconBrain, badge: 'srs-due' },
+      { key: 'review-sm2',    labelKey: 'reviewSm2',       href: '/review',             icon: IconRefresh, badge: 'builtin-due' },
+      { key: 'topics',        labelKey: 'topics',          href: '/topics',             icon: IconLayers },
+      { key: 'my-topics',     labelKey: 'myTopics',        href: '/my-topics',          icon: IconNotebook },
+      { key: 'community-topics', labelKey: 'communityTopics', href: '/community/topics', icon: IconLayers },
+      { key: 'ipa-chart',     labelKey: 'ipaChart',        href: '/learn/ipa',          icon: IconMic },
     ],
   },
   {
     key: 'practice',
-    label: 'Luyện tập',
+    labelKey: 'practice',
     href: '/practice-test',
     icon: IconTarget,
     children: [
-      { key: 'grammar',     label: 'Ngữ pháp',    href: '/grammar',                icon: IconBookOpen },
-      { key: 'games',       label: 'Trò chơi',    href: '/games',                  icon: IconGamepad },
-      { key: 'reading',     label: 'Đọc',         href: '/practice-test/reading',  icon: IconBookOpen, premium: true },
-      { key: 'listening',   label: 'Nghe',        href: '/practice-test/listening', icon: IconHeadphones, premium: true },
-      { key: 'writing',     label: 'Viết',        href: '/practice-test/writing',  icon: IconPenLine, premium: true },
-      { key: 'speaking',    label: 'Nói',         href: '/practice-test/speaking',   icon: IconMic, premium: true },
-      { key: 'speaking-rooms', label: 'Phòng nói', href: '/practice-test/speaking-rooms', icon: IconMic, beta: true },
-      { key: 'arena',       label: 'Đấu trường',  href: '/arena',                   icon: IconFlame, beta: true },
-      { key: 'dictation',   label: 'Chép chính tả', href: '/practice-test/dictation', icon: IconHeadphones },
-      { key: 'study-plan',  label: 'Kế hoạch',    href: '/study-plan',               icon: IconTarget },
+      { key: 'grammar',     labelKey: 'grammar',         href: '/grammar',                icon: IconBookOpen },
+      { key: 'games',       labelKey: 'games',           href: '/games',                  icon: IconGamepad },
+      { key: 'reading',     labelKey: 'reading',         href: '/practice-test/reading',  icon: IconBookOpen, premium: true },
+      { key: 'listening',   labelKey: 'listening',       href: '/practice-test/listening', icon: IconHeadphones, premium: true },
+      { key: 'writing',     labelKey: 'writing',         href: '/practice-test/writing',  icon: IconPenLine, premium: true },
+      { key: 'speaking',    labelKey: 'speaking',        href: '/practice-test/speaking',   icon: IconMic, premium: true },
+      { key: 'speaking-rooms', labelKey: 'speakingRooms', href: '/practice-test/speaking-rooms', icon: IconMic, beta: true },
+      { key: 'arena',       labelKey: 'arena',           href: '/arena',                   icon: IconFlame, beta: true },
+      { key: 'dictation',   labelKey: 'dictation',       href: '/practice-test/dictation', icon: IconHeadphones },
+      { key: 'study-plan',  labelKey: 'studyPlan',       href: '/study-plan',               icon: IconTarget },
     ],
   },
   {
     key: 'progress',
-    label: 'Tiến độ',
+    labelKey: 'progress',
     href: '/profile',
     icon: IconBarChart,
     children: [
-      { key: 'profile',       label: 'Hồ sơ',      href: '/profile',       icon: IconUser },
-      { key: 'achievements',  label: 'Thành tích', href: '/achievements',  icon: IconTrophy },
-      { key: 'leaderboard',   label: 'Xếp hạng',   href: '/leaderboard',   icon: IconZap },
-      { key: 'challenges',    label: 'Thử thách',  href: '/challenges',    icon: IconBrain },
-      { key: 'history',       label: 'Lịch sử',    href: '/history',       icon: IconClock },
+      { key: 'profile',       labelKey: 'profile',      href: '/profile',       icon: IconUser },
+      { key: 'achievements',  labelKey: 'achievements', href: '/achievements',  icon: IconTrophy },
+      { key: 'leaderboard',   labelKey: 'leaderboard',  href: '/leaderboard',   icon: IconZap },
+      { key: 'challenges',    labelKey: 'challenges',   href: '/challenges',    icon: IconBrain },
+      { key: 'history',       labelKey: 'history',      href: '/history',       icon: IconClock },
     ],
   },
   {
     key: 'more',
-    label: 'Thêm',
+    labelKey: 'more',
     href: '/settings',
     icon: IconMore,
     children: [
-      { key: 'settings',   label: 'Cài đặt',   href: '/settings',  icon: IconSettings },
-      { key: 'resources',  label: 'Tài nguyên', href: '/resources', icon: IconLink },
-      { key: 'pricing',    label: 'Nâng cấp',  href: '/pricing',   icon: IconStar },
-      { key: 'referral',   label: 'Giới thiệu bạn', href: '/referral', icon: IconUser },
+      { key: 'settings',   labelKey: 'settings',  href: '/settings',  icon: IconSettings },
+      { key: 'resources',  labelKey: 'resources', href: '/resources', icon: IconLink },
+      { key: 'pricing',    labelKey: 'pricing',   href: '/pricing',   icon: IconStar },
+      { key: 'referral',   labelKey: 'referral',  href: '/referral',  icon: IconUser },
     ],
   },
 ];

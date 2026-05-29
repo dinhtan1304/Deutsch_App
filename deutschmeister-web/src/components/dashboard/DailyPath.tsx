@@ -2,6 +2,7 @@
 /* eslint-disable no-restricted-syntax */
 
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { ACCENT, STATUS } from '@/lib/tokens';
 import { useDailyPath } from '@/hooks/useDashboard';
 
@@ -15,6 +16,7 @@ function IconStar({ size = 14 }: { size?: number }) {
 
 export function DailyPath() {
   const { data, isLoading } = useDailyPath();
+  const t = useTranslations('dashboard.dailyPath');
 
   if (isLoading || !data) return null;
 
@@ -52,10 +54,10 @@ export function DailyPath() {
         </div>
         <div className="flex-1 min-w-0">
           <div className="text-body font-bold truncate" style={{ color: 'var(--theme-text-primary)' }}>
-            Bài học hôm nay
+            {t('title')}
           </div>
           <div className="text-caption truncate" style={{ color: 'var(--theme-text-muted)' }}>
-            {allDone ? 'Hoàn thành! Hẹn ngày mai' : `${completedCount}/${totalCount} hoàn thành`}
+            {allDone ? t('allDone') : t('progress', { completed: completedCount, total: totalCount })}
           </div>
         </div>
         <div className="relative w-8 h-8 shrink-0">

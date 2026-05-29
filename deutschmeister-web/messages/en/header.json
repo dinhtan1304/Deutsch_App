@@ -1,0 +1,60 @@
+{
+  "search": {
+    "placeholderShort": "Search...",
+    "placeholderLong": "Search, navigate, translate sentences...",
+    "ariaOpenPalette": "Open command palette"
+  },
+  "streak": {
+    "title": "Streak: {count} days in a row"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "ariaLabel": "Notifications"
+  },
+  "userBadge": {
+    "premium": "Premium",
+    "free": "Free"
+  },
+  "userMenu": {
+    "profile": "My profile",
+    "settings": "Account settings",
+    "discord": "Join Discord",
+    "feedback": "Feedback & bug report",
+    "logout": "Sign out"
+  },
+  "guest": {
+    "login": "Sign in",
+    "register": "Sign up"
+  },
+  "feedback": {
+    "title": "Feedback",
+    "subtitle": "Help us improve DeutschMeister",
+    "closeAria": "Close",
+    "types": {
+      "bug": "Bug report",
+      "suggestion": "Suggestion",
+      "other": "Other"
+    },
+    "placeholders": {
+      "bug": "Describe the bug — where it happens and what you did when it broke...",
+      "suggestion": "What feature would you like, or what should we improve...",
+      "other": "Share your thoughts about the app..."
+    },
+    "minChars": "{count}/10 chars minimum",
+    "addScreenshot": "Add screenshot ({current}/{max})",
+    "imageAlt": "Image {index}",
+    "submit": "Send feedback",
+    "submitting": "Sending...",
+    "success": {
+      "title": "Thank you!",
+      "description": "Your feedback has been recorded and will help us improve the app.",
+      "close": "Close"
+    },
+    "errors": {
+      "tooManyImages": "At most {max} images",
+      "notImage": "Only image files accepted",
+      "tooLarge": "Image max {max}MB",
+      "processFailed": "Could not process image"
+    }
+  }
+}

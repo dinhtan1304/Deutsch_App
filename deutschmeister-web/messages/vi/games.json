@@ -1,0 +1,312 @@
+{
+  "landing": {
+    "title": "Trò chơi luyện từ",
+    "subtitle": "Luyện mạo từ, ghi nhớ nghĩa, nghe từ và chính tả bằng các phiên ngắn dễ bắt đầu.",
+    "srsCta": "Ôn SRS",
+    "levelBanner": {
+      "levelLabel": "Trình độ:",
+      "vocabRange": "Phạm vi từ vựng:",
+      "rangeNote": "Game ưu tiên 70% từ bạn đã học và 30% từ mới."
+    },
+    "recommendations": {
+      "title": "Gợi ý chơi ngay",
+      "subtitleDue": "Bạn có {count} từ cần ôn. Bắt đầu bằng SRS để giữ trí nhớ.",
+      "subtitleDefault": "Ba phiên ngắn phù hợp để khởi động hôm nay.",
+      "reasonDue": "{count} từ cần ôn",
+      "reasonStart": "Khởi động nhanh",
+      "reasonFit": "Phù hợp hôm nay",
+      "startCta": "Bắt đầu"
+    },
+    "allGames": {
+      "title": "Tất cả trò chơi",
+      "subtitle": "Chọn một dạng luyện phù hợp với thời gian và kỹ năng bạn muốn củng cố.",
+      "playNow": "Chơi ngay"
+    },
+    "tips": {
+      "title": "Mẹo chơi hiệu quả",
+      "subtitle": "Dùng game như một phiên ôn nhanh, không thay thế hoàn toàn SRS.",
+      "hotkeys": {
+        "title": "Phím tắt",
+        "text": "Dùng <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> để trả lời nhanh."
+      },
+      "combo": {
+        "title": "Combo",
+        "text": "Trả lời đúng liên tiếp để giữ nhịp và tăng điểm."
+      },
+      "preReview": {
+        "title": "Ôn trước khi chơi",
+        "text": "Ôn SRS trước giúp các game từ vựng hiệu quả hơn."
+      }
+    }
+  },
+  "levels": {
+    "A1": "Sơ cấp",
+    "A2": "Cơ bản",
+    "B1": "Trung cấp",
+    "B2": "Trung cấp cao",
+    "C1": "Nâng cao",
+    "C2": "Thành thạo",
+    "all": "Tất cả trình độ"
+  },
+  "definitions": {
+    "gender-quiz":      { "nameVi": "Mạo từ der/die/das", "description": "Chọn mạo từ đúng cho từng danh từ." },
+    "timed-challenge":  { "nameVi": "Thử thách tốc độ",    "description": "Trả lời nhanh trong thời gian giới hạn." },
+    "fill-blank":       { "nameVi": "Điền vào chỗ trống",  "description": "Điền mạo từ hoặc từ phù hợp trong câu." },
+    "flashcards":       { "nameVi": "Thẻ ghi nhớ",         "description": "Ôn nghĩa, mạo từ và ví dụ bằng thẻ." },
+    "srs-review":       { "nameVi": "Ôn SRS",              "description": "Ôn tập thông minh với thuật toán SM-2." },
+    "word-match":       { "nameVi": "Ghép từ",             "description": "Ghép từ tiếng Đức với nghĩa tương ứng." },
+    "listening":        { "nameVi": "Nghe từ",             "description": "Nghe audio và chọn từ đúng." },
+    "spelling":         { "nameVi": "Chính tả",            "description": "Gõ đúng chính tả từ tiếng Đức." },
+    "typing":           { "nameVi": "Tốc độ gõ",           "description": "60 giây luyện WPM và độ chính xác." }
+  },
+  "common": {
+    "loading": "Đang tải…",
+    "noQuestions": "Chưa có câu hỏi nào",
+    "checkAnswer": "Kiểm tra",
+    "next": "Tiếp theo",
+    "skip": "Bỏ qua",
+    "submit": "Gửi",
+    "restart": "Chơi lại",
+    "exit": "Thoát",
+    "exitConfirm": "Bạn có chắc muốn thoát?",
+    "correct": "Chính xác!",
+    "incorrect": "Sai rồi",
+    "score": "Điểm",
+    "streak": "Streak",
+    "combo": "Combo",
+    "time": "Thời gian",
+    "wordsLearned": "Từ đã học",
+    "accuracy": "Độ chính xác",
+    "tryAgain": "Thử lại",
+    "backToGames": "Quay lại trò chơi",
+    "secondsUnit": "giây",
+    "questionsUnit": "câu",
+    "questionOf": "Câu {current} / {total}",
+    "start": "Bắt đầu",
+    "back": "Quay lại",
+    "menu": "Menu",
+    "completed": "Hoàn thành!",
+    "correctLabel": "Đúng",
+    "wrongLabel": "Sai",
+    "questionLabel": "Câu",
+    "settingsHint": "(Thay đổi số câu trong Settings → Học tập)",
+    "errors": {
+      "minNounsWordBank": "Cần ít nhất 4 danh từ có mạo từ trong bộ sưu tập này",
+      "noVocab": "Không có từ vựng! Vui lòng thêm từ hoặc seed database.",
+      "minWords": "Cần ít nhất {count} từ trong bộ sưu tập này",
+      "minNouns": "Cần ít nhất {count} danh từ có mạo từ trong bộ sưu tập này"
+    },
+    "feedback": {
+      "correctMark": "✓ Chính xác!",
+      "wrongMark": "✗ Đáp án: {answer}"
+    },
+    "hotkeyHint": "Phím tắt: <kbd>1</kbd> der · <kbd>2</kbd> die · <kbd>3</kbd> das",
+    "result": "Kết quả",
+    "scoreUnit": "điểm",
+    "bestCombo": "Best Combo",
+    "soundLabel": "Âm thanh: {state}",
+    "soundOn": "Bật",
+    "soundOff": "Tắt",
+    "answerLabel": "Đáp án: {answer}"
+  },
+  "quickQuiz": {
+    "title": "Quick Quiz",
+    "description": "Chọn mạo từ đúng cho <emphasis>{count} từ</emphasis> tiếng Đức",
+    "info": {
+      "click": "Click hoặc dùng phím tắt để trả lời",
+      "hotkeys": "Phím: <kbd>1</kbd> der, <kbd>2</kbd> die, <kbd>3</kbd> das",
+      "feedback": "Phản hồi tức thì sau mỗi câu"
+    },
+    "resultSummary": "Bạn đúng {correct} trên {total} câu"
+  },
+  "genderQuiz": {
+    "title": "Gender Quiz",
+    "description": "Chọn mạo từ đúng cho <emphasis>{count} từ</emphasis>",
+    "result": "Kết quả",
+    "scoreUnit": "điểm",
+    "bestCombo": "Best Combo",
+    "info": {
+      "scoring": "10 điểm/câu đúng · Combo tối đa x4",
+      "sound": "Âm thanh: {state}",
+      "soundOn": "Bật",
+      "soundOff": "Tắt"
+    },
+    "answer": "Đáp án:"
+  },
+  "typing": {
+    "title": "Luyện gõ phím",
+    "description": "Tăng tốc độ gõ tiếng Đức trong <emphasis>{seconds} giây</emphasis>",
+    "metricHint": "Đo bằng WPM (từ/phút) và Accuracy",
+    "levelLabel": "Trình độ",
+    "categoryLabel": "Chủ đề",
+    "info": {
+      "duration": "Thời gian: {seconds} giây · Tối đa 40 câu",
+      "controls": "Gõ trực tiếp · <kbd>Space</kbd> để qua từ · gõ đúng cả dấu câu",
+      "umlautHint": "Mẹo umlaut: {hint}"
+    },
+    "loadingSentences": "Đang tải câu...",
+    "startCta": "Bắt đầu →",
+    "errors": {
+      "noSentences": "Không có câu nào cho cấu hình này. Vui lòng thử category khác.",
+      "loadFailed": "Không thể tải câu. Kiểm tra mạng và thử lại."
+    },
+    "countdownReady": "Sẵn sàng gõ {count} câu...",
+    "newBest": "★ Best mới",
+    "stats": {
+      "wpm": "WPM",
+      "accuracy": "Accuracy",
+      "sentencesCompleted": "Câu hoàn thành",
+      "errorsLabel": "Lỗi",
+      "sentenceShort": "Câu"
+    },
+    "changeConfig": "Đổi cấu hình",
+    "playAgain": "Chơi lại",
+    "bestByCategory": "Best WPM theo chủ đề",
+    "play": {
+      "satzLabel": "SATZ · {current} / {total} · {category}",
+      "tapToFocus": "Chạm vào màn hình để mở bàn phím · ",
+      "controls": "Gõ trực tiếp · Space để qua từ · {seconds}s · gõ đúng cả dấu câu · ",
+      "ariaInput": "Vùng gõ phím luyện typing"
+    }
+  },
+  "flashcards": {
+    "title": "Flashcards",
+    "description": "Ôn tập <emphasis>{count} từ</emphasis> với thẻ ghi nhớ",
+    "cardsHint": "(Thay đổi số thẻ trong Settings → Học tập)",
+    "info": {
+      "flip": "Click thẻ hoặc nhấn <kbd>Space</kbd> để lật",
+      "keys": "<kbd>←</kbd> Chưa nhớ · <kbd>→</kbd> Đã nhớ",
+      "audio": "Nút 🔊 để nghe phát âm tiếng Đức"
+    },
+    "errors": {
+      "minWords2": "Cần ít nhất 2 từ trong bộ sưu tập này"
+    },
+    "restudy": "Học lại",
+    "stats": {
+      "known": "Đã nhớ",
+      "needReview": "Cần ôn",
+      "bestStreak": "Best Streak",
+      "card": "Thẻ"
+    },
+    "reviewListTitle": "Từ cần ôn lại ({count})",
+    "front": {
+      "label": "Từ tiếng Đức",
+      "pluralPrefix": "Pl. {plural}",
+      "flipHint": "Click để lật thẻ · <kbd>Space</kbd>"
+    },
+    "back": {
+      "answerLabel": "Đáp án",
+      "unknownGender": "Unbekannt"
+    },
+    "buttons": {
+      "dontKnow": "Chưa nhớ",
+      "know": "Đã nhớ",
+      "flip": "Lật thẻ (Space)"
+    },
+    "nav": {
+      "prev": "Thẻ trước",
+      "speak": "Phát âm",
+      "shuffle": "Xáo trộn lại",
+      "next": "Thẻ tiếp"
+    }
+  },
+  "timeChallenge": {
+    "title": "Timed Challenge",
+    "description": "Trả lời nhanh trong <emphasis>{seconds} giây</emphasis>!",
+    "settingsHint": "(Thay đổi trong Settings → Học tập)",
+    "info": {
+      "scoring": "10 điểm/câu đúng · Combo tối đa x4 · Sai = mất combo",
+      "hotkeys": "Phím: <kbd>1</kbd> der, <kbd>2</kbd> die, <kbd>3</kbd> das",
+      "sound": "Âm thanh: {state}"
+    },
+    "errors": {
+      "minNouns10": "Cần ít nhất 10 danh từ có mạo từ trong bộ sưu tập này",
+      "loadFailed": "Lỗi tải từ vựng! Vui lòng thử lại."
+    },
+    "getReady": "Chuẩn bị!",
+    "timeUp": "Hết giờ!",
+    "speedLabel": "Tốc độ: {wpm} từ/phút",
+    "comboLabel": "🔥 Combo x{mult}"
+  },
+  "spelling": {
+    "title": "Spelling Bee",
+    "description": "Gõ đúng chính tả <emphasis>{count} từ</emphasis> tiếng Đức",
+    "info": {
+      "scoring": "15 điểm/câu đúng · Combo tối đa x4",
+      "enterToConfirm": "để xác nhận đáp án",
+      "specialChars": "Nút ký tự đặc biệt có sẵn"
+    },
+    "errors": {
+      "minWords4": "Cần ít nhất 4 từ trong bộ sưu tập này"
+    },
+    "articleLabel": "Mạo từ:",
+    "answerLabel": "Đáp án:",
+    "placeholder": "Gõ từ tiếng Đức...",
+    "umlautTooltip": "Mẹo: {hint}",
+    "orType": "hoặc gõ <code>{hint}</code>",
+    "confirm": "Xác nhận"
+  },
+  "listening": {
+    "title": "Listening Quiz",
+    "description": "Nghe và chọn đúng <emphasis>{count} từ</emphasis> tiếng Đức",
+    "info": {
+      "scoring": "Nghe lần 1: +15 · Lần 2: +10 · Lần 3+: +5",
+      "maxReplays": "Có thể nghe lại tối đa {max} lần",
+      "speech": "Dùng Web Speech API (cần kết nối và trình duyệt hỗ trợ)"
+    },
+    "errors": {
+      "minWords4": "Cần ít nhất 4 từ trong bộ sưu tập này"
+    },
+    "playing": "Đang phát...",
+    "tapToListen": "Nhấn để nghe từ",
+    "replayCount": "Nghe lại ({current}/{max})",
+    "pointHint": {
+      "first": "+15 điểm nếu đúng lần đầu",
+      "second": "+10 điểm nếu đúng",
+      "third": "+5 điểm nếu đúng"
+    },
+    "correctMark": "✓ Đúng!",
+    "wrongMark": "✗ Sai",
+    "answerLabel": "Đáp án:",
+    "pickPrompt": "Chọn từ bạn vừa nghe:"
+  },
+  "fillBlank": {
+    "title": "Fill in the Blank",
+    "description": "Điền mạo từ đúng cho <emphasis>{count} từ</emphasis>",
+    "info": {
+      "click": "Gõ hoặc click nút để điền mạo từ",
+      "enter": "Nhấn <kbd>Enter</kbd> để xác nhận",
+      "sound": "Âm thanh: {state}"
+    },
+    "hintToggle": "Xem gợi ý",
+    "hintFallback": "???",
+    "correctMark": "✓ Chính xác!",
+    "wrongMark": "✗ Đáp án: \"{answer}\"",
+    "emptyAnswer": "(trống)",
+    "placeholder": "Gõ der, die hoặc das...",
+    "check": "Kiểm tra",
+    "viewResult": "Xem kết quả",
+    "nextQuestion": "Câu tiếp theo →"
+  },
+  "wordMatch": {
+    "title": "Word Match",
+    "description": "Ghép <emphasis>{count} cặp</emphasis> từ với nghĩa tương ứng",
+    "subtitle": "Click từ bên trái, rồi click nghĩa tương ứng bên phải",
+    "info": {
+      "scoring": "10 điểm/cặp đúng · Combo tối đa x4",
+      "speedBonus": "Bonus tốc độ: +50 điểm nếu xong trong 60 giây"
+    },
+    "errors": {
+      "minWords4": "Cần ít nhất 4 từ trong bộ sưu tập này"
+    },
+    "stats": {
+      "pairs": "Cặp",
+      "wrong": "Sai"
+    },
+    "timeLabel": "Thời gian: {time}",
+    "hints": {
+      "selectLeft": "Click một từ bên trái để bắt đầu ghép cặp",
+      "selectRight": "Bây giờ chọn nghĩa tương ứng bên phải →"
+    }
+  }
+}

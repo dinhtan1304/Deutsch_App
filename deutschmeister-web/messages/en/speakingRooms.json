@@ -1,0 +1,82 @@
+{
+  "topics": {
+    "travel": "Travel",
+    "family": "Family",
+    "work": "Work",
+    "hobbies": "Hobbies",
+    "shopping": "Shopping",
+    "health": "Health",
+    "food": "Food",
+    "study": "Studying",
+    "dailyLife": "Daily life"
+  },
+  "list": {
+    "title": "Speaking Rooms",
+    "subtitle": "Pair up with other learners to practice speaking German live",
+    "reportBug": "🐞 Report a bug · Feedback",
+    "communityRules": "📜 Community rules",
+    "createRoom": "+ Create new room",
+    "findPartner": "Find a partner",
+    "joinByCodeLabel": "Join a private room with an invite code",
+    "codePlaceholder": "Paste a code or invite link...",
+    "joinRoom": "Join room",
+    "invalidCode": "Invalid invite code or link.",
+    "filterByLevel": "Filter by level",
+    "filterAll": "All",
+    "myRooms": "My rooms",
+    "publicRooms": "Public rooms",
+    "loading": "Loading...",
+    "empty": "No rooms waiting yet. Create the first one!"
+  },
+  "new": {
+    "title": "Create a speaking room",
+    "subtitle": "Open a room for friends, or make it public so anyone can find it",
+    "step1": "Step 1 — Level (CEFR)",
+    "step2": "Step 2 — Topic",
+    "step3": "Step 3 — Room name",
+    "step4": "Step 4 — Privacy",
+    "topicPlaceholder": "Or enter a custom topic...",
+    "visPublic": "Public",
+    "visPublicSub": "Listed publicly, anyone can join",
+    "visPrivate": "Private",
+    "visPrivateSub": "Only people with the invite link can join",
+    "createError": "Couldn't create the room.",
+    "creating": "Creating...",
+    "create": "Create room"
+  },
+  "match": {
+    "searchingTitle": "Looking for a partner...",
+    "topicLabel": "Topic:",
+    "matchingNote": "We're matching you with someone at the same level and topic. Stops automatically after 3 minutes.",
+    "cancelSearch": "Cancel search",
+    "title": "Find a speaking partner",
+    "subtitle": "Pick a level and topic, and we'll match you with a suitable partner",
+    "level": "Level",
+    "topic": "Topic",
+    "topicPlaceholder": "Or enter another topic...",
+    "timeout": "Couldn't find a suitable partner in 3 minutes. Try again with a broader topic.",
+    "expired": "Your search session expired. You can start searching again.",
+    "startError": "Couldn't find a partner.",
+    "starting": "Starting...",
+    "start": "Start finding a partner"
+  },
+  "detail": {
+    "subtitle": "Topic: {topic} · {level} · {status}",
+    "connected": "Connected",
+    "connecting": "Connecting...",
+    "copied": "✓ Copied",
+    "copyInvite": "Copy invite link",
+    "report": "🚩 Report",
+    "reportTitle": "Report {name}",
+    "leaving": "Leaving...",
+    "leave": "Leave room",
+    "chatPlaceholder": "Write in German...",
+    "loading": "Loading room...",
+    "opponent": "Partner"
+  },
+  "join": {
+    "title": "Join a private room",
+    "joining": "Joining the room...",
+    "invalidCode": "Invalid invite code."
+  }
+}

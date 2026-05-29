@@ -1,0 +1,108 @@
+{
+  "header": {
+    "title": "Settings",
+    "subtitle": "Customize your experience"
+  },
+  "tabs": {
+    "display": "Display",
+    "sound": "Sound",
+    "learning": "Learning",
+    "notification": "Notifications",
+    "account": "Account"
+  },
+  "toasts": {
+    "saved": "Saved!",
+    "saveFailed": "Couldn't save settings. Try again later.",
+    "reset": "Reset!",
+    "resetConfirm": "Reset all settings?"
+  },
+  "display": {
+    "themeLabel": "Theme",
+    "themes": {
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    },
+    "showVietnamese": {
+      "label": "Vietnamese meaning",
+      "desc": "Show Vietnamese meaning in word lists and examples"
+    },
+    "showPronunciation": {
+      "label": "IPA pronunciation",
+      "desc": "Show IPA pronunciation for vocabulary"
+    },
+    "showExamples": {
+      "label": "Example sentences",
+      "desc": "Show example usage for each word"
+    }
+  },
+  "sound": {
+    "soundEnabled": {
+      "label": "Sound effects",
+      "desc": "Play sounds for correct answers and completed lessons"
+    },
+    "autoPlaySound": {
+      "label": "Auto-play pronunciation",
+      "desc": "Auto-play pronunciation when a word is shown"
+    },
+    "speechRate": {
+      "label": "Speech rate",
+      "slow": "Slow",
+      "normal": "Normal",
+      "fast": "Fast"
+    }
+  },
+  "learning": {
+    "dailyGoal": "Daily goal",
+    "dailyGoalUnit": "words",
+    "questionsPerGame": "Questions per game",
+    "questionsPerGameUnit": "questions",
+    "timedChallenge": "Timed challenge",
+    "timedChallengeUnit": "seconds",
+    "preferredLevel": {
+      "label": "Preferred level",
+      "desc": "Game words are randomized from A1 up to this level",
+      "options": {
+        "all": "All levels",
+        "A1": "A1 - Beginner",
+        "A2": "A2 - Elementary",
+        "B1": "B1 - Intermediate",
+        "B2": "B2 - Upper-intermediate",
+        "C1": "C1 - Advanced",
+        "C2": "C2 - Proficient"
+      }
+    }
+  },
+  "notification": {
+    "dailyReminder": {
+      "label": "Daily reminder",
+      "desc": "Email reminder at 7pm if you haven't hit your daily goal"
+    },
+    "weeklyEmail": {
+      "label": "Weekly report",
+      "desc": "Weekly learning summary on Sunday evening"
+    }
+  },
+  "account": {
+    "fallbackName": "User",
+    "currentPlanLabel": "Current plan",
+    "planNames": {
+      "free": "Free plan",
+      "premium": "Premium plan",
+      "lifetime": "Lifetime plan"
+    },
+    "expiresOn": "Expires: {date}",
+    "basicFeatures": "Basic features",
+    "lifetimeBenefits": "Lifetime benefits",
+    "upgrade": "Upgrade now",
+    "managePlan": "Manage plan",
+    "logout": "Sign out",
+    "guestPrompt": "Please sign in",
+    "guestLogin": "Sign in",
+    "supportText": "Technical support:"
+  },
+  "footer": {
+    "reset": "Reset to defaults",
+    "backHome": "Back to home"
+  }
+}

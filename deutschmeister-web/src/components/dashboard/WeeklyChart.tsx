@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
+import { useTranslations } from 'next-intl';
 import { ACCENT, GRADIENT } from '@/lib/tokens';
 import type { WeeklyProgress } from '@/types/dashboard';
 
@@ -9,6 +10,7 @@ interface WeeklyChartProps {
 }
 
 export function WeeklyChart({ data }: WeeklyChartProps) {
+  const t = useTranslations('dashboard.weeklyChart');
   const maxWords = useMemo(() => Math.max(...data.map(d => d.wordsLearned), 1), [data]);
   const maxGames = useMemo(() => Math.max(...data.map(d => d.gamesPlayed), 1), [data]);
 
@@ -37,12 +39,12 @@ export function WeeklyChart({ data }: WeeklyChartProps) {
             style={{ background: GRADIENT.srsIconBg }}>
             <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke={ACCENT.srs} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10" /><line x1="12" y1="20" x2="12" y2="4" /><line x1="6" y1="20" x2="6" y2="14" /></svg>
           </span>
-          Tiến độ 7 ngày qua
+          {t('title')}
         </h3>
         <div className="flex items-center gap-4 text-xs">
           <div className="flex items-center gap-1.5">
             <div className="w-2.5 h-2.5 rounded-full" style={{ background: GRADIENT.action }} />
-            <span style={{ color: 'var(--theme-text-muted)' }}>Từ vựng</span>
+            <span style={{ color: 'var(--theme-text-muted)' }}>{t('wordsAxis')}</span>
           </div>
           <div className="flex items-center gap-1.5">
             <div className="w-2.5 h-2.5 rounded-full" style={{ background: GRADIENT.emerald }} />
@@ -77,7 +79,7 @@ export function WeeklyChart({ data }: WeeklyChartProps) {
                       opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10
                       text-white"
                       style={{ backgroundColor: ACCENT.srs }}>
-                      {day.wordsLearned} từ
+                      {t('wordsUnit', { count: day.wordsLearned })}
                     </div>
                   )}
                 </div>
@@ -125,13 +127,13 @@ export function WeeklyChart({ data }: WeeklyChartProps) {
       {/* Summary */}
       <div className="grid grid-cols-3 gap-3 pt-4" style={{ borderTop: '1px solid var(--theme-border)' }}>
         {[
-          { value: totals.words, label: 'Từ đã học', color: ACCENT.srs },
-          { value: totals.games, label: 'Games đã chơi', color: ACCENT.emerald },
+          { value: totals.words, label: t('totals.words'), color: ACCENT.srs },
+          { value: totals.games, label: t('totals.games'), color: ACCENT.emerald },
           {
             value: totals.minutes < 60
               ? `${totals.minutes}m`
               : `${Math.floor(totals.minutes / 60)}h ${totals.minutes % 60}m`,
-            label: 'Thời gian học',
+            label: t('totals.time'),
             color: ACCENT.vocab,
           },
         ].map((item, i) => (

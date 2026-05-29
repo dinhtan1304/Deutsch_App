@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { ACCENT, STATUS, GRADIENT } from '@/lib/tokens';
 import Link from 'next/link';
 import { useDueCards, useReviewCard, useProgressStats, useProgressIntervalPreview } from '@/hooks/useProgress';
@@ -12,14 +13,16 @@ import { Progress, ReviewRating } from '@/types';
 // The full review experience lives at /review; this widget is the 1-click entry.
 const QUICK_LIMIT = 5;
 
-const RATING_BUTTONS: { rating: ReviewRating; label: string; color: string }[] = [
-  { rating: 'again', label: 'Quên', color: STATUS.danger },
-  { rating: 'hard', label: 'Khó', color: ACCENT.xp },
-  { rating: 'good', label: 'Được', color: STATUS.success },
-  { rating: 'easy', label: 'Dễ', color: ACCENT.srs },
+// Color only; label resolved at render via dashboard.quickReview.rating.<rating>.
+const RATING_BUTTONS: { rating: ReviewRating; color: string }[] = [
+  { rating: 'again', color: STATUS.danger },
+  { rating: 'hard', color: ACCENT.xp },
+  { rating: 'good', color: STATUS.success },
+  { rating: 'easy', color: ACCENT.srs },
 ];
 
 export function QuickReviewWidget() {
+  const t = useTranslations('dashboard.quickReview');
   const { data: stats } = useProgressStats();
   const { data: allDue = [], isLoading } = useDueCards(QUICK_LIMIT);
   const reviewMutation = useReviewCard();
@@ -69,12 +72,12 @@ export function QuickReviewWidget() {
           </div>
           <div className="flex-1 min-w-0">
             <h3 className="text-[15px] font-bold" style={{ color: 'var(--theme-text-primary)' }}>
-              Ôn nhanh xong!
+              {t('doneTitle')}
             </h3>
             <p className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>
               {remaining > 0
-                ? `Còn ${remaining} từ chờ ôn — tiếp tục để giữ đà`
-                : 'Đã ôn hết hôm nay. Hẹn ngày mai!'}
+                ? t('doneRemaining', { count: remaining })
+                : t('doneCleared')}
             </p>
           </div>
         </div>
@@ -86,7 +89,7 @@ export function QuickReviewWidget() {
               color: 'white',
               boxShadow: '0 4px 12px rgba(139,92,246,.3)',
             }}>
-            Ôn tiếp {remaining} từ →
+            {t('continueLink', { count: remaining })}
           </Link>
         )}
       </div>
@@ -105,7 +108,7 @@ export function QuickReviewWidget() {
       setIndex((i) => i + 1);
       setRevealed(false);
     } catch {
-      setError('Không thể lưu kết quả ôn. Thử lại.');
+      setError(t('saveError'));
     }
   };
 
@@ -123,16 +126,16 @@ export function QuickReviewWidget() {
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={STATUS.danger} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" /></svg>
           <div>
             <h3 className="text-sm font-bold" style={{ color: 'var(--theme-text-primary)' }}>
-              Ôn nhanh {cards.length} từ
+              {t('title', { count: cards.length })}
             </h3>
             <p className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>
-              Tổng {dueTotal} từ chờ ôn — bấm 1 lần là xong
+              {t('subtitle', { total: dueTotal })}
             </p>
           </div>
         </div>
         <Link href="/review" className="text-caption font-medium shrink-0"
           style={{ color: 'var(--theme-text-muted)' }}>
-          Xem tất cả →
+          {t('viewAll')}
         </Link>
       </div>
 
@@ -171,7 +174,7 @@ export function QuickReviewWidget() {
               </div>
             ) : (
               <div className="text-caption font-medium" style={{ color: ACCENT.writing }}>
-                Nhấn để xem nghĩa
+                {t('tapToReveal')}
               </div>
             )}
           </button>
@@ -190,7 +193,7 @@ export function QuickReviewWidget() {
                   color: revealed ? btn.color : 'var(--theme-text-muted)',
                   border: `1px solid ${revealed ? `${btn.color}40` : 'var(--theme-border)'}`,
                 }}>
-                <div>{btn.label}</div>
+                <div>{t(`rating.${btn.rating}` as 'rating.again')}</div>
                 <div className="text-[9px] font-normal opacity-70">
                   {intervals ? getDelayText(intervals[btn.rating].delayMinutes) : '...'}
                 </div>

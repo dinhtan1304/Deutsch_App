@@ -1,11 +1,13 @@
 'use client';
 
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 import { useWeeklyChallenges } from '@/hooks/useChallenges';
 import { IconZap, IconCheck, IconArrowRight } from '@/components/ui/Icons';
 
 export function WeeklyChallengesWidget() {
+  const t = useTranslations('dashboard.weeklyChallenges');
   const { data, isLoading } = useWeeklyChallenges();
   const completedCount = data?.filter((c) => c.completed).length ?? 0;
 
@@ -16,18 +18,18 @@ export function WeeklyChallengesWidget() {
           <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: GRADIENT.action }}>
             <IconZap size={14} style={{ color: 'white' }} />
           </div>
-          <h3 className="text-title font-bold m-0" style={{ color: 'var(--theme-text-primary)' }}>Thử thách tuần</h3>
+          <h3 className="text-title font-bold m-0" style={{ color: 'var(--theme-text-primary)' }}>{t('title')}</h3>
         </div>
         <div className="flex items-center gap-2">
           <span className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>{completedCount}/3</span>
           <Link href="/challenges" className="text-body font-semibold flex items-center gap-0.5" style={{ color: ACCENT.srs, textDecoration: 'none' }}>
-            Chi tiết <IconArrowRight size={13} />
+            {t('details')} <IconArrowRight size={13} />
           </Link>
         </div>
       </div>
 
       {isLoading && (
-        <div className="text-body text-center py-3" style={{ color: 'var(--theme-text-muted)' }}>Đang tải...</div>
+        <div className="text-body text-center py-3" style={{ color: 'var(--theme-text-muted)' }}>{t('loading')}</div>
       )}
 
       <div className="flex flex-col gap-2.5">

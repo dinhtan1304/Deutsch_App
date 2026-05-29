@@ -1,0 +1,82 @@
+{
+  "topics": {
+    "travel": "Reisen",
+    "family": "Familie",
+    "work": "Arbeit",
+    "hobbies": "Hobbys",
+    "shopping": "Einkaufen",
+    "health": "Gesundheit",
+    "food": "Essen",
+    "study": "Lernen",
+    "dailyLife": "Alltag"
+  },
+  "list": {
+    "title": "Sprechräume",
+    "subtitle": "Finde Lernpartner, um live Deutsch zu sprechen",
+    "reportBug": "🐞 Fehler melden · Feedback",
+    "communityRules": "📜 Community-Regeln",
+    "createRoom": "+ Neuen Raum erstellen",
+    "findPartner": "Partner finden",
+    "joinByCodeLabel": "Mit einem Einladungscode einem privaten Raum beitreten",
+    "codePlaceholder": "Code oder Einladungslink einfügen...",
+    "joinRoom": "Beitreten",
+    "invalidCode": "Ungültiger Einladungscode oder Link.",
+    "filterByLevel": "Nach Niveau filtern",
+    "filterAll": "Alle",
+    "myRooms": "Meine Räume",
+    "publicRooms": "Öffentliche Räume",
+    "loading": "Wird geladen...",
+    "empty": "Noch keine wartenden Räume. Erstelle den ersten!"
+  },
+  "new": {
+    "title": "Sprechraum erstellen",
+    "subtitle": "Öffne einen Raum für Freunde oder mache ihn öffentlich, damit jeder ihn findet",
+    "step1": "Schritt 1 — Niveau (CEFR)",
+    "step2": "Schritt 2 — Thema",
+    "step3": "Schritt 3 — Raumname",
+    "step4": "Schritt 4 — Privatsphäre",
+    "topicPlaceholder": "Oder ein eigenes Thema eingeben...",
+    "visPublic": "Öffentlich",
+    "visPublicSub": "Öffentlich gelistet, jeder kann beitreten",
+    "visPrivate": "Privat",
+    "visPrivateSub": "Nur mit Einladungslink beitretbar",
+    "createError": "Raum konnte nicht erstellt werden.",
+    "creating": "Wird erstellt...",
+    "create": "Raum erstellen"
+  },
+  "match": {
+    "searchingTitle": "Suche einen Partner...",
+    "topicLabel": "Thema:",
+    "matchingNote": "Wir suchen jemanden mit demselben Niveau und Thema. Stoppt automatisch nach 3 Minuten.",
+    "cancelSearch": "Suche abbrechen",
+    "title": "Sprechpartner finden",
+    "subtitle": "Wähle Niveau und Thema, und wir finden einen passenden Partner für dich",
+    "level": "Niveau",
+    "topic": "Thema",
+    "topicPlaceholder": "Oder ein anderes Thema eingeben...",
+    "timeout": "Kein passender Partner in 3 Minuten gefunden. Versuche es mit einem breiteren Thema erneut.",
+    "expired": "Deine Suchsitzung ist abgelaufen. Du kannst die Suche neu starten.",
+    "startError": "Konnte keinen Partner finden.",
+    "starting": "Wird gestartet...",
+    "start": "Partnersuche starten"
+  },
+  "detail": {
+    "subtitle": "Thema: {topic} · {level} · {status}",
+    "connected": "Verbunden",
+    "connecting": "Verbinde...",
+    "copied": "✓ Kopiert",
+    "copyInvite": "Einladungslink kopieren",
+    "report": "🚩 Melden",
+    "reportTitle": "{name} melden",
+    "leaving": "Verlasse...",
+    "leave": "Raum verlassen",
+    "chatPlaceholder": "Auf Deutsch schreiben...",
+    "loading": "Raum wird geladen...",
+    "opponent": "Partner"
+  },
+  "join": {
+    "title": "Privatem Raum beitreten",
+    "joining": "Trete dem Raum bei...",
+    "invalidCode": "Ungültiger Einladungscode."
+  }
+}

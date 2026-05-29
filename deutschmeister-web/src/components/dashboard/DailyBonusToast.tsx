@@ -2,6 +2,7 @@
 /* eslint-disable no-restricted-syntax */
 
 import { useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import type { DailyBonusResult } from '@/lib/api/users';
 
 interface Props {
@@ -19,6 +20,7 @@ export function DailyBonusToast({ bonus, onDismiss }: Props) {
 }
 
 function DailyBonusToastInner({ bonus, onDismiss }: { bonus: DailyBonusResult; onDismiss: () => void }) {
+  const t = useTranslations('dashboard.dailyBonus');
   const [visible, setVisible] = useState(true);
 
   useEffect(() => {
@@ -61,8 +63,8 @@ function DailyBonusToastInner({ bonus, onDismiss }: { bonus: DailyBonusResult; o
           </div>
           <div className="text-white/90 text-xs leading-tight mt-0.5">
             {bonus.streak > 0
-              ? `Streak ${bonus.streak} ngày — tiếp tục nhé!`
-              : 'Chào mừng quay lại!'}
+              ? t('streakLabel', { days: bonus.streak })
+              : t('welcomeBack')}
           </div>
         </div>
       </button>

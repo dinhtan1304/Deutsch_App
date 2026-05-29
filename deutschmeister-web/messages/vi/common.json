@@ -1,0 +1,36 @@
+{
+  "actions": {
+    "save": "Lưu",
+    "cancel": "Hủy",
+    "confirm": "Xác nhận",
+    "continue": "Tiếp tục",
+    "back": "Quay lại",
+    "delete": "Xóa",
+    "edit": "Chỉnh sửa",
+    "close": "Đóng",
+    "submit": "Gửi",
+    "retry": "Thử lại",
+    "next": "Tiếp",
+    "previous": "Trước"
+  },
+  "state": {
+    "loading": "Đang tải…",
+    "error": "Đã xảy ra lỗi",
+    "empty": "Không có dữ liệu",
+    "saving": "Đang lưu…",
+    "saved": "Đã lưu"
+  },
+  "time": {
+    "justNow": "Vừa xong",
+    "minutesAgo": "{count, plural, =0 {vừa xong} one {# phút trước} other {# phút trước}}",
+    "hoursAgo": "{count, plural, one {# giờ trước} other {# giờ trước}}",
+    "daysAgo": "{count, plural, one {# ngày trước} other {# ngày trước}}"
+  },
+  "language": {
+    "label": "Ngôn ngữ",
+    "description": "Chọn ngôn ngữ hiển thị giao diện",
+    "vi": "Tiếng Việt",
+    "en": "English",
+    "de": "Deutsch"
+  }
+}

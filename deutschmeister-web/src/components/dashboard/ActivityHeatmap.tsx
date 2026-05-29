@@ -2,6 +2,7 @@
 /* eslint-disable no-restricted-syntax */
 
 import { useMemo, useState } from 'react';
+import { useTranslations, useFormatter } from 'next-intl';
 import { ACCENT } from '@/lib/tokens';
 import type { ActivityHeatmap as HeatmapData, ActivityDay } from '@/types/dashboard';
 import { IconFlame } from '@/components/ui/Icons';
@@ -22,6 +23,8 @@ const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', '
 const DAYS = ['', 'Mon', '', 'Wed', '', 'Fri', ''];
 
 export function ActivityHeatmap({ data }: ActivityHeatmapProps) {
+  const t = useTranslations('dashboard.activityHeatmap');
+  const formatter = useFormatter();
   const [hoveredDay, setHoveredDay] = useState<ActivityDay | null>(null);
   const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 });
 
@@ -79,7 +82,7 @@ export function ActivityHeatmap({ data }: ActivityHeatmapProps) {
 
   const formatDate = (dateStr: string) => {
     const parts = dateStr.split('-').map(Number);
-    return new Date(parts[0]!, parts[1]! - 1, parts[2]!).toLocaleDateString('vi-VN', {
+    return formatter.dateTime(new Date(parts[0]!, parts[1]! - 1, parts[2]!), {
       weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
     });
   };
@@ -97,17 +100,17 @@ export function ActivityHeatmap({ data }: ActivityHeatmapProps) {
             style={{ background: 'linear-gradient(135deg, rgba(16,185,129,.15), rgba(52,211,153,.1))' }}>
             📅
           </span>
-          Hoạt động trong năm
+          {t('title')}
         </h3>
         <div className="flex items-center gap-4 text-xs">
           <div className="flex items-center gap-1.5">
             <IconFlame size={14} style={{ color: ACCENT.games }} />
             <span className="font-bold" style={{ color: ACCENT.games }}>{data.currentStreak}</span>
-            <span style={{ color: 'var(--theme-text-muted)' }}>ngày liên tiếp</span>
+            <span style={{ color: 'var(--theme-text-muted)' }}>{t('streakLabel')}</span>
           </div>
           <div className="flex items-center gap-1.5">
             <span className="font-bold" style={{ color: '#10B981' }}>{data.totalActiveDays}</span>
-            <span style={{ color: 'var(--theme-text-muted)' }}>ngày hoạt động</span>
+            <span style={{ color: 'var(--theme-text-muted)' }}>{t('daysActiveLabel')}</span>
           </div>
         </div>
       </div>
@@ -167,11 +170,11 @@ export function ActivityHeatmap({ data }: ActivityHeatmapProps) {
 
       {/* Legend */}
       <div className="flex items-center justify-end gap-1.5 mt-4">
-        <span className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>Ít</span>
+        <span className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>{t('less')}</span>
         {LEVEL_COLORS.map((color, i) => (
           <div key={i} className="w-3 h-3 rounded-sm" style={{ backgroundColor: color }} />
         ))}
-        <span className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>Nhiều</span>
+        <span className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>{t('more')}</span>
       </div>
 
       {/* Tooltip */}
@@ -187,7 +190,7 @@ export function ActivityHeatmap({ data }: ActivityHeatmapProps) {
           }}
         >
           <div className="font-semibold" style={{ color: 'var(--theme-text-primary)' }}>
-            {hoveredDay.count} hoạt động
+            {t('activityCount', { count: hoveredDay.count })}
           </div>
           <div className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>
             {formatDate(hoveredDay.date)}

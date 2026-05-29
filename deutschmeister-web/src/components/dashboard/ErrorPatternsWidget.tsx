@@ -2,26 +2,27 @@
 /* eslint-disable no-restricted-syntax */
 
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { ACCENT, STATUS } from '@/lib/tokens';
 import { useErrorPatterns } from '@/hooks/useErrorPatterns';
 
-const ERROR_LABELS: Record<string, string> = {
-  article: 'Quán từ (der/die/das)',
-  conjugation: 'Chia động từ',
-  word_order: 'Trật tự từ',
-  case: 'Cách (Nom/Akk/Dat)',
-  spelling: 'Chính tả',
-  preposition: 'Giới từ',
-  plural: 'Danh từ số nhiều',
-  adjective_ending: 'Đuôi tính từ',
-  tense: 'Thì',
-  vocabulary: 'Từ vựng',
-};
+// Error-pattern keys that have a translated label under
+// `dashboard.errorPatterns.categories`. Anything backend returns outside
+// this set falls back to the raw errorType string.
+const TRANSLATED_CATEGORIES: ReadonlySet<string> = new Set([
+  'article', 'conjugation', 'word_order', 'case', 'spelling',
+  'preposition', 'plural', 'adjective_ending', 'tense', 'vocabulary',
+]);
 
 const BAR_COLORS = [STATUS.danger, ACCENT.xp, ACCENT.srs, ACCENT.vocab, ACCENT.cyan];
 
 export function ErrorPatternsWidget() {
+  const t = useTranslations('dashboard.errorPatterns');
   const { data, isLoading } = useErrorPatterns();
+  const labelFor = (errorType: string) =>
+    TRANSLATED_CATEGORIES.has(errorType)
+      ? t(`categories.${errorType}` as 'categories.article')
+      : errorType;
 
   return (
     <div className="rounded-card p-5 border shadow-card" style={{ backgroundColor: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}>
@@ -34,38 +35,38 @@ export function ErrorPatternsWidget() {
               <line x1="12" y1="16" x2="12.01" y2="16" />
             </svg>
           </div>
-          <h3 className="text-title font-bold m-0" style={{ color: 'var(--theme-text-primary)' }}>Lỗi thường gặp</h3>
+          <h3 className="text-title font-bold m-0" style={{ color: 'var(--theme-text-primary)' }}>{t('title')}</h3>
         </div>
       </div>
 
       {isLoading ? (
-        <div className="text-body text-center py-5" style={{ color: 'var(--theme-text-muted)' }}>Đang tải...</div>
+        <div className="text-body text-center py-5" style={{ color: 'var(--theme-text-muted)' }}>{t('loading')}</div>
       ) : !data || data.length === 0 ? (
         <div className="text-center py-5">
           <div className="w-14 h-14 mx-auto mb-2 rounded-card flex items-center justify-center" style={{ background: 'linear-gradient(135deg, rgba(99,102,241,.12), rgba(139,92,246,.08))' }}>
             <svg width={28} height={28} viewBox="0 0 24 24" fill="none" stroke="#6366F1" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" /><path d="m15 5 4 4" /></svg>
           </div>
           <p className="text-body mb-3" style={{ color: 'var(--theme-text-muted)' }}>
-            Hoàn thành bài viết để xem phân tích lỗi
+            {t('emptyTitle')}
           </p>
           <Link href="/practice-test/writing" className="text-body font-semibold" style={{ color: ACCENT.writing, textDecoration: 'none' }}>
-            Luyện viết ngay →
+            {t('emptyCta')}
           </Link>
         </div>
       ) : (
         <div className="flex flex-col gap-2.5">
           {data.slice(0, 5).map((pattern, idx) => {
-            const label = ERROR_LABELS[pattern.errorType] || pattern.errorType;
+            const label = labelFor(pattern.errorType);
             const color = BAR_COLORS[idx % BAR_COLORS.length];
             return (
               <div key={pattern.errorType}>
                 <div className="flex justify-between items-center mb-1 gap-2">
                   <span className="text-body font-semibold truncate" style={{ color: 'var(--theme-text-primary)' }}>{label}</span>
                   <div className="flex items-center gap-2 shrink-0">
-                    <span className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>{pattern.count} lần ({Math.round(pattern.percentage)}%)</span>
+                    <span className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>{t('occurrences', { count: pattern.count, percentage: Math.round(pattern.percentage) })}</span>
                     {pattern.grammarSlug && (
                       <Link href={`/grammar/${pattern.grammarSlug}`} className="text-caption font-semibold" style={{ color: ACCENT.srs, textDecoration: 'none' }}>
-                        Ôn tập
+                        {t('reviewAction')}
                       </Link>
                     )}
                   </div>

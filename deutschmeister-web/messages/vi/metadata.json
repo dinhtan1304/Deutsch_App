@@ -1,0 +1,26 @@
+{
+  "siteName": "Deutschmeister",
+  "rootTitle": "Deutschmeister — Học tiếng Đức cùng AI | Luyện thi Goethe & TELC",
+  "rootDescription": "Nền tảng học tiếng Đức toàn diện dành cho người Việt. 5000+ từ vựng, 8 trò chơi, AI chấm 4 kỹ năng Nghe-Nói-Đọc-Viết, đề thi chuẩn Goethe/TELC A1-B1.",
+  "twitterDescription": "5000+ từ vựng, 8 trò chơi, AI chấm 4 kỹ năng, đề thi chuẩn Goethe/TELC A1-B1.",
+  "ogImageAlt": "Deutschmeister — Học tiếng Đức cùng AI",
+  "pages": {
+    "grammar": {
+      "title": "Ngữ pháp tiếng Đức",
+      "description": "Học ngữ pháp tiếng Đức từ A1 đến B1: Kasus, Artikel, Konjugation, Modalverben và hơn 50 bài học chi tiết. Giải thích bằng tiếng Việt, dễ hiểu dễ nhớ.",
+      "ogTitle": "Ngữ pháp tiếng Đức — Deutschmeister",
+      "ogDescription": "Hơn 50 bài học ngữ pháp tiếng Đức A1-B1, giải thích bằng tiếng Việt. Kasus, Artikel, Modalverben và nhiều hơn nữa."
+    },
+    "guideB1": {
+      "title": "Cẩm nang luyện thi B1 Goethe & TELC — Cấu trúc đề, lộ trình, mẫu | DeutschMeister",
+      "description": "Hướng dẫn đầy đủ thi B1 tiếng Đức: cấu trúc đề Goethe-Zertifikat B1 & TELC Deutsch B1, lộ trình 12 tuần từ A2 lên B1, mẫu Schreiben, Redemittel Sprechen, Sprachbausteine, ngữ pháp & từ vựng B1 trọng tâm.",
+      "keywords": "cẩm nang B1, hướng dẫn thi B1, thi B1 Goethe, thi B1 TELC, Goethe-Zertifikat B1, TELC Deutsch B1, cấu trúc đề B1, Sprachbausteine TELC, mẫu Schreiben B1, Sprechen B1 Redemittel, lộ trình học tiếng Đức B1, ngữ pháp B1, từ vựng B1 theo chủ đề",
+      "ogTitle": "Cẩm nang luyện thi B1 Goethe & TELC — DeutschMeister",
+      "ogDescription": "Cấu trúc đề chi tiết, lộ trình 12 tuần, mẫu Schreiben, Redemittel Sprechen — tất cả ở 1 trang.",
+      "twitterTitle": "Cẩm nang luyện thi B1 Goethe & TELC",
+      "twitterDescription": "Cấu trúc đề, lộ trình 12 tuần, mẫu Schreiben & Sprechen.",
+      "jsonLdName": "Luyện thi B1 tiếng Đức (Goethe & TELC)",
+      "jsonLdDescription": "Cẩm nang và đề thi thử B1 cho cả Goethe-Zertifikat B1 và TELC Deutsch B1: cấu trúc đề, lộ trình 12 tuần, AI chấm Schreiben/Sprechen, ngữ pháp & từ vựng trọng tâm."
+    }
+  }
+}

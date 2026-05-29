@@ -1,6 +1,7 @@
 ﻿'use client';
 
 import { useState } from 'react';
+import { useTranslations, useFormatter } from 'next-intl';
 import type { RecentActivity } from '@/types/dashboard';
 import { ACCENT, GRADIENT } from '@/lib/tokens';
 import { IconGamepad, IconPencil, IconLayers, IconBrain, IconClock, IconGraduationCap, IconPenLine, IconBookOpen, IconHeadphones, IconMic, IconMessageCircle } from '@/components/ui/Icons';
@@ -11,28 +12,43 @@ interface RecentActivityFeedProps {
   initialCount?: number;
 }
 
+// Visual config only. Activity label is resolved at render via
+// `dashboard.recentActivity.labels.<type>` so it can be translated.
 const TYPE_CONFIG = {
-  game:           { icon: IconGamepad,       gradient: GRADIENT.action,                                                  accent: ACCENT.srs,         label: 'Game' },
+  game:           { icon: IconGamepad,       gradient: GRADIENT.action,                                                  accent: ACCENT.srs },
   // eslint-disable-next-line no-restricted-syntax
-  word:           { icon: IconPencil,        gradient: 'linear-gradient(135deg, #10B981, #34D399)',                      accent: ACCENT.reading,     label: 'Từ vựng' },
-  topic:          { icon: IconLayers,        gradient: GRADIENT.vocab,                                                   accent: ACCENT.vocab,       label: 'Chủ đề' },
+  word:           { icon: IconPencil,        gradient: 'linear-gradient(135deg, #10B981, #34D399)',                      accent: ACCENT.reading },
+  topic:          { icon: IconLayers,        gradient: GRADIENT.vocab,                                                   accent: ACCENT.vocab },
   // eslint-disable-next-line no-restricted-syntax
-  review:         { icon: IconBrain,         gradient: 'linear-gradient(135deg, #F59E0B, #FBBF24)',                      accent: ACCENT.xp,          label: 'Ôn tập' },
-  grammar:        { icon: IconGraduationCap, gradient: GRADIENT.speaking,                                                accent: ACCENT.xp,          label: 'Ngữ pháp' },
-  writing:        { icon: IconPenLine,       gradient: GRADIENT.writing,                                                 accent: ACCENT.writing,     label: 'Luyện viết' },
-  reading:        { icon: IconBookOpen,      gradient: GRADIENT.reading,                                                 accent: ACCENT.reading,     label: 'Luyện đọc' },
+  review:         { icon: IconBrain,         gradient: 'linear-gradient(135deg, #F59E0B, #FBBF24)',                      accent: ACCENT.xp },
+  grammar:        { icon: IconGraduationCap, gradient: GRADIENT.speaking,                                                accent: ACCENT.xp },
+  writing:        { icon: IconPenLine,       gradient: GRADIENT.writing,                                                 accent: ACCENT.writing },
+  reading:        { icon: IconBookOpen,      gradient: GRADIENT.reading,                                                 accent: ACCENT.reading },
   // eslint-disable-next-line no-restricted-syntax
-  listening:      { icon: IconHeadphones,    gradient: 'linear-gradient(135deg, #06B6D4, #0EA5E9)',                      accent: ACCENT.cyan,        label: 'Luyện nghe' },
+  listening:      { icon: IconHeadphones,    gradient: 'linear-gradient(135deg, #06B6D4, #0EA5E9)',                      accent: ACCENT.cyan },
   // eslint-disable-next-line no-restricted-syntax
-  exam_reading:   { icon: IconBookOpen,      gradient: 'linear-gradient(135deg, #22C55E, #10B981)',                      accent: ACCENT.reading,     label: 'Thi đọc' },
-  exam_writing:   { icon: IconPenLine,       gradient: GRADIENT.examWriting,                                             accent: ACCENT.examWriting, label: 'Thi viết' },
+  exam_reading:   { icon: IconBookOpen,      gradient: 'linear-gradient(135deg, #22C55E, #10B981)',                      accent: ACCENT.reading },
+  exam_writing:   { icon: IconPenLine,       gradient: GRADIENT.examWriting,                                             accent: ACCENT.examWriting },
   // eslint-disable-next-line no-restricted-syntax
-  exam_listening: { icon: IconHeadphones,    gradient: 'linear-gradient(135deg, #06B6D4, #0EA5E9)',                      accent: ACCENT.cyan,        label: 'Thi nghe' },
-  exam_speaking:  { icon: IconMic,           gradient: GRADIENT.speaking,                                                accent: ACCENT.xp,          label: 'Thi nói' },
+  exam_listening: { icon: IconHeadphones,    gradient: 'linear-gradient(135deg, #06B6D4, #0EA5E9)',                      accent: ACCENT.cyan },
+  exam_speaking:  { icon: IconMic,           gradient: GRADIENT.speaking,                                                accent: ACCENT.xp },
   // eslint-disable-next-line no-restricted-syntax
-  free_speaking:  { icon: IconMic,           gradient: 'linear-gradient(135deg, #F59E0B, #D97706)',                      accent: ACCENT.xp,          label: 'Luyện nói' },
+  free_speaking:  { icon: IconMic,           gradient: 'linear-gradient(135deg, #F59E0B, #D97706)',                      accent: ACCENT.xp },
   // eslint-disable-next-line no-restricted-syntax
-  roleplay:       { icon: IconMessageCircle, gradient: 'linear-gradient(135deg, #EC4899, #F43F5E)',                      accent: ACCENT.listening,   label: 'Roleplay' },
+  roleplay:       { icon: IconMessageCircle, gradient: 'linear-gradient(135deg, #EC4899, #F43F5E)',                      accent: ACCENT.listening },
+};
+
+// Activity types with explicit translations under `recentActivity.labels`.
+// `game`, `exam_listening`, `roleplay` aren't in the namespace yet — they
+// keep their hardcoded English-ish fallback below.
+const TRANSLATED_LABELS: ReadonlySet<string> = new Set([
+  'word', 'topic', 'review', 'grammar', 'writing', 'reading', 'listening',
+  'exam_reading', 'exam_writing', 'exam_speaking', 'free_speaking',
+]);
+const FALLBACK_LABEL: Record<string, string> = {
+  game: 'Game',
+  exam_listening: 'Listening exam',
+  roleplay: 'Roleplay',
 };
 
 // ─── Inline chevron icon ───
@@ -46,21 +62,35 @@ function IconChevronDown({ size = 16, style, className }: { size?: number; style
   );
 }
 
-function formatTimeAgo(timestamp: string): string {
-  const diff = Date.now() - new Date(timestamp).getTime();
-  const mins = Math.floor(diff / 60000);
-  const hrs = Math.floor(diff / 3600000);
-  const days = Math.floor(diff / 86400000);
+// Component-scoped relative-time hook — uses common.time.* plurals from i18n.
+function useFormatTimeAgo() {
+  const tCommon = useTranslations('common');
+  const formatter = useFormatter();
+  return (timestamp: string): string => {
+    const diff = Date.now() - new Date(timestamp).getTime();
+    const mins = Math.floor(diff / 60000);
+    const hrs = Math.floor(diff / 3600000);
+    const days = Math.floor(diff / 86400000);
 
-  if (mins < 1) return 'Vừa xong';
-  if (mins < 60) return `${mins} phút trước`;
-  if (hrs < 24) return `${hrs} giờ trước`;
-  if (days < 7) return `${days} ngày trước`;
-  return new Date(timestamp).toLocaleDateString('vi-VN');
+    if (mins < 1) return tCommon('time.justNow');
+    if (mins < 60) return tCommon('time.minutesAgo', { count: mins });
+    if (hrs < 24) return tCommon('time.hoursAgo', { count: hrs });
+    if (days < 7) return tCommon('time.daysAgo', { count: days });
+    return formatter.dateTime(new Date(timestamp));
+  };
 }
 
 export function RecentActivityFeed({ data, initialCount = 2 }: RecentActivityFeedProps) {
+  const t = useTranslations('dashboard.recentActivity');
+  const formatTimeAgo = useFormatTimeAgo();
   const [expanded, setExpanded] = useState(false);
+
+  const labelFor = (type: string): string => {
+    if (TRANSLATED_LABELS.has(type)) {
+      return t(`labels.${type}` as 'labels.word');
+    }
+    return FALLBACK_LABEL[type] ?? type;
+  };
 
   const hasMore = data.length > initialCount;
   const visibleData = expanded ? data : data.slice(0, initialCount);
@@ -79,7 +109,7 @@ export function RecentActivityFeed({ data, initialCount = 2 }: RecentActivityFee
             <IconClock size={15} style={{ color: ACCENT.vocab }} />
           </div>
           <h3 className="text-title font-bold" style={{ color: 'var(--theme-text-primary)' }}>
-            Hoạt động gần đây
+            {t('title')}
           </h3>
         </div>
         {data.length > 0 && (
@@ -96,10 +126,10 @@ export function RecentActivityFeed({ data, initialCount = 2 }: RecentActivityFee
             <svg width={28} height={28} viewBox="0 0 24 24" fill="none" stroke={ACCENT.reading} strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round"><path d="M7 20h10" /><path d="M10 20c5.5-2.5 .8-6.4 3-10" /><path d="M9.5 9.4c1.1.8 1.8 2.2 2.3 3.7-2 .4-3.5.4-4.8-.3-1.2-.6-2.3-1.9-3-4.2 2.8-.5 4.4 0 5.5.8z" /><path d="M14.1 6a7 7 0 0 0-1.1 4c1.9-.1 3.3-.6 4.3-1.4 1-1 1.6-2.3 1.7-4.6-2.7.1-4 1-4.9 2z" /></svg>
           </div>
           <p className="text-body font-medium" style={{ color: 'var(--theme-text-secondary)' }}>
-            Chưa có hoạt động nào
+            {t('emptyTitle')}
           </p>
           <p className="text-xs mt-1" style={{ color: 'var(--theme-text-muted)' }}>
-            Bắt đầu học để thấy tiến độ!
+            {t('emptySubtitle')}
           </p>
         </div>
       ) : (
@@ -108,6 +138,7 @@ export function RecentActivityFeed({ data, initialCount = 2 }: RecentActivityFee
             {visibleData.map((activity, i) => {
               const config = (TYPE_CONFIG as unknown as Record<string, typeof TYPE_CONFIG.word>)[activity.type] ?? TYPE_CONFIG.word;
               const Icon = config.icon;
+              const label = labelFor(activity.type);
 
               return (
                 <div
@@ -139,7 +170,7 @@ export function RecentActivityFeed({ data, initialCount = 2 }: RecentActivityFee
                     className="px-2 py-0.5 rounded-full text-caption font-semibold shrink-0"
                     style={{ backgroundColor: `${config.accent}15`, color: config.accent }}
                   >
-                    {config.label}
+                    {label}
                   </div>
                 </div>
               );
@@ -157,12 +188,12 @@ export function RecentActivityFeed({ data, initialCount = 2 }: RecentActivityFee
             >
               {expanded ? (
                 <>
-                  Thu gọn
+                  {t('collapse')}
                   <IconChevronDown size={14} style={{ transform: 'rotate(180deg)', transition: 'transform 200ms' }} />
                 </>
               ) : (
                 <>
-                  Xem thêm {hiddenCount} hoạt động
+                  {t('viewMore', { count: hiddenCount })}
                   <IconChevronDown size={14} style={{ transition: 'transform 200ms' }} />
                 </>
               )}

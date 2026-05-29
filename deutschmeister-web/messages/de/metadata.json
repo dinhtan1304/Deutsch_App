@@ -1,0 +1,26 @@
+{
+  "siteName": "Deutschmeister",
+  "rootTitle": "Deutschmeister — Deutsch lernen mit KI | Goethe- & TELC-Vorbereitung",
+  "rootDescription": "Eine umfassende Plattform zum Deutschlernen. 5.000+ Wörter, 8 Spiele, KI-Bewertung in allen 4 Fertigkeiten, vollständige Goethe-/TELC-A1-B1-Übungsprüfungen.",
+  "twitterDescription": "5.000+ Wörter, 8 Spiele, KI-Bewertung in allen 4 Fertigkeiten, vollständige Goethe-/TELC-A1-B1-Übungsprüfungen.",
+  "ogImageAlt": "Deutschmeister — Deutsch lernen mit KI",
+  "pages": {
+    "grammar": {
+      "title": "Deutsche Grammatik",
+      "description": "Lerne deutsche Grammatik von A1 bis B1: Kasus, Artikel, Konjugation, Modalverben und über 50 detaillierte Lektionen mit klaren Erklärungen.",
+      "ogTitle": "Deutsche Grammatik — Deutschmeister",
+      "ogDescription": "Über 50 Lektionen zur deutschen Grammatik A1-B1. Kasus, Artikel, Modalverben und vieles mehr."
+    },
+    "guideB1": {
+      "title": "B1-Prüfungsleitfaden für Goethe & TELC — Aufbau, Plan, Vorlagen | DeutschMeister",
+      "description": "Ein vollständiger Leitfaden zur deutschen B1-Prüfung: Aufbau von Goethe-Zertifikat B1 & TELC Deutsch B1, 12-Wochen-Plan von A2 auf B1, Schreiben-Vorlagen, Sprechen-Redemittel, Sprachbausteine sowie wichtigste B1-Grammatik & -Wortschatz.",
+      "keywords": "B1-Leitfaden, B1-Prüfungsvorbereitung, Goethe B1 Prüfung, TELC B1 Prüfung, Goethe-Zertifikat B1, TELC Deutsch B1, B1-Prüfungsaufbau, Sprachbausteine TELC, B1 Schreiben Vorlage, B1 Sprechen Redemittel, Deutsch B1 Lernplan, B1-Grammatik, B1-Wortschatz nach Thema",
+      "ogTitle": "B1-Prüfungsleitfaden für Goethe & TELC — DeutschMeister",
+      "ogDescription": "Detaillierter Prüfungsaufbau, 12-Wochen-Plan, Schreiben-Vorlagen, Sprechen-Redemittel — alles auf einer Seite.",
+      "twitterTitle": "B1-Prüfungsleitfaden für Goethe & TELC",
+      "twitterDescription": "Prüfungsaufbau, 12-Wochen-Plan, Schreiben- & Sprechen-Vorlagen.",
+      "jsonLdName": "Deutsch B1 Prüfungsvorbereitung (Goethe & TELC)",
+      "jsonLdDescription": "Leitfaden und Übungsprüfungen für Goethe-Zertifikat B1 und TELC Deutsch B1: Prüfungsaufbau, 12-Wochen-Plan, KI-Bewertung für Schreiben/Sprechen, wichtigste Grammatik & Wortschatz."
+    }
+  }
+}

@@ -1,7 +1,7 @@
 'use client';
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { Link, usePathname } from '@/i18n/navigation';
 import { ACCENT } from '@/lib/tokens';
 import { PRIMARY_NAV, type NavItem } from '@/config/navigation';
 
@@ -20,6 +20,7 @@ function isItemActive(pathname: string, item: NavItem): boolean {
 
 export function BottomTabBar() {
   const pathname = usePathname();
+  const tNav = useTranslations('nav');
 
   return (
     <>
@@ -51,7 +52,7 @@ export function BottomTabBar() {
                 <span className="transition-transform" style={{ transform: active ? 'scale(1.1)' : 'scale(1)' }}>
                   <Icon size={22} />
                 </span>
-                <span className="text-[10px] font-semibold leading-none">{item.label}</span>
+                <span className="text-[10px] font-semibold leading-none">{tNav(item.labelKey)}</span>
                 {active && (
                   <span
                     className="absolute bottom-0 w-8 h-0.5 rounded-full"

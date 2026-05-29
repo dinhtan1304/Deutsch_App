@@ -1,0 +1,242 @@
+{
+  "navMenu": {
+    "features": "Tính năng",
+    "ai": "AI",
+    "exam": "Luyện thi",
+    "story": "Câu chuyện",
+    "pricing": "Bảng giá",
+    "openMenu": "Mở menu",
+    "closeMenu": "Đóng menu",
+    "signIn": "Đăng nhập",
+    "startNow": "Bắt đầu ngay",
+    "startFree": "Bắt đầu miễn phí"
+  },
+  "hero": {
+    "badge": "Chuẩn Goethe/TELC",
+    "titleStart": "Học tiếng Đức",
+    "titleAccent": "thông minh",
+    "titleEnd": "cùng AI",
+    "subtitle": "Nền tảng luyện thi tiếng Đức toàn diện — từ từ vựng cơ bản đến đề thi Goethe/TELC A1·A2·B1. AI sinh đề từ kho đề thi thật (RAG), chấm điểm và nhận xét chi tiết bằng tiếng Việt.",
+    "ctaPrimary": "Học miễn phí ngay",
+    "ctaSecondary": "Xem gói Premium",
+    "ctaNote": "Không cần thẻ tín dụng · Miễn phí mãi mãi · 3 tính năng AI/tuần",
+    "chipWords": "5000+ từ vựng",
+    "chipGames": "8 trò chơi",
+    "chipPronunciation": "AI chấm phát âm",
+    "chipRag": "RAG từ đề thi thật",
+    "chipSrs": "SRS thông minh",
+    "dashboardAlt": "Ảnh xem trước dashboard Deutschmeister",
+    "practiceAlt": "Ảnh xem trước luyện kỹ năng",
+    "gamesAlt": "Ảnh xem trước trò chơi luyện từ"
+  },
+  "stats": {
+    "wordsLabel": "Từ vựng",
+    "wordsSub": "chuẩn Goethe",
+    "gamesLabel": "Trò chơi",
+    "gamesSub": "gamification học từ",
+    "skillsLabel": "Kỹ năng",
+    "skillsSub": "Nghe · Nói · Đọc · Viết"
+  },
+  "coreFeatures": {
+    "kicker": "TÍNH NĂNG CỐT LÕI",
+    "titleStart": "Mọi thứ bạn cần để",
+    "titleAccent": "học tiếng Đức",
+    "subtitle": "Từ nền tảng từ vựng đến luyện thi chính thức — một nền tảng hoàn chỉnh.",
+    "dictionary": {
+      "title": "Từ điển & Chủ đề",
+      "badge": "12+ chủ đề",
+      "desc": "5000+ từ vựng theo chuẩn Goethe. Học theo chủ đề: gia đình, công việc, du lịch, nhà ở...",
+      "point1": "5000+ từ vựng chuẩn Goethe",
+      "point2": "12+ chủ đề ",
+      "point3": "Ngữ pháp giải thích song ngữ"
+    },
+    "games": {
+      "title": "8 Trò chơi học từ",
+      "badge": "Gamification",
+      "desc": "Học từ vựng không nhàm chán với 8 mini-game đa dạng: quiz, flashcard, điền từ, ghép từ...",
+      "point1": "Quick Quiz — trắc nghiệm nhanh",
+      "point2": "Gender Quiz — Der/Die/Das",
+      "point3": "Timed Challenge — thử thách tốc độ"
+    },
+    "srs": {
+      "title": "Ôn tập SRS",
+      "badge": "Spaced Repetition",
+      "desc": "Hệ thống ôn tập thông minh dựa trên Spaced Repetition — ghi nhớ từ vĩnh viễn, không quên.",
+      "point1": "Thuật toán SRS tối ưu hóa việc ôn",
+      "point2": "Nhắc nhở hàng ngày đúng lúc",
+      "point3": "Theo dõi tiến độ từng từ"
+    },
+    "exam": {
+      "title": "Luyện thi chuẩn",
+      "badge": "Goethe & TELC",
+      "desc": "AI sinh đề từ kho đề thi thật (RAG) — đúng format, đúng độ khó, đúng Teile như kỳ thi Goethe & TELC chính thức.",
+      "point1": "RAG từ đề thi Goethe/TELC thật",
+      "point2": "A1 · A2 · B1 đầy đủ 4 kỹ năng",
+      "point3": "AI chấm điểm theo tiêu chí chính thức"
+    }
+  },
+  "aiSection": {
+    "kicker": "AI hỗ trợ luyện thi",
+    "titleStart": "AI làm thầy giáo",
+    "titleAccent": "24/7 của bạn",
+    "subtitle": "Sinh đề từ kho đề thi thật bằng RAG — phân tích, chấm điểm và nhận xét chi tiết bằng tiếng Việt giúp bạn cải thiện từng ngày.",
+    "geminiTitle": "Gemini AI",
+    "geminiSub": "Multimodal AI Engine",
+    "listen": {
+      "skill": "Nghe",
+      "title": "AI tạo bài nghe tiếng Đức",
+      "desc": "Gemini tạo ra audio tiếng Đức tự nhiên theo cấp độ của bạn. Nghe và trả lời câu hỏi hiểu bài.",
+      "badge": "Tự do + Đề chuẩn Goethe/TELC + Audio chất lượng cao"
+    },
+    "write": {
+      "skill": "Viết",
+      "title": "AI chấm bài viết chi tiết",
+      "desc": "Nộp bài viết tiếng Đức — Gemini phân tích ngữ pháp, từ vựng, cấu trúc câu và cho điểm theo tiêu chí chính thức.",
+      "badge": "Tự do + Đề chuẩn Goethe/TELC + Nhận xét song ngữ Đức-Việt"
+    },
+    "speak": {
+      "skill": "Nói",
+      "title": "AI chấm phát âm & ngữ pháp",
+      "desc": "Ghi âm câu trả lời bằng tiếng Đức — Gemini phân tích multimodal từ audio + transcript, chấm 4 tiêu chí.",
+      "badge": "Tự do + Đề chuẩn Goethe/TELC + Phát âm · Ngữ pháp · Từ vựng · Nội dung"
+    },
+    "read": {
+      "skill": "Đọc",
+      "title": "AI sinh đề từ đề thi thật (RAG)",
+      "desc": "AI học từ kho đề thi Goethe/TELC thật, sinh ra đề mới giống hệt format — cùng độ khó, cùng dạng câu hỏi.",
+      "badge": "RAG từ đề thi thật + Tự do + Đề chuẩn Goethe/TELC"
+    }
+  },
+  "examSection": {
+    "kicker": "LUYỆN THI CHUẨN",
+    "titleStart": "Đề thi",
+    "titleAccent": "Goethe & TELC",
+    "titleEnd": "sinh từ đề thật",
+    "subtitle": "AI học từ kho đề thi Goethe/TELC thật (RAG), sinh đề mới đúng format, đúng độ khó, đúng Teile. Cả 4 kỹ năng: Nghe · Đọc · Viết · Nói.",
+    "levelA1Desc": "Beginner — Giao tiếp cơ bản, giới thiệu bản thân, mua sắm",
+    "levelA2Desc": "Elementary — Cuộc sống hàng ngày, công việc, gia đình",
+    "levelB1Desc": "Intermediate — Suy nghĩ, quan điểm, sự kiện xã hội",
+    "levelMeta": "{teile} kỹ năng · {time} phút",
+    "skillLevels": "A1 · A2 · B1",
+    "skill4Read": "Đọc",
+    "skill4ReadDesc": "Đề chuẩn đầy đủ Teile Lesen",
+    "skill4Listen": "Nghe",
+    "skill4ListenDesc": "Audio Hören chuẩn định dạng",
+    "skill4Write": "Viết",
+    "skill4WriteDesc": "Schreiben với AI chấm điểm",
+    "skill4Speak": "Nói",
+    "skill4SpeakDesc": "Sprechen với AI phân tích audio"
+  },
+  "gamesSection": {
+    "kicker": "8 TRÒ CHƠI HỌC TỪ",
+    "titleStart": "Học mà như",
+    "titleAccent": "đang chơi",
+    "subtitle": "8 mini-game đa dạng giúp ôn từ vựng một cách tự nhiên và không nhàm chán.",
+    "quickQuiz": "Trắc nghiệm",
+    "genderQuiz": "Der/Die/Das",
+    "flashcards": "Thẻ ghi nhớ",
+    "fillBlank": "Điền từ",
+    "timedChallenge": "Thử thách",
+    "wordMatch": "Ghép từ",
+    "listening": "Nghe từ",
+    "spelling": "Chính tả"
+  },
+  "demoSection": {
+    "kicker": "THỬ NGAY",
+    "titleStart": "Der, Die hay",
+    "titleAccent": "Das",
+    "titleSuffix": "?",
+    "subtitle": "Thử sức với 10 câu hỏi mạo từ tiếng Đức — không cần đăng nhập."
+  },
+  "jsonLd": {
+    "description": "Nền tảng học tiếng Đức toàn diện dành cho người Việt. 5000+ từ vựng, 8 trò chơi, AI chấm 4 kỹ năng, đề thi chuẩn Goethe/TELC A1-B1."
+  },
+  "demoQuiz": {
+    "loading": "Đang tải...",
+    "start": "Bắt đầu · 10 câu",
+    "questionProgress": "Câu {current} / {total}",
+    "resultExcellent": "Xuất sắc!",
+    "resultGood": "Khá tốt!",
+    "resultKeepGoing": "Tiếp tục luyện!",
+    "accuracy": "{pct}% chính xác",
+    "registerCta": "Đăng ký miễn phí · Luyện 5000+ từ →",
+    "playAgain": "Chơi lại"
+  },
+  "footer": {
+    "brandDesc": "Nền tảng học tiếng Đức toàn diện — từ cơ bản đến luyện thi Goethe/TELC.",
+    "geminiTitle": "Gemini AI",
+    "geminiSub": "Multimodal AI Engine",
+    "colLearning": "Học tập",
+    "colExam": "Luyện thi",
+    "colCommunity": "Cộng đồng",
+    "colAccount": "Tài khoản",
+    "colPolicy": "Chính sách",
+    "learnDictionary": "Từ điển từ vựng",
+    "learnGames": "8 trò chơi học từ",
+    "learnSrs": "Ôn tập SRS thông minh",
+    "learnGrammar": "Ngữ pháp song ngữ",
+    "examReading": "Đọc hiểu (Lesen)",
+    "examListening": "Nghe hiểu (Hören)",
+    "examWriting": "Viết luận (Schreiben)",
+    "examSpeaking": "Nói (Sprechen)",
+    "examLevels": "Goethe & TELC A1/A2/B1",
+    "discord": "Discord Deutschmeister",
+    "accountRegister": "Đăng ký miễn phí",
+    "accountLogin": "Đăng nhập",
+    "startNow": "Bắt đầu ngay",
+    "policyPrivacy": "Chính sách bảo mật",
+    "policyTerms": "Điều khoản sử dụng",
+    "copyright": "© 2025 – 2026 Deutschmeister · Made with Yuii in Vietnam",
+    "bottomPrivacy": "Bảo mật",
+    "bottomTerms": "Điều khoản"
+  },
+  "finalCta": {
+    "titleStart": "Sẵn sàng bắt đầu",
+    "titleAccent": "hành trình",
+    "titleEnd": "của bạn?",
+    "subtitle": "Bắt đầu học tiếng Đức ngay hôm nay với sự hỗ trợ của AI.",
+    "createAccount": "Tạo tài khoản",
+    "badgeAi": "AI",
+    "badgeStandard": "Chuẩn Goethe/TELC"
+  },
+  "faq": {
+    "kicker": "CÂU HỎI THƯỜNG GẶP",
+    "titleStart": "Bạn đang",
+    "titleAccent": "thắc mắc",
+    "titleEnd": "gì?",
+    "viewPricing": "Xem bảng giá chi tiết →",
+    "q1": "App có thực sự miễn phí không?",
+    "a1": "Có. Tất cả từ vựng, mini-games, ngữ pháp, chủ đề hoàn toàn miễn phí mãi mãi. Chỉ các tính năng AI nâng cao (luyện thi Goethe/TELC, chấm writing/speaking) mới cần Premium — với giới hạn 3 lần/tuần cho Free.",
+    "q2": "Tôi cần trả phí để luyện thi Goethe/TELC không?",
+    "a2": "Free users có 3 lần/tuần để dùng tất cả tính năng AI bao gồm luyện thi. Premium sẽ mở không giới hạn tất cả đề thi A1/A2/B1, AI chấm bài, và AI giải thích lỗi bằng tiếng Việt.",
+    "q3": "AI chấm bài tiếng Đức có chính xác không?",
+    "a3": "Deutschmeister dùng Gemini AI của Google — được train trên dữ liệu ngôn ngữ khổng lồ. AI chấm theo đúng tiêu chí của Goethe/TELC: ngữ pháp, từ vựng, cấu trúc câu, nội dung. Mỗi lỗi đều có giải thích chi tiết bằng tiếng Việt.",
+    "q4": "Thanh toán Premium như thế nào?",
+    "a4": "Chuyển khoản ngân hàng hoặc quét mã VietQR. Sau khi chuyển khoản với đúng nội dung, admin xác nhận trong vòng vài giờ (tối đa 24h) và Premium tự động kích hoạt. Xem chi tiết tại trang Pricing.",
+    "q5": "App hỗ trợ những trình độ nào?",
+    "a5": "A1 (sơ cấp), A2 (cơ bản), B1 (trung cấp) — đầy đủ 4 kỹ năng Nghe/Nói/Đọc/Viết theo format Goethe-Zertifikat và TELC Deutsch. Phù hợp cho người mới bắt đầu đến người chuẩn bị thi.",
+    "q6": "Cần cài đặt gì không? Có app di động không?",
+    "a6": "Không cần cài đặt — chạy hoàn toàn trên trình duyệt web. App di động (Android/iOS) đang phát triển, sẽ ra mắt sớm. Tài khoản dùng chung trên cả web và mobile.",
+    "q7": "Lifetime deal là gì?",
+    "a7": "Trả 1 lần, dùng mãi mãi — không cần gia hạn hàng tháng/năm. Đây là Early Bird deal giới hạn chỉ 500 suất đầu tiên. Bạn sẽ nhận Early Backer badge và ưu tiên tính năng mới. Khi hết 500 suất là không mở lại."
+  },
+  "story": {
+    "kicker": "CÂU CHUYỆN CỦA CHÚNG TÔI",
+    "titleStart": "Từ nỗi đau",
+    "titleAccent": "đến Deutschmeister",
+    "item1Label": "Khởi đầu — Nỗi đau thật sự",
+    "item1Para1": "Mình bắt đầu học tiếng Đức từ con số 0 — không biết gì ngoài \"Hallo\" và \"Danke\". Mở sách ra, đập vào mặt là <b>der, die, das</b> — ba cái giống mà tiếng Việt không hề có. Mình nhớ cái bàn là \"der Tisch\" nhưng cái ghế lại là \"der Stuhl\", còn cái cửa thì \"die Tür\". Chẳng có quy luật nào cả.",
+    "item1Para2": "Mình dùng Duolingo, Anki, Google Translate — mỗi cái một ít nhưng không cái nào đủ. Duolingo thì không giải thích ngữ pháp cho người Việt. Anki thì quá khô khan. Tìm tài liệu tiếng Việt thì ít ỏi, rời rạc, không có hệ thống.",
+    "item2Label": "Thực tế phũ phàng",
+    "item2Para1": "Khi mình chuẩn bị thi Goethe A1, mình mới nhận ra: <b>không có công cụ nào tạo đề thi chuẩn format Goethe bằng tiếng Việt</b>. Muốn luyện Lesen Teil 1? Phải tự tìm đề cũ trên mạng, photocopy, tự chấm. Muốn luyện Schreiben? Viết xong không ai sửa, không biết sai ở đâu.",
+    "item2Para2": "Luyện nói thì càng khó hơn — không có bạn học, không dám nói sai, mở miệng ra chỉ nhớ mỗi \"Ich heiße...\" rồi đứng hình. Mình học một mình, đôi khi nản đến mức muốn bỏ cuộc.",
+    "item3Label": "Ý tưởng ra đời",
+    "item3Para1": "Mình tự hỏi: <i>\"Nếu có một app mà vừa học từ, vừa chơi game ôn tập, vừa tạo đề thi chuẩn Goethe, lại còn có AI chấm bài viết và nói — tất cả bằng tiếng Việt thì sao?\"</i>",
+    "item3Para2": "Mình là developer, và mình quyết định tự xây cái mà mình cần. Không phải vì muốn kinh doanh, mà vì thật sự không có công cụ nào phù hợp. Mỗi tính năng trong Deutschmeister đều sinh ra từ một nỗi đau thật: không nhớ nổi giống của danh từ → có Gender Quiz. Viết xong không ai sửa → có AI chấm bài. Học từ xong quên ngay → có SRS nhắc nhở.",
+    "finalLabel": "Deutschmeister ra đời",
+    "finalPara1": "Deutschmeister không phải sản phẩm của một công ty lớn. Nó là sản phẩm của <b>một người học tiếng Đức, xây cho những người học tiếng Đức</b>. Mỗi dòng code, mỗi tính năng đều xuất phát từ câu hỏi: \"Cái này có giúp mình học tốt hơn không?\"",
+    "finalPara2": "Mình biết con đường học tiếng Đức rất dài và đôi khi cô đơn. Nhưng mình hy vọng với Deutschmeister, bạn sẽ có một người bạn đồng hành — không hoàn hảo, nhưng luôn ở đó, 24/7, sẵn sàng tạo đề cho bạn luyện, sửa bài cho bạn học, và nhắc bạn ôn từ mỗi ngày.",
+    "quote": "\"Tiếng Đức khó, nhưng không phải không học được. Chỉ là cần đúng công cụ và đủ kiên nhẫn.\"",
+    "quoteAuthor": "— Yuii, Developer & German Learner"
+  }
+}

@@ -1,0 +1,218 @@
+{
+  "authGate": {
+    "title": "Anmelden, um das Dashboard zu sehen",
+    "description": "Verfolge deine Serie, XP und Lernfortschritt."
+  },
+  "greeting": "Hallo, {name}!",
+  "statusPills": {
+    "dayUnit": "Tag",
+    "xpUnit": "XP",
+    "levelPrefix": "Lv."
+  },
+  "viewMode": {
+    "ariaLabel": "Dashboard-Ansicht",
+    "overview": "Übersicht",
+    "detailed": "Details"
+  },
+  "todayHero": {
+    "title": "Was solltest du heute tun?",
+    "subtitle": "Eine Hauptaktion, um in Schwung zu bleiben — Nebenaktionen darunter."
+  },
+  "miniActions": {
+    "review": {
+      "titleWithCount": "{count, plural, one {# Wort zu wiederholen} other {# Wörter zu wiederholen}}",
+      "titleEmpty": "Wortkartei",
+      "subtitleWithCount": "Schnell wiederholen, um deinen SRS-Rhythmus zu halten.",
+      "subtitleEmpty": "Neue Wörter hinzufügen oder gespeicherte ansehen.",
+      "ctaWithCount": "Jetzt wiederholen",
+      "ctaEmpty": "Wortkartei öffnen"
+    },
+    "studyPlan": {
+      "title": "Lernplan",
+      "subtitle": "Verfolge deinen Goethe-/TELC-Fahrplan und Wochenaufgaben.",
+      "cta": "Plan ansehen"
+    },
+    "quickGame": {
+      "title": "Schnelles Üben",
+      "subtitle": "Spiele eine kurze Runde, wenn du nur wenige Minuten hast.",
+      "cta": "5 Min spielen"
+    }
+  },
+  "detailed": {
+    "title": "Lernübersicht",
+    "subtitle": "Detaillierte Metriken, Aktivitätsverlauf und Wochenfortschritt."
+  },
+  "upsell": {
+    "title": "Goethe- & TELC-Übungsprüfungen warten auf dich",
+    "description": "Zeitgesteuerte 4-Fertigkeiten-Übungsprüfungen · KI-Bewertung für Schreiben & Sprechen · Unbegrenzte Versuche",
+    "ctaLabel": "Auf Premium upgraden"
+  },
+  "stats": {
+    "streak": "Aktuelle Serie",
+    "streakActive": "Tage in Folge",
+    "streakStart": "Beginne heute!",
+    "wordsLearned": "Gelernte Wörter",
+    "wordsLearnedUnit": "/ {total} Wörter",
+    "accuracy": "Genauigkeit",
+    "accuracyGames": "{count} Spiele gespielt",
+    "studyTime": "Lernzeit",
+    "studyTimeSince": "Seit {date}",
+    "topicsDone": "Abgeschlossene Themen",
+    "topicsDoneUnit": "/ {total} Themen",
+    "grammar": "Grammatik",
+    "grammarUnit": "/ {total} Lektionen",
+    "needsReview": "Wiederholen",
+    "needsReviewActive": "Wörter heute",
+    "needsReviewEmpty": "Alles erledigt!",
+    "streakFreezeTitle": "{count} Serien-Schutz — schützt deine Serie, falls du einen Tag aussetzt"
+  },
+  "heroAction": {
+    "weakSkill": "Verbesserungsbedarf"
+  },
+  "dailyPath": {
+    "title": "Heutige Lektion",
+    "allDone": "Geschafft! Bis morgen",
+    "progress": "{completed}/{total} erledigt"
+  },
+  "hero": {
+    "todayGoalLabel": "Heutiges Ziel"
+  },
+  "quickReview": {
+    "rating": {
+      "again": "Vergessen",
+      "hard": "Schwer",
+      "good": "Gut",
+      "easy": "Leicht"
+    },
+    "doneTitle": "Schnelle Wiederholung erledigt!",
+    "doneRemaining": "Noch {count} Wörter offen — weitermachen, um im Rhythmus zu bleiben",
+    "doneCleared": "Für heute erledigt. Bis morgen!",
+    "continueLink": "Noch {count} wiederholen →",
+    "saveError": "Wiederholung konnte nicht gespeichert werden. Erneut versuchen.",
+    "title": "Schnell {count} Wörter wiederholen",
+    "subtitle": "{total} Wörter insgesamt fällig — ein Klick und fertig",
+    "viewAll": "Alle ansehen →",
+    "tapToReveal": "Tippen, um Bedeutung zu zeigen"
+  },
+  "studyPlanWidget": {
+    "ctaTitle": "Lernplan einrichten",
+    "ctaSubtitle": "Automatischer Goethe-/TELC-Fahrplan",
+    "pausedTitle": "Fahrplan pausiert",
+    "pausedSubtitle": "{exam} {level} · Jetzt fortsetzen",
+    "daysUntilExam": "Noch {days} Tage"
+  },
+  "weeklyChallenges": {
+    "title": "Wöchentliche Herausforderungen",
+    "details": "Details",
+    "loading": "Wird geladen..."
+  },
+  "streakWarning": {
+    "title": "Deine {days}-Tage-Serie ist gefährdet!",
+    "description": "Mache heute mindestens eine Lektion, um deine Serie zu halten. Tagesende (VN) und sie ist weg",
+    "cta": "Jetzt lernen"
+  },
+  "weeklyChart": {
+    "title": "Fortschritt der letzten 7 Tage",
+    "wordsAxis": "Wortschatz",
+    "wordsUnit": "{count} Wörter",
+    "totals": {
+      "words": "Gelernte Wörter",
+      "games": "Gespielte Spiele",
+      "time": "Lernzeit"
+    }
+  },
+  "topicProgress": {
+    "title": "Themenfortschritt",
+    "viewAll": "Alle ansehen",
+    "totalProgress": "Gesamtfortschritt",
+    "completed": "Abgeschlossen",
+    "wordsCount": "{learned}/{total} Wörter",
+    "emptyTitle": "Themenbasiert lernen",
+    "emptySubtitle": "Wähle ein Thema, um Wortschatz systematisch zu lernen",
+    "emptyCta": "Themen entdecken"
+  },
+  "activityHeatmap": {
+    "title": "Aktivität dieses Jahr",
+    "streakLabel": "Tage in Folge",
+    "daysActiveLabel": "aktive Tage",
+    "less": "Wenig",
+    "more": "Viel",
+    "activityCount": "{count} Aktivitäten"
+  },
+  "recentActivity": {
+    "title": "Letzte Aktivitäten",
+    "emptyTitle": "Noch keine Aktivität",
+    "emptySubtitle": "Beginne zu lernen, um deinen Fortschritt zu sehen!",
+    "collapse": "Einklappen",
+    "viewMore": "Weitere {count} Aktivitäten anzeigen",
+    "labels": {
+      "word": "Wortschatz",
+      "topic": "Thema",
+      "review": "Wiederholung",
+      "grammar": "Grammatik",
+      "writing": "Schreibübung",
+      "reading": "Leseübung",
+      "listening": "Hörübung",
+      "exam_reading": "Leseprüfung",
+      "exam_writing": "Schreibprüfung",
+      "exam_speaking": "Sprechprüfung",
+      "free_speaking": "Sprechübung"
+    }
+  },
+  "dailyBonus": {
+    "streakLabel": "{days}-Tage-Serie — weiter so!",
+    "welcomeBack": "Willkommen zurück!"
+  },
+  "quickActions": {
+    "title": "Schnellaktionen",
+    "reviewNow": "Jetzt wiederholen!",
+    "reviewCount": "{count} Wörter zu wiederholen",
+    "actions": {
+      "topics": { "label": "Themen", "description": "12 A1-Themen" },
+      "dictionary": { "label": "Wörterbuch", "description": "Wortschatz nachschlagen" },
+      "practice": { "label": "Übungsprüfung", "description": "Goethe & TELC" },
+      "srs": { "label": "SRS", "description": "Karteikarten-Wiederholung" }
+    }
+  },
+  "todayFocus": {
+    "title": "Heutiges Ziel",
+    "allDone": "Alle erledigt! Bis morgen",
+    "progress": "{completed}/{total} Aufgaben",
+    "progressWithSrs": "{completed}/{total} Aufgaben · {srs} Karten fällig"
+  },
+  "leaderboardWidget": {
+    "title": "Wochen-Bestenliste",
+    "viewAll": "Alle ansehen",
+    "loading": "Wird geladen...",
+    "empty": "Noch keine Daten für diese Woche"
+  },
+  "firstDayJourney": {
+    "title": "Reise am ersten Tag",
+    "subtitle": "Schließe 3 Schritte ab, um mit {level} zu beginnen",
+    "steps": {
+      "topics": "Themen entdecken & 5 Wörter lernen",
+      "game": "Ein Spiel zur Wiederholung spielen",
+      "grammar": "Eine Grammatik-Lektion lernen"
+    }
+  },
+  "errorPatterns": {
+    "title": "Häufige Fehler",
+    "loading": "Wird geladen...",
+    "emptyTitle": "Schließe eine Schreibaufgabe ab, um die Fehleranalyse zu sehen",
+    "emptyCta": "Jetzt schreiben →",
+    "occurrences": "{count} Mal ({percentage}%)",
+    "reviewAction": "Wiederholen",
+    "categories": {
+      "article": "Artikel (der/die/das)",
+      "conjugation": "Verbkonjugation",
+      "word_order": "Wortstellung",
+      "case": "Fall (Nom/Akk/Dat)",
+      "spelling": "Rechtschreibung",
+      "preposition": "Präpositionen",
+      "plural": "Pluralformen",
+      "adjective_ending": "Adjektivendungen",
+      "tense": "Zeitform",
+      "vocabulary": "Wortschatz"
+    }
+  }
+}

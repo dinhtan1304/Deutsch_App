@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { ACCENT, GRADIENT } from '@/lib/tokens';
 import { useLeaderboard } from '@/hooks/useLeaderboard';
 import { useAuthStore } from '@/stores/authStore';
@@ -30,6 +31,7 @@ function MiniRank({ rank }: { rank: number }) {
 }
 
 export function LeaderboardWidget() {
+  const t = useTranslations('dashboard.leaderboardWidget');
   const { data, isLoading } = useLeaderboard('weekly', 3);
   const { user } = useAuthStore();
 
@@ -40,20 +42,20 @@ export function LeaderboardWidget() {
           <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: GRADIENT.speaking }}>
             <IconTrophy size={14} style={{ color: 'white' }} />
           </div>
-          <h3 className="text-title font-bold m-0" style={{ color: 'var(--theme-text-primary)' }}>BXH tuần này</h3>
+          <h3 className="text-title font-bold m-0" style={{ color: 'var(--theme-text-primary)' }}>{t('title')}</h3>
         </div>
         <Link href="/leaderboard" className="text-body font-semibold flex items-center gap-0.5" style={{ color: ACCENT.xp, textDecoration: 'none' }}>
-          Xem tất cả <IconArrowRight size={13} />
+          {t('viewAll')} <IconArrowRight size={13} />
         </Link>
       </div>
 
       {isLoading && (
-        <div className="text-body text-center py-5" style={{ color: 'var(--theme-text-muted)' }}>Đang tải...</div>
+        <div className="text-body text-center py-5" style={{ color: 'var(--theme-text-muted)' }}>{t('loading')}</div>
       )}
 
       {!isLoading && data?.length === 0 && (
         <div className="text-body text-center py-3" style={{ color: 'var(--theme-text-muted)' }}>
-          Chưa có dữ liệu tuần này
+          {t('empty')}
         </div>
       )}
 

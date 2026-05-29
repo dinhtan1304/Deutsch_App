@@ -1,0 +1,36 @@
+{
+  "actions": {
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "confirm": "Bestätigen",
+    "continue": "Weiter",
+    "back": "Zurück",
+    "delete": "Löschen",
+    "edit": "Bearbeiten",
+    "close": "Schließen",
+    "submit": "Senden",
+    "retry": "Erneut versuchen",
+    "next": "Weiter",
+    "previous": "Zurück"
+  },
+  "state": {
+    "loading": "Wird geladen…",
+    "error": "Ein Fehler ist aufgetreten",
+    "empty": "Keine Daten",
+    "saving": "Wird gespeichert…",
+    "saved": "Gespeichert"
+  },
+  "time": {
+    "justNow": "Gerade eben",
+    "minutesAgo": "{count, plural, =0 {gerade eben} one {vor # Minute} other {vor # Minuten}}",
+    "hoursAgo": "{count, plural, one {vor # Stunde} other {vor # Stunden}}",
+    "daysAgo": "{count, plural, one {vor # Tag} other {vor # Tagen}}"
+  },
+  "language": {
+    "label": "Sprache",
+    "description": "Sprache der Benutzeroberfläche wählen",
+    "vi": "Tiếng Việt",
+    "en": "English",
+    "de": "Deutsch"
+  }
+}

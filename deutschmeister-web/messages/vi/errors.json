@@ -1,0 +1,7 @@
+{
+  "generic": "Đã xảy ra lỗi",
+  "authExpired": "Phiên đăng nhập hết hạn",
+  "authRequired": "Vui lòng đăng nhập lại",
+  "network": "Không thể kết nối đến máy chủ",
+  "httpError": "Lỗi HTTP {status}"
+}

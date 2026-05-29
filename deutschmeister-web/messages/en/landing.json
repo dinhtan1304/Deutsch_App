@@ -1,0 +1,242 @@
+{
+  "navMenu": {
+    "features": "Features",
+    "ai": "AI",
+    "exam": "Exam prep",
+    "story": "Story",
+    "pricing": "Pricing",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "signIn": "Sign in",
+    "startNow": "Start now",
+    "startFree": "Start free"
+  },
+  "hero": {
+    "badge": "Goethe/TELC standard",
+    "titleStart": "Learn German",
+    "titleAccent": "smartly",
+    "titleEnd": "with AI",
+    "subtitle": "An end-to-end German learning platform — from basic vocabulary to Goethe/TELC A1·A2·B1 exam prep. AI generates papers from a real-exam corpus (RAG), grades them, and gives detailed Vietnamese feedback.",
+    "ctaPrimary": "Start learning free",
+    "ctaSecondary": "See Premium plans",
+    "ctaNote": "No credit card · Free forever · 3 AI features/week",
+    "chipWords": "5000+ words",
+    "chipGames": "8 games",
+    "chipPronunciation": "AI pronunciation grading",
+    "chipRag": "RAG from real papers",
+    "chipSrs": "Smart SRS",
+    "dashboardAlt": "Deutschmeister dashboard preview",
+    "practiceAlt": "Skill practice preview",
+    "gamesAlt": "Vocabulary games preview"
+  },
+  "stats": {
+    "wordsLabel": "Words",
+    "wordsSub": "Goethe-aligned",
+    "gamesLabel": "Games",
+    "gamesSub": "gamified vocabulary",
+    "skillsLabel": "Skills",
+    "skillsSub": "Listen · Speak · Read · Write"
+  },
+  "coreFeatures": {
+    "kicker": "CORE FEATURES",
+    "titleStart": "Everything you need to",
+    "titleAccent": "learn German",
+    "subtitle": "From a vocabulary foundation to official exam prep — one complete platform.",
+    "dictionary": {
+      "title": "Dictionary & Topics",
+      "badge": "12+ topics",
+      "desc": "5000+ Goethe-aligned words. Learn by topic: family, work, travel, home...",
+      "point1": "5000+ Goethe-standard words",
+      "point2": "12+ topics",
+      "point3": "Bilingual grammar explanations"
+    },
+    "games": {
+      "title": "8 vocabulary games",
+      "badge": "Gamification",
+      "desc": "Make vocab fun with 8 varied mini-games: quiz, flashcard, fill-blank, word-match...",
+      "point1": "Quick Quiz — fast multiple choice",
+      "point2": "Gender Quiz — Der/Die/Das",
+      "point3": "Timed Challenge — speed runs"
+    },
+    "srs": {
+      "title": "SRS review",
+      "badge": "Spaced Repetition",
+      "desc": "Smart review based on Spaced Repetition — memorise words for the long term.",
+      "point1": "SRS algorithm optimises review",
+      "point2": "Daily reminders at the right time",
+      "point3": "Track progress per word"
+    },
+    "exam": {
+      "title": "Standard exam prep",
+      "badge": "Goethe & TELC",
+      "desc": "AI generates papers from real-exam corpus (RAG) — right format, right difficulty, right Teile as in official Goethe & TELC.",
+      "point1": "RAG from real Goethe/TELC papers",
+      "point2": "A1 · A2 · B1 — all four skills",
+      "point3": "AI grades against official criteria"
+    }
+  },
+  "aiSection": {
+    "kicker": "AI exam tutor",
+    "titleStart": "AI as your",
+    "titleAccent": "24/7 teacher",
+    "subtitle": "Generates papers from a real-exam corpus via RAG — analyses, grades, and provides detailed Vietnamese feedback to improve daily.",
+    "geminiTitle": "Gemini AI",
+    "geminiSub": "Multimodal AI Engine",
+    "listen": {
+      "skill": "Listen",
+      "title": "AI generates German listening tasks",
+      "desc": "Gemini produces natural-sounding German audio at your level. Listen and answer comprehension questions.",
+      "badge": "Free + Goethe/TELC + high-quality audio"
+    },
+    "write": {
+      "skill": "Write",
+      "title": "Detailed AI writing grading",
+      "desc": "Submit a German text — Gemini analyses grammar, vocabulary, sentence structure, and grades against official rubrics.",
+      "badge": "Free + Goethe/TELC + Vietnamese-German feedback"
+    },
+    "speak": {
+      "skill": "Speak",
+      "title": "AI pronunciation & grammar grading",
+      "desc": "Record your German answer — Gemini analyses audio + transcript multimodally, grading 4 criteria.",
+      "badge": "Free + Goethe/TELC + Pronunciation · Grammar · Vocabulary · Content"
+    },
+    "read": {
+      "skill": "Read",
+      "title": "AI generates from real papers (RAG)",
+      "desc": "AI learns from real Goethe/TELC papers and generates new ones with the same format, difficulty, and question types.",
+      "badge": "RAG from real papers + free + Goethe/TELC"
+    }
+  },
+  "examSection": {
+    "kicker": "EXAM PREP",
+    "titleStart": "Exam papers",
+    "titleAccent": "Goethe & TELC",
+    "titleEnd": "from real corpus",
+    "subtitle": "AI learns from a real Goethe/TELC corpus (RAG) and generates new papers with correct format, difficulty, and Teile across all 4 skills: Listen · Read · Write · Speak.",
+    "levelA1Desc": "Beginner — basic communication, intro, shopping",
+    "levelA2Desc": "Elementary — daily life, work, family",
+    "levelB1Desc": "Intermediate — opinions, views, social events",
+    "levelMeta": "{teile} skills · {time} min",
+    "skillLevels": "A1 · A2 · B1",
+    "skill4Read": "Read",
+    "skill4ReadDesc": "Full Lesen Teile",
+    "skill4Listen": "Listen",
+    "skill4ListenDesc": "Hören with standard format",
+    "skill4Write": "Write",
+    "skill4WriteDesc": "Schreiben with AI grading",
+    "skill4Speak": "Speak",
+    "skill4SpeakDesc": "Sprechen with AI audio analysis"
+  },
+  "gamesSection": {
+    "kicker": "8 VOCABULARY GAMES",
+    "titleStart": "Learn like you're",
+    "titleAccent": "playing",
+    "subtitle": "8 varied mini-games to review vocabulary naturally without boredom.",
+    "quickQuiz": "Multiple choice",
+    "genderQuiz": "Der/Die/Das",
+    "flashcards": "Flashcards",
+    "fillBlank": "Fill blanks",
+    "timedChallenge": "Challenge",
+    "wordMatch": "Word match",
+    "listening": "Listen to word",
+    "spelling": "Spelling"
+  },
+  "demoSection": {
+    "kicker": "TRY IT NOW",
+    "titleStart": "Der, Die or",
+    "titleAccent": "Das",
+    "titleSuffix": "?",
+    "subtitle": "Try 10 German article questions — no sign-in required."
+  },
+  "jsonLd": {
+    "description": "Comprehensive German learning platform for Vietnamese learners. 5000+ words, 8 games, AI grading for 4 skills, Goethe/TELC A1-B1 papers."
+  },
+  "demoQuiz": {
+    "loading": "Loading...",
+    "start": "Start · 10 questions",
+    "questionProgress": "Question {current} / {total}",
+    "resultExcellent": "Excellent!",
+    "resultGood": "Pretty good!",
+    "resultKeepGoing": "Keep practising!",
+    "accuracy": "{pct}% accurate",
+    "registerCta": "Register free · Learn 5000+ words →",
+    "playAgain": "Play again"
+  },
+  "footer": {
+    "brandDesc": "A complete German learning platform — from basics to Goethe/TELC exam prep.",
+    "geminiTitle": "Gemini AI",
+    "geminiSub": "Multimodal AI Engine",
+    "colLearning": "Learning",
+    "colExam": "Exam prep",
+    "colCommunity": "Community",
+    "colAccount": "Account",
+    "colPolicy": "Policies",
+    "learnDictionary": "Vocabulary dictionary",
+    "learnGames": "8 vocabulary games",
+    "learnSrs": "Smart SRS review",
+    "learnGrammar": "Bilingual grammar",
+    "examReading": "Reading (Lesen)",
+    "examListening": "Listening (Hören)",
+    "examWriting": "Writing (Schreiben)",
+    "examSpeaking": "Speaking (Sprechen)",
+    "examLevels": "Goethe & TELC A1/A2/B1",
+    "discord": "Deutschmeister Discord",
+    "accountRegister": "Register free",
+    "accountLogin": "Sign in",
+    "startNow": "Start now",
+    "policyPrivacy": "Privacy policy",
+    "policyTerms": "Terms of use",
+    "copyright": "© 2025 – 2026 Deutschmeister · Made with Yuii in Vietnam",
+    "bottomPrivacy": "Privacy",
+    "bottomTerms": "Terms"
+  },
+  "finalCta": {
+    "titleStart": "Ready to start",
+    "titleAccent": "your journey",
+    "titleEnd": "?",
+    "subtitle": "Start learning German today with AI support.",
+    "createAccount": "Create account",
+    "badgeAi": "AI",
+    "badgeStandard": "Goethe/TELC standard"
+  },
+  "faq": {
+    "kicker": "FREQUENTLY ASKED",
+    "titleStart": "What are you",
+    "titleAccent": "wondering",
+    "titleEnd": "about?",
+    "viewPricing": "See detailed pricing →",
+    "q1": "Is the app really free?",
+    "a1": "Yes. All vocabulary, mini-games, grammar, and topics are free forever. Only advanced AI features (Goethe/TELC exam prep, writing/speaking grading) need Premium — with a 3/week limit for Free users.",
+    "q2": "Do I need to pay to practise Goethe/TELC?",
+    "a2": "Free users get 3 uses/week for all AI features including exam prep. Premium unlocks unlimited A1/A2/B1 exams, AI grading, and AI error explanations in Vietnamese.",
+    "q3": "Is AI German grading accurate?",
+    "a3": "Deutschmeister uses Google's Gemini AI — trained on massive language data. It grades against Goethe/TELC criteria: grammar, vocabulary, sentence structure, content. Every error has a detailed Vietnamese explanation.",
+    "q4": "How do I pay for Premium?",
+    "a4": "Bank transfer or scan VietQR. After transferring with the correct memo, the admin confirms within a few hours (max 24h) and Premium activates automatically. See the Pricing page for details.",
+    "q5": "Which levels does the app support?",
+    "a5": "A1 (beginner), A2 (elementary), B1 (intermediate) — all 4 skills Listen/Speak/Read/Write in Goethe-Zertifikat and TELC Deutsch format. Suitable from beginners to exam candidates.",
+    "q6": "Do I need to install anything? Is there a mobile app?",
+    "a6": "No installation — runs entirely in the browser. A mobile app (Android/iOS) is in development and coming soon. Accounts are shared across web and mobile.",
+    "q7": "What is the lifetime deal?",
+    "a7": "Pay once, use forever — no monthly/yearly renewal. This is an Early Bird deal limited to the first 500 spots. You'll get an Early Backer badge and priority on new features. Once 500 spots are gone, it won't reopen."
+  },
+  "story": {
+    "kicker": "OUR STORY",
+    "titleStart": "From the pain",
+    "titleAccent": "to Deutschmeister",
+    "item1Label": "The beginning — real pain",
+    "item1Para1": "I started German from zero — knowing nothing but \"Hallo\" and \"Danke\". I opened the book and was hit by <b>der, die, das</b> — three genders that don't exist in Vietnamese. I remembered the table is \"der Tisch\" but the chair is also \"der Stuhl\", while the door is \"die Tür\". No rule at all.",
+    "item1Para2": "I used Duolingo, Anki, Google Translate — a bit of each but none was enough. Duolingo doesn't explain grammar for Vietnamese speakers. Anki is too dry. Vietnamese resources were scarce, scattered, and unsystematic.",
+    "item2Label": "The harsh reality",
+    "item2Para1": "When preparing for Goethe A1, I realised: <b>no tool generates Goethe-format exams in Vietnamese</b>. Want to practise Lesen Teil 1? You must hunt for old papers online, photocopy them, grade yourself. Want to practise Schreiben? After writing, no one corrects it — you don't know what's wrong.",
+    "item2Para2": "Speaking was even harder — no study partner, afraid to make mistakes, opening your mouth only to remember \"Ich heiße...\" then freezing. I learned alone, sometimes so discouraged I wanted to quit.",
+    "item3Label": "The idea is born",
+    "item3Para1": "I asked myself: <i>\"What if there were an app that teaches words, plays review games, generates Goethe-format exams, and even has AI grading for writing and speaking — all in Vietnamese?\"</i>",
+    "item3Para2": "I'm a developer, and I decided to build what I needed. Not to run a business, but because no suitable tool existed. Every feature in Deutschmeister was born from real pain: can't remember noun genders → Gender Quiz. No one to correct your writing → AI grading. Forget words right after learning → SRS reminders.",
+    "finalLabel": "Deutschmeister is born",
+    "finalPara1": "Deutschmeister isn't a big company's product. It's the product of <b>a German learner, built for German learners</b>. Every line of code, every feature, started from one question: \"Does this help me learn better?\"",
+    "finalPara2": "I know the path to learning German is long and sometimes lonely. But I hope with Deutschmeister you'll have a companion — imperfect, but always there, 24/7, ready to generate papers to practise, correct your work, and remind you to review words every day.",
+    "quote": "\"German is hard, but not unlearnable. You just need the right tools and enough patience.\"",
+    "quoteAuthor": "— Yuii, Developer & German Learner"
+  }
+}

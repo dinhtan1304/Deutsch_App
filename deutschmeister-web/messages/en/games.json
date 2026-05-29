@@ -1,0 +1,312 @@
+{
+  "landing": {
+    "title": "Vocabulary games",
+    "subtitle": "Practice articles, meanings, listening and spelling in short sessions.",
+    "srsCta": "SRS review",
+    "levelBanner": {
+      "levelLabel": "Level:",
+      "vocabRange": "Vocab range:",
+      "rangeNote": "Games favor 70% words you've learned and 30% new ones."
+    },
+    "recommendations": {
+      "title": "Play now",
+      "subtitleDue": "You have {count} words to review. Start with SRS to keep memory fresh.",
+      "subtitleDefault": "Three short sessions to warm up today.",
+      "reasonDue": "{count} words to review",
+      "reasonStart": "Quick start",
+      "reasonFit": "Good for today",
+      "startCta": "Start"
+    },
+    "allGames": {
+      "title": "All games",
+      "subtitle": "Pick a format that matches your time and the skill you want to build.",
+      "playNow": "Play now"
+    },
+    "tips": {
+      "title": "Tips for effective play",
+      "subtitle": "Use games as short reviews — they don't replace SRS.",
+      "hotkeys": {
+        "title": "Hotkeys",
+        "text": "Use <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> to answer quickly."
+      },
+      "combo": {
+        "title": "Combo",
+        "text": "Answer correctly in a row to keep rhythm and earn more points."
+      },
+      "preReview": {
+        "title": "Review first",
+        "text": "An SRS session before playing makes vocab games more effective."
+      }
+    }
+  },
+  "levels": {
+    "A1": "Beginner",
+    "A2": "Elementary",
+    "B1": "Intermediate",
+    "B2": "Upper-intermediate",
+    "C1": "Advanced",
+    "C2": "Proficient",
+    "all": "All levels"
+  },
+  "definitions": {
+    "gender-quiz":      { "nameVi": "der/die/das articles", "description": "Pick the right article for each noun." },
+    "timed-challenge":  { "nameVi": "Time challenge",       "description": "Answer fast within the time limit." },
+    "fill-blank":       { "nameVi": "Fill in the blank",    "description": "Fill the missing article or word." },
+    "flashcards":       { "nameVi": "Flashcards",           "description": "Review meaning, article and example on cards." },
+    "srs-review":       { "nameVi": "SRS review",           "description": "Smart review with the SM-2 algorithm." },
+    "word-match":       { "nameVi": "Word match",           "description": "Match German words with their meaning." },
+    "listening":        { "nameVi": "Listening",            "description": "Hear an audio clip and pick the right word." },
+    "spelling":         { "nameVi": "Spelling",             "description": "Type the German word correctly." },
+    "typing":           { "nameVi": "Typing speed",         "description": "60 seconds of WPM and accuracy practice." }
+  },
+  "common": {
+    "loading": "Loading…",
+    "noQuestions": "No questions yet",
+    "checkAnswer": "Check",
+    "next": "Next",
+    "skip": "Skip",
+    "submit": "Submit",
+    "restart": "Play again",
+    "exit": "Exit",
+    "exitConfirm": "Are you sure you want to exit?",
+    "correct": "Correct!",
+    "incorrect": "Incorrect",
+    "score": "Score",
+    "streak": "Streak",
+    "combo": "Combo",
+    "time": "Time",
+    "wordsLearned": "Words learned",
+    "accuracy": "Accuracy",
+    "tryAgain": "Try again",
+    "backToGames": "Back to games",
+    "secondsUnit": "s",
+    "questionsUnit": "questions",
+    "questionOf": "Question {current} / {total}",
+    "start": "Start",
+    "back": "Back",
+    "menu": "Menu",
+    "completed": "Done!",
+    "correctLabel": "Correct",
+    "wrongLabel": "Wrong",
+    "questionLabel": "Q",
+    "settingsHint": "(Change question count in Settings → Learning)",
+    "errors": {
+      "minNounsWordBank": "Need at least 4 nouns with articles in this collection",
+      "noVocab": "No vocabulary! Please add words or seed the database.",
+      "minWords": "Need at least {count} words in this collection",
+      "minNouns": "Need at least {count} nouns with articles in this collection"
+    },
+    "feedback": {
+      "correctMark": "✓ Correct!",
+      "wrongMark": "✗ Answer: {answer}"
+    },
+    "hotkeyHint": "Hotkeys: <kbd>1</kbd> der · <kbd>2</kbd> die · <kbd>3</kbd> das",
+    "result": "Result",
+    "scoreUnit": "points",
+    "bestCombo": "Best combo",
+    "soundLabel": "Sound: {state}",
+    "soundOn": "On",
+    "soundOff": "Off",
+    "answerLabel": "Answer: {answer}"
+  },
+  "quickQuiz": {
+    "title": "Quick Quiz",
+    "description": "Pick the right article for <emphasis>{count} German words</emphasis>",
+    "info": {
+      "click": "Click or use hotkeys to answer",
+      "hotkeys": "Keys: <kbd>1</kbd> der, <kbd>2</kbd> die, <kbd>3</kbd> das",
+      "feedback": "Instant feedback after each question"
+    },
+    "resultSummary": "You got {correct} of {total} correct"
+  },
+  "genderQuiz": {
+    "title": "Gender Quiz",
+    "description": "Pick the right article for <emphasis>{count} words</emphasis>",
+    "result": "Result",
+    "scoreUnit": "points",
+    "bestCombo": "Best combo",
+    "info": {
+      "scoring": "10 pts per correct · combo up to x4",
+      "sound": "Sound: {state}",
+      "soundOn": "On",
+      "soundOff": "Off"
+    },
+    "answer": "Answer:"
+  },
+  "typing": {
+    "title": "Typing practice",
+    "description": "Boost your German typing speed in <emphasis>{seconds} seconds</emphasis>",
+    "metricHint": "Measured in WPM (words/minute) and accuracy",
+    "levelLabel": "Level",
+    "categoryLabel": "Category",
+    "info": {
+      "duration": "Duration: {seconds} seconds · Up to 40 sentences",
+      "controls": "Type directly · <kbd>Space</kbd> to skip a word · punctuation counts",
+      "umlautHint": "Umlaut tip: {hint}"
+    },
+    "loadingSentences": "Loading sentences...",
+    "startCta": "Start →",
+    "errors": {
+      "noSentences": "No sentences for this configuration. Please try another category.",
+      "loadFailed": "Couldn't load sentences. Check your connection and try again."
+    },
+    "countdownReady": "Get ready to type {count} sentences...",
+    "newBest": "★ New best",
+    "stats": {
+      "wpm": "WPM",
+      "accuracy": "Accuracy",
+      "sentencesCompleted": "Sentences done",
+      "errorsLabel": "Errors",
+      "sentenceShort": "Sentences"
+    },
+    "changeConfig": "Change settings",
+    "playAgain": "Play again",
+    "bestByCategory": "Best WPM by category",
+    "play": {
+      "satzLabel": "SATZ · {current} / {total} · {category}",
+      "tapToFocus": "Tap the screen to open the keyboard · ",
+      "controls": "Type directly · Space to skip · {seconds}s · punctuation counts · ",
+      "ariaInput": "Typing practice input"
+    }
+  },
+  "flashcards": {
+    "title": "Flashcards",
+    "description": "Review <emphasis>{count} words</emphasis> with flashcards",
+    "cardsHint": "(Change card count in Settings → Learning)",
+    "info": {
+      "flip": "Click the card or press <kbd>Space</kbd> to flip",
+      "keys": "<kbd>←</kbd> Didn't know · <kbd>→</kbd> Knew it",
+      "audio": "Press 🔊 to hear the German pronunciation"
+    },
+    "errors": {
+      "minWords2": "Need at least 2 words in this collection"
+    },
+    "restudy": "Study again",
+    "stats": {
+      "known": "Knew",
+      "needReview": "Review",
+      "bestStreak": "Best streak",
+      "card": "Card"
+    },
+    "reviewListTitle": "Words to review ({count})",
+    "front": {
+      "label": "German word",
+      "pluralPrefix": "Pl. {plural}",
+      "flipHint": "Click to flip · <kbd>Space</kbd>"
+    },
+    "back": {
+      "answerLabel": "Answer",
+      "unknownGender": "Unbekannt"
+    },
+    "buttons": {
+      "dontKnow": "Didn't know",
+      "know": "Knew it",
+      "flip": "Flip (Space)"
+    },
+    "nav": {
+      "prev": "Previous card",
+      "speak": "Pronounce",
+      "shuffle": "Shuffle",
+      "next": "Next card"
+    }
+  },
+  "timeChallenge": {
+    "title": "Timed Challenge",
+    "description": "Answer fast in <emphasis>{seconds} seconds</emphasis>!",
+    "settingsHint": "(Change in Settings → Learning)",
+    "info": {
+      "scoring": "10 pts/correct · combo up to x4 · wrong = combo lost",
+      "hotkeys": "Keys: <kbd>1</kbd> der, <kbd>2</kbd> die, <kbd>3</kbd> das",
+      "sound": "Sound: {state}"
+    },
+    "errors": {
+      "minNouns10": "Need at least 10 nouns with articles in this collection",
+      "loadFailed": "Failed to load vocabulary! Please try again."
+    },
+    "getReady": "Get ready!",
+    "timeUp": "Time's up!",
+    "speedLabel": "Speed: {wpm} words/min",
+    "comboLabel": "🔥 Combo x{mult}"
+  },
+  "spelling": {
+    "title": "Spelling Bee",
+    "description": "Spell <emphasis>{count} German words</emphasis> correctly",
+    "info": {
+      "scoring": "15 pts/correct · combo up to x4",
+      "enterToConfirm": "to confirm your answer",
+      "specialChars": "Special character buttons available"
+    },
+    "errors": {
+      "minWords4": "Need at least 4 words in this collection"
+    },
+    "articleLabel": "Article:",
+    "answerLabel": "Answer:",
+    "placeholder": "Type the German word...",
+    "umlautTooltip": "Tip: {hint}",
+    "orType": "or type <code>{hint}</code>",
+    "confirm": "Confirm"
+  },
+  "listening": {
+    "title": "Listening Quiz",
+    "description": "Listen and pick the right <emphasis>{count} German words</emphasis>",
+    "info": {
+      "scoring": "1st listen: +15 · 2nd: +10 · 3rd+: +5",
+      "maxReplays": "Up to {max} replays per question",
+      "speech": "Uses Web Speech API (browser/network support required)"
+    },
+    "errors": {
+      "minWords4": "Need at least 4 words in this collection"
+    },
+    "playing": "Playing...",
+    "tapToListen": "Tap to hear the word",
+    "replayCount": "Replay ({current}/{max})",
+    "pointHint": {
+      "first": "+15 points if correct first try",
+      "second": "+10 points if correct",
+      "third": "+5 points if correct"
+    },
+    "correctMark": "✓ Correct!",
+    "wrongMark": "✗ Wrong",
+    "answerLabel": "Answer:",
+    "pickPrompt": "Pick the word you just heard:"
+  },
+  "fillBlank": {
+    "title": "Fill in the Blank",
+    "description": "Fill the right article for <emphasis>{count} words</emphasis>",
+    "info": {
+      "click": "Type or click a button to fill the article",
+      "enter": "Press <kbd>Enter</kbd> to confirm",
+      "sound": "Sound: {state}"
+    },
+    "hintToggle": "Show hint",
+    "hintFallback": "???",
+    "correctMark": "✓ Correct!",
+    "wrongMark": "✗ Answer: \"{answer}\"",
+    "emptyAnswer": "(empty)",
+    "placeholder": "Type der, die or das...",
+    "check": "Check",
+    "viewResult": "View result",
+    "nextQuestion": "Next question →"
+  },
+  "wordMatch": {
+    "title": "Word Match",
+    "description": "Match <emphasis>{count} pairs</emphasis> with their meanings",
+    "subtitle": "Click a word on the left, then click the matching meaning on the right",
+    "info": {
+      "scoring": "10 pts/correct pair · combo up to x4",
+      "speedBonus": "Speed bonus: +50 points if finished within 60 seconds"
+    },
+    "errors": {
+      "minWords4": "Need at least 4 words in this collection"
+    },
+    "stats": {
+      "pairs": "Pairs",
+      "wrong": "Wrong"
+    },
+    "timeLabel": "Time: {time}",
+    "hints": {
+      "selectLeft": "Click a word on the left to start matching",
+      "selectRight": "Now pick the matching meaning on the right →"
+    }
+  }
+}

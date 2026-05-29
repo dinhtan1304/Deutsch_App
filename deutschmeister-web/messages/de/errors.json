@@ -1,0 +1,7 @@
+{
+  "generic": "Ein Fehler ist aufgetreten",
+  "authExpired": "Sitzung abgelaufen",
+  "authRequired": "Bitte erneut anmelden",
+  "network": "Server nicht erreichbar",
+  "httpError": "HTTP-Fehler {status}"
+}

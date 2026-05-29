@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { useRouter } from '@/i18n/navigation';
 import { IconSearch } from '@/components/ui/Icons';
 import { useAutoTranslate } from '@/hooks/useAutoTranslate';
 import { type TranslateLang } from '@/lib/api/translation';
@@ -23,16 +24,21 @@ interface CommandPaletteProps {
   onClose: () => void;
 }
 
-function navMatches(nav: NavItem[], query: string): NavItem[] {
+function navMatches(
+  nav: NavItem[],
+  query: string,
+  resolveLabel: (item: NavItem) => string,
+): NavItem[] {
   const q = query.trim().toLowerCase();
   if (!q) return [];
   return nav
-    .filter(item => item.label.toLowerCase().includes(q) || item.href.toLowerCase().includes(q))
+    .filter(item => resolveLabel(item).toLowerCase().includes(q) || item.href.toLowerCase().includes(q))
     .slice(0, 6);
 }
 
 export function CommandPalette({ open, onClose }: CommandPaletteProps) {
   const router = useRouter();
+  const tNav = useTranslations('nav');
   const inputRef = useRef<HTMLInputElement>(null);
   const [query, setQuery] = useState('');
   const [langOverride, setLangOverride] = useState<TranslateLang | undefined>(undefined);
@@ -53,7 +59,10 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
     onClose();
   }, [onClose]);
 
-  const navResults = useMemo(() => navMatches(NAV_FLAT, query), [query]);
+  const navResults = useMemo(
+    () => navMatches(NAV_FLAT, query, (item) => tNav(item.labelKey)),
+    [query, tNav],
+  );
 
   // Flat actions list for keyboard navigation
   const actions = useMemo(() => {
@@ -262,7 +271,7 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
                     }}
                   >
                     <Icon size={18} />
-                    <span className="flex-1 text-body font-medium">{item.label}</span>
+                    <span className="flex-1 text-body font-medium">{tNav(item.labelKey)}</span>
                     <span className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>{item.href}</span>
                   </button>
                 );

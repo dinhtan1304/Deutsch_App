@@ -1,5 +1,6 @@
 'use client';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { ACCENT, GRADIENT } from '@/lib/tokens';
 import {
   IconLayers, IconBook,
@@ -10,46 +11,17 @@ interface QuickActionsProps {
   wordsToReview: number;
 }
 
-const actions = [
-  {
-    icon: IconLayers,
-    label: 'Học chủ đề',
-    description: '12 chủ đề A1',
-    href: '/topics',
-    gradient: GRADIENT.vocabBg,
-    iconBg: GRADIENT.vocab,
-    accent: ACCENT.vocab,
-  },
-  {
-    icon: IconBook,
-    label: 'Từ điển',
-    description: 'Tra cứu từ vựng',
-    href: '/words',
-    gradient: GRADIENT.xpBg,
-    iconBg: GRADIENT.xpLight,
-    accent: ACCENT.xp,
-  },
-  {
-    icon: IconGraduationCap,
-    label: 'Luyện đề',
-    description: 'Goethe & TELC',
-    href: '/practice-test',
-    gradient: GRADIENT.listeningBg,
-    iconBg: GRADIENT.pronunciation,
-    accent: ACCENT.listening,
-  },
-  {
-    icon: IconRotateCcw,
-    label: 'SRS',
-    description: 'Ôn tập thẻ nhớ',
-    href: '/srs',
-    gradient: GRADIENT.cyanBg,
-    iconBg: GRADIENT.cyanSky,
-    accent: ACCENT.cyan,
-  },
+// Visual config; label + description come from dashboard.quickActions.actions.<key>.
+type ActionKey = 'topics' | 'dictionary' | 'practice' | 'srs';
+const actions: Array<{ key: ActionKey; icon: typeof IconLayers; href: string; gradient: string; iconBg: string; accent: string }> = [
+  { key: 'topics',     icon: IconLayers,          href: '/topics',         gradient: GRADIENT.vocabBg,     iconBg: GRADIENT.vocab,         accent: ACCENT.vocab },
+  { key: 'dictionary', icon: IconBook,            href: '/words',          gradient: GRADIENT.xpBg,        iconBg: GRADIENT.xpLight,       accent: ACCENT.xp },
+  { key: 'practice',   icon: IconGraduationCap,   href: '/practice-test',  gradient: GRADIENT.listeningBg, iconBg: GRADIENT.pronunciation, accent: ACCENT.listening },
+  { key: 'srs',        icon: IconRotateCcw,       href: '/srs',            gradient: GRADIENT.cyanBg,      iconBg: GRADIENT.cyanSky,       accent: ACCENT.cyan },
 ];
 
 export function QuickActions({ wordsToReview }: QuickActionsProps) {
+  const t = useTranslations('dashboard.quickActions');
   return (
     <div
       className="p-5 rounded-card border shadow-card flex flex-col h-full"
@@ -66,7 +38,7 @@ export function QuickActions({ wordsToReview }: QuickActionsProps) {
           <IconZap size={15} className="text-white" />
         </div>
         <h3 className="text-title font-bold m-0" style={{ color: 'var(--theme-text-primary)' }}>
-          Hành động nhanh
+          {t('title')}
         </h3>
       </div>
 
@@ -82,9 +54,9 @@ export function QuickActions({ wordsToReview }: QuickActionsProps) {
             <IconBrain size={22} className="text-white" />
           </div>
           <div className="flex-1 text-white min-w-0">
-            <div className="font-bold text-[15px] truncate">Ôn tập ngay!</div>
+            <div className="font-bold text-[15px] truncate">{t('reviewNow')}</div>
             <div className="text-[12.5px] opacity-85 truncate">
-              {wordsToReview} từ cần ôn tập
+              {t('reviewCount', { count: wordsToReview })}
             </div>
           </div>
           <IconArrowRight size={20} className="text-white/70 group-hover:text-white group-hover:translate-x-1 transition-all duration-300 shrink-0" />
@@ -93,11 +65,11 @@ export function QuickActions({ wordsToReview }: QuickActionsProps) {
 
       {/* Action grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-3 mt-auto">
-        {actions.map((action, i) => {
+        {actions.map((action) => {
           const Icon = action.icon;
           return (
             <Link
-              key={i}
+              key={action.key}
               href={action.href}
               className="group flex items-center gap-3 p-3 rounded-xl
                 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md border border-transparent hover:border-black/5 dark:hover:border-white/5"
@@ -112,10 +84,10 @@ export function QuickActions({ wordsToReview }: QuickActionsProps) {
               </div>
               <div className="min-w-0">
                 <div className="text-body font-semibold truncate" style={{ color: action.accent }}>
-                  {action.label}
+                  {t(`actions.${action.key}.label` as 'actions.topics.label')}
                 </div>
                 <div className="text-[11px] leading-tight opacity-80" style={{ color: 'var(--theme-text-muted)' }}>
-                  {action.description}
+                  {t(`actions.${action.key}.description` as 'actions.topics.description')}
                 </div>
               </div>
             </Link>

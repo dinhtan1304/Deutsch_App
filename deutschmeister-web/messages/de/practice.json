@@ -1,0 +1,1281 @@
+{
+  "landing": {
+    "title": "Übung & Prüfungsvorbereitung",
+    "subtitle": "Wähle deinen Weg: tägliche Skills üben, mit KI sprechen, oder offizielle Goethe/TELC-Modellprüfungen ablegen.",
+    "quickStart": {
+      "title": "Schnellstart",
+      "subtitle": "Ziel zuerst wählen, dann passende Übung starten.",
+      "skill": {
+        "title": "Ich möchte Skills üben",
+        "subtitle": "Freies Lesen, Hören, Schreiben, Sprechen."
+      },
+      "exam": {
+        "title": "Ich möchte eine Modellprüfung",
+        "subtitle": "Goethe/TELC A1–B1 im Originalformat."
+      },
+      "ai": {
+        "title": "Ich möchte Kommunikation üben",
+        "subtitle": "Rollenspiel, Aussprache und Diktat."
+      }
+    },
+    "skills": {
+      "title": "Skills üben",
+      "subtitle": "Freie Übungen, um regelmäßig zu lernen und jeden Skill zu verbessern.",
+      "reading": {
+        "title": "Lesen",
+        "titleDe": "Leseübung",
+        "description": "Deutsche Lesetexte erstellen und Verständnis prüfen."
+      },
+      "listening": {
+        "title": "Hören",
+        "titleDe": "Hörübung",
+        "description": "Deutsche Audios hören und Fragen je Niveau beantworten."
+      },
+      "writing": {
+        "title": "Schreiben",
+        "titleDe": "Schreibübung",
+        "description": "Texte schreiben, Bewertung und detaillierte Korrekturen erhalten."
+      },
+      "speaking": {
+        "title": "Sprechen",
+        "titleDe": "Sprechübung",
+        "description": "Antworten aufnehmen und Feedback zu Aussprache und Inhalt erhalten."
+      }
+    },
+    "ai": {
+      "title": "KI-Unterstützung",
+      "subtitle": "Nutze KI, was allein schwer zu üben ist: Dialog, Aussprache und Diktat.",
+      "roleplay": {
+        "title": "Rollenspiel-KI",
+        "titleDe": "Rollenspiel",
+        "description": "Realistische Dialoge: Arztbesuch, Vorstellungsgespräch, Wohnungssuche."
+      },
+      "pronunciation": {
+        "title": "Aussprache-KI",
+        "titleDe": "Aussprachetraining",
+        "description": "Wörter aufnehmen und detailliertes Aussprache-Feedback erhalten."
+      },
+      "dictation": {
+        "title": "Diktat",
+        "titleDe": "Diktat",
+        "description": "Deutsche Videos hören und fehlende Wörter ergänzen."
+      }
+    },
+    "exam": {
+      "title": "Offizielle Goethe/TELC-Prüfungen",
+      "subtitleUnlocked": "A1/A2/B1-Modellprüfungen im echten Format ablegen und Ergebnisse prüfen.",
+      "subtitleLocked": "Offizielle Modellprüfungen brauchen Premium. Du kannst oben kostenlos üben.",
+      "badge": "Modellprüfung",
+      "premiumBadge": "PREMIUM",
+      "reading": {
+        "title": "Lesen",
+        "titleDe": "Prüfungslesen",
+        "description": "Goethe & TELC A1/A2/B1 mit allen Teilen wie im Original."
+      },
+      "listening": {
+        "title": "Hören",
+        "titleDe": "Prüfungshören",
+        "description": "Audios und Fragen im Goethe/TELC-Format."
+      },
+      "writing": {
+        "title": "Schreiben",
+        "titleDe": "Prüfungsschreiben",
+        "description": "Schreiben nach offiziellem Prompt, Bewertung nach Kriterien."
+      },
+      "speaking": {
+        "title": "Sprechen",
+        "titleDe": "Prüfungssprechen",
+        "description": "Vollständiger Sprechen-Teil im Goethe/TELC-Format."
+      }
+    },
+    "cta": {
+      "start": "Starten",
+      "viewPremium": "Premium ansehen"
+    },
+    "guideB1Card": {
+      "title": "B1-Prüfungsleitfaden",
+      "description": "Prüfungsstruktur, 12-Wochen-Plan, Schreiben-Beispiele, Sprechen-Redemittel, Grammatik und FAQ.",
+      "cta": "Leitfaden öffnen"
+    }
+  },
+  "guideB1": {
+    "back": "Zurück zu Übung & Prüfungsvorbereitung",
+    "header": {
+      "title": "B1-Prüfungsleitfaden",
+      "subtitle": "Alles über das Goethe-Zertifikat B1 und TELC Deutsch B1 — Prüfungsaufbau, 12-Wochen-Plan, Schreiben-Vorlagen, Sprechen-Redemittel sowie die wichtigste Grammatik & Wortschatz.",
+      "navAria": "Inhalt des B1-Leitfadens",
+      "navChooseExam": "Zertifikat wählen",
+      "navStructure": "Prüfungsaufbau",
+      "navRoadmap": "12-Wochen-Plan",
+      "navSkills": "Fertigkeiten-Leitfaden",
+      "navFaq": "FAQ"
+    },
+    "choose": {
+      "title": "Das passende Zertifikat wählen",
+      "subtitle": "Goethe und TELC sind beide international anerkannt. Wähle nach deinen Stärken.",
+      "viewStructure": "Prüfungsaufbau im Detail ansehen",
+      "compareTitle": "Goethe B1 vs. TELC B1 im Vergleich",
+      "colCriterion": "Kriterium",
+      "recognizedNote": "Beide Zertifikate sind international anerkannt und für ein Aufenthaltsvisum in Deutschland gültig.",
+      "whyTitle": "Warum B1 auf DeutschMeister üben?"
+    },
+    "structure": {
+      "title": "Prüfungsaufbau",
+      "subtitle": "Jede Fertigkeit im Detail — Zeit, Anzahl der Teile und Prüfungstipps.",
+      "tabAria": "Prüfungstyp wählen",
+      "practiceCta": "Diese Fertigkeit jetzt üben"
+    },
+    "roadmap": {
+      "title": "12-Wochen-Plan — von A2 auf B1",
+      "subtitle": "Lerne täglich 1–2 Stunden und du kannst nach 3 Monaten zur Prüfung. Ideal für Berufstätige oder Studierende."
+    },
+    "skill": {
+      "title": "Leitfaden zum Fertigkeitstraining",
+      "subtitle": "Schreiben-Vorlagen, Sprechen-Redemittel, Lesen-Tipps und Sprachbausteine-Grammatik — einmal lernen, für Goethe und TELC nutzen.",
+      "tabAria": "Fertigkeit wählen",
+      "mistakesTitle": "Häufige Fehler",
+      "telcEmailTitle": "TELC B1 — E-Mail/Brief",
+      "telcEmailSub": "80–100 Wörter · 1 Aufgabe",
+      "goetheT1Title": "Goethe B1 Teil 1 — Antwort",
+      "goetheT1Sub": "~80 Wörter · 3 Punkte beantworten",
+      "goetheT2Title": "Goethe B1 Teil 2 — Kommentar",
+      "goetheT2Sub": "~80 Wörter · Pro/Contra/Meinung",
+      "goetheCriteriaTitle": "Goethe — 4 Bewertungskriterien",
+      "telcTeileTitle": "TELC — Mündliche Prüfung in 3 Teilen",
+      "sprachHintLabel": "Hinweis:",
+      "sprachHintBody": "Sprachbausteine gibt es nur in der <b>TELC</b>-Prüfung (nicht bei Goethe). Lerne die 4 Gruppen unten gründlich, um zu punkten."
+    },
+    "grammarVocab": {
+      "title": "Wichtigste B1-Grammatik & -Wortschatz",
+      "subtitle": "Die 6 häufigsten Grammatikstrukturen + 6 gängige Wortschatzthemen in der Prüfung.",
+      "grammarTitle": "Die 6 wichtigsten Grammatikstrukturen",
+      "colStructure": "Struktur",
+      "colExample": "Beispiel",
+      "colUsage": "Anwendung",
+      "vocabTitle": "B1-Wortschatz nach Thema",
+      "viewAllTopics": "Alle Themen ansehen"
+    },
+    "faq": {
+      "title": "Häufige Fragen zur B1-Prüfung",
+      "subtitle": "Die häufigsten Fragen bei der Vorbereitung auf die Goethe- & TELC-B1-Prüfung."
+    },
+    "cta": {
+      "readyTitle": "Bereit zum Üben?",
+      "readyBody": "Wähle den Prüfungstyp, mit dem du starten willst — die KI erstellt eine vollständige Prüfung mit allen Teilen im Goethe- oder TELC-Format, inkl. detaillierter Bewertung.",
+      "lesenBtn": "Lesen B1 üben",
+      "schreibenBtn": "Schreiben B1 üben",
+      "startTitle": "Starte mit B1 — kostenlos",
+      "startBody": "Melde dich in 30 Sekunden an und schalte Goethe- & TELC-Übungsprüfungen, KI-Bewertung für Schreiben/Sprechen, Karteikarten und Fortschritts-Tracking frei.",
+      "registerBtn": "Kostenlos registrieren",
+      "loginBtn": "Schon ein Konto? Anmelden"
+    }
+  },
+  "common": {
+    "allLevels": "Alle Niveaus",
+    "allStatuses": "Alle Status",
+    "all": "Alle",
+    "previous": "ZURÜCK",
+    "next": "WEITER",
+    "delete": "Löschen",
+    "cancel": "Abbrechen",
+    "deletePermanently": "Endgültig löschen",
+    "confirmDelete": "Löschen bestätigen?",
+    "cannotUndo": "Diese Aktion kann nicht rückgängig gemacht werden.",
+    "share": "Teilen",
+    "newSession": "Neu",
+    "shareTitle": "DeutschMeister",
+    "status": {
+      "DRAFT": "Nicht begonnen",
+      "GRADED": "Bewertet",
+      "SUBMITTED": "Eingereicht",
+      "GRADING": "Bewertung läuft…",
+      "ERROR": "Fehler",
+      "draftWriting": "Entwurf",
+      "gradingShort": "Bewertung"
+    }
+  },
+  "reading": {
+    "list": {
+      "title": "Leseübung",
+      "subtitle": "KI generiert deutsche Lesetexte — Goethe/TELC-Leseverständnis üben",
+      "examLink": "Modellprüfung →",
+      "newSession": "Neuer Text",
+      "stats": {
+        "totalSessions": "Texte gesamt",
+        "averageScore": "Ø Punktzahl",
+        "bestScore": "Beste Punktzahl"
+      },
+      "confirmDeleteTitle": "Löschen bestätigen?",
+      "confirmDeleteSubtitle": "Diese Aktion kann nicht rückgängig gemacht werden.",
+      "emptyTitle": "Noch keine Lesetexte",
+      "emptySubtitle": "Du hast noch keine Leseübung gemacht. Jetzt loslegen!",
+      "emptyCta": "Jetzt starten",
+      "questionsCount": "{count} Fragen",
+      "correctCount": "{correct}/{total} richtig",
+      "textTypes": {
+        "anzeige": "Anzeige",
+        "kurznachricht": "Kurznachricht",
+        "brief": "Brief/E-Mail",
+        "artikel": "Artikel",
+        "dialog": "Dialog"
+      }
+    },
+    "setup": {
+      "quotaLabel": "Reading-KI-Kontingent",
+      "title": "Neuen Lesetext erstellen",
+      "subtitle": "KI erstellt einen deutschen Lesetext nach deiner Konfiguration",
+      "stepLevel": "1. GER-Niveau",
+      "stepTopic": "2. Thema",
+      "stepTextType": "3. Textsorte",
+      "stepQuestionCount": "4. Anzahl Fragen",
+      "customTopicPlaceholder": "Oder ein eigenes Thema eingeben...",
+      "customLabel": "Eigen ✓",
+      "summary": "Konfiguration",
+      "summaryLevel": "Niveau:",
+      "summaryTopic": "Thema:",
+      "summaryTextType": "Textsorte:",
+      "summaryQuestionCount": "Fragen:",
+      "questionsUnit": "{count} Fragen",
+      "notSelected": "Nicht gewählt",
+      "generating": "KI erstellt den Text...",
+      "generate": "Text erstellen",
+      "generateError": "Text konnte nicht erstellt werden. Bitte erneut versuchen."
+    },
+    "answering": {
+      "loading": "Text wird geladen...",
+      "notFound": "Text nicht gefunden.",
+      "backToList": "Zurück zur Liste",
+      "title": "Leseübung",
+      "readingTime": "~{minutes} Min Lesezeit",
+      "wordCount": "{count} Wörter",
+      "answeredCount": "{answered}/{total} beantwortet",
+      "tabTask": "Passage",
+      "tabEditor": "Fragen",
+      "vocabHighlights": "Wichtiger Wortschatz",
+      "questionsTitle": "Fragen ({count})",
+      "progressLabel": "Fortschritt: {answered}/{total}",
+      "grading": "Wird bewertet...",
+      "submit": "Abgeben"
+    },
+    "result": {
+      "loading": "Ergebnisse werden geladen...",
+      "notFound": "Ergebnisse nicht gefunden.",
+      "backToList": "Zurück zur Liste",
+      "title": "Lese-Ergebnis",
+      "grades": {
+        "excellent": "Ausgezeichnet!",
+        "veryGood": "Sehr gut! 👏",
+        "good": "Gut!",
+        "needsWork": "Noch üben",
+        "keepPracticing": "Weiter üben"
+      },
+      "stats": {
+        "correct": "Richtig",
+        "wrong": "Falsch",
+        "time": "Zeit",
+        "score": "Punkte"
+      },
+      "reviewTitle": "Jede Frage prüfen",
+      "tabAll": "Alle",
+      "tabWrong": "Falsch",
+      "tabCorrect": "Richtig",
+      "noQuestions": "Keine Fragen",
+      "questionLabel": "Frage {index}:",
+      "correctAnswer": "Richtige Antwort: {answer}",
+      "explanation": "Erklärung:",
+      "shareText": "Ich habe gerade eine Leseübung abgeschlossen!"
+    }
+  },
+  "writing": {
+    "list": {
+      "title": "Schreibübung",
+      "subtitle": "KI generiert deutsche Schreibaufgaben — schreiben und detailliertes Feedback erhalten",
+      "examLink": "Modellprüfung →",
+      "newSession": "Neuer Text",
+      "stats": {
+        "totalSessions": "Texte gesamt",
+        "averageScore": "Ø Punktzahl",
+        "bestScore": "Beste Punktzahl"
+      },
+      "confirmDeleteTitle": "Löschen bestätigen?",
+      "confirmDeleteSubtitle": "Du kannst dieses Übungsergebnis nicht wiederherstellen.",
+      "emptyTitle": "Noch keine Texte",
+      "emptySubtitle": "Du hast noch keine Schreibübung gemacht. Jetzt loslegen!",
+      "emptyCta": "Jetzt starten",
+      "typeLabel": "Typ: {type}",
+      "gradedLabel": "Bewertet",
+      "writingTypes": {
+        "email": "E-Mail",
+        "brief": "Brief",
+        "beschreibung": "Beschreibung",
+        "tagebuch": "Tagebuch",
+        "dialog": "Dialog",
+        "aufsatz": "Aufsatz",
+        "einladung": "Einladung",
+        "beschwerde": "Beschwerde",
+        "bewerbung": "Bewerbung",
+        "formular": "Formular"
+      }
+    },
+    "setup": {
+      "quotaLabel": "Writing-KI-Kontingent",
+      "title": "Neue Aufgabe erstellen",
+      "subtitle": "Konfiguration wählen, damit KI eine deutsche Schreibaufgabe erstellt",
+      "stepLevel": "1. GER-Niveau",
+      "stepTopic": "2. Thema",
+      "stepWritingType": "3. Textsorte",
+      "stepWordCount": "4. Länge",
+      "customTopicPlaceholder": "Oder ein eigenes Thema eingeben...",
+      "customLabel": "Eigen ✓",
+      "summary": "Konfiguration",
+      "summaryLevel": "Niveau:",
+      "summaryTopic": "Thema:",
+      "summaryWritingType": "Textsorte:",
+      "summaryWordCount": "Länge:",
+      "notSelected": "Nicht gewählt",
+      "noneDash": "—",
+      "generating": "KI erstellt die Aufgabe...",
+      "generate": "Aufgabe erstellen",
+      "generateError": "Aufgabe konnte nicht erstellt werden. Bitte erneut versuchen."
+    },
+    "answering": {
+      "notFound": "Text nicht gefunden",
+      "backToList": "Zurück zur Liste",
+      "backShort": "← Schreibübung",
+      "saving": "Speichert...",
+      "savedAt": "Gespeichert {time}",
+      "ctrlSHint": "Strg+S zum Speichern",
+      "tabTask": "Aufgabe",
+      "tabEditor": "Schreiben",
+      "wordsShort": "{count} W",
+      "promptHeader": "Aufgabe",
+      "hideHints": "Hinweise ausblenden",
+      "showHints": "Hinweise anzeigen",
+      "vocabHints": "Vokabelhilfe",
+      "grammarHints": "Grammatik",
+      "editorLabel": "Dein Text",
+      "wordCountLabel": "{count} / {min}–{max} Wörter",
+      "specialCharsLabel": "Zeichen:",
+      "orType": "oder tippen",
+      "textareaPlaceholder": "Schreiben Sie hier Ihren Text...\n\n({min}–{max} Wörter)",
+      "umlautTip": "Tipp: {hint}",
+      "saveDraft": "Entwurf speichern",
+      "submitting": "KI bewertet...",
+      "submit": "Abgeben & bewerten",
+      "submitError": "Bewertung fehlgeschlagen. Bitte erneut versuchen.",
+      "needMoreWords": "Noch {count} Wörter bis zur Abgabe",
+      "alertMinWords": "Der Text braucht mindestens {min} Wörter. Aktuell: {current} Wörter.",
+      "confirmSubmit": "Wirklich abgeben? KI wird bewerten und korrigieren."
+    },
+    "result": {
+      "title": "Schreib-Ergebnis",
+      "notFound": "Ergebnis nicht gefunden",
+      "stillGrading": "Text wird bewertet... Bitte warten.",
+      "backToList": "← Zurück zur Liste",
+      "grades": {
+        "excellent": "Ausgezeichnet!",
+        "veryGood": "Sehr gut!",
+        "good": "Gut!",
+        "satisfactory": "Befriedigend",
+        "sufficient": "Ausreichend",
+        "keepPracticing": "Weiter üben!"
+      },
+      "scoreOf": "/100",
+      "noCriteria": "Keine detaillierten Kriterien",
+      "feedbackDe": "Feedback auf Deutsch",
+      "feedbackVi": "Feedback (Deutsch)",
+      "essayTitle": "Text",
+      "tabOriginal": "Original",
+      "tabCorrected": "Korrigiert",
+      "errorsTitle": "Fehlerdetails ({count})",
+      "filterAll": "Alle ({count})",
+      "noErrors": "Keine Fehler!",
+      "analysis": {
+        "title": "Grammatikanalyse",
+        "tense": "Zeitform:",
+        "sentenceType": "Satzart:",
+        "correctedSentence": "Korrekter Satz",
+        "grammarRules": "Grammatikregeln",
+        "explanation": "Erklärung",
+        "tip": "Tipp:"
+      },
+      "error": {
+        "deutsch": "Deutsch",
+        "vietnamese": "Deutsch (Übersetzung)",
+        "tip": "Tipp:",
+        "learnLesson": "Lerne: {title} →",
+        "explainAi": "Detailliert mit KI erklären",
+        "explainPremium": "Detailliert erklären (Premium)"
+      },
+      "errorTypes": {
+        "article": "Artikel",
+        "grammar": "Grammatik",
+        "word_order": "Wortstellung",
+        "conjugation": "Konjugation",
+        "case": "Kasus",
+        "spelling": "Rechtschreibung",
+        "vocabulary": "Wortschatz"
+      },
+      "severity": {
+        "error": "Fehler",
+        "warning": "Warnung",
+        "suggestion": "Vorschlag"
+      },
+      "shareText": "Ich habe {score}/100 in einem deutschen Text erreicht!"
+    }
+  },
+  "listening": {
+    "list": {
+      "title": "Hörübung",
+      "subtitle": "KI generiert deutsche Höraufgaben — Goethe/TELC-Hörverständnis üben",
+      "examLink": "Modellprüfung →",
+      "newSession": "Neue Höraufgabe",
+      "stats": {
+        "total": "Sitzungen gesamt",
+        "averageScore": "Ø Punktzahl",
+        "bestScore": "Beste Punktzahl"
+      },
+      "statusGraded": "Bewertet",
+      "statusDraft": "Nicht abgegeben",
+      "audioFormat": "KI-Audioformat",
+      "emptyTitle": "Noch keine Höraufgaben",
+      "emptySubtitle": "Du hast noch keine Höraufgabe gemacht. Jetzt loslegen!",
+      "emptyCta": "Jetzt starten",
+      "scriptTypes": {
+        "dialogue": "Dialog",
+        "monologue": "Monolog",
+        "announcement": "Ansage",
+        "interview": "Interview",
+        "radio": "Radio"
+      }
+    },
+    "setup": {
+      "quotaLabel": "Listening-KI-Kontingent",
+      "title": "Neue Höraufgabe",
+      "subtitle": "KI erzeugt Audio-Skript + Fragen",
+      "stepLevel": "Niveau",
+      "stepScriptType": "Audio-Typ",
+      "levels": {
+        "A1": "Einfacher Dialog · 80–120 Wörter",
+        "A2": "Alltagssituationen · 130–180 Wörter",
+        "B1": "Reicher Inhalt · 200–280 Wörter"
+      },
+      "scriptTypes": {
+        "dialogue": { "label": "Dialog", "desc": "Dialog zwischen zwei Personen" },
+        "monologue": { "label": "Monolog", "desc": "Monolog einer Person" },
+        "announcement": { "label": "Ansage", "desc": "Ansage / Werbung" },
+        "interview": { "label": "Interview", "desc": "Interview" },
+        "radio": { "label": "Radio", "desc": "Radio-Nachrichten" }
+      },
+      "generating": "Höraufgabe wird erstellt...",
+      "generate": "🎧 Höraufgabe erstellen",
+      "generateError": "Erstellung fehlgeschlagen. Bitte erneut versuchen."
+    },
+    "answering": {
+      "loading": "Sitzung wird geladen...",
+      "notFound": "Sitzung nicht gefunden.",
+      "backToList": "Zurück",
+      "title": "Hörübung",
+      "answeredCount": "{answered}/{total} Fragen beantwortet",
+      "questionsTitle": "Fragen ({count})",
+      "submit": "Abgeben",
+      "submitError": "Abgabe fehlgeschlagen. Bitte erneut versuchen.",
+      "questionTooltip": "Frage {index}",
+      "ttsPlaying": "🎧 Wiedergabe...",
+      "ttsTitle": "Deutsch Listening",
+      "ttsReady": "Bereit zum Üben",
+      "ttsPlayCount": "{count}× abgespielt",
+      "ttsAudioLabel": "Audio · de-DE",
+      "ttsSpeedLabel": "Abspielgeschwindigkeit",
+      "ttsTip": "* Tipp: Höre mindestens zweimal, bevor du deine endgültige Antwort wählst. Das Transkript erscheint auf der Ergebnisseite."
+    },
+    "result": {
+      "loading": "Ergebnisse werden geladen...",
+      "notFound": "Ergebnis nicht gefunden.",
+      "backToList": "Zurück zur Liste",
+      "title": "Hörergebnis",
+      "sessionTitle": "Sitzung: {title}",
+      "grades": {
+        "excellent": "Ausgezeichnet!",
+        "veryGood": "Sehr gut! 👏",
+        "good": "Nicht schlecht!",
+        "needsWork": "Noch üben",
+        "keepPracticing": "Weiter üben"
+      },
+      "stats": {
+        "correct": "Richtig",
+        "wrong": "Falsch",
+        "score": "Punkte",
+        "questions": "Fragen"
+      },
+      "transcriptToggle": "Transkript (Audiotext)",
+      "transcriptListenAgain": "Erneut hören",
+      "reviewTitle": "Jede Frage prüfen",
+      "tabAll": "Alle",
+      "tabWrong": "Falsch",
+      "tabCorrect": "Richtig",
+      "noQuestions": "Keine Fragen",
+      "questionLabel": "Frage {index}: {question}",
+      "correctAnswer": "Richtige Antwort: {answer}",
+      "yourAnswer": "Deine Antwort: ",
+      "explanation": "Erklärung:",
+      "share": "Teilen",
+      "newSession": "Neue Sitzung",
+      "shareText": "Ich habe {score}% in einer deutschen Höraufgabe erreicht!"
+    }
+  },
+  "speaking": {
+    "list": {
+      "title": "Sprechübung",
+      "subtitle": "KI generiert deutsche Prompts — aufnehmen und detailliertes Feedback erhalten (v3)",
+      "examLink": "Modellprüfung →",
+      "newSession": "Neue Sprechübung",
+      "stats": {
+        "total": "Sitzungen gesamt",
+        "accuracy": "Genauigkeit",
+        "best": "Beste"
+      },
+      "statusGraded": "Bewertet",
+      "statusGrading": "Bewertung...",
+      "statusDraft": "Nicht abgegeben",
+      "goetheTelcFormat": "Goethe/TELC-Format",
+      "filterStatuses": {
+        "DRAFT": "Nicht abgegeben",
+        "GRADING": "Bewertung",
+        "GRADED": "Bewertet"
+      },
+      "confirmDeleteTitle": "Löschen bestätigen?",
+      "confirmDeleteSubtitle": "Du kannst diese Übungssitzung nicht wiederherstellen.",
+      "cancel": "Abbrechen",
+      "emptyTitle": "Noch keine Übungssitzungen",
+      "emptySubtitle": "Erstelle deine erste Sprechübung, damit die KI dich bewertet und Feedback gibt!",
+      "emptyCta": "Jetzt starten",
+      "topics": {
+        "sich_vorstellen": "Sich vorstellen",
+        "alltag": "Alltag & Freizeit",
+        "wohnen": "Wohnen",
+        "arbeit": "Arbeit & Beruf",
+        "familie": "Familie & Freunde",
+        "reisen": "Reisen",
+        "einkaufen": "Einkaufen",
+        "gesundheit": "Gesundheit & Sport",
+        "meinung": "Meinungen"
+      }
+    },
+    "setup": {
+      "quotaLabel": "Speaking-KI-Kontingent",
+      "title": "Neue Sprechübung",
+      "subtitle": "KI erzeugt einen deutschen Prompt → du nimmst auf → Gemini bewertet detailliert",
+      "stepLevel": "Schritt 1 — GER-Niveau",
+      "stepTopic": "Schritt 2 — Thema",
+      "topics": {
+        "sich_vorstellen": { "de": "Sich vorstellen", "vi": "Sich vorstellen" },
+        "alltag": { "de": "Alltag & Freizeit", "vi": "Alltag & Freizeit" },
+        "wohnen": { "de": "Wohnen", "vi": "Wohnen" },
+        "arbeit": { "de": "Arbeit & Beruf", "vi": "Arbeit & Beruf" },
+        "familie": { "de": "Familie & Freunde", "vi": "Familie & Freunde" },
+        "reisen": { "de": "Reisen", "vi": "Reisen" },
+        "einkaufen": { "de": "Einkaufen", "vi": "Einkaufen" },
+        "gesundheit": { "de": "Gesundheit & Sport", "vi": "Gesundheit & Sport" },
+        "meinung": { "de": "Meinungen äußern", "vi": "Meinungen äußern" }
+      },
+      "info": "Voraussetzung: Mikrofon + Chrome/Edge. KI erstellt eine Zufallsfrage, du nimmst auf, Gemini bewertet anhand Audio + Transkript.",
+      "generating": "Prompt wird erstellt...",
+      "generate": "Sprechübung erstellen",
+      "generateError": "Erstellung fehlgeschlagen. Bitte erneut versuchen."
+    },
+    "answering": {
+      "loading": "Sitzung wird geladen...",
+      "notFound": "Sitzung nicht gefunden.",
+      "backToList": "← Liste",
+      "title": "Sprechübung",
+      "promptHeader": "Aufgabe",
+      "suggestionsHeader": "Was du erwähnen solltest",
+      "recordReady": "Bereit zur Aufnahme",
+      "recordListening": "Hört zu...",
+      "recordDone": "Aufnahme fertig",
+      "rec": "REC",
+      "transcriptLive": "Live-Transkript",
+      "transcriptDone": "Erkannter Inhalt",
+      "transcriptCompleted": "Fertig",
+      "transcriptPromptSay": "Sag etwas...",
+      "transcriptEmpty": "Kein Transkript verfügbar",
+      "recordedOk": "Aufnahme erfolgreich ({seconds}s)",
+      "noSpeechWarn": "Dein Browser unterstützt kein Live-Transkript. Keine Sorge — die KI erhält trotzdem deine Aufnahme und bewertet sie normal.",
+      "startRecord": "AUFNAHME STARTEN",
+      "stopRecord": "AUFNAHME STOPPEN ({seconds}s)",
+      "retake": "Neu aufnehmen",
+      "submit": "ABGEBEN & BEWERTEN",
+      "grading": "KI bewertet...",
+      "gradingSubtitle": "Gemini analysiert deine Stimme und Inhalte. Das dauert etwa 15-30 Sekunden.",
+      "micError": "Kein Zugriff auf das Mikrofon. Bitte Berechtigung erteilen.",
+      "submitError": "Abgabe fehlgeschlagen. Bitte erneut versuchen."
+    },
+    "result": {
+      "loading": "Ergebnisse werden geladen...",
+      "title": "Sprech-Ergebnis",
+      "backToList": "← Zurück zur Liste",
+      "grading": "KI bewertet...",
+      "gradingSubtitle": "Gemini analysiert dein Audio und den Inhalt. Bitte einen Moment warten.",
+      "errorTitle": "Bewertung fehlgeschlagen. Bitte später erneut versuchen.",
+      "criteriaTitle": "Kriterien im Detail",
+      "yourVoice": "Deine Stimme",
+      "nativeSample": "Muttersprachliche Vorlage",
+      "transcriptTitle": "Transkript & Korrekturen",
+      "correctionTypeGrammar": "Grammatik",
+      "correctionTypePronunciation": "Aussprache",
+      "strengths": "Stärken",
+      "needsImprovement": "Verbesserungsbedarf",
+      "defaultStrength": "Natürliche Aussprache",
+      "defaultImprovement": "Achte auf Endlaute",
+      "feedback": "KI-Feedback",
+      "totalScore": "Gesamtpunktzahl",
+      "wordCount": "Wortzahl",
+      "completedAt": "Abgeschlossen: {date}",
+      "completedJustNow": "Gerade eben",
+      "share": "Teilen",
+      "newSession": "NEUE SPRECHÜBUNG",
+      "shareTitle": "Sprechergebnis",
+      "shareText": "Ich habe {score}/100 Punkte erreicht!",
+      "grades": {
+        "excellent": { "badge": "Ausgezeichnet", "title": "Perfekt! 🎉" },
+        "veryGood": { "badge": "Sehr gut", "title": "Du hast sehr gut gesprochen! 👏" },
+        "good": { "badge": "Gut", "title": "Fortschritte! 💪" },
+        "needsWork": { "badge": "Dranbleiben", "title": "Weiter üben! 🤗" },
+        "keepPracticing": { "badge": "Üben", "title": "Nicht aufgeben! 📚" }
+      }
+    }
+  },
+  "dictation": {
+    "list": {
+      "title": "Diktat",
+      "subtitle": "Üben Sie deutsches Hören und Schreiben mit echten YouTube-Videos",
+      "shadowingLink": "🎤 Shadowing",
+      "newSession": "Neu",
+      "statusGraded": "Bewertet",
+      "statusDraft": "Nicht abgegeben",
+      "defaultTopic": "Diktat",
+      "blanksCount": "{count} Lücken",
+      "stats": {
+        "total": "Sitzungen gesamt",
+        "accuracy": "Genauigkeit",
+        "best": "Beste Punktzahl"
+      },
+      "emptyTitle": "Noch keine Sitzungen",
+      "emptySubtitle": "Entdecke die Video-Bibliothek und starte deine Diktat-Herausforderung!",
+      "emptyCta": "Bibliothek öffnen",
+      "quickStart": {
+        "urlTitle": "YouTube-URL einfügen",
+        "urlSubtitle": "Übe mit einem beliebigen Video",
+        "randomTitle": "Zufall aus Bibliothek",
+        "randomSubtitle": "Niveau wählen und Glück versuchen",
+        "randomDescription": "Wir wählen ein zufälliges Video aus der Bibliothek passend zu deinem Niveau.",
+        "urlPlaceholder": "https://youtube.com/watch?v=...",
+        "urlMissing": "Bitte eine YouTube-URL einfügen.",
+        "urlInvalid": "Ungültige URL. Bitte einen YouTube-Link verwenden.",
+        "urlGenericError": "Video konnte nicht verarbeitet werden. Andere URL versuchen.",
+        "randomNotFound": "Kein passendes Video gefunden. Versuche ein anderes Niveau!",
+        "processing": "Wird verarbeitet...",
+        "searching": "Video wird gesucht...",
+        "start": "Starten →",
+        "startRandom": "Zufällige Sitzung",
+        "allLevels": "Alle"
+      },
+      "requests": {
+        "title": "Meine Anfragen",
+        "pending": "Ausstehend",
+        "approved": "Genehmigt",
+        "rejected": "Abgelehnt",
+        "reason": "Grund: {reason}",
+        "start": "Starten →"
+      }
+    },
+    "session": {
+      "loading": "Sitzung wird geladen...",
+      "notFound": "Sitzung nicht gefunden.",
+      "title": "Diktat",
+      "subtitle": "Höre zu und fülle die fehlenden Wörter in den Untertiteln aus",
+      "speedLabel": "Tempo",
+      "autoPause": "Automatische Pause nach jeder Zeile",
+      "nextSegment": "Nächstes Segment",
+      "warnUnansweredTitle": "{count} Lücken unbeantwortet",
+      "warnUnansweredSubtitle": "Diese gelten als falsch. Trotzdem abgeben?",
+      "continueWriting": "Weiter schreiben",
+      "submitNow": "Jetzt abgeben"
+    },
+    "result": {
+      "title": "Übungsergebnis",
+      "notFound": "Sitzung nicht gefunden.",
+      "grades": {
+        "excellent": "Ausgezeichnet!",
+        "veryGood": "Sehr gut!",
+        "good": "Bestanden!",
+        "needsWork": "Noch üben",
+        "keepPracticing": "Weiter üben"
+      },
+      "mistakesTitle": "Fehler zum Wiederholen",
+      "skipped": "(übersprungen)",
+      "reviewTitle": "Jede Zeile prüfen",
+      "noDetail": "Keine Detaildaten für diese Sitzung.",
+      "filterAll": "Alle ({count})",
+      "filterWrong": "Nur falsch ({count})",
+      "noErrors": "✓ Super! Du hast keine verpasst.",
+      "segmentCorrect": "{correct}/{total} richtig",
+      "retry": "Sitzung wiederholen",
+      "library": "Andere wählen",
+      "shadowVideo": "Dieses Video shadowen"
+    },
+    "library": {
+      "titleDictation": "Video-Bibliothek",
+      "titleShadowing": "Shadowing-Bibliothek",
+      "subtitleDictation": "Wähle aus hunderten kuratierten Videos und starte deine Deutschreise",
+      "subtitleShadowing": "Wähle ein Video, um Shadowing zu starten — Vorlage hören und nachsprechen",
+      "allLevels": "Alle Niveaus",
+      "allTopics": "Alle Themen",
+      "previewUnavailable": "Vorschau nicht verfügbar",
+      "defaultTopic": "Allgemein",
+      "defaultChannel": "YouTube",
+      "ctaDictation": "Üben →",
+      "ctaShadowing": "🎤 Shadow →",
+      "empty": "Keine passenden Videos",
+      "page": "Seite {page} / {total}"
+    },
+    "shadow": {
+      "title": "Shadowing-Übung",
+      "subtitle": "Höre die Vorlage und sprich nach — Aussprache + Intonation imitieren",
+      "chooseVideo": "Video wählen",
+      "statusSubmitted": "Fertig",
+      "statusDraft": "Läuft",
+      "segmentsCount": "{completed} / {total} Zeilen",
+      "filterStatuses": {
+        "DRAFT": "Läuft",
+        "SUBMITTED": "Fertig"
+      },
+      "stats": {
+        "total": "Geübte Sitzungen",
+        "averageScore": "Ø Punktzahl",
+        "bestScore": "Beste Punktzahl"
+      },
+      "urlTitle": "YouTube-URL einfügen",
+      "urlAiBadge": "KI-Fallback",
+      "urlSubtitle": "Wenn das Video keine deutschen Untertitel hat, transkribiert die KI automatisch (max. 15 Min.).",
+      "urlPlaceholder": "https://youtube.com/watch?v=...",
+      "urlMissing": "Bitte eine YouTube-URL einfügen.",
+      "urlInvalid": "Ungültige URL. Bitte einen YouTube-Link verwenden.",
+      "urlGenericError": "Video konnte nicht verarbeitet werden. Andere URL versuchen.",
+      "processing": "Wird verarbeitet...",
+      "start": "Starten →",
+      "chooseShadowVideoTitle": "Shadowing-Video wählen",
+      "chooseShadowVideoSubtitle": "Bibliothek öffnen und passendes Video wählen",
+      "chooseShadowVideoDesc": "Jedes Video aus der Diktat-Bibliothek kann geshadowt werden — wähle einfach eins, das dir gefällt.",
+      "openLibrary": "Bibliothek öffnen →",
+      "randomTitle": "Zufall aus Bibliothek",
+      "randomSubtitle": "Niveau wählen und Glück versuchen",
+      "randomError": "Kein passendes Video gefunden. Versuche ein anderes Niveau!",
+      "randomSearching": "Video wird gesucht...",
+      "randomStart": "Zufällige Sitzung",
+      "allLevels": "Alle",
+      "emptyTitle": "Noch keine Shadowing-Sitzungen",
+      "emptySubtitle": "Wähle ein Video aus der Bibliothek und imitiere einen Muttersprachler!",
+      "emptyCta": "Bibliothek öffnen",
+      "session": {
+        "title": "Shadowing-Sitzung",
+        "notFound": "Shadowing-Sitzung nicht gefunden.",
+        "tip": "Pausiere und lies laut. Fokus auf Rhythmus und Aussprache, nicht Perfektion. Langsam starten, dann schneller.",
+        "dismiss": "Schließen",
+        "subtitleSourceLabel": "Untertitel:",
+        "subtitleSourceAi": "✨ Von KI",
+        "subtitleSourceYoutube": "Von YouTube",
+        "autoPause": "Automatische Pause",
+        "replaySample": "Vorlage erneut hören",
+        "grading": "Wird bewertet…",
+        "ready": "Bereit zur Aufnahme",
+        "readyHint": "Knopf oben drücken, um zu starten",
+        "headphoneTip": "Kopfhörer empfohlen für beste Ergebnisse",
+        "retryHint": "Mikro antippen, um erneut zu versuchen",
+        "nextSegment": "Nächstes Segment",
+        "progress": "Fortschritt",
+        "submit": "Fertig →",
+        "submitting": "Wird verarbeitet...",
+        "warnNoAttempts": "Übe mindestens eine Zeile, bevor du fertigmachst.",
+        "warnSubmitError": "Sitzung konnte nicht beendet werden.",
+        "attemptCount": "Versuch {count}",
+        "feedbackTipPrefix": "💡"
+      },
+      "result": {
+        "title": "Shadowing-Ergebnis",
+        "notFound": "Shadowing-Sitzung nicht gefunden.",
+        "overallLabel": "Gesamtpunktzahl",
+        "summary": "Du hast {completed} / {total} Zeilen in diesem Video geübt.",
+        "retry": "🔄 Dieses Video erneut üben",
+        "retryPending": "Wird erstellt...",
+        "backList": "Zurück zu Shadowing",
+        "filterLabel": "Filter",
+        "filterAll": "Alle ({count})",
+        "filterWeak": "Verbessern ({count})",
+        "attemptTries": "{count} Versuche",
+        "youSaid": "Du sagtest: \"{text}\"",
+        "noFiltered": "Keine Zeilen passen zum Filter.",
+        "grades": {
+          "excellent": { "label": "Ausgezeichnet", "emoji": "🌟" },
+          "veryGood": { "label": "Sehr gut", "emoji": "✨" },
+          "good": { "label": "Nicht schlecht", "emoji": "👍" },
+          "needsWork": { "label": "Weiter versuchen", "emoji": "💪" },
+          "keepPracticing": { "label": "Weiter üben", "emoji": "🔄" }
+        }
+      }
+    }
+  },
+  "pronunciation": {
+    "landing": {
+      "title": "Aussprachetraining",
+      "back": "← Übung",
+      "subtitle": "Wörter aufnehmen und KI-Feedback zur Aussprache pro Wort erhalten",
+      "quotaLabel": "{used}/{limit} Versuche/Woche",
+      "drillCta": {
+        "title": "Drills für schwierige Laute (Vietnamesisch)",
+        "subtitle": "ü, ö, ch, r, ß, ei/ie — fokussiertes Lauttraining"
+      },
+      "stats": {
+        "totalAttempts": "Versuche",
+        "averageScore": "Ø Punktzahl",
+        "levels": "Geübte Niveaus"
+      },
+      "allLevels": "Alle",
+      "recent": "Kürzliche Übungen"
+    },
+    "session": {
+      "title": "Aussprachetraining",
+      "subtitle": "Aussprache · KI-Analyse",
+      "instruction": "Sprich das:",
+      "overallScore": "Gesamtpunktzahl",
+      "wordAnalysis": "Analyse pro Wort",
+      "recordReady": "Bereit zur Aufnahme",
+      "recordListening": "Hört zu...",
+      "recordDone": "Aufgenommen",
+      "suggestions": "Verbesserungstipps",
+      "startRecord": "AUFNAHME STARTEN",
+      "stopRecord": "AUFNAHME STOPPEN",
+      "retry": "ERNEUT AUFNEHMEN",
+      "score": "BEWERTEN",
+      "tryAgain": "ERNEUT VERSUCHEN",
+      "nextSentence": "WEITER",
+      "analyzing": "ANALYSE LÄUFT...",
+      "micError": "Kein Zugriff auf das Mikrofon. Bitte Berechtigung erteilen.",
+      "scoreError": "Bewertung fehlgeschlagen"
+    },
+    "drills": {
+      "back": "← Aussprache",
+      "title": "Drills für schwierige Laute (Vietnamesisch)",
+      "subtitle": "Konzentriere dich auf Laute, die vietnamesische Lernende oft falsch aussprechen — ü, ö, ch, r und mehr",
+      "difficulty": {
+        "high": "Schwer",
+        "medium": "Mittel",
+        "low": "Leicht"
+      },
+      "attemptsLabel": "{count} Versuche",
+      "bestScore": "Beste: {score}",
+      "averageScore": "Ø: {score}",
+      "notPracticed": "Noch nicht — Starten →",
+      "drillBack": "← Alle Drills",
+      "minimalPairs": "Minimalpaare",
+      "practiceWords": "Übungswörter — antippen zum Lesen",
+      "practiceSentences": "Übungssätze — antippen zum Lesen",
+      "record": "🎙️ Aufnehmen",
+      "stop": "⏹ Stopp",
+      "retry": "Erneut aufnehmen",
+      "score": "Bewerten",
+      "analyzing": "KI analysiert...",
+      "suggestionsTitle": "Tipps",
+      "tryAgain": "Erneut versuchen",
+      "micError": "Kein Zugriff auf das Mikrofon. Bitte Berechtigung erteilen.",
+      "scoreError": "Bewertung fehlgeschlagen"
+    }
+  },
+  "roleplay": {
+    "list": {
+      "title": "Rollenspiel-KI",
+      "subtitle": "Übe deutsche Gespräche mit KI in echten Alltagssituationen",
+      "quotaLabel": "{used}/{limit} Versuche / Woche",
+      "allLevels": "Alle",
+      "scenariosTitle": "Übungsszenarien",
+      "confirmDeleteTitle": "Chat löschen?",
+      "confirmDeleteSubtitle": "Dieser Chat-Verlauf wird dauerhaft entfernt.",
+      "cancel": "Abbrechen",
+      "deletePermanently": "Endgültig löschen",
+      "historyTitle": "Letzter Verlauf",
+      "statusCompleted": "Abgeschlossen",
+      "statusActive": "Läuft"
+    },
+    "session": {
+      "loading": "Wird geladen…",
+      "notFound": "Chat nicht gefunden",
+      "backToList": "Zurück zur Liste",
+      "backAria": "Zurück",
+      "endButton": "Beenden",
+      "ending": "Bewertung…",
+      "endConfirm": "Chat beenden und Bewertung sehen?",
+      "endError": "Chat konnte nicht beendet werden",
+      "sendError": "Senden fehlgeschlagen",
+      "tipsHeader": "💡 TIPPS",
+      "newScenario": "Anderes Szenario versuchen",
+      "inputHint": "Enter zum Senden • Shift+Enter für neue Zeile"
+    }
+  },
+  "examCommon": {
+    "examLabel": "{examType} · {cefrLevel}",
+    "questionsCount": "{count} Fragen",
+    "teilLabel": "T{teil}: {correct}/{total}",
+    "newSession": "Neue Sitzung",
+    "startNow": "Jetzt starten",
+    "statusGraded": "Bewertet",
+    "statusDraft": "Nicht eingereicht",
+    "statusGrading": "Wird bewertet",
+    "statusError": "Fehler",
+    "stats": {
+      "total": "Prüfungen gesamt",
+      "averageScore": "Durchschnitt",
+      "bestScore": "Bestleistung"
+    },
+    "filterAllStatuses": "Alle Status",
+    "filterDraft": "Nicht eingereicht",
+    "filterGraded": "Bewertet",
+    "emptyTitle": "Noch keine Prüfungssitzung",
+    "setup": {
+      "step1Label": "Schritt 1 — Prüfungstyp",
+      "step2Label": "Schritt 2 — Niveau (CEFR)",
+      "goetheLabel": "Goethe-Zertifikat",
+      "goetheDesc": "Goethe-Institut-Zertifikat",
+      "telcLabel": "TELC Deutsch",
+      "telcDesc": "The European Language Certificates",
+      "naBadge": "N/A",
+      "teile": "Teile",
+      "questions": "Fragen",
+      "timeLabel": "Zeit",
+      "minutesAbbr": "Min",
+      "maxPoints": "Max. Punkte",
+      "teilLine": "Teil {i}",
+      "createExam": "Prüfung erstellen"
+    },
+    "answering": {
+      "loadingExam": "Prüfung wird geladen...",
+      "examNotFound": "Prüfung nicht gefunden.",
+      "back": "Zurück",
+      "submitError": "Senden fehlgeschlagen. Bitte erneut versuchen.",
+      "submit": "Abgeben",
+      "answeredCount": "{done}/{total} beantwortet",
+      "unsupportedQuestion": "Fragetyp nicht unterstützt.",
+      "anweisungLabel": "Anweisung",
+      "fragenLabel": "Fragen ({n})",
+      "bitteWahlen": "— Bitte wählen —",
+      "keinePasst": "X — Keine passt",
+      "teilXofY": "Teil {n} / {total}"
+    },
+    "result": {
+      "loadingResult": "Ergebnis wird geladen...",
+      "shareBtn": "Teilen",
+      "newExam": "Neue Prüfung",
+      "reviewDetails": "Details ansehen",
+      "reviewTeile": "Teile durchgehen",
+      "correctLabel": "Richtig",
+      "wrongLabel": "Falsch",
+      "totalLabel": "Gesamt",
+      "pointsLabel": "Punkte",
+      "youAnswered": "Deine Antwort:",
+      "correctAnswerLabel": "Richtig:",
+      "skipped": "(übersprungen)",
+      "userVsCorrect": "Du: {user} · Richtig: {correct}",
+      "questionLabel": "F{n}: {text}",
+      "explanation": "Erklärung:",
+      "emDash": "—",
+      "xKeinePasst": "X (Keine passt)",
+      "bestanden": "Bestanden!",
+      "nichtBestanden": "Nicht bestanden",
+      "bestandenShort": "Bestanden",
+      "nichtBestandenShort": "Nicht b.",
+      "gesamtergebnis": "Gesamtergebnis",
+      "richtigSuffix": "richtig",
+      "punkteJeTeil": "Punkte je Teil",
+      "ergebnisseJeTeil": "Ergebnisse je Teil",
+      "gradeExcellent": "Hervorragend!",
+      "gradeVeryGood": "Sehr gut! 👏",
+      "gradeBestanden": "Bestanden! 💪",
+      "gradeMoreEffort": "Mehr üben",
+      "gradeStudyMore": "Weiter lernen",
+      "shareTitle": "DeutschMeister"
+    }
+  },
+  "examReading": {
+    "list": {
+      "title": "Lesen — Standardprüfung",
+      "subtitle": "Goethe & TELC · A1 / A2 / B1 · Alle Teile enthalten",
+      "cardLine": "Standard-Leseprüfung",
+      "emptySubtitle": "Starte jetzt eine Goethe-/TELC-Leseprüfung."
+    },
+    "paywall": {
+      "title": "Lesen — Standardprüfung",
+      "description": "Übe Goethe- & TELC-Prüfungen A1–B1 mit Premium",
+      "featureContext": "Goethe-/TELC-Leseverstehen mit ausführlichen Antworterklärungen — nur für Premium."
+    },
+    "new": {
+      "pageTitle": "Leseprüfung erstellen",
+      "pageSubtitle": "Wähle Prüfungstyp und Niveau — die KI erzeugt alle Teile",
+      "skillLabel": "Lesen",
+      "errorCreate": "Prüfung konnte nicht erstellt werden. Bitte erneut versuchen.",
+      "loadingLong": "Prüfung wird erstellt (kann 20–40 Sekunden dauern)...",
+      "loadingHint": "KI erzeugt alle Teile parallel..."
+    },
+    "answering": {
+      "pageTitle": "Leseprüfung",
+      "listen": "Anhören",
+      "byAuthor": "von {author}",
+      "wortliste": "Wortliste",
+      "themaLabel": "THEMA",
+      "zuordnungNoteIntro": "Hinweis:",
+      "zuordnungNoteBody": "Einige Fragen passen ggf. zu KEINER Anzeige — wähle",
+      "zuordnungNoteXBadge": "X",
+      "zuordnungNoteTail": "in diesem Fall.",
+      "richtigLabel": "Richtig ✓",
+      "falschLabel": "Falsch ✗",
+      "jaLabel": "Ja — Dafür ✓",
+      "neinLabel": "Nein — Dagegen ✗"
+    },
+    "result": {
+      "pageTitle": "Ergebnis Leseprüfung",
+      "shareText": "Ich habe {score}% in der {examType}-{cefrLevel}-Leseprüfung erreicht!",
+      "showPassage": "Text anzeigen",
+      "hidePassage": "Text ausblenden",
+      "correctOfTotalDone": "{correct}/{total} richtig · {pct}%",
+      "taskTypes": {
+        "richtig_falsch": "Richtig / Falsch",
+        "multiple_choice": "Multiple Choice",
+        "zuordnung": "Zuordnung",
+        "ja_nein": "Ja / Nein",
+        "sprachbausteine": "Sprachbausteine"
+      }
+    }
+  },
+  "examWriting": {
+    "list": {
+      "title": "Schreiben — Standardprüfung",
+      "subtitle": "Goethe & TELC · A1 / A2 / B1 · KI bewertet Schreiben-Teile",
+      "cardLine": "Standard-Schreibprüfung",
+      "emptySubtitle": "Starte jetzt eine Goethe-/TELC-Schreibprüfung.",
+      "gradedAt": "Bewertet um {time}"
+    },
+    "paywall": {
+      "title": "Schreiben — Standardprüfung",
+      "description": "Übe Schreiben in Goethe- & TELC-Prüfungen A1–B1 mit Premium",
+      "featureContext": "KI bewertet deinen Schreib-Teil nach den Goethe-/TELC-Kriterien — Fehler-für-Fehler-Erklärung auf Vietnamesisch und Deutsch. Nur für Premium."
+    },
+    "new": {
+      "pageTitle": "Schreibprüfung erstellen",
+      "pageSubtitle": "Wähle Prüfungstyp und Niveau — die KI erzeugt alle Teile",
+      "skillLabel": "Schreiben",
+      "errorCreate": "Prüfung konnte nicht erstellt werden. Bitte erneut versuchen.",
+      "loadingShort": "Prüfung wird erstellt...",
+      "loadingHint": "KI erzeugt die Schreibaufgaben..."
+    },
+    "answering": {
+      "pageTitleBack": "← Schreibprüfung",
+      "subtitle": "Schreiben · Goethe/TELC Standard",
+      "saving": "Speichern…",
+      "saved": "Gespeichert",
+      "situationLabel": "Situation",
+      "situationLabelVi": "Situation",
+      "aufgabeLabel": "Aufgabe",
+      "aufgabeLabelVi": "Aufgabe",
+      "meinText": "Mein Text",
+      "specialCharsLabel": "Zeichen:",
+      "umlautOrType": "oder tippe",
+      "writeHint": "Schreiben Sie ca. {min}–{max} Wörter · max. {points} Punkte",
+      "writePlaceholder": "Schreiben Sie hier Ihren Text…",
+      "umlautTip": "Tipp: {hint}",
+      "wordsLabel": "{count} Wörter",
+      "tooLong": "zu lang",
+      "stillNeed": "noch {n} fehlend",
+      "previousBtn": "Zurück",
+      "nextBtn": "Weiter",
+      "gradingBtn": "Wird bewertet...",
+      "submitBtn": "Abgeben",
+      "doneCounter": "Fertig",
+      "confirmTitle": "Prüfung abgeben?",
+      "confirmBody": "Die KI bewertet deinen Text nach dem {examType}-Standard. Das dauert ca. 30 Sekunden.",
+      "cancelBtn": "Abbrechen",
+      "confirmBtn": "Bestätigen",
+      "mobileTaskLabel": "Aufgabe",
+      "mobileEditorLabel": "Schreiben",
+      "taskTypes": {
+        "form_fill": "Formular ausfüllen",
+        "informal_email": "E-Mail (informell)",
+        "formal_email": "E-Mail (formell)",
+        "sms": "SMS / Kurznachricht",
+        "forum_comment": "Forumsbeitrag"
+      }
+    },
+    "result": {
+      "pageTitle": "Ergebnis Schreibprüfung",
+      "shareText": "Ich habe {score}% in der {examType}-{cefrLevel}-Schreibprüfung erreicht!",
+      "examNotFound": "Prüfung nicht gefunden.",
+      "gradingError": "Bewertungsfehler",
+      "gradingErrorBody": "KI-Bewertung fehlgeschlagen. Bitte erneut versuchen.",
+      "backToWriting": "Zurück zur Aufgabe",
+      "aiGrading": "KI bewertet deinen Text...",
+      "aiGradingBody": "Das System bewertet deinen Text nach Goethe-/TELC-Kriterien. Dauert meist 10–30 Sekunden.",
+      "subtitle": "{examType} · {cefrLevel} · SCHREIBEN",
+      "gradedRecently": "Gerade eben",
+      "congratsPassed": "Herzlichen Glückwunsch! Du hast die Prüfung bestanden. Schau dir die Details an.",
+      "congratsFailed": "Leider hat es diesmal nicht gereicht. Lies die Korrekturen aufmerksam, um besser zu werden.",
+      "detailsByTeil": "Details je Teil",
+      "punkteSuffix": "Punkte",
+      "bewertung": "Bewertung",
+      "staerken": "Stärken",
+      "verbesserungen": "Verbesserungen",
+      "korrekturen": "Korrekturen",
+      "showText": "Deinen Text anzeigen",
+      "hideText": "Text ausblenden",
+      "taskTypes": {
+        "form_fill": "Formular",
+        "informal_email": "E-Mail (informell)",
+        "formal_email": "E-Mail (formell)",
+        "sms": "SMS / Kurznachricht",
+        "forum_comment": "Forumsbeitrag"
+      }
+    }
+  },
+  "examListening": {
+    "list": {
+      "title": "Hören — Standardprüfung",
+      "subtitle": "Goethe & TELC · A1 / A2 / B1 · Alle Hören-Teile",
+      "cardLine": "Standard-Hörprüfung",
+      "emptySubtitle": "Starte jetzt eine Goethe-/TELC-Hörprüfung."
+    },
+    "paywall": {
+      "title": "Hören — Standardprüfung",
+      "description": "Übe Hörverstehen in Goethe- & TELC-Prüfungen A1–B1 mit Premium",
+      "featureContext": "Zeitgesteuerte Hör-Probeprüfungen im Goethe-/TELC-Format — nur für Premium. Upgrade für unbegrenztes Üben mit echtem Prüfungstimer."
+    },
+    "new": {
+      "pageTitle": "Hörprüfung erstellen",
+      "pageSubtitle": "Wähle Prüfungstyp und Niveau — die KI erzeugt alle Hören-Teile",
+      "skillLabel": "Hören",
+      "errorCreate": "Hörprüfung konnte nicht erstellt werden. Bitte erneut versuchen.",
+      "loadingLong": "Prüfung wird erstellt (kann 20–40 Sekunden dauern)...",
+      "loadingHint": "KI erzeugt alle Hören-Teile parallel..."
+    },
+    "answering": {
+      "pageTitle": "Hörprüfung",
+      "audioExam": "Audio Exam · de-DE",
+      "playing": "🎧 Prüfung läuft...",
+      "audioReady": "Prüfung Audio",
+      "playedNTimes": "{n}× angehört",
+      "readyToListen": "Starte, wenn du bereit bist",
+      "speedLabel": "Wiedergabegeschwindigkeit",
+      "listeningWarning": "* Hinweis: In der echten Prüfung darfst du manche Teile nur 1–2× hören."
+    },
+    "result": {
+      "pageTitle": "Ergebnis Hörprüfung",
+      "shareText": "Ich habe {score}% in der {examType}-{cefrLevel}-Hörprüfung erreicht!",
+      "subtitle": "{examType} · Deutsch {cefrLevel} · Hören",
+      "showTranscript": "Transkript anzeigen",
+      "hideTranscript": "Transkript ausblenden",
+      "listenAgain": "Erneut anhören",
+      "teilFallback": "Teil {n}",
+      "correctOfTotalDone": "{correct}/{total} richtig · {pct}%",
+      "taskTypes": {
+        "richtig_falsch": "Richtig / Falsch",
+        "multiple_choice": "Multiple Choice",
+        "zuordnung": "Zuordnung"
+      }
+    }
+  },
+  "examSpeaking": {
+    "list": {
+      "title": "Sprechen — Standardprüfung",
+      "subtitle": "Goethe & TELC · A1 / A2 / B1 · Mündliche Prüfung mit allen Teilen",
+      "cardLine": "Standard-Sprechprüfung",
+      "emptySubtitle": "Starte jetzt eine Goethe-/TELC-Sprechprüfung."
+    },
+    "paywall": {
+      "title": "Sprechen — Standardprüfung",
+      "description": "Übe Sprechen in Goethe- & TELC-Prüfungen A1–B1 mit Premium",
+      "featureContext": "KI bewertet die Mündliche Prüfung nach den Goethe-/TELC-Kriterien — prüfungsechter Timer, automatisches Transkript. Nur für Premium."
+    },
+    "new": {
+      "pageTitle": "Sprechprüfung erstellen",
+      "pageSubtitle": "Wähle Prüfungstyp und Niveau — die KI erzeugt alle Sprechen-Teile",
+      "skillLabel": "Sprechen",
+      "errorCreate": "Sprechprüfung konnte nicht erstellt werden. Bitte erneut versuchen.",
+      "loadingShort": "Prüfung wird erstellt (20–40 Sekunden)...",
+      "loadingHint": "KI erzeugt alle Sprechen-Teile parallel...",
+      "requirements": "Voraussetzungen: Mikrofon + Chrome/Edge (Web Speech API). Gemini bewertet Audio und Transkript."
+    },
+    "answering": {
+      "pageTitle": "Sprechprüfung",
+      "subtitle": "Sprechen · Exam Practice",
+      "micError": "Mikrofon-Zugriff nicht möglich. Bitte Berechtigungen prüfen.",
+      "submitError": "Abgabe fehlgeschlagen. Bitte erneut versuchen.",
+      "gradingTitle": "KI bewertet...",
+      "gradingBody": "Gemini analysiert dein Audio und Transkript. Dauert 20–40 Sekunden.",
+      "wordCardsLabel": "Wortkarten",
+      "partnerLabel": "Partner / Prüfer",
+      "statusIdle": "Bereit",
+      "statusPrep": "Vorbereitung...",
+      "statusRecording": "Aufnahme...",
+      "statusDone": "Fertig",
+      "recBadge": "REC",
+      "transcriptLabel": "Transkript",
+      "listeningHint": "Höre zu...",
+      "noData": "Keine Daten",
+      "startPrep": "VORBEREITUNG STARTEN",
+      "startRecord": "AUFNAHME STARTEN",
+      "skipPrep": "VORBEREITUNG ÜBERSPRINGEN →",
+      "stopRecord": "AUFNAHME STOPPEN",
+      "retake": "ERNEUT AUFNEHMEN",
+      "nextTeil": "WEITER: TEIL {n}",
+      "submitExam": "PRÜFUNG ABGEBEN"
+    },
+    "result": {
+      "pageTitle": "Ergebnis Sprechprüfung",
+      "shareText": "Ich habe {score}% in der {examType}-{cefrLevel}-Prüfung erreicht!",
+      "shareTitle": "Ergebnis Sprechprüfung",
+      "examNotFound": "Prüfung nicht gefunden.",
+      "backToList": "← Zur Liste",
+      "loadingResult": "Ergebnis wird geladen...",
+      "aiGrading": "KI bewertet...",
+      "aiGradingBody": "Kann 20–40 Sekunden dauern. Bitte warten.",
+      "kicker": "Ergebnis Sprechprüfung",
+      "headerSkill": "{examType} Deutsch · {cefrLevel} · Sprechen",
+      "teileCount": "{count} Teile · {cefrLevel}",
+      "perTeil": "Ergebnis je Teil",
+      "teilLine": "Teil {n}",
+      "criteriaTitle": "Details nach Kriterien",
+      "youSaid": "Du hast gesagt",
+      "nativeSpeaker": "Native Speaker",
+      "transcriptHeader": "📄 Transkript",
+      "errorPronunciation": "Aussprachefehler",
+      "errorGrammar": "Grammatikfehler",
+      "strengthsTitle": "🌿 Stärken",
+      "improvementsTitle": "⚠️ Verbessern",
+      "defaultStrength": "Teil abgeschlossen",
+      "defaultImprovement": "Übe weiter!",
+      "noGrading": "Keine Bewertung verfügbar.",
+      "gradeBadgeExcellent": "Hervorragend",
+      "gradeBadgeGood": "Sehr gut",
+      "gradeBadgePassed": "Bestanden",
+      "gradeBadgeKeepTrying": "Weiter üben",
+      "gradeBadgeFailed": "Nicht best.",
+      "gradeTitleExcellent": "Ausgezeichnet! 🎉",
+      "gradeTitleGood": "Sehr gut! 👏",
+      "gradeTitlePassed": "Bestanden! 💪",
+      "gradeTitleKeepTrying": "Weiter üben! 🤗",
+      "gradeTitleFailed": "Nicht aufgeben! 📚",
+      "criteriaLabels": {
+        "aufgabe": "Aufgabe",
+        "grammatik": "Grammatik",
+        "aussprache": "Aussprache",
+        "wortschatz": "Wortschatz"
+      }
+    }
+  }
+}

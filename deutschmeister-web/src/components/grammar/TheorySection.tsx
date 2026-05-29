@@ -2,6 +2,8 @@
 /* eslint-disable no-restricted-syntax */
 
 import { useState, useCallback, useEffect, useRef } from 'react';
+import { useTranslations, useLocale } from 'next-intl';
+import { pickLocale } from '@/i18n/pickLocale';
 import { ACCENT, STATUS } from '@/lib/tokens';
 import { usePronunciation } from '@/hooks/usePronunciation';
 import { HighlightedText } from '@/components/word-highlight/HighlightedText';
@@ -58,7 +60,7 @@ function isSpecialLetter(letter: string): boolean {
   return /[ÄÖÜäöüß]/.test(letter);
 }
 
-/** Parse "Apfel (táo)" → { de: "Apfel", vi: "táo" } */
+/** Parse "Apfel (apple)" → { de: "Apfel", vi: "apple" } */
 function parseExample(raw: string): { de: string; vi: string } | null {
   const m = raw.match(/^(.+?)\s*\(([^)]+)\)\s*$/);
   if (!m) return null;
@@ -66,39 +68,8 @@ function parseExample(raw: string): { de: string; vi: string } | null {
 }
 
 // ─── Alphabet card data ────────────────────────────────────────────────
-
-const LETTER_TIPS: Record<string, string> = {
-  'Aa': "Tương tự 'a' tiếng Anh nhưng rõ hơn, kéo dài. Không nuốt âm cuối.",
-  'Bb': "Giống 'b' tiếng Việt, nhưng môi chạm nhau chắc hơn.",
-  'Cc': "Trước e/i/y phát âm 'ts', trước a/o/u phát âm 'k'.",
-  'Dd': "Như 'd' tiếng Anh nhưng không bật hơi. Cuối từ đọc như 't'.",
-  'Ee': "Giữ miệng hơi mở, kéo dài âm. Không trượt sang âm khác.",
-  'Ff': "Giống 'ph' tiếng Việt. Môi dưới chạm răng trên.",
-  'Gg': "Như 'g' trong 'go', không phải 'j'. Cuối từ đọc như 'k'.",
-  'Hh': "Thở ra nhẹ, như 'h' tiếng Anh. Không rung cổ họng.",
-  'Ii': "Ngắn và rõ như 'i' tiếng Việt. Không kéo dài.",
-  'Jj': "Phát âm như 'y' trong 'yes'. Không phải 'j' tiếng Anh.",
-  'Kk': "Như 'k' tiếng Việt nhưng bật hơi mạnh hơn.",
-  'Ll': "Đặt đầu lưỡi sau răng trên. Rõ hơn 'l' tiếng Anh.",
-  'Mm': "Giống 'm' tiếng Việt. Môi chạm nhau.",
-  'Nn': "Giống 'n' tiếng Việt. Đầu lưỡi chạm nướu trên.",
-  'Oo': "Tròn môi và giữ nguyên vị trí. Không trượt sang âm khác.",
-  'Pp': "Như 'p' tiếng Việt nhưng bật hơi mạnh hơn.",
-  'Qq': "Luôn đi kèm 'u', phát âm như 'kv'. Ví dụ: Quelle = kvelle.",
-  'Rr': "Rung nhẹ ở cuống họng (khác với 'r' tiếng Việt đầu lưỡi).",
-  'Ss': "Đầu từ trước nguyên âm đọc như 'z'. Cuối từ đọc như 's'.",
-  'Tt': "Như 't' tiếng Anh, bật hơi. Cuối từ giữ nguyên.",
-  'Uu': "Tròn môi chắc và ngắn. Không kéo dài như 'u' tiếng Việt.",
-  'Vv': "Phát âm như 'f' (không phải 'v'). Ví dụ: Vater = Fater.",
-  'Ww': "Phát âm như 'v' tiếng Anh. Ví dụ: Wasser = Vasser.",
-  'Xx': "Phát âm như 'ks'. Ví dụ: Taxi = Taksi.",
-  'Yy': "Như 'ü' ngắn hoặc 'i' trong từ mượn tiếng Anh/Hy Lạp.",
-  'Zz': "Phát âm như 'ts'. Ví dụ: Zeit = Tsait.",
-  'Ää': "Mở miệng rộng hơn 'a', phát âm gần như 'e' trong 'bed'.",
-  'Öö': "Tròn môi như 'o' nhưng cố phát âm 'e'. Lưỡi phía trước.",
-  'Üü': "Tròn môi như 'u' nhưng cố phát âm 'i'. Luyện nhiều để quen.",
-  'ß':  "Chỉ có tiếng Đức, phát âm như 'ss'. Sau nguyên âm dài hoặc đôi.",
-};
+// Per-letter pronunciation tips live in messages/<locale>/vocabulary.json
+// under grammar.theory.letterTips (looked up by letter key, e.g. "Aa").
 
 const CARD_PALETTE = [
   { accent: ACCENT.srs, border: 'rgba(59,130,246,.25)', bg: 'rgba(59,130,246,.05)', hoverBorder: 'rgba(59,130,246,.6)' },
@@ -144,6 +115,7 @@ function AlphabetCardGrid({ rows, onSpeak }: {
   rows: string[][];
   onSpeak: (text: string) => void;
 }) {
+  const t = useTranslations('vocabulary.grammar.theory');
   const [speakingIdx, setSpeakingIdx] = useState<number | null>(null);
   const [noiState, setNoiState] = useState<Record<number, NoiState>>({});
   const [flippedIdx, setFlippedIdx] = useState<number | null>(null);
@@ -207,7 +179,10 @@ function AlphabetCardGrid({ rows, onSpeak }: {
           const ns      = noiState[idx] ?? 'idle';
           const isNghe  = speakingIdx === idx;
           const palette = special ? SPECIAL_PALETTE : CARD_PALETTE[idx % CARD_PALETTE.length]!;
-          const tip     = LETTER_TIPS[letter] ?? `Luyện phát âm "${name}" nhiều lần để quen.`;
+          const tipKey  = `letterTips.${letter}` as 'letterTips.Aa';
+          const tip     = letter && t.has(tipKey)
+            ? t(tipKey)
+            : t('defaultLetterTip', { name });
           const isFlipped = flippedIdx === idx;
 
           return (
@@ -235,7 +210,7 @@ function AlphabetCardGrid({ rows, onSpeak }: {
                   {special && (
                     <div className="px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-wider text-center"
                       style={{ background: 'rgba(245,158,11,.18)', color: ACCENT.xp }}>
-                      Đặc biệt
+                      {t('special')}
                     </div>
                   )}
                   <div className="flex-1 flex flex-col items-center justify-center px-3 pt-4 pb-2 text-center gap-1">
@@ -261,7 +236,7 @@ function AlphabetCardGrid({ rows, onSpeak }: {
                       className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-semibold transition-all border-r"
                       style={{ borderColor: palette.border, background: isNghe ? `${palette.accent}18` : 'transparent', color: isNghe ? palette.accent : 'var(--theme-text-muted)' }}
                     >
-                      <SpeakerIcon /> Nghe
+                      <SpeakerIcon /> {t('listen')}
                     </button>
                     <button
                       onClick={(e) => handleNoi(idx, name, e)}
@@ -271,22 +246,22 @@ function AlphabetCardGrid({ rows, onSpeak }: {
                         color: ns === 'idle' ? 'var(--theme-text-muted)' : ns === 'listening' ? STATUS.success : ns === 'correct' ? STATUS.success : STATUS.danger,
                       }}
                     >
-                      {ns === 'idle'      && <><MicIcon /> Nói</>}
-                      {ns === 'listening' && <><span className="animate-pulse">●</span> Đang nghe</>}
-                      {ns === 'correct'   && <>✓ Tốt lắm!</>}
-                      {ns === 'wrong'     && <>✗ Thử lại</>}
+                      {ns === 'idle'      && <><MicIcon /> {t('speak')}</>}
+                      {ns === 'listening' && <><span className="animate-pulse">●</span> {t('listening')}</>}
+                      {ns === 'correct'   && <>✓ {t('wellDone')}</>}
+                      {ns === 'wrong'     && <>✗ {t('tryAgain')}</>}
                     </button>
                   </div>
                 </div>
 
-                {/* ── BACK: mẹo nhớ ── */}
+                {/* ── BACK: memory tip ── */}
                 <div
                   className="alpha-card-face alpha-card-back absolute inset-0 rounded-xl flex flex-col items-center justify-center p-4 text-center gap-3"
                   style={{ background: 'linear-gradient(135deg, #4F46E5, #7C3AED)', border: `1.5px solid rgba(139,92,246,.5)` }}
                 >
                   <div style={{ color: 'rgba(255,255,255,.8)' }}><SparkleIcon /></div>
                   <div>
-                    <div className="text-body font-extrabold text-white mb-1">Mẹo nhớ</div>
+                    <div className="text-body font-extrabold text-white mb-1">{t('memoryTip')}</div>
                     <div className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,.82)' }}>{tip}</div>
                   </div>
                   <button
@@ -294,7 +269,7 @@ function AlphabetCardGrid({ rows, onSpeak }: {
                     className="mt-1 px-3 py-1 rounded-lg text-caption font-bold transition-all hover:scale-105"
                     style={{ background: 'rgba(255,255,255,.18)', color: 'rgba(255,255,255,.9)' }}
                   >
-                    Click để lật lại
+                    {t('clickToFlipBack')}
                   </button>
                 </div>
 
@@ -319,6 +294,8 @@ function levenshtein(a: string, b: string): number {
 // ─── Main TheorySection ────────────────────────────────────────────────
 
 export const TheorySection = ({ content }: TheorySectionProps) => {
+  const t = useTranslations('vocabulary.grammar.theory');
+  const locale = useLocale();
   const { speak } = usePronunciation();
   const [playingCell, setPlayingCell] = useState<string | null>(null);
   const [readingAll, setReadingAll] = useState<number | null>(null); // section idx being read
@@ -385,7 +362,7 @@ export const TheorySection = ({ content }: TheorySectionProps) => {
                 </div>
                 <div className="min-w-0">
                   <h3 className="text-base font-bold truncate" style={{ color: 'var(--theme-text-primary)' }}>
-                    {section.title.vi}
+                    {pickLocale(section.title, locale)}
                   </h3>
                   <p className="text-xs truncate" style={{ color: 'var(--theme-text-muted)' }}>
                     {section.title.de}
@@ -393,7 +370,7 @@ export const TheorySection = ({ content }: TheorySectionProps) => {
                 </div>
               </div>
 
-              {/* "Đọc toàn bộ" button */}
+              {/* "Read all" button */}
               <button
                 onClick={() => readingAll === sIdx ? setReadingAll(null) : handleReadAll(sIdx, section)}
                 className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all hover:scale-[1.03]"
@@ -407,7 +384,7 @@ export const TheorySection = ({ content }: TheorySectionProps) => {
                 }}
               >
                 <IconVolume size={13} className={readingAll === sIdx ? 'animate-pulse' : ''} />
-                {readingAll === sIdx ? 'Đang đọc...' : 'Đọc toàn bộ'}
+                {readingAll === sIdx ? t('reading') : t('readAll')}
               </button>
             </div>
 
@@ -498,7 +475,7 @@ export const TheorySection = ({ content }: TheorySectionProps) => {
                                 backgroundColor: isPlaying ? `${palette.accent}20` : 'transparent',
                                 color: isPlaying ? palette.accent : 'var(--theme-text-muted)',
                               }}
-                              title={`Nghe: ${extractGerman(audioText)}`}
+                              title={t('listenWord', { word: extractGerman(audioText) })}
                             >
                               <IconVolume
                                 size={15}

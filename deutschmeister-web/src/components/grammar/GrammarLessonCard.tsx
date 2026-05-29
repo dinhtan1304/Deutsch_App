@@ -2,6 +2,8 @@
 
 import { GrammarLesson } from '@/types/grammar';
 import Link from 'next/link';
+import { useTranslations, useLocale } from 'next-intl';
+import { pickField } from '@/i18n/pickLocale';
 import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 
 interface GrammarLessonCardProps {
@@ -54,6 +56,8 @@ function IconChevronRight({ size = 18 }: { size?: number }) {
 }
 
 const GrammarLessonCard = ({ lesson, progress, locked, lockedReason }: GrammarLessonCardProps) => {
+  const t = useTranslations('vocabulary.grammar');
+  const locale = useLocale();
   const isLocked = locked || lesson.isActive === false;
   const isCompleted = progress?.status === 'completed';
   const isInProgress = progress?.status === 'in_progress';
@@ -66,10 +70,10 @@ const GrammarLessonCard = ({ lesson, progress, locked, lockedReason }: GrammarLe
 
   // Status badge config
   const statusConfig = (() => {
-    if (isLocked)      return { label: 'Khóa',      bg: `${STATUS.danger}15`,   color: STATUS.danger };
-    if (isCompleted)   return { label: 'Hoàn thành', bg: `${STATUS.success}15`, color: STATUS.success };
-    if (isInProgress)  return { label: 'Đang học',   bg: `${ACCENT.srs}15`,     color: ACCENT.srs };
-    return               { label: 'Chưa học',   bg: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' };
+    if (isLocked)      return { label: t('statusLocked'),     bg: `${STATUS.danger}15`,   color: STATUS.danger };
+    if (isCompleted)   return { label: t('statusCompleted'),  bg: `${STATUS.success}15`, color: STATUS.success };
+    if (isInProgress)  return { label: t('statusInProgress'), bg: `${ACCENT.srs}15`,     color: ACCENT.srs };
+    return               { label: t('statusNotStarted'), bg: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' };
   })();
 
   const cardContent = (
@@ -126,14 +130,14 @@ const GrammarLessonCard = ({ lesson, progress, locked, lockedReason }: GrammarLe
                 className="text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg border"
                 style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-muted)' }}
               >
-                ~{lesson.estimatedMinutes}ph
+                {t('minutesShortCard', { min: lesson.estimatedMinutes })}
               </span>
             )}
           </div>
 
           {/* Title */}
           <p className="text-base font-black tracking-tight mb-0.5 truncate" style={{ color: 'var(--theme-text-primary)' }}>
-            {lesson.titleVi}
+            {pickField(lesson, 'title', locale)}
           </p>
 
           {/* German subtitle + exercise count */}
@@ -143,7 +147,7 @@ const GrammarLessonCard = ({ lesson, progress, locked, lockedReason }: GrammarLe
             {lesson.exerciseCount != null && lesson.exerciseCount > 0 && (
               <>
                 <span className="w-1 h-1 rounded-full bg-current shrink-0" />
-                <span>{lesson.exerciseCount} bài tập</span>
+                <span>{t('exerciseCount', { count: lesson.exerciseCount })}</span>
               </>
             )}
           </div>
@@ -168,7 +172,7 @@ const GrammarLessonCard = ({ lesson, progress, locked, lockedReason }: GrammarLe
         {isCompleted && progress?.score !== undefined ? (
           <div className="text-right shrink-0">
             <div className="text-2xl font-black tracking-tight" style={{ color: getScoreColor(progress.score) }}>
-              {Math.round(progress.score)}<span className="text-xs ml-0.5">đ</span>
+              {Math.round(progress.score)}<span className="text-xs ml-0.5">{t('scoreSuffix')}</span>
             </div>
           </div>
         ) : !isLocked ? (

@@ -1,0 +1,7 @@
+{
+  "generic": "Something went wrong",
+  "authExpired": "Session expired",
+  "authRequired": "Please sign in again",
+  "network": "Could not reach the server",
+  "httpError": "HTTP error {status}"
+}

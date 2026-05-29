@@ -1,0 +1,82 @@
+{
+  "topics": {
+    "travel": "Du lịch",
+    "family": "Gia đình",
+    "work": "Công việc",
+    "hobbies": "Sở thích",
+    "shopping": "Mua sắm",
+    "health": "Sức khỏe",
+    "food": "Ẩm thực",
+    "study": "Học tập",
+    "dailyLife": "Cuộc sống hằng ngày"
+  },
+  "list": {
+    "title": "Phòng Luyện Nói",
+    "subtitle": "Ghép cặp với người học khác để luyện nói tiếng Đức trực tiếp",
+    "reportBug": "🐞 Báo lỗi · Góp ý",
+    "communityRules": "📜 Quy tắc cộng đồng",
+    "createRoom": "+ Tạo phòng mới",
+    "findPartner": "Tìm partner",
+    "joinByCodeLabel": "Vào phòng riêng bằng mã mời",
+    "codePlaceholder": "Dán mã hoặc link mời...",
+    "joinRoom": "Vào phòng",
+    "invalidCode": "Mã mời hoặc link mời không hợp lệ.",
+    "filterByLevel": "Lọc theo trình độ",
+    "filterAll": "Tất cả",
+    "myRooms": "Phòng của tôi",
+    "publicRooms": "Phòng công khai",
+    "loading": "Đang tải...",
+    "empty": "Chưa có phòng nào đang chờ. Hãy tạo phòng đầu tiên!"
+  },
+  "new": {
+    "title": "Tạo phòng luyện nói",
+    "subtitle": "Mở phòng để bạn bè vào, hoặc public để ai cũng tìm thấy",
+    "step1": "Bước 1 — Trình độ (CEFR)",
+    "step2": "Bước 2 — Chủ đề",
+    "step3": "Bước 3 — Tên phòng",
+    "step4": "Bước 4 — Quyền riêng tư",
+    "topicPlaceholder": "Hoặc nhập chủ đề tùy chọn...",
+    "visPublic": "Công khai",
+    "visPublicSub": "Hiện trong danh sách, ai cũng tham gia được",
+    "visPrivate": "Riêng tư",
+    "visPrivateSub": "Chỉ ai có link mời mới vào được",
+    "createError": "Không tạo được phòng.",
+    "creating": "Đang tạo...",
+    "create": "Tạo phòng"
+  },
+  "match": {
+    "searchingTitle": "Đang tìm partner...",
+    "topicLabel": "Chủ đề:",
+    "matchingNote": "Hệ thống đang ghép cặp với người có cùng trình độ và chủ đề. Tự dừng sau 3 phút.",
+    "cancelSearch": "Hủy tìm",
+    "title": "Tìm partner luyện nói",
+    "subtitle": "Chọn trình độ và chủ đề, hệ thống sẽ ghép bạn với người phù hợp",
+    "level": "Trình độ",
+    "topic": "Chủ đề",
+    "topicPlaceholder": "Hoặc nhập chủ đề khác...",
+    "timeout": "Chưa tìm thấy partner phù hợp trong 3 phút. Bạn có thể thử lại với chủ đề rộng hơn.",
+    "expired": "Phiên tìm partner đã hết hạn. Bạn có thể bắt đầu tìm lại.",
+    "startError": "Không tìm được partner.",
+    "starting": "Đang bắt đầu...",
+    "start": "Bắt đầu tìm partner"
+  },
+  "detail": {
+    "subtitle": "Chủ đề: {topic} · {level} · {status}",
+    "connected": "Đã kết nối",
+    "connecting": "Đang kết nối...",
+    "copied": "✓ Đã copy",
+    "copyInvite": "Copy link mời",
+    "report": "🚩 Báo cáo",
+    "reportTitle": "Báo cáo {name}",
+    "leaving": "Đang rời...",
+    "leave": "Rời phòng",
+    "chatPlaceholder": "Viết bằng tiếng Đức...",
+    "loading": "Đang tải phòng...",
+    "opponent": "Đối phương"
+  },
+  "join": {
+    "title": "Vào phòng riêng",
+    "joining": "Đang vào phòng...",
+    "invalidCode": "Mã mời không hợp lệ."
+  }
+}

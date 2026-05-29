@@ -1,0 +1,101 @@
+{
+  "dayNames": {
+    "sun": "CN",
+    "mon": "T2",
+    "tue": "T3",
+    "wed": "T4",
+    "thu": "T5",
+    "fri": "T6",
+    "sat": "T7"
+  },
+  "empty": {
+    "title": "Chưa có lịch học",
+    "subtitle": "Tạo lịch trình học tập cá nhân để chuẩn bị cho kỳ thi Goethe/TELC",
+    "create": "Tạo lịch học"
+  },
+  "header": {
+    "weekProgress": "Tuần {current}/{total}",
+    "daysUntilExam": "Còn {days} ngày đến kỳ thi",
+    "resume": "Tiếp tục học",
+    "pause": "Tạm dừng",
+    "pausedBanner": "Lịch học đang tạm dừng. Nhấn \"Tiếp tục\" để học lại."
+  },
+  "progress": {
+    "label": "Progress",
+    "completed": "hoàn thành",
+    "totalWeeks": "Lộ trình {weeks} tuần"
+  },
+  "sidebar": {
+    "title": "Lộ trình học",
+    "week": "Tuần {n}"
+  },
+  "phase": {
+    "label": "Phase: {name}",
+    "weekSub": "Tuần {week} — {nameEn}"
+  },
+  "today": {
+    "title": "Nhiệm vụ hôm nay · {day}",
+    "doneBadge": "{done}/{total} Done"
+  },
+  "week": {
+    "details": "Chi tiết tuần {week}",
+    "allDays": "ALL"
+  },
+  "delete": {
+    "title": "Xóa lịch học?",
+    "confirm": "Bạn có chắc muốn xóa lịch học này? Hành động này không thể hoàn tác.",
+    "cancel": "Hủy",
+    "deleting": "Đang xóa...",
+    "submit": "Xóa"
+  },
+  "setup": {
+    "stepLabel": "Step {current} of {total}",
+    "step0": {
+      "title": "Lộ trình của riêng bạn",
+      "subtitle": "Chúng tôi sẽ cá nhân hóa lịch trình học dựa trên mục tiêu chứng chỉ của bạn."
+    },
+    "step1": {
+      "title": "Mục tiêu của bạn",
+      "subtitle": "Học viên đạt trình độ {level} thường mất 2-4 tháng luyện tập.",
+      "subtitleEmpty": "Học viên đạt trình độ ... thường mất 2-4 tháng luyện tập.",
+      "back": "Quay lại bước trước"
+    },
+    "step2": {
+      "title": "Ngày về đích",
+      "subtitle": "{exam} {level} — Chọn ngày bạn sẽ dự thi.",
+      "dateLabel": "Dự kiến ngày thi",
+      "weeksLeft": "{weeks} tuần ôn luyện",
+      "tooSoon": "Thời gian khá gấp! Bạn cần tập trung cao độ để đạt mục tiêu.",
+      "tooFar": "Bạn có rất nhiều thời gian. Hãy học đều đặn mỗi ngày.",
+      "ideal": "Khoảng thời gian lý tưởng để bứt phá trình độ.",
+      "submit": "Bắt đầu ngay",
+      "submitting": "Đang tạo lộ trình...",
+      "back": "Quay lại",
+      "errorDefault": "Có lỗi xảy ra"
+    },
+    "exams": {
+      "goethe": {
+        "name": "Goethe-Zertifikat",
+        "description": "Chứng chỉ uy tín nhất của Viện Goethe"
+      },
+      "telc": {
+        "name": "TELC Deutsch",
+        "description": "Chứng chỉ phổ biến tại châu Âu"
+      }
+    },
+    "levels": {
+      "a1": {
+        "label": "A1 — Beginner",
+        "desc": "Giao tiếp cơ bản: chào hỏi, giới thiệu bản thân"
+      },
+      "a2": {
+        "label": "A2 — Elementary",
+        "desc": "Hiểu và trao đổi thông tin quen thuộc"
+      },
+      "b1": {
+        "label": "B1 — Intermediate",
+        "desc": "Giao tiếp trong công việc, du lịch, học tập"
+      }
+    }
+  }
+}

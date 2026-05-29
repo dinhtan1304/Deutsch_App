@@ -1,0 +1,70 @@
+{
+  "welcome": {
+    "greeting": "Welcome!",
+    "intro": "Take a quick quiz so we can assess your level",
+    "startBtn": "Start the quiz",
+    "skipBtn": "Skip, go to Dashboard →"
+  },
+  "quiz": {
+    "hintFormat": "{level} — {hint}",
+    "progressFormat": "{current} / {total}",
+    "skip": "Skip →"
+  },
+  "result": {
+    "levelLabel": "Level: {level} — {label}",
+    "msgExcellent": "Excellent! You have a great German foundation.",
+    "msgGood": "Not bad! You have the basics.",
+    "msgBeginner": "No problem, we'll start from the basics!",
+    "continueBtn": "Continue"
+  },
+  "goal": {
+    "title": "Daily learning goal?",
+    "subtitle": "How many words do you want to learn each day?",
+    "label10": "10 words",
+    "sub10": "~5 min",
+    "label20": "20 words",
+    "sub20": "~10 min",
+    "label30": "30 words",
+    "sub30": "~15 min",
+    "continueBtn": "Continue",
+    "skipBtn": "Skip →"
+  },
+  "summary": {
+    "title": "Ready to learn!",
+    "subtitle": "Here's your info",
+    "levelLabel": "Level",
+    "levelValue": "{level} — {label}",
+    "goalLabel": "Daily goal",
+    "goalValue": "{count} words / day",
+    "goalEmpty": "--- words / day",
+    "quizLabel": "Quiz",
+    "quizValue": "{correct}/{total} correct",
+    "savingBtn": "Saving...",
+    "startBtn": "Start learning now!"
+  },
+  "levelA1": "Beginner",
+  "levelA2": "Upper beginner",
+  "levelB1": "Intermediate",
+  "placement": {
+    "introTitle": "Level placement",
+    "introSubtitle": "15 grammar questions — 5 each for A1, A2, B1",
+    "introNote": "Results will update your suggested level. Takes about 3–5 minutes.",
+    "currentLevel": "Current level: {level}",
+    "back": "Back",
+    "start": "Start",
+    "progressFormat": "{current}/{total}",
+    "resultTitle": "Result",
+    "resultScore": "{correct}/15 correct",
+    "estimatedLevel": "Estimated level",
+    "estimateNote": "Estimate based on 15 grammar questions — does not replace an official exam.",
+    "keepCurrent": "Keep current",
+    "saving": "Saving...",
+    "updateTo": "Update → {level}",
+    "sublevelA1Foundation": "A1.2 — Solid foundation",
+    "sublevelA1Begin": "A1.1 — Just starting",
+    "sublevelA2Upper": "A2.2 — Upper elementary",
+    "sublevelA2Lower": "A2.1 — Elementary",
+    "sublevelB1Upper": "B1.2 — Solid intermediate",
+    "sublevelB1Lower": "B1.1 — Lower intermediate"
+  }
+}

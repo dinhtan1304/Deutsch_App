@@ -1,6 +1,7 @@
 ﻿'use client';
 
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { useNextAction } from '@/hooks/useDashboard';
 
 // Inline SVG icon map — replaces emoji from backend `icon` field
@@ -47,6 +48,7 @@ function HeroSkeleton() {
 
 export function HeroActionCard() {
   const { data, isLoading } = useNextAction();
+  const t = useTranslations('dashboard.heroAction');
 
   if (isLoading) return <HeroSkeleton />;
   if (!data) return null;
@@ -88,7 +90,7 @@ export function HeroActionCard() {
         <div className="flex-1 min-w-0">
           {data.priority === 'weak_skill' && (
             <p className="text-caption font-bold uppercase tracking-wider text-white/60 mb-0.5">
-              Kỹ năng cần cải thiện
+              {t('weakSkill')}
             </p>
           )}
           <div className="flex items-center gap-2 mb-0.5">

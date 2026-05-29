@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { useStreakStatus } from '@/hooks/useDailyBonus';
 import { GRADIENT } from '@/lib/tokens';
 
@@ -11,6 +12,7 @@ import { GRADIENT } from '@/lib/tokens';
  * midnight VN time to keep the streak alive.
  */
 export function StreakWarningBanner() {
+  const t = useTranslations('dashboard.streakWarning');
   const { data, isLoading } = useStreakStatus();
 
   if (isLoading || !data) return null;
@@ -32,14 +34,13 @@ export function StreakWarningBanner() {
           className="font-bold text-sm"
           style={{ color: 'var(--theme-text-primary)' }}
         >
-          Streak {data.streak} ngày của bạn đang gặp nguy hiểm!
+          {t('title', { days: data.streak })}
         </div>
         <div
           className="text-xs mt-0.5"
           style={{ color: 'var(--theme-text-muted)' }}
         >
-          Hãy học ít nhất 1 bài hôm nay để giữ streak. Hết ngày (VN) là
-          mất đấy
+          {t('description')}
         </div>
       </div>
       <Link
@@ -49,7 +50,7 @@ export function StreakWarningBanner() {
           background: GRADIENT.dangerGames,
         }}
       >
-        Học ngay
+        {t('cta')}
       </Link>
     </div>
   );

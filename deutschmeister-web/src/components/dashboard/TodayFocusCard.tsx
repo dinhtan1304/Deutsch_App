@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { ACCENT, STATUS, GRADIENT } from '@/lib/tokens';
 import { useDailyPath } from '@/hooks/useDashboard';
 
@@ -50,6 +51,7 @@ function TaskIcon({ type, completed }: { type: string; completed: boolean }) {
 }
 
 export function TodayFocusCard() {
+  const t = useTranslations('dashboard.todayFocus');
   const { data, isLoading } = useDailyPath();
 
   if (isLoading || !data) return null;
@@ -84,12 +86,14 @@ export function TodayFocusCard() {
         {/* Title + subtitle */}
         <div className="flex-1 min-w-0">
           <div className="text-sm font-bold" style={{ color: 'var(--theme-text-primary)' }}>
-            Mục tiêu hôm nay
+            {t('title')}
           </div>
           <div className="text-xs mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>
             {allDone
-              ? 'Hoàn thành tất cả! Hẹn ngày mai'
-              : `${completedCount}/${totalCount} nhiệm vụ${srsDueCount > 0 ? ` · ${srsDueCount} thẻ cần ôn` : ''}`
+              ? t('allDone')
+              : srsDueCount > 0
+                ? t('progressWithSrs', { completed: completedCount, total: totalCount, srs: srsDueCount })
+                : t('progress', { completed: completedCount, total: totalCount })
             }
           </div>
         </div>

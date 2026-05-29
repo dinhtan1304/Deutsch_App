@@ -2,39 +2,27 @@
 /* eslint-disable no-restricted-syntax -- custom UI gradients */
 
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { useFullDashboard } from '@/hooks/useDashboard';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { ACCENT, STATUS } from '@/lib/tokens';
 
 interface JourneyStep {
-  title: string;
+  id: 'topics' | 'game' | 'grammar';
   href: string;
   color: string;
   checkFn: (stats: { totalWordsLearned: number; gamesPlayed: number; grammarCompleted: number }) => boolean;
 }
 
+// Step copy is resolved at render via dashboard.firstDayJourney.steps.<id>.
 const STEPS: JourneyStep[] = [
-  {
-    title: 'Khám phá chủ đề & học 5 từ',
-    href: '/topics',
-    color: ACCENT.srs,
-    checkFn: (s) => s.totalWordsLearned >= 5,
-  },
-  {
-    title: 'Chơi 1 trò chơi để ôn tập',
-    href: '/games',
-    color: ACCENT.vocab,
-    checkFn: (s) => s.gamesPlayed >= 1,
-  },
-  {
-    title: 'Học 1 bài ngữ pháp',
-    href: '/grammar',
-    color: ACCENT.xp,
-    checkFn: (s) => s.grammarCompleted >= 1,
-  },
+  { id: 'topics',  href: '/topics',  color: ACCENT.srs,   checkFn: (s) => s.totalWordsLearned >= 5 },
+  { id: 'game',    href: '/games',   color: ACCENT.vocab, checkFn: (s) => s.gamesPlayed >= 1 },
+  { id: 'grammar', href: '/grammar', color: ACCENT.xp,    checkFn: (s) => s.grammarCompleted >= 1 },
 ];
 
 export function FirstDayJourney() {
+  const t = useTranslations('dashboard.firstDayJourney');
   const { settings } = useSettingsStore();
   const { data } = useFullDashboard();
   const stats = data?.stats;
@@ -86,10 +74,10 @@ export function FirstDayJourney() {
         </div>
         <div className="flex-1 min-w-0">
           <div className="text-body font-bold truncate" style={{ color: 'var(--theme-text-primary)' }}>
-            Hành trình ngày đầu tiên
+            {t('title')}
           </div>
           <div className="text-caption truncate" style={{ color: 'var(--theme-text-muted)' }}>
-            Hoàn thành 3 bước để bắt đầu {level}
+            {t('subtitle', { level })}
           </div>
         </div>
         <span

@@ -1,0 +1,101 @@
+{
+  "dayNames": {
+    "sun": "So",
+    "mon": "Mo",
+    "tue": "Di",
+    "wed": "Mi",
+    "thu": "Do",
+    "fri": "Fr",
+    "sat": "Sa"
+  },
+  "empty": {
+    "title": "Noch kein Lernplan",
+    "subtitle": "Erstelle einen personalisierten Lernplan für die Goethe/TELC-Prüfung",
+    "create": "Lernplan erstellen"
+  },
+  "header": {
+    "weekProgress": "Woche {current}/{total}",
+    "daysUntilExam": "Noch {days} Tage bis zur Prüfung",
+    "resume": "Fortsetzen",
+    "pause": "Pausieren",
+    "pausedBanner": "Plan ist pausiert. Klicke auf \"Fortsetzen\", um weiterzulernen."
+  },
+  "progress": {
+    "label": "Fortschritt",
+    "completed": "abgeschlossen",
+    "totalWeeks": "{weeks}-Wochen-Plan"
+  },
+  "sidebar": {
+    "title": "Lernpfad",
+    "week": "Woche {n}"
+  },
+  "phase": {
+    "label": "Phase: {name}",
+    "weekSub": "Woche {week} — {nameEn}"
+  },
+  "today": {
+    "title": "Aufgaben heute · {day}",
+    "doneBadge": "{done}/{total} erledigt"
+  },
+  "week": {
+    "details": "Woche {week} im Detail",
+    "allDays": "ALLE"
+  },
+  "delete": {
+    "title": "Lernplan löschen?",
+    "confirm": "Möchtest du diesen Plan wirklich löschen? Diese Aktion ist endgültig.",
+    "cancel": "Abbrechen",
+    "deleting": "Wird gelöscht...",
+    "submit": "Löschen"
+  },
+  "setup": {
+    "stepLabel": "Schritt {current} von {total}",
+    "step0": {
+      "title": "Dein persönlicher Plan",
+      "subtitle": "Wir personalisieren deinen Plan basierend auf deinem Zertifikatsziel."
+    },
+    "step1": {
+      "title": "Dein Ziel",
+      "subtitle": "Das Niveau {level} dauert meist 2–4 Monate intensives Üben.",
+      "subtitleEmpty": "Das Niveau ... dauert meist 2–4 Monate intensives Üben.",
+      "back": "Zurück zum vorherigen Schritt"
+    },
+    "step2": {
+      "title": "Zielgerade",
+      "subtitle": "{exam} {level} — Wähle dein Prüfungsdatum.",
+      "dateLabel": "Geplantes Prüfungsdatum",
+      "weeksLeft": "{weeks} Wochen Übung",
+      "tooSoon": "Knapper Zeitplan! Du brauchst hohe Konzentration, um dein Ziel zu erreichen.",
+      "tooFar": "Du hast viel Zeit. Lerne jeden Tag kontinuierlich.",
+      "ideal": "Idealer Zeitraum, um dein Niveau zu steigern.",
+      "submit": "Jetzt starten",
+      "submitting": "Plan wird erstellt...",
+      "back": "Zurück",
+      "errorDefault": "Etwas ist schiefgelaufen"
+    },
+    "exams": {
+      "goethe": {
+        "name": "Goethe-Zertifikat",
+        "description": "Das anerkannteste Zertifikat des Goethe-Instituts"
+      },
+      "telc": {
+        "name": "TELC Deutsch",
+        "description": "In Europa weit verbreitetes Zertifikat"
+      }
+    },
+    "levels": {
+      "a1": {
+        "label": "A1 — Anfänger",
+        "desc": "Grundkonversation: Begrüßung, Vorstellung"
+      },
+      "a2": {
+        "label": "A2 — Grundstufe",
+        "desc": "Vertraute Informationen verstehen und austauschen"
+      },
+      "b1": {
+        "label": "B1 — Mittelstufe",
+        "desc": "Kommunikation im Beruf, beim Reisen und Lernen"
+      }
+    }
+  }
+}
