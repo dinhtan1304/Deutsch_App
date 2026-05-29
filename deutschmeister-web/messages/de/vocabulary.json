@@ -57,7 +57,16 @@
     "importBtn": "Vokabeln importieren",
     "noFoundTitle": "Keine Wörter gefunden",
     "noFoundBody": "Versuche andere Filter",
-    "pagesSuffix": "/ {total} Seiten"
+    "pagesSuffix": "/ {total} Seiten",
+    "srsBanner": {
+      "dueLine": "Du hast <b>{due}</b> Wörter heute zu wiederholen",
+      "allDone": "Super! Du hast heute alle Wörter wiederholt.",
+      "matureLine": "{mature} / {total} beherrscht ({pct}%)",
+      "newWords": "{count} neue Wörter",
+      "weakWords": "Schwache Wörter",
+      "reviewNow": "Jetzt wiederholen",
+      "learnMore": "Mehr lernen"
+    }
   },
   "grammar": {
     "pageTitle": "Deutsche Grammatik",

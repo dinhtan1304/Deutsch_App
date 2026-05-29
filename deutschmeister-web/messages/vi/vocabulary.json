@@ -57,7 +57,16 @@
     "importBtn": "Import từ vựng",
     "noFoundTitle": "Không tìm thấy từ nào",
     "noFoundBody": "Thử thay đổi bộ lọc",
-    "pagesSuffix": "/ {total} trang"
+    "pagesSuffix": "/ {total} trang",
+    "srsBanner": {
+      "dueLine": "Có <b>{due}</b> từ cần ôn tập hôm nay",
+      "allDone": "Tuyệt vời! Bạn đã ôn hết từ cho hôm nay.",
+      "matureLine": "{mature} / {total} đã thuộc ({pct}%)",
+      "newWords": "{count} từ mới",
+      "weakWords": "Từ yếu",
+      "reviewNow": "Ôn ngay",
+      "learnMore": "Học thêm"
+    }
   },
   "grammar": {
     "pageTitle": "Ngữ pháp tiếng Đức",

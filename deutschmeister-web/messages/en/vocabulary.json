@@ -57,7 +57,16 @@
     "importBtn": "Import vocabulary",
     "noFoundTitle": "No words found",
     "noFoundBody": "Try changing the filters",
-    "pagesSuffix": "/ {total} pages"
+    "pagesSuffix": "/ {total} pages",
+    "srsBanner": {
+      "dueLine": "You have <b>{due}</b> words to review today",
+      "allDone": "Great! You've reviewed all your words for today.",
+      "matureLine": "{mature} / {total} mastered ({pct}%)",
+      "newWords": "{count} new words",
+      "weakWords": "Weak words",
+      "reviewNow": "Review now",
+      "learnMore": "Learn more"
+    }
   },
   "grammar": {
     "pageTitle": "German grammar",

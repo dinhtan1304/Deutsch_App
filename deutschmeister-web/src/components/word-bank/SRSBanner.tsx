@@ -1,6 +1,7 @@
 'use client';
   
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { STATUS, GRADIENT } from '@/lib/tokens';
 
 const monoSoftBg = (color: string) => `linear-gradient(135deg, ${color}26, ${color}14)`;
@@ -13,6 +14,7 @@ interface SRSBannerProps {
 }
 
 export function SRSBanner({ srsStats, statTotal }: SRSBannerProps) {
+  const t = useTranslations('vocabulary.wordBank.srsBanner');
   const isDue = srsStats.due > 0;
   return (
     <div
@@ -34,14 +36,14 @@ export function SRSBanner({ srsStats, statTotal }: SRSBannerProps) {
         <div>
           <p className="text-sm" style={{ color: 'var(--theme-text-primary)' }}>
             {isDue ? (
-              <>Có <span className="font-bold" style={{ color: STATUS.danger }}>{srsStats.due}</span> từ cần ôn tập hôm nay</>
+              t.rich('dueLine', { due: srsStats.due, b: (chunks) => <span className="font-bold" style={{ color: STATUS.danger }}>{chunks}</span> })
             ) : (
-              <span className="font-medium" style={{ color: STATUS.success }}>Tuyệt vời! Bạn đã ôn hết từ cho hôm nay.</span>
+              <span className="font-medium" style={{ color: STATUS.success }}>{t('allDone')}</span>
             )}
           </p>
           <div className="flex items-center gap-3 mt-1 text-xs" style={{ color: 'var(--theme-text-muted)' }}>
-            <span>{srsStats.mature} / {statTotal} đã thuộc ({Math.round((srsStats.mature / statTotal) * 100)}%)</span>
-            {srsStats.new > 0 && <span>• {srsStats.new} từ mới</span>}
+            <span>{t('matureLine', { mature: srsStats.mature, total: statTotal, pct: Math.round((srsStats.mature / statTotal) * 100) })}</span>
+            {srsStats.new > 0 && <span>• {t('newWords', { count: srsStats.new })}</span>}
           </div>
         </div>
       </div>
@@ -52,14 +54,14 @@ export function SRSBanner({ srsStats, statTotal }: SRSBannerProps) {
           className="flex items-center gap-1.5 px-3 py-2 rounded-xl font-semibold text-xs transition-all hover:scale-105"
           style={{ background: `${STATUS.danger}1A`, color: STATUS.danger }}
         >
-          <IconTarget size={14} /> Từ yếu
+          <IconTarget size={14} /> {t('weakWords')}
         </Link>
         <Link
           href="/word-bank/review"
           className="flex items-center gap-1.5 px-4 py-2 rounded-xl font-semibold text-xs text-white transition-all hover:scale-105"
           style={{ background: isDue ? GRADIENT.dangerSolid : GRADIENT.action }}
         >
-          <IconRefresh size={14} /> {isDue ? 'Ôn ngay' : 'Học thêm'}
+          <IconRefresh size={14} /> {isDue ? t('reviewNow') : t('learnMore')}
         </Link>
       </div>
     </div>
