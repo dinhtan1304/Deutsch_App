@@ -50,7 +50,10 @@
       "Bash(npm install nodemailer @types/nodemailer --save)",
       "Bash(node -e \"require\\(''nodemailer''\\); console.log\\(''ok''\\)\")",
       "Bash(npx tsx prisma/seeds/grammar-a2.ts)",
-      "Bash(npx tsx prisma/seeds/seed.ts)"
+      "Bash(npx tsx prisma/seeds/seed.ts)",
+      "Bash(cd \"e:/Deutsch_App/deutschmeister-web\")",
+      "Bash(node -e 'JSON.parse\\(require\\('\\\\''fs'\\\\''\\).readFileSync\\('\\\\''messages/__TRACKED_VAR__/progress.json'\\\\'','\\\\''utf8'\\\\''\\)\\)')",
+      "Bash(echo '__TRACKED_VAR__ BAD')"
     ]
   }
 }

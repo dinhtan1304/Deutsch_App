@@ -2,6 +2,7 @@
 /* eslint-disable no-restricted-syntax */
 
 import Link from 'next/link';
+import { useTranslations, useLocale } from 'next-intl';
 import { GRADIENT, ACCENT } from '@/lib/tokens';
 import { IconMail, IconZap, IconStar, IconPencil, IconTrophy, IconCheckCircle, IconLock } from '@/components/ui/Icons';
 import { resolveCoverBackground } from '@/lib/coverPresets';
@@ -50,11 +51,13 @@ const PLAN_BADGES = {
 } as const;
 
 export function ProfileHeroCard({ user, xpInfo, isLoading, points, onEdit, readonly = false }: Props) {
+  const t = useTranslations('progress.profile.hero');
+  const locale = useLocale();
   const planRaw = (user?.subscription?.plan ?? 'free') as keyof typeof PLAN_BADGES;
   const plan = PLAN_BADGES[planRaw] ?? PLAN_BADGES.free;
   const isFree = planRaw === 'free';
   const joinedDate = user?.createdAt
-    ? new Date(user.createdAt).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })
+    ? new Date(user.createdAt).toLocaleDateString(locale, { day: '2-digit', month: '2-digit', year: 'numeric' })
     : '—';
 
   const cover = resolveCoverBackground(user?.coverImage);
@@ -81,7 +84,7 @@ export function ProfileHeroCard({ user, xpInfo, isLoading, points, onEdit, reado
           <div className="absolute top-3 right-3 px-2.5 py-1 rounded-full flex items-center gap-1.5 backdrop-blur"
             style={{ backgroundColor: 'rgba(0,0,0,0.45)', color: '#fff' }}>
             <IconLock size={12} />
-            <span className="text-[10px] font-bold uppercase tracking-wider">Riêng tư</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider">{t('private')}</span>
           </div>
         )}
       </div>
@@ -163,7 +166,7 @@ export function ProfileHeroCard({ user, xpInfo, isLoading, points, onEdit, reado
                 className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest text-white shadow-lg transition-transform hover:-translate-y-0.5"
                 style={{ background: GRADIENT.brand }}
               >
-                Nâng cấp
+                {t('upgrade')}
               </Link>
             )}
           </div>
@@ -183,7 +186,7 @@ export function ProfileHeroCard({ user, xpInfo, isLoading, points, onEdit, reado
               className="text-sm mb-4 italic underline-offset-2 hover:underline transition-colors"
               style={{ color: 'var(--theme-text-muted)' }}
             >
-              + Thêm mô tả về bạn...
+              {t('addBio')}
             </button>
           )
         )}
@@ -204,7 +207,7 @@ export function ProfileHeroCard({ user, xpInfo, isLoading, points, onEdit, reado
               <line x1="8" y1="2" x2="8" y2="6" />
               <line x1="3" y1="10" x2="21" y2="10" />
             </svg>
-            Joined {joinedDate}
+            {t('joined', { date: joinedDate })}
           </span>
         </div>
 
@@ -223,7 +226,7 @@ export function ProfileHeroCard({ user, xpInfo, isLoading, points, onEdit, reado
             style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-secondary)44' }}>
             <IconZap size={14} className="text-amber-500" />
             <span className="text-[11px] font-black uppercase tracking-wider text-amber-500">
-              {isLoading ? '—' : points.toLocaleString('vi-VN')} XP
+              {isLoading ? '—' : points.toLocaleString(locale)} XP
             </span>
           </div>
           <div className="px-4 py-2 rounded-2xl border flex items-center gap-2 transition-colors hover:bg-theme-bg-secondary"

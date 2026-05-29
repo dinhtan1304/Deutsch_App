@@ -163,6 +163,66 @@
         "speaking": "Sprechen",
         "grammar": "Grammatik"
       }
+    },
+    "answerStats": {
+      "title": "Antwortstatistik",
+      "accuracyRate": "Genauigkeitsrate",
+      "correctShort": "{n} richtig",
+      "wrongShort": "{n} falsch",
+      "totalAnswers": "Antworten gesamt",
+      "correctAnswers": "Richtige Antworten",
+      "wrongAnswers": "Falsche Antworten"
+    },
+    "roadmap": {
+      "title": "Lernpfad",
+      "subtitle": "Grammatikfortschritt nach CEFR-Niveau",
+      "levelBadge": "Niveau: {level}",
+      "grammarLevel": "{level}-Grammatik",
+      "passedOfTotal": "{passed}/{total} bestanden",
+      "testedOfTotal": "{passed}/{total} per Prüfung getestet",
+      "legendPassed": "Bestanden",
+      "legendNeedsReview": "Nachholbedarf",
+      "legendNotTested": "Nicht getestet",
+      "expand": "Lektionsdetails anzeigen",
+      "collapse": "Liste einklappen",
+      "statusLocked": "Gesperrt",
+      "statusPassed": "Bestanden",
+      "statusNeedsReview": "Nachholbedarf",
+      "statusNotTested": "nicht getestet",
+      "notPassedHeader": "Nicht bestanden ({count} Lektionen)",
+      "practiceLevel": "{level} üben",
+      "testButton": "Testprüfung",
+      "lockReason": "Schließe zuerst \"{names}\" ab (≥80%)",
+      "lockReasonGeneric": "Schließe zuerst die Vorlektionen ab (≥80%)"
+    },
+    "hero": {
+      "private": "Privat",
+      "upgrade": "Upgraden",
+      "addBio": "+ Füge eine Beschreibung über dich hinzu...",
+      "joined": "Beigetreten {date}"
+    },
+    "editModal": {
+      "title": "Profil bearbeiten",
+      "close": "Schließen",
+      "coverLabel": "Titelbild",
+      "uploadTab": "Hochladen",
+      "uploading": "Wird hochgeladen...",
+      "chooseFile": "Vom Gerät wählen",
+      "fileHint": "Max. 5MB. Format JPG, PNG oder WebP.",
+      "avatarLabel": "Avatar",
+      "changeAvatar": "Foto ändern",
+      "nameLabel": "Anzeigename",
+      "namePlaceholder": "Dein Name",
+      "nameRequired": "Name darf nicht leer sein",
+      "bioLabel": "Beschreibung",
+      "bioPlaceholder": "Ein paar Worte über dich...",
+      "publicLabel": "Öffentliches Profil",
+      "publicDesc": "Erlaube anderen Nutzern, dein Profil über die Bestenliste zu sehen. Wenn aus, ist dein Profil nur für dich sichtbar.",
+      "cancel": "Abbrechen",
+      "save": "Änderungen speichern",
+      "avatarUploadFailed": "Avatar-Upload fehlgeschlagen",
+      "coverUploadFailed": "Titelbild-Upload fehlgeschlagen",
+      "updateFailed": "Profilaktualisierung fehlgeschlagen"
     }
   }
 }

@@ -163,6 +163,66 @@
         "speaking": "Speaking",
         "grammar": "Grammar"
       }
+    },
+    "answerStats": {
+      "title": "Answer statistics",
+      "accuracyRate": "Accuracy rate",
+      "correctShort": "{n} correct",
+      "wrongShort": "{n} wrong",
+      "totalAnswers": "Total answers",
+      "correctAnswers": "Correct answers",
+      "wrongAnswers": "Wrong answers"
+    },
+    "roadmap": {
+      "title": "Learning roadmap",
+      "subtitle": "Grammar progress by CEFR level",
+      "levelBadge": "Level: {level}",
+      "grammarLevel": "{level} grammar",
+      "passedOfTotal": "{passed}/{total} passed",
+      "testedOfTotal": "{passed}/{total} tested via exam",
+      "legendPassed": "Passed",
+      "legendNeedsReview": "Needs review",
+      "legendNotTested": "Not tested",
+      "expand": "Show lesson details",
+      "collapse": "Collapse list",
+      "statusLocked": "Locked",
+      "statusPassed": "Passed",
+      "statusNeedsReview": "Needs review",
+      "statusNotTested": "not tested",
+      "notPassedHeader": "Not passed ({count} lessons)",
+      "practiceLevel": "Practice {level}",
+      "testButton": "Mock exam",
+      "lockReason": "Complete \"{names}\" first (≥80%)",
+      "lockReasonGeneric": "Complete prerequisite lessons first (≥80%)"
+    },
+    "hero": {
+      "private": "Private",
+      "upgrade": "Upgrade",
+      "addBio": "+ Add a description about yourself...",
+      "joined": "Joined {date}"
+    },
+    "editModal": {
+      "title": "Edit profile",
+      "close": "Close",
+      "coverLabel": "Cover image",
+      "uploadTab": "Upload",
+      "uploading": "Uploading...",
+      "chooseFile": "Choose from device",
+      "fileHint": "Max 5MB. JPG, PNG or WebP format.",
+      "avatarLabel": "Avatar",
+      "changeAvatar": "Change photo",
+      "nameLabel": "Display name",
+      "namePlaceholder": "Your name",
+      "nameRequired": "Name cannot be empty",
+      "bioLabel": "Bio",
+      "bioPlaceholder": "A few words about you...",
+      "publicLabel": "Public profile",
+      "publicDesc": "Allow other users to view your profile from the leaderboard. When off, your profile is only visible to you.",
+      "cancel": "Cancel",
+      "save": "Save changes",
+      "avatarUploadFailed": "Failed to upload avatar",
+      "coverUploadFailed": "Failed to upload cover image",
+      "updateFailed": "Failed to update profile"
     }
   }
 }

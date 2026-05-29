@@ -2,6 +2,8 @@
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
+import { useTranslations, useLocale } from 'next-intl';
+import { pickField } from '@/i18n/pickLocale';
 import { GRADIENT, ACCENT, STATUS } from '@/lib/tokens';
 import { useGrammarLessons, useGrammarProgress } from '@/hooks/useGrammar';
 import type { GrammarProgress } from '@/types/grammar';
@@ -28,6 +30,8 @@ const LEVEL_COLORS = {
 };
 
 export function ProfileLearningRoadmap() {
+  const t = useTranslations('progress.profile.roadmap');
+  const locale = useLocale();
   const [selectedLevel, setSelectedLevel] = useState<Level>('A1');
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -53,15 +57,18 @@ export function ProfileLearningRoadmap() {
       if (unmet.length === 0) {
         map.set(lesson.id, { locked: false, reason: '' });
       } else {
-        const names = unmet.map(id => lessonMap.get(id)?.titleVi).filter(Boolean);
+        const names = unmet.map(id => {
+          const l = lessonMap.get(id);
+          return l ? pickField(l, 'title', locale) : '';
+        }).filter(Boolean);
         map.set(lesson.id, {
           locked: true,
-          reason: names.length > 0 ? `Hoàn thành "${names.join(', ')}" trước (≥80%)` : 'Hoàn thành bài tiên quyết trước (≥80%)',
+          reason: names.length > 0 ? t('lockReason', { names: names.join(', ') }) : t('lockReasonGeneric'),
         });
       }
     }
     return map;
-  }, [allLessons, progressData]);
+  }, [allLessons, progressData, locale, t]);
 
   const levelStats = useMemo(() => {
     return LEVELS.map(level => {
@@ -103,14 +110,14 @@ export function ProfileLearningRoadmap() {
             <IconGraduationCap size={20} className="text-white" />
           </div>
           <div>
-            <h2 className="text-base font-black tracking-tight" style={{ color: 'var(--theme-text-primary)' }}>Lộ trình học tập</h2>
-            <p className="text-[11px] opacity-50 font-medium" style={{ color: 'var(--theme-text-muted)' }}>Tiến độ ngữ pháp theo tiêu chuẩn CEFR</p>
+            <h2 className="text-base font-black tracking-tight" style={{ color: 'var(--theme-text-primary)' }}>{t('title')}</h2>
+            <p className="text-[11px] opacity-50 font-medium" style={{ color: 'var(--theme-text-muted)' }}>{t('subtitle')}</p>
           </div>
         </div>
         <span className="flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest"
           style={{ background: `${color}15`, color }}>
           <IconGraduationCap size={12} />
-          Level: {selectedLevel}
+          {t('levelBadge', { level: selectedLevel })}
         </span>
       </div>
 
@@ -166,12 +173,12 @@ export function ProfileLearningRoadmap() {
           <div className="flex items-center gap-2">
             <IconBookOpen size={15} style={{ color }} />
             <span className="text-sm font-bold" style={{ color: 'var(--theme-text-primary)' }}>
-              Ngữ pháp {selectedLevel}
+              {t('grammarLevel', { level: selectedLevel })}
             </span>
           </div>
           <span className="text-xs font-semibold px-2 py-0.5 rounded-md"
             style={{ background: `${color}12`, color }}>
-            {selStats?.passed || 0}/{selStats?.total || 0} đạt qua thi
+            {t('passedOfTotal', { passed: selStats?.passed || 0, total: selStats?.total || 0 })}
           </span>
         </div>
 
@@ -181,16 +188,16 @@ export function ProfileLearningRoadmap() {
         </div>
         {!loadingLessons && selStats && (
           <div className="text-caption mb-4 text-right" style={{ color: 'var(--theme-text-muted)' }}>
-            {selStats.passed}/{selStats.total} đã kiểm tra qua bài thi
+            {t('testedOfTotal', { passed: selStats.passed, total: selStats.total })}
           </div>
         )}
 
         {!loadingLessons && selStats && (
           <div className="flex items-center gap-3 mb-4 px-1 flex-wrap">
             {[
-              { dot: STATUS.success, label: 'Đạt', value: selStats.passed },
-              { dot: ACCENT.xp, label: 'Cần bổ sung', value: selStats.needsReview },
-              { dot: 'var(--theme-border)', label: 'Chưa thi', value: selStats.total - selStats.passed - selStats.needsReview, border: true },
+              { dot: STATUS.success, label: t('legendPassed'), value: selStats.passed },
+              { dot: ACCENT.xp, label: t('legendNeedsReview'), value: selStats.needsReview },
+              { dot: 'var(--theme-border)', label: t('legendNotTested'), value: selStats.total - selStats.passed - selStats.needsReview, border: true },
             ].map(s => (
               <span key={s.label} className="flex items-center gap-1.5 text-xs">
                 <span className="w-2.5 h-2.5 rounded-full shrink-0 border"
@@ -209,7 +216,7 @@ export function ProfileLearningRoadmap() {
             className="w-full py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all hover:opacity-80"
             style={{ color: color, backgroundColor: `${color}10`, border: `1px solid ${color}20` }}
           >
-            {isExpanded ? 'Thu gọn danh sách' : 'Xem chi tiết bài học'}
+            {isExpanded ? t('collapse') : t('expand')}
             <IconChevronRight
               size={14}
               style={{ transform: isExpanded ? 'rotate(-90deg)' : 'rotate(90deg)', transition: 'transform 200ms' }}
@@ -232,13 +239,14 @@ export function ProfileLearningRoadmap() {
                   const st = lesson.status;
                   const isLocked = lesson.locked;
                   const dotColor = st === 'passed' ? STATUS.success : st === 'needs_review' ? ACCENT.xp : 'var(--theme-border)';
+                  const scoreSuffix = lesson.progress?.score ? ` ${Math.round(lesson.progress.score)}%` : '';
                   const statusLabel = isLocked
-                    ? 'Đã khóa'
+                    ? t('statusLocked')
                     : st === 'passed'
-                      ? `Đạt${lesson.progress?.score ? ` ${Math.round(lesson.progress.score)}%` : ''}`
+                      ? `${t('statusPassed')}${scoreSuffix}`
                       : st === 'needs_review'
-                        ? `Cần bổ sung${lesson.progress?.score ? ` ${Math.round(lesson.progress.score)}%` : ''}`
-                        : 'chưa thi';
+                        ? `${t('statusNeedsReview')}${scoreSuffix}`
+                        : t('statusNotTested');
                   const statusColor = isLocked
                     ? 'var(--theme-text-muted)'
                     : st === 'passed' ? STATUS.success : st === 'needs_review' ? ACCENT.xp : 'var(--theme-text-muted)';
@@ -257,7 +265,7 @@ export function ProfileLearningRoadmap() {
                       </span>
                       <span className="flex-1 text-body font-medium truncate"
                         style={{ color: isLocked ? 'var(--theme-text-muted)' : 'var(--theme-text-primary)' }}>
-                        {lesson.titleVi}
+                        {pickField(lesson, 'title', locale)}
                       </span>
                       <span className="text-caption font-semibold shrink-0" style={{ color: statusColor }}>
                         {statusLabel}
@@ -298,7 +306,7 @@ export function ProfileLearningRoadmap() {
                 <p className="text-[11.5px] font-semibold mb-2 flex items-center gap-1.5" style={{ color: ACCENT.xp }}>
                   <span className="w-4 h-4 rounded-full flex items-center justify-center text-white text-caption"
                     style={{ background: ACCENT.xp }}>!</span>
-                  Chưa đạt ({notPassed.length} bài)
+                  {t('notPassedHeader', { count: notPassed.length })}
                 </p>
                 <div className="flex flex-wrap gap-1.5">
                   {notPassed.map(l => {
@@ -313,7 +321,7 @@ export function ProfileLearningRoadmap() {
                           className={`${baseClass} cursor-not-allowed`}
                           style={{ ...baseStyle, opacity: 0.55 }}>
                           <IconLock size={10} />
-                          {l.titleVi}
+                          {pickField(l, 'title', locale)}
                         </span>
                       );
                     }
@@ -321,7 +329,7 @@ export function ProfileLearningRoadmap() {
                       <Link key={l.id} href={`/grammar/${l.slug}`}
                         className={`${baseClass} hover:opacity-80`}
                         style={baseStyle}>
-                        {l.titleVi}
+                        {pickField(l, 'title', locale)}
                       </Link>
                     );
                   })}
@@ -334,13 +342,13 @@ export function ProfileLearningRoadmap() {
                 className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-body font-semibold text-white transition-all hover:-translate-y-0.5"
                 style={{ background: `linear-gradient(135deg, ${color}, ${color}cc)`, boxShadow: `0 4px 12px ${color}28` }}>
                 <IconBookOpen size={15} />
-                Luyện tập {selectedLevel}
+                {t('practiceLevel', { level: selectedLevel })}
               </Link>
               <Link href="/practice-test"
                 className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-body font-semibold transition-all hover:-translate-y-0.5"
                 style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-secondary)', border: '1px solid var(--theme-border)' }}>
                 <IconGraduationCap size={15} />
-                Đề kiểm tra
+                {t('testButton')}
               </Link>
             </div>
           </div>

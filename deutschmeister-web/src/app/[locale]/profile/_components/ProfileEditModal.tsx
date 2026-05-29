@@ -2,6 +2,7 @@
 /* eslint-disable no-restricted-syntax */
 
 import { useEffect, useRef, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Button, Input, Switch } from '@/components/ui';
 import { IconX, IconUpload, IconCheck, IconLoader } from '@/components/ui/Icons';
 import { useUpdateProfile, useUploadAvatar, useUploadCover } from '@/hooks/useUser';
@@ -24,6 +25,7 @@ export function ProfileEditModal({ open, onClose, user }: Props) {
 }
 
 function ProfileEditModalInner({ onClose, user }: { onClose: () => void; user: User }) {
+  const t = useTranslations('progress.profile.editModal');
   const updateProfile = useUpdateProfile();
   const uploadAvatar = useUploadAvatar();
   const uploadCover = useUploadCover();
@@ -71,7 +73,7 @@ function ProfileEditModalInner({ onClose, user }: { onClose: () => void; user: U
       const { url } = await uploadAvatar.mutateAsync(file);
       setAvatar(url);
     } catch (e) {
-      setError(getApiErrorMessage(e, 'Tải ảnh đại diện thất bại'));
+      setError(getApiErrorMessage(e, t('avatarUploadFailed')));
     }
   };
 
@@ -81,7 +83,7 @@ function ProfileEditModalInner({ onClose, user }: { onClose: () => void; user: U
       const { url } = await uploadCover.mutateAsync(file);
       setCoverImage(url);
     } catch (e) {
-      setError(getApiErrorMessage(e, 'Tải ảnh nền thất bại'));
+      setError(getApiErrorMessage(e, t('coverUploadFailed')));
     }
   };
 
@@ -97,7 +99,7 @@ function ProfileEditModalInner({ onClose, user }: { onClose: () => void; user: U
       });
       onClose();
     } catch (e) {
-      setError(getApiErrorMessage(e, 'Cập nhật hồ sơ thất bại'));
+      setError(getApiErrorMessage(e, t('updateFailed')));
     }
   };
 
@@ -123,13 +125,13 @@ function ProfileEditModalInner({ onClose, user }: { onClose: () => void; user: U
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b sticky top-0 z-10"
           style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
-          <h2 className="text-lg font-bold" style={{ color: 'var(--theme-text-primary)' }}>Chỉnh sửa hồ sơ</h2>
+          <h2 className="text-lg font-bold" style={{ color: 'var(--theme-text-primary)' }}>{t('title')}</h2>
           <button
             type="button"
             onClick={onClose}
             className="p-2 rounded-lg transition-colors hover:bg-theme-bg-secondary"
             style={{ color: 'var(--theme-text-secondary)' }}
-            aria-label="Đóng"
+            aria-label={t('close')}
           >
             <IconX size={20} />
           </button>
@@ -140,7 +142,7 @@ function ProfileEditModalInner({ onClose, user }: { onClose: () => void; user: U
           {/* Cover preview */}
           <div>
             <div className="text-xs font-bold uppercase tracking-wider mb-2"
-              style={{ color: 'var(--theme-text-muted)' }}>Ảnh nền</div>
+              style={{ color: 'var(--theme-text-muted)' }}>{t('coverLabel')}</div>
             <div className="relative h-32 rounded-2xl overflow-hidden border"
               style={{ borderColor: 'var(--theme-border)' }}>
               {renderCoverPreview()}
@@ -167,7 +169,7 @@ function ProfileEditModalInner({ onClose, user }: { onClose: () => void; user: U
                   color: coverTab === 'upload' ? '#fff' : 'var(--theme-text-secondary)',
                   border: '1px solid var(--theme-border)',
                 }}
-              >Tải ảnh lên</button>
+              >{t('uploadTab')}</button>
             </div>
 
             {coverTab === 'preset' && (
@@ -216,10 +218,10 @@ function ProfileEditModalInner({ onClose, user }: { onClose: () => void; user: U
                   isLoading={uploadCover.isPending}
                   onClick={() => coverInputRef.current?.click()}
                 >
-                  {uploadCover.isPending ? 'Đang tải...' : 'Chọn ảnh từ máy'}
+                  {uploadCover.isPending ? t('uploading') : t('chooseFile')}
                 </Button>
                 <p className="text-xs mt-2" style={{ color: 'var(--theme-text-muted)' }}>
-                  Tối đa 5MB. Định dạng JPG, PNG hoặc WebP.
+                  {t('fileHint')}
                 </p>
               </div>
             )}
@@ -228,7 +230,7 @@ function ProfileEditModalInner({ onClose, user }: { onClose: () => void; user: U
           {/* Avatar */}
           <div>
             <div className="text-xs font-bold uppercase tracking-wider mb-2"
-              style={{ color: 'var(--theme-text-muted)' }}>Ảnh đại diện</div>
+              style={{ color: 'var(--theme-text-muted)' }}>{t('avatarLabel')}</div>
             <div className="flex items-center gap-4">
               <div className="w-20 h-20 rounded-full overflow-hidden flex items-center justify-center text-white text-2xl font-black"
                 style={{ background: avatar ? undefined : 'linear-gradient(135deg, #4F46E5, #3730A3)' }}>
@@ -258,7 +260,7 @@ function ProfileEditModalInner({ onClose, user }: { onClose: () => void; user: U
                 isLoading={uploadAvatar.isPending}
                 onClick={() => avatarInputRef.current?.click()}
               >
-                {uploadAvatar.isPending ? 'Đang tải...' : 'Đổi ảnh'}
+                {uploadAvatar.isPending ? t('uploading') : t('changeAvatar')}
               </Button>
             </div>
           </div>
@@ -266,15 +268,15 @@ function ProfileEditModalInner({ onClose, user }: { onClose: () => void; user: U
           {/* Name */}
           <div>
             <div className="text-xs font-bold uppercase tracking-wider mb-2"
-              style={{ color: 'var(--theme-text-muted)' }}>Tên hiển thị</div>
+              style={{ color: 'var(--theme-text-muted)' }}>{t('nameLabel')}</div>
             <Input
               value={name}
               onChange={(e) => setName(e.target.value)}
               maxLength={NAME_MAX}
-              placeholder="Tên của bạn"
+              placeholder={t('namePlaceholder')}
             />
             <div className="flex justify-between text-xs mt-1" style={{ color: 'var(--theme-text-muted)' }}>
-              <span>{nameInvalid && trimmedName.length === 0 ? 'Tên không được để trống' : ''}</span>
+              <span>{nameInvalid && trimmedName.length === 0 ? t('nameRequired') : ''}</span>
               <span>{trimmedName.length}/{NAME_MAX}</span>
             </div>
           </div>
@@ -282,13 +284,13 @@ function ProfileEditModalInner({ onClose, user }: { onClose: () => void; user: U
           {/* Bio */}
           <div>
             <div className="text-xs font-bold uppercase tracking-wider mb-2"
-              style={{ color: 'var(--theme-text-muted)' }}>Mô tả</div>
+              style={{ color: 'var(--theme-text-muted)' }}>{t('bioLabel')}</div>
             <textarea
               value={bio}
               onChange={(e) => setBio(e.target.value)}
               maxLength={BIO_MAX + 50}
               rows={4}
-              placeholder="Vài dòng về bạn..."
+              placeholder={t('bioPlaceholder')}
               className="w-full px-3 py-2 rounded-xl border text-sm resize-none focus:outline-none focus:ring-2"
               style={{
                 backgroundColor: 'var(--theme-bg-body)',
@@ -308,8 +310,8 @@ function ProfileEditModalInner({ onClose, user }: { onClose: () => void; user: U
             <Switch
               checked={isPublic}
               onChange={setIsPublic}
-              label="Công khai hồ sơ"
-              description="Cho phép người dùng khác xem hồ sơ của bạn từ bảng xếp hạng. Khi tắt, hồ sơ chỉ hiển thị với bạn."
+              label={t('publicLabel')}
+              description={t('publicDesc')}
             />
           </div>
 
@@ -324,14 +326,14 @@ function ProfileEditModalInner({ onClose, user }: { onClose: () => void; user: U
         {/* Footer */}
         <div className="flex items-center justify-end gap-2 px-6 py-4 border-t sticky bottom-0 z-10"
           style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
-          <Button variant="ghost" onClick={onClose} disabled={updateProfile.isPending}>Hủy</Button>
+          <Button variant="ghost" onClick={onClose} disabled={updateProfile.isPending}>{t('cancel')}</Button>
           <Button
             variant="primary"
             onClick={handleSave}
             disabled={!canSave}
             isLoading={updateProfile.isPending}
           >
-            Lưu thay đổi
+            {t('save')}
           </Button>
         </div>
       </div>

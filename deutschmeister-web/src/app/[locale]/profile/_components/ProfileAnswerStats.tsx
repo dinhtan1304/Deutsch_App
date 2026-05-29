@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { ACCENT, STATUS } from '@/lib/tokens';
 import { IconTarget, IconBrain, IconCheckAll, IconX } from '@/components/ui/Icons';
 
@@ -12,18 +13,19 @@ interface Props {
 }
 
 export function ProfileAnswerStats({ isLoading, accuracyPct, correctAnswers, wrongAnswers, totalAnswers }: Props) {
+  const t = useTranslations('progress.profile.answerStats');
   return (
     <div className="rounded-2xl border p-5"
       style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
       <h2 className="text-[15px] font-bold mb-4" style={{ color: 'var(--theme-text-primary)' }}>
-        Thống kê trả lời
+        {t('title')}
       </h2>
 
       <div className="mb-4 p-3.5 rounded-xl" style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-1.5 text-body font-medium" style={{ color: 'var(--theme-text-secondary)' }}>
             <IconTarget size={14} style={{ color: STATUS.success }} />
-            Tỉ lệ chính xác
+            {t('accuracyRate')}
           </div>
           <span className="text-sm font-extrabold" style={{ color: STATUS.success }}>
             {isLoading ? '—' : `${accuracyPct}%`}
@@ -36,16 +38,16 @@ export function ProfileAnswerStats({ isLoading, accuracyPct, correctAnswers, wro
           />
         </div>
         <div className="flex justify-between mt-1.5 text-[10.5px]" style={{ color: 'var(--theme-text-muted)' }}>
-          <span>{correctAnswers} đúng</span>
-          <span>{wrongAnswers} sai</span>
+          <span>{t('correctShort', { n: correctAnswers })}</span>
+          <span>{t('wrongShort', { n: wrongAnswers })}</span>
         </div>
       </div>
 
       <div className="space-y-2">
         {[
-          { label: 'Tổng câu trả lời', value: totalAnswers, color: 'var(--theme-text-primary)', icon: IconBrain, accent: ACCENT.srs },
-          { label: 'Trả lời đúng', value: correctAnswers, color: STATUS.success, icon: IconCheckAll, accent: STATUS.success },
-          { label: 'Trả lời sai', value: wrongAnswers, color: STATUS.danger, icon: IconX, accent: STATUS.danger },
+          { label: t('totalAnswers'), value: totalAnswers, color: 'var(--theme-text-primary)', icon: IconBrain, accent: ACCENT.srs },
+          { label: t('correctAnswers'), value: correctAnswers, color: STATUS.success, icon: IconCheckAll, accent: STATUS.success },
+          { label: t('wrongAnswers'), value: wrongAnswers, color: STATUS.danger, icon: IconX, accent: STATUS.danger },
         ].map((row, i) => {
           const RowIcon = row.icon;
           return (

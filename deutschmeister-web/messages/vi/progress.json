@@ -163,6 +163,66 @@
         "speaking": "Nói",
         "grammar": "Ngữ pháp"
       }
+    },
+    "answerStats": {
+      "title": "Thống kê trả lời",
+      "accuracyRate": "Tỉ lệ chính xác",
+      "correctShort": "{n} đúng",
+      "wrongShort": "{n} sai",
+      "totalAnswers": "Tổng câu trả lời",
+      "correctAnswers": "Trả lời đúng",
+      "wrongAnswers": "Trả lời sai"
+    },
+    "roadmap": {
+      "title": "Lộ trình học tập",
+      "subtitle": "Tiến độ ngữ pháp theo tiêu chuẩn CEFR",
+      "levelBadge": "Level: {level}",
+      "grammarLevel": "Ngữ pháp {level}",
+      "passedOfTotal": "{passed}/{total} đạt qua thi",
+      "testedOfTotal": "{passed}/{total} đã kiểm tra qua bài thi",
+      "legendPassed": "Đạt",
+      "legendNeedsReview": "Cần bổ sung",
+      "legendNotTested": "Chưa thi",
+      "expand": "Xem chi tiết bài học",
+      "collapse": "Thu gọn danh sách",
+      "statusLocked": "Đã khóa",
+      "statusPassed": "Đạt",
+      "statusNeedsReview": "Cần bổ sung",
+      "statusNotTested": "chưa thi",
+      "notPassedHeader": "Chưa đạt ({count} bài)",
+      "practiceLevel": "Luyện tập {level}",
+      "testButton": "Đề kiểm tra",
+      "lockReason": "Hoàn thành \"{names}\" trước (≥80%)",
+      "lockReasonGeneric": "Hoàn thành bài tiên quyết trước (≥80%)"
+    },
+    "hero": {
+      "private": "Riêng tư",
+      "upgrade": "Nâng cấp",
+      "addBio": "+ Thêm mô tả về bạn...",
+      "joined": "Tham gia {date}"
+    },
+    "editModal": {
+      "title": "Chỉnh sửa hồ sơ",
+      "close": "Đóng",
+      "coverLabel": "Ảnh nền",
+      "uploadTab": "Tải ảnh lên",
+      "uploading": "Đang tải...",
+      "chooseFile": "Chọn ảnh từ máy",
+      "fileHint": "Tối đa 5MB. Định dạng JPG, PNG hoặc WebP.",
+      "avatarLabel": "Ảnh đại diện",
+      "changeAvatar": "Đổi ảnh",
+      "nameLabel": "Tên hiển thị",
+      "namePlaceholder": "Tên của bạn",
+      "nameRequired": "Tên không được để trống",
+      "bioLabel": "Mô tả",
+      "bioPlaceholder": "Vài dòng về bạn...",
+      "publicLabel": "Công khai hồ sơ",
+      "publicDesc": "Cho phép người dùng khác xem hồ sơ của bạn từ bảng xếp hạng. Khi tắt, hồ sơ chỉ hiển thị với bạn.",
+      "cancel": "Hủy",
+      "save": "Lưu thay đổi",
+      "avatarUploadFailed": "Tải ảnh đại diện thất bại",
+      "coverUploadFailed": "Tải ảnh nền thất bại",
+      "updateFailed": "Cập nhật hồ sơ thất bại"
     }
   }
 }
