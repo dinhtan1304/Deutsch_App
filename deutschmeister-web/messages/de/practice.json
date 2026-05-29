@@ -701,7 +701,17 @@
       "warnUnansweredTitle": "{count} Lücken unbeantwortet",
       "warnUnansweredSubtitle": "Diese gelten als falsch. Trotzdem abgeben?",
       "continueWriting": "Weiter schreiben",
-      "submitNow": "Jetzt abgeben"
+      "submitNow": "Jetzt abgeben",
+      "difficultyBadge": "Schwierigkeit: {difficulty}",
+      "completedBadge": "Abgeschlossen: {pct}%",
+      "checkAnswers": "Antworten prüfen",
+      "listenSegment": "Diesen Satz anhören",
+      "seekHere": "Zu dieser Stelle springen",
+      "umlautTip": "Umlaut-Tipp: {hint}",
+      "videoUnavailableTitle": "Video nicht verfügbar",
+      "videoUnavailableBody": "Dieses Video wurde möglicherweise entfernt oder ist in deiner Region gesperrt.",
+      "processing": "Wird verarbeitet...",
+      "chooseOtherVideo": "Anderes Video wählen"
     },
     "result": {
       "title": "Übungsergebnis",

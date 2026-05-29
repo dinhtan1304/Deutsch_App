@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { ACCENT, STATUS } from '@/lib/tokens';
 import { Part, SegmentWithParts } from '@/lib/api/dictation';
 import { YouTubeEmbedRef } from './YouTubeEmbed';
@@ -22,6 +23,7 @@ function formatTimestamp(ms: number): string {
 }
 
 export function DictationSegmentRow({ segment, userAnswers, onChange, playerRef, isGraded, isActive }: Props) {
+  const t = useTranslations('practice.dictation.session');
   const opacityClass = isGraded ? 'opacity-100' : isActive ? 'opacity-100 scale-[1.01]' : 'opacity-50 hover:opacity-100';
   const textWeightClass = isActive && !isGraded ? 'font-medium' : 'font-normal';
 
@@ -37,7 +39,7 @@ export function DictationSegmentRow({ segment, userAnswers, onChange, playerRef,
       {/* Headphone button — plays this segment */}
       <button
         type="button"
-        title="Nghe câu này"
+        title={t('listenSegment')}
         onClick={() => playerRef.current?.playSegment(segment.start / 1000, segment.end / 1000)}
         className={`shrink-0 w-10 h-10 rounded-full flex items-center justify-center transition-all mt-0.5 shadow-sm${isActive && !isGraded ? ' animate-[pulse_2s_ease-in-out_infinite]' : ''}`}
         style={{
@@ -75,7 +77,7 @@ export function DictationSegmentRow({ segment, userAnswers, onChange, playerRef,
       {/* Timestamp — click to seek */}
       <button
         type="button"
-        title="Nhảy tới vị trí này"
+        title={t('seekHere')}
         onClick={() => playerRef.current?.seekTo(segment.start / 1000)}
         className="shrink-0 text-xs font-mono mt-1 transition-colors px-2 py-1 rounded-lg"
         style={{
@@ -140,6 +142,7 @@ function BlankInput({ part, value, onChange, pxWidth }: {
   onChange: (blankId: string, value: string) => void;
   pxWidth: string;
 }) {
+  const t = useTranslations('practice.dictation.session');
   const onUmlautKey = useUmlautTrigger((next) => onChange(part.blankId, next));
   const isFilled = value.trim().length > 0;
   const idleBg = isFilled ? `${ACCENT.dictation}15` : 'var(--theme-bg-card)';
@@ -152,7 +155,7 @@ function BlankInput({ part, value, onChange, pxWidth }: {
       value={value}
       onChange={e => onChange(part.blankId, e.target.value)}
       onKeyDown={onUmlautKey}
-      title={`Mẹo gõ umlaut: ${UMLAUT_TRIGGER_HINT}`}
+      title={t('umlautTip', { hint: UMLAUT_TRIGGER_HINT })}
       className="inline-block text-center rounded-lg shadow-sm font-bold outline-none transition-all duration-200 mx-1 py-1"
       style={{
         width: pxWidth,

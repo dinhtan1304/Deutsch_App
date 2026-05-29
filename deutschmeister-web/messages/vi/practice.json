@@ -701,7 +701,17 @@
       "warnUnansweredTitle": "Còn {count} ô chưa hoàn thành",
       "warnUnansweredSubtitle": "Những ô này sẽ tính là không chính xác. Bạn có muốn nộp bài?",
       "continueWriting": "Tiếp tục viết",
-      "submitNow": "Nộp ngay"
+      "submitNow": "Nộp ngay",
+      "difficultyBadge": "Độ khó: {difficulty}",
+      "completedBadge": "Hoàn thành: {pct}%",
+      "checkAnswers": "Kiểm tra đáp án",
+      "listenSegment": "Nghe câu này",
+      "seekHere": "Nhảy tới vị trí này",
+      "umlautTip": "Mẹo gõ umlaut: {hint}",
+      "videoUnavailableTitle": "Video không khả dụng",
+      "videoUnavailableBody": "Video này có thể đã bị xóa hoặc bị chặn tại khu vực của bạn.",
+      "processing": "Đang xử lý...",
+      "chooseOtherVideo": "Chọn video khác"
     },
     "result": {
       "title": "Kết quả luyện tập",

@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { GRADIENT } from '@/lib/tokens';
 
 interface Props {
@@ -11,6 +12,7 @@ interface Props {
 }
 
 export function DictationHeader({ difficulty, answeredCount, totalBlanks, onSubmit, isSubmitting }: Props) {
+  const t = useTranslations('practice.dictation.session');
   const pct = totalBlanks > 0 ? Math.round((answeredCount / totalBlanks) * 100) : 0;
 
   return (
@@ -20,13 +22,13 @@ export function DictationHeader({ difficulty, answeredCount, totalBlanks, onSubm
           className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold text-white"
           style={{ background: GRADIENT.dictation }}
         >
-          Độ khó: {difficulty}
+          {t('difficultyBadge', { difficulty })}
         </span>
         <span
           className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold border"
           style={{ color: 'var(--theme-text-secondary)', borderColor: 'var(--theme-border)' }}
         >
-          Hoàn thành: {pct}%
+          {t('completedBadge', { pct })}
         </span>
       </div>
       <button
@@ -46,7 +48,7 @@ export function DictationHeader({ difficulty, answeredCount, totalBlanks, onSubm
             <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
           </svg>
         )}
-        Kiểm tra đáp án
+        {t('checkAnswers')}
       </button>
     </div>
   );

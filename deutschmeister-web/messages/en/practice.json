@@ -701,7 +701,17 @@
       "warnUnansweredTitle": "{count} blanks left unanswered",
       "warnUnansweredSubtitle": "These will count as incorrect. Submit anyway?",
       "continueWriting": "Keep writing",
-      "submitNow": "Submit now"
+      "submitNow": "Submit now",
+      "difficultyBadge": "Difficulty: {difficulty}",
+      "completedBadge": "Completed: {pct}%",
+      "checkAnswers": "Check answers",
+      "listenSegment": "Listen to this line",
+      "seekHere": "Jump to this position",
+      "umlautTip": "Umlaut typing tip: {hint}",
+      "videoUnavailableTitle": "Video unavailable",
+      "videoUnavailableBody": "This video may have been removed or blocked in your region.",
+      "processing": "Processing...",
+      "chooseOtherVideo": "Choose another video"
     },
     "result": {
       "title": "Practice result",

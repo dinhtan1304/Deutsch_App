@@ -1,6 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { GRADIENT, STATUS } from '@/lib/tokens';
 import { useDeleteDictation } from '@/hooks/useDictation';
 
@@ -9,6 +10,7 @@ interface Props {
 }
 
 export function VideoUnavailableFallback({ sessionId }: Props) {
+  const t = useTranslations('practice.dictation.session');
   const router = useRouter();
   const { mutate: deleteSession, isPending } = useDeleteDictation();
 
@@ -30,10 +32,10 @@ export function VideoUnavailableFallback({ sessionId }: Props) {
       </div>
       <div>
         <p className="font-bold text-base" style={{ color: 'var(--theme-text-primary)' }}>
-          Video không khả dụng
+          {t('videoUnavailableTitle')}
         </p>
         <p className="text-sm mt-1" style={{ color: 'var(--theme-text-muted)' }}>
-          Video này có thể đã bị xóa hoặc bị chặn tại khu vực của bạn.
+          {t('videoUnavailableBody')}
         </p>
       </div>
       <button
@@ -43,7 +45,7 @@ export function VideoUnavailableFallback({ sessionId }: Props) {
         className="px-5 py-2 rounded-xl text-sm font-bold text-white disabled:opacity-60"
         style={{ background: GRADIENT.dictation }}
       >
-        {isPending ? 'Đang xử lý...' : 'Chọn video khác'}
+        {isPending ? t('processing') : t('chooseOtherVideo')}
       </button>
     </div>
   );
