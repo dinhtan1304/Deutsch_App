@@ -2,6 +2,7 @@
 /* eslint-disable no-restricted-syntax */
 
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { ACCENT } from '@/lib/tokens';
 import { useIsPremium, useBetaOpen } from '@/hooks/useSubscription';
 
@@ -30,16 +31,21 @@ interface Props {
  */
 export function UpsellTrigger({
   variant = 'card',
-  title = 'Mở khóa toàn bộ tính năng Premium',
-  description = 'Đề chuẩn Goethe & TELC, không giới hạn AI chấm bài, ôn tập cá nhân hóa.',
-  ctaLabel = 'Nâng cấp',
+  title: titleProp,
+  description: descriptionProp,
+  ctaLabel: ctaLabelProp,
   href = '/pricing',
   source,
 }: Props) {
+  const t = useTranslations('subscription.upsell');
   const isPremium = useIsPremium();
   const betaOpen = useBetaOpen();
 
   if (isPremium || betaOpen) return null;
+
+  const title = titleProp ?? t('defaultTitle');
+  const description = descriptionProp ?? t('defaultDescription');
+  const ctaLabel = ctaLabelProp ?? t('cta');
 
   const fullHref = source ? `${href}?src=${encodeURIComponent(source)}` : href;
 
@@ -173,13 +179,14 @@ function CrownIcon({ size = 18, color = ACCENT.vocab }: { size?: number; color?:
  * Hidden when the user is Premium or BETA_OPEN.
  */
 export function PremiumLockIcon({ size = 12 }: { size?: number }) {
+  const t = useTranslations('subscription.upsell');
   const isPremium = useIsPremium();
   const betaOpen = useBetaOpen();
   if (isPremium || betaOpen) return null;
   return (
     <span
       className="shrink-0 inline-flex items-center justify-center"
-      title="Premium only"
+      title={t('premiumOnly')}
       style={{ color: ACCENT.vocab }}
     >
       <CrownIcon size={size} color="#8B5CF6" />

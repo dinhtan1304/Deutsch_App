@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useCheckQuota } from '@/hooks/useSubscription';
 import { useAuthStore } from '@/stores/authStore';
 import { UpgradeModal } from './UpgradeModal';
@@ -21,6 +22,7 @@ interface Props {
  * If user is not authenticated, shows a login prompt.
  */
 export function QuotaPaywall({ feature, children, featureContext }: Props) {
+  const t = useTranslations('subscription.quota');
   const { isAuthenticated } = useAuthStore();
   const pathname = usePathname();
   const { data: quota, isLoading } = useCheckQuota(feature, isAuthenticated);
@@ -39,21 +41,21 @@ export function QuotaPaywall({ feature, children, featureContext }: Props) {
           </svg>
         </div>
         <h3 className="text-base font-bold mb-1" style={{ color: 'var(--theme-text-primary)' }}>
-          Đăng nhập để dùng AI luyện tập
+          {t('guestTitle')}
         </h3>
         <p className="text-body mb-5" style={{ color: 'var(--theme-text-muted)' }}>
-          Tạo tài khoản miễn phí để AI sinh đề luyện tập cá nhân hóa cho bạn.
+          {t('guestBody')}
         </p>
         <div className="flex gap-3 justify-center flex-wrap">
           <Link href={`/auth/register?returnTo=${pathname}`}
             className="px-5 py-2.5 rounded-xl text-sm font-bold text-white transition-opacity hover:opacity-90"
             style={{ background: GRADIENT.brand }}>
-            Đăng ký miễn phí
+            {t('registerFree')}
           </Link>
           <Link href={`/auth/login?returnTo=${pathname}`}
             className="px-5 py-2.5 rounded-xl text-sm font-semibold border transition-opacity hover:opacity-80"
             style={{ color: 'var(--theme-text-secondary)', borderColor: 'var(--theme-border)' }}>
-            Đăng nhập
+            {t('login')}
           </Link>
         </div>
       </div>
@@ -83,10 +85,10 @@ export function QuotaPaywall({ feature, children, featureContext }: Props) {
         </div>
 
         <h3 className="text-base font-bold mb-1" style={{ color: 'var(--theme-text-primary)' }}>
-          Hết lượt luyện tập tuần này
+          {t('exhaustedTitle')}
         </h3>
         <p className="text-body mb-4" style={{ color: 'var(--theme-text-muted)' }}>
-          Bạn đã sử dụng {quota.used}/{quota.limit} lượt miễn phí tuần này
+          {t('usedLine', { used: quota.used, limit: quota.limit })}
         </p>
 
         {/* Progress bar */}
@@ -102,11 +104,11 @@ export function QuotaPaywall({ feature, children, featureContext }: Props) {
           className="w-full py-3 rounded-xl text-sm font-bold text-white mb-3 transition-transform hover:scale-[1.01]"
           style={{ background: GRADIENT.writing }}
         >
-          Nâng cấp Premium — Không giới hạn
+          {t('upgradeUnlimited')}
         </button>
 
         <p className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>
-          Lượt miễn phí reset vào thứ Hai hàng tuần (00:00 UTC+7)
+          {t('resetNote')}
         </p>
       </div>
 

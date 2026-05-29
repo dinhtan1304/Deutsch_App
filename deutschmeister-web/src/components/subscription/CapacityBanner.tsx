@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { UpgradeModal } from './UpgradeModal';
 import { ACCENT, STATUS, GRADIENT } from '@/lib/tokens';
 
@@ -25,6 +26,8 @@ interface Props {
  * Renders nothing for paid users — they don't have a cap.
  */
 export function CapacityBanner({ used, limit, isPaid, label, featureContext }: Props) {
+  const t = useTranslations('subscription.capacity');
+  const tc = useTranslations('subscription.common');
   const [upgradeOpen, setUpgradeOpen] = useState(false);
 
   if (isPaid || limit < 0) return null;
@@ -52,10 +55,10 @@ export function CapacityBanner({ used, limit, isPaid, label, featureContext }: P
           <div className="flex items-baseline justify-between gap-2 mb-1.5">
             <span className="text-xs font-semibold" style={{ color: 'var(--theme-text-secondary)' }}>
               {label}: <strong style={{ color: accent }}>{capped}/{limit}</strong>
-              {depleted && <span className="ml-2" style={{ color: STATUS.danger }}>đã đầy</span>}
+              {depleted && <span className="ml-2" style={{ color: STATUS.danger }}>{t('full')}</span>}
             </span>
             <span className="text-[11px]" style={{ color: 'var(--theme-text-muted)' }}>
-              Free • Upgrade để không giới hạn
+              {t('freeUpgradeHint')}
             </span>
           </div>
           <div
@@ -82,7 +85,7 @@ export function CapacityBanner({ used, limit, isPaid, label, featureContext }: P
           className="text-xs font-bold px-3 py-1.5 rounded-lg text-white transition-transform hover:scale-[1.02] active:scale-95 whitespace-nowrap"
           style={{ background: GRADIENT.premium }}
         >
-          {depleted ? 'Nâng cấp ngay' : 'Premium từ 29k'}
+          {depleted ? tc('upgradeNow') : tc('premiumFrom')}
         </button>
       </div>
 

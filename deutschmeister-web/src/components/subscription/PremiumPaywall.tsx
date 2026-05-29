@@ -1,6 +1,7 @@
 ﻿'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { ACCENT, GRADIENT } from '@/lib/tokens';
 import { useIsExamUnlocked } from '@/hooks/useSubscription';
 import { UpgradeModal } from './UpgradeModal';
@@ -18,17 +19,21 @@ interface Props {
  * otherwise shows an upgrade card with an UpgradeModal trigger.
  */
 export function PremiumPaywall({
-  title = 'Tính năng Premium',
-  description = 'Nâng cấp để truy cập đề thi chuẩn Goethe & TELC',
+  title: titleProp,
+  description: descriptionProp,
   children,
   featureContext,
 }: Props) {
+  const t = useTranslations('subscription.paywall');
   const unlocked = useIsExamUnlocked();
   const [upgradeOpen, setUpgradeOpen] = useState(false);
 
   if (unlocked) {
     return <>{children}</>;
   }
+
+  const title = titleProp ?? t('defaultTitle');
+  const description = descriptionProp ?? t('defaultDescription');
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: 'var(--theme-bg-primary)' }}>
@@ -87,11 +92,11 @@ export function PremiumPaywall({
             className="w-full py-3 rounded-xl text-sm font-bold text-white mb-3 transition-transform hover:scale-[1.01]"
             style={{ background: GRADIENT.writing }}
           >
-            Nâng cấp Premium
+            {t('upgrade')}
           </button>
 
           <p className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>
-            Mở khoá đề Goethe/TELC A1–B1, AI chấm điểm, giải thích lỗi
+            {t('footnote')}
           </p>
         </div>
       </div>

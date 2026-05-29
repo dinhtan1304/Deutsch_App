@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { useCheckQuota, useIsPremium } from '@/hooks/useSubscription';
 import { useAuthStore } from '@/stores/authStore';
 import { UpgradeModal } from './UpgradeModal';
@@ -15,9 +16,11 @@ interface Props {
   featureContext?: string;
 }
 
-function formatResetHint(resetsAt: string | undefined, window: 'daily' | 'weekly'): string {
+type QuotaT = ReturnType<typeof useTranslations<'subscription.quota'>>;
+
+function formatResetHint(resetsAt: string | undefined, window: 'daily' | 'weekly', t: QuotaT): string {
   if (!resetsAt) {
-    return window === 'daily' ? 'Reset 0h sáng mai' : 'Reset thứ Hai tuần sau';
+    return window === 'daily' ? t('resetDailyDefault') : t('resetWeeklyDefault');
   }
   const reset = new Date(resetsAt);
   const now = new Date();
@@ -26,12 +29,12 @@ function formatResetHint(resetsAt: string | undefined, window: 'daily' | 'weekly
   const diffDays = Math.floor(diffHours / 24);
 
   if (window === 'daily') {
-    if (diffHours < 1) return 'Reset trong < 1 giờ';
-    return `Reset trong ${diffHours} giờ`;
+    if (diffHours < 1) return t('resetUnderHour');
+    return t('resetHours', { h: diffHours });
   }
-  if (diffDays === 0) return `Reset trong ${diffHours} giờ`;
-  if (diffDays === 1) return 'Reset ngày mai';
-  return `Reset trong ${diffDays} ngày`;
+  if (diffDays === 0) return t('resetHours', { h: diffHours });
+  if (diffDays === 1) return t('resetTomorrow');
+  return t('resetDays', { d: diffDays });
 }
 
 /**
@@ -43,6 +46,8 @@ function formatResetHint(resetsAt: string | undefined, window: 'daily' | 'weekly
  * paywall blocks the action when quota is depleted.
  */
 export function QuotaBanner({ feature, label, featureContext }: Props) {
+  const t = useTranslations('subscription.quota');
+  const tc = useTranslations('subscription.common');
   const { isAuthenticated } = useAuthStore();
   const isPremium = useIsPremium(isAuthenticated);
   const { data: quota, isLoading } = useCheckQuota(feature, isAuthenticated);
@@ -58,8 +63,8 @@ export function QuotaBanner({ feature, label, featureContext }: Props) {
   const lastOne = remaining === 1;
 
   const accent = depleted ? STATUS.danger : lastOne ? STATUS.warning : ACCENT.reading;
-  const periodLabel = quota.window === 'daily' ? 'hôm nay' : 'tuần này';
-  const resetHint = formatResetHint(quota.resetsAt, quota.window);
+  const periodLabel = quota.window === 'daily' ? t('periodDaily') : t('periodWeekly');
+  const resetHint = formatResetHint(quota.resetsAt, quota.window, t);
 
   return (
     <>
@@ -108,7 +113,7 @@ export function QuotaBanner({ feature, label, featureContext }: Props) {
           className="text-xs font-bold px-3 py-1.5 rounded-lg text-white transition-transform hover:scale-[1.02] active:scale-95 whitespace-nowrap"
           style={{ background: GRADIENT.premium }}
         >
-          {depleted ? 'Nâng cấp ngay' : 'Premium từ 29k'}
+          {depleted ? tc('upgradeNow') : tc('premiumFrom')}
         </button>
       </div>
 

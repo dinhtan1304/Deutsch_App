@@ -2,6 +2,7 @@
 /* eslint-disable no-restricted-syntax -- custom UI gradients */
 
 import { useState, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import {
   useRequestUpgrade,
   useValidatePromo,
@@ -114,6 +115,7 @@ function priceForPeriod(p: BillingPeriod, plans?: Plan[]): number {
 }
 
 export function UpgradeModal({ open, onClose, defaultPeriod = 'yearly', featureContext }: Props) {
+  const t = useTranslations('subscription.upgradeModal');
   const { isAuthenticated } = useAuthStore();
   const dialogRef = useModalA11y(open, onClose);
   const [period, setPeriod] = useState<BillingPeriod>(defaultPeriod);
@@ -151,7 +153,7 @@ export function UpgradeModal({ open, onClose, defaultPeriod = 'yearly', featureC
       setPromoApplied({ discount: res.discount, label: res.discountLabel });
     } catch (e) {
       setPromoApplied(null);
-      setPromoError((e as { response?: { data?: { message?: string } } } | undefined)?.response?.data?.message || (e as Error | undefined)?.message || 'Mã không hợp lệ');
+      setPromoError((e as { response?: { data?: { message?: string } } } | undefined)?.response?.data?.message || (e as Error | undefined)?.message || t('promoInvalid'));
     }
   };
 
@@ -197,7 +199,7 @@ export function UpgradeModal({ open, onClose, defaultPeriod = 'yearly', featureC
         {/* Close button */}
         <button
           onClick={handleClose}
-          aria-label="Đóng"
+          aria-label={t('close')}
           className="absolute top-4 right-4 p-1 rounded-lg transition-colors"
           style={{ color: 'var(--theme-text-muted)' }}
         >
@@ -207,7 +209,7 @@ export function UpgradeModal({ open, onClose, defaultPeriod = 'yearly', featureC
         {step === 'select' ? (
           <>
             <h2 id="upgrade-modal-title" className="text-lg font-bold mb-1" style={{ color: 'var(--theme-text-primary)' }}>
-              Nâng cấp Premium
+              {t('title')}
             </h2>
             {featureContext ? (
               <div className="rounded-xl px-3 py-2.5 mb-4 text-body leading-relaxed"
@@ -216,7 +218,7 @@ export function UpgradeModal({ open, onClose, defaultPeriod = 'yearly', featureC
               </div>
             ) : (
               <p className="text-body mb-5" style={{ color: 'var(--theme-text-muted)' }}>
-                Luyện tập không giới hạn, đề thi chuẩn Goethe/TELC, AI chấm bài
+                {t('tagline')}
               </p>
             )}
 
@@ -224,7 +226,7 @@ export function UpgradeModal({ open, onClose, defaultPeriod = 'yearly', featureC
             <div className="mb-5">
               {/* Premium Lite row */}
               <div className="text-[10px] font-black uppercase tracking-widest mb-2 text-emerald-500">
-                Premium Lite — Không có exam mode
+                {t('liteRow')}
               </div>
               <div className="grid grid-cols-2 gap-2 mb-3">
                 {(['lite_monthly', 'lite_quarterly'] as const).map((p) => {
@@ -241,7 +243,7 @@ export function UpgradeModal({ open, onClose, defaultPeriod = 'yearly', featureC
                       }}
                     >
                       <div className="text-caption opacity-90">
-                        {p === 'lite_monthly' ? 'Lite · Tháng' : 'Lite · 3 Tháng'}
+                        {p === 'lite_monthly' ? t('liteMonthly') : t('liteQuarterly')}
                       </div>
                       <div className="text-body font-bold mt-0.5">
                         {plansLoading ? '...' : formatVND(priceForPeriod(p, plans))}
@@ -253,7 +255,7 @@ export function UpgradeModal({ open, onClose, defaultPeriod = 'yearly', featureC
 
               {/* Premium Full row */}
               <div className="text-[10px] font-black uppercase tracking-widest mb-2 text-indigo-500">
-                Premium — Đầy đủ + Exam mode
+                {t('fullRow')}
               </div>
               <div className="grid grid-cols-3 gap-2 mb-3">
                 {(['monthly', 'quarterly', 'yearly'] as const).map((p) => {
@@ -270,7 +272,7 @@ export function UpgradeModal({ open, onClose, defaultPeriod = 'yearly', featureC
                       }}
                     >
                       <div className="text-caption opacity-90">
-                        {p === 'monthly' ? 'Tháng' : p === 'quarterly' ? '3 Tháng' : 'Năm'}
+                        {p === 'monthly' ? t('monthly') : p === 'quarterly' ? t('quarterly') : t('yearly')}
                       </div>
                       <div className="text-body font-bold mt-0.5">
                         {plansLoading ? '...' : formatVND(priceForPeriod(p, plans))}
@@ -292,7 +294,7 @@ export function UpgradeModal({ open, onClose, defaultPeriod = 'yearly', featureC
 
               {/* Exam Bundle + Lifetime row */}
               <div className="text-[10px] font-black uppercase tracking-widest mb-2" style={{ color: 'var(--theme-text-muted)' }}>
-                Một lần thanh toán
+                {t('oneTimeRow')}
               </div>
               <div className="grid grid-cols-2 gap-2">
                 {(['exam_bundle', 'lifetime'] as const).map((p) => {
@@ -312,7 +314,7 @@ export function UpgradeModal({ open, onClose, defaultPeriod = 'yearly', featureC
                       }}
                     >
                       <div className="text-caption opacity-90">
-                        {p === 'exam_bundle' ? 'Exam Bundle · 90 ngày' : 'Lifetime · Trọn đời'}
+                        {p === 'exam_bundle' ? t('examBundle') : t('lifetime')}
                       </div>
                       <div className="text-body font-bold mt-0.5">
                         {plansLoading ? '...' : formatVND(priceForPeriod(p, plans))}
@@ -338,7 +340,11 @@ export function UpgradeModal({ open, onClose, defaultPeriod = 'yearly', featureC
                   border: '1px solid rgba(236,72,153,0.2)',
                 }}
               >
-                🔥 Còn <b>{lifetimeInfo.remaining}/{lifetimeInfo.max}</b> suất Lifetime
+                {t.rich('lifetimeRemaining', {
+                  remaining: lifetimeInfo.remaining,
+                  max: lifetimeInfo.max,
+                  b: (chunks) => <b>{chunks}</b>,
+                })}
               </div>
             )}
 
@@ -348,7 +354,7 @@ export function UpgradeModal({ open, onClose, defaultPeriod = 'yearly', featureC
                 className="text-caption uppercase tracking-wide block mb-1.5"
                 style={{ color: 'var(--theme-text-muted)' }}
               >
-                Mã giảm giá (tùy chọn)
+                {t('promoLabel')}
               </label>
               {promoApplied ? (
                 <div
@@ -371,7 +377,7 @@ export function UpgradeModal({ open, onClose, defaultPeriod = 'yearly', featureC
                     className="text-caption px-2 py-0.5 rounded font-medium"
                     style={{ color: 'var(--theme-text-muted)' }}
                   >
-                    Bỏ
+                    {t('promoRemove')}
                   </button>
                 </div>
               ) : (
@@ -380,7 +386,7 @@ export function UpgradeModal({ open, onClose, defaultPeriod = 'yearly', featureC
                     type="text"
                     value={promoCode}
                     onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
-                    placeholder="VD: EARLY50"
+                    placeholder={t('promoPlaceholder')}
                     className="flex-1 px-3 py-2 rounded-lg text-body font-mono uppercase outline-none"
                     style={{
                       backgroundColor: 'var(--theme-bg-secondary)',
@@ -398,7 +404,7 @@ export function UpgradeModal({ open, onClose, defaultPeriod = 'yearly', featureC
                       border: '1px solid var(--theme-border)',
                     }}
                   >
-                    {validatePromoMut.isPending ? '...' : 'Áp dụng'}
+                    {validatePromoMut.isPending ? '...' : t('promoApply')}
                   </button>
                 </div>
               )}
@@ -413,7 +419,7 @@ export function UpgradeModal({ open, onClose, defaultPeriod = 'yearly', featureC
             <div className="rounded-xl p-4 mb-5" style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
               <div className="flex justify-between items-center mb-1">
                 <span className="text-body" style={{ color: 'var(--theme-text-secondary)' }}>
-                  {period === 'lifetime' ? 'Gói Lifetime' : 'Gói Premium'}
+                  {period === 'lifetime' ? t('planLifetime') : t('planPremium')}
                 </span>
                 <span
                   className="text-sm font-bold"
@@ -430,7 +436,7 @@ export function UpgradeModal({ open, onClose, defaultPeriod = 'yearly', featureC
                 <>
                   <div className="flex justify-between items-center mb-1">
                     <span className="text-xs" style={{ color: STATUS.success }}>
-                      Giảm giá ({promoApplied.label})
+                      {t('discount', { label: promoApplied.label })}
                     </span>
                     <span className="text-xs font-semibold" style={{ color: STATUS.success }}>
                       -{formatVND(promoApplied.discount)}
@@ -438,7 +444,7 @@ export function UpgradeModal({ open, onClose, defaultPeriod = 'yearly', featureC
                   </div>
                   <div className="flex justify-between items-center pt-2 mt-2 border-t" style={{ borderColor: 'var(--theme-border)' }}>
                     <span className="text-body font-semibold" style={{ color: 'var(--theme-text-primary)' }}>
-                      Tổng thanh toán
+                      {t('total')}
                     </span>
                     <span className="text-base font-bold" style={{ color: ACCENT.vocab }}>
                       {formatVND(finalPrice)}
@@ -447,10 +453,10 @@ export function UpgradeModal({ open, onClose, defaultPeriod = 'yearly', featureC
                 </>
               )}
               <div className="text-xs mt-1" style={{ color: 'var(--theme-text-muted)' }}>
-                {period === 'yearly' ? '12 tháng sử dụng' :
-                 period === 'quarterly' ? '3 tháng sử dụng' :
-                 period === 'lifetime' ? 'Truy cập trọn đời — không cần gia hạn' :
-                 '1 tháng sử dụng'}
+                {period === 'yearly' ? t('durationYearly') :
+                 period === 'quarterly' ? t('durationQuarterly') :
+                 period === 'lifetime' ? t('durationLifetime') :
+                 t('durationMonthly')}
               </div>
             </div>
 
@@ -460,16 +466,16 @@ export function UpgradeModal({ open, onClose, defaultPeriod = 'yearly', featureC
               className="w-full py-3 rounded-xl text-sm font-bold text-white transition-transform hover:scale-[1.01] disabled:opacity-60"
               style={{ background: 'linear-gradient(135deg, #6366F1, #8B5CF6)' }}
             >
-              {upgradeMut.isPending ? 'Đang tạo...' : plansLoading ? 'Đang tải...' : 'Tiếp tục thanh toán'}
+              {upgradeMut.isPending ? t('creating') : plansLoading ? t('loading') : t('continuePayment')}
             </button>
           </>
         ) : upgradeData ? (
           <>
             <h2 id="upgrade-modal-title" className="text-lg font-bold mb-1" style={{ color: 'var(--theme-text-primary)' }}>
-              Thông tin chuyển khoản
+              {t('paymentTitle')}
             </h2>
             <p className="text-body mb-4" style={{ color: 'var(--theme-text-muted)' }}>
-              Chuyển khoản theo thông tin bên dưới hoặc quét mã QR
+              {t('paymentSubtitle')}
             </p>
 
             {/* QR + Bank details side by side */}
@@ -488,13 +494,13 @@ export function UpgradeModal({ open, onClose, defaultPeriod = 'yearly', featureC
               {/* Right: Bank details */}
               <div className="flex-1 rounded-xl border p-4 space-y-3" style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-secondary)' }}>
                 <div>
-                  <div className="text-caption uppercase tracking-wide mb-0.5" style={{ color: 'var(--theme-text-muted)' }}>Ngân hàng</div>
+                  <div className="text-caption uppercase tracking-wide mb-0.5" style={{ color: 'var(--theme-text-muted)' }}>{t('bank')}</div>
                   <div className="text-body font-semibold" style={{ color: 'var(--theme-text-primary)' }}>
                     {upgradeData.bankInfo.bankName}
                   </div>
                 </div>
                 <div>
-                  <div className="text-caption uppercase tracking-wide mb-0.5" style={{ color: 'var(--theme-text-muted)' }}>Số tài khoản</div>
+                  <div className="text-caption uppercase tracking-wide mb-0.5" style={{ color: 'var(--theme-text-muted)' }}>{t('accountNumber')}</div>
                   <div className="flex items-center gap-1">
                     <span className="text-body font-mono font-semibold" style={{ color: 'var(--theme-text-primary)' }}>
                       {upgradeData.bankInfo.accountNumber}
@@ -503,13 +509,13 @@ export function UpgradeModal({ open, onClose, defaultPeriod = 'yearly', featureC
                   </div>
                 </div>
                 <div>
-                  <div className="text-caption uppercase tracking-wide mb-0.5" style={{ color: 'var(--theme-text-muted)' }}>Chủ tài khoản</div>
+                  <div className="text-caption uppercase tracking-wide mb-0.5" style={{ color: 'var(--theme-text-muted)' }}>{t('accountName')}</div>
                   <div className="text-body font-semibold" style={{ color: 'var(--theme-text-primary)' }}>
                     {upgradeData.bankInfo.accountName}
                   </div>
                 </div>
                 <div>
-                  <div className="text-caption uppercase tracking-wide mb-0.5" style={{ color: 'var(--theme-text-muted)' }}>Số tiền</div>
+                  <div className="text-caption uppercase tracking-wide mb-0.5" style={{ color: 'var(--theme-text-muted)' }}>{t('amount')}</div>
                   <div className="flex items-center gap-1">
                     <span className="text-[15px] font-bold" style={{ color: ACCENT.vocab }}>
                       {formatVND(upgradeData.bankInfo.amount)}
@@ -519,7 +525,7 @@ export function UpgradeModal({ open, onClose, defaultPeriod = 'yearly', featureC
                 </div>
                 <div>
                   <div className="text-caption uppercase tracking-wide mb-0.5" style={{ color: 'var(--theme-text-muted)' }}>
-                    Nội dung chuyển khoản
+                    {t('transferContent')}
                   </div>
                   <div className="flex items-center gap-1">
                     <span className="text-body font-mono font-bold" style={{ color: ACCENT.xp }}>
@@ -532,8 +538,7 @@ export function UpgradeModal({ open, onClose, defaultPeriod = 'yearly', featureC
             </div>
 
             <div className="rounded-lg p-3 mb-4 text-xs leading-relaxed" style={{ backgroundColor: 'rgba(59,130,246,0.08)', color: 'var(--theme-text-secondary)' }}>
-              Sau khi chuyển khoản, admin sẽ xác nhận trong vòng 24 giờ.
-              Premium sẽ được kích hoạt tự động sau khi xác nhận.
+              {t('confirmNote')}
             </div>
 
             <button
@@ -541,7 +546,7 @@ export function UpgradeModal({ open, onClose, defaultPeriod = 'yearly', featureC
               className="w-full py-3 rounded-xl text-sm font-bold transition-colors"
               style={{ color: 'var(--theme-text-primary)', backgroundColor: 'var(--theme-bg-secondary)' }}
             >
-              Tôi đã chuyển khoản
+              {t('transferred')}
             </button>
           </>
         ) : null}
