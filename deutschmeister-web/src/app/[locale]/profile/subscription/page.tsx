@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations, useLocale } from 'next-intl';
 import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 import Link from 'next/link';
 import { useMySubscription } from '@/hooks/useSubscription';
@@ -27,11 +28,11 @@ function formatVND(n: number) {
   return n.toLocaleString('vi-VN') + 'đ';
 }
 
-function formatDate(s: string) {
+function formatDate(s: string, locale: string) {
   if (!s) return '—';
   const date = new Date(s);
   if (isNaN(date.getTime())) return '—';
-  return date.toLocaleDateString('vi-VN', { year: 'numeric', month: 'long', day: 'numeric' });
+  return date.toLocaleDateString(locale, { year: 'numeric', month: 'long', day: 'numeric' });
 }
 
 function daysUntil(dateStr: string): number {
@@ -39,23 +40,20 @@ function daysUntil(dateStr: string): number {
   return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
 }
 
-const STATUS_LABELS = {
-  pending: { text: 'Chờ xác nhận', color: ACCENT.xp, bg: 'rgba(245,158,11,0.1)' },
-  confirmed: { text: 'Đã xác nhận', color: STATUS.success, bg: 'rgba(34,197,94,0.1)' },
-  rejected: { text: 'Từ chối', color: STATUS.danger, bg: 'rgba(239,68,68,0.1)' },
+const STATUS_STYLES = {
+  pending: { color: ACCENT.xp, bg: 'rgba(245,158,11,0.1)' },
+  confirmed: { color: STATUS.success, bg: 'rgba(34,197,94,0.1)' },
+  rejected: { color: STATUS.danger, bg: 'rgba(239,68,68,0.1)' },
 };
 
-const PREMIUM_BENEFITS = [
-  'Luyện tập không giới hạn mỗi ngày',
-  'AI phản hồi chi tiết bài viết & phát âm',
-  'Mở khóa toàn bộ ngân hàng đề thi chuẩn',
-  'Không quảng cáo & ưu tiên tính năng mới',
-  'Quyền truy cập kho tài liệu bản xứ nâng cao',
-  'Hỗ trợ kỹ thuật ưu tiên 24/7',
-];
+const BENEFIT_KEYS = ['b1', 'b2', 'b3', 'b4', 'b5', 'b6'] as const;
 
 // ─── Main Component ──────────────────────────────────────────────────────────
 export default function SubscriptionPage() {
+  const t = useTranslations('subscription.page');
+  const tb = useTranslations('subscription.benefits');
+  const ts = useTranslations('subscription.status');
+  const locale = useLocale();
   const { isAuthenticated } = useAuthStore();
   const { data, isLoading } = useMySubscription();
   const [upgradeOpen, setUpgradeOpen] = useState(false);
@@ -66,11 +64,11 @@ export default function SubscriptionPage() {
         <div className="w-20 h-20 rounded-3xl bg-white/5 flex items-center justify-center mx-auto mb-8 border border-white/10 shadow-2xl">
           <IconShieldCheck size={40} style={{ color: 'var(--theme-text-muted)' }} />
         </div>
-        <h2 className="text-2xl font-black mb-3" style={{ color: 'var(--theme-text-primary)' }}>Phiên làm việc hết hạn</h2>
-        <p className="text-base mb-10 opacity-50 font-medium" style={{ color: 'var(--theme-text-primary)' }}>Vui lòng đăng nhập để quản lý các gói đăng ký và quyền lợi của bạn.</p>
+        <h2 className="text-2xl font-black mb-3" style={{ color: 'var(--theme-text-primary)' }}>{t('authExpiredTitle')}</h2>
+        <p className="text-base mb-10 opacity-50 font-medium" style={{ color: 'var(--theme-text-primary)' }}>{t('authExpiredBody')}</p>
         <Link href="/auth/login"
           className="inline-block px-10 py-4 rounded-2xl text-sm font-black text-white transition-all hover:scale-105 active:scale-95 shadow-xl shadow-indigo-500/20"
-          style={{ background: GRADIENT.writing }}>Đăng nhập ngay</Link>
+          style={{ background: GRADIENT.writing }}>{t('loginNow')}</Link>
       </div>
     );
   }
@@ -97,8 +95,8 @@ export default function SubscriptionPage() {
     <div className="max-w-4xl mx-auto px-4 py-8 pb-32">
       <PageHeader
         backHref="/profile"
-        title="Gói đăng ký"
-        subtitle="Thông tin chi tiết về gói đăng ký và quyền lợi của bạn"
+        title={t('pageTitle')}
+        subtitle={t('pageSubtitle')}
         accent="vocab"
       />
 
@@ -142,7 +140,7 @@ export default function SubscriptionPage() {
                       )}
                     </div>
                     <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-60 leading-none" style={{ color: isPremium ? ACCENT.vocab : 'var(--theme-text-muted)' }}>
-                      {isLifetime ? 'Hội viên trọn đời' : isPremium ? 'Hội viên cao cấp' : 'Hội viên miễn phí'}
+                      {isLifetime ? t('planSubLifetime') : isPremium ? t('planSubPremium') : t('planSubFree')}
                     </p>
                   </div>
                 </div>
@@ -150,27 +148,27 @@ export default function SubscriptionPage() {
                 {isPremium ? (
                   <div className="flex flex-col items-start md:items-end gap-1.5">
                     <span className="px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-500 text-[9px] font-black uppercase tracking-widest border border-emerald-500/20 shadow-sm flex items-center gap-1.5">
-                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> Đang kích hoạt
+                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> {t('active')}
                     </span>
                     {!isLifetime && data.expiresAt && (
                       <span className="text-[10px] font-black" style={{ color: ACCENT.xp }}>
-                        Còn {daysUntil(data.expiresAt)} ngày
+                        {t('daysLeft', { n: daysUntil(data.expiresAt) })}
                       </span>
                     )}
                   </div>
                 ) : (
                   <span className="px-3 py-1 rounded-full bg-white/5 text-theme-muted text-[9px] font-black uppercase tracking-widest border border-white/10">
-                    Chưa kích hoạt
+                    {t('inactive')}
                   </span>
                 )}
               </div>
 
               <div className="grid md:grid-cols-2 gap-4 mb-8">
                 <div className="p-4 rounded-2xl bg-black/3 dark:bg-white/3 border border-black/5 dark:border-white/5 backdrop-blur-sm">
-                  <p className="text-[9px] font-black uppercase tracking-widest opacity-60 mb-2" style={{ color: 'var(--theme-text-primary)' }}>Trạng thái tài khoản</p>
+                  <p className="text-[9px] font-black uppercase tracking-widest opacity-60 mb-2" style={{ color: 'var(--theme-text-primary)' }}>{t('accountStatus')}</p>
                   <div className="flex items-center gap-2">
                     <span className="text-lg font-black" style={{ color: isPremium ? STATUS.success : 'var(--theme-text-primary)' }}>
-                      {isPremium ? 'Đã xác thực' : 'Bản miễn phí'}
+                      {isPremium ? t('verified') : t('freeVersion')}
                     </span>
                     {isPremium && <IconCircleCheck size={16} className="text-emerald-500" />}
                   </div>
@@ -178,10 +176,10 @@ export default function SubscriptionPage() {
 
                 <div className="p-4 rounded-2xl bg-black/3 dark:bg-white/3 border border-black/5 dark:border-white/5 backdrop-blur-sm">
                   <p className="text-[9px] font-black uppercase tracking-widest opacity-60 mb-2" style={{ color: 'var(--theme-text-primary)' }}>
-                    {isLifetime ? 'Ngày kích hoạt' : 'Hạn dùng'}
+                    {isLifetime ? t('activationDate') : t('expiryDate')}
                   </p>
                   <p className="text-lg font-black" style={{ color: 'var(--theme-text-primary)' }}>
-                    {isLifetime ? (data.updatedAt ? formatDate(data.updatedAt) : '—') : data.expiresAt ? formatDate(data.expiresAt) : 'Vô thời hạn'}
+                    {isLifetime ? (data.updatedAt ? formatDate(data.updatedAt, locale) : '—') : data.expiresAt ? formatDate(data.expiresAt, locale) : t('unlimited')}
                   </p>
                 </div>
               </div>
@@ -191,20 +189,20 @@ export default function SubscriptionPage() {
                   <button onClick={() => setUpgradeOpen(true)}
                     className="flex-1 py-4 rounded-xl text-xs font-black text-white transition-all hover:scale-[1.02] active:scale-95 shadow-lg shadow-indigo-500/20"
                     style={{ background: GRADIENT.writing }}>
-                    {isExpired ? 'Gia hạn Premium ngay' : 'Nâng cấp lên Premium'}
+                    {isExpired ? t('renewNow') : t('upgradeToPremium')}
                   </button>
                 )}
                 {isPremium && !isLifetime && data.expiresAt && daysUntil(data.expiresAt) <= 30 && (
                   <button onClick={() => setUpgradeOpen(true)}
                     className="flex-1 py-4 rounded-xl text-xs font-black transition-all hover:bg-indigo-500 hover:text-white border border-indigo-500/30"
                     style={{ color: ACCENT.vocab, backgroundColor: 'rgba(139,92,246,0.05)' }}>
-                    Gia hạn gói đăng ký
+                    {t('renewPlan')}
                   </button>
                 )}
                 <Link href="/pricing"
                   className="flex-1 py-4 rounded-xl text-xs font-black text-center transition-all hover:bg-white/5 border border-white/10"
                   style={{ color: 'var(--theme-text-primary)' }}>
-                  Xem so sánh các gói
+                  {t('comparePlans')}
                 </Link>
               </div>
             </div>
@@ -214,21 +212,21 @@ export default function SubscriptionPage() {
           <div className="rounded-4xl border p-8 shadow-lg" style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
             <div className="flex items-center justify-between mb-8">
               <div>
-                <h3 className="text-lg font-black tracking-tight" style={{ color: 'var(--theme-text-primary)' }}>Quyền lợi của bạn</h3>
-                <p className="text-xs opacity-50 font-medium">Bạn đã mở khóa toàn bộ sức mạnh của Deutschmeister</p>
+                <h3 className="text-lg font-black tracking-tight" style={{ color: 'var(--theme-text-primary)' }}>{t('benefitsTitle')}</h3>
+                <p className="text-xs opacity-50 font-medium">{t('benefitsSubtitle')}</p>
               </div>
               <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-500">
                 <IconShieldCheck size={20} />
               </div>
             </div>
             <div className="grid sm:grid-cols-2 gap-4">
-              {PREMIUM_BENEFITS.map((b, i) => (
-                <div key={i} className="flex items-center gap-3 p-3.5 rounded-xl bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5 transition-all hover:bg-black/8 dark:hover:bg-white/8">
+              {BENEFIT_KEYS.map((k) => (
+                <div key={k} className="flex items-center gap-3 p-3.5 rounded-xl bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5 transition-all hover:bg-black/8 dark:hover:bg-white/8">
                   <div className="w-5 h-5 rounded-full flex items-center justify-center text-white shadow-md shadow-emerald-500/20 shrink-0"
                     style={{ backgroundColor: ACCENT.emerald }}>
                     <IconCircleCheck size={12} />
                   </div>
-                  <span className="text-xs font-bold leading-tight" style={{ color: 'var(--theme-text-primary)' }}>{b}</span>
+                  <span className="text-xs font-bold leading-tight" style={{ color: 'var(--theme-text-primary)' }}>{tb(k)}</span>
                 </div>
               ))}
             </div>
@@ -239,7 +237,7 @@ export default function SubscriptionPage() {
         <div className="lg:col-span-4 space-y-5">
           <div className="flex items-center justify-between px-2">
             <h3 className="text-[10px] font-black uppercase tracking-[0.2em] opacity-60" style={{ color: 'var(--theme-text-primary)' }}>
-              Lịch sử giao dịch
+              {t('txHistory')}
             </h3>
             <IconCreditCard size={14} className="opacity-40" />
           </div>
@@ -250,11 +248,11 @@ export default function SubscriptionPage() {
                 <div className="w-10 h-10 rounded-xl bg-black/6 dark:bg-white/8 flex items-center justify-center mx-auto mb-3">
                   <IconCreditCard size={20} style={{ color: 'var(--theme-text-primary)', opacity: 0.5 }} />
                 </div>
-                <p className="text-[10px] font-bold opacity-60 uppercase tracking-widest" style={{ color: 'var(--theme-text-primary)' }}>Chưa có giao dịch</p>
+                <p className="text-[10px] font-bold opacity-60 uppercase tracking-widest" style={{ color: 'var(--theme-text-primary)' }}>{t('noTx')}</p>
               </div>
             ) : (
               data.payments.map((p) => {
-                const s = STATUS_LABELS[p.status] ?? STATUS_LABELS.pending;
+                const s = STATUS_STYLES[p.status] ?? STATUS_STYLES.pending;
                 return (
                   <div key={p.id} className="group rounded-2xl border p-4 transition-all hover:bg-white/4 hover:-translate-y-0.5"
                     style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
@@ -267,7 +265,7 @@ export default function SubscriptionPage() {
                           <p className="text-[11px] font-black tracking-tight" style={{ color: 'var(--theme-text-primary)' }}>
                             Premium {p.period === 'yearly' ? 'Yearly' : p.period === 'lifetime' ? 'Lifetime' : 'Monthly'}
                           </p>
-                          <p className="text-[9px] font-bold opacity-40 mt-0.5 uppercase" style={{ color: 'var(--theme-text-primary)' }}>{formatDate(p.createdAt)}</p>
+                          <p className="text-[9px] font-bold opacity-40 mt-0.5 uppercase" style={{ color: 'var(--theme-text-primary)' }}>{formatDate(p.createdAt, locale)}</p>
                         </div>
                       </div>
                       <div className="text-right">
@@ -277,7 +275,7 @@ export default function SubscriptionPage() {
                     <div className="flex items-center justify-between pt-3 border-t border-white/5">
                       <span className="text-[8px] font-black uppercase tracking-widest opacity-30">#{p.id.slice(-6)}</span>
                       <span className="text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md"
-                        style={{ color: s.color, backgroundColor: s.bg, border: `1px solid ${s.color}22` }}>{s.text}</span>
+                        style={{ color: s.color, backgroundColor: s.bg, border: `1px solid ${s.color}22` }}>{ts(p.status)}</span>
                     </div>
                   </div>
                 );
@@ -288,10 +286,10 @@ export default function SubscriptionPage() {
           <div className="rounded-2xl border p-5 bg-amber-500/2 border-amber-500/10">
             <div className="flex items-center gap-2 mb-3">
               <IconShieldCheck size={16} className="text-amber-500" />
-              <h4 className="text-[9px] font-black uppercase tracking-widest text-amber-500">Hỗ trợ</h4>
+              <h4 className="text-[9px] font-black uppercase tracking-widest text-amber-500">{t('support')}</h4>
             </div>
             <p className="text-[11px] leading-relaxed opacity-60 font-medium" style={{ color: 'var(--theme-text-secondary)' }}>
-              Nếu gặp vấn đề thanh toán, vui lòng liên hệ <strong>support@deutschmeister.de</strong>
+              {t.rich('supportBody', { mail: () => <strong>support@deutschmeister.de</strong> })}
             </p>
           </div>
         </div>

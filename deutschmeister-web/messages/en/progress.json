@@ -223,6 +223,34 @@
       "avatarUploadFailed": "Failed to upload avatar",
       "coverUploadFailed": "Failed to upload cover image",
       "updateFailed": "Failed to update profile"
+    },
+    "public": {
+      "notFoundTitle": "Profile not found",
+      "notFoundBody": "This user does not exist or has been deleted.",
+      "leaderboard": "Leaderboard",
+      "privateTitle": "This profile is private",
+      "privateBody": "The owner hasn't allowed others to view this profile.",
+      "back": "Back"
+    },
+    "share": {
+      "title": "Share your achievements",
+      "subtitle": "Download the image and post it on Instagram / Facebook to show your friends — help spread German!",
+      "exportFailed": "Couldn't export the image. Please try again!",
+      "defaultName": "Learner",
+      "defaultLevelName": "Beginner",
+      "generating": "Generating image...",
+      "download": "⬇ Download image",
+      "sizeHint": "Image size 1080×1350 (Instagram Portrait). Works for stories or posts.",
+      "levelBadge": "Lv.{level} · {name}",
+      "streakLabel": "Streak",
+      "streakSub": "days in a row",
+      "vocabLabel": "Vocabulary",
+      "vocabSub": "words learned",
+      "accuracyLabel": "Accuracy",
+      "accuracySub": "on average",
+      "xpLabel": "Total XP",
+      "xpSub": "experience points",
+      "footer": "Learn German with me at"
     }
   }
 }

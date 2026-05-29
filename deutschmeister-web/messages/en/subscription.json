@@ -1,0 +1,44 @@
+{
+  "page": {
+    "authExpiredTitle": "Session expired",
+    "authExpiredBody": "Please sign in to manage your subscriptions and benefits.",
+    "loginNow": "Sign in now",
+    "pageTitle": "Subscription",
+    "pageSubtitle": "Details about your subscription plan and benefits",
+    "planSubLifetime": "Lifetime member",
+    "planSubPremium": "Premium member",
+    "planSubFree": "Free member",
+    "active": "Active",
+    "daysLeft": "{n} days left",
+    "inactive": "Inactive",
+    "accountStatus": "Account status",
+    "verified": "Verified",
+    "freeVersion": "Free version",
+    "activationDate": "Activation date",
+    "expiryDate": "Expiry date",
+    "unlimited": "Unlimited",
+    "renewNow": "Renew Premium now",
+    "upgradeToPremium": "Upgrade to Premium",
+    "renewPlan": "Renew subscription",
+    "comparePlans": "Compare plans",
+    "benefitsTitle": "Your benefits",
+    "benefitsSubtitle": "You've unlocked the full power of Deutschmeister",
+    "txHistory": "Transaction history",
+    "noTx": "No transactions yet",
+    "support": "Support",
+    "supportBody": "If you have a payment issue, please contact <mail></mail>"
+  },
+  "benefits": {
+    "b1": "Unlimited practice every day",
+    "b2": "Detailed AI feedback on writing & pronunciation",
+    "b3": "Unlock the full bank of standard mock exams",
+    "b4": "No ads & early access to new features",
+    "b5": "Access to advanced native-content library",
+    "b6": "Priority 24/7 technical support"
+  },
+  "status": {
+    "pending": "Pending",
+    "confirmed": "Confirmed",
+    "rejected": "Rejected"
+  }
+}

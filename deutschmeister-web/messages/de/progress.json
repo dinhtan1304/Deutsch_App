@@ -223,6 +223,34 @@
       "avatarUploadFailed": "Avatar-Upload fehlgeschlagen",
       "coverUploadFailed": "Titelbild-Upload fehlgeschlagen",
       "updateFailed": "Profilaktualisierung fehlgeschlagen"
+    },
+    "public": {
+      "notFoundTitle": "Profil nicht gefunden",
+      "notFoundBody": "Dieser Nutzer existiert nicht oder wurde gelöscht.",
+      "leaderboard": "Bestenliste",
+      "privateTitle": "Dieses Profil ist privat",
+      "privateBody": "Der Eigentümer hat anderen nicht erlaubt, dieses Profil zu sehen.",
+      "back": "Zurück"
+    },
+    "share": {
+      "title": "Teile deine Erfolge",
+      "subtitle": "Lade das Bild herunter und poste es auf Instagram / Facebook, um es deinen Freunden zu zeigen — verbreite Deutsch!",
+      "exportFailed": "Bild konnte nicht exportiert werden. Bitte versuche es erneut!",
+      "defaultName": "Lernende(r)",
+      "defaultLevelName": "Anfänger",
+      "generating": "Bild wird erstellt...",
+      "download": "⬇ Bild herunterladen",
+      "sizeHint": "Bildgröße 1080×1350 (Instagram Portrait). Für Story oder Post geeignet.",
+      "levelBadge": "Lv.{level} · {name}",
+      "streakLabel": "Streak",
+      "streakSub": "Tage in Folge",
+      "vocabLabel": "Wortschatz",
+      "vocabSub": "gelernte Wörter",
+      "accuracyLabel": "Genauigkeit",
+      "accuracySub": "im Durchschnitt",
+      "xpLabel": "Gesamt-XP",
+      "xpSub": "Erfahrungspunkte",
+      "footer": "Lerne Deutsch mit mir auf"
     }
   }
 }

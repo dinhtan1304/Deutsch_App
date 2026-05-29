@@ -1,0 +1,44 @@
+{
+  "page": {
+    "authExpiredTitle": "Sitzung abgelaufen",
+    "authExpiredBody": "Bitte melde dich an, um deine Abos und Vorteile zu verwalten.",
+    "loginNow": "Jetzt anmelden",
+    "pageTitle": "Abonnement",
+    "pageSubtitle": "Details zu deinem Abo und deinen Vorteilen",
+    "planSubLifetime": "Lebenslanges Mitglied",
+    "planSubPremium": "Premium-Mitglied",
+    "planSubFree": "Kostenloses Mitglied",
+    "active": "Aktiv",
+    "daysLeft": "Noch {n} Tage",
+    "inactive": "Inaktiv",
+    "accountStatus": "Kontostatus",
+    "verified": "Verifiziert",
+    "freeVersion": "Kostenlose Version",
+    "activationDate": "Aktivierungsdatum",
+    "expiryDate": "Ablaufdatum",
+    "unlimited": "Unbegrenzt",
+    "renewNow": "Premium jetzt verlängern",
+    "upgradeToPremium": "Auf Premium upgraden",
+    "renewPlan": "Abo verlängern",
+    "comparePlans": "Tarife vergleichen",
+    "benefitsTitle": "Deine Vorteile",
+    "benefitsSubtitle": "Du hast die volle Power von Deutschmeister freigeschaltet",
+    "txHistory": "Transaktionsverlauf",
+    "noTx": "Noch keine Transaktionen",
+    "support": "Support",
+    "supportBody": "Bei Zahlungsproblemen kontaktiere bitte <mail></mail>"
+  },
+  "benefits": {
+    "b1": "Unbegrenztes Üben jeden Tag",
+    "b2": "Detailliertes KI-Feedback zu Schreiben & Aussprache",
+    "b3": "Zugriff auf die komplette Sammlung an Übungsprüfungen",
+    "b4": "Keine Werbung & früher Zugang zu neuen Funktionen",
+    "b5": "Zugang zur erweiterten Bibliothek mit muttersprachlichen Inhalten",
+    "b6": "Priorisierter technischer Support rund um die Uhr"
+  },
+  "status": {
+    "pending": "Ausstehend",
+    "confirmed": "Bestätigt",
+    "rejected": "Abgelehnt"
+  }
+}

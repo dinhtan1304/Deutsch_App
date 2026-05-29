@@ -4,7 +4,7 @@ import { routing } from './routing';
 
 // Add a namespace here when a new messages/<locale>/<ns>.json is created.
 // Phase 1 ships 4 namespaces — refactoring more features will append more here.
-const NAMESPACES = ['common', 'nav', 'auth', 'metadata', 'dashboard', 'header', 'settings', 'games', 'practice', 'vocabulary', 'progress', 'landing', 'errors', 'account', 'onboarding', 'studyPlan', 'learn', 'arena', 'speakingRooms'] as const;
+const NAMESPACES = ['common', 'nav', 'auth', 'metadata', 'dashboard', 'header', 'settings', 'games', 'practice', 'vocabulary', 'progress', 'landing', 'errors', 'account', 'onboarding', 'studyPlan', 'learn', 'arena', 'speakingRooms', 'subscription'] as const;
 
 type Namespace = (typeof NAMESPACES)[number];
 type MessageBag = Record<Namespace, Record<string, unknown>>;

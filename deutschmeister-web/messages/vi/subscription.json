@@ -1,0 +1,44 @@
+{
+  "page": {
+    "authExpiredTitle": "Phiên làm việc hết hạn",
+    "authExpiredBody": "Vui lòng đăng nhập để quản lý các gói đăng ký và quyền lợi của bạn.",
+    "loginNow": "Đăng nhập ngay",
+    "pageTitle": "Gói đăng ký",
+    "pageSubtitle": "Thông tin chi tiết về gói đăng ký và quyền lợi của bạn",
+    "planSubLifetime": "Hội viên trọn đời",
+    "planSubPremium": "Hội viên cao cấp",
+    "planSubFree": "Hội viên miễn phí",
+    "active": "Đang kích hoạt",
+    "daysLeft": "Còn {n} ngày",
+    "inactive": "Chưa kích hoạt",
+    "accountStatus": "Trạng thái tài khoản",
+    "verified": "Đã xác thực",
+    "freeVersion": "Bản miễn phí",
+    "activationDate": "Ngày kích hoạt",
+    "expiryDate": "Hạn dùng",
+    "unlimited": "Vô thời hạn",
+    "renewNow": "Gia hạn Premium ngay",
+    "upgradeToPremium": "Nâng cấp lên Premium",
+    "renewPlan": "Gia hạn gói đăng ký",
+    "comparePlans": "Xem so sánh các gói",
+    "benefitsTitle": "Quyền lợi của bạn",
+    "benefitsSubtitle": "Bạn đã mở khóa toàn bộ sức mạnh của Deutschmeister",
+    "txHistory": "Lịch sử giao dịch",
+    "noTx": "Chưa có giao dịch",
+    "support": "Hỗ trợ",
+    "supportBody": "Nếu gặp vấn đề thanh toán, vui lòng liên hệ <mail></mail>"
+  },
+  "benefits": {
+    "b1": "Luyện tập không giới hạn mỗi ngày",
+    "b2": "AI phản hồi chi tiết bài viết & phát âm",
+    "b3": "Mở khóa toàn bộ ngân hàng đề thi chuẩn",
+    "b4": "Không quảng cáo & ưu tiên tính năng mới",
+    "b5": "Quyền truy cập kho tài liệu bản xứ nâng cao",
+    "b6": "Hỗ trợ kỹ thuật ưu tiên 24/7"
+  },
+  "status": {
+    "pending": "Chờ xác nhận",
+    "confirmed": "Đã xác nhận",
+    "rejected": "Từ chối"
+  }
+}

@@ -2,6 +2,8 @@
 /* eslint-disable no-restricted-syntax */
 
 import React, { useEffect, useRef, useState, forwardRef } from 'react';
+import { useTranslations, useLocale } from 'next-intl';
+import { pickField } from '@/i18n/pickLocale';
 import { STATUS } from '@/lib/tokens';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/stores/authStore';
@@ -14,6 +16,8 @@ import { useDashboardStats } from '@/hooks/useDashboard';
  * get a small DeutschMeister watermark in the corner.
  */
 export default function ProfileSharePage() {
+  const t = useTranslations('progress.profile.share');
+  const locale = useLocale();
   const router = useRouter();
   const { user, isAuthenticated, _hasHydrated } = useAuthStore();
   const { data: xpInfo } = useXp();
@@ -44,7 +48,7 @@ export default function ProfileSharePage() {
       link.click();
     } catch (err) {
       console.error('Share card export failed', err);
-      setError('Không xuất được ảnh. Thử lại nhé!');
+      setError(t('exportFailed'));
     } finally {
       setDownloading(false);
     }
@@ -52,9 +56,9 @@ export default function ProfileSharePage() {
 
   if (!_hasHydrated || !isAuthenticated) return null;
 
-  const name = user?.name || 'Học viên';
+  const name = user?.name || t('defaultName');
   const level = xpInfo?.level ?? 1;
-  const levelName = xpInfo?.nameVi || 'Người mới bắt đầu';
+  const levelName = (xpInfo ? pickField(xpInfo, 'name', locale) : '') || t('defaultLevelName');
   const xp = xpInfo?.xp ?? 0;
   const streak = stats?.streak ?? 0;
   const wordsLearned = stats?.totalWordsLearned ?? 0;
@@ -67,14 +71,13 @@ export default function ProfileSharePage() {
           className="text-2xl font-bold"
           style={{ color: 'var(--theme-text-primary)' }}
         >
-          Chia sẻ thành tích
+          {t('title')}
         </h1>
         <p
           className="text-body mt-1"
           style={{ color: 'var(--theme-text-muted)' }}
         >
-          Tải ảnh xuống rồi đăng Instagram / Facebook để khoe bạn bè — giúp lan
-          tỏa tiếng Đức!
+          {t('subtitle')}
         </p>
       </div>
 
@@ -122,7 +125,7 @@ export default function ProfileSharePage() {
             boxShadow: '0 8px 24px -6px rgba(99,102,241,0.5)',
           }}
         >
-          {downloading ? 'Đang tạo ảnh...' : '⬇ Tải ảnh về máy'}
+          {downloading ? t('generating') : t('download')}
         </button>
 
         {error && (
@@ -142,8 +145,7 @@ export default function ProfileSharePage() {
           className="text-xs text-center max-w-md"
           style={{ color: 'var(--theme-text-muted)' }}
         >
-          Ảnh kích thước 1080×1350 (Instagram Portrait). Dùng trong story hoặc
-          post đều được.
+          {t('sizeHint')}
         </p>
       </div>
     </div>
@@ -176,6 +178,8 @@ const ShareCard = forwardRef<HTMLDivElement, CardProps>(function ShareCard(
   },
   ref,
 ) {
+  const t = useTranslations('progress.profile.share');
+  const locale = useLocale();
   return (
     <div
       ref={ref}
@@ -315,7 +319,7 @@ const ShareCard = forwardRef<HTMLDivElement, CardProps>(function ShareCard(
           }}
         >
           <span>⭐</span>
-          <span>Lv.{level} · {levelName}</span>
+          <span>{t('levelBadge', { level, name: levelName })}</span>
         </div>
       </div>
 
@@ -333,30 +337,30 @@ const ShareCard = forwardRef<HTMLDivElement, CardProps>(function ShareCard(
       >
         <StatBlock
           icon="🔥"
-          label="Streak"
+          label={t('streakLabel')}
           value={`${streak}`}
-          sub="ngày liên tiếp"
+          sub={t('streakSub')}
           accent="#F97316"
         />
         <StatBlock
           icon="📚"
-          label="Từ vựng"
+          label={t('vocabLabel')}
           value={`${wordsLearned}`}
-          sub="từ đã học"
+          sub={t('vocabSub')}
           accent="#3B82F6"
         />
         <StatBlock
           icon="🎯"
-          label="Độ chính xác"
+          label={t('accuracyLabel')}
           value={`${accuracy}%`}
-          sub="trung bình"
+          sub={t('accuracySub')}
           accent="#22C55E"
         />
         <StatBlock
           icon="✨"
-          label="Tổng XP"
-          value={`${xp.toLocaleString('vi-VN')}`}
-          sub="điểm kinh nghiệm"
+          label={t('xpLabel')}
+          value={`${xp.toLocaleString(locale)}`}
+          sub={t('xpSub')}
           accent="#8B5CF6"
         />
       </div>
@@ -374,7 +378,7 @@ const ShareCard = forwardRef<HTMLDivElement, CardProps>(function ShareCard(
           color: 'rgba(255,255,255,0.7)',
         }}
       >
-        Học tiếng Đức cùng mình tại <span style={{ color: '#A78BFA', fontWeight: 800 }}>deutschmeister.app</span>
+        {t('footer')} <span style={{ color: '#A78BFA', fontWeight: 800 }}>deutschmeister.app</span>
       </div>
     </div>
   );

@@ -3,6 +3,7 @@
 
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { ACCENT, GRADIENT } from '@/lib/tokens';
 import { usePublicProfile } from '@/hooks/useUser';
 import { useAuthStore } from '@/stores/authStore';
@@ -13,6 +14,7 @@ import { IconLock, IconArrowLeft, IconGamepad, IconTarget, IconStar, IconBrain }
 import { STATUS } from '@/lib/tokens';
 
 export default function PublicProfilePage() {
+  const t = useTranslations('progress.profile');
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const { user: viewer } = useAuthStore();
@@ -45,15 +47,15 @@ export default function PublicProfilePage() {
     return (
       <div className="py-20 max-w-md mx-auto px-4 text-center">
         <h1 className="text-2xl font-bold mb-2" style={{ color: 'var(--theme-text-primary)' }}>
-          Không tìm thấy hồ sơ
+          {t('public.notFoundTitle')}
         </h1>
         <p className="text-sm mb-6" style={{ color: 'var(--theme-text-muted)' }}>
-          Người dùng này không tồn tại hoặc đã bị xóa.
+          {t('public.notFoundBody')}
         </p>
         <Link href="/leaderboard"
           className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl text-xs font-black uppercase tracking-widest text-white"
           style={{ background: GRADIENT.brand }}>
-          <IconArrowLeft size={14} /> Bảng xếp hạng
+          <IconArrowLeft size={14} /> {t('public.leaderboard')}
         </Link>
       </div>
     );
@@ -69,10 +71,10 @@ export default function PublicProfilePage() {
             <IconLock size={32} className="text-white" />
           </div>
           <h1 className="text-xl font-bold mb-2" style={{ color: 'var(--theme-text-primary)' }}>
-            Hồ sơ này đang ở chế độ riêng tư
+            {t('public.privateTitle')}
           </h1>
           <p className="text-sm mb-6" style={{ color: 'var(--theme-text-muted)' }}>
-            Chủ sở hữu chưa cho phép người khác xem hồ sơ này.
+            {t('public.privateBody')}
           </p>
           <button
             type="button"
@@ -80,7 +82,7 @@ export default function PublicProfilePage() {
             className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl text-xs font-black uppercase tracking-widest text-white transition-transform hover:-translate-y-0.5"
             style={{ background: GRADIENT.brand }}
           >
-            <IconArrowLeft size={14} /> Quay lại
+            <IconArrowLeft size={14} /> {t('public.back')}
           </button>
         </div>
       </div>
@@ -91,10 +93,10 @@ export default function PublicProfilePage() {
   const stats = data.stats;
   const statCards = stats
     ? [
-        { label: 'Trò chơi', value: stats.gamesPlayed ?? 0, color: ACCENT.srs, icon: IconGamepad },
-        { label: 'Chính xác', value: `${stats.accuracy ?? 0}%`, color: STATUS.success, icon: IconTarget },
-        { label: 'Yêu thích', value: stats.favorites ?? 0, color: ACCENT.xp, icon: IconStar },
-        { label: 'Đã học', value: stats.wordsLearned ?? 0, color: ACCENT.vocab, icon: IconBrain },
+        { label: t('statGames'), value: stats.gamesPlayed ?? 0, color: ACCENT.srs, icon: IconGamepad },
+        { label: t('statAccuracy'), value: `${stats.accuracy ?? 0}%`, color: STATUS.success, icon: IconTarget },
+        { label: t('statFavorites'), value: stats.favorites ?? 0, color: ACCENT.xp, icon: IconStar },
+        { label: t('statLearned'), value: stats.wordsLearned ?? 0, color: ACCENT.vocab, icon: IconBrain },
       ]
     : [];
 

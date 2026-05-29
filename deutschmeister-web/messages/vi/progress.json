@@ -223,6 +223,34 @@
       "avatarUploadFailed": "Tải ảnh đại diện thất bại",
       "coverUploadFailed": "Tải ảnh nền thất bại",
       "updateFailed": "Cập nhật hồ sơ thất bại"
+    },
+    "public": {
+      "notFoundTitle": "Không tìm thấy hồ sơ",
+      "notFoundBody": "Người dùng này không tồn tại hoặc đã bị xóa.",
+      "leaderboard": "Bảng xếp hạng",
+      "privateTitle": "Hồ sơ này đang ở chế độ riêng tư",
+      "privateBody": "Chủ sở hữu chưa cho phép người khác xem hồ sơ này.",
+      "back": "Quay lại"
+    },
+    "share": {
+      "title": "Chia sẻ thành tích",
+      "subtitle": "Tải ảnh xuống rồi đăng Instagram / Facebook để khoe bạn bè — giúp lan tỏa tiếng Đức!",
+      "exportFailed": "Không xuất được ảnh. Thử lại nhé!",
+      "defaultName": "Học viên",
+      "defaultLevelName": "Người mới bắt đầu",
+      "generating": "Đang tạo ảnh...",
+      "download": "⬇ Tải ảnh về máy",
+      "sizeHint": "Ảnh kích thước 1080×1350 (Instagram Portrait). Dùng trong story hoặc post đều được.",
+      "levelBadge": "Lv.{level} · {name}",
+      "streakLabel": "Streak",
+      "streakSub": "ngày liên tiếp",
+      "vocabLabel": "Từ vựng",
+      "vocabSub": "từ đã học",
+      "accuracyLabel": "Độ chính xác",
+      "accuracySub": "trung bình",
+      "xpLabel": "Tổng XP",
+      "xpSub": "điểm kinh nghiệm",
+      "footer": "Học tiếng Đức cùng mình tại"
     }
   }
 }
