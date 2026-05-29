@@ -66,6 +66,31 @@
       "weakWords": "Từ yếu",
       "reviewNow": "Ôn ngay",
       "learnMore": "Học thêm"
+    },
+    "gamesLauncher": {
+      "header": "Luyện tập với từ này",
+      "collectionTag": "bộ sưu tập",
+      "games": {
+        "flashcards": "Flashcards",
+        "word-match": "Ghép từ",
+        "spelling": "Đánh vần",
+        "listening": "Nghe hiểu",
+        "gender-quiz": "Mạo từ",
+        "quick-quiz": "Trắc nghiệm",
+        "fill-blank": "Điền từ",
+        "time-challenge": "Đua thời gian"
+      }
+    },
+    "collectionPicker": {
+      "saveToFolder": "Lưu vào thư mục",
+      "noFolders": "Chưa có thư mục nào",
+      "namePlaceholder": "Tên thư mục...",
+      "create": "Tạo",
+      "cancel": "Huỷ",
+      "createNew": "Tạo thư mục mới",
+      "done": "Xong",
+      "nameExists": "Tên đã tồn tại",
+      "createFailed": "Tạo thất bại"
     }
   },
   "grammar": {

@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { PersonalWord } from '@/types/personalWord';
 import { canPlayGame } from '@/lib/personalWordAdapter';
 import { ACCENT, STATUS } from '@/lib/tokens';
@@ -12,20 +13,19 @@ import {
 
 interface GameConfig {
   id: string;
-  label: string;
   Icon: React.ComponentType<{ size?: number; style?: React.CSSProperties }>;
   color: string;
 }
 
 const GAMES: GameConfig[] = [
-  { id: 'flashcards',    label: 'Flashcards',      Icon: IconLayers,     color: STATUS.success },
-  { id: 'word-match',    label: 'Ghép từ',          Icon: IconLink,       color: ACCENT.cyan },
-  { id: 'spelling',      label: 'Đánh vần',         Icon: IconSpellCheck, color: ACCENT.listening },
-  { id: 'listening',     label: 'Nghe hiểu',        Icon: IconHeadphones, color: ACCENT.srs },
-  { id: 'gender-quiz',   label: 'Mạo từ',           Icon: IconTarget,     color: ACCENT.vocab },
-  { id: 'quick-quiz',    label: 'Trắc nghiệm',      Icon: IconZap,        color: ACCENT.games },
-  { id: 'fill-blank',    label: 'Điền từ',          Icon: IconPenTool,    color: ACCENT.xp },
-  { id: 'time-challenge',label: 'Đua thời gian',    Icon: IconClock,      color: STATUS.danger },
+  { id: 'flashcards',    Icon: IconLayers,     color: STATUS.success },
+  { id: 'word-match',    Icon: IconLink,       color: ACCENT.cyan },
+  { id: 'spelling',      Icon: IconSpellCheck, color: ACCENT.listening },
+  { id: 'listening',     Icon: IconHeadphones, color: ACCENT.srs },
+  { id: 'gender-quiz',   Icon: IconTarget,     color: ACCENT.vocab },
+  { id: 'quick-quiz',    Icon: IconZap,        color: ACCENT.games },
+  { id: 'fill-blank',    Icon: IconPenTool,    color: ACCENT.xp },
+  { id: 'time-challenge',Icon: IconClock,      color: STATUS.danger },
 ];
 
 interface Props {
@@ -34,6 +34,7 @@ interface Props {
 }
 
 export function WordBankGamesLauncher({ collectionId, words }: Props) {
+  const t = useTranslations('vocabulary.wordBank.gamesLauncher');
   const [collapsed, setCollapsed] = useState(false);
 
   const buildHref = (gameId: string) => {
@@ -51,12 +52,12 @@ export function WordBankGamesLauncher({ collectionId, words }: Props) {
         <div className="flex items-center gap-2">
           <IconLayers size={14} style={{ color: ACCENT.vocab }} />
           <span className="text-sm font-semibold" style={{ color: 'var(--theme-text-primary)' }}>
-            Luyện tập với từ này
+            {t('header')}
           </span>
           {collectionId && (
             <span className="text-xs px-2 py-0.5 rounded-full"
               style={{ backgroundColor: `${ACCENT.vocab}20`, color: ACCENT.vocab }}>
-              bộ sưu tập
+              {t('collectionTag')}
             </span>
           )}
         </div>
@@ -71,7 +72,8 @@ export function WordBankGamesLauncher({ collectionId, words }: Props) {
 
       {!collapsed && (
         <div className="px-4 pb-4 grid grid-cols-4 sm:grid-cols-8 gap-2">
-          {GAMES.map(({ id, label, Icon, color }) => {
+          {GAMES.map(({ id, Icon, color }) => {
+            const label = t(`games.${id}` as 'games.flashcards');
             const { canPlay, reason } = canPlayGame(id, words);
             const href = buildHref(id);
 

@@ -1,6 +1,7 @@
 ﻿'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { useTranslations } from 'next-intl';
 import { STATUS, GRADIENT } from '@/lib/tokens';
 import { useCollections, useCreateCollection, useAddToCollection, useRemoveFromCollection, useWordCollections } from '@/hooks/usePersonalWords';
 import { IconCheck, IconPlus, IconX } from '@/components/ui/Icons';
@@ -11,6 +12,7 @@ interface AddToCollectionPickerProps {
 }
 
 export function AddToCollectionPicker({ personalWordId, onClose }: AddToCollectionPickerProps) {
+  const t = useTranslations('vocabulary.wordBank.collectionPicker');
   const ref = useRef<HTMLDivElement>(null);
   const { data: collections = [] } = useCollections();
   const { data: wordCollections = [] } = useWordCollections(personalWordId);
@@ -53,8 +55,8 @@ export function AddToCollectionPicker({ personalWordId, onClose }: AddToCollecti
     } catch (err) {
       const msg = (err as { response?: { data?: { message?: string } } } | undefined)?.response?.data?.message || (err as Error | undefined)?.message || '';
       setCreateError(msg.includes('Conflict') || msg.includes('duplicate') || msg.includes('exists')
-        ? 'Tên đã tồn tại'
-        : 'Tạo thất bại');
+        ? t('nameExists')
+        : t('createFailed'));
     }
   };
 
@@ -68,7 +70,7 @@ export function AddToCollectionPicker({ personalWordId, onClose }: AddToCollecti
         style={{ borderBottom: '1px solid var(--theme-border)' }}>
         <p className="text-caption font-semibold uppercase tracking-wide"
           style={{ color: 'var(--theme-text-muted)' }}>
-          Lưu vào thư mục
+          {t('saveToFolder')}
         </p>
         <button onClick={onClose} className="p-0.5 rounded hover:opacity-70 transition-opacity"
           style={{ color: 'var(--theme-text-muted)' }}>
@@ -80,7 +82,7 @@ export function AddToCollectionPicker({ personalWordId, onClose }: AddToCollecti
       <div className="max-h-40 overflow-y-auto">
         {collections.length === 0 && !showCreate ? (
           <p className="px-3 py-3 text-xs" style={{ color: 'var(--theme-text-muted)' }}>
-            Chưa có thư mục nào
+            {t('noFolders')}
           </p>
         ) : (
           collections.map(col => {
@@ -120,7 +122,7 @@ export function AddToCollectionPicker({ personalWordId, onClose }: AddToCollecti
               if (e.key === 'Enter') handleCreate();
               if (e.key === 'Escape') { setShowCreate(false); setNewName(''); setCreateError(null); }
             }}
-            placeholder="Tên thư mục..."
+            placeholder={t('namePlaceholder')}
             maxLength={50}
             className="w-full px-2 py-1.5 rounded-lg border text-caption focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
             style={{
@@ -138,13 +140,13 @@ export function AddToCollectionPicker({ personalWordId, onClose }: AddToCollecti
               disabled={!newName.trim() || createCollection.isPending}
               className="flex-1 py-1 rounded-lg text-caption font-semibold text-white transition-all disabled:opacity-40"
               style={{ background: GRADIENT.writing }}>
-              Tạo
+              {t('create')}
             </button>
             <button
               onClick={() => { setShowCreate(false); setNewName(''); setCreateError(null); }}
               className="px-2 py-1 rounded-lg text-caption transition-all"
               style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }}>
-              Huỷ
+              {t('cancel')}
             </button>
           </div>
         </div>
@@ -153,7 +155,7 @@ export function AddToCollectionPicker({ personalWordId, onClose }: AddToCollecti
           onClick={() => setShowCreate(true)}
           className="w-full flex items-center gap-2 px-3 py-2 text-caption font-medium transition-all hover:opacity-80"
           style={{ color: 'var(--theme-text-muted)' }}>
-          <IconPlus size={11} /> Tạo thư mục mới
+          <IconPlus size={11} /> {t('createNew')}
         </button>
       )}
 
@@ -166,7 +168,7 @@ export function AddToCollectionPicker({ personalWordId, onClose }: AddToCollecti
             color: 'var(--theme-text-primary)',
             border: '1px solid var(--theme-border)',
           }}>
-          Xong
+          {t('done')}
         </button>
       </div>
     </div>

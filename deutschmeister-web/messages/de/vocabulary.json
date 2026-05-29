@@ -66,6 +66,31 @@
       "weakWords": "Schwache Wörter",
       "reviewNow": "Jetzt wiederholen",
       "learnMore": "Mehr lernen"
+    },
+    "gamesLauncher": {
+      "header": "Mit diesen Wörtern üben",
+      "collectionTag": "Sammlung",
+      "games": {
+        "flashcards": "Karteikarten",
+        "word-match": "Wörter zuordnen",
+        "spelling": "Buchstabieren",
+        "listening": "Hörverstehen",
+        "gender-quiz": "Artikel",
+        "quick-quiz": "Quiz",
+        "fill-blank": "Lückentext",
+        "time-challenge": "Zeitchallenge"
+      }
+    },
+    "collectionPicker": {
+      "saveToFolder": "In Ordner speichern",
+      "noFolders": "Noch keine Ordner",
+      "namePlaceholder": "Ordnername...",
+      "create": "Erstellen",
+      "cancel": "Abbrechen",
+      "createNew": "Neuer Ordner",
+      "done": "Fertig",
+      "nameExists": "Name existiert bereits",
+      "createFailed": "Erstellen fehlgeschlagen"
     }
   },
   "grammar": {
