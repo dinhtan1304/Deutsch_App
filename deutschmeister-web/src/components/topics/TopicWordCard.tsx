@@ -2,6 +2,7 @@
 /* eslint-disable no-restricted-syntax */
 
 import { useState, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import { ACCENT, STATUS } from '@/lib/tokens';
 import type { TopicWord } from '@/types/topic';
 import { useQuickAddWithCollection } from '@/hooks/useQuickAddWithCollection';
@@ -74,6 +75,7 @@ interface TopicWordCardProps {
 export function TopicWordCard({
   word, index, isLearned = false, onMarkLearned, onPlayAudio,
 }: TopicWordCardProps) {
+  const t = useTranslations('vocabulary.topicWord');
   const [showDetails, setShowDetails] = useState(false);
   const { isAdding, isAdded, pendingWordId, quickAdd, closePicker } = useQuickAddWithCollection();
   const ac = AC_STYLES[word.article] || DEFAULT_AC;
@@ -127,7 +129,7 @@ export function TopicWordCard({
               {word.isCore && (
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-caption font-bold"
                   style={{ background: ac.gradient, color: 'white' }}>
-                  <IconStar size={9} /> Core
+                  <IconStar size={9} /> {t('core')}
                 </span>
               )}
             </div>
@@ -162,7 +164,7 @@ export function TopicWordCard({
               className="w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200
                 opacity-50 hover:opacity-100 hover:scale-110"
               style={{ backgroundColor: ac.bg, color: ac.color }}
-              title="Nghe phát âm">
+              title={t('listen')}>
               <IconVolume size={16} />
             </button>
 
@@ -176,7 +178,7 @@ export function TopicWordCard({
                   ? { backgroundColor: 'rgba(34,197,94,.1)', borderColor: STATUS.success, color: STATUS.success }
                   : { backgroundColor: 'transparent', borderColor: 'var(--theme-border)', color: 'var(--theme-text-muted)' }
                 }
-                title={isAdded ? 'Đã thêm vào Word Bank' : 'Thêm vào Word Bank'}>
+                title={isAdded ? t('added') : t('add')}>
                 {(isAdded && !pendingWordId)
                   ? <IconCheck size={13} />
                   : <IconPlus size={13} />
@@ -198,7 +200,7 @@ export function TopicWordCard({
                   ? { background: 'linear-gradient(135deg, #22C55E, #16A34A)', borderColor: 'transparent', color: 'white' }
                   : { borderColor: 'var(--theme-border)', color: 'transparent' }
                 }
-                title={isLearned ? 'Đã học' : 'Đánh dấu đã học'}>
+                title={isLearned ? t('learned') : t('markLearned')}>
                 <IconCheck size={14} />
               </button>
             )}
@@ -217,7 +219,7 @@ export function TopicWordCard({
                   style={{ background: ac.bg }}>
                   <IconVolume size={11} style={{ color: ac.color }} />
                 </span>
-                Ví dụ
+                {t('examples')}
               </p>
               <ul className="space-y-1.5">
                 {word.examples.map((ex, i) => (
@@ -238,7 +240,7 @@ export function TopicWordCard({
                   style={{ background: 'rgba(245,158,11,.1)' }}>
                   <IconLightbulb size={11} style={{ color: ACCENT.xp }} />
                 </span>
-                Mẹo nhớ
+                {t('tips')}
               </p>
               <ul className="space-y-1">
                 {word.tips.map((tip, i) => (

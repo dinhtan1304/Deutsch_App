@@ -1,6 +1,7 @@
-﻿'use client';
+'use client';
 
 import { useReducer, useEffect, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import { ACCENT, STATUS, GRADIENT } from '@/lib/tokens';
 import type { TopicWord } from '@/types/topic';
 import { speakGerman } from '@/lib/utils';
@@ -88,7 +89,7 @@ function generateQuestions(words: TopicWord[], count: number): Question[] {
   return questions;
 }
 
-// â”€â”€â”€ State management â”€â”€â”€
+// ─── State management ───
 
 type QuizState = {
   questions: Question[];
@@ -126,7 +127,7 @@ function quizReducer(state: QuizState, action: QuizAction): QuizState {
 
 const QUIZ_SIZE = 10;
 
-// â”€â”€â”€ Component â”€â”€â”€
+// ─── Component ───
 
 interface Props {
   words: TopicWord[];
@@ -138,6 +139,7 @@ interface Props {
 const monoGradient = (color: string) => `linear-gradient(135deg, ${color}, ${color}cc)`;
 
 export function TopicQuiz({ words, topicColor, onMarkLearned, hideIcons = false }: Props) {
+  const t = useTranslations('vocabulary.topicStudy');
   const [state, dispatch] = useReducer(quizReducer, {
     questions: [], currentIndex: 0, selectedOption: null,
     isAnswered: false, score: 0, wrongWords: new Set<string>(), isFinished: false,
@@ -191,24 +193,25 @@ export function TopicQuiz({ words, topicColor, onMarkLearned, hideIcons = false 
       <div className="text-center py-12">
         {!hideIcons && <div className="text-4xl mb-3">📝</div>}
         <p style={{ color: 'var(--theme-text-muted)' }}>
-          Cáº§n Ã­t nháº¥t 4 tá»« Ä‘á»ƒ táº¡o quiz. Chá»§ Ä‘á» nÃ y cÃ³ {words.length} tá»«.
+          {t('quizNeedMin', { count: words.length })}
         </p>
       </div>
     );
   }
 
-  // â”€â”€â”€ Finished â”€â”€â”€
+  // ─── Finished ───
   if (isFinished) {
     const pct = total > 0 ? Math.round((score / total) * 100) : 0;
     const scoreGradient = pct >= 80 ? GRADIENT.readingGreenH : pct >= 50 ? GRADIENT.xpGoldH : GRADIENT.dangerSolidH;
+    const resultMsg = pct >= 80 ? t('msgExcellent') : pct >= 50 ? t('msgGood') : t('msgNeedReview');
     return (
       <div className="text-center py-10">
-        {!hideIcons && <div className="text-5xl mb-4">{pct >= 80 ? 'Xuất sắc!' : pct >= 50 ? 'Khá tốt, tiếp tục cố gắng!' : 'Cần ôn lại thêm nhé!'}</div>}
+        {!hideIcons && <div className="text-5xl mb-4">{resultMsg}</div>}
         <h3 className="text-xl font-bold mb-1" style={{ color: 'var(--theme-text-primary)' }}>
-          Káº¿t quáº£: {score}/{total}
+          {t('resultScore', { score, total })}
         </h3>
         <p className="text-sm mb-6" style={{ color: 'var(--theme-text-muted)' }}>
-          {pct >= 80 ? 'Xuất sắc!' : pct >= 50 ? 'Khá tốt, tiếp tục cố gắng!' : 'Cần ôn lại thêm nhé!'}
+          {resultMsg}
         </p>
 
         {/* Score bar */}
@@ -225,7 +228,7 @@ export function TopicQuiz({ words, topicColor, onMarkLearned, hideIcons = false 
           <div className="max-w-sm mx-auto mb-6 text-left p-4 rounded-xl"
             style={{ backgroundColor: 'rgba(239,68,68,.06)', border: '1px solid rgba(239,68,68,.15)' }}>
             <div className="text-xs font-bold mb-2" style={{ color: STATUS.danger }}>
-              Tá»« cáº§n Ã´n láº¡i ({wrongWords.size}):
+              {t('wrongWordsRecap', { count: wrongWords.size })}
             </div>
             <div className="space-y-1.5">
               {words.filter(w => wrongWords.has(w.id)).map(w => (
@@ -233,7 +236,7 @@ export function TopicQuiz({ words, topicColor, onMarkLearned, hideIcons = false 
                   <span className="font-semibold" style={{ color: ArticleColor[w.article] || ACCENT.gray }}>
                     {w.article} {w.word}
                   </span>
-                  <span style={{ color: 'var(--theme-text-muted)' }}>â€”</span>
+                  <span style={{ color: 'var(--theme-text-muted)' }}>—</span>
                   <span style={{ color: 'var(--theme-text-secondary)' }}>
                     {w.translationVi || w.translationEn}
                   </span>
@@ -251,13 +254,13 @@ export function TopicQuiz({ words, topicColor, onMarkLearned, hideIcons = false 
             }}
               className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-body font-semibold transition-all hover:-translate-y-0.5"
               style={{ background: 'rgba(239,68,68,.1)', color: STATUS.danger }}>
-              {!hideIcons && <IconRotateCcw size={15} />} Ã”n tá»« sai
+              {!hideIcons && <IconRotateCcw size={15} />} {t('reviewWrong')}
             </button>
           )}
           <button onClick={() => startQuiz()}
             className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-body font-semibold transition-all hover:-translate-y-0.5"
             style={{ background: `${topicColor}15`, color: topicColor }}>
-            {!hideIcons && <IconRotateCcw size={15} />} Quiz má»›i
+            {!hideIcons && <IconRotateCcw size={15} />} {t('newQuiz')}
           </button>
         </div>
       </div>
@@ -268,20 +271,20 @@ export function TopicQuiz({ words, topicColor, onMarkLearned, hideIcons = false 
 
   const ac = ArticleColor[current.word.article] || ACCENT.gray;
   const questionLabel = current.mode === 'de-to-vi'
-    ? 'NghÄ©a cá»§a tá»« nÃ y?'
+    ? t('qDeToVi')
     : current.mode === 'vi-to-de'
-    ? 'Tá»« tiáº¿ng Äá»©c nÃ o Ä‘Ãºng?'
-    : 'Article nÃ o Ä‘Ãºng?';
+    ? t('qViToDe')
+    : t('qArticle');
 
   return (
     <div>
       {/* Progress */}
       <div className="flex items-center justify-between mb-3">
         <span className="text-body font-medium" style={{ color: 'var(--theme-text-muted)' }}>
-          CÃ¢u {currentIndex + 1}/{total}
+          {t('questionProgress', { current: currentIndex + 1, total })}
         </span>
         <span className="text-body font-bold" style={{ color: topicColor }}>
-          Äiá»ƒm: {score}/{currentIndex + (isAnswered ? 1 : 0)}
+          {t('scoreLabel', { score, answered: currentIndex + (isAnswered ? 1 : 0) })}
         </span>
       </div>
       <div className="h-1.5 rounded-full overflow-hidden mb-6"
@@ -311,7 +314,7 @@ export function TopicQuiz({ words, topicColor, onMarkLearned, hideIcons = false 
             <button onClick={() => playAudio(`${current.word.article || ''} ${current.word.word}`)}
               className="w-9 h-9 rounded-lg flex items-center justify-center transition-all hover:scale-110"
               style={{ backgroundColor: `${ac}15`, color: ac }}>
-              {hideIcons ? 'Nghe' : <IconVolume size={16} />}
+              {hideIcons ? t('listen') : <IconVolume size={16} />}
             </button>
           </div>
         ) : (
@@ -366,12 +369,12 @@ export function TopicQuiz({ words, topicColor, onMarkLearned, hideIcons = false 
         <div className="flex items-center justify-between">
           <div className="text-sm font-semibold"
             style={{ color: selectedOption === current.correctIndex ? STATUS.success : STATUS.danger }}>
-            {selectedOption === current.correctIndex ? 'Chính xác!' : 'Sai rồi!'}
+            {selectedOption === current.correctIndex ? t('correct') : t('wrong')}
           </div>
           <button onClick={handleNext}
             className="px-5 py-2.5 rounded-xl text-body font-semibold text-white transition-all hover:-translate-y-0.5"
             style={{ background: monoGradient(topicColor) }}>
-            {currentIndex < total - 1 ? 'CÃ¢u tiáº¿p â†’ Enter' : 'Xem káº¿t quáº£'}
+            {currentIndex < total - 1 ? t('nextQuestion') : t('viewResult')}
           </button>
         </div>
       )}

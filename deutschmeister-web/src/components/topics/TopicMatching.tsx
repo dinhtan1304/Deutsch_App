@@ -1,6 +1,7 @@
-﻿'use client';
+'use client';
 
 import { useReducer, useEffect, useCallback, useRef } from 'react';
+import { useTranslations } from 'next-intl';
 import { ACCENT, STATUS } from '@/lib/tokens';
 import type { TopicWord } from '@/types/topic';
 
@@ -46,7 +47,7 @@ interface MatchItem {
 
 const ROUND_SIZE = 6;
 
-// â”€â”€â”€ State management â”€â”€â”€
+// ─── State management ───
 
 type MatchState = {
   leftItems: MatchItem[];
@@ -136,7 +137,7 @@ function buildRound(pool: TopicWord[]): { roundWords: TopicWord[]; left: MatchIt
   return { roundWords, left, right };
 }
 
-// â”€â”€â”€ Component â”€â”€â”€
+// ─── Component ───
 
 interface Props {
   words: TopicWord[];
@@ -146,6 +147,7 @@ interface Props {
 }
 
 export function TopicMatching({ words, topicColor, onMarkLearned, hideIcons = false }: Props) {
+  const t = useTranslations('vocabulary.topicStudy');
   const [state, dispatch] = useReducer(matchReducer, EMPTY_STATE);
   const { leftItems, rightItems, selectedLeft, selectedRight, matched, wrongPair, attempts, isFinished, startTime, elapsed, roundWords } = state;
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -173,7 +175,7 @@ export function TopicMatching({ words, topicColor, onMarkLearned, hideIcons = fa
     dispatch({ type: 'start', ...round, startTime: Date.now() });
   }, [words]);
 
-  // Match logic runs in click handlers â€” no effect needed
+  // Match logic runs in click handlers — no effect needed
   const runMatch = useCallback((leftId: string, rightId: string, leftWordId: string, rightWordId: string) => {
     if (leftWordId === rightWordId) {
       dispatch({ type: 'correct', wordId: leftWordId });
@@ -222,13 +224,13 @@ export function TopicMatching({ words, topicColor, onMarkLearned, hideIcons = fa
       <div className="text-center py-12">
         {!hideIcons && <div className="text-4xl mb-3">🔗</div>}
         <p style={{ color: 'var(--theme-text-muted)' }}>
-          Cáº§n Ã­t nháº¥t 3 tá»« Ä‘á»ƒ chÆ¡i ná»‘i tá»«. Chá»§ Ä‘á» nÃ y cÃ³ {words.length} tá»«.
+          {t('matchNeedMin', { count: words.length })}
         </p>
       </div>
     );
   }
 
-  // â”€â”€â”€ Finished â”€â”€â”€
+  // ─── Finished ───
   if (isFinished) {
     const accuracy = attempts > 0 ? Math.round((roundWords.length / attempts) * 100) : 100;
     const stars = accuracy >= 90 ? 3 : accuracy >= 70 ? 2 : 1;
@@ -236,33 +238,33 @@ export function TopicMatching({ words, topicColor, onMarkLearned, hideIcons = fa
       <div className="text-center py-10">
         {!hideIcons && <div className="text-5xl mb-3">{'⭐'.repeat(stars)}</div>}
         <h3 className="text-xl font-bold mb-1" style={{ color: 'var(--theme-text-primary)' }}>
-          HoÃ n thÃ nh!
+          {t('finished')}
         </h3>
         <div className="flex justify-center gap-6 mb-6 mt-4">
           <div className="text-center">
             <div className="text-2xl font-bold" style={{ color: topicColor }}>{roundWords.length}</div>
-            <div className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>Cáº·p tá»«</div>
+            <div className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>{t('pairs')}</div>
           </div>
           <div className="text-center">
             <div className="text-2xl font-bold" style={{ color: 'var(--theme-text-primary)' }}>{attempts}</div>
-            <div className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>Láº§n thá»­</div>
+            <div className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>{t('attempts')}</div>
           </div>
           <div className="text-center">
             <div className="text-2xl font-bold" style={{ color: STATUS.success }}>{formatTime(elapsed)}</div>
-            <div className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>Thá»i gian</div>
+            <div className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>{t('time')}</div>
           </div>
           <div className="text-center">
             <div className="text-2xl font-bold" style={{ color: accuracy >= 70 ? STATUS.success : ACCENT.xp }}>
               {accuracy}%
             </div>
-            <div className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>ChÃ­nh xÃ¡c</div>
+            <div className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>{t('accuracy')}</div>
           </div>
         </div>
         <div className="flex justify-center gap-3">
           <button onClick={() => startRound()}
             className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-body font-semibold transition-all hover:-translate-y-0.5"
             style={{ background: `${topicColor}15`, color: topicColor }}>
-            {!hideIcons && <IconRotateCcw size={15} />} ChÆ¡i láº¡i
+            {!hideIcons && <IconRotateCcw size={15} />} {t('playAgain')}
           </button>
         </div>
       </div>
@@ -275,10 +277,10 @@ export function TopicMatching({ words, topicColor, onMarkLearned, hideIcons = fa
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-3">
           <span className="text-body font-medium" style={{ color: 'var(--theme-text-muted)' }}>
-            Ná»‘i: {matched.size}/{roundWords.length}
+            {t('matchedLabel', { matched: matched.size, total: roundWords.length })}
           </span>
           <span className="text-xs px-2 py-0.5 rounded-md" style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }}>
-            Thá»­: {attempts}
+            {t('attemptsLabel', { count: attempts })}
           </span>
         </div>
         <div className="flex items-center gap-1.5 text-body" style={{ color: 'var(--theme-text-muted)' }}>
@@ -300,7 +302,7 @@ export function TopicMatching({ words, topicColor, onMarkLearned, hideIcons = fa
         <div className="space-y-2.5">
           <div className="text-caption font-bold uppercase tracking-wide mb-2"
             style={{ color: 'var(--theme-text-muted)' }}>
-            Tiếng Đức
+            {t('german')}
           </div>
           {leftItems.map(item => {
             const isMatched = matched.has(item.wordId);
@@ -352,7 +354,7 @@ export function TopicMatching({ words, topicColor, onMarkLearned, hideIcons = fa
         <div className="space-y-2.5">
           <div className="text-caption font-bold uppercase tracking-wide mb-2"
             style={{ color: 'var(--theme-text-muted)' }}>
-            Tiếng Việt
+            {t('vietnamese')}
           </div>
           {rightItems.map(item => {
             const isMatched = matched.has(item.wordId);
@@ -403,7 +405,7 @@ export function TopicMatching({ words, topicColor, onMarkLearned, hideIcons = fa
 
       {/* Hint */}
       <div className="text-center mt-5 text-xs" style={{ color: 'var(--theme-text-muted)' }}>
-        Chá»n 1 tá»« bÃªn trÃ¡i â†’ chá»n nghÄ©a bÃªn pháº£i Ä‘á»ƒ ná»‘i
+        {t('matchHint')}
       </div>
     </div>
   );

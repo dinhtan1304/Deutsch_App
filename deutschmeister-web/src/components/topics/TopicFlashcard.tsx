@@ -1,11 +1,12 @@
-﻿'use client';
+'use client';
 
 import { useReducer, useCallback, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { ACCENT, STATUS } from '@/lib/tokens';
 import type { TopicWord } from '@/types/topic';
 import { speakGerman } from '@/lib/utils';
 
-// â”€â”€â”€ Icons â”€â”€â”€
+// ─── Icons ───
 function IconVolume({ size = 16 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -81,7 +82,7 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
-// â”€â”€â”€ State management â”€â”€â”€
+// ─── State management ───
 
 type FlashState = {
   deck: TopicWord[];
@@ -144,7 +145,7 @@ function initFlash(words: TopicWord[]): FlashState {
   return { deck: shuffle(words), currentIndex: 0, isFlipped: false, known: new Set(), unknown: new Set(), isFinished: false };
 }
 
-// â”€â”€â”€ Component â”€â”€â”€
+// ─── Component ───
 
 interface Props {
   words: TopicWord[];
@@ -154,6 +155,7 @@ interface Props {
 }
 
 export function TopicFlashcard({ words, topicColor, onMarkLearned, hideIcons = false }: Props) {
+  const t = useTranslations('vocabulary.topicStudy');
   const [state, dispatch] = useReducer(flashReducer, words, initFlash);
   const { deck, currentIndex, isFlipped, known, unknown, isFinished } = state;
 
@@ -200,27 +202,27 @@ export function TopicFlashcard({ words, topicColor, onMarkLearned, hideIcons = f
 
   if (!currentWord && !isFinished) return null;
 
-  // â”€â”€â”€ Finished screen â”€â”€â”€
+  // ─── Finished screen ───
   if (isFinished) {
     const pct = total > 0 ? Math.round((known.size / total) * 100) : 0;
     return (
       <div className="text-center py-10">
         {!hideIcons && <div className="text-5xl mb-4">{pct >= 80 ? '🎉' : pct >= 50 ? '💪' : '📚'}</div>}
         <h3 className="text-xl font-bold mb-2" style={{ color: 'var(--theme-text-primary)' }}>
-          HoÃ n thÃ nh!
+          {t('finished')}
         </h3>
         <div className="flex justify-center gap-6 mb-6">
           <div className="text-center">
             <div className="text-2xl font-bold" style={{ color: STATUS.success }}>{known.size}</div>
-            <div className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>ÄÃ£ biáº¿t</div>
+            <div className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>{t('known')}</div>
           </div>
           <div className="text-center">
             <div className="text-2xl font-bold" style={{ color: STATUS.danger }}>{unknown.size}</div>
-            <div className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>Cáº§n Ã´n</div>
+            <div className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>{t('needReview')}</div>
           </div>
           <div className="text-center">
             <div className="text-2xl font-bold" style={{ color: topicColor }}>{pct}%</div>
-            <div className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>ChÃ­nh xÃ¡c</div>
+            <div className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>{t('accuracy')}</div>
           </div>
         </div>
         <div className="flex justify-center gap-3">
@@ -228,13 +230,13 @@ export function TopicFlashcard({ words, topicColor, onMarkLearned, hideIcons = f
             <button onClick={() => restart(true)}
               className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-body font-semibold transition-all hover:-translate-y-0.5"
               style={{ background: 'rgba(239,68,68,.1)', color: STATUS.danger }}>
-              {!hideIcons && <IconRotateCcw size={15} />} Ã”n {unknown.size} tá»« chÆ°a biáº¿t
+              {!hideIcons && <IconRotateCcw size={15} />} {t('reviewUnknown', { count: unknown.size })}
             </button>
           )}
           <button onClick={() => restart(false)}
             className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-body font-semibold transition-all hover:-translate-y-0.5"
             style={{ background: `${topicColor}15`, color: topicColor }}>
-            {!hideIcons && <IconShuffle size={15} />} Há»c láº¡i táº¥t cáº£
+            {!hideIcons && <IconShuffle size={15} />} {t('restartAll')}
           </button>
         </div>
       </div>
@@ -252,8 +254,8 @@ export function TopicFlashcard({ words, topicColor, onMarkLearned, hideIcons = f
           {currentIndex + 1} / {total}
         </span>
         <div className="flex items-center gap-3 text-xs">
-          <span style={{ color: STATUS.success }}>{hideIcons ? `Đã biết ${known.size}` : `✓ ${known.size}`}</span>
-          <span style={{ color: STATUS.danger }}>{hideIcons ? `Cần ôn ${unknown.size}` : `✕ ${unknown.size}`}</span>
+          <span style={{ color: STATUS.success }}>{hideIcons ? t('knownShort', { count: known.size }) : `✓ ${known.size}`}</span>
+          <span style={{ color: STATUS.danger }}>{hideIcons ? t('needReviewShort', { count: unknown.size }) : `✕ ${unknown.size}`}</span>
         </div>
       </div>
       <div className="h-1.5 rounded-full overflow-hidden mb-6"
@@ -300,10 +302,10 @@ export function TopicFlashcard({ words, topicColor, onMarkLearned, hideIcons = f
                 onClick={(e) => { e.stopPropagation(); playAudio(`${currentWord.article} ${currentWord.word}`); }}
                 className="w-10 h-10 rounded-xl flex items-center justify-center transition-all hover:scale-110"
                 style={{ backgroundColor: `${ac}15`, color: ac }}>
-                {hideIcons ? 'Nghe' : <IconVolume size={20} />}
+                {hideIcons ? t('listen') : <IconVolume size={20} />}
               </button>
               <div className="absolute bottom-4 text-caption" style={{ color: 'var(--theme-text-muted)' }}>
-                Nháº¥n Ä‘á»ƒ láº­t Â· Space
+                {t('flipHint')}
               </div>
             </div>
 
@@ -317,7 +319,7 @@ export function TopicFlashcard({ words, topicColor, onMarkLearned, hideIcons = f
               }}>
               <div className="text-caption font-bold uppercase mb-4 px-3 py-1 rounded-lg tracking-wide"
                 style={{ backgroundColor: `${topicColor}15`, color: topicColor }}>
-                NghÄ©a
+                {t('meaning')}
               </div>
               {currentWord.translationVi && (
                 <div className="text-2xl font-bold mb-1" style={{ color: 'var(--theme-text-primary)' }}>
@@ -331,12 +333,12 @@ export function TopicFlashcard({ words, topicColor, onMarkLearned, hideIcons = f
                 <div className="w-full mt-2 px-4">
                   <div className="text-xs italic text-center py-2 rounded-lg"
                     style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-secondary)' }}>
-                    â€ž{currentWord.examples[0]}&quot;
+                    „{currentWord.examples[0]}&quot;
                   </div>
                 </div>
               )}
               <div className="absolute bottom-4 text-caption" style={{ color: 'var(--theme-text-muted)' }}>
-                Nháº¥n Ä‘á»ƒ láº­t Â· Space
+                {t('flipHint')}
               </div>
             </div>
           </div>
@@ -348,12 +350,12 @@ export function TopicFlashcard({ words, topicColor, onMarkLearned, hideIcons = f
         <button onClick={handleUnknown}
           className="flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold transition-all hover:-translate-y-0.5 hover:shadow-md"
           style={{ background: 'rgba(239,68,68,.1)', color: STATUS.danger, border: '1px solid rgba(239,68,68,.2)' }}>
-          {!hideIcons && <IconX size={18} />} ChÆ°a biáº¿t Â· â†
+          {!hideIcons && <IconX size={18} />} {t('dontKnow')}
         </button>
         <button onClick={handleKnown}
           className="flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold transition-all hover:-translate-y-0.5 hover:shadow-md"
           style={{ background: 'rgba(34,197,94,.1)', color: STATUS.success, border: '1px solid rgba(34,197,94,.2)' }}>
-          {!hideIcons && <IconCheck size={18} />} ÄÃ£ biáº¿t Â· â†’
+          {!hideIcons && <IconCheck size={18} />} {t('know')}
         </button>
       </div>
 
@@ -363,18 +365,18 @@ export function TopicFlashcard({ words, topicColor, onMarkLearned, hideIcons = f
           disabled={currentIndex === 0}
           className="p-2 rounded-lg transition-all disabled:opacity-30"
           style={{ color: 'var(--theme-text-muted)' }}>
-          {hideIcons ? 'Trước' : <IconChevronLeft size={20} />}
+          {hideIcons ? t('prev') : <IconChevronLeft size={20} />}
         </button>
         <button onClick={() => restart(false)}
           className="p-2 rounded-lg transition-all hover:opacity-70"
-          style={{ color: 'var(--theme-text-muted)' }} title="XÃ¡o trá»™n láº¡i">
-          {hideIcons ? 'Trộn' : <IconShuffle size={18} />}
+          style={{ color: 'var(--theme-text-muted)' }} title={t('shuffleTitle')}>
+          {hideIcons ? t('shuffle') : <IconShuffle size={18} />}
         </button>
         <button onClick={() => dispatch({ type: 'next' })}
           disabled={currentIndex >= total - 1}
           className="p-2 rounded-lg transition-all disabled:opacity-30"
           style={{ color: 'var(--theme-text-muted)' }}>
-          {hideIcons ? 'Sau' : <IconChevronRight size={20} />}
+          {hideIcons ? t('next') : <IconChevronRight size={20} />}
         </button>
       </div>
     </div>

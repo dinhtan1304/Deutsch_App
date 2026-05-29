@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 import type { Topic, TopicWithProgress } from '@/types/topic';
 
@@ -40,6 +41,7 @@ interface TopicCardProps {
 }
 
 export function TopicCard({ topic, showProgress = false }: TopicCardProps) {
+  const t = useTranslations('vocabulary.topicCard');
   const masteryPct  = 'masteryPercent' in topic ? topic.masteryPercent : 0;
   const wordsLearned = 'wordsLearned' in topic ? topic.wordsLearned : 0;
   const isCompleted = masteryPct >= 100;
@@ -49,9 +51,9 @@ export function TopicCard({ topic, showProgress = false }: TopicCardProps) {
 
   // Status badge
   const statusConfig = (() => {
-    if (isCompleted)   return { label: 'Hoàn thành', bg: `${STATUS.success}15`,  color: STATUS.success };
-    if (isInProgress)  return { label: 'Đang học',   bg: `${ACCENT.srs}15`,      color: ACCENT.srs };
-    return               { label: 'Chưa học',   bg: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' };
+    if (isCompleted)   return { label: t('statusCompleted'), bg: `${STATUS.success}15`,  color: STATUS.success };
+    if (isInProgress)  return { label: t('statusInProgress'),   bg: `${ACCENT.srs}15`,      color: ACCENT.srs };
+    return               { label: t('statusNotStarted'),   bg: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' };
   })();
 
   return (
@@ -110,7 +112,7 @@ export function TopicCard({ topic, showProgress = false }: TopicCardProps) {
                 className="text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg border"
                 style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-muted)' }}
               >
-                {topic.wordCount} từ
+                {t('wordCount', { count: topic.wordCount })}
               </span>
             </div>
 

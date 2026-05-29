@@ -1,7 +1,10 @@
+'use client';
+
 import { TopicWord, ArticleColor } from '@/types/topic';
 import { ACCENT, STATUS } from '@/lib/tokens';
 import { IconVolume, IconLightbulb, IconX } from '@/components/ui/Icons';
 import { useEffect, useRef } from 'react';
+import { useTranslations } from 'next-intl';
 
 interface TopicWordDetailModalProps {
   word: TopicWord;
@@ -10,6 +13,7 @@ interface TopicWordDetailModalProps {
 }
 
 export function TopicWordDetailModal({ word, onClose, onSpeak }: TopicWordDetailModalProps) {
+  const t = useTranslations('vocabulary.topicWordDetail');
   const ref = useRef<HTMLDivElement>(null);
   const DEFAULT_AC = { color: ACCENT.gray, bg: `${ACCENT.gray}1a` };
   const ac = ArticleColor[word.article] ?? DEFAULT_AC;
@@ -32,12 +36,12 @@ export function TopicWordDetailModal({ word, onClose, onSpeak }: TopicWordDetail
       <div ref={ref} onClick={e => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
-        aria-label={`Chi tiết: ${word.word}`}
+        aria-label={t('detailAria', { word: word.word })}
         className="relative w-full max-w-lg p-6 rounded-2xl shadow-xl overflow-hidden"
         style={{ backgroundColor: 'var(--theme-bg-card)', borderTop: `6px solid ${ac.color}` }}>
 
         <button onClick={onClose}
-          aria-label="Đóng"
+          aria-label={t('close')}
           className="absolute top-4 right-4 p-2 rounded-full transition-colors hover:bg-black/5 dark:hover:bg-white/5"
           style={{ color: 'var(--theme-text-muted)' }}>
           <IconX size={20} />
@@ -49,18 +53,18 @@ export function TopicWordDetailModal({ word, onClose, onSpeak }: TopicWordDetail
               {word.article ? (
                 <span className="px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider"
                   style={{ backgroundColor: ac.bg, color: ac.color }}>
-                  Danh từ
+                  {t('noun')}
                 </span>
               ) : (
                 <span className="px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider"
                   style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }}>
-                  Khác
+                  {t('other')}
                 </span>
               )}
               {word.isCore && (
                 <span className="px-2 py-1 rounded text-xs font-bold"
                   style={{ backgroundColor: 'rgba(245,158,11,.1)', color: ACCENT.xp }}>
-                  Core Word
+                  {t('coreWord')}
                 </span>
               )}
             </div>
@@ -79,7 +83,7 @@ export function TopicWordDetailModal({ word, onClose, onSpeak }: TopicWordDetail
             {word.plural && (
               <div className="mb-4">
                 <span className="text-sm font-medium" style={{ color: 'var(--theme-text-muted)' }}>
-                  Số nhiều (Plural): die {word.plural}
+                  {t('pluralLabel', { plural: word.plural })}
                 </span>
               </div>
             )}
@@ -108,7 +112,7 @@ export function TopicWordDetailModal({ word, onClose, onSpeak }: TopicWordDetail
           <div className="mt-6 pt-5 border-t" style={{ borderColor: 'var(--theme-border)' }}>
             {word.examples && word.examples.length > 0 && (
               <div className="mb-4">
-                <p className="text-xs font-bold uppercase tracking-wider mb-2" style={{ color: 'var(--theme-text-muted)' }}>Ví dụ</p>
+                <p className="text-xs font-bold uppercase tracking-wider mb-2" style={{ color: 'var(--theme-text-muted)' }}>{t('examples')}</p>
                 <div className="flex flex-col gap-2">
                   {word.examples.map((ex, i) => (
                     <div key={i} className="flex items-start gap-2 text-sm italic leading-relaxed" style={{ color: 'var(--theme-text-primary)' }}>
@@ -139,7 +143,7 @@ export function TopicWordDetailModal({ word, onClose, onSpeak }: TopicWordDetail
           <button onClick={handleSpeak}
             className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl font-bold transition-all text-sm hover:scale-[1.02]"
             style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-primary)' }}>
-            <IconVolume size={16} /> Phát âm
+            <IconVolume size={16} /> {t('speak')}
           </button>
         </div>
 
