@@ -91,6 +91,14 @@
       "done": "Xong",
       "nameExists": "Tên đã tồn tại",
       "createFailed": "Tạo thất bại"
+    },
+    "collectionsSidebar": {
+      "all": "Tất cả",
+      "favorites": "Yêu thích",
+      "deleteTitle": "Xoá thư mục",
+      "deleteConfirm": "Xoá thư mục này? Các từ trong thư mục sẽ không bị xoá.",
+      "nameExists": "Tên thư mục đã tồn tại",
+      "createFailed": "Tạo thư mục thất bại. Vui lòng thử lại."
     }
   },
   "grammar": {

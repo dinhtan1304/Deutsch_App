@@ -91,6 +91,14 @@
       "done": "Fertig",
       "nameExists": "Name existiert bereits",
       "createFailed": "Erstellen fehlgeschlagen"
+    },
+    "collectionsSidebar": {
+      "all": "Alle",
+      "favorites": "Favoriten",
+      "deleteTitle": "Ordner löschen",
+      "deleteConfirm": "Diesen Ordner löschen? Die Wörter darin werden nicht gelöscht.",
+      "nameExists": "Ordnername existiert bereits",
+      "createFailed": "Ordner konnte nicht erstellt werden. Bitte versuche es erneut."
     }
   },
   "grammar": {

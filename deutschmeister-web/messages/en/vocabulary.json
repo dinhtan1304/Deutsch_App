@@ -91,6 +91,14 @@
       "done": "Done",
       "nameExists": "Name already exists",
       "createFailed": "Creation failed"
+    },
+    "collectionsSidebar": {
+      "all": "All",
+      "favorites": "Favorites",
+      "deleteTitle": "Delete folder",
+      "deleteConfirm": "Delete this folder? The words in it won't be deleted.",
+      "nameExists": "Folder name already exists",
+      "createFailed": "Failed to create folder. Please try again."
     }
   },
   "grammar": {

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { ACCENT, STATUS, GRADIENT } from '@/lib/tokens';
 import { IconX, IconPlus } from '@/components/ui/Icons';
 import {
@@ -28,6 +29,8 @@ export function CollectionsSidebar({
   onSelectCollection,
   onDeleteCollection,
 }: CollectionsSidebarProps) {
+  const t = useTranslations('vocabulary.wordBank.collectionsSidebar');
+  const tp = useTranslations('vocabulary.wordBank.collectionPicker');
   const { data: collections = [] } = useCollections();
   const createCollection = useCreateCollection();
   const deleteCollection = useDeleteCollection();
@@ -49,15 +52,15 @@ export function CollectionsSidebar({
         ?? (err as Error | undefined)?.message ?? '';
       setError(
         msg.includes('Conflict') || msg.includes('duplicate') || msg.includes('exists')
-          ? 'Tên thư mục đã tồn tại'
-          : 'Tạo thư mục thất bại. Vui lòng thử lại.'
+          ? t('nameExists')
+          : t('createFailed')
       );
     }
   };
 
   const handleDelete = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!confirm('Xoá thư mục này? Các từ trong thư mục sẽ không bị xoá.')) return;
+    if (!confirm(t('deleteConfirm'))) return;
     onDeleteCollection(id);
     await deleteCollection.mutateAsync(id);
   };
@@ -103,7 +106,7 @@ export function CollectionsSidebar({
           <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
           <rect x="8" y="2" width="8" height="4" rx="1" ry="1" />
         </svg>,
-        'Tất cả', statTotal
+        t('all'), statTotal
       )}
 
       {navItem(
@@ -111,7 +114,7 @@ export function CollectionsSidebar({
         <svg width={15} height={15} viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
           <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
         </svg>,
-        'Yêu thích', statFavorites
+        t('favorites'), statFavorites
       )}
 
       {collections.length > 0 && (
@@ -147,7 +150,7 @@ export function CollectionsSidebar({
           <button
             onClick={e => handleDelete(col.id, e)}
             className="opacity-0 group-hover:opacity-100 transition-opacity ml-0.5 hover:text-red-500 shrink-0"
-            title="Xoá thư mục"
+            title={t('deleteTitle')}
           >
             <IconX size={12} />
           </button>
@@ -166,7 +169,7 @@ export function CollectionsSidebar({
               if (e.key === 'Enter') handleCreate();
               if (e.key === 'Escape') { setShowNew(false); setNewName(''); }
             }}
-            placeholder="Tên thư mục..."
+            placeholder={tp('namePlaceholder')}
             maxLength={50}
             className="w-full px-2.5 py-1.5 rounded-lg border text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
             style={{
@@ -183,14 +186,14 @@ export function CollectionsSidebar({
               className="flex-1 py-1 rounded-lg text-caption font-semibold text-white transition-all disabled:opacity-40"
               style={{ background: GRADIENT.writing }}
             >
-              Tạo
+              {tp('create')}
             </button>
             <button
               onClick={() => { setShowNew(false); setNewName(''); setError(null); }}
               className="px-2 py-1 rounded-lg text-caption transition-all"
               style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }}
             >
-              Huỷ
+              {tp('cancel')}
             </button>
           </div>
         </div>
@@ -200,7 +203,7 @@ export function CollectionsSidebar({
           className="flex items-center gap-2 px-3.5 py-2.5 text-xs font-medium transition-all hover:opacity-80"
           style={{ color: 'var(--theme-text-muted)' }}
         >
-          <IconPlus size={13} /> Tạo thư mục mới
+          <IconPlus size={13} /> {tp('createNew')}
         </button>
       )}
     </div>
