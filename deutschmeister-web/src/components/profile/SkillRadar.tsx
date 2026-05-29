@@ -2,23 +2,24 @@
 /* eslint-disable no-restricted-syntax */
 
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { ACCENT, STATUS } from '@/lib/tokens';
 import { useSkills } from '@/hooks/useUser';
 import type { SkillScores, SkillScore } from '@/lib/api/users';
 
 // ─── Config ──────────────────────────────────────────────────────────────────
+// Labels live in messages → progress.profile.skillRadar.skills.<key>
 
 const SKILLS: {
   key: keyof Pick<SkillScores, 'reading' | 'writing' | 'listening' | 'speaking' | 'grammar'>;
-  label: string;
   color: string;
   href: string;
 }[] = [
-  { key: 'reading',   label: 'Đọc',      color: STATUS.success, href: '/practice-test/reading' },
-  { key: 'writing',   label: 'Viết',      color: ACCENT.writing, href: '/practice-test/writing' },
-  { key: 'listening', label: 'Nghe',      color: ACCENT.cyan, href: '/practice-test/listening' },
-  { key: 'speaking',  label: 'Nói',       color: ACCENT.xp, href: '/practice-test/pronunciation' },
-  { key: 'grammar',   label: 'Ngữ pháp', color: ACCENT.vocab, href: '/grammar' },
+  { key: 'reading',   color: STATUS.success, href: '/practice-test/reading' },
+  { key: 'writing',   color: ACCENT.writing, href: '/practice-test/writing' },
+  { key: 'listening', color: ACCENT.cyan, href: '/practice-test/listening' },
+  { key: 'speaking',  color: ACCENT.xp, href: '/practice-test/pronunciation' },
+  { key: 'grammar',   color: ACCENT.vocab, href: '/grammar' },
 ];
 
 const CX = 140;
@@ -59,6 +60,7 @@ function TrendArrow({ trend }: { trend: 'up' | 'down' | 'flat' }) {
 // ─── Radar SVG ───────────────────────────────────────────────────────────────
 
 function RadarChart({ data }: { data: SkillScores }) {
+  const t = useTranslations('progress.profile.skillRadar');
   const n = SKILLS.length;
   const step = 360 / n;
 
@@ -160,7 +162,7 @@ function RadarChart({ data }: { data: SkillScores }) {
               opacity: sk.score !== null ? 1 : 0.4
             }}
           >
-            {s.label}
+            {t(`skills.${s.key}` as 'skills.reading')}
           </text>
         );
       })}
@@ -179,6 +181,7 @@ function SkillRow({
   data: SkillScore;
   isWeakest: boolean;
 }) {
+  const t = useTranslations('progress.profile.skillRadar');
   return (
     <div
       className="group flex items-center gap-3 px-4 py-2.5 rounded-2xl transition-all duration-300"
@@ -197,7 +200,7 @@ function SkillRow({
         className="flex-1 text-[11px] font-black uppercase tracking-widest opacity-70 group-hover:opacity-100 transition-opacity"
         style={{ color: 'var(--theme-text-primary)' }}
       >
-        {skill.label}
+        {t(`skills.${skill.key}` as 'skills.reading')}
       </span>
       {/* Score */}
       <span
@@ -214,7 +217,7 @@ function SkillRow({
           className="text-[9px] font-black px-2 py-0.5 rounded-lg uppercase tracking-tighter shrink-0"
           style={{ background: STATUS.danger, color: 'white' }}
         >
-          Weakest
+          {t('weakest')}
         </span>
       )}
     </div>
@@ -224,6 +227,7 @@ function SkillRow({
 // ─── Main Widget ─────────────────────────────────────────────────────────────
 
 export function SkillRadar() {
+  const t = useTranslations('progress.profile.skillRadar');
   const { data, isLoading } = useSkills();
 
   // Loading state
@@ -262,7 +266,7 @@ export function SkillRadar() {
             </svg>
           </div>
           <h2 className="text-[15px] font-bold" style={{ color: 'var(--theme-text-primary)' }}>
-            Phân tích kỹ năng
+            {t('title')}
           </h2>
         </div>
         <div className="text-center py-8">
@@ -278,10 +282,10 @@ export function SkillRadar() {
             className="text-sm font-semibold mb-1"
             style={{ color: 'var(--theme-text-primary)' }}
           >
-            Chưa đủ dữ liệu
+            {t('noDataTitle')}
           </p>
           <p className="text-xs mb-4" style={{ color: 'var(--theme-text-muted)' }}>
-            Hoàn thành thêm bài tập để xem phân tích kỹ năng
+            {t('noDataBody')}
           </p>
           <Link
             href="/practice-test"
@@ -291,7 +295,7 @@ export function SkillRadar() {
               boxShadow: '0 4px 12px rgba(99,102,241,.3)',
             }}
           >
-            Luyện tập ngay
+            {t('practiceNow')}
           </Link>
         </div>
       </div>
@@ -321,10 +325,10 @@ export function SkillRadar() {
           </div>
           <div>
             <h2 className="text-base font-black tracking-tight" style={{ color: 'var(--theme-text-primary)' }}>
-              Phân tích kỹ năng
+              {t('title')}
             </h2>
             <p className="text-[11px] opacity-50 font-medium" style={{ color: 'var(--theme-text-muted)' }}>
-              Cấp độ tinh thông 5 kỹ năng
+              {t('subtitle')}
             </p>
           </div>
         </div>
@@ -371,7 +375,7 @@ export function SkillRadar() {
             <polyline points="12 16 16 12 12 8" />
             <line x1="8" y1="12" x2="16" y2="12" />
           </svg>
-          Tập trung cải thiện: {weakLabel.label}
+          {t('focusImprove', { skill: t(`skills.${weakLabel.key}` as 'skills.reading') })}
         </Link>
       )}
     </div>

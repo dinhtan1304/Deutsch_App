@@ -136,6 +136,33 @@
     "statGames": "Spiele",
     "statAccuracy": "Genauigkeit",
     "statFavorites": "Favoriten",
-    "statLearned": "Gelernt"
+    "statLearned": "Gelernt",
+    "quickActions": {
+      "title": "Schnellzugriff",
+      "gamesLabel": "Spiele",
+      "gamesSub": "Artikel üben",
+      "dictLabel": "Wörterbuch",
+      "dictSub": "Neue Wörter lernen",
+      "grammarLabel": "Grammatik",
+      "grammarSub": "Übungen machen",
+      "examLabel": "Prüfungsvorbereitung",
+      "examSub": "Goethe/TELC-Tests"
+    },
+    "skillRadar": {
+      "title": "Fähigkeitsanalyse",
+      "subtitle": "Beherrschung von 5 Fertigkeiten",
+      "noDataTitle": "Nicht genügend Daten",
+      "noDataBody": "Mache mehr Übungen, um deine Fähigkeitsanalyse zu sehen",
+      "practiceNow": "Jetzt üben",
+      "weakest": "Schwächste",
+      "focusImprove": "Verbessern: {skill}",
+      "skills": {
+        "reading": "Lesen",
+        "writing": "Schreiben",
+        "listening": "Hören",
+        "speaking": "Sprechen",
+        "grammar": "Grammatik"
+      }
+    }
   }
 }

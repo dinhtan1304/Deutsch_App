@@ -136,6 +136,33 @@
     "statGames": "Games",
     "statAccuracy": "Accuracy",
     "statFavorites": "Favorites",
-    "statLearned": "Learned"
+    "statLearned": "Learned",
+    "quickActions": {
+      "title": "Quick access",
+      "gamesLabel": "Play games",
+      "gamesSub": "Practice articles",
+      "dictLabel": "Dictionary",
+      "dictSub": "Learn new words",
+      "grammarLabel": "Grammar",
+      "grammarSub": "Practice exercises",
+      "examLabel": "Exam prep",
+      "examSub": "Goethe/TELC tests"
+    },
+    "skillRadar": {
+      "title": "Skill analysis",
+      "subtitle": "Mastery level across 5 skills",
+      "noDataTitle": "Not enough data",
+      "noDataBody": "Complete more exercises to see your skill analysis",
+      "practiceNow": "Practice now",
+      "weakest": "Weakest",
+      "focusImprove": "Focus on improving: {skill}",
+      "skills": {
+        "reading": "Reading",
+        "writing": "Writing",
+        "listening": "Listening",
+        "speaking": "Speaking",
+        "grammar": "Grammar"
+      }
+    }
   }
 }

@@ -136,6 +136,33 @@
     "statGames": "Trò chơi",
     "statAccuracy": "Chính xác",
     "statFavorites": "Yêu thích",
-    "statLearned": "Đã học"
+    "statLearned": "Đã học",
+    "quickActions": {
+      "title": "Truy cập nhanh",
+      "gamesLabel": "Chơi game",
+      "gamesSub": "Luyện mạo từ",
+      "dictLabel": "Từ điển",
+      "dictSub": "Học từ mới",
+      "grammarLabel": "Ngữ pháp",
+      "grammarSub": "Luyện bài tập",
+      "examLabel": "Luyện thi",
+      "examSub": "Đề Goethe/TELC"
+    },
+    "skillRadar": {
+      "title": "Phân tích kỹ năng",
+      "subtitle": "Cấp độ tinh thông 5 kỹ năng",
+      "noDataTitle": "Chưa đủ dữ liệu",
+      "noDataBody": "Hoàn thành thêm bài tập để xem phân tích kỹ năng",
+      "practiceNow": "Luyện tập ngay",
+      "weakest": "Yếu nhất",
+      "focusImprove": "Tập trung cải thiện: {skill}",
+      "skills": {
+        "reading": "Đọc",
+        "writing": "Viết",
+        "listening": "Nghe",
+        "speaking": "Nói",
+        "grammar": "Ngữ pháp"
+      }
+    }
   }
 }
