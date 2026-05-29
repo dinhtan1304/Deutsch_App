@@ -1,6 +1,7 @@
 'use client';
 
 import { Fragment, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { useAIVocabQuota, useAIGenerateVocabulary } from '@/hooks/usePersonalWords';
 import { AIGeneratedVocabWord } from '@/lib/api/personal-words';
@@ -36,6 +37,7 @@ const WORD_TYPE_COLORS: Record<string, string> = {
 };
 
 export function AIVocabModal({ isOpen, onClose, collectionId }: Props) {
+  const t = useTranslations('vocabulary.wordBank.aiVocab');
   const [step, setStep] = useState<Step>('form');
   const [topic, setTopic] = useState('');
   const [count, setCount] = useState(10);
@@ -112,7 +114,7 @@ export function AIVocabModal({ isOpen, onClose, collectionId }: Props) {
       );
       setStep('preview');
     } catch (err: any) {
-      setError(err?.message ?? 'Có lỗi xảy ra, vui lòng thử lại.');
+      setError(err?.message ?? t('genericError'));
       setStep('form');
     }
   };
@@ -151,13 +153,13 @@ export function AIVocabModal({ isOpen, onClose, collectionId }: Props) {
             </div>
             <div>
               <h2 className="text-lg font-bold leading-tight" style={{ color: 'var(--theme-text-primary)' }}>
-                Tạo từ vựng bằng AI
+                {t('title')}
               </h2>
               <span
                 className="text-xs px-2 py-0.5 rounded-full font-medium"
                 style={{ backgroundColor: `${quotaColor}1A`, color: quotaColor }}
               >
-                Còn {quotaRemaining}/{weeklyLimit} lượt tuần này
+                {t('quotaBadge', { remaining: quotaRemaining, limit: weeklyLimit })}
               </span>
             </div>
           </div>
@@ -183,13 +185,13 @@ export function AIVocabModal({ isOpen, onClose, collectionId }: Props) {
                     <IconSparkles size={28} style={{ color: 'white' }} />
                   </div>
                   <h3 className="text-base font-bold mb-2" style={{ color: 'var(--theme-text-primary)' }}>
-                    Đã dùng hết lượt tuần này
+                    {t('exhaustedTitle')}
                   </h3>
                   <p className="text-sm mb-1" style={{ color: 'var(--theme-text-muted)' }}>
-                    Tài khoản miễn phí được tạo <strong>1 bộ từ</strong> mỗi tuần.
+                    {t.rich('exhaustedFree', { b: (chunks) => <strong>{chunks}</strong> })}
                   </p>
                   <p className="text-sm mb-6" style={{ color: 'var(--theme-text-muted)' }}>
-                    Nâng cấp Premium để tạo <strong>5 bộ từ</strong> mỗi tuần.
+                    {t.rich('exhaustedUpsell', { b: (chunks) => <strong>{chunks}</strong> })}
                   </p>
                   <Link
                     href="/pricing"
@@ -197,7 +199,7 @@ export function AIVocabModal({ isOpen, onClose, collectionId }: Props) {
                     style={{ background: GRADIENT.vocab }}
                     onClick={handleClose}
                   >
-                    Xem gói Premium
+                    {t('viewPremium')}
                   </Link>
                 </div>
               ) : (
@@ -205,14 +207,14 @@ export function AIVocabModal({ isOpen, onClose, collectionId }: Props) {
                   {/* Topic */}
                   <div>
                     <label className="block text-sm font-semibold mb-1.5" style={{ color: 'var(--theme-text-primary)' }}>
-                      Chủ đề từ vựng <span style={{ color: STATUS.danger }}>*</span>
+                      {t('topicLabel')} <span style={{ color: STATUS.danger }}>*</span>
                     </label>
                     <input
                       type="text"
                       value={topic}
                       onChange={e => setTopic(e.target.value)}
                       onKeyDown={e => e.key === 'Enter' && topic.trim() && runGenerate(false)}
-                      placeholder="VD: Tiere, Berufe, Im Restaurant, Körperteile..."
+                      placeholder={t('topicPlaceholder')}
                       maxLength={100}
                       className="w-full px-4 py-2.5 rounded-xl text-sm border outline-none transition-all"
                       style={{
@@ -227,11 +229,11 @@ export function AIVocabModal({ isOpen, onClose, collectionId }: Props) {
                   <div>
                     <div className="flex items-center justify-between mb-1.5">
                       <label className="text-sm font-semibold" style={{ color: 'var(--theme-text-primary)' }}>
-                        Số từ vựng
+                        {t('countLabel')}
                       </label>
                       <span className="text-sm font-bold px-2 py-0.5 rounded-lg"
                         style={{ backgroundColor: `${ACCENT.vocab}1A`, color: ACCENT.vocab }}>
-                        {count} từ
+                        {t('countValue', { count })}
                       </span>
                     </div>
                     <input
@@ -251,7 +253,7 @@ export function AIVocabModal({ isOpen, onClose, collectionId }: Props) {
                   {/* Level */}
                   <div>
                     <label className="block text-sm font-semibold mb-1.5" style={{ color: 'var(--theme-text-primary)' }}>
-                      Trình độ <span className="font-normal text-xs" style={{ color: 'var(--theme-text-muted)' }}>(tuỳ chọn)</span>
+                      {t('levelLabel')} <span className="font-normal text-xs" style={{ color: 'var(--theme-text-muted)' }}>{t('optional')}</span>
                     </label>
                     <select
                       value={level}
@@ -263,7 +265,7 @@ export function AIVocabModal({ isOpen, onClose, collectionId }: Props) {
                         color: 'var(--theme-text-primary)',
                       }}
                     >
-                      <option value="">Tất cả trình độ</option>
+                      <option value="">{t('allLevels')}</option>
                       {LEVELS.map(l => <option key={l} value={l}>{l}</option>)}
                     </select>
                   </div>
@@ -271,12 +273,12 @@ export function AIVocabModal({ isOpen, onClose, collectionId }: Props) {
                   {/* Description */}
                   <div>
                     <label className="block text-sm font-semibold mb-1.5" style={{ color: 'var(--theme-text-primary)' }}>
-                      Mô tả thêm <span className="font-normal text-xs" style={{ color: 'var(--theme-text-muted)' }}>(tuỳ chọn)</span>
+                      {t('descLabel')} <span className="font-normal text-xs" style={{ color: 'var(--theme-text-muted)' }}>{t('optional')}</span>
                     </label>
                     <textarea
                       value={description}
                       onChange={e => setDescription(e.target.value)}
-                      placeholder="VD: Chỉ lấy động từ mạnh, liên quan đến nấu ăn trong nhà bếp..."
+                      placeholder={t('descPlaceholder')}
                       maxLength={300}
                       rows={2}
                       className="w-full px-4 py-2.5 rounded-xl text-sm border outline-none resize-none"
@@ -304,7 +306,7 @@ export function AIVocabModal({ isOpen, onClose, collectionId }: Props) {
                     style={{ background: GRADIENT.vocab }}
                   >
                     <IconSparkles size={16} />
-                    Tạo {count} từ vựng
+                    {t('generateBtn', { count })}
                   </button>
                 </div>
               )}
@@ -320,10 +322,10 @@ export function AIVocabModal({ isOpen, onClose, collectionId }: Props) {
               </div>
               <div className="text-center">
                 <p className="font-semibold mb-1" style={{ color: 'var(--theme-text-primary)' }}>
-                  AI đang tạo từ vựng...
+                  {t('generatingTitle')}
                 </p>
                 <p className="text-sm" style={{ color: 'var(--theme-text-muted)' }}>
-                  Chủ đề: <strong>{topic}</strong>
+                  {t('topicPrefix')} <strong>{topic}</strong>
                   {level && <span> · {level}</span>}
                 </p>
               </div>
@@ -337,16 +339,18 @@ export function AIVocabModal({ isOpen, onClose, collectionId }: Props) {
               <div className="p-3 rounded-xl border"
                 style={{ borderColor: `${ACCENT.vocab}33`, backgroundColor: `${ACCENT.vocab}0D` }}>
                 <p className="text-sm font-semibold" style={{ color: 'var(--theme-text-primary)' }}>
-                  AI tạo được{' '}
-                  <span style={{ color: ACCENT.vocab }}>{resultInfo.wordsAdded} từ mới</span>
+                  {t.rich('resultSummary', {
+                    added: resultInfo.wordsAdded,
+                    v: (chunks) => <span style={{ color: ACCENT.vocab }}>{chunks}</span>,
+                  })}
                   {resultInfo.wordsSkipped > 0 && (
                     <span className="font-normal" style={{ color: 'var(--theme-text-muted)' }}>
-                      {' '}({resultInfo.wordsSkipped} từ đã có trong sổ)
+                      {' '}{t('skippedNote', { skipped: resultInfo.wordsSkipped })}
                     </span>
                   )}
                 </p>
                 <p className="text-xs mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>
-                  Tất cả đã được thêm vào {collectionId ? 'bộ sưu tập' : 'sổ từ vựng'} của bạn
+                  {collectionId ? t('addedToCollection') : t('addedToWordBank')}
                 </p>
               </div>
 
@@ -370,7 +374,7 @@ export function AIVocabModal({ isOpen, onClose, collectionId }: Props) {
                             color: 'var(--theme-text-muted)',
                           }}
                         >
-                          — Lượt {batchIdx + 2} —
+                          {t('batchSeparator', { num: batchIdx + 2 })}
                         </div>
                       )}
                     <div
@@ -425,7 +429,7 @@ export function AIVocabModal({ isOpen, onClose, collectionId }: Props) {
                 <button
                   onClick={() => runGenerate(true)}
                   disabled={resultInfo.quotaRemaining === 0 || generateMutation.isPending}
-                  title={resultInfo.quotaRemaining === 0 ? 'Đã hết lượt tuần này' : undefined}
+                  title={resultInfo.quotaRemaining === 0 ? t('outOfQuotaTitle') : undefined}
                   className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold border transition-all hover:-translate-y-0.5 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0"
                   style={{
                     borderColor: ACCENT.vocab,
@@ -434,8 +438,8 @@ export function AIVocabModal({ isOpen, onClose, collectionId }: Props) {
                   }}
                 >
                   <IconSparkles size={14} />
-                  Tạo thêm
-                  {resultInfo.quotaRemaining === 0 && <span className="text-xs">(hết lượt)</span>}
+                  {t('generateMore')}
+                  {resultInfo.quotaRemaining === 0 && <span className="text-xs">{t('outOfQuotaParen')}</span>}
                 </button>
                 <button
                   onClick={handleClose}
@@ -443,7 +447,7 @@ export function AIVocabModal({ isOpen, onClose, collectionId }: Props) {
                   style={{ background: GRADIENT.vocab }}
                 >
                   <IconCheck size={14} />
-                  Hoàn tất{checkedCount > 0 ? ` (${checkedCount} từ)` : ''}
+                  {checkedCount > 0 ? t('finishWithCount', { count: checkedCount }) : t('finish')}
                 </button>
               </div>
             </div>

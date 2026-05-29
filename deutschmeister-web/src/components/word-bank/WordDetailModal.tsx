@@ -1,7 +1,10 @@
+'use client';
+
 import { PersonalWord, WordTypeInfo, GenderInfo, Gender } from '@/types/personalWord';
 import { ACCENT, STATUS } from '@/lib/tokens';
 import { IconVolume, IconStar, IconLightbulb, IconX } from '@/components/ui/Icons';
 import { useEffect, useRef } from 'react';
+import { useTranslations } from 'next-intl';
 
 interface WordDetailModalProps {
   word: PersonalWord;
@@ -11,6 +14,7 @@ interface WordDetailModalProps {
 }
 
 export function WordDetailModal({ word, onClose, onSpeak, onToggleFavorite }: WordDetailModalProps) {
+  const t = useTranslations('vocabulary.wordBank.wordDetail');
   const typeInfo = WordTypeInfo[word.wordType] ?? WordTypeInfo['andere'];
   const ref = useRef<HTMLDivElement>(null);
 
@@ -78,12 +82,12 @@ export function WordDetailModal({ word, onClose, onSpeak, onToggleFavorite }: Wo
       <div ref={ref} onClick={e => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
-        aria-label={`Chi tiết: ${word.word}`}
+        aria-label={t('detailAria', { word: word.word })}
         className="relative w-full max-w-lg p-6 rounded-2xl shadow-xl overflow-hidden"
         style={{ backgroundColor: 'var(--theme-bg-card)', borderTop: `6px solid ${typeInfo.color}` }}>
 
         <button onClick={onClose}
-          aria-label="Đóng"
+          aria-label={t('close')}
           className="absolute top-4 right-4 p-2 rounded-full transition-colors hover:bg-black/5 dark:hover:bg-white/5"
           style={{ color: 'var(--theme-text-muted)' }}>
           <IconX size={20} />
@@ -139,7 +143,7 @@ export function WordDetailModal({ word, onClose, onSpeak, onToggleFavorite }: Wo
           <div className="mt-6 pt-5 border-t" style={{ borderColor: 'var(--theme-border)' }}>
             {word.examples?.length > 0 && (
               <div className="mb-4">
-                <p className="text-xs font-bold uppercase tracking-wider mb-2" style={{ color: 'var(--theme-text-muted)' }}>Ví dụ</p>
+                <p className="text-xs font-bold uppercase tracking-wider mb-2" style={{ color: 'var(--theme-text-muted)' }}>{t('examplesHeader')}</p>
                 <div className="flex flex-col gap-2">
                   {word.examples.map((ex, i) => (
                     <div key={i} className="flex items-start gap-2 text-sm italic leading-relaxed" style={{ color: 'var(--theme-text-primary)' }}>
@@ -177,12 +181,12 @@ export function WordDetailModal({ word, onClose, onSpeak, onToggleFavorite }: Wo
           <button onClick={handleSpeak}
             className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl font-bold transition-all text-sm"
             style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-primary)' }}>
-            <IconVolume size={16} /> Phát âm
+            <IconVolume size={16} /> {t('speak')}
           </button>
           <button onClick={() => onToggleFavorite(word.id)}
             className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl font-bold transition-all text-sm"
             style={{ backgroundColor: word.isFavorite ? 'rgba(245,158,11,.1)' : 'var(--theme-bg-secondary)', color: word.isFavorite ? ACCENT.xp : 'var(--theme-text-primary)' }}>
-            <IconStar size={16} style={word.isFavorite ? { fill: ACCENT.xp } : {}} /> {word.isFavorite ? 'Đã yêu thích' : 'Yêu thích'}
+            <IconStar size={16} style={word.isFavorite ? { fill: ACCENT.xp } : {}} /> {word.isFavorite ? t('favorited') : t('favorite')}
           </button>
         </div>
 

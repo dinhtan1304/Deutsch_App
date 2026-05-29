@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { ACCENT } from '@/lib/tokens';
 import { IconSearch, IconStar, IconFilter, IconRefresh } from '@/components/ui/Icons';
 import {
@@ -33,6 +34,7 @@ export function WordBankFiltersBar({
   selectedView, stats, categories,
   total, shown, page, totalPages,
 }: WordBankFiltersBarProps) {
+  const t = useTranslations('vocabulary.wordBank.filtersBar');
   return (
     <>
       <div className="flex flex-wrap gap-2 mb-4">
@@ -43,7 +45,7 @@ export function WordBankFiltersBar({
           <input
             value={filters.search}
             onChange={e => setFilters({ search: e.target.value })}
-            placeholder="Tìm từ, nghĩa, ghi chú..."
+            placeholder={t('searchPlaceholder')}
             className="w-full pl-10 pr-4 py-2.5 rounded-xl border text-body focus:outline-none focus:ring-2 focus:ring-blue-500/40 transition-all"
             style={{
               borderColor: 'var(--theme-border)',
@@ -62,7 +64,7 @@ export function WordBankFiltersBar({
             color: showFilters ? ACCENT.srs : 'var(--theme-text-secondary)',
           }}
         >
-          <IconFilter size={14} /> Lọc
+          <IconFilter size={14} /> {t('filterBtn')}
         </button>
 
         {selectedView !== 'favorites' && (
@@ -75,7 +77,7 @@ export function WordBankFiltersBar({
               color: filters.favoritesOnly ? ACCENT.xp : 'var(--theme-text-secondary)',
             }}
           >
-            <IconStar size={14} style={filters.favoritesOnly ? { fill: ACCENT.xp } : {}} /> Yêu thích
+            <IconStar size={14} style={filters.favoritesOnly ? { fill: ACCENT.xp } : {}} /> {t('favoritesBtn')}
           </button>
         )}
 
@@ -92,12 +94,12 @@ export function WordBankFiltersBar({
             color: 'var(--theme-text-primary)',
           }}
         >
-          <option value="createdAt-desc">Mới nhất</option>
-          <option value="createdAt-asc">Cũ nhất</option>
-          <option value="word-asc">A → Z</option>
-          <option value="word-desc">Z → A</option>
-          <option value="level-asc">Level ↑</option>
-          <option value="wordType-asc">Từ loại</option>
+          <option value="createdAt-desc">{t('sortNewest')}</option>
+          <option value="createdAt-asc">{t('sortOldest')}</option>
+          <option value="word-asc">{t('sortAZ')}</option>
+          <option value="word-desc">{t('sortZA')}</option>
+          <option value="level-asc">{t('sortLevel')}</option>
+          <option value="wordType-asc">{t('sortType')}</option>
         </select>
       </div>
 
@@ -108,7 +110,7 @@ export function WordBankFiltersBar({
         >
           {stats && (
             <div>
-              <label className="block text-caption font-semibold mb-2" style={{ color: 'var(--theme-text-muted)' }}>Từ loại</label>
+              <label className="block text-caption font-semibold mb-2" style={{ color: 'var(--theme-text-muted)' }}>{t('labelWordType')}</label>
               <div className="flex flex-wrap gap-2">
                 {WORD_TYPES.map(t => {
                   const info = WordTypeInfo[t];
@@ -137,7 +139,7 @@ export function WordBankFiltersBar({
 
           <div className="flex flex-wrap gap-5">
             <div>
-              <label className="block text-caption font-semibold mb-1.5" style={{ color: 'var(--theme-text-muted)' }}>Cấp độ</label>
+              <label className="block text-caption font-semibold mb-1.5" style={{ color: 'var(--theme-text-muted)' }}>{t('labelLevel')}</label>
               <div className="flex gap-1">
                 <button
                   onClick={() => setFilters({ level: 'all' })}
@@ -147,7 +149,7 @@ export function WordBankFiltersBar({
                     color: filters.level === 'all' ? 'white' : 'var(--theme-text-secondary)',
                   }}
                 >
-                  Tất cả
+                  {t('all')}
                 </button>
                 {LEVELS.map(l => (
                   <button
@@ -166,7 +168,7 @@ export function WordBankFiltersBar({
             </div>
 
             <div>
-              <label className="block text-caption font-semibold mb-1.5" style={{ color: 'var(--theme-text-muted)' }}>Giống (Nomen)</label>
+              <label className="block text-caption font-semibold mb-1.5" style={{ color: 'var(--theme-text-muted)' }}>{t('labelGender')}</label>
               <div className="flex gap-1">
                 <button
                   onClick={() => setFilters({ gender: 'all' })}
@@ -176,7 +178,7 @@ export function WordBankFiltersBar({
                     color: filters.gender === 'all' ? 'white' : 'var(--theme-text-secondary)',
                   }}
                 >
-                  Tất cả
+                  {t('all')}
                 </button>
                 {GENDERS.map(g => {
                   const info = GenderInfo[g];
@@ -199,7 +201,7 @@ export function WordBankFiltersBar({
 
             {categories.length > 0 && (
               <div>
-                <label className="block text-caption font-semibold mb-1.5" style={{ color: 'var(--theme-text-muted)' }}>Chủ đề</label>
+                <label className="block text-caption font-semibold mb-1.5" style={{ color: 'var(--theme-text-muted)' }}>{t('labelCategory')}</label>
                 <select
                   value={filters.category}
                   onChange={e => setFilters({ category: e.target.value })}
@@ -210,7 +212,7 @@ export function WordBankFiltersBar({
                     color: 'var(--theme-text-primary)',
                   }}
                 >
-                  <option value="">Tất cả</option>
+                  <option value="">{t('all')}</option>
                   {categories.map(c => <option key={c} value={c}>{c}</option>)}
                 </select>
               </div>
@@ -222,14 +224,14 @@ export function WordBankFiltersBar({
             className="flex items-center gap-1.5 text-xs font-medium transition-all hover:opacity-70"
             style={{ color: ACCENT.srs }}
           >
-            <IconRefresh size={13} /> Reset bộ lọc
+            <IconRefresh size={13} /> {t('resetFilters')}
           </button>
         </div>
       )}
 
       <p className="text-xs mb-3" style={{ color: 'var(--theme-text-muted)' }}>
-        Hiển thị {shown} / {total} từ
-        {totalPages > 1 && ` • Trang ${page} / ${totalPages}`}
+        {t('showing', { shown, total })}
+        {totalPages > 1 && ` • ${t('pageInfo', { page, totalPages })}`}
       </p>
     </>
   );

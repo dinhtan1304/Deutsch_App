@@ -1,34 +1,37 @@
 'use client';
 
 import { useState, useRef } from 'react';
+import { useTranslations } from 'next-intl';
 import { ImportRow, ImportResult, ImportValidationError, WordType, WordTypeInfo } from '@/types/personalWord';
 import { IconDownload, IconX, IconLoader, IconCheck, IconUpload } from '@/components/ui/Icons';
 import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 
+type ImportT = (key: string, values?: Record<string, string | number>) => string;
+
 // ============================================
 // Validation
 // ============================================
-function validateImportRow(row: ImportRow, rowIndex: number): ImportValidationError[] {
+function validateImportRow(row: ImportRow, rowIndex: number, t: ImportT): ImportValidationError[] {
   const errors: ImportValidationError[] = [];
 
   if (!row.word?.trim()) {
-    errors.push({ row: rowIndex, field: 'word', message: 'Từ không được để trống' });
+    errors.push({ row: rowIndex, field: 'word', message: t('wordRequired') });
   }
   if (!row.translationEn?.trim()) {
-    errors.push({ row: rowIndex, field: 'translationEn', message: 'Nghĩa tiếng Anh không được để trống' });
+    errors.push({ row: rowIndex, field: 'translationEn', message: t('enRequired') });
   }
   if (!row.translationVi?.trim()) {
-    errors.push({ row: rowIndex, field: 'translationVi', message: 'Nghĩa tiếng Việt không được để trống' });
+    errors.push({ row: rowIndex, field: 'translationVi', message: t('viRequired') });
   }
 
   const validTypes: WordType[] = ['nomen', 'verb', 'adjektiv', 'adverb', 'praposition', 'konjunktion', 'pronomen', 'partikel', 'andere'];
   if (!row.wordType || !validTypes.includes(row.wordType)) {
-    errors.push({ row: rowIndex, field: 'wordType', message: `Từ loại phải là: ${validTypes.join(', ')}` });
+    errors.push({ row: rowIndex, field: 'wordType', message: t('wordTypeInvalid', { types: validTypes.join(', ') }) });
   }
 
   if (row.wordType === 'nomen') {
     if (!row.article || !['der', 'die', 'das'].includes(row.article.toLowerCase())) {
-      errors.push({ row: rowIndex, field: 'article', message: 'Danh từ phải có mạo từ (der/die/das)' });
+      errors.push({ row: rowIndex, field: 'article', message: t('nomenArticleRequired') });
     }
   }
 
@@ -67,6 +70,7 @@ interface ImportModalProps {
 }
 
 export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
+  const t = useTranslations('vocabulary.wordBank.importModal');
   const [step, setStep] = useState<'upload' | 'preview' | 'importing' | 'result'>('upload');
   const [parsedRows, setParsedRows] = useState<ImportRow[]>([]);
   const [previewErrors, setPreviewErrors] = useState<ImportValidationError[]>([]);
@@ -154,7 +158,7 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
         const rows = await parseExcel(data);
 
         if (rows.length === 0) {
-          setImportError('File không có dữ liệu hoặc định dạng không đúng.');
+          setImportError(t('fileEmpty'));
           return;
         }
 
@@ -162,14 +166,14 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
 
         const allErrors: ImportValidationError[] = [];
         rows.forEach((row, i) => {
-          const errors = validateImportRow(row, i + 1);
+          const errors = validateImportRow(row, i + 1, t as ImportT);
           allErrors.push(...errors);
         });
         setPreviewErrors(allErrors);
         setStep('preview');
       } catch (err) {
         if (process.env.NODE_ENV === 'development') console.error(err);
-        setImportError('Không thể đọc file. Vui lòng kiểm tra định dạng Excel.');
+        setImportError(t('fileReadError'));
       }
     };
     reader.readAsArrayBuffer(file);
@@ -184,7 +188,7 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
       setImportResult(result);
       setStep('result');
     } catch (err) {
-      setImportError((err as Error | undefined)?.message || 'Import thất bại.');
+      setImportError((err as Error | undefined)?.message || t('importFailed'));
       setStep('preview');
     }
   };
@@ -220,7 +224,7 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
       <div
         role="dialog"
         aria-modal="true"
-        aria-label="Import từ vựng từ file Excel"
+        aria-label={t('ariaLabel')}
         className="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl"
         style={{ backgroundColor: 'var(--theme-bg-card, #ffffff)' }}
         onClick={e => e.stopPropagation()}>
@@ -235,7 +239,7 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
               <IconDownload size={17} className="text-white" />
             </div>
             <h2 className="text-xl font-bold" style={{ color: 'var(--theme-text-primary)' }}>
-              Import từ vựng (Excel)
+              {t('title')}
             </h2>
           </div>
           <button onClick={() => { reset(); onClose(); }}
@@ -250,20 +254,20 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
           {step === 'upload' && (
             <div className="space-y-5">
               <div className="p-4 rounded-xl border" style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-secondary)' }}>
-                <h3 className="font-bold mb-2" style={{ color: 'var(--theme-text-primary)' }}>Định dạng Excel (.xlsx)</h3>
-                <p className="text-sm mb-3" style={{ color: 'var(--theme-text-muted)' }}>Từ đã có trong sổ sẽ được <strong>tự động bỏ qua</strong>.</p>
+                <h3 className="font-bold mb-2" style={{ color: 'var(--theme-text-primary)' }}>{t('formatTitle')}</h3>
+                <p className="text-sm mb-3" style={{ color: 'var(--theme-text-muted)' }}>{t.rich('autoSkip', { b: (chunks) => <strong>{chunks}</strong> })}</p>
                 <table className="text-xs w-full">
                   <thead>
                     <tr className="text-left border-b" style={{ borderColor: 'var(--theme-border)' }}>
-                      <th className="p-1.5 font-bold">Cột</th><th className="p-1.5">Mô tả</th><th className="p-1.5">Bắt buộc</th>
+                      <th className="p-1.5 font-bold">{t('thColumn')}</th><th className="p-1.5">{t('thDesc')}</th><th className="p-1.5">{t('thRequired')}</th>
                     </tr>
                   </thead>
                   <tbody style={{ color: 'var(--theme-text-muted)' }}>
-                    <tr><td className="p-1.5 font-mono">word</td><td>Từ gốc</td><td style={{ color: STATUS.danger, fontWeight: 'bold' }}>✱</td></tr>
+                    <tr><td className="p-1.5 font-mono">word</td><td>{t('descWord')}</td><td style={{ color: STATUS.danger, fontWeight: 'bold' }}>✱</td></tr>
                     <tr><td className="p-1.5 font-mono">wordType</td><td>nomen / verb / adjektiv / ...</td><td style={{ color: STATUS.danger, fontWeight: 'bold' }}>✱</td></tr>
-                    <tr><td className="p-1.5 font-mono">article</td><td>der / die / das</td><td style={{ color: STATUS.danger }}>✱ nomen</td></tr>
-                    <tr><td className="p-1.5 font-mono">translationEn</td><td>Nghĩa tiếng Anh</td><td style={{ color: STATUS.danger, fontWeight: 'bold' }}>✱</td></tr>
-                    <tr><td className="p-1.5 font-mono">translationVi</td><td>Nghĩa tiếng Việt</td><td style={{ color: STATUS.danger, fontWeight: 'bold' }}>✱</td></tr>
+                    <tr><td className="p-1.5 font-mono">article</td><td>der / die / das</td><td style={{ color: STATUS.danger }}>{t('reqNomen')}</td></tr>
+                    <tr><td className="p-1.5 font-mono">translationEn</td><td>{t('descEn')}</td><td style={{ color: STATUS.danger, fontWeight: 'bold' }}>✱</td></tr>
+                    <tr><td className="p-1.5 font-mono">translationVi</td><td>{t('descVi')}</td><td style={{ color: STATUS.danger, fontWeight: 'bold' }}>✱</td></tr>
                     <tr><td className="p-1.5 font-mono">level</td><td>A1 / A2 / B1 / B2 / C1</td><td></td></tr>
                   </tbody>
                 </table>
@@ -271,7 +275,7 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
                   className="mt-3 flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-white transition-all hover:-translate-y-0.5 hover:shadow-md"
                   // eslint-disable-next-line no-restricted-syntax
               style={{ background: 'linear-gradient(135deg, #10B981, #059669)' }}>
-                  <IconDownload size={14} /> Tải file mẫu Excel
+                  <IconDownload size={14} /> {t('downloadTemplate')}
                 </button>
               </div>
 
@@ -282,7 +286,7 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
               )}
 
               <div>
-                <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--theme-text-primary)' }}>Chọn file Excel</label>
+                <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--theme-text-primary)' }}>{t('selectFile')}</label>
                 <input ref={fileInputRef} type="file" accept=".xlsx,.xls" onChange={handleFileUpload}
                   className="w-full p-3 rounded-xl border" style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-secondary)' }} />
               </div>
@@ -294,20 +298,20 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="font-bold" style={{ color: 'var(--theme-text-primary)' }}>
-                  Xem trước: {parsedRows.length} từ
+                  {t('previewTitle', { count: parsedRows.length })}
                   <span className="text-sm font-normal ml-2" style={{ color: 'var(--theme-text-muted)' }}>({fileName})</span>
                 </h3>
-                <button onClick={reset} className="text-sm transition-all hover:opacity-70" style={{ color: ACCENT.srs }}>← Chọn file khác</button>
+                <button onClick={reset} className="text-sm transition-all hover:opacity-70" style={{ color: ACCENT.srs }}>{t('chooseAnother')}</button>
               </div>
 
               {importError && <div className="p-3 rounded-xl border" style={{ backgroundColor: `${STATUS.danger}0F`, borderColor: `${STATUS.danger}33` }}><p className="text-sm" style={{ color: STATUS.danger }}>{importError}</p></div>}
 
               {previewErrors.length > 0 && (
                 <div className="p-3 rounded-xl border" style={{ backgroundColor: `${ACCENT.xp}0F`, borderColor: `${ACCENT.xp}33` }}>
-                  <p className="font-medium mb-2" style={{ color: ACCENT.xp }}>{previewErrors.length} cảnh báo</p>
+                  <p className="font-medium mb-2" style={{ color: ACCENT.xp }}>{t('warningsCount', { count: previewErrors.length })}</p>
                   <div className="max-h-28 overflow-y-auto space-y-1">
                     {previewErrors.slice(0, 20).map((err, i) => (
-                      <p key={i} className="text-xs" style={{ color: ACCENT.xp }}>Dòng {err.row}: [{err.field}] {err.message}</p>
+                      <p key={i} className="text-xs" style={{ color: ACCENT.xp }}>{t('rowError', { row: err.row, field: err.field, message: err.message })}</p>
                     ))}
                   </div>
                 </div>
@@ -318,8 +322,8 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
                   <thead>
                     <tr style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
                       <th className="p-2 text-left text-xs font-medium" style={{ color: 'var(--theme-text-muted)' }}>#</th>
-                      <th className="p-2 text-left text-xs font-medium" style={{ color: 'var(--theme-text-muted)' }}>Từ</th>
-                      <th className="p-2 text-left text-xs font-medium" style={{ color: 'var(--theme-text-muted)' }}>Loại</th>
+                      <th className="p-2 text-left text-xs font-medium" style={{ color: 'var(--theme-text-muted)' }}>{t('thWord')}</th>
+                      <th className="p-2 text-left text-xs font-medium" style={{ color: 'var(--theme-text-muted)' }}>{t('thType')}</th>
                       <th className="p-2 text-left text-xs font-medium" style={{ color: 'var(--theme-text-muted)' }}>EN</th>
                       <th className="p-2 text-left text-xs font-medium" style={{ color: 'var(--theme-text-muted)' }}>VI</th>
                       <th className="p-2 text-left text-xs font-medium" style={{ color: 'var(--theme-text-muted)' }}>Level</th>
@@ -345,14 +349,14 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
                     })}
                   </tbody>
                 </table>
-                {parsedRows.length > 50 && <p className="p-2 text-center text-xs" style={{ color: 'var(--theme-text-muted)' }}>...và {parsedRows.length - 50} từ khác</p>}
+                {parsedRows.length > 50 && <p className="p-2 text-center text-xs" style={{ color: 'var(--theme-text-muted)' }}>{t('andMore', { count: parsedRows.length - 50 })}</p>}
               </div>
 
               <button onClick={handleImport}
                 className="w-full py-3 rounded-xl font-medium text-white flex items-center justify-center gap-2 transition-all hover:shadow-md hover:-translate-y-0.5"
                 // eslint-disable-next-line no-restricted-syntax
               style={{ background: 'linear-gradient(135deg, #10B981, #059669)' }}>
-                <IconUpload size={15} /> Import {parsedRows.length} từ
+                <IconUpload size={15} /> {t('importBtn', { count: parsedRows.length })}
               </button>
             </div>
           )}
@@ -364,7 +368,7 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
                 style={{ background: `linear-gradient(135deg, ${STATUS.success}26, ${STATUS.success}1A)` }}>
                 <IconLoader size={32} style={{ color: STATUS.success }} />
               </div>
-              <p className="text-lg font-medium" style={{ color: 'var(--theme-text-primary)' }}>Đang import {parsedRows.length} từ...</p>
+              <p className="text-lg font-medium" style={{ color: 'var(--theme-text-primary)' }}>{t('importing', { count: parsedRows.length })}</p>
             </div>
           )}
 
@@ -378,27 +382,27 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
                     : `linear-gradient(135deg, var(--theme-bg-secondary), var(--theme-bg-tertiary))` }}>
                   <IconCheck size={32} style={{ color: importResult.added > 0 ? STATUS.success : 'var(--theme-text-muted)' }} />
                 </div>
-                <h3 className="text-2xl font-bold" style={{ color: 'var(--theme-text-primary)' }}>Kết quả Import</h3>
+                <h3 className="text-2xl font-bold" style={{ color: 'var(--theme-text-primary)' }}>{t('resultTitle')}</h3>
               </div>
 
               <div className="grid grid-cols-3 gap-3">
                 <div className="p-4 rounded-xl text-center" style={{ backgroundColor: `${STATUS.success}1A` }}>
                   <div className="text-3xl font-bold" style={{ color: STATUS.success }}>{importResult.added}</div>
-                  <div className="text-sm font-medium" style={{ color: STATUS.success }}>Đã thêm</div>
+                  <div className="text-sm font-medium" style={{ color: STATUS.success }}>{t('statAdded')}</div>
                 </div>
                 <div className="p-4 rounded-xl text-center" style={{ backgroundColor: `${ACCENT.xp}1A` }}>
                   <div className="text-3xl font-bold" style={{ color: ACCENT.xp }}>{importResult.skipped}</div>
-                  <div className="text-sm font-medium" style={{ color: ACCENT.xp }}>Đã có</div>
+                  <div className="text-sm font-medium" style={{ color: ACCENT.xp }}>{t('statSkipped')}</div>
                 </div>
                 <div className="p-4 rounded-xl text-center" style={{ backgroundColor: `${STATUS.danger}1A` }}>
                   <div className="text-3xl font-bold" style={{ color: STATUS.danger }}>{importResult.failed}</div>
-                  <div className="text-sm font-medium" style={{ color: STATUS.danger }}>Lỗi</div>
+                  <div className="text-sm font-medium" style={{ color: STATUS.danger }}>{t('statFailed')}</div>
                 </div>
               </div>
 
               {importResult.skippedWords && importResult.skippedWords.length > 0 && (
                 <div className="p-3 rounded-xl border" style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-secondary)' }}>
-                  <p className="text-sm font-medium mb-2" style={{ color: ACCENT.xp }}>Từ đã có (bỏ qua):</p>
+                  <p className="text-sm font-medium mb-2" style={{ color: ACCENT.xp }}>{t('skippedHeader')}</p>
                   <div className="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto">
                     {importResult.skippedWords.slice(0, 30).map((w, i) => (
                       <span key={i} className="px-2 py-1 rounded-lg text-xs font-medium" style={{ backgroundColor: `${ACCENT.xp}1A`, color: ACCENT.xp }}>{w}</span>
@@ -410,7 +414,7 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
               <button onClick={() => { reset(); onClose(); }}
                 className="w-full py-3 rounded-xl font-medium text-white transition-all hover:shadow-md hover:-translate-y-0.5"
                 style={{ background: GRADIENT.action }}>
-                Đóng
+                {t('close')}
               </button>
             </div>
           )}

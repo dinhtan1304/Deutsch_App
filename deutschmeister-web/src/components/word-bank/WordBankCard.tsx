@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { useTranslations } from 'next-intl';
 import { ACCENT, STATUS } from '@/lib/tokens';
 import { PersonalWord, WordTypeInfo, GenderInfo, Gender, WordCollection } from '@/types/personalWord';
 import { IconVolume, IconStar, IconCheck } from '@/components/ui/Icons';
@@ -15,6 +16,7 @@ interface CollectionPopoverProps {
 }
 
 function CollectionPopover({ wordId, collections, onClose }: CollectionPopoverProps) {
+  const t = useTranslations('vocabulary.wordBank.card');
   const ref = useRef<HTMLDivElement>(null);
   const { data: wordCollections = [] } = useWordCollections(wordId);
   const addMutation = useAddToCollection();
@@ -44,11 +46,11 @@ function CollectionPopover({ wordId, collections, onClose }: CollectionPopoverPr
       style={{ backgroundColor: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}>
       <p className="px-3 py-2 text-caption font-semibold uppercase tracking-wide"
         style={{ color: 'var(--theme-text-muted)', borderBottom: '1px solid var(--theme-border)' }}>
-        Thêm vào thư mục
+        {t('addToFolder')}
       </p>
       {collections.length === 0 ? (
         <p className="px-3 py-3 text-xs" style={{ color: 'var(--theme-text-muted)' }}>
-          Chưa có thư mục nào
+          {t('noFolders')}
         </p>
       ) : (
         collections.map(col => {
@@ -90,6 +92,7 @@ interface WordBankCardProps {
 }
 
 export function WordBankCard({ word, onToggleFavorite, onSpeak, collections = [], onClick }: WordBankCardProps) {
+  const t = useTranslations('vocabulary.wordBank.card');
   const [showCollPopover, setShowCollPopover] = useState(false);
   const typeInfo = WordTypeInfo[word.wordType] ?? WordTypeInfo['andere'];
 
@@ -172,7 +175,7 @@ export function WordBankCard({ word, onToggleFavorite, onSpeak, collections = []
         <div className="flex items-center gap-1">
           <button onClick={(e) => { e.stopPropagation(); onToggleFavorite(word.id); }}
             className="w-8 h-8 flex items-center justify-center rounded-xl transition-all hover:scale-110 hover:bg-black/5"
-            title="Yêu thích">
+            title={t('favorite')}>
             <IconStar size={16} style={word.isFavorite
               ? { fill: ACCENT.xp, color: ACCENT.xp }
               : { color: 'var(--theme-text-muted)', opacity: 0.5 }} />
@@ -182,7 +185,7 @@ export function WordBankCard({ word, onToggleFavorite, onSpeak, collections = []
             <button
               onClick={(e) => { e.stopPropagation(); setShowCollPopover(v => !v); }}
               className="w-8 h-8 flex items-center justify-center rounded-xl transition-all text-base hover:bg-black/5"
-              title="Thêm vào thư mục"
+              title={t('addToFolder')}
               style={{ opacity: showCollPopover ? 1 : 0.6, color: 'var(--theme-text-secondary)' }}>
               <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" /></svg>
             </button>
@@ -207,7 +210,7 @@ export function WordBankCard({ word, onToggleFavorite, onSpeak, collections = []
         <button onClick={(e) => { e.stopPropagation(); handleSpeak(); }}
           className="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 transition-transform duration-300 hover:scale-110 shadow-sm"
           style={{ backgroundColor: `${typeInfo.color}15`, color: typeInfo.color }}
-          title="Phát âm">
+          title={t('speak')}>
           <IconVolume size={18} />
         </button>
       </div>
