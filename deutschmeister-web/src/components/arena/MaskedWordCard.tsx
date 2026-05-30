@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import type { ArenaRoundClue } from '@/types/arena-events.types';
 import { ACCENT, GRADIENT } from '@/lib/tokens';
 import { IconVolume, IconBookOpen, IconPin, IconSparkles } from '@/components/ui/Icons';
@@ -34,6 +35,7 @@ function computeInitialTier(roundStartedAt: number, skewMs: number): number {
  * skips already-passed thresholds.
  */
 export function MaskedWordCard({ clue, serverClockSkewMs = 0 }: MaskedWordCardProps) {
+  const t = useTranslations('arena.components');
   const { speak } = usePronunciation();
   const [hintTier, setHintTier] = useState(() =>
     computeInitialTier(clue.roundStartedAt, serverClockSkewMs),
@@ -114,7 +116,7 @@ export function MaskedWordCard({ clue, serverClockSkewMs = 0 }: MaskedWordCardPr
             <span>{germanWord}</span>
             <button
               type="button"
-              aria-label="Phát âm"
+              aria-label={t('pronounce')}
               onClick={() => speak(germanWord, 'de-DE', { fast: true })}
               className="ml-2 w-9 h-9 rounded-full flex items-center justify-center transition-transform hover:scale-110"
               style={{ background: 'rgba(59,130,246,.1)', color: ACCENT.srs }}
@@ -161,7 +163,7 @@ export function MaskedWordCard({ clue, serverClockSkewMs = 0 }: MaskedWordCardPr
             style={{ color: 'var(--theme-text-muted)' }}
           >
             <IconBookOpen size={12} />
-            <span>Bản dịch</span>
+            <span>{t('translation')}</span>
           </div>
           <div
             className="text-lead font-semibold mt-0.5"
@@ -175,12 +177,12 @@ export function MaskedWordCard({ clue, serverClockSkewMs = 0 }: MaskedWordCardPr
       {/* Progressive hints — unlocked at 20s and 10s remaining */}
       <div className="space-y-2">
         {hintTier >= 1 && clue.category && (
-          <RevealedHint label="Loại từ" Icon={IconPin}>
+          <RevealedHint label={t('hintWordType')} Icon={IconPin}>
             <span style={{ color: 'var(--theme-text-secondary)' }}>{clue.category}</span>
           </RevealedHint>
         )}
         {hintTier >= 2 && isDeMode && pronunciation && (
-          <RevealedHint label="Phát âm" Icon={IconSparkles}>
+          <RevealedHint label={t('hintPronunciation')} Icon={IconSparkles}>
             <span style={{ color: 'var(--theme-text-secondary)' }}>/{pronunciation}/</span>
           </RevealedHint>
         )}

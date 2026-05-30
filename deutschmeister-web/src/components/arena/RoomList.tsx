@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { arenaApi } from '@/lib/api/arena';
 import type { ArenaRoomSummary } from '@/types/arena-events.types';
 import { Button, Loading } from '@/components/ui';
@@ -12,6 +13,7 @@ import { parseArenaInviteCode } from '@/lib/arena/invite-code';
 import { IconLogIn, IconKey, IconPlus } from '@/components/ui/Icons';
 
 export function RoomList() {
+  const t = useTranslations('arena.components');
   const router = useRouter();
   const [rooms, setRooms] = useState<ArenaRoomSummary[]>([]);
   const [loading, setLoading] = useState(true);
@@ -56,19 +58,19 @@ export function RoomList() {
           style={{ color: 'var(--theme-text-primary)' }}
         >
           <IconLogIn size={16} />
-          <span>Phòng đang mở</span>
+          <span>{t('openRooms')}</span>
           <span
             className="text-caption font-normal"
             style={{ color: 'var(--theme-text-muted)' }}
           >
-            (giao hữu, không tính rating)
+            {t('friendlyNote')}
           </span>
         </h3>
         <Link href="/arena/rooms/new">
           <Button variant="primary" size="sm" style={{ background: GRADIENT.vocab }}>
             <span className="inline-flex items-center gap-1">
               <IconPlus size={14} />
-              <span>Tạo phòng</span>
+              <span>{t('createRoom')}</span>
             </span>
           </Button>
         </Link>
@@ -81,7 +83,7 @@ export function RoomList() {
           setCodeError(null);
           const code = parseArenaInviteCode(codeInput);
           if (!code) {
-            setCodeError('Mã không hợp lệ. Mã phòng có 6 ký tự (vd: K7M3Q2).');
+            setCodeError(t('invalidCode'));
             return;
           }
           router.push(`/arena/rooms/${code}`);
@@ -96,7 +98,7 @@ export function RoomList() {
               setCodeInput(e.target.value);
               if (codeError) setCodeError(null);
             }}
-            placeholder="Nhập mã phòng hoặc dán link mời"
+            placeholder={t('codePlaceholder')}
             maxLength={200}
             autoComplete="off"
             className="flex-1 min-w-0 px-3 py-2 rounded-lg font-mono"
@@ -115,7 +117,7 @@ export function RoomList() {
           >
             <span className="inline-flex items-center gap-1.5">
               <IconKey size={14} />
-              <span>Vào phòng</span>
+              <span>{t('enterRoom')}</span>
             </span>
           </Button>
         </div>
@@ -128,7 +130,7 @@ export function RoomList() {
           className="text-caption mt-1"
           style={{ color: 'var(--theme-text-muted)' }}
         >
-          Đã có mã từ bạn bè? Dán vào đây để vào phòng riêng.
+          {t('haveCodeHint')}
         </div>
       </form>
 
@@ -139,7 +141,7 @@ export function RoomList() {
           className="text-caption text-center py-6"
           style={{ color: 'var(--theme-text-muted)' }}
         >
-          Chưa có phòng công khai nào. Hãy tạo phòng đầu tiên!
+          {t('noPublicRooms')}
         </div>
       ) : (
         <div className="space-y-2">
@@ -172,7 +174,7 @@ export function RoomList() {
                     className="font-semibold truncate"
                     style={{ color: 'var(--theme-text-primary)' }}
                   >
-                    {r.name ?? `Phòng của ${r.owner.name ?? 'người chơi'}`}
+                    {r.name ?? t('roomOf', { name: r.owner.name ?? t('playerFallback') })}
                   </div>
                   <div
                     className="text-caption"
@@ -182,7 +184,7 @@ export function RoomList() {
                   </div>
                 </div>
                 <Button variant="outline" size="sm">
-                  Vào
+                  {t('enter')}
                 </Button>
               </div>
             </Link>

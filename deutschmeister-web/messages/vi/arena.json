@@ -177,5 +177,33 @@
     "connConnecting": "Đang kết nối tới Đấu trường...",
     "connReconnecting": "Đang kết nối lại. Trận sẽ tự khôi phục nếu còn hiệu lực.",
     "connLost": "Mất kết nối tới Đấu trường."
+  },
+  "components": {
+    "openRooms": "Phòng đang mở",
+    "friendlyNote": "(giao hữu, không tính rating)",
+    "createRoom": "Tạo phòng",
+    "invalidCode": "Mã không hợp lệ. Mã phòng có 6 ký tự (vd: K7M3Q2).",
+    "codePlaceholder": "Nhập mã phòng hoặc dán link mời",
+    "enterRoom": "Vào phòng",
+    "haveCodeHint": "Đã có mã từ bạn bè? Dán vào đây để vào phòng riêng.",
+    "noPublicRooms": "Chưa có phòng công khai nào. Hãy tạo phòng đầu tiên!",
+    "roomOf": "Phòng của {name}",
+    "playerFallback": "người chơi",
+    "enter": "Vào",
+    "timeUp": "Hết giờ",
+    "youWonRound": "Bạn thắng vòng này",
+    "opponentWonRound": "Đối thủ thắng vòng này",
+    "roundAnswerAria": "Đáp án vòng đấu",
+    "replayPronunciation": "Phát âm lại",
+    "nextRoundIn": "Vòng tiếp theo bắt đầu sau {sec}s...",
+    "leading": "Đang dẫn điểm",
+    "roundProgress": "Vòng {round}/{total}",
+    "botSuffix": "· Bot",
+    "disconnected": "Mất kết nối",
+    "opponentDisconnected": "Đối thủ mất kết nối — chờ tối đa {sec}s",
+    "pronounce": "Phát âm",
+    "translation": "Bản dịch",
+    "hintWordType": "Loại từ",
+    "hintPronunciation": "Phát âm"
   }
 }

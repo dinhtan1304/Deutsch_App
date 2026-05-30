@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import type { ArenaPlayerLite } from '@/types/arena-events.types';
 import { GRADIENT } from '@/lib/tokens';
 import { IconAward, IconStar, IconInfo } from '@/components/ui/Icons';
@@ -48,10 +49,11 @@ function Avatar({ player, ring }: { player: ArenaPlayerLite; ring: boolean }) {
 }
 
 function CrownBadge() {
+  const t = useTranslations('arena.components');
   return (
     <span
       aria-hidden="true"
-      title="Đang dẫn điểm"
+      title={t('leading')}
       style={{
         position: 'absolute',
         top: -8,
@@ -82,6 +84,7 @@ export function ArenaScoreboard({
   opponentConnected,
   graceRemainingMs,
 }: ArenaScoreboardProps) {
+  const t = useTranslations('arena.components');
   const prevMine = useRef(myScore);
   const prevOpp = useRef(opponentScore);
   const [bounce, setBounce] = useState<Bounce>(null);
@@ -160,7 +163,7 @@ export function ArenaScoreboard({
             </span>
           </div>
           <div className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>
-            Vòng {roundNumber}/{totalRounds}
+            {t('roundProgress', { round: roundNumber, total: totalRounds })}
           </div>
         </div>
 
@@ -177,7 +180,7 @@ export function ArenaScoreboard({
                   className="ml-1 text-caption font-normal"
                   style={{ color: '#A855F7' }}
                 >
-                  · Bot
+                  {t('botSuffix')}
                 </span>
               )}
             </div>
@@ -196,7 +199,7 @@ export function ArenaScoreboard({
               <span
                 className="absolute -top-1 -right-1 w-3 h-3 rounded-full"
                 style={{ background: '#EF4444', boxShadow: '0 0 0 2px var(--theme-bg-card)' }}
-                title="Mất kết nối"
+                title={t('disconnected')}
               />
             )}
           </div>
@@ -213,7 +216,7 @@ export function ArenaScoreboard({
           }}
         >
           <IconInfo size={14} />
-          <span>Đối thủ mất kết nối — chờ tối đa {Math.ceil(graceRemainingMs / 1000)}s</span>
+          <span>{t('opponentDisconnected', { sec: Math.ceil(graceRemainingMs / 1000) })}</span>
         </div>
       )}
     </div>

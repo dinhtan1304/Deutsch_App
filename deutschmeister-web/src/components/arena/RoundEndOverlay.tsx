@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import type { ArenaWordReveal } from '@/types/arena-events.types';
 import { usePronunciation } from '@/hooks/usePronunciation';
 import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
@@ -41,14 +42,15 @@ function ExampleWithHighlight({ example, target }: { example: string; target: st
 }
 
 export function RoundEndOverlay({ reveal, myUserId }: RoundEndOverlayProps) {
+  const t = useTranslations('arena.components');
   const { speak, stop } = usePronunciation();
   const { wordReveal } = reveal;
   const headline =
     reveal.winnerUserId === null
-      ? 'Hết giờ'
+      ? t('timeUp')
       : reveal.winnerUserId === myUserId
-        ? 'Bạn thắng vòng này'
-        : 'Đối thủ thắng vòng này';
+        ? t('youWonRound')
+        : t('opponentWonRound');
   const headlineColor =
     reveal.winnerUserId === null
       ? 'var(--theme-text-muted)'
@@ -87,7 +89,7 @@ export function RoundEndOverlay({ reveal, myUserId }: RoundEndOverlayProps) {
       }}
       role="dialog"
       aria-modal="true"
-      aria-label="Đáp án vòng đấu"
+      aria-label={t('roundAnswerAria')}
     >
       {reveal.winnerUserId === myUserId && (
         <ConfettiBurst count={16} durationMs={1500} />
@@ -122,7 +124,7 @@ export function RoundEndOverlay({ reveal, myUserId }: RoundEndOverlayProps) {
             </span>
             <button
               type="button"
-              aria-label="Phát âm lại"
+              aria-label={t('replayPronunciation')}
               onClick={() => speak(wordReveal.word, 'de-DE', { fast: true })}
               className="ml-1 w-9 h-9 rounded-full flex items-center justify-center transition-transform hover:scale-110"
               style={{ background: 'rgba(255,255,255,0.2)', color: '#fff' }}
@@ -163,7 +165,7 @@ export function RoundEndOverlay({ reveal, myUserId }: RoundEndOverlayProps) {
         )}
 
         <div className="text-caption text-center mt-3" style={{ color: 'var(--theme-text-muted)' }}>
-          Vòng tiếp theo bắt đầu sau {Math.round(reveal.revealDurationMs / 1000)}s...
+          {t('nextRoundIn', { sec: Math.round(reveal.revealDurationMs / 1000) })}
         </div>
       </div>
     </div>

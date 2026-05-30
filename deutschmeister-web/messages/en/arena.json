@@ -177,5 +177,33 @@
     "connConnecting": "Connecting to the Arena...",
     "connReconnecting": "Reconnecting. The match will be restored if still valid.",
     "connLost": "Lost connection to the Arena."
+  },
+  "components": {
+    "openRooms": "Open rooms",
+    "friendlyNote": "(friendly, no rating)",
+    "createRoom": "Create room",
+    "invalidCode": "Invalid code. Room codes are 6 characters (e.g. K7M3Q2).",
+    "codePlaceholder": "Enter room code or paste invite link",
+    "enterRoom": "Join room",
+    "haveCodeHint": "Got a code from a friend? Paste it here to join a private room.",
+    "noPublicRooms": "No public rooms yet. Create the first one!",
+    "roomOf": "{name}'s room",
+    "playerFallback": "player",
+    "enter": "Join",
+    "timeUp": "Time's up",
+    "youWonRound": "You won this round",
+    "opponentWonRound": "Opponent won this round",
+    "roundAnswerAria": "Round answer",
+    "replayPronunciation": "Play again",
+    "nextRoundIn": "Next round starts in {sec}s...",
+    "leading": "Leading",
+    "roundProgress": "Round {round}/{total}",
+    "botSuffix": "· Bot",
+    "disconnected": "Disconnected",
+    "opponentDisconnected": "Opponent disconnected — waiting up to {sec}s",
+    "pronounce": "Pronounce",
+    "translation": "Translation",
+    "hintWordType": "Word type",
+    "hintPronunciation": "Pronunciation"
   }
 }

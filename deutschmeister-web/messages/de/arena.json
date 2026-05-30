@@ -177,5 +177,33 @@
     "connConnecting": "Verbinde mit der Arena...",
     "connReconnecting": "Verbinde erneut. Das Match wird wiederhergestellt, falls noch gültig.",
     "connLost": "Verbindung zur Arena verloren."
+  },
+  "components": {
+    "openRooms": "Offene Räume",
+    "friendlyNote": "(freundschaftlich, ohne Wertung)",
+    "createRoom": "Raum erstellen",
+    "invalidCode": "Ungültiger Code. Raumcodes haben 6 Zeichen (z. B. K7M3Q2).",
+    "codePlaceholder": "Raumcode eingeben oder Einladungslink einfügen",
+    "enterRoom": "Raum beitreten",
+    "haveCodeHint": "Code von einem Freund? Hier einfügen, um einem privaten Raum beizutreten.",
+    "noPublicRooms": "Noch keine öffentlichen Räume. Erstelle den ersten!",
+    "roomOf": "Raum von {name}",
+    "playerFallback": "Spieler",
+    "enter": "Beitreten",
+    "timeUp": "Zeit abgelaufen",
+    "youWonRound": "Du hast diese Runde gewonnen",
+    "opponentWonRound": "Gegner hat diese Runde gewonnen",
+    "roundAnswerAria": "Rundenantwort",
+    "replayPronunciation": "Erneut abspielen",
+    "nextRoundIn": "Nächste Runde startet in {sec}s...",
+    "leading": "In Führung",
+    "roundProgress": "Runde {round}/{total}",
+    "botSuffix": "· Bot",
+    "disconnected": "Verbindung getrennt",
+    "opponentDisconnected": "Gegner getrennt — warte bis zu {sec}s",
+    "pronounce": "Aussprechen",
+    "translation": "Übersetzung",
+    "hintWordType": "Wortart",
+    "hintPronunciation": "Aussprache"
   }
 }
