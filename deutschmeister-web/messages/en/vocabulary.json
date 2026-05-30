@@ -692,6 +692,34 @@
     "vietnamese": "Vietnamese",
     "matchHint": "Pick a word on the left → pick its meaning on the right to match"
   },
+  "genderTip": {
+    "endingTip": "Ending <b>{pattern}</b> → {article} ({reliability}%)",
+    "prefixTip": "Prefix <b>{pattern}</b> → {article} ({reliability}%)",
+    "memoryTip": "Memory tip",
+    "reliabilityBadge": "{reliability}% accurate",
+    "exceptions": "⚠️ Exceptions: {list}"
+  },
+  "wordCard": {
+    "listen": "Listen",
+    "removeFavorite": "Remove favorite",
+    "addFavorite": "Add to favorites",
+    "addedToBank": "Added to Word Bank",
+    "addToBank": "Add to Word Bank",
+    "viewDetail": "Tap to view details →"
+  },
+  "wordDetailFull": {
+    "detailAria": "Word details: {word}",
+    "removeFavorite": "Remove favorite",
+    "addFavorite": "Add favorite",
+    "pluralLabel": "Plural: <b>die {plural}</b>",
+    "meaning": "Meaning",
+    "examples": "Examples ({count})",
+    "notes": "Notes ({count})",
+    "adding": "Adding...",
+    "alreadyInBank": "Already in Word Bank",
+    "addToBank": "Add to Word Bank",
+    "close": "Close"
+  },
   "favorites": {
     "authGate": {
       "title": "Sign in to view favorites",

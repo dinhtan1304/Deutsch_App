@@ -1,6 +1,7 @@
 ﻿'use client';
 
 import { useEffect, useCallback, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { ACCENT, STATUS, GRADIENT } from '@/lib/tokens';
 import { Word, GenderInfo } from '@/types';
 import { useSettingsStore } from '@/stores/settingsStore';
@@ -47,6 +48,7 @@ export function WordDetailModal({
   onFavoriteToggle,
   isFavorite = false,
 }: WordDetailModalProps) {
+  const t = useTranslations('vocabulary.wordDetailFull');
   const { settings } = useSettingsStore();
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [imageErrorWordId, setImageErrorWordId] = useState<string | null>(null);
@@ -113,7 +115,7 @@ export function WordDetailModal({
       <div
         role="dialog"
         aria-modal="true"
-        aria-label={`Chi tiết từ vựng: ${word?.word ?? ''}`}
+        aria-label={t('detailAria', { word: word?.word ?? '' })}
         className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-3xl shadow-2xl"
         style={{ backgroundColor: 'var(--theme-bg-card)', animation: 'modalIn 0.3s ease-out' }}
         onClick={e => e.stopPropagation()}
@@ -129,7 +131,7 @@ export function WordDetailModal({
               <button
                 onClick={() => onFavoriteToggle(word.id)}
                 className="w-10 h-10 rounded-xl flex items-center justify-center bg-white/15 hover:bg-white/25 transition-all"
-                title={isFavorite ? 'Bỏ yêu thích' : 'Thêm yêu thích'}>
+                title={isFavorite ? t('removeFavorite') : t('addFavorite')}>
                 <IconStar size={20} style={isFavorite ? { fill: ACCENT.xp, color: ACCENT.xp } : { color: 'white' }} />
               </button>
             ) : <div />}
@@ -155,7 +157,7 @@ export function WordDetailModal({
 
             {word.plural && (
               <p className="mt-2 text-white/70 text-sm">
-                Plural: <span className="font-medium text-white/90">die {word.plural}</span>
+                {t.rich('pluralLabel', { plural: word.plural, b: (chunks) => <span className="font-medium text-white/90">{chunks}</span> })}
               </p>
             )}
 
@@ -196,7 +198,7 @@ export function WordDetailModal({
                 style={{ backgroundColor: gs.bg }}>
                 <IconBookOpen size={13} style={{ color: gs.text }} />
               </span>
-              Nghĩa
+              {t('meaning')}
             </h3>
             <div className="space-y-2">
               <div className="flex items-center gap-3 p-3 rounded-xl"
@@ -229,7 +231,7 @@ export function WordDetailModal({
                   style={{ backgroundColor: gs.bg }}>
                   <IconVolume size={13} style={{ color: gs.text }} />
                 </span>
-                Ví dụ ({word.examples.length})
+                {t('examples', { count: word.examples.length })}
               </h3>
               <div className="space-y-2">
                 {word.examples.map((example, i) => (
@@ -260,7 +262,7 @@ export function WordDetailModal({
                   style={{ backgroundColor: `${ACCENT.xp}1a` }}>
                   <IconLightbulb size={13} style={{ color: ACCENT.xp }} />
                 </span>
-                Ghi chú ({word.tips.length})
+                {t('notes', { count: word.tips.length })}
               </h3>
               <div className="space-y-2">
                 {word.tips.map((tip, i) => (
@@ -286,10 +288,10 @@ export function WordDetailModal({
             }
           >
             {isAdding
-              ? <><IconLoader size={15} /> Đang thêm...</>
+              ? <><IconLoader size={15} /> {t('adding')}</>
               : (isAdded && !pendingWordId)
-              ? <><IconCheck size={15} /> Đã có trong Word Bank</>
-              : <><IconPlus size={15} /> Thêm vào Word Bank</>
+              ? <><IconCheck size={15} /> {t('alreadyInBank')}</>
+              : <><IconPlus size={15} /> {t('addToBank')}</>
             }
           </button>
           {pendingWordId && (
@@ -299,7 +301,7 @@ export function WordDetailModal({
             onClick={onClose}
             className="w-full py-3 rounded-xl font-semibold text-white text-sm transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0"
             style={{ background: gs.gradient }}>
-            Đóng
+            {t('close')}
           </button>
         </div>
       </div>

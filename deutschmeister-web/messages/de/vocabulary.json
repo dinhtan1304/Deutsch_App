@@ -692,6 +692,34 @@
     "vietnamese": "Vietnamesisch",
     "matchHint": "Wähle links ein Wort → wähle rechts die Bedeutung zum Zuordnen"
   },
+  "genderTip": {
+    "endingTip": "Endung <b>{pattern}</b> → {article} ({reliability}%)",
+    "prefixTip": "Präfix <b>{pattern}</b> → {article} ({reliability}%)",
+    "memoryTip": "Merkhilfe",
+    "reliabilityBadge": "{reliability}% genau",
+    "exceptions": "⚠️ Ausnahmen: {list}"
+  },
+  "wordCard": {
+    "listen": "Anhören",
+    "removeFavorite": "Favorit entfernen",
+    "addFavorite": "Zu Favoriten",
+    "addedToBank": "Zur Wortbank hinzugefügt",
+    "addToBank": "Zur Wortbank hinzufügen",
+    "viewDetail": "Für Details tippen →"
+  },
+  "wordDetailFull": {
+    "detailAria": "Wortdetails: {word}",
+    "removeFavorite": "Favorit entfernen",
+    "addFavorite": "Favorit hinzufügen",
+    "pluralLabel": "Plural: <b>die {plural}</b>",
+    "meaning": "Bedeutung",
+    "examples": "Beispiele ({count})",
+    "notes": "Notizen ({count})",
+    "adding": "Wird hinzugefügt...",
+    "alreadyInBank": "Bereits in der Wortbank",
+    "addToBank": "Zur Wortbank hinzufügen",
+    "close": "Schließen"
+  },
   "favorites": {
     "authGate": {
       "title": "Anmelden, um Favoriten zu sehen",

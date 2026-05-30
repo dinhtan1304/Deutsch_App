@@ -1,6 +1,7 @@
 ﻿'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { STATUS, GRADIENT, ACCENT } from '@/lib/tokens';
 import { Word, GenderInfo } from '@/types';
 import type { Level } from '@/types/personalWord';
@@ -27,6 +28,7 @@ export function WordCard({
   showFavoriteButton = true,
   compact = false
 }: WordCardProps) {
+  const t = useTranslations('vocabulary.wordCard');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [imageError, setImageError] = useState(false);
   const [addedToBank, setAddedToBank] = useState(false);
@@ -177,7 +179,7 @@ export function WordCard({
                 <button onClick={speakWord} onMouseEnter={prewarmAudio} onFocus={prewarmAudio}
                   className="w-7 h-7 flex items-center justify-center rounded-lg transition-all hover:scale-110"
                   style={{ backgroundColor: styles.bg, color: styles.text }}
-                  title="Nghe phát âm">
+                  title={t('listen')}>
                   <IconVolume size={14} />
                 </button>
               </div>
@@ -229,7 +231,7 @@ export function WordCard({
                   <button onClick={handleFavoriteClick}
                     className="w-8 h-8 flex items-center justify-center rounded-xl transition-all hover:scale-110"
                     style={{ backgroundColor: isFavorite ? `${ACCENT.xp}26` : 'var(--theme-bg-secondary)', color: isFavorite ? ACCENT.xp : 'var(--theme-text-muted)' }}
-                    title={isFavorite ? 'Bỏ yêu thích' : 'Thêm vào yêu thích'}>
+                    title={isFavorite ? t('removeFavorite') : t('addFavorite')}>
                     <IconStar size={16} style={isFavorite ? { fill: ACCENT.xp } : {}} />
                   </button>
                 )}
@@ -239,7 +241,7 @@ export function WordCard({
                     backgroundColor: addedToBank ? 'rgba(34,197,94,.15)' : 'var(--theme-bg-secondary)',
                     color: addedToBank ? STATUS.success : 'var(--theme-text-muted)',
                   }}
-                  title={addedToBank ? 'Đã thêm vào Word Bank' : 'Thêm vào Word Bank'}>
+                  title={addedToBank ? t('addedToBank') : t('addToBank')}>
                   {addedToBank ? <IconCheck size={14} /> : <IconPlus size={14} />}
                 </button>
               </div>
@@ -267,7 +269,7 @@ export function WordCard({
           {/* Hover CTA */}
           <p className="text-center text-caption mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 font-medium"
             style={{ color: styles.text }}>
-            Nhấn để xem chi tiết →
+            {t('viewDetail')}
           </p>
         </div>
       </div>

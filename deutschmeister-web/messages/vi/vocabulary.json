@@ -692,6 +692,34 @@
     "vietnamese": "Tiếng Việt",
     "matchHint": "Chọn 1 từ bên trái → chọn nghĩa bên phải để nối"
   },
+  "genderTip": {
+    "endingTip": "Đuôi <b>{pattern}</b> → {article} ({reliability}%)",
+    "prefixTip": "Tiền tố <b>{pattern}</b> → {article} ({reliability}%)",
+    "memoryTip": "Mẹo nhớ",
+    "reliabilityBadge": "{reliability}% chính xác",
+    "exceptions": "⚠️ Ngoại lệ: {list}"
+  },
+  "wordCard": {
+    "listen": "Nghe phát âm",
+    "removeFavorite": "Bỏ yêu thích",
+    "addFavorite": "Thêm vào yêu thích",
+    "addedToBank": "Đã thêm vào Word Bank",
+    "addToBank": "Thêm vào Word Bank",
+    "viewDetail": "Nhấn để xem chi tiết →"
+  },
+  "wordDetailFull": {
+    "detailAria": "Chi tiết từ vựng: {word}",
+    "removeFavorite": "Bỏ yêu thích",
+    "addFavorite": "Thêm yêu thích",
+    "pluralLabel": "Plural: <b>die {plural}</b>",
+    "meaning": "Nghĩa",
+    "examples": "Ví dụ ({count})",
+    "notes": "Ghi chú ({count})",
+    "adding": "Đang thêm...",
+    "alreadyInBank": "Đã có trong Word Bank",
+    "addToBank": "Thêm vào Word Bank",
+    "close": "Đóng"
+  },
   "favorites": {
     "authGate": {
       "title": "Đăng nhập để xem yêu thích",

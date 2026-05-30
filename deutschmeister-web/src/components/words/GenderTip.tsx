@@ -1,5 +1,6 @@
 ﻿'use client';
 
+import { useTranslations } from 'next-intl';
 import { Gender } from '@/types';
 import { ACCENT, STATUS } from '@/lib/tokens';
 import { getBestRule, getTipForWord } from '@/lib/genderRules';
@@ -28,6 +29,7 @@ const COLORS = {
 };
 
 export function GenderTip({ word, gender, showDetailed = false }: GenderTipProps) {
+  const t = useTranslations('vocabulary.genderTip');
   const rule = getBestRule(word, gender);
   if (!rule) return null;
 
@@ -48,8 +50,8 @@ export function GenderTip({ word, gender, showDetailed = false }: GenderTipProps
         style={{ backgroundColor: c.bg }}>
         <IconLightbulb size={14} />
         <span style={{ color: c.text }}>
-          {rule.type === 'ending' && <>Đuôi <strong>{patternDisplay}</strong> → {article} ({rule.reliability}%)</>}
-          {rule.type === 'prefix' && <>Tiền tố <strong>{patternDisplay}</strong> → {article} ({rule.reliability}%)</>}
+          {rule.type === 'ending' && t.rich('endingTip', { pattern: patternDisplay, article, reliability: rule.reliability, b: (chunks) => <strong>{chunks}</strong> })}
+          {rule.type === 'prefix' && t.rich('prefixTip', { pattern: patternDisplay, article, reliability: rule.reliability, b: (chunks) => <strong>{chunks}</strong> })}
           {(rule.type === 'category' || rule.type === 'special') && <>{rule.description}</>}
         </span>
       </div>
@@ -64,10 +66,10 @@ export function GenderTip({ word, gender, showDetailed = false }: GenderTipProps
           style={{ backgroundColor: c.bg, color: c.text }}>
           <IconLightbulb size={16} />
         </span>
-        <span className="font-semibold text-sm" style={{ color: c.text }}>Mẹo nhớ</span>
+        <span className="font-semibold text-sm" style={{ color: c.text }}>{t('memoryTip')}</span>
         <span className="ml-auto px-2.5 py-0.5 rounded-full text-caption font-semibold text-white"
           style={{ backgroundColor: c.border }}>
-          {rule.reliability}% chính xác
+          {t('reliabilityBadge', { reliability: rule.reliability })}
         </span>
       </div>
 
@@ -86,7 +88,7 @@ export function GenderTip({ word, gender, showDetailed = false }: GenderTipProps
       {/* Exceptions */}
       {rule.exceptions && rule.exceptions.length > 0 && (
         <p className="text-caption mt-2.5" style={{ color: 'var(--theme-text-muted)' }}>
-          ⚠️ Ngoại lệ: {rule.exceptions.slice(0, 3).join(', ')}
+          {t('exceptions', { list: rule.exceptions.slice(0, 3).join(', ') })}
         </p>
       )}
     </div>
