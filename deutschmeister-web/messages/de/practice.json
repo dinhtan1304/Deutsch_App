@@ -874,6 +874,17 @@
       "micError": "Kein Zugriff auf das Mikrofon. Bitte Berechtigung erteilen.",
       "scoreError": "Bewertung fehlgeschlagen"
     },
+    "ipa": {
+      "difficultyAria": "Schwierigkeit: {level}",
+      "pronounceAria": "{word} aussprechen",
+      "diffHigh": "Schwer für Vietnamesisch-Sprecher",
+      "diffMedium": "Mittel",
+      "diffLow": "Leicht",
+      "close": "Schließen",
+      "tipTitle": "Aussprachetipp",
+      "examples": "Beispiele ({count})",
+      "deepDrill": "Diesen Laut intensiv üben →"
+    },
     "drills": {
       "back": "← Aussprache",
       "title": "Drills für schwierige Laute (Vietnamesisch)",

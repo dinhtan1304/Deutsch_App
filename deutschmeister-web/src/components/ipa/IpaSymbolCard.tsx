@@ -1,6 +1,7 @@
 'use client';
 
 import type { KeyboardEvent, MouseEvent } from 'react';
+import { useTranslations } from 'next-intl';
 import { ACCENT, STATUS } from '@/lib/tokens';
 import { usePronunciation } from '@/hooks/usePronunciation';
 import type { IpaSymbol } from '@/lib/data/ipaChart';
@@ -18,6 +19,7 @@ interface IpaSymbolCardProps {
 }
 
 export function IpaSymbolCard({ symbol, active, onSelect }: IpaSymbolCardProps) {
+  const t = useTranslations('practice.pronunciation.ipa');
   const { speak } = usePronunciation();
   const firstExample = symbol.examples[0]?.word;
 
@@ -51,7 +53,7 @@ export function IpaSymbolCard({ symbol, active, onSelect }: IpaSymbolCardProps) 
         <span
           className="absolute top-2 right-2 w-2 h-2 rounded-full"
           style={{ backgroundColor: DIFFICULTY_DOT[symbol.difficultyForVi] }}
-          aria-label={`Độ khó: ${symbol.difficultyForVi}`}
+          aria-label={t('difficultyAria', { level: symbol.difficultyForVi })}
         />
       )}
 
@@ -97,7 +99,7 @@ export function IpaSymbolCard({ symbol, active, onSelect }: IpaSymbolCardProps) 
         <button
           type="button"
           onClick={handlePlay}
-          aria-label={`Phát âm ${firstExample}`}
+          aria-label={t('pronounceAria', { word: firstExample ?? '' })}
           className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-colors"
           style={{
             backgroundColor: `${ACCENT.examWriting}1A`,

@@ -874,6 +874,17 @@
       "micError": "Không thể truy cập microphone. Vui lòng cấp quyền.",
       "scoreError": "Chấm điểm thất bại"
     },
+    "ipa": {
+      "difficultyAria": "Độ khó: {level}",
+      "pronounceAria": "Phát âm {word}",
+      "diffHigh": "Khó với người Việt",
+      "diffMedium": "Trung bình",
+      "diffLow": "Dễ",
+      "close": "Đóng",
+      "tipTitle": "Mẹo phát âm",
+      "examples": "Ví dụ ({count})",
+      "deepDrill": "Luyện sâu âm này →"
+    },
     "drills": {
       "back": "← Luyện phát âm",
       "title": "Drill âm khó cho người Việt",

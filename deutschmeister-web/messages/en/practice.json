@@ -874,6 +874,17 @@
       "micError": "Couldn't access microphone. Please grant permission.",
       "scoreError": "Scoring failed"
     },
+    "ipa": {
+      "difficultyAria": "Difficulty: {level}",
+      "pronounceAria": "Pronounce {word}",
+      "diffHigh": "Hard for Vietnamese speakers",
+      "diffMedium": "Medium",
+      "diffLow": "Easy",
+      "close": "Close",
+      "tipTitle": "Pronunciation tip",
+      "examples": "Examples ({count})",
+      "deepDrill": "Drill this sound →"
+    },
     "drills": {
       "back": "← Pronunciation",
       "title": "Drill tough sounds for Vietnamese speakers",

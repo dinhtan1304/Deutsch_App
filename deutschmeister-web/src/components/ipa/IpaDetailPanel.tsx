@@ -1,15 +1,16 @@
 'use client';
 
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 import { usePronunciation } from '@/hooks/usePronunciation';
 import type { IpaSymbol } from '@/lib/data/ipaChart';
 import { IPA_CATEGORY_LABELS } from '@/lib/data/ipaChart';
 
-const DIFFICULTY_BADGE: Record<NonNullable<IpaSymbol['difficultyForVi']>, { bg: string; text: string; label: string }> = {
-  high:   { bg: 'rgba(239,68,68,.1)',   text: STATUS.danger,  label: 'Khó với người Việt' },
-  medium: { bg: 'rgba(245,158,11,.1)',  text: STATUS.warning, label: 'Trung bình' },
-  low:    { bg: 'rgba(34,197,94,.1)',   text: STATUS.success, label: 'Dễ' },
+const DIFFICULTY_BADGE: Record<NonNullable<IpaSymbol['difficultyForVi']>, { bg: string; text: string; labelKey: string }> = {
+  high:   { bg: 'rgba(239,68,68,.1)',   text: STATUS.danger,  labelKey: 'diffHigh' },
+  medium: { bg: 'rgba(245,158,11,.1)',  text: STATUS.warning, labelKey: 'diffMedium' },
+  low:    { bg: 'rgba(34,197,94,.1)',   text: STATUS.success, labelKey: 'diffLow' },
 };
 
 interface IpaDetailPanelProps {
@@ -18,6 +19,7 @@ interface IpaDetailPanelProps {
 }
 
 export function IpaDetailPanel({ symbol, onClose }: IpaDetailPanelProps) {
+  const t = useTranslations('practice.pronunciation.ipa');
   const { speak } = usePronunciation();
   const diff = symbol.difficultyForVi ? DIFFICULTY_BADGE[symbol.difficultyForVi] : null;
 
@@ -56,7 +58,7 @@ export function IpaDetailPanel({ symbol, onClose }: IpaDetailPanelProps) {
         <button
           type="button"
           onClick={onClose}
-          aria-label="Đóng"
+          aria-label={t('close')}
           className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-colors"
           style={{
             backgroundColor: 'var(--theme-bg-secondary)',
@@ -77,7 +79,7 @@ export function IpaDetailPanel({ symbol, onClose }: IpaDetailPanelProps) {
             className="px-2 py-0.5 rounded-md text-caption font-bold"
             style={{ backgroundColor: diff.bg, color: diff.text }}
           >
-            {diff.label}
+            {t(diff.labelKey as 'diffHigh')}
           </span>
         )}
         {symbol.spellings.map(sp => (
@@ -107,7 +109,7 @@ export function IpaDetailPanel({ symbol, onClose }: IpaDetailPanelProps) {
           className="text-[10px] font-bold uppercase tracking-wider mb-1"
           style={{ color: ACCENT.examWriting }}
         >
-          Mẹo phát âm
+          {t('tipTitle')}
         </div>
         <p className="text-sm leading-relaxed" style={{ color: 'var(--theme-text-primary)' }}>
           {symbol.tipVi}
@@ -120,7 +122,7 @@ export function IpaDetailPanel({ symbol, onClose }: IpaDetailPanelProps) {
           className="text-[10px] font-bold uppercase tracking-wider mb-2"
           style={{ color: 'var(--theme-text-muted)' }}
         >
-          Ví dụ ({symbol.examples.length})
+          {t('examples', { count: symbol.examples.length })}
         </div>
         <div className="space-y-1.5">
           {symbol.examples.map(ex => (
@@ -149,7 +151,7 @@ export function IpaDetailPanel({ symbol, onClose }: IpaDetailPanelProps) {
               <button
                 type="button"
                 onClick={() => speak(ex.word)}
-                aria-label={`Phát âm ${ex.word}`}
+                aria-label={t('pronounceAria', { word: ex.word })}
                 className="w-9 h-9 rounded-full flex items-center justify-center shrink-0 transition-transform hover:scale-105"
                 style={{ background: GRADIENT.pronunciation, color: 'white' }}
               >
@@ -169,7 +171,7 @@ export function IpaDetailPanel({ symbol, onClose }: IpaDetailPanelProps) {
           className="block rounded-xl p-3 text-center font-semibold text-sm transition-transform hover:scale-[1.01]"
           style={{ background: GRADIENT.pronunciation, color: 'white' }}
         >
-          Luyện sâu âm này →
+          {t('deepDrill')}
         </Link>
       )}
     </div>
