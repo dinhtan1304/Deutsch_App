@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import { useTranslations } from 'next-intl';
 import type { SpeakingMessage } from '@/lib/api/speakingRooms';
 import { ACCENT } from '@/lib/tokens';
 
@@ -12,6 +13,7 @@ interface Props {
 }
 
 export function ChatPanel({ messages, currentUserId, participantById, typingUserIds }: Props) {
+  const t = useTranslations('speakingRooms.components');
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -20,7 +22,7 @@ export function ChatPanel({ messages, currentUserId, participantById, typingUser
 
   const typingNames = Array.from(typingUserIds)
     .filter((id) => id !== currentUserId)
-    .map((id) => participantById.get(id)?.name ?? 'Đối phương');
+    .map((id) => participantById.get(id)?.name ?? t('opponent'));
 
   return (
     <div
@@ -34,7 +36,7 @@ export function ChatPanel({ messages, currentUserId, participantById, typingUser
     >
       {messages.length === 0 && (
         <p className="text-center text-sm py-8" style={{ color: 'var(--theme-text-muted)' }}>
-          Hãy gửi tin nhắn đầu tiên để bắt đầu!
+          {t('firstMessage')}
         </p>
       )}
       {messages.map((m) => {
@@ -58,7 +60,7 @@ export function ChatPanel({ messages, currentUserId, participantById, typingUser
             <div className="max-w-[75%]">
               {!isMine && (
                 <p className="text-caption mb-0.5 px-2" style={{ color: 'var(--theme-text-muted)' }}>
-                  {sender?.name ?? 'Đối phương'}
+                  {sender?.name ?? t('opponent')}
                 </p>
               )}
               <div
@@ -77,7 +79,7 @@ export function ChatPanel({ messages, currentUserId, participantById, typingUser
       })}
       {typingNames.length > 0 && (
         <p className="text-caption italic" style={{ color: 'var(--theme-text-muted)' }}>
-          {typingNames.join(', ')} đang nhập...
+          {t('typing', { names: typingNames.join(', ') })}
         </p>
       )}
     </div>

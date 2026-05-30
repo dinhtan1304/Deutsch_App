@@ -1,18 +1,14 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { ACCENT } from '@/lib/tokens';
 
-const RULES = [
-  'Tôn trọng và thân thiện với người bạn đang trò chuyện.',
-  'Không quấy rối, bắt nạt hoặc phát ngôn thù ghét dưới bất kỳ hình thức nào.',
-  'Giữ cuộc trò chuyện phù hợp và lịch sự.',
-  'Không chia sẻ thông tin cá nhân như địa chỉ hoặc số điện thoại.',
-  'Bạn có thể rời phòng nếu cảm thấy không thoải mái.',
-];
-
 export function CommunityRules() {
+  const t = useTranslations('speakingRooms.components');
   const [open, setOpen] = useState(false);
+
+  const RULES = [t('rule1'), t('rule2'), t('rule3'), t('rule4'), t('rule5')];
 
   return (
     <div className="relative inline-flex">
@@ -27,7 +23,7 @@ export function CommunityRules() {
           <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
           <path d="m9 12 2 2 4-5" />
         </svg>
-        Quy tắc cộng đồng
+        {t('rulesTitle')}
       </button>
 
       {open && (
@@ -44,7 +40,7 @@ export function CommunityRules() {
               <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
               <path d="m9 12 2 2 4-5" />
             </svg>
-            Quy tắc cộng đồng
+            {t('rulesTitle')}
           </div>
           <ul className="space-y-2.5">
             {RULES.map((rule) => (

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import type { SpeakingSuggestion } from '@/lib/api/speakingRooms';
 import { ACCENT } from '@/lib/tokens';
 
@@ -14,6 +15,7 @@ interface Props {
 type Tab = 'subTopics' | 'starters' | 'followUps';
 
 export function SuggestionsPanel({ suggestions, loading, onFetch, onPick }: Props) {
+  const tr = useTranslations('speakingRooms.components');
   const [open, setOpen] = useState(true);
   const [tab, setTab] = useState<Tab>('starters');
 
@@ -35,7 +37,7 @@ export function SuggestionsPanel({ suggestions, loading, onFetch, onPick }: Prop
         className="w-full flex items-center justify-between p-3"
       >
         <span className="font-bold" style={{ color: 'var(--theme-text-primary)' }}>
-          Gợi ý chủ đề & câu mẫu
+          {tr('suggestionsTitle')}
         </span>
         <svg
           width={18}
@@ -62,31 +64,31 @@ export function SuggestionsPanel({ suggestions, loading, onFetch, onPick }: Prop
               className="w-full py-2 rounded-lg text-sm font-bold text-white"
               style={{ backgroundColor: ACCENT.speaking }}
             >
-              Nhận gợi ý từ AI
+              {tr('getAiSuggestions')}
             </button>
           )}
-          {loading && <p className="text-sm" style={{ color: 'var(--theme-text-muted)' }}>Đang lấy gợi ý...</p>}
+          {loading && <p className="text-sm" style={{ color: 'var(--theme-text-muted)' }}>{tr('loadingSuggestions')}</p>}
           {suggestions && (
             <>
               <div className="flex gap-1 mb-3">
                 {(
                   [
-                    { key: 'subTopics', label: 'Hướng đi' },
-                    { key: 'starters', label: 'Câu mở' },
-                    { key: 'followUps', label: 'Hỏi lại' },
+                    { key: 'subTopics', label: tr('tabSubTopics') },
+                    { key: 'starters', label: tr('tabStarters') },
+                    { key: 'followUps', label: tr('tabFollowUps') },
                   ] as { key: Tab; label: string }[]
-                ).map((t) => (
+                ).map((tabItem) => (
                   <button
-                    key={t.key}
-                    onClick={() => setTab(t.key)}
+                    key={tabItem.key}
+                    onClick={() => setTab(tabItem.key)}
                     className="flex-1 py-1.5 rounded-lg text-xs font-bold"
                     style={
-                      tab === t.key
+                      tab === tabItem.key
                         ? { backgroundColor: ACCENT.speaking, color: '#fff' }
                         : { backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-primary)' }
                     }
                   >
-                    {t.label}
+                    {tabItem.label}
                   </button>
                 ))}
               </div>
@@ -116,7 +118,7 @@ export function SuggestionsPanel({ suggestions, loading, onFetch, onPick }: Prop
                 className="w-full mt-2 py-1.5 rounded-lg text-xs font-bold border"
                 style={{ borderColor: ACCENT.speaking, color: ACCENT.speaking }}
               >
-                Làm mới gợi ý
+                {tr('refreshSuggestions')}
               </button>
             </>
           )}

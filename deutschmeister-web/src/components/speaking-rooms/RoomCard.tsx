@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import type { SpeakingRoom, SpeakingRoomStatus } from '@/lib/api/speakingRooms';
 import { ACCENT } from '@/lib/tokens';
 
@@ -11,13 +12,14 @@ interface Props {
   variant?: 'public' | 'mine';
 }
 
-const STATUS_STYLE: Record<SpeakingRoomStatus, { label: string; bg: string; color: string }> = {
-  WAITING: { label: 'Đang chờ', bg: '#22C55E1A', color: '#16A34A' },
-  ACTIVE: { label: 'Đang nói', bg: '#A855F71A', color: '#9333EA' },
-  CLOSED: { label: 'Đã đóng', bg: '#9CA3AF1A', color: '#6B7280' },
+const STATUS_STYLE: Record<SpeakingRoomStatus, { labelKey: string; bg: string; color: string }> = {
+  WAITING: { labelKey: 'statusWaiting', bg: '#22C55E1A', color: '#16A34A' },
+  ACTIVE: { labelKey: 'statusActive', bg: '#A855F71A', color: '#9333EA' },
+  CLOSED: { labelKey: 'statusClosed', bg: '#9CA3AF1A', color: '#6B7280' },
 };
 
 export function RoomCard({ room, onJoin, onReopen, loading, variant = 'public' }: Props) {
+  const t = useTranslations('speakingRooms.components');
   const activeCount = room.participants.filter((p) => !p.leftAt).length;
   const isFull = activeCount >= room.maxSeats;
   const isClosed = room.status === 'CLOSED';
@@ -33,12 +35,12 @@ export function RoomCard({ room, onJoin, onReopen, loading, variant = 'public' }
   };
 
   const buttonLabel = isClosed
-    ? 'Mở lại phòng'
+    ? t('reopen')
     : variant === 'mine'
-      ? 'Vào lại'
+      ? t('rejoin')
       : isFull
-        ? 'Đầy'
-        : 'Vào phòng';
+        ? t('full')
+        : t('join');
 
   const buttonDisabled = loading || (!isClosed && isFull) || (isClosed ? !onReopen : !onJoin);
 
@@ -74,18 +76,18 @@ export function RoomCard({ room, onJoin, onReopen, loading, variant = 'public' }
               className="px-2 py-0.5 rounded text-xs font-bold"
               style={{ backgroundColor: status.bg, color: status.color }}
             >
-              {status.label}
+              {t(status.labelKey as 'statusWaiting')}
             </span>
           )}
           <span className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>
-            {activeCount}/{room.maxSeats} người
+            {t('seats', { count: activeCount, max: room.maxSeats })}
           </span>
         </div>
         <p className="font-bold truncate" style={{ color: 'var(--theme-text-primary)' }}>
           {room.title}
         </p>
         <p className="text-caption truncate" style={{ color: 'var(--theme-text-muted)' }}>
-          Chủ đề: {room.topic}
+          {t('topicPrefix', { topic: room.topic })}
         </p>
       </div>
       <button

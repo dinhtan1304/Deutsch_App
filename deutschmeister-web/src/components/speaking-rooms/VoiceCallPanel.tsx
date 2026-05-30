@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { ACCENT } from '@/lib/tokens';
 import type { useWebRTCCall } from '@/hooks/useWebRTCCall';
 
@@ -39,16 +40,17 @@ function fmtDuration(s: number) {
 }
 
 export function VoiceCallPanel({ call, remotePeer }: Props) {
+  const t = useTranslations('speakingRooms.components');
   const connected = call.callState === 'in-call';
   const canUseVoice = !!remotePeer;
 
-  let statusLabel = 'Đang đợi partner vào phòng...';
-  if (remotePeer && call.callState === 'connecting') statusLabel = 'Đang kết nối voice...';
-  else if (remotePeer && call.callState === 'in-call') statusLabel = `Đang nói chuyện với ${remotePeer.name}`;
-  else if (remotePeer && call.callState === 'failed') statusLabel = 'Kết nối thất bại';
-  else if (remotePeer && call.localVoiceEnabled && call.callState === 'idle') statusLabel = `Đang chờ ${remotePeer.name} bật voice...`;
-  else if (remotePeer && call.remoteReady) statusLabel = `${remotePeer.name} đã sẵn sàng voice`;
-  else if (remotePeer && call.callState === 'idle') statusLabel = `Sẵn sàng kết nối với ${remotePeer.name}`;
+  let statusLabel = t('waitingPartner');
+  if (remotePeer && call.callState === 'connecting') statusLabel = t('connectingVoice');
+  else if (remotePeer && call.callState === 'in-call') statusLabel = t('talkingWith', { name: remotePeer.name });
+  else if (remotePeer && call.callState === 'failed') statusLabel = t('connectionFailed');
+  else if (remotePeer && call.localVoiceEnabled && call.callState === 'idle') statusLabel = t('waitingEnableVoice', { name: remotePeer.name });
+  else if (remotePeer && call.remoteReady) statusLabel = t('partnerReady', { name: remotePeer.name });
+  else if (remotePeer && call.callState === 'idle') statusLabel = t('readyToConnect', { name: remotePeer.name });
 
   return (
     <div
@@ -81,7 +83,7 @@ export function VoiceCallPanel({ call, remotePeer }: Props) {
         {connected && remotePeer && (
           <div className="flex items-center gap-3 mt-1">
             <div className="flex items-center gap-1">
-              <span className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>Bạn</span>
+              <span className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>{t('you')}</span>
               <VuMeter level={call.audioLevel} color={ACCENT.speaking} />
             </div>
             <div className="flex items-center gap-1">
@@ -106,7 +108,7 @@ export function VoiceCallPanel({ call, remotePeer }: Props) {
             className="px-3 py-2 rounded-lg font-bold text-sm text-white disabled:opacity-40 disabled:cursor-not-allowed"
             style={{ backgroundColor: ACCENT.speaking }}
           >
-            Thử lại
+            {t('retry')}
           </button>
         ) : call.localVoiceEnabled ? (
           <button
@@ -114,7 +116,7 @@ export function VoiceCallPanel({ call, remotePeer }: Props) {
             className="px-3 py-2 rounded-lg font-bold text-sm border"
             style={{ borderColor: '#EF4444', color: '#EF4444' }}
           >
-            Tắt voice
+            {t('stopVoice')}
           </button>
         ) : (
           <button
@@ -123,7 +125,7 @@ export function VoiceCallPanel({ call, remotePeer }: Props) {
             className="px-3 py-2 rounded-lg font-bold text-sm text-white disabled:opacity-40 disabled:cursor-not-allowed"
             style={{ backgroundColor: ACCENT.speaking }}
           >
-            Bắt đầu voice
+            {t('startVoice')}
           </button>
         )}
       </div>
@@ -137,8 +139,8 @@ export function VoiceCallPanel({ call, remotePeer }: Props) {
           backgroundColor: call.isMuted ? 'rgba(239,68,68,0.1)' : 'transparent',
           color: call.isMuted ? '#EF4444' : 'var(--theme-text-primary)',
         }}
-        title={call.isMuted ? 'Bật mic' : 'Tắt mic'}
-        aria-label={call.isMuted ? 'Bật mic' : 'Tắt mic'}
+        title={call.isMuted ? t('unmute') : t('mute')}
+        aria-label={call.isMuted ? t('unmute') : t('mute')}
       >
         <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
           {call.isMuted ? (

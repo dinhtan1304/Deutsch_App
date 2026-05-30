@@ -1,17 +1,19 @@
 'use client';
 
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import type { SpeakingRoomQuota } from '@/lib/api/speakingRooms';
 import { ACCENT } from '@/lib/tokens';
 
 export function QuotaBanner({ quota }: { quota?: SpeakingRoomQuota }) {
+  const t = useTranslations('speakingRooms.components');
   if (!quota || quota.isPremium) return null;
 
   const remaining = Math.max(0, quota.limit - quota.used);
   const isExhausted = remaining === 0;
   const isLow = remaining === 1;
 
-  const periodLabel = quota.window === 'weekly' ? 'tuần này' : 'hôm nay';
+  const periodLabel = quota.window === 'weekly' ? t('periodWeekly') : t('periodDaily');
 
   return (
     <div
@@ -32,12 +34,10 @@ export function QuotaBanner({ quota }: { quota?: SpeakingRoomQuota }) {
       </div>
       <div className="flex-1">
         <p className="text-sm font-semibold" style={{ color: 'var(--theme-text-primary)' }}>
-          Còn <strong>{remaining}/{quota.limit}</strong> lượt {periodLabel}
+          {t.rich('quotaRemaining', { remaining, limit: quota.limit, period: periodLabel, b: (chunks) => <strong>{chunks}</strong> })}
         </p>
         <p className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>
-          {isExhausted
-            ? 'Bạn đã dùng hết lượt. Nâng cấp Premium để dùng không giới hạn.'
-            : 'Mỗi lần tạo phòng hoặc tham gia mới tính 1 lượt.'}
+          {isExhausted ? t('quotaExhaustedHint') : t('quotaNormalHint')}
         </p>
       </div>
       {(isExhausted || isLow) && (
@@ -46,7 +46,7 @@ export function QuotaBanner({ quota }: { quota?: SpeakingRoomQuota }) {
           className="px-3 py-1.5 rounded-lg text-sm font-bold text-white whitespace-nowrap"
           style={{ backgroundColor: ACCENT.premium }}
         >
-          Premium
+          {t('premium')}
         </Link>
       )}
     </div>

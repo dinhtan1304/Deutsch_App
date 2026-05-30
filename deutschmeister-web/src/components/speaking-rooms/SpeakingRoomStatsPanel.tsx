@@ -1,6 +1,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
+import { useTranslations } from 'next-intl';
 import type { User } from '@/lib/api/auth';
 import type { SpeakingRoomStats } from '@/lib/api/speakingRooms';
 import { ACCENT } from '@/lib/tokens';
@@ -43,6 +44,7 @@ function StatItem({
 }
 
 export function SpeakingRoomsActivityBar({ stats }: { stats?: SpeakingRoomStats }) {
+  const t = useTranslations('speakingRooms.components');
   return (
     <div className="my-4 flex flex-wrap items-center justify-center gap-3 text-sm" style={{ color: 'var(--theme-text-muted)' }}>
       <div className="inline-flex items-center gap-2">
@@ -54,12 +56,12 @@ export function SpeakingRoomsActivityBar({ stats }: { stats?: SpeakingRoomStats 
         </svg>
         <span className="h-2 w-2 rounded-full bg-emerald-500" />
         <strong style={{ color: ACCENT.speaking }}>{stats?.onlineCount ?? 0}</strong>
-        <span>đang trò chuyện</span>
+        <span>{t('chatting')}</span>
       </div>
       <span className="hidden h-4 w-px sm:block" style={{ backgroundColor: 'var(--theme-border)' }} />
       <div className="inline-flex items-center gap-2">
         <strong style={{ color: ACCENT.speaking }}>{stats?.waitingRooms ?? 0}</strong>
-        <span>phòng đang chờ</span>
+        <span>{t('waitingRooms')}</span>
       </div>
       <span className="hidden h-4 w-px sm:block" style={{ backgroundColor: 'var(--theme-border)' }} />
       <CommunityRules />
@@ -68,7 +70,8 @@ export function SpeakingRoomsActivityBar({ stats }: { stats?: SpeakingRoomStats 
 }
 
 export function SpeakingRoomStatsCard({ stats, user }: { stats?: SpeakingRoomStats; user?: User | null }) {
-  const name = user?.name || 'Bạn';
+  const t = useTranslations('speakingRooms.components');
+  const name = user?.name || t('you');
   const initial = name.charAt(0).toUpperCase();
 
   return (
@@ -93,7 +96,7 @@ export function SpeakingRoomStatsCard({ stats, user }: { stats?: SpeakingRoomSta
             {name}
           </p>
           <p className="text-caption" style={{ color: ACCENT.speaking }}>
-            Thống kê của bạn
+            {t('yourStats')}
           </p>
         </div>
       </div>
@@ -102,17 +105,17 @@ export function SpeakingRoomStatsCard({ stats, user }: { stats?: SpeakingRoomSta
         <StatItem
           icon={<svg width={17} height={17} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.79 19.79 0 0 1 11.19 19 19.5 19.5 0 0 1 5 12.81 19.79 19.79 0 0 1 2.11 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.12.9.33 1.77.62 2.61a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.47-1.19a2 2 0 0 1 2.11-.45c.84.29 1.71.5 2.61.62A2 2 0 0 1 22 16.92z" /></svg>}
           value={stats?.my.sessions ?? 0}
-          label="Lượt tham gia"
+          label={t('statSessions')}
         />
         <StatItem
           icon={<svg width={17} height={17} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" /></svg>}
           value={formatDuration(stats?.my.roomSeconds ?? 0)}
-          label="Thời gian phòng"
+          label={t('statRoomTime')}
         />
         <StatItem
           icon={<svg width={17} height={17} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><path d="M21 15a4 4 0 0 1-4 4H7l-4 4V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z" /></svg>}
           value={stats?.my.messages ?? 0}
-          label="Tin nhắn"
+          label={t('statMessages')}
         />
       </div>
     </div>
