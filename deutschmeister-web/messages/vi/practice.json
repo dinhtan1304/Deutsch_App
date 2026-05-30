@@ -812,6 +812,23 @@
         "attemptCount": "Lần thử {count}",
         "feedbackTipPrefix": "💡"
       },
+      "components": {
+        "aiLoading": "Đang tải lượt AI review...",
+        "aiUnlimited": "Số lượt AI review: <b>Không giới hạn</b>",
+        "aiPeriodDaily": "Làm mới mỗi ngày",
+        "aiPeriodWeekly": "Reset vào thứ Hai hàng tuần",
+        "aiExhausted": "Hết lượt AI review {period}",
+        "aiPeriodToday": "hôm nay",
+        "aiPeriodThisWeek": "tuần này",
+        "aiUpgrade": "Nâng cấp Premium →",
+        "aiRemaining": "Số lượt AI review còn lại: <b>{remaining}/{limit}</b>. {period}.",
+        "recMicError": "Không thể truy cập microphone. Vui lòng cấp quyền trong trình duyệt.",
+        "recTooShort": "Audio quá ngắn — hãy nói dài hơn rồi thử lại.",
+        "recProcessError": "Có lỗi khi xử lý audio.",
+        "recStop": "Dừng ghi âm",
+        "recStart": "Bắt đầu ghi âm",
+        "recGrading": "Đang chấm điểm…"
+      },
       "result": {
         "title": "Kết quả Shadowing",
         "notFound": "Không tìm thấy phiên shadowing.",

@@ -812,6 +812,23 @@
         "attemptCount": "Versuch {count}",
         "feedbackTipPrefix": "💡"
       },
+      "components": {
+        "aiLoading": "Lade KI-Review-Kontingent...",
+        "aiUnlimited": "KI-Reviews: <b>Unbegrenzt</b>",
+        "aiPeriodDaily": "Täglich zurückgesetzt",
+        "aiPeriodWeekly": "Jeden Montag zurückgesetzt",
+        "aiExhausted": "Keine KI-Reviews mehr {period}",
+        "aiPeriodToday": "heute",
+        "aiPeriodThisWeek": "diese Woche",
+        "aiUpgrade": "Auf Premium upgraden →",
+        "aiRemaining": "KI-Reviews übrig: <b>{remaining}/{limit}</b>. {period}.",
+        "recMicError": "Kein Zugriff auf das Mikrofon. Bitte erteile die Berechtigung im Browser.",
+        "recTooShort": "Audio zu kurz — sprich länger und versuche es erneut.",
+        "recProcessError": "Beim Verarbeiten des Audios ist ein Fehler aufgetreten.",
+        "recStop": "Aufnahme stoppen",
+        "recStart": "Aufnahme starten",
+        "recGrading": "Wird bewertet…"
+      },
       "result": {
         "title": "Shadowing-Ergebnis",
         "notFound": "Shadowing-Sitzung nicht gefunden.",

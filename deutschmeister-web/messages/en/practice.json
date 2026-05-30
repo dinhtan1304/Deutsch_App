@@ -812,6 +812,23 @@
         "attemptCount": "Attempt {count}",
         "feedbackTipPrefix": "💡"
       },
+      "components": {
+        "aiLoading": "Loading AI review quota...",
+        "aiUnlimited": "AI review uses: <b>Unlimited</b>",
+        "aiPeriodDaily": "Resets every day",
+        "aiPeriodWeekly": "Resets every Monday",
+        "aiExhausted": "Out of AI reviews {period}",
+        "aiPeriodToday": "today",
+        "aiPeriodThisWeek": "this week",
+        "aiUpgrade": "Upgrade to Premium →",
+        "aiRemaining": "AI reviews left: <b>{remaining}/{limit}</b>. {period}.",
+        "recMicError": "Couldn't access the microphone. Please grant permission in your browser.",
+        "recTooShort": "Audio too short — speak longer and try again.",
+        "recProcessError": "Something went wrong processing the audio.",
+        "recStop": "Stop recording",
+        "recStart": "Start recording",
+        "recGrading": "Grading…"
+      },
       "result": {
         "title": "Shadowing Result",
         "notFound": "Shadowing session not found.",

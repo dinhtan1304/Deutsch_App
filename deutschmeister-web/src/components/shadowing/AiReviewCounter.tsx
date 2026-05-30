@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { useCheckQuota, useIsPremium } from '@/hooks/useSubscription';
 import { ACCENT, STATUS } from '@/lib/tokens';
 
@@ -10,6 +11,7 @@ interface Props {
 }
 
 export function AiReviewCounter({ enabled = true }: Props) {
+  const t = useTranslations('practice.dictation.shadow.components');
   const { data: quota, isLoading } = useCheckQuota('shadowing', enabled);
   const isPremium = useIsPremium();
 
@@ -18,7 +20,7 @@ export function AiReviewCounter({ enabled = true }: Props) {
   if (isLoading || !quota) {
     return (
       <p className="text-xs font-medium opacity-50" style={{ color: 'var(--theme-text-muted)' }}>
-        Đang tải lượt AI review...
+        {t('aiLoading')}
       </p>
     );
   }
@@ -31,13 +33,13 @@ export function AiReviewCounter({ enabled = true }: Props) {
         style={{ color: ACCENT.reading }}
       >
         <span>⭐</span>
-        Số lượt AI review: <strong>Không giới hạn</strong>
+        {t.rich('aiUnlimited', { b: (chunks) => <strong>{chunks}</strong> })}
       </p>
     );
   }
 
   const remaining = Math.max(0, quota.limit - quota.used);
-  const periodLabel = quota.window === 'daily' ? 'Làm mới mỗi ngày' : 'Reset vào thứ Hai hàng tuần';
+  const periodLabel = quota.window === 'daily' ? t('aiPeriodDaily') : t('aiPeriodWeekly');
 
   if (remaining === 0) {
     return (
@@ -46,14 +48,14 @@ export function AiReviewCounter({ enabled = true }: Props) {
           className="text-xs font-bold"
           style={{ color: STATUS.danger }}
         >
-          Hết lượt AI review {quota.window === 'daily' ? 'hôm nay' : 'tuần này'}
+          {t('aiExhausted', { period: quota.window === 'daily' ? t('aiPeriodToday') : t('aiPeriodThisWeek') })}
         </p>
         <Link
           href="/pricing"
           className="text-[11px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg transition-all hover:brightness-110 active:scale-95 text-white"
           style={{ background: ACCENT.premium }}
         >
-          Nâng cấp Premium →
+          {t('aiUpgrade')}
         </Link>
       </div>
     );
@@ -65,11 +67,12 @@ export function AiReviewCounter({ enabled = true }: Props) {
       className="text-xs font-medium"
       style={{ color: 'var(--theme-text-secondary)' }}
     >
-      Số lượt AI review còn lại:{' '}
-      <strong style={{ color: ACCENT.reading }}>
-        {remaining}/{quota.limit}
-      </strong>
-      . {periodLabel}.
+      {t.rich('aiRemaining', {
+        remaining,
+        limit: quota.limit,
+        period: periodLabel,
+        b: (chunks) => <strong style={{ color: ACCENT.reading }}>{chunks}</strong>,
+      })}
     </p>
   );
 }

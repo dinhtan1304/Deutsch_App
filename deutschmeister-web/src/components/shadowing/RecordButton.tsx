@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { ACCENT, STATUS } from '@/lib/tokens';
 
 type RecState = 'idle' | 'recording' | 'processing';
@@ -24,6 +25,7 @@ export function RecordButton({
   accentColor = ACCENT.dictation,
   recordingColor = STATUS.danger,
 }: Props) {
+  const t = useTranslations('practice.dictation.shadow.components');
   const [state, setState] = useState<RecState>('idle');
   const [elapsedMs, setElapsedMs] = useState(0);
 
@@ -60,7 +62,7 @@ export function RecordButton({
     try {
       stream = await navigator.mediaDevices.getUserMedia({ audio: true });
     } catch {
-      onError?.('Không thể truy cập microphone. Vui lòng cấp quyền trong trình duyệt.');
+      onError?.(t('recMicError'));
       return;
     }
     streamRef.current = stream;
@@ -86,7 +88,7 @@ export function RecordButton({
       const blob = new Blob(chunksRef.current, { type: mimeType });
       if (blob.size < 1000) {
         setState('idle');
-        onError?.('Audio quá ngắn — hãy nói dài hơn rồi thử lại.');
+        onError?.(t('recTooShort'));
         return;
       }
       setState('processing');
@@ -97,7 +99,7 @@ export function RecordButton({
         );
         await onRecorded(base64, mimeType);
       } catch (err) {
-        onError?.(err instanceof Error ? err.message : 'Có lỗi khi xử lý audio.');
+        onError?.(err instanceof Error ? err.message : t('recProcessError'));
       } finally {
         setState('idle');
         setElapsedMs(0);
@@ -134,7 +136,7 @@ export function RecordButton({
         type="button"
         onClick={handleClick}
         disabled={disabled || isProcessing}
-        aria-label={isRecording ? 'Dừng ghi âm' : 'Bắt đầu ghi âm'}
+        aria-label={isRecording ? t('recStop') : t('recStart')}
         className="relative rounded-full flex items-center justify-center transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
         style={{
           width: size,
@@ -196,7 +198,7 @@ export function RecordButton({
           className="text-xs font-bold opacity-70"
           style={{ color: 'var(--theme-text-secondary)' }}
         >
-          Đang chấm điểm…
+          {t('recGrading')}
         </span>
       )}
     </div>
