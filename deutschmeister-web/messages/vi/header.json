@@ -9,7 +9,30 @@
   },
   "notifications": {
     "title": "Thông báo",
-    "ariaLabel": "Thông báo"
+    "ariaLabel": "Thông báo",
+    "unreadCount": "{count} tin nhắn mới",
+    "noUnread": "Không có tin mới",
+    "markAll": "Đọc tất cả",
+    "errorTitle": "Ối! Đã có lỗi xảy ra",
+    "errorBody": "Không thể tải thông báo lúc này",
+    "retry": "Thử lại",
+    "empty": "Trống rỗng",
+    "settings": "Cài đặt",
+    "totalCount": "{count} thông báo"
+  },
+  "commandPalette": {
+    "placeholder": "Tìm trang, từ vựng, hoặc dịch câu...",
+    "swapDirection": "⇄ Đổi chiều",
+    "translating": "Đang dịch...",
+    "copy": "Copy",
+    "speak": "Phát âm",
+    "translateError": "Không dịch được. Thử lại sau.",
+    "navigation": "Điều hướng",
+    "searchAction": "Tìm “{query}” trong từ điển",
+    "emptyHint": "Gõ để tìm trang, từ vựng, hoặc nhập câu để dịch VI↔DE",
+    "hintMove": "di chuyển",
+    "hintSelect": "chọn",
+    "hintClose": "đóng"
   },
   "userBadge": {
     "premium": "Premium",

@@ -9,7 +9,30 @@
   },
   "notifications": {
     "title": "Benachrichtigungen",
-    "ariaLabel": "Benachrichtigungen"
+    "ariaLabel": "Benachrichtigungen",
+    "unreadCount": "{count} neue Nachrichten",
+    "noUnread": "Keine neuen Nachrichten",
+    "markAll": "Alle als gelesen",
+    "errorTitle": "Ups! Etwas ist schiefgelaufen",
+    "errorBody": "Benachrichtigungen konnten nicht geladen werden",
+    "retry": "Erneut versuchen",
+    "empty": "Alles erledigt",
+    "settings": "Einstellungen",
+    "totalCount": "{count} Benachrichtigungen"
+  },
+  "commandPalette": {
+    "placeholder": "Seiten, Vokabeln suchen oder Satz übersetzen...",
+    "swapDirection": "⇄ Richtung wechseln",
+    "translating": "Wird übersetzt...",
+    "copy": "Kopieren",
+    "speak": "Aussprechen",
+    "translateError": "Übersetzung fehlgeschlagen. Bitte später erneut.",
+    "navigation": "Navigation",
+    "searchAction": "„{query}“ im Wörterbuch suchen",
+    "emptyHint": "Tippe, um Seiten/Vokabeln zu finden, oder gib einen Satz zum Übersetzen VI↔DE ein",
+    "hintMove": "bewegen",
+    "hintSelect": "auswählen",
+    "hintClose": "schließen"
   },
   "userBadge": {
     "premium": "Premium",

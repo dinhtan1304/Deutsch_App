@@ -39,6 +39,7 @@ function navMatches(
 export function CommandPalette({ open, onClose }: CommandPaletteProps) {
   const router = useRouter();
   const tNav = useTranslations('nav');
+  const t = useTranslations('header.commandPalette');
   const inputRef = useRef<HTMLInputElement>(null);
   const [query, setQuery] = useState('');
   const [langOverride, setLangOverride] = useState<TranslateLang | undefined>(undefined);
@@ -166,7 +167,7 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
             type="text"
             value={query}
             onChange={e => { setQuery(e.target.value); setLangOverride(undefined); setActiveIndex(0); }}
-            placeholder="Tìm trang, từ vựng, hoặc dịch câu..."
+            placeholder={t('placeholder')}
             className="flex-1 bg-transparent text-lead focus:outline-none"
             style={{ color: 'var(--theme-text-primary)' }}
             autoComplete="off"
@@ -200,7 +201,7 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
                   className="text-caption font-bold rounded-sm px-2 py-0.5"
                   style={{ background: `${ACCENT.brand}1A`, color: ACCENT.brand }}
                 >
-                  ⇄ Đổi chiều
+                  {t('swapDirection')}
                 </button>
               </div>
 
@@ -209,7 +210,7 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={ACCENT.brand} strokeWidth="2" strokeLinecap="round" className="animate-spin" aria-hidden>
                     <path d="M21 12a9 9 0 1 1-6.219-8.56" />
                   </svg>
-                  <span className="text-body" style={{ color: 'var(--theme-text-muted)' }}>Đang dịch...</span>
+                  <span className="text-body" style={{ color: 'var(--theme-text-muted)' }}>{t('translating')}</span>
                 </div>
               ) : translated ? (
                 <div>
@@ -226,7 +227,7 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
                         color: 'var(--theme-text-secondary)',
                       }}
                     >
-                      Copy
+                      {t('copy')}
                     </button>
                     <button
                       onClick={speakTranslation}
@@ -237,13 +238,13 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
                         color: 'var(--theme-text-secondary)',
                       }}
                     >
-                      Phát âm
+                      {t('speak')}
                     </button>
                   </div>
                 </div>
               ) : (
                 <p className="text-caption" style={{ color: 'var(--color-status-danger, #EF4444)' }}>
-                  Không dịch được. Thử lại sau.
+                  {t('translateError')}
                 </p>
               )}
             </div>
@@ -253,7 +254,7 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
           {navResults.length > 0 && (
             <div className="py-2">
               <div className="px-4 py-1 text-caption font-semibold uppercase tracking-wide" style={{ color: 'var(--theme-text-muted)' }}>
-                Điều hướng
+                {t('navigation')}
               </div>
               {navResults.map((item, idx) => {
                 const actionIdx = query.trim() ? idx + 1 : idx;
@@ -293,7 +294,7 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
             >
               <IconSearch size={18} />
               <span className="flex-1 text-body font-medium">
-                Tìm &ldquo;{query.trim()}&rdquo; trong từ điển
+                {t('searchAction', { query: query.trim() })}
               </span>
               <kbd
                 className="rounded-sm px-1.5 py-0.5 text-caption font-semibold"
@@ -312,15 +313,15 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
           {!query.trim() && (
             <div className="px-4 py-8 text-center">
               <p className="text-body" style={{ color: 'var(--theme-text-muted)' }}>
-                Gõ để tìm trang, từ vựng, hoặc nhập câu để dịch VI↔DE
+                {t('emptyHint')}
               </p>
               <div className="mt-4 flex items-center justify-center gap-2 text-caption" style={{ color: 'var(--theme-text-muted)' }}>
                 <kbd className="rounded-sm px-1.5 py-0.5 font-semibold" style={{ background: 'var(--theme-bg-secondary)', border: '1px solid var(--theme-border)' }}>↑↓</kbd>
-                <span>di chuyển</span>
+                <span>{t('hintMove')}</span>
                 <kbd className="rounded-sm px-1.5 py-0.5 font-semibold ml-2" style={{ background: 'var(--theme-bg-secondary)', border: '1px solid var(--theme-border)' }}>↵</kbd>
-                <span>chọn</span>
+                <span>{t('hintSelect')}</span>
                 <kbd className="rounded-sm px-1.5 py-0.5 font-semibold ml-2" style={{ background: 'var(--theme-bg-secondary)', border: '1px solid var(--theme-border)' }}>Esc</kbd>
-                <span>đóng</span>
+                <span>{t('hintClose')}</span>
               </div>
             </div>
           )}

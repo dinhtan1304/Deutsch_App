@@ -9,7 +9,30 @@
   },
   "notifications": {
     "title": "Notifications",
-    "ariaLabel": "Notifications"
+    "ariaLabel": "Notifications",
+    "unreadCount": "{count} new messages",
+    "noUnread": "No new messages",
+    "markAll": "Mark all read",
+    "errorTitle": "Oops! Something went wrong",
+    "errorBody": "Couldn't load notifications right now",
+    "retry": "Try again",
+    "empty": "All caught up",
+    "settings": "Settings",
+    "totalCount": "{count} notifications"
+  },
+  "commandPalette": {
+    "placeholder": "Search pages, vocabulary, or translate a phrase...",
+    "swapDirection": "⇄ Swap direction",
+    "translating": "Translating...",
+    "copy": "Copy",
+    "speak": "Pronounce",
+    "translateError": "Couldn't translate. Try again later.",
+    "navigation": "Navigation",
+    "searchAction": "Search “{query}” in the dictionary",
+    "emptyHint": "Type to find pages, vocabulary, or enter a phrase to translate VI↔DE",
+    "hintMove": "move",
+    "hintSelect": "select",
+    "hintClose": "close"
   },
   "userBadge": {
     "premium": "Premium",

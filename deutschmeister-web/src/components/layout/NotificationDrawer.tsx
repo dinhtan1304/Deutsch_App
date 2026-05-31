@@ -44,6 +44,7 @@ function useTimeAgo() {
 }
 
 export function NotificationDrawer({ open, onClose }: Props) {
+  const t = useTranslations('header.notifications');
   const drawerRef = useModalA11y(open, onClose);
   const timeAgo = useTimeAgo();
   const [page] = useState(1);
@@ -94,7 +95,7 @@ export function NotificationDrawer({ open, onClose }: Props) {
         <div className="px-6 py-5 shrink-0 border-b border-black/5 dark:border-white/5">
           <div className="flex items-center justify-between mb-1">
             <h3 id="notif-drawer-title" className="text-xl font-black tracking-tight" style={{ color: 'var(--theme-text-primary)' }}>
-              Thông báo
+              {t('title')}
             </h3>
             <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-full bg-black/5 dark:bg-white/5 hover:scale-110 transition-transform active:scale-90" style={{ color: 'var(--theme-text-muted)' }}>
               <IconX size={16} />
@@ -102,7 +103,7 @@ export function NotificationDrawer({ open, onClose }: Props) {
           </div>
           <div className="flex items-center justify-between">
             <p className="text-[11px] font-bold opacity-40 uppercase tracking-widest" style={{ color: 'var(--theme-text-primary)' }}>
-              {data?.unreadCount ? `${data.unreadCount} tin nhắn mới` : 'Không có tin mới'}
+              {data?.unreadCount ? t('unreadCount', { count: data.unreadCount }) : t('noUnread')}
             </p>
             {(data?.unreadCount ?? 0) > 0 && (
               <button
@@ -111,7 +112,7 @@ export function NotificationDrawer({ open, onClose }: Props) {
                 style={{ color: ACCENT.srs }}
               >
                 <IconCheck size={12} />
-                Đọc tất cả
+                {t('markAll')}
               </button>
             )}
           </div>
@@ -130,11 +131,11 @@ export function NotificationDrawer({ open, onClose }: Props) {
                 <IconInfo size={32} />
               </div>
               <div className="space-y-1">
-                <p className="text-sm font-black" style={{ color: 'var(--theme-text-primary)' }}>Ối! Đã có lỗi xảy ra</p>
-                <p className="text-xs opacity-50 font-medium" style={{ color: 'var(--theme-text-muted)' }}>Không thể tải thông báo lúc này</p>
+                <p className="text-sm font-black" style={{ color: 'var(--theme-text-primary)' }}>{t('errorTitle')}</p>
+                <p className="text-xs opacity-50 font-medium" style={{ color: 'var(--theme-text-muted)' }}>{t('errorBody')}</p>
               </div>
               <button onClick={() => refetch()} className="px-5 py-2 rounded-xl text-xs font-black border border-indigo-500/30 transition-all hover:bg-indigo-500 hover:text-white" style={{ color: ACCENT.srs }}>
-                Thử lại
+                {t('retry')}
               </button>
             </div>
           ) : !data?.items.length ? (
@@ -142,7 +143,7 @@ export function NotificationDrawer({ open, onClose }: Props) {
               <div className="w-20 h-20 rounded-4xl bg-black/3 dark:bg-white/5 flex items-center justify-center text-muted opacity-30">
                 <IconBell size={40} />
               </div>
-              <p className="text-sm font-black opacity-30 uppercase tracking-widest" style={{ color: 'var(--theme-text-primary)' }}>Trống rỗng</p>
+              <p className="text-sm font-black opacity-30 uppercase tracking-widest" style={{ color: 'var(--theme-text-primary)' }}>{t('empty')}</p>
             </div>
           ) : (
             <div className="divide-y divide-black/5 dark:divide-white/5">
@@ -202,11 +203,11 @@ export function NotificationDrawer({ open, onClose }: Props) {
         <div className="px-6 py-4 shrink-0 bg-black/2 dark:bg-white/3 border-t border-black/5 dark:border-white/5 flex items-center justify-between">
            <Link href="/settings" onClick={onClose} className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest opacity-40 hover:opacity-100 transition-opacity" style={{ color: 'var(--theme-text-primary)' }}>
               <IconSettings size={14} />
-              Cài đặt
+              {t('settings')}
            </Link>
            {data && data.total > 0 && (
               <span className="text-[10px] font-black uppercase tracking-widest opacity-30" style={{ color: 'var(--theme-text-primary)' }}>
-                {data.total} thông báo
+                {t('totalCount', { count: data.total })}
               </span>
            )}
         </div>
