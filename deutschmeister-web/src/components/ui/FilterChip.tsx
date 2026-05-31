@@ -21,7 +21,7 @@ export function FilterChip({ active, onClick, children, className = '', size = '
     <button
       type="button"
       onClick={onClick}
-      className={`inline-flex items-center gap-1.5 rounded-lg font-medium whitespace-nowrap transition-colors ${className}`}
+      className={`inline-flex items-center gap-1.5 rounded-[7px] font-medium whitespace-nowrap transition-colors ${className}`}
       style={{
         padding: pad,
         fontSize,

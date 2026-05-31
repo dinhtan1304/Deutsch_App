@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useRef, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { ACCENT, STATUS } from '@/lib/tokens';
 import { IPA_CHART, IPA_CATEGORY_LABELS, IPA_VIDEOS } from '@/lib/data/ipaChart';
@@ -40,7 +40,6 @@ export default function IpaChartPage() {
     { key: 'low', label: tIpa('diffShortLow') },
   ];
   const [selected, setSelected] = useState<IpaSymbol | null>(null);
-  const detailRef = useRef<HTMLDivElement | null>(null);
 
   const countByDiff = (d: Exclude<DiffFilter, 'all'>) => IPA_CHART.filter(s => s.difficultyForVi === d).length;
 
@@ -57,9 +56,14 @@ export default function IpaChartPage() {
     return Array.from(map.entries()).map(([category, items]) => ({ category, items }));
   }, [filter, diff]);
 
+  // Detail opens in a modal — close on Escape, lock body scroll while open.
   useEffect(() => {
     if (!selected) return;
-    detailRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setSelected(null); };
+    window.addEventListener('keydown', onKey);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { window.removeEventListener('keydown', onKey); document.body.style.overflow = prev; };
   }, [selected]);
 
 
@@ -198,13 +202,6 @@ export default function IpaChartPage() {
           ))}
         </div>
 
-        {/* Detail panel */}
-        {selected && (
-          <div ref={detailRef} className="mt-8 scroll-mt-4">
-            <IpaDetailPanel symbol={selected} onClose={() => setSelected(null)} />
-          </div>
-        )}
-
         {/* Footer note */}
         <div
           className="mt-10 rounded-xl border p-4 text-xs leading-relaxed"
@@ -217,6 +214,21 @@ export default function IpaChartPage() {
           <strong style={{ color: ACCENT.examWriting }}>{t('noteLabel')}</strong> {t('noteBody')}
         </div>
       </div>
+
+      {/* Detail modal — opens on phoneme click */}
+      {selected && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }}
+          onClick={() => setSelected(null)}
+          role="dialog"
+          aria-modal="true"
+        >
+          <div className="w-full max-w-lg max-h-[85vh] overflow-y-auto animate-[bounceIn_.18s_ease-out]" onClick={(e) => e.stopPropagation()}>
+            <IpaDetailPanel symbol={selected} onClose={() => setSelected(null)} />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
