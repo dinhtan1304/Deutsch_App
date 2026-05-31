@@ -666,6 +666,12 @@ input[type="range"]::-webkit-slider-thumb {
 .v2-medal { background: linear-gradient(135deg, var(--medal), color-mix(in srgb, var(--medal) 60%, transparent)); }
 .v2-badge-unlocked { background: linear-gradient(160deg, color-mix(in srgb, var(--medal) 12%, transparent), var(--theme-bg-card) 60%); }
 
+/* v2 games hub: recommend hero gradient + per-game icon gradient + CTA hover-fill (driven by inline --gc color) */
+.v2-recommend-hero { background: linear-gradient(135deg, color-mix(in srgb, var(--violet) 16%, transparent), color-mix(in srgb, var(--der) 8%, transparent)); }
+.v2-game-icongrad { background: linear-gradient(135deg, var(--gc), color-mix(in srgb, var(--gc) 67%, transparent)); }
+.v2-game-cta { background: transparent; border: 1px solid color-mix(in srgb, var(--gc) 55%, transparent); color: var(--gc); transition: background .15s, color .15s, border-color .15s; }
+.word-card-v2:hover .v2-game-cta { background: var(--gc); color: #fff; border-color: var(--gc); }
+
 /* v2 word/entity card hover lift — border turns to the card's article/route
    accent (--card-accent set inline). */
 .word-card-v2 { transition: border-color .2s, transform .2s, box-shadow .2s; }

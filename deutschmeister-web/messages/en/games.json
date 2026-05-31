@@ -41,10 +41,15 @@
   },
   "hub": {
     "eyebrow": "Games · Spiele",
-    "statGames": "Games",
-    "statDue": "Due",
-    "statMastered": "Mastered",
+    "gamesUnit": "games",
+    "subtitleNote": "70% learned + 30% new words",
+    "statPlayed": "Played",
+    "statWeek": "This week",
+    "statAvg": "Avg score",
     "recommend": "Recommended for you",
+    "rec1Label": "★ Pick #1",
+    "recommendReason": "based on {count} words due",
+    "fitToday": "Good for today",
     "primaryReason": "Best fit",
     "categories": {
       "all": "All",
@@ -54,8 +59,13 @@
       "speed": "Challenge"
     },
     "minutesShort": "{min} min",
+    "playsUnit": "plays",
+    "bestLabel": "Best",
+    "notTried": "Not tried yet",
+    "playMore": "Play again",
+    "tryIt": "Try",
     "diff1": "Easy",
-    "diff2": "Medium",
+    "diff2": "Med",
     "diff3": "Hard",
     "play": "Play now"
   },
