@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl';
 import { ACCENT } from '@/lib/tokens';
 
 interface BetaBadgeProps {
@@ -10,11 +11,12 @@ interface BetaBadgeProps {
  * Amber-on-translucent-amber — consistent with the xp accent.
  */
 export function BetaBadge({ size = 'sm', className }: BetaBadgeProps) {
+  const t = useTranslations('common.ui');
   const isSm = size === 'sm';
   return (
     <span
       role="img"
-      aria-label="Tính năng beta"
+      aria-label={t('betaFeature')}
       className={className}
       style={{
         display: 'inline-flex',

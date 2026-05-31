@@ -3,5 +3,12 @@
   "authExpired": "Sitzung abgelaufen",
   "authRequired": "Bitte erneut anmelden",
   "network": "Server nicht erreichbar",
-  "httpError": "HTTP-Fehler {status}"
+  "httpError": "HTTP-Fehler {status}",
+  "boundary": {
+    "title": "Ups! Etwas ist schiefgelaufen",
+    "body": "Ein unerwarteter Fehler ist aufgetreten. Bitte versuche es erneut oder lade die Seite neu.",
+    "details": "Fehlerdetails (Dev-Modus)",
+    "retry": "Erneut versuchen",
+    "reload": "Seite neu laden"
+  }
 }

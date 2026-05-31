@@ -2,6 +2,7 @@
 
 import { ReactNode, useCallback, useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import dynamic from 'next/dynamic';
 import { Sidebar, SIDEBAR_WIDTH, SIDEBAR_COLLAPSED_WIDTH } from './Sidebar';
 import { Header } from './Header';
@@ -22,6 +23,7 @@ const SIDEBAR_COLLAPSED_KEY = 'deutschmeister-sidebar-collapsed';
 const BARE_ROUTES = ['/auth/login', '/auth/register', '/auth', '/', '/landing', '/admin', '/onboarding', '/privacy', '/terms', '/pricing'];
 
 export function MainLayout({ children }: MainLayoutProps) {
+  const t = useTranslations('common.ui');
   const pathname = usePathname();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -93,7 +95,7 @@ export function MainLayout({ children }: MainLayoutProps) {
         href="#main-content"
         className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-100 focus:px-4 focus:py-2 focus:rounded-lg focus:bg-blue-600 focus:text-white focus:font-semibold"
       >
-        Bỏ qua điều hướng
+        {t('skipNav')}
       </a>
 
       <main

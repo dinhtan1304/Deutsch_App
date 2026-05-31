@@ -3,5 +3,12 @@
   "authExpired": "Session expired",
   "authRequired": "Please sign in again",
   "network": "Could not reach the server",
-  "httpError": "HTTP error {status}"
+  "httpError": "HTTP error {status}",
+  "boundary": {
+    "title": "Oops! Something went wrong",
+    "body": "An unexpected error occurred. Please try again or reload the page.",
+    "details": "Error details (dev mode)",
+    "retry": "Try again",
+    "reload": "Reload page"
+  }
 }

@@ -3,5 +3,12 @@
   "authExpired": "Phiên đăng nhập hết hạn",
   "authRequired": "Vui lòng đăng nhập lại",
   "network": "Không thể kết nối đến máy chủ",
-  "httpError": "Lỗi HTTP {status}"
+  "httpError": "Lỗi HTTP {status}",
+  "boundary": {
+    "title": "Oops! Có lỗi xảy ra",
+    "body": "Đã có lỗi không mong muốn. Vui lòng thử lại hoặc tải lại trang.",
+    "details": "Chi tiết lỗi (dev mode)",
+    "retry": "Thử lại",
+    "reload": "Tải lại trang"
+  }
 }

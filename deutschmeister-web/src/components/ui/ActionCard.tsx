@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { ReactNode } from 'react';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { ACCENT, GRADIENT, type AccentKey } from '@/lib/tokens';
 
@@ -37,6 +38,7 @@ export function ActionCard({
   secondary,
   className,
 }: ActionCardProps) {
+  const t = useTranslations('common.ui');
   const gradient = accent in GRADIENT ? GRADIENT[accent as keyof typeof GRADIENT] : GRADIENT.brand;
   const progressPct = progress ? Math.min(100, Math.round((progress.current / progress.total) * 100)) : 0;
 
@@ -87,7 +89,7 @@ export function ActionCard({
       {progress && (
         <div className="relative mt-5 max-w-xl">
           <div className="flex items-center justify-between text-xs font-bold opacity-90 mb-1.5">
-            <span>{progress.label ?? 'Tiến độ'}</span>
+            <span>{progress.label ?? t('progressFallback')}</span>
             <span>
               {progress.current} / {progress.total}
             </span>

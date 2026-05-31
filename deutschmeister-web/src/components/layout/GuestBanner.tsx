@@ -2,6 +2,7 @@
 
 import { useState, useSyncExternalStore } from 'react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { useAuthStore } from '@/stores/authStore';
 import { GRADIENT } from '@/lib/tokens';
 
@@ -12,6 +13,7 @@ function getSnapshot(): boolean { return sessionStorage.getItem(DISMISSED_KEY) =
 function getServerSnapshot(): boolean { return true; }
 
 export function GuestBanner() {
+  const t = useTranslations('common.ui');
   const { isAuthenticated } = useAuthStore();
   const storedDismissed = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
   const [dismissed, setDismissed] = useState(false);
@@ -29,16 +31,18 @@ export function GuestBanner() {
       style={{ background: GRADIENT.brand }}
     >
       <span className="min-w-0 truncate">
-        Bạn đang xem với tư cách khách —{' '}
-        <Link href="/auth/register" className="underline font-bold hover:opacity-80 transition-opacity">
-          Đăng ký miễn phí
-        </Link>{' '}
-        để lưu tiến trình học
+        {t.rich('guestText', {
+          a: (chunks) => (
+            <Link href="/auth/register" className="underline font-bold hover:opacity-80 transition-opacity">
+              {chunks}
+            </Link>
+          ),
+        })}
       </span>
       <button
         onClick={dismiss}
         className="shrink-0 opacity-70 hover:opacity-100 transition-opacity"
-        aria-label="Đóng thông báo"
+        aria-label={t('guestDismiss')}
       >
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden>
           <path d="M18 6 6 18M6 6l12 12" />

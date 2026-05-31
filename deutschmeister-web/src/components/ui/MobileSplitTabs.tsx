@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { ACCENT, GRADIENT } from '@/lib/tokens';
 
 type AccentKey = 'writing' | 'examWriting' | 'reading';
@@ -19,12 +20,15 @@ export function MobileSplitTabs({
   view,
   onChange,
   accent,
-  taskLabel = 'Aufgabe / Đề bài',
-  editorLabel = 'Antwort / Trả lời',
+  taskLabel,
+  editorLabel,
   taskBadge,
   editorBadge,
   topOffsetPx = 64,
 }: MobileSplitTabsProps) {
+  const t = useTranslations('common.ui');
+  const taskLabelText = taskLabel ?? t('taskLabelDefault');
+  const editorLabelText = editorLabel ?? t('editorLabelDefault');
   const accentColor = ACCENT[accent];
   const gradient = GRADIENT[accent];
 
@@ -71,8 +75,8 @@ export function MobileSplitTabs({
       }}
     >
       <div className="flex gap-1.5 max-w-2xl mx-auto">
-        {renderTab('task', taskLabel, taskBadge)}
-        {renderTab('editor', editorLabel, editorBadge)}
+        {renderTab('task', taskLabelText, taskBadge)}
+        {renderTab('editor', editorLabelText, editorBadge)}
       </div>
     </div>
   );

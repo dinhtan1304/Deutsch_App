@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useAuthStore } from '@/stores/authStore';
 
 interface RequireAuthProps {
@@ -9,6 +10,7 @@ interface RequireAuthProps {
 }
 
 export function RequireAuth({ children }: RequireAuthProps) {
+  const t = useTranslations('common.ui');
   const router = useRouter();
   const pathname = usePathname();
   const _hasHydrated = useAuthStore((s) => s._hasHydrated);
@@ -31,7 +33,7 @@ export function RequireAuth({ children }: RequireAuthProps) {
         className="min-h-[60vh] flex items-center justify-center px-4 text-sm"
         style={{ color: 'var(--theme-text-muted)' }}
       >
-        Đang kiểm tra đăng nhập...
+        {t('checkingAuth')}
       </div>
     );
   }

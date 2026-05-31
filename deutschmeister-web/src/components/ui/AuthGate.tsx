@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { GRADIENT } from '@/lib/tokens';
 
 interface AuthGateProps {
@@ -12,6 +13,7 @@ interface AuthGateProps {
 }
 
 export function AuthGate({ icon, gradient = GRADIENT.brand, title, description }: AuthGateProps) {
+  const t = useTranslations('common.ui');
   const pathname = usePathname();
 
   return (
@@ -32,14 +34,14 @@ export function AuthGate({ icon, gradient = GRADIENT.brand, title, description }
           className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white transition-opacity hover:opacity-90"
           style={{ background: GRADIENT.brand }}
         >
-          Đăng nhập
+          {t('authLogin')}
         </Link>
         <Link
           href={`/auth/register?returnTo=${pathname}`}
           className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold border transition-opacity hover:opacity-80"
           style={{ color: 'var(--theme-text-secondary)', borderColor: 'var(--theme-border)' }}
         >
-          Đăng ký miễn phí
+          {t('authRegister')}
         </Link>
       </div>
     </div>
