@@ -39,6 +39,26 @@
       }
     }
   },
+  "hub": {
+    "eyebrow": "Spiele · Trò chơi",
+    "statGames": "Spiele",
+    "statDue": "Fällig",
+    "statMastered": "Gemeistert",
+    "recommend": "Für dich empfohlen",
+    "primaryReason": "Am besten geeignet",
+    "categories": {
+      "all": "Alle",
+      "vocab": "Wortschatz",
+      "grammar": "Grammatik & Artikel",
+      "audio": "Hören & Rechtschreibung",
+      "speed": "Challenge"
+    },
+    "minutesShort": "{min} Min",
+    "diff1": "Leicht",
+    "diff2": "Mittel",
+    "diff3": "Schwer",
+    "play": "Jetzt spielen"
+  },
   "levels": {
     "A1": "Anfänger",
     "A2": "Grundkenntnisse",

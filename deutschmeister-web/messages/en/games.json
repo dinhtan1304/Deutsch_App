@@ -39,6 +39,26 @@
       }
     }
   },
+  "hub": {
+    "eyebrow": "Games · Spiele",
+    "statGames": "Games",
+    "statDue": "Due",
+    "statMastered": "Mastered",
+    "recommend": "Recommended for you",
+    "primaryReason": "Best fit",
+    "categories": {
+      "all": "All",
+      "vocab": "Vocabulary",
+      "grammar": "Grammar & Articles",
+      "audio": "Listening & Spelling",
+      "speed": "Challenge"
+    },
+    "minutesShort": "{min} min",
+    "diff1": "Easy",
+    "diff2": "Medium",
+    "diff3": "Hard",
+    "play": "Play now"
+  },
   "levels": {
     "A1": "Beginner",
     "A2": "Elementary",

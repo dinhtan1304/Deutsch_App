@@ -39,6 +39,26 @@
       }
     }
   },
+  "hub": {
+    "eyebrow": "Trò chơi · Spiele",
+    "statGames": "Trò chơi",
+    "statDue": "Cần ôn",
+    "statMastered": "Đã thuộc",
+    "recommend": "Gợi ý cho bạn",
+    "primaryReason": "Phù hợp nhất",
+    "categories": {
+      "all": "Tất cả",
+      "vocab": "Từ vựng",
+      "grammar": "Ngữ pháp & Mạo từ",
+      "audio": "Nghe & Chính tả",
+      "speed": "Thử thách"
+    },
+    "minutesShort": "{min} phút",
+    "diff1": "Dễ",
+    "diff2": "Trung bình",
+    "diff3": "Khó",
+    "play": "Chơi ngay"
+  },
   "levels": {
     "A1": "Sơ cấp",
     "A2": "Cơ bản",
