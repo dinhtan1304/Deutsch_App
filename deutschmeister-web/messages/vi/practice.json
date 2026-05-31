@@ -448,6 +448,8 @@
   },
   "listening": {
     "list": {
+      "eyebrow": "Hören · Nghe",
+      "heroNewTitle": "Tạo bài nghe mới với AI",
       "title": "Luyện Nghe",
       "subtitle": "AI tạo bài nghe tiếng Đức — Luyện kỹ năng nghe hiểu Goethe/TELC",
       "examLink": "Theo đề chuẩn →",

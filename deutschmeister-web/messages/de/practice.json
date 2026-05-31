@@ -448,6 +448,8 @@
   },
   "listening": {
     "list": {
+      "eyebrow": "Hören · Nghe",
+      "heroNewTitle": "Neue Hörübung mit KI erstellen",
       "title": "Hörübung",
       "subtitle": "KI generiert deutsche Höraufgaben — Goethe/TELC-Hörverständnis üben",
       "examLink": "Modellprüfung →",

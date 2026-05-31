@@ -448,6 +448,8 @@
   },
   "listening": {
     "list": {
+      "eyebrow": "Hören · Listening",
+      "heroNewTitle": "Generate a new listening exercise with AI",
       "title": "Listening Practice",
       "subtitle": "AI-generated German listening — Build Goethe/TELC listening skills",
       "examLink": "Mock exam →",
