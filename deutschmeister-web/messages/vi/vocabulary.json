@@ -720,6 +720,18 @@
     "addToBank": "Thêm vào Word Bank",
     "close": "Đóng"
   },
+  "dictionaryPopup": {
+    "loading": "Đang tra cứu...",
+    "notFound": "Không tìm thấy <b>\"{word}\"</b> trong từ điển",
+    "listenInline": "🔊 Nghe phát âm",
+    "listen": "Nghe phát âm",
+    "plural": "(Pl. {plural})",
+    "adding": "⏳ Đang thêm...",
+    "alreadyInBank": "✅ Đã có trong Word Bank",
+    "addToBank": "➕ Thêm vào Word Bank",
+    "lookupAria": "Tra cứu từ điển",
+    "close": "Đóng"
+  },
   "favorites": {
     "authGate": {
       "title": "Đăng nhập để xem yêu thích",

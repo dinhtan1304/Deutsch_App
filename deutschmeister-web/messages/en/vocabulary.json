@@ -720,6 +720,18 @@
     "addToBank": "Add to Word Bank",
     "close": "Close"
   },
+  "dictionaryPopup": {
+    "loading": "Looking up...",
+    "notFound": "Couldn't find <b>\"{word}\"</b> in the dictionary",
+    "listenInline": "🔊 Listen",
+    "listen": "Listen",
+    "plural": "(Pl. {plural})",
+    "adding": "⏳ Adding...",
+    "alreadyInBank": "✅ Already in Word Bank",
+    "addToBank": "➕ Add to Word Bank",
+    "lookupAria": "Dictionary lookup",
+    "close": "Close"
+  },
   "favorites": {
     "authGate": {
       "title": "Sign in to view favorites",

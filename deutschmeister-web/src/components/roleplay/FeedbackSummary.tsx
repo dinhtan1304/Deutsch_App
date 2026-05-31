@@ -1,6 +1,7 @@
 ﻿'use client';
 /* eslint-disable no-restricted-syntax */
 
+import { useTranslations } from 'next-intl';
 import { RoleplayFeedback } from '@/lib/api/roleplay';
 import { ACCENT, STATUS } from '@/lib/tokens';
 
@@ -16,6 +17,7 @@ interface Props {
 }
 
 export function FeedbackSummary({ feedback }: Props) {
+  const t = useTranslations('practice.roleplay.components');
   const overallColor = getScoreColor(feedback.overallScore);
 
   return (
@@ -36,16 +38,16 @@ export function FeedbackSummary({ feedback }: Props) {
           <span className="text-2xl opacity-60">/100</span>
         </div>
         <div className="text-sm" style={{ color: 'var(--theme-text-muted)' }}>
-          Điểm tổng
+          {t('overallScore')}
         </div>
       </div>
 
       {/* Sub-scores */}
       <div className="grid grid-cols-3 gap-2">
         {[
-          { label: 'Ngữ pháp', value: feedback.grammarScore },
-          { label: 'Từ vựng', value: feedback.vocabScore },
-          { label: 'Lưu loát', value: feedback.fluencyScore },
+          { label: t('grammar'), value: feedback.grammarScore },
+          { label: t('vocab'), value: feedback.vocabScore },
+          { label: t('fluency'), value: feedback.fluencyScore },
         ].map((s) => (
           <div
             key={s.label}
@@ -84,7 +86,7 @@ export function FeedbackSummary({ feedback }: Props) {
             className="text-sm font-bold mb-2 flex items-center gap-2"
             style={{ color: 'var(--theme-text-primary)' }}
           >
-            💬 Nhận xét
+            {t('feedbackTitle')}
           </h4>
           <p
             className="text-sm leading-relaxed"
@@ -105,7 +107,7 @@ export function FeedbackSummary({ feedback }: Props) {
           }}
         >
           <h4 className="text-sm font-bold mb-2" style={{ color: STATUS.success }}>
-            ✅ Điểm mạnh
+            {t('strengths')}
           </h4>
           <ul className="space-y-1.5">
             {feedback.strengths.map((s, i) => (
@@ -132,7 +134,7 @@ export function FeedbackSummary({ feedback }: Props) {
           }}
         >
           <h4 className="text-sm font-bold mb-2" style={{ color: ACCENT.xp }}>
-            💡 Cần cải thiện
+            {t('improvements')}
           </h4>
           <ul className="space-y-1.5">
             {feedback.improvements.map((s, i) => (
@@ -162,7 +164,7 @@ export function FeedbackSummary({ feedback }: Props) {
             className="text-sm font-bold mb-3"
             style={{ color: 'var(--theme-text-primary)' }}
           >
-            ✏️ Sửa lỗi
+            {t('corrections')}
           </h4>
           <div className="space-y-3">
             {feedback.corrections.map((c, i) => (

@@ -1,10 +1,12 @@
 'use client';
 
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { useDictionaryPopupStore } from '@/stores/dictionaryPopupStore';
 import { PopupContent } from './PopupContent';
 
 export function DictionaryPopup() {
+  const t = useTranslations('vocabulary.dictionaryPopup');
   const { isOpen, selectedWord, position, closePopup } = useDictionaryPopupStore();
   const popupRef = useRef<HTMLDivElement>(null);
   const [adjustedPos, setAdjustedPos] = useState<{ x: number; y: number } | null>(null);
@@ -57,7 +59,7 @@ export function DictionaryPopup() {
       <div
         ref={popupRef}
         role="dialog"
-        aria-label="Tra cứu từ điển"
+        aria-label={t('lookupAria')}
         className="dictionary-popup"
         style={{
           position: 'fixed',
@@ -73,7 +75,7 @@ export function DictionaryPopup() {
         {/* Close button */}
         <button
           onClick={closePopup}
-          aria-label="Đóng"
+          aria-label={t('close')}
           className="dict-popup-close"
         >
           ✕

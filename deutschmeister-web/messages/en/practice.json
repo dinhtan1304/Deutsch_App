@@ -958,6 +958,18 @@
       "tipsHeader": "💡 TIPS",
       "newScenario": "Try another scenario",
       "inputHint": "Enter to send • Shift+Enter for newline"
+    },
+    "components": {
+      "chatPlaceholder": "Write your reply in German...",
+      "send": "Send",
+      "overallScore": "Overall score",
+      "grammar": "Grammar",
+      "vocab": "Vocabulary",
+      "fluency": "Fluency",
+      "feedbackTitle": "💬 Feedback",
+      "strengths": "✅ Strengths",
+      "improvements": "💡 To improve",
+      "corrections": "✏️ Corrections"
     }
   },
   "examCommon": {

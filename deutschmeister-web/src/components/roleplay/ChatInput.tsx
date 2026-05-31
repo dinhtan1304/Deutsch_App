@@ -1,5 +1,8 @@
-import { useState, KeyboardEvent, useRef, useCallback, useEffect } from 'react';
+'use client';
 /* eslint-disable no-restricted-syntax */
+
+import { useState, KeyboardEvent, useRef, useCallback, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 
 interface Props {
   onSend: (text: string) => void;
@@ -10,7 +13,9 @@ interface Props {
 
 const SPECIAL_CHARS = ['ä', 'ö', 'ü', 'ß', 'Ä', 'Ö', 'Ü'];
 
-export function ChatInput({ onSend, onTypingChange, disabled, placeholder = 'Viết câu trả lời bằng tiếng Đức...' }: Props) {
+export function ChatInput({ onSend, onTypingChange, disabled, placeholder }: Props) {
+  const t = useTranslations('practice.roleplay.components');
+  const placeholderText = placeholder ?? t('chatPlaceholder');
   const [text, setText] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -112,7 +117,7 @@ export function ChatInput({ onSend, onTypingChange, disabled, placeholder = 'Vi�
           onChange={(e) => handleChange(e.target.value)}
           onKeyDown={handleKey}
           rows={1}
-          placeholder={placeholder}
+          placeholder={placeholderText}
           disabled={disabled}
           maxLength={1000}
           className="flex-1 resize-none bg-transparent px-3 py-2 text-sm outline-none disabled:opacity-50"
@@ -130,7 +135,7 @@ export function ChatInput({ onSend, onTypingChange, disabled, placeholder = 'Vi�
             background: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
             color: 'white',
           }}
-          aria-label="Gửi"
+          aria-label={t('send')}
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <line x1="22" y1="2" x2="11" y2="13" />

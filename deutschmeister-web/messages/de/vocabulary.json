@@ -720,6 +720,18 @@
     "addToBank": "Zur Wortbank hinzufügen",
     "close": "Schließen"
   },
+  "dictionaryPopup": {
+    "loading": "Wird nachgeschlagen...",
+    "notFound": "<b>\"{word}\"</b> nicht im Wörterbuch gefunden",
+    "listenInline": "🔊 Anhören",
+    "listen": "Anhören",
+    "plural": "(Pl. {plural})",
+    "adding": "⏳ Wird hinzugefügt...",
+    "alreadyInBank": "✅ Bereits in der Wortbank",
+    "addToBank": "➕ Zur Wortbank hinzufügen",
+    "lookupAria": "Wörterbuch-Suche",
+    "close": "Schließen"
+  },
   "favorites": {
     "authGate": {
       "title": "Anmelden, um Favoriten zu sehen",

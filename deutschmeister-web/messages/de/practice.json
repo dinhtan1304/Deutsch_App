@@ -958,6 +958,18 @@
       "tipsHeader": "💡 TIPPS",
       "newScenario": "Anderes Szenario versuchen",
       "inputHint": "Enter zum Senden • Shift+Enter für neue Zeile"
+    },
+    "components": {
+      "chatPlaceholder": "Schreibe deine Antwort auf Deutsch...",
+      "send": "Senden",
+      "overallScore": "Gesamtpunktzahl",
+      "grammar": "Grammatik",
+      "vocab": "Wortschatz",
+      "fluency": "Flüssigkeit",
+      "feedbackTitle": "💬 Feedback",
+      "strengths": "✅ Stärken",
+      "improvements": "💡 Zu verbessern",
+      "corrections": "✏️ Korrekturen"
     }
   },
   "examCommon": {

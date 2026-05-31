@@ -958,6 +958,18 @@
       "tipsHeader": "💡 GỢI Ý",
       "newScenario": "Luyện scenario khác",
       "inputHint": "Nhấn Enter để gửi • Shift+Enter để xuống dòng"
+    },
+    "components": {
+      "chatPlaceholder": "Viết câu trả lời bằng tiếng Đức...",
+      "send": "Gửi",
+      "overallScore": "Điểm tổng",
+      "grammar": "Ngữ pháp",
+      "vocab": "Từ vựng",
+      "fluency": "Lưu loát",
+      "feedbackTitle": "💬 Nhận xét",
+      "strengths": "✅ Điểm mạnh",
+      "improvements": "💡 Cần cải thiện",
+      "corrections": "✏️ Sửa lỗi"
     }
   },
   "examCommon": {

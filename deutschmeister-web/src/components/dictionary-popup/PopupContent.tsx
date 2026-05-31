@@ -2,6 +2,7 @@
 /* eslint-disable no-restricted-syntax */
 
 import { useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import { ACCENT, STATUS } from '@/lib/tokens';
 import { useDictionaryLookup, useCheckWordBank } from '@/hooks/useDictionaryLookup';
 import { useQuickAddWithCollection } from '@/hooks/useQuickAddWithCollection';
@@ -29,6 +30,7 @@ const ARTICLE_STYLES: Record<string, { bg: string; label: string }> = {
 };
 
 export function PopupContent({ word }: PopupContentProps) {
+  const t = useTranslations('vocabulary.dictionaryPopup');
   const { data: result, isLoading, isError } = useDictionaryLookup(word);
   const { data: wordBankCheck } = useCheckWordBank(result?.word || null);
   const { isAdding, isAdded, pendingWordId, quickAdd, closePicker } = useQuickAddWithCollection();
@@ -57,7 +59,7 @@ export function PopupContent({ word }: PopupContentProps) {
       <div className="dict-popup-body">
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '20px 0' }}>
           <div className="dict-spinner" />
-          <span className="dict-text-muted">Đang tra cứu...</span>
+          <span className="dict-text-muted">{t('loading')}</span>
         </div>
         <Style />
       </div>
@@ -70,10 +72,10 @@ export function PopupContent({ word }: PopupContentProps) {
       <div className="dict-popup-body">
         <div style={{ padding: '4px 0 8px' }}>
           <p className="dict-text-muted" style={{ marginBottom: '10px' }}>
-            Không tìm thấy <strong className="dict-text-primary">&quot;{word}&quot;</strong> trong từ điển
+            {t.rich('notFound', { word, b: (chunks) => <strong className="dict-text-primary">{chunks}</strong> })}
           </p>
           <button onClick={() => handleSpeak(word)} className="dict-speak-btn">
-            🔊 Nghe phát âm
+            {t('listenInline')}
           </button>
         </div>
         <Style />
@@ -109,12 +111,12 @@ export function PopupContent({ word }: PopupContentProps) {
         </span>
         {result.plural && (
           <span className="dict-text-muted" style={{ fontSize: '13px' }}>
-            (Pl. {result.plural})
+            {t('plural', { plural: result.plural })}
           </span>
         )}
         <button
           onClick={() => handleSpeak(result.word)}
-          title="Nghe phát âm"
+          title={t('listen')}
           className="dict-icon-btn"
           style={{ marginLeft: 'auto' }}
         >
@@ -172,10 +174,10 @@ export function PopupContent({ word }: PopupContentProps) {
           className={alreadyInBank && !pendingWordId ? 'dict-btn-added' : 'dict-btn-add'}
         >
           {isAdding
-            ? '⏳ Đang thêm...'
+            ? t('adding')
             : alreadyInBank && !pendingWordId
-              ? '✅ Đã có trong Word Bank'
-              : '➕ Thêm vào Word Bank'}
+              ? t('alreadyInBank')
+              : t('addToBank')}
         </button>
         {pendingWordId && (
           <div style={{ position: 'absolute', left: 0, right: 0, bottom: '100%', marginBottom: '4px', zIndex: 60 }}>
