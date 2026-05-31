@@ -143,8 +143,8 @@ function SettingToggle({ label, desc, checked, onChange }: {
         <div className="text-[11px] mt-0.5 opacity-50 font-medium" style={{ color: 'var(--theme-text-muted)' }}>{desc}</div>
       </div>
       <button onClick={() => onChange(!checked)}
-        className={`relative w-11 h-6 rounded-full transition-all duration-300 shrink-0 ${checked ? 'shadow-[0_0_15px_rgba(59,130,246,0.3)]' : ''}`}
-        style={{ backgroundColor: checked ? ACCENT.srs : 'var(--theme-bg-secondary)' }}>
+        className="relative w-11 h-6 rounded-full transition-all duration-300 shrink-0"
+        style={{ backgroundColor: checked ? 'var(--accent)' : 'var(--theme-bg-secondary)', boxShadow: checked ? '0 0 15px color-mix(in srgb, var(--accent) 30%, transparent)' : 'none' }}>
         <div className="absolute top-1 w-4 h-4 rounded-full bg-white shadow-md transition-all duration-300"
           style={{ left: checked ? '1.625rem' : '0.25rem' }} />
       </button>
@@ -152,7 +152,7 @@ function SettingToggle({ label, desc, checked, onChange }: {
   );
 }
 
-function SettingSlider({ label, value, min, max, step, unit, onChange, color = ACCENT.srs }: {
+function SettingSlider({ label, value, min, max, step, unit, onChange, color = 'var(--accent)' }: {
   label: string; value: number; min: number; max: number; step: number; unit: string;
   onChange: (v: number) => void; color?: string;
 }) {
@@ -439,8 +439,8 @@ export default function SettingsPage() {
                   <span className="text-[13px] font-bold" style={{ color: 'var(--theme-text-primary)' }}>
                     {t('sound.speechRate.label')}
                   </span>
-                  <span className="text-[11px] font-black px-2 py-0.5 rounded-lg"
-                    style={{ background: 'rgba(59,130,246,.1)', color: ACCENT.srs }}>
+                  <span className="text-[11px] font-black px-2 py-0.5 rounded-lg mono"
+                    style={{ background: 'color-mix(in srgb, var(--accent) 12%, transparent)', color: 'var(--accent)' }}>
                     {settings.speechRate}x
                   </span>
                 </div>
@@ -449,13 +449,13 @@ export default function SettingsPage() {
                   return (
                     <div className="relative h-6 flex items-center px-1">
                       <div className="absolute left-1 right-1 h-1 rounded-full" style={{ backgroundColor: 'var(--theme-bg-secondary)' }} />
-                      <div className="absolute h-1 rounded-full transition-all duration-300" style={{ left: 4, width: `calc(${pct}% - 8px)`, backgroundColor: ACCENT.srs, boxShadow: '0 0 10px rgba(59,130,246,0.3)' }} />
+                      <div className="absolute h-1 rounded-full transition-all duration-300" style={{ left: 4, width: `calc(${pct}% - 8px)`, backgroundColor: 'var(--accent)', boxShadow: '0 0 10px color-mix(in srgb, var(--accent) 30%, transparent)' }} />
                       <input type="range" min="0.5" max="1.5" step="0.1"
                         value={settings.speechRate}
                         onChange={e => handleChange('speechRate', parseFloat(e.target.value))}
                         className="absolute w-full h-6 opacity-0 cursor-pointer z-10" />
                       <div className="absolute w-4 h-4 rounded-full border-2 bg-white shadow-lg pointer-events-none transition-all duration-150"
-                        style={{ left: `calc(${pct}% - 8px)`, borderColor: ACCENT.srs }} />
+                        style={{ left: `calc(${pct}% - 8px)`, borderColor: 'var(--accent)' }} />
                     </div>
                   );
                 })()}
@@ -478,7 +478,7 @@ export default function SettingsPage() {
               <SettingSlider
                 label={t('learning.questionsPerGame')}
                 value={settings.questionsPerGame} min={5} max={50} step={5} unit={t('learning.questionsPerGameUnit')}
-                onChange={v => handleChange('questionsPerGame', v)} color={ACCENT.srs}
+                onChange={v => handleChange('questionsPerGame', v)} color="var(--accent)"
               />
               <SettingSlider
                 label={t('learning.timedChallenge')}
