@@ -25,10 +25,11 @@ export function IpaDetailPanel({ symbol, onClose }: IpaDetailPanelProps) {
 
   return (
     <div
-      className="rounded-2xl border p-5"
+      className="rounded-2xl border p-5 shadow-2xl"
       style={{
         borderColor: `${ACCENT.examWriting}40`,
-        background: `linear-gradient(135deg, ${ACCENT.examWriting}08, ${ACCENT.listening}06)`,
+        // Solid card base + faint accent tint (opaque so it reads as a dialog).
+        background: `linear-gradient(135deg, color-mix(in srgb, ${ACCENT.examWriting} 7%, var(--theme-bg-card)), var(--theme-bg-card))`,
       }}
     >
       {/* Header */}
