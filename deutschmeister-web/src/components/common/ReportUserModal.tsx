@@ -2,6 +2,7 @@
 
 import { ComponentType, useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
+import { useTranslations } from 'next-intl';
 import { abuseReportsApi, type AbuseContext, type AbuseReason } from '@/lib/api/abuseReports';
 import { useModalA11y } from '@/hooks/useModalA11y';
 import { Button } from '@/components/ui';
@@ -25,12 +26,12 @@ interface ReportUserModalProps {
 }
 
 type ReasonIcon = ComponentType<{ size?: number; className?: string }>;
-const REASONS: { value: AbuseReason; label: string; Icon: ReasonIcon }[] = [
-  { value: 'harassment',    label: 'Quấy rối / Xúc phạm',   Icon: IconFlame        },
-  { value: 'cheating',      label: 'Gian lận',              Icon: IconShieldCheck       },
-  { value: 'inappropriate', label: 'Nội dung không phù hợp', Icon: IconZap          },
-  { value: 'spam',          label: 'Spam / Phá game',       Icon: IconLightbulb    },
-  { value: 'other',         label: 'Khác',                  Icon: IconMessageCircle },
+const REASONS: { value: AbuseReason; labelKey: string; Icon: ReasonIcon }[] = [
+  { value: 'harassment',    labelKey: 'reasonHarassment',    Icon: IconFlame        },
+  { value: 'cheating',      labelKey: 'reasonCheating',      Icon: IconShieldCheck       },
+  { value: 'inappropriate', labelKey: 'reasonInappropriate', Icon: IconZap          },
+  { value: 'spam',          labelKey: 'reasonSpam',          Icon: IconLightbulb    },
+  { value: 'other',         labelKey: 'reasonOther',         Icon: IconMessageCircle },
 ];
 
 export function ReportUserModal({
@@ -40,6 +41,7 @@ export function ReportUserModal({
   contextId,
   onClose,
 }: ReportUserModalProps) {
+  const t = useTranslations('common.reportModal');
   const dialogRef = useModalA11y(true, onClose);
   const [reason, setReason] = useState<AbuseReason>('harassment');
   const [description, setDescription] = useState('');
@@ -61,9 +63,9 @@ export function ReportUserModal({
   const errorCode = apiErr?.body?.code;
   const errorMessage =
     errorCode === 'CANNOT_REPORT_SELF'
-      ? 'Không thể báo cáo chính mình.'
+      ? t('errorSelf')
       : errorCode === 'REPORTED_USER_NOT_FOUND'
-        ? 'Không tìm thấy người dùng này.'
+        ? t('errorNotFound')
         : apiErr?.message ?? null;
 
   return (
@@ -101,13 +103,13 @@ export function ReportUserModal({
               className="text-lead font-bold"
               style={{ color: 'var(--theme-text-primary)' }}
             >
-              Báo cáo người chơi
+              {t('title')}
             </h2>
           </div>
           <button
             type="button"
             onClick={onClose}
-            aria-label="Đóng"
+            aria-label={t('close')}
             className="w-8 h-8 rounded-full flex items-center justify-center transition-colors hover:bg-opacity-80"
             style={{ background: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }}
           >
@@ -124,15 +126,13 @@ export function ReportUserModal({
               <IconCheck size={28} />
             </div>
             <div className="font-semibold text-lead mb-1" style={{ color: 'var(--theme-text-primary)' }}>
-              Đã ghi nhận báo cáo
+              {t('successTitle')}
             </div>
             <p className="text-body mb-4" style={{ color: 'var(--theme-text-secondary)' }}>
-              {success.deduped
-                ? 'Bạn đã báo cáo người này gần đây — chúng tôi đã gộp thông tin bổ sung. Đội DeutschMeister sẽ rà soát trong 48 giờ.'
-                : 'Cảm ơn bạn đã giúp giữ cộng đồng an toàn. Đội DeutschMeister sẽ rà soát trong 48 giờ.'}
+              {success.deduped ? t('successDeduped') : t('successNew')}
             </p>
             <Button variant="primary" fullWidth onClick={onClose}>
-              Đóng
+              {t('close')}
             </Button>
           </div>
         ) : (
@@ -145,7 +145,7 @@ export function ReportUserModal({
                   color: 'var(--theme-text-secondary)',
                 }}
               >
-                Đang báo cáo: <strong style={{ color: 'var(--theme-text-primary)' }}>{reportedUserName}</strong>
+                {t.rich('reportingPrefix', { name: reportedUserName, b: (chunks) => <strong style={{ color: 'var(--theme-text-primary)' }}>{chunks}</strong> })}
               </div>
             )}
 
@@ -153,7 +153,7 @@ export function ReportUserModal({
               className="text-caption uppercase font-bold tracking-wider mb-2"
               style={{ color: 'var(--theme-text-muted)' }}
             >
-              Lý do
+              {t('reasonLabel')}
             </div>
             <div className="space-y-1.5 mb-4">
               {REASONS.map((r) => {
@@ -172,7 +172,7 @@ export function ReportUserModal({
                     }}
                   >
                     <Icon size={16} className="shrink-0" />
-                    <span className="font-medium text-body">{r.label}</span>
+                    <span className="font-medium text-body">{t(r.labelKey as 'reasonHarassment')}</span>
                     {sel && <IconCheck size={14} className="ml-auto shrink-0" />}
                   </button>
                 );
@@ -183,12 +183,12 @@ export function ReportUserModal({
               className="text-caption uppercase font-bold tracking-wider mb-2"
               style={{ color: 'var(--theme-text-muted)' }}
             >
-              Mô tả (tuỳ chọn)
+              {t('descLabel')}
             </div>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Ví dụ: Người chơi xúc phạm tôi ở phút thứ 3 trong phòng nói."
+              placeholder={t('descPlaceholder')}
               maxLength={1000}
               rows={4}
               className="w-full px-3 py-2 rounded-lg mb-1 text-body resize-y"
@@ -227,12 +227,12 @@ export function ReportUserModal({
                 color: ACCENT.xp,
               }}
             >
-              ⚠️ Báo cáo sai sự thật có thể dẫn tới giảm uy tín tài khoản của bạn.
+              {t('warning')}
             </div>
 
             <div className="flex gap-2">
               <Button type="button" variant="outline" fullWidth onClick={onClose}>
-                Huỷ
+                {t('cancel')}
               </Button>
               <Button
                 type="button"
@@ -242,7 +242,7 @@ export function ReportUserModal({
                 onClick={() => mutation.mutate()}
                 style={{ background: STATUS.danger }}
               >
-                Gửi báo cáo
+                {t('submit')}
               </Button>
             </div>
           </>

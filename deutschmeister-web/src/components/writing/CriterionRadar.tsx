@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import type { CriterionScores } from '@/lib/api/writing';
 import { ACCENT, STATUS } from '@/lib/tokens';
 
@@ -9,31 +10,18 @@ interface CriterionRadarProps {
 }
 
 const AXES = [
-  { key: 'aufgabenerfuellung' as const, label: 'Đáp ứng\nyêu cầu', color: ACCENT.examWriting },
-  { key: 'grammatik' as const,          label: 'Ngữ pháp',         color: ACCENT.writing },
-  { key: 'wortschatz' as const,         label: 'Từ vựng',          color: STATUS.success },
-  { key: 'kohaerenz' as const,          label: 'Mạch lạc',         color: ACCENT.xp },
+  { key: 'aufgabenerfuellung' as const, suffix: 'Aufgabe',    color: ACCENT.examWriting },
+  { key: 'grammatik' as const,          suffix: 'Grammatik',  color: ACCENT.writing },
+  { key: 'wortschatz' as const,         suffix: 'Wortschatz', color: STATUS.success },
+  { key: 'kohaerenz' as const,          suffix: 'Kohaerenz',  color: ACCENT.xp },
 ];
-
-const CRITERION_LABELS_VI: Record<keyof CriterionScores, string> = {
-  aufgabenerfuellung: 'Đáp ứng yêu cầu',
-  grammatik: 'Ngữ pháp',
-  wortschatz: 'Từ vựng',
-  kohaerenz: 'Mạch lạc',
-};
-
-const CRITERION_HINTS: Record<keyof CriterionScores, string> = {
-  aufgabenerfuellung: 'Tập trung trả lời đủ các điểm yêu cầu trong đề — đọc kỹ và viết đủ độ dài.',
-  grammatik: 'Ôn lại quán từ, chia động từ, cách (Kasus) và trật tự từ trong câu.',
-  wortschatz: 'Mở rộng từ vựng theo chủ đề và dùng collocation phù hợp.',
-  kohaerenz: 'Dùng các từ nối (weil, deshalb, außerdem, trotzdem) để liên kết câu.',
-};
 
 /**
  * 4-axis radar chart for Goethe-style writing criteria.
  * Pure SVG — no external chart dependency.
  */
 export function CriterionRadar({ scores, size = 260 }: CriterionRadarProps) {
+  const t = useTranslations('practice.grading');
   const cx = size / 2;
   const cy = size / 2;
   const radius = size * 0.38;
@@ -122,7 +110,7 @@ export function CriterionRadar({ scores, size = 260 }: CriterionRadarProps) {
         {AXES.map((axis, i) => {
           const labelR = radius + 28;
           const lp = axisEnd(i, labelR);
-          const lines = axis.label.split('\n');
+          const lines = t(`axis${axis.suffix}` as 'axisAufgabe').split('\n');
           return (
             <g key={i}>
               {lines.map((ln, li) => (
@@ -164,9 +152,9 @@ export function CriterionRadar({ scores, size = 260 }: CriterionRadarProps) {
         }}
       >
         <div className="font-bold mb-1" style={{ color: weakest.color }}>
-          Cần cải thiện nhất: {CRITERION_LABELS_VI[weakest.key]} ({Math.round(scoreValues[weakestIdx]!)}/100)
+          {t('weakestPrefix', { label: t(`label${weakest.suffix}` as 'labelAufgabe'), score: Math.round(scoreValues[weakestIdx]!) })}
         </div>
-        <div>{CRITERION_HINTS[weakest.key]}</div>
+        <div>{t(`hint${weakest.suffix}` as 'hintAufgabe')}</div>
       </div>
     </div>
   );

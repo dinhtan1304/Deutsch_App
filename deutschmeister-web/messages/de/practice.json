@@ -972,6 +972,25 @@
       "corrections": "✏️ Korrekturen"
     }
   },
+  "grading": {
+    "insightsAria": "Bewertungsdetails",
+    "insightsTitle": "Detailliertes Feedback",
+    "improvements": "Zu verbessern",
+    "strengths": "Stärken",
+    "axisAufgabe": "Aufgaben-\nerfüllung",
+    "axisGrammatik": "Grammatik",
+    "axisWortschatz": "Wortschatz",
+    "axisKohaerenz": "Kohärenz",
+    "labelAufgabe": "Aufgabenerfüllung",
+    "labelGrammatik": "Grammatik",
+    "labelWortschatz": "Wortschatz",
+    "labelKohaerenz": "Kohärenz",
+    "hintAufgabe": "Behandle alle geforderten Punkte der Aufgabe — lies genau und schreibe ausreichend.",
+    "hintGrammatik": "Wiederhole Artikel, Verbkonjugation, Kasus und Wortstellung.",
+    "hintWortschatz": "Erweitere den themenbezogenen Wortschatz und nutze passende Kollokationen.",
+    "hintKohaerenz": "Nutze Konnektoren (weil, deshalb, außerdem, trotzdem), um Sätze zu verbinden.",
+    "weakestPrefix": "Größter Verbesserungsbedarf: {label} ({score}/100)"
+  },
   "examCommon": {
     "examLabel": "{examType} · {cefrLevel}",
     "questionsCount": "{count} Fragen",

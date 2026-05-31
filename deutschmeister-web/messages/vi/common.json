@@ -32,5 +32,26 @@
     "vi": "Tiếng Việt",
     "en": "English",
     "de": "Deutsch"
+  },
+  "reportModal": {
+    "title": "Báo cáo người chơi",
+    "close": "Đóng",
+    "reasonHarassment": "Quấy rối / Xúc phạm",
+    "reasonCheating": "Gian lận",
+    "reasonInappropriate": "Nội dung không phù hợp",
+    "reasonSpam": "Spam / Phá game",
+    "reasonOther": "Khác",
+    "errorSelf": "Không thể báo cáo chính mình.",
+    "errorNotFound": "Không tìm thấy người dùng này.",
+    "successTitle": "Đã ghi nhận báo cáo",
+    "successDeduped": "Bạn đã báo cáo người này gần đây — chúng tôi đã gộp thông tin bổ sung. Đội DeutschMeister sẽ rà soát trong 48 giờ.",
+    "successNew": "Cảm ơn bạn đã giúp giữ cộng đồng an toàn. Đội DeutschMeister sẽ rà soát trong 48 giờ.",
+    "reportingPrefix": "Đang báo cáo: <b>{name}</b>",
+    "reasonLabel": "Lý do",
+    "descLabel": "Mô tả (tuỳ chọn)",
+    "descPlaceholder": "Ví dụ: Người chơi xúc phạm tôi ở phút thứ 3 trong phòng nói.",
+    "warning": "⚠️ Báo cáo sai sự thật có thể dẫn tới giảm uy tín tài khoản của bạn.",
+    "cancel": "Huỷ",
+    "submit": "Gửi báo cáo"
   }
 }

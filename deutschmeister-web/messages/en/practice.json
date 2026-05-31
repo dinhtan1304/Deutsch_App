@@ -972,6 +972,25 @@
       "corrections": "✏️ Corrections"
     }
   },
+  "grading": {
+    "insightsAria": "Grading details",
+    "insightsTitle": "Detailed feedback",
+    "improvements": "To improve",
+    "strengths": "Strengths",
+    "axisAufgabe": "Task\nresponse",
+    "axisGrammatik": "Grammar",
+    "axisWortschatz": "Vocabulary",
+    "axisKohaerenz": "Coherence",
+    "labelAufgabe": "Task response",
+    "labelGrammatik": "Grammar",
+    "labelWortschatz": "Vocabulary",
+    "labelKohaerenz": "Coherence",
+    "hintAufgabe": "Focus on covering all required points in the prompt — read carefully and write enough length.",
+    "hintGrammatik": "Review articles, verb conjugation, cases (Kasus) and word order.",
+    "hintWortschatz": "Expand topic vocabulary and use suitable collocations.",
+    "hintKohaerenz": "Use connectors (weil, deshalb, außerdem, trotzdem) to link sentences.",
+    "weakestPrefix": "Needs the most work: {label} ({score}/100)"
+  },
   "examCommon": {
     "examLabel": "{examType} · {cefrLevel}",
     "questionsCount": "{count} questions",

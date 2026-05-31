@@ -32,5 +32,26 @@
     "vi": "Tiếng Việt",
     "en": "English",
     "de": "Deutsch"
+  },
+  "reportModal": {
+    "title": "Report player",
+    "close": "Close",
+    "reasonHarassment": "Harassment / Abuse",
+    "reasonCheating": "Cheating",
+    "reasonInappropriate": "Inappropriate content",
+    "reasonSpam": "Spam / Griefing",
+    "reasonOther": "Other",
+    "errorSelf": "You can't report yourself.",
+    "errorNotFound": "This user was not found.",
+    "successTitle": "Report received",
+    "successDeduped": "You reported this person recently — we've merged the extra info. The DeutschMeister team will review within 48 hours.",
+    "successNew": "Thanks for helping keep the community safe. The DeutschMeister team will review within 48 hours.",
+    "reportingPrefix": "Reporting: <b>{name}</b>",
+    "reasonLabel": "Reason",
+    "descLabel": "Description (optional)",
+    "descPlaceholder": "e.g. The player insulted me at minute 3 in the speaking room.",
+    "warning": "⚠️ False reports may reduce your account's trust score.",
+    "cancel": "Cancel",
+    "submit": "Send report"
   }
 }

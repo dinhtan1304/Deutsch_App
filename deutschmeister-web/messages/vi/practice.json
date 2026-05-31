@@ -972,6 +972,25 @@
       "corrections": "✏️ Sửa lỗi"
     }
   },
+  "grading": {
+    "insightsAria": "Chi tiết chấm bài",
+    "insightsTitle": "Chi tiết nhận xét",
+    "improvements": "Cần cải thiện",
+    "strengths": "Điểm mạnh",
+    "axisAufgabe": "Đáp ứng\nyêu cầu",
+    "axisGrammatik": "Ngữ pháp",
+    "axisWortschatz": "Từ vựng",
+    "axisKohaerenz": "Mạch lạc",
+    "labelAufgabe": "Đáp ứng yêu cầu",
+    "labelGrammatik": "Ngữ pháp",
+    "labelWortschatz": "Từ vựng",
+    "labelKohaerenz": "Mạch lạc",
+    "hintAufgabe": "Tập trung trả lời đủ các điểm yêu cầu trong đề — đọc kỹ và viết đủ độ dài.",
+    "hintGrammatik": "Ôn lại quán từ, chia động từ, cách (Kasus) và trật tự từ trong câu.",
+    "hintWortschatz": "Mở rộng từ vựng theo chủ đề và dùng collocation phù hợp.",
+    "hintKohaerenz": "Dùng các từ nối (weil, deshalb, außerdem, trotzdem) để liên kết câu.",
+    "weakestPrefix": "Cần cải thiện nhất: {label} ({score}/100)"
+  },
   "examCommon": {
     "examLabel": "{examType} · {cefrLevel}",
     "questionsCount": "{count} câu hỏi",

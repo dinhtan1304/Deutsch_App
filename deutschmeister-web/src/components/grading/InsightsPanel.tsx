@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import type { GradingInsights } from '@/lib/api/types/grading-insights';
 import { WeaknessCard } from './WeaknessCard';
 import { StrengthCard } from './StrengthCard';
@@ -29,6 +30,7 @@ export function InsightsPanel({
   insights: GradingInsights | null;
   className?: string;
 }) {
+  const t = useTranslations('practice.grading');
   if (!insights) return null;
   const { weaknesses, strengths, overallSummaryVi } = insights;
   const hasAny = weaknesses.length > 0 || strengths.length > 0 || overallSummaryVi.length > 0;
@@ -41,12 +43,12 @@ export function InsightsPanel({
         backgroundColor: 'var(--theme-bg-card)',
         borderColor: 'var(--theme-border)',
       }}
-      aria-label="Chi tiết chấm bài"
+      aria-label={t('insightsAria')}
     >
       <div className="flex items-center gap-2">
         <span aria-hidden className="text-xl">🎯</span>
         <h3 className="text-lg font-bold" style={{ color: 'var(--theme-text-primary)' }}>
-          Chi tiết nhận xét
+          {t('insightsTitle')}
         </h3>
       </div>
 
@@ -65,7 +67,7 @@ export function InsightsPanel({
             className="mb-2 text-sm font-semibold uppercase tracking-wide"
             style={{ color: 'var(--theme-text-secondary)' }}
           >
-            Cần cải thiện
+            {t('improvements')}
           </h4>
           <div className="space-y-2">
             {weaknesses.map((w, i) => (
@@ -81,7 +83,7 @@ export function InsightsPanel({
             className="mb-2 text-sm font-semibold uppercase tracking-wide"
             style={{ color: 'var(--theme-text-secondary)' }}
           >
-            Điểm mạnh
+            {t('strengths')}
           </h4>
           <div className="space-y-2">
             {strengths.map((s, i) => (

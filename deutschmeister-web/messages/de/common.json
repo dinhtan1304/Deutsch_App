@@ -32,5 +32,26 @@
     "vi": "Tiếng Việt",
     "en": "English",
     "de": "Deutsch"
+  },
+  "reportModal": {
+    "title": "Spieler melden",
+    "close": "Schließen",
+    "reasonHarassment": "Belästigung / Beleidigung",
+    "reasonCheating": "Betrug",
+    "reasonInappropriate": "Unangemessener Inhalt",
+    "reasonSpam": "Spam / Stören",
+    "reasonOther": "Sonstiges",
+    "errorSelf": "Du kannst dich nicht selbst melden.",
+    "errorNotFound": "Dieser Nutzer wurde nicht gefunden.",
+    "successTitle": "Meldung erhalten",
+    "successDeduped": "Du hast diese Person kürzlich gemeldet — wir haben die Zusatzinfos zusammengeführt. Das DeutschMeister-Team prüft das innerhalb von 48 Stunden.",
+    "successNew": "Danke, dass du die Community sicher hältst. Das DeutschMeister-Team prüft das innerhalb von 48 Stunden.",
+    "reportingPrefix": "Melde: <b>{name}</b>",
+    "reasonLabel": "Grund",
+    "descLabel": "Beschreibung (optional)",
+    "descPlaceholder": "z. B. Der Spieler hat mich in Minute 3 im Sprechraum beleidigt.",
+    "warning": "⚠️ Falschmeldungen können den Vertrauenswert deines Kontos senken.",
+    "cancel": "Abbrechen",
+    "submit": "Meldung senden"
   }
 }
