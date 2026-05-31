@@ -273,15 +273,16 @@ export default function GrammarDashboardPage() {
                 <span className="text-sm font-black shrink-0" style={{ color: lc.color }}>{lvlPct}%</span>
               </div>
 
-              {/* Card grid */}
-              <div className="grid grid-cols-1 gap-4">
-                {levelLessons.map(lesson => (
+              {/* Lesson path */}
+              <div>
+                {levelLessons.map((lesson, idx) => (
                   <GrammarLessonCard
                     key={lesson.id}
                     lesson={lesson}
                     progress={progressMap[lesson.id]}
                     locked={lockInfo[lesson.id]?.locked}
                     lockedReason={lockInfo[lesson.id]?.reason}
+                    isLast={idx === levelLessons.length - 1}
                   />
                 ))}
               </div>

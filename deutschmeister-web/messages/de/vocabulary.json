@@ -304,6 +304,9 @@
     "minutesShortCard": "~{min}Min",
     "exerciseCount": "{count} Übungen",
     "scoreSuffix": "P",
+    "ctaStart": "Starten",
+    "ctaContinue": "Weiter",
+    "ctaReview": "Wiederholen",
     "lesson": {
       "back": "Zurück",
       "backToList": "Zurück zur Liste",

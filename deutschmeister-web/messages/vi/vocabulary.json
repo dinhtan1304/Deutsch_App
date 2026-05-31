@@ -304,6 +304,9 @@
     "minutesShortCard": "~{min}ph",
     "exerciseCount": "{count} bài tập",
     "scoreSuffix": "đ",
+    "ctaStart": "Bắt đầu",
+    "ctaContinue": "Tiếp tục",
+    "ctaReview": "Ôn lại",
     "lesson": {
       "back": "Quay lại",
       "backToList": "Quay lại danh sách",

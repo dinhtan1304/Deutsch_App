@@ -304,6 +304,9 @@
     "minutesShortCard": "~{min}m",
     "exerciseCount": "{count} exercises",
     "scoreSuffix": "pts",
+    "ctaStart": "Start",
+    "ctaContinue": "Continue",
+    "ctaReview": "Review",
     "lesson": {
       "back": "Back",
       "backToList": "Back to list",
