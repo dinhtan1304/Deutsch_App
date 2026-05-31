@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
+import { useTranslations } from 'next-intl';
 import { ACCENT, STATUS } from '@/lib/tokens';
 import { useWordHighlightStore } from '@/stores/wordHighlightStore';
 
@@ -51,6 +52,7 @@ function tokenize(text: string): string[] {
  * Từ không có trong DB → không highlight.
  */
 export function HighlightedText({ text, className, style }: HighlightedTextProps) {
+  const t = useTranslations('vocabulary.wordHighlight');
   const { enabled, levelIndex } = useWordHighlightStore();
 
   const elements = useMemo(() => {
@@ -80,7 +82,7 @@ export function HighlightedText({ text, className, style }: HighlightedTextProps
           key={i}
           className="wh-word"
           data-level={level}
-          title={`${level} — Click để tra cứu`}
+          title={t('lookupTitle', { level })}
           style={{
             borderBottom: `2px solid ${colors.underline}`,
             borderRadius: '1px',
@@ -99,7 +101,7 @@ export function HighlightedText({ text, className, style }: HighlightedTextProps
         </span>
       );
     });
-  }, [text, enabled, levelIndex]);
+  }, [text, enabled, levelIndex, t]);
 
   // Nếu tắt hoặc chưa load → render text thường
   if (!elements) {
@@ -118,13 +120,14 @@ export function HighlightedText({ text, className, style }: HighlightedTextProps
  * Đặt ở header Grammar lesson hoặc bất kỳ đâu.
  */
 export function HighlightLegend() {
+  const t = useTranslations('vocabulary.wordHighlight');
   const { enabled, toggle } = useWordHighlightStore();
 
   return (
     <div className="wh-legend">
-      <button onClick={toggle} className="wh-toggle" title={enabled ? 'Tắt tô màu' : 'Bật tô màu'}>
+      <button onClick={toggle} className="wh-toggle" title={enabled ? t('toggleOff') : t('toggleOn')}>
         <span style={{ fontSize: '14px' }}>{enabled ? '🎨' : '⬜'}</span>
-        <span>{enabled ? 'Tô màu: BẬT' : 'Tô màu: TẮT'}</span>
+        <span>{enabled ? t('colorOn') : t('colorOff')}</span>
       </button>
 
       {enabled && (

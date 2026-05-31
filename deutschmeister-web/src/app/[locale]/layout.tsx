@@ -45,12 +45,7 @@ export async function generateMetadata({
   return {
     title: { default: t('rootTitle'), template: `%s | ${t('siteName')}` },
     description: t('rootDescription'),
-    keywords: [
-      'học tiếng Đức', 'luyện thi Goethe', 'luyện thi TELC',
-      'tiếng Đức A1', 'tiếng Đức A2', 'tiếng Đức B1',
-      'Der Die Das', 'từ vựng tiếng Đức', 'ngữ pháp tiếng Đức',
-      'German learning Vietnamese', 'Deutschmeister',
-    ],
+    keywords: t('rootKeywords').split(',').map((k) => k.trim()),
     authors: [{ name: 'Deutschmeister' }],
     creator: 'Deutschmeister',
     metadataBase: new URL('https://www.deutschmeister.vn'),

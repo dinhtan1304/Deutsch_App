@@ -47,7 +47,9 @@
     "guestDismiss": "Hinweis schließen",
     "skipNav": "Navigation überspringen",
     "taskLabelDefault": "Aufgabe / Aufgabe",
-    "editorLabelDefault": "Antwort / Antwort"
+    "editorLabelDefault": "Antwort / Antwort",
+    "upgradePremium": "Auf Premium upgraden",
+    "levelEstimate": "Schätzung basierend auf XP — mach einen Einstufungstest für ein genaues Level"
   },
   "breadcrumb": {
     "dashboard": "Startseite",

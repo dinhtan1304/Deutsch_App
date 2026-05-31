@@ -1107,7 +1107,9 @@
       "richtigLabel": "Richtig ✓",
       "falschLabel": "Falsch ✗",
       "jaLabel": "Ja — In favour ✓",
-      "neinLabel": "Nein — Against ✗"
+      "neinLabel": "Nein — Against ✗",
+      "splitTabTask": "Texte / Texts",
+      "splitTabEditor": "Fragen / Questions"
     },
     "result": {
       "pageTitle": "Reading exam result",

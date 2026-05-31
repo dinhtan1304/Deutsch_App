@@ -461,8 +461,8 @@ export default function ExamReadingPage() {
         view={mobileView}
         onChange={setMobileView}
         accent="reading"
-        taskLabel="Texte / Bài đọc"
-        editorLabel="Fragen / Câu hỏi"
+        taskLabel={t('splitTabTask')}
+        editorLabel={t('splitTabEditor')}
         editorBadge={
           <span className="text-[10px] font-mono opacity-80">
             {Object.keys(teilAnswers).length}/{teilTotalQ}

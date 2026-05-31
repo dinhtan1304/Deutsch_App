@@ -781,6 +781,13 @@
     "lookupAria": "Tra cứu từ điển",
     "close": "Đóng"
   },
+  "wordHighlight": {
+    "lookupTitle": "{level} — Click để tra cứu",
+    "toggleOff": "Tắt tô màu",
+    "toggleOn": "Bật tô màu",
+    "colorOn": "Tô màu: BẬT",
+    "colorOff": "Tô màu: TẮT"
+  },
   "favorites": {
     "authGate": {
       "title": "Đăng nhập để xem yêu thích",

@@ -781,6 +781,13 @@
     "lookupAria": "Dictionary lookup",
     "close": "Close"
   },
+  "wordHighlight": {
+    "lookupTitle": "{level} — Click to look up",
+    "toggleOff": "Turn off highlighting",
+    "toggleOn": "Turn on highlighting",
+    "colorOn": "Highlight: ON",
+    "colorOff": "Highlight: OFF"
+  },
   "favorites": {
     "authGate": {
       "title": "Sign in to view favorites",

@@ -469,7 +469,7 @@ function PersonalWordPicker({
             setPicked(new Set());
           }}
         >
-          Thêm {picked.size} thẻ
+          {t('addNCards', { count: picked.size })}
         </Button>
       </div>
     </div>

@@ -47,7 +47,9 @@
     "guestDismiss": "Dismiss notice",
     "skipNav": "Skip navigation",
     "taskLabelDefault": "Aufgabe / Task",
-    "editorLabelDefault": "Antwort / Answer"
+    "editorLabelDefault": "Antwort / Answer",
+    "upgradePremium": "Upgrade to Premium",
+    "levelEstimate": "Estimate based on XP — take a placement test for an exact level"
   },
   "breadcrumb": {
     "dashboard": "Home",

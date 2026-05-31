@@ -1107,7 +1107,9 @@
       "richtigLabel": "Richtig ✓",
       "falschLabel": "Falsch ✗",
       "jaLabel": "Ja — Dafür ✓",
-      "neinLabel": "Nein — Dagegen ✗"
+      "neinLabel": "Nein — Dagegen ✗",
+      "splitTabTask": "Texte / Texte",
+      "splitTabEditor": "Fragen / Fragen"
     },
     "result": {
       "pageTitle": "Ergebnis Leseprüfung",

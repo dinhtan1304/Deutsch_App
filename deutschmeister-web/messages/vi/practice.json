@@ -1107,7 +1107,9 @@
       "richtigLabel": "Richtig ✓",
       "falschLabel": "Falsch ✗",
       "jaLabel": "Ja — Dafür ✓",
-      "neinLabel": "Nein — Dagegen ✗"
+      "neinLabel": "Nein — Dagegen ✗",
+      "splitTabTask": "Texte / Bài đọc",
+      "splitTabEditor": "Fragen / Câu hỏi"
     },
     "result": {
       "pageTitle": "Kết quả bài đọc theo đề",

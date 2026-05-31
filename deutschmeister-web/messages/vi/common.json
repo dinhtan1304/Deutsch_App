@@ -47,7 +47,9 @@
     "guestDismiss": "Đóng thông báo",
     "skipNav": "Bỏ qua điều hướng",
     "taskLabelDefault": "Aufgabe / Đề bài",
-    "editorLabelDefault": "Antwort / Trả lời"
+    "editorLabelDefault": "Antwort / Trả lời",
+    "upgradePremium": "Nâng cấp Premium",
+    "levelEstimate": "Mức ước tính dựa trên XP — thi placement test để xác định chính xác"
   },
   "breadcrumb": {
     "dashboard": "Trang chủ",

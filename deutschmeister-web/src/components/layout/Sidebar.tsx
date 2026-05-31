@@ -26,6 +26,7 @@ interface SidebarProps {
 function SidebarComponent({ isCollapsed, onToggle }: SidebarProps) {
   const pathname = usePathname();
   const tNav = useTranslations('nav');
+  const tUi = useTranslations('common.ui');
   const user = useAuthUser();
   const isAuthenticated = useIsAuthenticated();
   const bootstrap = useAuthBootstrap();
@@ -373,7 +374,7 @@ function SidebarComponent({ isCollapsed, onToggle }: SidebarProps) {
               className="flex items-center justify-center gap-2 py-2 rounded-xl text-xs font-bold text-white transition-transform hover:scale-[1.02]"
               style={{ background: GRADIENT.writing }}
             >
-              {!isCollapsed && <span>Nâng cấp Premium</span>}
+              {!isCollapsed && <span>{tUi('upgradePremium')}</span>}
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
               </svg>
@@ -397,7 +398,7 @@ function SidebarComponent({ isCollapsed, onToggle }: SidebarProps) {
             {xpInfo.cefr && (
               <div
                 className="text-[10px] font-semibold mb-1"
-                title="Mức ước tính dựa trên XP — thi placement test để xác định chính xác"
+                title={tUi('levelEstimate')}
                 style={{ color: 'var(--theme-text-muted)' }}
               >
                 ≈ {xpInfo.cefrLabel}

@@ -781,6 +781,13 @@
     "lookupAria": "Wörterbuch-Suche",
     "close": "Schließen"
   },
+  "wordHighlight": {
+    "lookupTitle": "{level} — Zum Nachschlagen klicken",
+    "toggleOff": "Hervorhebung aus",
+    "toggleOn": "Hervorhebung an",
+    "colorOn": "Hervorhebung: AN",
+    "colorOff": "Hervorhebung: AUS"
+  },
   "favorites": {
     "authGate": {
       "title": "Anmelden, um Favoriten zu sehen",
