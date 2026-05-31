@@ -5,6 +5,12 @@
     "back": "Back",
     "unlocked": "Earned",
     "locked": "Locked",
+    "statUnlocked": "Unlocked",
+    "statComplete": "Complete",
+    "collectionProgress": "Badge collection progress",
+    "filterAll": "All",
+    "filterUnlocked": "Unlocked",
+    "filterLocked": "Locked",
     "categories": {
       "vocabulary": "Vocabulary",
       "games": "Games",

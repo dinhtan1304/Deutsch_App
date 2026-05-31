@@ -5,6 +5,12 @@
     "back": "Quay lại",
     "unlocked": "Đã nhận",
     "locked": "Chưa đạt",
+    "statUnlocked": "Đã mở",
+    "statComplete": "Hoàn thành",
+    "collectionProgress": "Tiến độ sưu tập huy hiệu",
+    "filterAll": "Tất cả",
+    "filterUnlocked": "Đã mở",
+    "filterLocked": "Chưa mở",
     "categories": {
       "vocabulary": "Từ vựng",
       "games": "Games",

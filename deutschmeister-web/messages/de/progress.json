@@ -5,6 +5,12 @@
     "back": "Zurück",
     "unlocked": "Erhalten",
     "locked": "Gesperrt",
+    "statUnlocked": "Freigeschaltet",
+    "statComplete": "Abgeschlossen",
+    "collectionProgress": "Sammlungsfortschritt",
+    "filterAll": "Alle",
+    "filterUnlocked": "Freigeschaltet",
+    "filterLocked": "Gesperrt",
     "categories": {
       "vocabulary": "Wortschatz",
       "games": "Spiele",

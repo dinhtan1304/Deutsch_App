@@ -662,6 +662,10 @@ input[type="range"]::-webkit-slider-thumb {
 .v2-icongrad-accent { background: linear-gradient(135deg, var(--accent), var(--der)); }
 .v2-icongrad-warn { background: linear-gradient(135deg, var(--warn), var(--streak)); }
 
+/* v2 achievement medallion + unlocked-card tint (driven by inline --medal color) */
+.v2-medal { background: linear-gradient(135deg, var(--medal), color-mix(in srgb, var(--medal) 60%, transparent)); }
+.v2-badge-unlocked { background: linear-gradient(160deg, color-mix(in srgb, var(--medal) 12%, transparent), var(--theme-bg-card) 60%); }
+
 /* v2 word/entity card hover lift — border turns to the card's article/route
    accent (--card-accent set inline). */
 .word-card-v2 { transition: border-color .2s, transform .2s, box-shadow .2s; }
