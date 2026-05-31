@@ -1,8 +1,7 @@
 'use client';
-/* eslint-disable no-restricted-syntax */
 
+import { useState, useEffect, useMemo, type ReactNode } from 'react';
 import Link from 'next/link';
-import type { ReactNode } from 'react';
 import { useTranslations, useFormatter } from 'next-intl';
 import {
   useDailyMissions,
@@ -13,32 +12,25 @@ import type { ChallengeProgress, DailyMission } from '@/lib/api/challenges';
 import { ACCENT, STATUS } from '@/lib/tokens';
 import { GridSkeleton } from '@/components/ui';
 import {
-  IconChevronLeft,
-  IconCheck,
-  IconZap,
-  IconFlame,
-  IconTarget,
-  IconUsers,
-  IconBookOpen,
-  IconRotateCcw,
+  IconChevronLeft, IconCheck, IconZap, IconFlame, IconTarget,
+  IconUsers, IconBookOpen, IconRotateCcw, IconArrowRight,
 } from '@/components/ui/Icons';
 
-const EVENT_COLORS = {
+const EVENT_COLOR = {
   STREAK: ACCENT.xp,
   WORDS: ACCENT.srs,
   GAMES: ACCENT.vocab,
   COMMUNITY: ACCENT.listening,
   LEARNING: STATUS.success,
 } as const;
-
-type EventType = keyof typeof EVENT_COLORS;
+type EventType = keyof typeof EVENT_COLOR;
 
 const EVENT_ICONS: Record<EventType, ReactNode> = {
-  STREAK: <IconFlame size={18} />,
-  WORDS: <IconTarget size={18} />,
-  GAMES: <IconRotateCcw size={18} />,
-  COMMUNITY: <IconUsers size={18} />,
-  LEARNING: <IconBookOpen size={18} />,
+  STREAK: <IconFlame size={20} />,
+  WORDS: <IconTarget size={20} />,
+  GAMES: <IconRotateCcw size={20} />,
+  COMMUNITY: <IconUsers size={20} />,
+  LEARNING: <IconBookOpen size={20} />,
 };
 
 const CHALLENGE_DESC_KEYS = ['learn_words_30', 'streak_5', 'game_sessions_10', 'complete_exams_2', 'writing_sessions_3', 'grammar_lessons_3'] as const;
@@ -60,272 +52,242 @@ function getEventType(key: string): EventType {
   return 'LEARNING';
 }
 
-function ProgressBar({ current, target, color }: { current: number; target: number; color: string }) {
-  const t = useTranslations('progress.challenges');
-  const progress = target > 0 ? Math.min(100, (current / target) * 100) : 0;
+// ─── Countdown ────────────────────────────────────────────────────────────────
+function Countdown({ label, target }: { label: string; target: number }) {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, []);
+  const diff = Math.max(0, target - now);
+  const h = Math.floor(diff / 3600000);
+  const m = Math.floor((diff % 3600000) / 60000);
+  const s = Math.floor((diff % 60000) / 1000);
+  const pad = (n: number) => String(n).padStart(2, '0');
   return (
-    <div className="space-y-2">
-      <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest opacity-40">
-        <span>{t('progressLabel')}</span>
-        <span>{Math.round(progress)}%</span>
-      </div>
-      <div className="h-2 rounded-full bg-theme-bg-secondary overflow-hidden border border-theme-border/50">
-        <div
-          className="h-full transition-all duration-1000 ease-out rounded-full"
-          style={{
-            width: `${progress}%`,
-            background: `linear-gradient(90deg, ${color}dd, ${color})`,
-            boxShadow: `0 0 10px ${color}33`,
-          }}
-        />
-      </div>
-    </div>
+    <span className="inline-flex items-center gap-1.5 text-caption" style={{ color: 'var(--theme-text-muted)' }}>
+      {label}
+      <span className="mono font-bold" style={{ color: 'var(--streak)' }}>
+        {h > 24 ? `${Math.floor(h / 24)}d ${h % 24}h` : `${pad(h)}:${pad(m)}:${pad(s)}`}
+      </span>
+    </span>
   );
 }
 
-function DailyMissionCard({ mission }: { mission: DailyMission }) {
+// ─── Quest card (daily + weekly) ──────────────────────────────────────────────
+function QuestCard({
+  title, description, current, target, completed, xpReward, eventType, href, big,
+}: {
+  title: string; description: string; current: number; target: number;
+  completed: boolean; xpReward: number; eventType: EventType; href?: string; big?: boolean;
+}) {
   const t = useTranslations('progress.challenges');
-  const eventType = getEventType(mission.missionKey);
-  const color = EVENT_COLORS[eventType];
-  const href = mission.metadata?.href ?? '/dashboard';
-  const description = mission.metadata?.description ?? t('defaultMissionDesc');
-  const unit = mission.metadata?.unit ?? t('goalUnit');
+  const color = EVENT_COLOR[eventType];
+  const pct = target > 0 ? Math.min(100, Math.round((current / target) * 100)) : 0;
+  const cardColor = completed ? 'var(--success)' : color;
 
-  return (
-    <Link
-      href={href}
-      className="group block p-5 rounded-2xl border transition-all duration-300 hover:-translate-y-1"
-      style={{
-        backgroundColor: 'var(--theme-bg-card)',
-        borderColor: mission.completed ? `${STATUS.success}55` : 'var(--theme-border)',
-        boxShadow: mission.completed ? `0 10px 30px -18px ${STATUS.success}` : 'none',
-      }}
-    >
-      <div className="flex items-start justify-between gap-4 mb-5">
-        <div
-          className="w-11 h-11 rounded-xl flex items-center justify-center shadow-lg transition-transform group-hover:rotate-6"
-          style={{ background: `linear-gradient(135deg, ${color}, ${color}cc)`, color: '#fff' }}
-        >
+  const inner = (
+    <article className="word-card-v2 relative flex h-full flex-col gap-3 overflow-hidden rounded-[14px] p-4"
+      style={{ background: 'var(--theme-bg-card)', border: '1px solid var(--theme-border)', ['--card-accent' as string]: cardColor } as React.CSSProperties}>
+      <header className="flex items-start justify-between">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: `color-mix(in srgb, ${color} 16%, transparent)`, color }}>
           {EVENT_ICONS[eventType]}
         </div>
-        {mission.completed ? (
-          <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-green-500/10 text-green-500 text-[10px] font-black uppercase tracking-widest border border-green-500/20">
-            <IconCheck size={12} /> {t('doneLabel')}
-          </div>
-        ) : (
-          <div className="text-[10px] font-black opacity-40 uppercase tracking-widest bg-theme-bg-secondary px-3 py-1 rounded-full border border-theme-border">
-            {mission.current} / {mission.target} {unit}
-          </div>
-        )}
+        <span className="mono rounded-md px-2 py-1 text-[11px] font-bold" style={completed
+          ? { background: 'color-mix(in srgb, var(--success) 14%, transparent)', color: 'var(--success)' }
+          : { background: 'var(--theme-bg-secondary)', color: 'var(--theme-text-secondary)', border: '1px solid var(--theme-border)' }}>
+          {current}/{target}
+        </span>
+      </header>
+      <div>
+        <h3 className="font-bold leading-snug" style={{ fontSize: big ? 16 : 15, letterSpacing: '-.01em', color: 'var(--theme-text-primary)' }}>{title}</h3>
+        <p className="mt-1 text-caption leading-relaxed line-clamp-2" style={{ color: 'var(--theme-text-muted)' }}>{description}</p>
       </div>
-
-      <h3 className="text-lg font-black mb-1.5 leading-tight">{mission.titleVi}</h3>
-      <p className="text-sm opacity-55 font-medium mb-5 line-clamp-2 leading-relaxed">{description}</p>
-
-      <ProgressBar current={mission.current} target={mission.target} color={color} />
-
-      <div className="flex items-center justify-between pt-4 mt-5 border-t border-theme-border/50">
-        <div className="flex items-center gap-1.5 text-amber-500 font-black text-sm">
-          <div className="w-6 h-6 rounded-lg bg-amber-500/10 flex items-center justify-center">
-            <IconZap size={14} />
-          </div>
-          <span>+{mission.xpReward} XP</span>
+      <div>
+        <div className="mb-1.5 flex items-center justify-between">
+          <span className="text-[11px] font-semibold uppercase" style={{ color: 'var(--theme-text-muted)', letterSpacing: '.05em' }}>{t('progressLabel')}</span>
+          <span className="mono text-[11px] font-bold" style={{ color: cardColor }}>{pct}%</span>
         </div>
-        <div className="text-[10px] font-bold opacity-35 uppercase tracking-tighter">
-          {t('randomDaily')}
+        <div className="h-1.5 overflow-hidden rounded-full" style={{ background: 'var(--theme-bg-secondary)' }}>
+          <div className="h-full rounded-full transition-all duration-700" style={{ width: `${pct}%`, background: cardColor }} />
         </div>
       </div>
-    </Link>
+      <footer className="mt-auto flex items-center justify-between">
+        <span className="inline-flex items-center gap-1.5">
+          <IconZap size={14} style={{ color: 'var(--warn)' }} />
+          <span className="mono text-body font-bold" style={{ color: 'var(--warn)' }}>+{xpReward}</span>
+          <span className="text-[11px]" style={{ color: 'var(--theme-text-muted)' }}>XP</span>
+        </span>
+        {completed ? (
+          <span className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-[11.5px] font-bold" style={{ background: 'color-mix(in srgb, var(--success) 14%, transparent)', color: 'var(--success)' }}>
+            <IconCheck size={12} /> {t('claimReward')}
+          </span>
+        ) : href ? (
+          <span className="inline-flex h-8 items-center gap-1.5 rounded-lg px-3.5 text-[12.5px] font-semibold text-white" style={{ background: color }}>
+            {t('doNow')} <IconArrowRight size={12} />
+          </span>
+        ) : null}
+      </footer>
+    </article>
   );
-}
 
-function ChallengeCard({ challenge }: { challenge: ChallengeProgress }) {
-  const t = useTranslations('progress.challenges');
-  const getChallengeDesc = useChallengeDesc();
-  const eventType = getEventType(challenge.challengeKey);
-  const color = EVENT_COLORS[eventType];
-  const description = getChallengeDesc(challenge.challengeKey);
-
-  return (
-    <div
-      className="group relative p-6 rounded-3xl border transition-all duration-500 hover:scale-[1.02] overflow-hidden"
-      style={{
-        backgroundColor: 'var(--theme-bg-card)',
-        borderColor: challenge.completed ? `${color}44` : 'var(--theme-border)',
-        boxShadow: challenge.completed ? `0 10px 40px -15px ${color}22` : 'none',
-      }}
-    >
-      <div
-        aria-hidden
-        className="absolute -top-10 -right-10 w-32 h-32 rounded-full blur-3xl opacity-5 pointer-events-none"
-        style={{ backgroundColor: color }}
-      />
-
-      <div className="relative z-10">
-        <div className="flex items-start justify-between mb-6">
-          <div
-            className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg transition-transform group-hover:rotate-12 duration-500"
-            style={{ background: `linear-gradient(135deg, ${color}, ${color}cc)`, color: '#fff' }}
-          >
-            {EVENT_ICONS[eventType]}
-          </div>
-          {challenge.completed ? (
-            <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-green-500/10 text-green-500 text-[10px] font-black uppercase tracking-widest border border-green-500/20">
-              <IconCheck size={12} /> {t('completedLabel')}
-            </div>
-          ) : (
-            <div className="text-[10px] font-black opacity-30 uppercase tracking-widest bg-theme-bg-secondary px-3 py-1 rounded-full border border-theme-border">
-              {challenge.current} / {challenge.target} {t('goalUnit')}
-            </div>
-          )}
-        </div>
-
-        <h3 className="text-lg font-black mb-1.5 leading-tight">{challenge.titleVi}</h3>
-        <p className="text-sm opacity-50 font-medium mb-6 line-clamp-2 leading-relaxed">{description}</p>
-
-        <ProgressBar current={challenge.current} target={challenge.target} color={color} />
-
-        <div className="flex items-center justify-between pt-4 mt-6 border-t border-theme-border/50">
-          <div className="flex items-center gap-1.5 text-amber-500 font-black text-sm">
-            <div className="w-6 h-6 rounded-lg bg-amber-500/10 flex items-center justify-center">
-              <IconZap size={14} />
-            </div>
-            <span>+{challenge.xpReward} XP</span>
-          </div>
-          {!challenge.completed && (
-            <div className="text-[10px] font-bold opacity-30 uppercase tracking-tighter">{t('expiresSunday')}</div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
+  if (href && !completed) return <Link href={href} className="block h-full outline-none">{inner}</Link>;
+  return inner;
 }
 
 export default function ChallengesPage() {
   const t = useTranslations('progress.challenges');
   const fmt = useFormatter();
+  const getChallengeDesc = useChallengeDesc();
   const { data: daily, isLoading: isDailyLoading } = useDailyMissions();
   const { data: weekly, isLoading: isWeeklyLoading } = useWeeklyChallenges();
   const { data: history, isLoading: isHistoryLoading } = useChallengeHistory();
   const isLoading = isDailyLoading || isWeeklyLoading || isHistoryLoading;
 
+  const dailyXP = (daily ?? []).reduce((s, m) => s + m.xpReward, 0);
+  const dailyEarned = (daily ?? []).filter((m) => m.completed).reduce((s, m) => s + m.xpReward, 0);
+  const weeklyXP = (weekly ?? []).reduce((s, c) => s + c.xpReward, 0);
+  const totalAvail = dailyXP + weeklyXP;
+
+  const dailyReset = useMemo(() => { const d = new Date(); d.setHours(24, 0, 0, 0); return d.getTime(); }, []);
+  const weeklyReset = useMemo(() => { const d = new Date(); const days = (7 - d.getDay()) % 7 || 7; d.setDate(d.getDate() + days); d.setHours(24, 0, 0, 0); return d.getTime(); }, []);
+
+  const dailyDesc = (m: DailyMission) => m.metadata?.description ?? t('defaultMissionDesc');
+
+  // Group history by week start.
+  const historyGroups = useMemo(() => {
+    const map = new Map<string, ChallengeProgress[]>();
+    (history ?? []).forEach((c) => {
+      const key = c.weekStart;
+      if (!map.has(key)) map.set(key, []);
+      map.get(key)!.push(c);
+    });
+    return Array.from(map.entries());
+  }, [history]);
+
   return (
-    <div
-      className="min-h-screen"
-      style={{
-        backgroundColor: 'var(--theme-bg-body)',
-        color: 'var(--theme-text-primary)',
-        backgroundImage: 'radial-gradient(circle at 50% -20%, color-mix(in srgb, var(--accent) 8%, transparent), transparent 70%)',
-      }}
-    >
-      <div className="max-w-6xl mx-auto px-4 py-10">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
-          <div className="flex items-center gap-4">
-            <div
-              className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-2xl relative overflow-hidden"
-              style={{ background: 'linear-gradient(135deg, #F59E0B, #D97706)' }}
-            >
-              <div className="absolute inset-0 bg-white/10 animate-pulse" />
-              <IconTarget size={28} className="text-white relative z-10" />
-            </div>
-            <div>
-              <h1 className="text-3xl font-black tracking-tight mb-0.5">{t('pageTitle')}</h1>
-              <p className="text-sm opacity-50 font-medium">{t('pageSubtitle')}</p>
-            </div>
+    <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6">
+      <Link href="/dashboard" className="mb-3 inline-flex items-center gap-1 text-caption font-medium transition-opacity hover:opacity-70" style={{ color: 'var(--accent)' }}>
+        <IconChevronLeft size={15} /> {t('back')}
+      </Link>
+
+      {/* Header + XP pool */}
+      <header className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-3.5">
+          <div className="v2-icongrad-warn flex h-13 w-13 shrink-0 items-center justify-center rounded-[14px] text-white" style={{ boxShadow: '0 8px 20px color-mix(in srgb, var(--warn) 40%, transparent)' }}>
+            <IconTarget size={26} />
           </div>
-
-          <Link
-            href="/dashboard"
-            className="flex items-center gap-2 px-6 py-3 rounded-2xl font-black text-[11px] uppercase tracking-widest border transition-all hover:bg-white/5"
-            style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)' }}
-          >
-            <IconChevronLeft size={14} /> {t('back')}
-          </Link>
+          <div>
+            <h1 className="text-h1 font-extrabold leading-tight" style={{ letterSpacing: '-.02em', color: 'var(--theme-text-primary)' }}>{t('pageTitle')}</h1>
+            <p className="mt-0.5 text-body" style={{ color: 'var(--theme-text-muted)' }}>{t('pageSubtitle')}</p>
+          </div>
         </div>
-
-        {isLoading ? (
-          <GridSkeleton cols={2} count={4} height="h-64" rounded="rounded-3xl" bordered gap="gap-6" />
-        ) : (
-          <div className="space-y-16 animate-[slideUp_0.5s_ease-out_both]">
-            <section className="space-y-6">
-              <div className="flex items-center justify-between gap-4 px-2">
-                <h2 className="text-[10px] font-black uppercase tracking-[0.2em] opacity-35">{t('dailyHeader')}</h2>
-                <span className="text-[10px] font-black uppercase tracking-widest opacity-35">
-                  {t('vietnamTime')}
-                </span>
-              </div>
-              <div className="grid md:grid-cols-3 gap-5">
-                {daily && daily.length > 0 ? (
-                  daily.map((mission) => <DailyMissionCard key={mission.id} mission={mission} />)
-                ) : (
-                  <div className="md:col-span-3 py-20 text-center opacity-40 font-bold uppercase tracking-widest text-xs">
-                    {t('dailyEmpty')}
-                  </div>
-                )}
-              </div>
-            </section>
-
-            <section className="space-y-6">
-              <h2 className="text-[10px] font-black uppercase tracking-[0.2em] opacity-35 px-2">{t('weeklyHeader')}</h2>
-              <div className="grid md:grid-cols-2 gap-6">
-                {weekly && weekly.length > 0 ? (
-                  weekly.map((challenge) => <ChallengeCard key={challenge.id} challenge={challenge} />)
-                ) : (
-                  <div className="md:col-span-2 py-20 text-center opacity-40 font-bold uppercase tracking-widest text-xs">
-                    {t('weeklyEmpty')}
-                  </div>
-                )}
-              </div>
-            </section>
-
-            {history && history.length > 0 && (
-              <section className="space-y-6">
-                <div className="flex items-center gap-4">
-                  <h2 className="text-[10px] font-black uppercase tracking-[0.2em] opacity-35 px-2 whitespace-nowrap">{t('historyHeader')}</h2>
-                  <div className="flex-1 h-px bg-white/5" />
-                </div>
-                <div className="grid md:grid-cols-2 gap-4">
-                  {history.map((challenge) => {
-                    const eventType = getEventType(challenge.challengeKey);
-                    const color = EVENT_COLORS[eventType];
-                    return (
-                      <div key={challenge.id} className="flex items-center gap-4 px-5 py-4 rounded-2xl border bg-theme-bg-secondary/30 border-theme-border transition-all hover:bg-theme-bg-secondary/50">
-                        <div
-                          className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border border-theme-border"
-                          style={{ background: `${color}15`, color }}
-                        >
-                          {EVENT_ICONS[eventType]}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="text-sm font-bold truncate opacity-80">{challenge.titleVi}</div>
-                          <div className="text-[9px] font-black uppercase tracking-widest opacity-30 mt-0.5">
-                            {t('weekPrefix', { date: fmt.dateTime(new Date(challenge.weekStart), { dateStyle: 'short' }) })}
-                          </div>
-                        </div>
-                        <div className="text-right shrink-0">
-                          <div className="flex items-center gap-1 text-[10px] font-black text-green-500/60 uppercase tracking-widest">
-                            <IconCheck size={11} /> {t('doneLabel')}
-                          </div>
-                          <div className="flex items-center gap-0.5 justify-end text-amber-500/50 text-[10px] font-black">
-                            <IconZap size={10} /> +{challenge.xpReward} XP
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </section>
-            )}
+        {totalAvail > 0 && (
+          <div className="v2-hero-warn rounded-md px-4 py-2.5 text-center" style={{ border: '1px solid color-mix(in srgb, var(--warn) 30%, transparent)' }}>
+            <div className="text-[10.5px] font-semibold uppercase" style={{ color: 'var(--theme-text-muted)', letterSpacing: '.05em' }}>{t('xpPoolLabel')}</div>
+            <div className="flex items-baseline justify-center gap-1">
+              <IconZap size={15} style={{ color: 'var(--warn)' }} />
+              <span className="mono text-h2 font-extrabold" style={{ color: 'var(--warn)' }}>{totalAvail}</span>
+            </div>
           </div>
         )}
-      </div>
+      </header>
 
-      <style jsx global>{`
-        @keyframes slideUp {
-          from { opacity: 0; transform: translateY(30px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
+      {isLoading ? (
+        <GridSkeleton cols={3} count={6} height="h-52" rounded="rounded-[14px]" bordered gap="gap-3" />
+      ) : (
+        <div className="space-y-7">
+          {/* Daily */}
+          <section>
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <span className="h-1.5 w-1.5 rounded-full" style={{ background: 'var(--streak)' }} />
+                <h2 className="text-caption font-semibold uppercase" style={{ color: 'var(--theme-text-secondary)', letterSpacing: '.06em' }}>
+                  {t('todayMissions')} · <span className="mono">{dailyEarned}/{dailyXP}</span> XP
+                </h2>
+              </div>
+              <Countdown label={t('refreshIn')} target={dailyReset} />
+            </div>
+            {daily && daily.length > 0 ? (
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {daily.map((m) => (
+                  <QuestCard key={m.id} title={m.titleVi} description={dailyDesc(m)} current={m.current} target={m.target}
+                    completed={m.completed} xpReward={m.xpReward} eventType={getEventType(m.missionKey)} href={m.metadata?.href ?? '/dashboard'} />
+                ))}
+              </div>
+            ) : (
+              <p className="py-10 text-center text-caption font-semibold uppercase tracking-wider" style={{ color: 'var(--theme-text-muted)' }}>{t('dailyEmpty')}</p>
+            )}
+          </section>
+
+          {/* Weekly */}
+          <section>
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <span className="h-1.5 w-1.5 rounded-full" style={{ background: 'var(--violet)' }} />
+                <h2 className="text-caption font-semibold uppercase" style={{ color: 'var(--theme-text-secondary)', letterSpacing: '.06em' }}>
+                  {t('weekChallenges')} · <span className="mono">{weeklyXP}</span> XP
+                </h2>
+              </div>
+              <Countdown label={t('expiresIn')} target={weeklyReset} />
+            </div>
+            {weekly && weekly.length > 0 ? (
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {weekly.map((c) => (
+                  <QuestCard key={c.id} title={c.titleVi} description={getChallengeDesc(c.challengeKey)} current={c.current} target={c.target}
+                    completed={c.completed} xpReward={c.xpReward} eventType={getEventType(c.challengeKey)} big />
+                ))}
+              </div>
+            ) : (
+              <p className="py-10 text-center text-caption font-semibold uppercase tracking-wider" style={{ color: 'var(--theme-text-muted)' }}>{t('weeklyEmpty')}</p>
+            )}
+          </section>
+
+          {/* History grouped by week */}
+          {historyGroups.length > 0 && (
+            <section>
+              <div className="mb-3 flex items-center gap-2">
+                <IconRotateCcw size={14} style={{ color: 'var(--theme-text-muted)' }} />
+                <h2 className="text-caption font-semibold uppercase" style={{ color: 'var(--theme-text-secondary)', letterSpacing: '.06em' }}>{t('historyHeader')}</h2>
+              </div>
+              <div className="space-y-3">
+                {historyGroups.map(([week, items]) => {
+                  const grpXP = items.reduce((s, it) => s + it.xpReward, 0);
+                  return (
+                    <div key={week} className="rounded-[13px] p-4" style={{ background: 'var(--theme-bg-card)', border: '1px solid var(--theme-border)' }}>
+                      <div className="mb-3 flex items-center justify-between">
+                        <span className="text-body font-bold" style={{ color: 'var(--theme-text-primary)' }}>
+                          {t('weekPrefix', { date: fmt.dateTime(new Date(week), { dateStyle: 'short' }) })}
+                        </span>
+                        <span className="flex items-center gap-2">
+                          <span className="text-[11px]" style={{ color: 'var(--theme-text-muted)' }}>{t('challengeCount', { count: items.length })}</span>
+                          <span className="mono text-caption font-bold" style={{ color: 'var(--success)' }}>+{grpXP} XP</span>
+                        </span>
+                      </div>
+                      <div className="grid gap-2 sm:grid-cols-2">
+                        {items.map((it) => {
+                          const color = EVENT_COLOR[getEventType(it.challengeKey)];
+                          return (
+                            <div key={it.id} className="flex items-center gap-2.5 rounded-[9px] px-3 py-2" style={{ background: 'var(--theme-bg-secondary)', border: '1px solid var(--theme-border)' }}>
+                              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg" style={{ background: `color-mix(in srgb, ${color} 16%, transparent)`, color }}>
+                                {EVENT_ICONS[getEventType(it.challengeKey)]}
+                              </div>
+                              <span className="min-w-0 flex-1 truncate text-caption font-medium" style={{ color: 'var(--theme-text-primary)' }}>{it.titleVi}</span>
+                              <span className="inline-flex items-center gap-1 text-[10.5px] font-bold" style={{ color: 'var(--success)' }}>
+                                <IconCheck size={11} /><span className="mono">+{it.xpReward}</span>
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </section>
+          )}
+        </div>
+      )}
     </div>
   );
 }
