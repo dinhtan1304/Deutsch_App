@@ -656,6 +656,12 @@ input[type="range"]::-webkit-slider-thumb {
 .v2-node-done { background: linear-gradient(135deg, var(--m-learned), #10B981); }
 .v2-accent-grad { background: linear-gradient(135deg, var(--accent), var(--accent-hi)); }
 
+/* v2 practice-skill hub helpers (route accent + semantic vars, can't be static GRADIENT) */
+.v2-hero-accent { background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 12%, transparent), transparent); }
+.v2-hero-warn { background: linear-gradient(135deg, color-mix(in srgb, var(--warn) 16%, transparent), transparent); }
+.v2-icongrad-accent { background: linear-gradient(135deg, var(--accent), var(--der)); }
+.v2-icongrad-warn { background: linear-gradient(135deg, var(--warn), var(--streak)); }
+
 /* v2 word/entity card hover lift — border turns to the card's article/route
    accent (--card-accent set inline). */
 .word-card-v2 { transition: border-color .2s, transform .2s, box-shadow .2s; }

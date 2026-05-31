@@ -171,6 +171,26 @@
     }
   },
   "common": {
+    "hub": {
+      "heroNewEyebrow": "AI generation",
+      "heroNewDesc": "Pick a topic + level — AI generates the passage and questions in seconds.",
+      "heroContinueEyebrow": "In progress",
+      "heroContinueCta": "Continue",
+      "back": "Back",
+      "newCta": "New session",
+      "examCta": "Official exam",
+      "filterType": "Type",
+      "filterLevel": "Level",
+      "filterStatus": "Status",
+      "showing": "Showing {count}/{total}",
+      "view": "Review",
+      "continue": "Continue",
+      "start": "Start",
+      "remaining": "{count} left",
+      "statDone": "Done",
+      "statAvg": "Avg",
+      "statBest": "Best"
+    },
     "allLevels": "All levels",
     "allStatuses": "All statuses",
     "all": "All",
@@ -196,6 +216,8 @@
   },
   "reading": {
     "list": {
+      "eyebrow": "Lesen · Reading",
+      "heroNewTitle": "Generate a new reading passage with AI",
       "title": "Reading Practice",
       "subtitle": "AI-generated German passages — practice Goethe/TELC reading comprehension",
       "examLink": "Mock exam →",

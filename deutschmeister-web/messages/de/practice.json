@@ -171,6 +171,26 @@
     }
   },
   "common": {
+    "hub": {
+      "heroNewEyebrow": "KI-Generierung",
+      "heroNewDesc": "Thema + Niveau wählen — die KI erstellt Text und Fragen in Sekunden.",
+      "heroContinueEyebrow": "In Bearbeitung",
+      "heroContinueCta": "Fortsetzen",
+      "back": "Zurück",
+      "newCta": "Neue Übung",
+      "examCta": "Offizielle Prüfung",
+      "filterType": "Typ",
+      "filterLevel": "Niveau",
+      "filterStatus": "Status",
+      "showing": "{count}/{total} angezeigt",
+      "view": "Ansehen",
+      "continue": "Fortsetzen",
+      "start": "Starten",
+      "remaining": "noch {count}",
+      "statDone": "Erledigt",
+      "statAvg": "Ø Punkte",
+      "statBest": "Best"
+    },
     "allLevels": "Alle Niveaus",
     "allStatuses": "Alle Status",
     "all": "Alle",
@@ -196,6 +216,8 @@
   },
   "reading": {
     "list": {
+      "eyebrow": "Lesen · Đọc",
+      "heroNewTitle": "Neuen Lesetext mit KI erstellen",
       "title": "Leseübung",
       "subtitle": "KI generiert deutsche Lesetexte — Goethe/TELC-Leseverständnis üben",
       "examLink": "Modellprüfung →",
