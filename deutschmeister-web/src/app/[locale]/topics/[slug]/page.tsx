@@ -211,7 +211,7 @@ export default function TopicDetailPage() {
   }
 
   return (
-      <div className="py-6">
+      <div className="py-6 max-w-360 mx-auto">
         {/* Header card */}
         <div className="relative overflow-hidden p-6 rounded-2xl mb-6 shadow-sm border border-black/5 dark:border-white/5"
           style={{ backgroundColor: 'var(--theme-bg-card)' }}>
@@ -294,7 +294,7 @@ export default function TopicDetailPage() {
         {activeTab === 'words' && (
           <div className="mb-8">
             <h2 className="text-lg font-bold mb-4" style={{ color: 'var(--theme-text-primary)' }}>{t('chooseStudyMode')}</h2>
-            <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))' }}>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
               {STUDY_MODES.map(mode => {
                 const Icon = mode.icon;
                 return (
