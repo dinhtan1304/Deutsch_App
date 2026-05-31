@@ -14,6 +14,14 @@ type DiffFilter = 'all' | 'low' | 'medium' | 'high';
 
 const FILTER_CATEGORIES: IpaCategory[] = ['vowel-short', 'vowel-long', 'diphthong', 'consonant', 'affricate'];
 const DIFF_DOT: Record<Exclude<DiffFilter, 'all'>, string> = { high: STATUS.danger, medium: STATUS.warning, low: STATUS.success };
+// Per-category dot color (matches IpaSymbolCard group colors).
+const CAT_DOT: Record<IpaCategory, string> = {
+  'vowel-short': 'var(--v2-cyan)',
+  'vowel-long': 'var(--v2-violet)',
+  'diphthong': 'var(--die)',
+  'consonant': 'var(--v2-warn)',
+  'affricate': 'var(--streak)',
+};
 
 export default function IpaChartPage() {
   const t = useTranslations('learn.ipa');
@@ -106,11 +114,11 @@ export default function IpaChartPage() {
               {IPA_VIDEOS.length}
             </span>
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             {IPA_VIDEOS.map(v => (
               <div
                 key={v.id}
-                className="rounded-2xl border overflow-hidden"
+                className="rounded-xl border overflow-hidden"
                 style={{
                   borderColor: 'var(--theme-border)',
                   backgroundColor: 'var(--theme-bg-card)',
@@ -140,7 +148,10 @@ export default function IpaChartPage() {
           style={{ borderColor: 'var(--theme-border)', background: 'var(--theme-bg-card)' }}>
           <div className="flex items-center gap-1.5 flex-wrap">
             {filters.map(f => (
-              <FilterChip key={f.key} active={filter === f.key} size="sm" onClick={() => setFilter(f.key)}>{f.label}</FilterChip>
+              <FilterChip key={f.key} active={filter === f.key} size="sm" onClick={() => setFilter(f.key)}>
+                {f.key !== 'all' && <span className="w-1.5 h-1.5 rounded-full" style={{ background: CAT_DOT[f.key as IpaCategory] }} />}
+                {f.label}
+              </FilterChip>
             ))}
           </div>
           <span className="w-px h-5 hidden sm:block" style={{ background: 'var(--theme-border)' }} />
