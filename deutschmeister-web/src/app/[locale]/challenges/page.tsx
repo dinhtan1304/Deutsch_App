@@ -215,7 +215,7 @@ export default function ChallengesPage() {
       style={{
         backgroundColor: 'var(--theme-bg-body)',
         color: 'var(--theme-text-primary)',
-        backgroundImage: 'radial-gradient(circle at 50% -20%, var(--color-accent-brand)10, transparent 70%)',
+        backgroundImage: 'radial-gradient(circle at 50% -20%, color-mix(in srgb, var(--accent) 8%, transparent), transparent 70%)',
       }}
     >
       <div className="max-w-6xl mx-auto px-4 py-10">

@@ -99,8 +99,7 @@ export default function LeaderboardPage() {
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
           <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-2xl relative overflow-hidden"
-              style={{ background: GRADIENT.action }}>
+            <div className="v2-accent-grad w-14 h-14 rounded-2xl flex items-center justify-center shadow-2xl relative overflow-hidden">
               <div className="absolute inset-0 bg-white/10 animate-pulse" />
               <IconBarChart size={28} className="text-white relative z-10" />
             </div>
@@ -125,9 +124,9 @@ export default function LeaderboardPage() {
               <button key={key} onClick={() => setPeriod(key)}
                 className={`px-8 py-2.5 rounded-full text-[11px] font-black uppercase tracking-widest transition-all duration-300 ${period === key ? 'scale-105' : 'opacity-60 hover:opacity-90'}`}
                 style={period === key ? {
-                  backgroundColor: ACCENT.srs,
-                  color: 'white',
-                  boxShadow: `0 4px 14px ${ACCENT.srs}33`,
+                  backgroundColor: 'var(--accent)',
+                  color: 'var(--accent-on)',
+                  boxShadow: '0 4px 14px color-mix(in srgb, var(--accent) 35%, transparent)',
                 } : { color: 'var(--theme-text-muted)' }}>
                 {periodLabel(key)}
               </button>
@@ -223,9 +222,9 @@ export default function LeaderboardPage() {
                     userId={entry.userId}
                     selfId={user?.id}
                     style={{
-                      borderColor: isMe ? ACCENT.srs : 'var(--theme-border)',
-                      backgroundColor: isMe ? `${ACCENT.srs}1A` : 'var(--theme-bg-card)',
-                      boxShadow: isMe ? `0 4px 16px ${ACCENT.srs}1A` : 'none',
+                      borderColor: isMe ? 'var(--accent)' : 'var(--theme-border)',
+                      backgroundColor: isMe ? 'color-mix(in srgb, var(--accent) 10%, transparent)' : 'var(--theme-bg-card)',
+                      boxShadow: 'none',
                     }}
                     className="flex items-center gap-4 px-5 py-3.5 rounded-xl border transition-all hover:scale-[1.01]"
                   >
@@ -244,8 +243,8 @@ export default function LeaderboardPage() {
                       <div className="text-sm font-black truncate flex items-center gap-2">
                         {entry.name || t('anonymous')}
                         {isMe && (
-                          <span className="px-2 py-0.5 rounded-full text-[8px] text-white uppercase tracking-tighter"
-                            style={{ backgroundColor: ACCENT.srs }}>
+                          <span className="px-2 py-0.5 rounded-full text-[8px] uppercase tracking-tighter"
+                            style={{ backgroundColor: 'var(--accent)', color: 'var(--accent-on)' }}>
                             {t('youBadge')}
                           </span>
                         )}

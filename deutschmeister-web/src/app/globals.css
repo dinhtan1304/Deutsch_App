@@ -654,6 +654,7 @@ input[type="range"]::-webkit-slider-thumb {
 .v2-bar-today { background: linear-gradient(180deg, var(--accent), color-mix(in srgb, var(--accent) 78%, transparent)); }
 .v2-flip-card { background: linear-gradient(180deg, var(--theme-bg-secondary) 0%, var(--theme-bg-tertiary) 100%); }
 .v2-node-done { background: linear-gradient(135deg, var(--m-learned), #10B981); }
+.v2-accent-grad { background: linear-gradient(135deg, var(--accent), var(--accent-hi)); }
 
 /* v2 word/entity card hover lift — border turns to the card's article/route
    accent (--card-accent set inline). */
