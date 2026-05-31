@@ -9,11 +9,13 @@ import {
   useCreateCollection,
   useDeleteCollection,
 } from '@/hooks/usePersonalWords';
+import type { SRSStats } from '@/lib/api/personal-words';
 
 interface CollectionsSidebarProps {
   selectedView: string;
   statTotal: number;
   statFavorites: number;
+  srsStats?: SRSStats;
   onSelectAll: () => void;
   onSelectFavorites: () => void;
   onSelectCollection: (id: string) => void;
@@ -24,6 +26,7 @@ export function CollectionsSidebar({
   selectedView,
   statTotal,
   statFavorites,
+  srsStats,
   onSelectAll,
   onSelectFavorites,
   onSelectCollection,
@@ -65,9 +68,9 @@ export function CollectionsSidebar({
     await deleteCollection.mutateAsync(id);
   };
 
+  // v2 folder item — neutral active (raised bg-secondary), colored dot/icon.
   const navItem = (
     active: boolean,
-    activeColor: string,
     onClick: () => void,
     icon: React.ReactNode,
     label: string,
@@ -75,92 +78,80 @@ export function CollectionsSidebar({
   ) => (
     <button
       onClick={onClick}
-      className="flex items-center gap-2.5 px-3.5 py-2.5 text-body font-medium transition-all text-left w-full"
+      className="sb-nav-link flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-body text-left w-full"
       style={{
-        backgroundColor: active ? `${activeColor}1A` : 'transparent',
-        color: active ? activeColor : 'var(--theme-text-secondary)',
+        backgroundColor: active ? 'var(--theme-bg-secondary)' : 'transparent',
+        color: active ? 'var(--theme-text-primary)' : 'var(--theme-text-secondary)',
+        fontWeight: active ? 600 : 500,
       }}
     >
-      {icon}
-      <span className="flex-1">{label}</span>
-      <span
-        className="text-caption font-semibold px-1.5 py-0.5 rounded-full"
-        style={{
-          backgroundColor: active ? `${activeColor}26` : 'var(--theme-bg-secondary)',
-          color: active ? activeColor : 'var(--theme-text-muted)',
-        }}
-      >
-        {count}
-      </span>
+      <span className="shrink-0 flex">{icon}</span>
+      <span className="flex-1 truncate">{label}</span>
+      <span className="mono text-caption shrink-0" style={{ color: 'var(--theme-text-muted)' }}>{count}</span>
     </button>
   );
 
+  const cardStyle: React.CSSProperties = { borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' };
+
   return (
-    <div
-      className="hidden md:flex flex-col w-52 shrink-0 rounded-2xl border overflow-hidden"
-      style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}
-    >
-      {navItem(
-        selectedView === 'all', ACCENT.writing, onSelectAll,
-        <svg width={15} height={15} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-          <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
-          <rect x="8" y="2" width="8" height="4" rx="1" ry="1" />
-        </svg>,
-        t('all'), statTotal
-      )}
+    <div className="hidden md:flex flex-col gap-1.5 w-55 shrink-0">
 
-      {navItem(
-        selectedView === 'favorites', ACCENT.xp, onSelectFavorites,
-        <svg width={15} height={15} viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
-          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-        </svg>,
-        t('favorites'), statFavorites
-      )}
+      {/* System folders */}
+      <div className="rounded-xl border p-2 flex flex-col gap-0.5" style={cardStyle}>
+        {navItem(
+          selectedView === 'all', onSelectAll,
+          <svg width={15} height={15} viewBox="0 0 24 24" fill="none" stroke="var(--theme-text-muted)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+            <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+            <rect x="8" y="2" width="8" height="4" rx="1" ry="1" />
+          </svg>,
+          t('all'), statTotal
+        )}
+        {navItem(
+          selectedView === 'favorites', onSelectFavorites,
+          <svg width={15} height={15} viewBox="0 0 24 24" fill={ACCENT.xp} stroke={ACCENT.xp} strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+          </svg>,
+          t('favorites'), statFavorites
+        )}
+      </div>
 
-      {collections.length > 0 && (
-        <div className="mx-3 my-1 h-px" style={{ backgroundColor: 'var(--theme-border)' }} />
-      )}
+      {/* User folders */}
+      <div className="rounded-xl border p-2 flex flex-col gap-0.5" style={cardStyle}>
+        <div className="flex items-center justify-between px-2.5 pt-1 pb-1.5 text-caption font-semibold uppercase" style={{ color: 'var(--theme-text-muted)', letterSpacing: '.06em' }}>
+          {t('myFolders')}
+          <span className="mono font-medium">{collections.length}</span>
+        </div>
 
-      {collections.map(col => (
-        <div
-          key={col.id}
-          onClick={() => onSelectCollection(col.id)}
-          role="button"
-          tabIndex={0}
-          onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') onSelectCollection(col.id); }}
-          className="group flex items-center gap-2.5 px-3.5 py-2.5 text-body font-medium transition-all text-left cursor-pointer"
-          style={{
-            backgroundColor: selectedView === col.id ? `${col.color}18` : 'transparent',
-            color: selectedView === col.id ? col.color : 'var(--theme-text-secondary)',
-          }}
-        >
-          <svg width={15} height={15} viewBox="0 0 24 24" fill="none" stroke={col.color || 'currentColor'} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
-            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
-          </svg>
-          <span className="flex-1 truncate">{col.name}</span>
-          <span
-            className="text-caption font-semibold px-1.5 py-0.5 rounded-full shrink-0"
+        {collections.map(col => (
+          <div
+            key={col.id}
+            onClick={() => onSelectCollection(col.id)}
+            role="button"
+            tabIndex={0}
+            onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') onSelectCollection(col.id); }}
+            className="sb-nav-link group flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-body text-left cursor-pointer"
             style={{
-              backgroundColor: selectedView === col.id ? `${col.color}22` : 'var(--theme-bg-secondary)',
-              color: selectedView === col.id ? col.color : 'var(--theme-text-muted)',
+              backgroundColor: selectedView === col.id ? 'var(--theme-bg-secondary)' : 'transparent',
+              color: selectedView === col.id ? 'var(--theme-text-primary)' : 'var(--theme-text-secondary)',
+              fontWeight: selectedView === col.id ? 600 : 500,
             }}
           >
-            {col.wordCount}
-          </span>
-          <button
-            onClick={e => handleDelete(col.id, e)}
-            className="opacity-0 group-hover:opacity-100 transition-opacity ml-0.5 hover:text-red-500 shrink-0"
-            title={t('deleteTitle')}
-          >
-            <IconX size={12} />
-          </button>
-        </div>
-      ))}
-
-      <div className="mx-3 my-1 h-px" style={{ backgroundColor: 'var(--theme-border)' }} />
+            <span className="w-2 h-2 rounded-full shrink-0" style={{ background: col.color || 'var(--accent)' }} />
+            <span className="flex-1 truncate">{col.name}</span>
+            <span className="mono text-caption shrink-0" style={{ color: 'var(--theme-text-muted)' }}>{col.wordCount}</span>
+            <button
+              onClick={e => handleDelete(col.id, e)}
+              className="opacity-0 group-hover:opacity-100 transition-opacity ml-0.5 shrink-0"
+              style={{ color: 'var(--theme-text-muted)' }}
+              title={t('deleteTitle')}
+            >
+              <IconX size={12} />
+            </button>
+          </div>
+        ))}
 
       {showNew ? (
-        <div className="px-3 py-2">
+        <div className="px-1 py-1">
           <input
             autoFocus
             value={newName}
@@ -200,12 +191,42 @@ export function CollectionsSidebar({
       ) : (
         <button
           onClick={() => setShowNew(true)}
-          className="flex items-center gap-2 px-3.5 py-2.5 text-xs font-medium transition-all hover:opacity-80"
+          className="sb-nav-link flex items-center gap-2 px-2.5 py-2 mt-0.5 rounded-lg text-xs font-medium text-left"
           style={{ color: 'var(--theme-text-muted)' }}
         >
           <IconPlus size={13} /> {tp('createNew')}
         </button>
       )}
+      </div>
+
+      {/* Overview (SRS breakdown) */}
+      {srsStats && srsStats.total > 0 && (
+        <div className="rounded-xl border p-3.5" style={cardStyle}>
+          <div className="text-caption font-semibold uppercase mb-2.5" style={{ color: 'var(--theme-text-muted)', letterSpacing: '.06em' }}>
+            {t('overview')}
+          </div>
+          <div className="flex flex-col gap-2">
+            <MiniStat color="var(--m-learned)" label={t('ovLearned')} value={srsStats.mature} total={srsStats.total} />
+            <MiniStat color="var(--m-learning)" label={t('ovLearning')} value={srsStats.learning} total={srsStats.total} />
+            <MiniStat color="var(--m-new)" label={t('ovNew')} value={srsStats.new} total={srsStats.total} />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function MiniStat({ color, label, value, total }: { color: string; label: string; value: number; total: number }) {
+  const pct = total > 0 ? Math.round((value / total) * 100) : 0;
+  return (
+    <div>
+      <div className="flex justify-between items-center mb-1">
+        <span className="text-caption" style={{ color: 'var(--theme-text-secondary)' }}>{label}</span>
+        <span className="mono text-caption font-semibold" style={{ color: 'var(--theme-text-primary)' }}>{value}</span>
+      </div>
+      <div className="h-0.75 rounded-full overflow-hidden" style={{ background: 'var(--theme-bg-secondary)' }}>
+        <div className="h-full rounded-full" style={{ width: `${pct}%`, background: color }} />
+      </div>
     </div>
   );
 }

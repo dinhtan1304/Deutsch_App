@@ -82,9 +82,9 @@ function HeaderComponent({ sidebarCollapsed, onOpenPalette }: HeaderProps) {
         <button
           type="button"
           onClick={onOpenPalette}
-          className="flex-1 max-w-md flex items-center gap-2 pl-3 pr-2 py-2 rounded-md border text-left transition-colors"
+          className="flex-1 max-w-130 h-10 flex items-center gap-2.5 px-3.5 rounded-[10px] border text-left transition-colors"
           style={{
-            backgroundColor: 'var(--theme-bg-secondary)',
+            backgroundColor: 'var(--theme-bg-card)',
             borderColor: 'var(--theme-border)',
             color: 'var(--theme-text-muted)',
           }}
@@ -94,27 +94,54 @@ function HeaderComponent({ sidebarCollapsed, onOpenPalette }: HeaderProps) {
           <span className="flex-1 text-body truncate sm:hidden">{t('search.placeholderShort')}</span>
           <span className="flex-1 text-body truncate hidden sm:block">{t('search.placeholderLong')}</span>
           <kbd
-            className="shrink-0 rounded-sm px-1.5 py-0.5 text-caption font-semibold hidden sm:inline-flex"
-            style={{ backgroundColor: 'var(--theme-bg-tertiary)', color: 'var(--theme-text-muted)' }}
+            className="shrink-0 rounded-[5px] px-1.5 py-0.5 text-caption font-semibold mono hidden sm:inline-flex border"
+            style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-secondary)', borderColor: 'var(--theme-border)' }}
           >
-            Ctrl+K
+            ⌘K
           </kbd>
         </button>
 
         {/* Right side */}
         <div className="flex items-center gap-3">
 
-          {/* Streak pill */}
-          {isAuthenticated && streak > 0 && (
+          {/* Streak pill — v2: flame in solid square + stacked count/label.
+              Always visible for signed-in users (shows 0 before today's first activity). */}
+          {isAuthenticated && (
             <div
-              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-body font-bold select-none"
-              style={{ background: `${ACCENT.games}1F`, color: ACCENT.games }}
+              className="hidden sm:flex items-center gap-2.5 h-10 pl-3 pr-3.5 rounded-[10px] select-none"
+              style={{
+                background: GRADIENT.v2StreakPill,
+                border: '1px solid rgba(255,120,73,.25)',
+              }}
               title={t('streak.title', { count: streak })}
             >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill={ACCENT.games} stroke="none">
-                <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" />
-              </svg>
-              {streak}
+              <span
+                className="w-6 h-6 rounded-[7px] flex items-center justify-center"
+                style={{ background: 'var(--streak)', boxShadow: '0 2px 6px rgba(255,120,73,.4)' }}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="white" stroke="none">
+                  <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" />
+                </svg>
+              </span>
+              <div className="flex flex-col items-start leading-none">
+                <span className="mono font-bold text-body" style={{ color: 'var(--theme-text-primary)' }}>{streak}</span>
+                <span className="uppercase" style={{ fontSize: 9.5, letterSpacing: '.04em', color: 'var(--theme-text-muted)' }}>
+                  {t('streak.unit')}
+                </span>
+              </div>
+            </div>
+          )}
+
+          {/* XP pill — v2 */}
+          {isAuthenticated && xpInfo && (
+            <div
+              className="hidden md:flex items-center gap-2 h-10 px-3.5 rounded-[10px] select-none"
+              style={{ background: 'var(--theme-bg-card)', border: '1px solid var(--theme-border)' }}
+              title={`${xpInfo.xp} XP · Lv.${xpInfo.level}`}
+            >
+              <IconZap size={14} style={{ color: 'var(--accent)' }} />
+              <span className="mono font-bold text-body" style={{ color: 'var(--theme-text-primary)' }}>{formatter.number(xpInfo.xp)}</span>
+              <span className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>XP</span>
             </div>
           )}
 
@@ -122,10 +149,10 @@ function HeaderComponent({ sidebarCollapsed, onOpenPalette }: HeaderProps) {
           {isAuthenticated && (
             <button
               onClick={toggleNotifs}
-              className="relative flex items-center justify-center w-9 h-9 rounded-xl transition-all duration-200"
-              style={{ color: 'var(--theme-text-muted)' }}
-              onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'var(--theme-bg-secondary)'; e.currentTarget.style.color = STATUS.info; }}
-              onMouseLeave={e => { e.currentTarget.style.backgroundColor = ''; e.currentTarget.style.color = 'var(--theme-text-muted)'; }}
+              className="relative flex items-center justify-center w-10 h-10 rounded-[10px] border transition-all duration-200"
+              style={{ color: 'var(--theme-text-muted)', background: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}
+              onMouseEnter={e => { e.currentTarget.style.color = 'var(--accent)'; }}
+              onMouseLeave={e => { e.currentTarget.style.color = 'var(--theme-text-muted)'; }}
               title={t('notifications.title')}
               aria-label={t('notifications.ariaLabel')}
             >
@@ -157,15 +184,15 @@ function HeaderComponent({ sidebarCollapsed, onOpenPalette }: HeaderProps) {
                 onClick={() => setShowUserMenu(v => !v)}
                 aria-expanded={showUserMenu}
                 aria-haspopup="menu"
-                className="flex items-center gap-2.5 px-2 py-1.5 rounded-xl
-                hover:bg-(--theme-bg-secondary) transition-all duration-200"
+                className="flex items-center gap-2 h-10 px-1 rounded-[10px] border transition-all duration-200"
+                style={{ background: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}
               >
-                <div className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-body"
-                  style={{ background: GRADIENT.writing }}>
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-body"
+                  style={{ background: GRADIENT.v2Logo }}>
                   {user?.name?.charAt(0).toUpperCase() || '?'}
                 </div>
                 {!sidebarCollapsed && (
-                  <span className="hidden md:block text-body font-medium" style={{ color: 'var(--theme-text-primary)' }}>
+                  <span className="hidden md:block text-body font-medium pr-2" style={{ color: 'var(--theme-text-primary)' }}>
                     {user?.name}
                   </span>
                 )}

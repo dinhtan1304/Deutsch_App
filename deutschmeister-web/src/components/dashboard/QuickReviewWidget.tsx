@@ -2,24 +2,32 @@
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { ACCENT, STATUS, GRADIENT } from '@/lib/tokens';
+import { STATUS } from '@/lib/tokens';
 import Link from 'next/link';
 import { useDueCards, useReviewCard, useProgressStats, useProgressIntervalPreview } from '@/hooks/useProgress';
 import { getDelayText } from '@/lib/srs';
+import { IconFlame, IconCheck } from '@/components/ui/Icons';
 import { Progress, ReviewRating } from '@/types';
 
-// Compact inline SRS review — 5 cards max, surfaced directly on the dashboard
-// so the user never has to navigate elsewhere to clear their daily queue.
-// The full review experience lives at /review; this widget is the 1-click entry.
+// Compact inline SRS review — 5 cards max, surfaced directly on the dashboard.
+// Full review lives at /review; this widget is the 1-click entry.
 const QUICK_LIMIT = 5;
 
-// Color only; label resolved at render via dashboard.quickReview.rating.<rating>.
+// v2 "Ôn nhanh" rating colors (match dashboard.js) via CSS vars.
 const RATING_BUTTONS: { rating: ReviewRating; color: string }[] = [
-  { rating: 'again', color: STATUS.danger },
-  { rating: 'hard', color: ACCENT.xp },
-  { rating: 'good', color: STATUS.success },
-  { rating: 'easy', color: ACCENT.srs },
+  { rating: 'again', color: 'var(--v2-danger)' },
+  { rating: 'hard', color: 'var(--v2-warn)' },
+  { rating: 'good', color: 'var(--v2-violet)' },
+  { rating: 'easy', color: 'var(--v2-success)' },
 ];
+
+function CardShell({ children }: { children: React.ReactNode }) {
+  return (
+    <section className="rounded-2xl p-4.5" style={{ background: 'var(--theme-bg-card)', border: '1px solid var(--theme-border)' }}>
+      {children}
+    </section>
+  );
+}
 
 export function QuickReviewWidget() {
   const t = useTranslations('dashboard.quickReview');
@@ -33,24 +41,21 @@ export function QuickReviewWidget() {
   const [error, setError] = useState<string | null>(null);
   const [sessionCards, setSessionCards] = useState<Progress[] | null>(null);
 
-  // Lock the first 5 cards once the user starts rating so query invalidation
-  // cannot shift the active list under the session.
   const cards = sessionCards ?? allDue.slice(0, QUICK_LIMIT);
   const current = cards[index];
   const { data: intervals } = useProgressIntervalPreview(current?.wordId);
   const dueTotal = stats?.due ?? 0;
 
-  // Nothing due — hide the widget entirely. Don't render empty state; the
-  // dashboard already has other content, don't waste vertical space.
   if (!isLoading && dueTotal === 0) return null;
 
   if (isLoading) {
     return (
-      <div className="rounded-2xl border p-5 animate-pulse"
-        style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)', height: 220 }}>
-        <div className="h-4 w-32 rounded mb-3" style={{ backgroundColor: 'var(--theme-bg-secondary)' }} />
-        <div className="h-24 rounded-xl" style={{ backgroundColor: 'var(--theme-bg-secondary)' }} />
-      </div>
+      <CardShell>
+        <div className="animate-pulse">
+          <div className="h-4 w-28 rounded mb-3" style={{ backgroundColor: 'var(--theme-bg-secondary)' }} />
+          <div className="h-40 rounded-xl" style={{ backgroundColor: 'var(--theme-bg-secondary)' }} />
+        </div>
+      </CardShell>
     );
   }
 
@@ -58,43 +63,29 @@ export function QuickReviewWidget() {
   if (index >= cards.length) {
     const remaining = Math.max(0, dueTotal - completed);
     return (
-      <div className="rounded-2xl border p-5"
-        style={{
-          borderColor: 'rgba(34,197,94,.25)',
-          background: GRADIENT.readingBg,
-        }}>
+      <CardShell>
         <div className="flex items-center gap-3 mb-2">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white"
-            style={{ background: GRADIENT.reading }}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="20 6 9 17 4 12" />
-            </svg>
-          </div>
+          <span className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: 'color-mix(in srgb, var(--m-learned) 16%, transparent)', color: 'var(--m-learned)' }}>
+            <IconCheck size={18} />
+          </span>
           <div className="flex-1 min-w-0">
-            <h3 className="text-[15px] font-bold" style={{ color: 'var(--theme-text-primary)' }}>
-              {t('doneTitle')}
-            </h3>
-            <p className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>
-              {remaining > 0
-                ? t('doneRemaining', { count: remaining })
-                : t('doneCleared')}
+            <h3 className="text-body font-bold" style={{ color: 'var(--theme-text-primary)' }}>{t('doneTitle')}</h3>
+            <p className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>
+              {remaining > 0 ? t('doneRemaining', { count: remaining }) : t('doneCleared')}
             </p>
           </div>
         </div>
         {remaining > 0 && (
-          <Link href="/review"
-            className="block text-center text-body font-bold px-4 py-2.5 rounded-xl transition-all hover:scale-[1.02]"
-            style={{
-              background: GRADIENT.vocab,
-              color: 'white',
-              boxShadow: '0 4px 12px rgba(139,92,246,.3)',
-            }}>
+          <Link href="/review" className="block text-center text-body font-bold px-4 py-2.5 rounded-xl transition-transform hover:-translate-y-0.5"
+            style={{ background: 'var(--accent)', color: 'var(--accent-on)' }}>
             {t('continueLink', { count: remaining })}
           </Link>
         )}
-      </div>
+      </CardShell>
     );
   }
+
+  if (!current) return null;
 
   const handleRate = async (rating: ReviewRating) => {
     const activeCards = sessionCards ?? allDue.slice(0, QUICK_LIMIT);
@@ -112,101 +103,72 @@ export function QuickReviewWidget() {
     }
   };
 
-  const progressPct = (index / cards.length) * 100;
-
   return (
-    <div className="rounded-2xl border p-5"
-      style={{
-        borderColor: 'rgba(239,68,68,.25)',
-        background: GRADIENT.warnDangerBg,
-      }}>
+    <CardShell>
       {/* Header */}
-      <div className="flex items-center justify-between gap-3 mb-3">
+      <div className="flex items-center justify-between mb-3.5">
         <div className="flex items-center gap-2">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={STATUS.danger} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" /></svg>
-          <div>
-            <h3 className="text-sm font-bold" style={{ color: 'var(--theme-text-primary)' }}>
-              {t('title', { count: cards.length })}
-            </h3>
-            <p className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>
-              {t('subtitle', { total: dueTotal })}
-            </p>
-          </div>
+          <span className="w-5.5 h-5.5 rounded-md inline-flex items-center justify-center" style={{ background: 'var(--streak-soft)', color: 'var(--streak)' }}>
+            <IconFlame size={12} />
+          </span>
+          <span className="text-body font-semibold" style={{ color: 'var(--theme-text-primary)' }}>{t('title', { count: cards.length })}</span>
         </div>
-        <Link href="/review" className="text-caption font-medium shrink-0"
-          style={{ color: 'var(--theme-text-muted)' }}>
-          {t('viewAll')}
-        </Link>
+        <span className="mono text-caption" style={{ color: 'var(--theme-text-muted)' }}>{index + 1} / {cards.length}</span>
       </div>
 
-      {/* Progress bar */}
-      <div className="h-1 rounded-full mb-4 overflow-hidden" style={{ backgroundColor: 'rgba(148,163,184,.15)' }}>
-        <div className="h-full rounded-full transition-all duration-500"
-          style={{
-            width: `${progressPct}%`,
-            background: GRADIENT.dangerToXp,
-          }} />
-      </div>
-
-      {/* Card */}
-      {current && (
-        <>
-          <button
-            type="button"
-            onClick={() => setRevealed(true)}
-            disabled={revealed}
-            className="w-full rounded-xl p-5 mb-3 text-center transition-all"
-            style={{
-              backgroundColor: 'var(--theme-bg-card)',
-              border: '1.5px solid var(--theme-border)',
-              cursor: revealed ? 'default' : 'pointer',
-              minHeight: 120,
-            }}>
-            <div className="text-caption font-medium mb-1" style={{ color: 'var(--theme-text-muted)' }}>
-              {index + 1} / {cards.length}
-            </div>
-            <div className="text-xl font-extrabold mb-1" style={{ color: 'var(--theme-text-primary)' }}>
+      {/* Flip card */}
+      <button
+        type="button"
+        onClick={() => !revealed && setRevealed(true)}
+        className="v2-flip-card w-full rounded-xl px-4.5 py-6 mb-3 flex flex-col items-center justify-center gap-1.5 text-center"
+        style={{
+          minHeight: 160,
+          border: '1px solid var(--theme-border)',
+          cursor: revealed ? 'default' : 'pointer',
+        }}
+      >
+        {!revealed ? (
+          <>
+            <span className="text-[10.5px] font-semibold uppercase" style={{ color: 'var(--theme-text-muted)', letterSpacing: '.08em' }}>Deutsch</span>
+            <h4 className="font-bold" style={{ fontSize: 26, letterSpacing: '-.02em', color: 'var(--theme-text-primary)' }}>
               {current.word.article} {current.word.word}
-            </div>
-            {revealed ? (
-              <div className="text-body" style={{ color: 'var(--theme-text-secondary)' }}>
-                {current.word.translationVi || current.word.translationEn}
-              </div>
-            ) : (
-              <div className="text-caption font-medium" style={{ color: ACCENT.writing }}>
-                {t('tapToReveal')}
-              </div>
+            </h4>
+            {current.word.pronunciation && <span className="mono text-[11.5px]" style={{ color: 'var(--theme-text-muted)' }}>/{current.word.pronunciation}/</span>}
+            <span className="text-[11.5px] mt-1.5" style={{ color: 'var(--theme-text-secondary)' }}>{t('tapToReveal')}</span>
+          </>
+        ) : (
+          <>
+            <span className="text-[10.5px] font-semibold uppercase" style={{ color: 'var(--accent)', letterSpacing: '.08em' }}>{t('meaningLabel')}</span>
+            <h4 className="font-bold" style={{ fontSize: 20, letterSpacing: '-.01em', color: 'var(--theme-text-primary)' }}>
+              {current.word.translationVi || current.word.translationEn}
+            </h4>
+            {current.word.examples?.[0] && <span className="text-[12.5px] italic" style={{ color: 'var(--theme-text-secondary)' }}>&bdquo;{current.word.examples[0]}&ldquo;</span>}
+            {current.word.translationEn && current.word.translationVi && (
+              <span className="text-[11px] mt-1" style={{ color: 'var(--theme-text-muted)' }}>EN: {current.word.translationEn}</span>
             )}
-          </button>
+          </>
+        )}
+      </button>
 
-          {/* Rating buttons */}
-          <div className="grid grid-cols-4 gap-2">
-            {RATING_BUTTONS.map((btn) => (
-              <button
-                key={btn.rating}
-                type="button"
-                onClick={() => handleRate(btn.rating)}
-                disabled={!revealed || reviewMutation.isPending}
-                className="py-2 rounded-lg text-caption font-bold transition-all disabled:opacity-40"
-                style={{
-                  backgroundColor: revealed ? `${btn.color}18` : 'var(--theme-bg-secondary)',
-                  color: revealed ? btn.color : 'var(--theme-text-muted)',
-                  border: `1px solid ${revealed ? `${btn.color}40` : 'var(--theme-border)'}`,
-                }}>
-                <div>{t(`rating.${btn.rating}` as 'rating.again')}</div>
-                <div className="text-[9px] font-normal opacity-70">
-                  {intervals ? getDelayText(intervals[btn.rating].delayMinutes) : '...'}
-                </div>
-              </button>
-            ))}
-          </div>
-          {error && (
-            <p className="mt-2 text-caption font-medium" style={{ color: STATUS.danger }}>
-              {error}
-            </p>
-          )}
-        </>
-      )}
-    </div>
+      {/* Rating buttons */}
+      <div className="grid grid-cols-4 gap-1.5">
+        {RATING_BUTTONS.map((btn) => (
+          <button
+            key={btn.rating}
+            type="button"
+            onClick={() => handleRate(btn.rating)}
+            disabled={!revealed || reviewMutation.isPending}
+            className="py-2 px-1 rounded-[9px] flex flex-col items-center gap-0.5 transition-colors disabled:opacity-40"
+            style={{ background: 'var(--theme-bg-secondary)', border: '1px solid var(--theme-border)' }}
+            onMouseEnter={(e) => { if (revealed) { e.currentTarget.style.background = `color-mix(in srgb, ${btn.color} 18%, transparent)`; e.currentTarget.style.borderColor = `color-mix(in srgb, ${btn.color} 55%, transparent)`; } }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--theme-bg-secondary)'; e.currentTarget.style.borderColor = 'var(--theme-border)'; }}
+          >
+            <span className="text-caption font-semibold" style={{ color: revealed ? 'var(--theme-text-primary)' : 'var(--theme-text-muted)' }}>{t(`rating.${btn.rating}` as 'rating.again')}</span>
+            <span className="mono text-[9.5px]" style={{ color: 'var(--theme-text-muted)' }}>{intervals ? getDelayText(intervals[btn.rating].delayMinutes) : '…'}</span>
+          </button>
+        ))}
+      </div>
+      {error && <p className="mt-2 text-caption font-medium" style={{ color: STATUS.danger }}>{error}</p>}
+    </CardShell>
   );
 }

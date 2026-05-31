@@ -15,7 +15,7 @@ import { PRIMARY_NAV, PREMIUM_HREFS, AUTH_HREFS, NAV_FLAT, type NavItem } from '
 import { STATUS, ACCENT, GRADIENT } from '@/lib/tokens';
 
 // Widths (px) — exported for MainLayout & Header
-export const SIDEBAR_WIDTH = 260;
+export const SIDEBAR_WIDTH = 232;
 export const SIDEBAR_COLLAPSED_WIDTH = 72;
 
 interface SidebarProps {
@@ -116,8 +116,8 @@ function SidebarComponent({ isCollapsed, onToggle }: SidebarProps) {
                 className="sb-nav-link group relative flex items-center justify-center py-2.5 rounded-xl"
                 data-active={active ? 'true' : 'false'}
                 style={{
-                  color: active ? ACCENT.srs : 'var(--theme-text-secondary)',
-                  backgroundColor: active ? `${ACCENT.srs}14` : undefined,
+                  color: active ? 'var(--theme-text-primary)' : 'var(--theme-text-secondary)',
+                  backgroundColor: active ? 'var(--theme-bg-card)' : undefined,
                 }}
                 onMouseEnter={e => showTooltip(item.key, e.currentTarget)}
                 onMouseLeave={hideTooltip}
@@ -134,8 +134,8 @@ function SidebarComponent({ isCollapsed, onToggle }: SidebarProps) {
                 className="sb-nav-link group relative w-full flex items-center gap-3 px-3 py-2.5 rounded-xl outline-none"
                 data-active={active ? 'true' : 'false'}
                 style={{
-                  color: active ? ACCENT.srs : 'var(--theme-text-secondary)',
-                  backgroundColor: active ? `${ACCENT.srs}14` : undefined,
+                  color: active ? 'var(--theme-text-primary)' : 'var(--theme-text-secondary)',
+                  backgroundColor: active ? 'var(--theme-bg-card)' : undefined,
                 }}
               >
                 {active && <ActiveBar />}
@@ -195,9 +195,9 @@ function SidebarComponent({ isCollapsed, onToggle }: SidebarProps) {
                         className="sb-nav-link flex items-center gap-2.5 px-3 py-2 rounded-lg text-body"
                         data-active={childActive ? 'true' : 'false'}
                         style={{
-                          color: childActive ? ACCENT.srs : 'var(--theme-text-muted)',
+                          color: childActive ? 'var(--theme-text-primary)' : 'var(--theme-text-muted)',
                           fontWeight: childActive ? 600 : 400,
-                          backgroundColor: childActive ? `${ACCENT.srs}14` : undefined,
+                          backgroundColor: childActive ? 'var(--theme-bg-card)' : undefined,
                         }}
                       >
                         <span className="shrink-0 w-4 h-4 flex items-center justify-center"><ChildIcon size={16} /></span>
@@ -230,8 +230,8 @@ function SidebarComponent({ isCollapsed, onToggle }: SidebarProps) {
               className={`sb-nav-link group relative flex items-center ${isCollapsed ? 'justify-center' : 'gap-3 px-3'} py-2.5 rounded-xl`}
               data-active={active ? 'true' : 'false'}
               style={{
-                color: active ? ACCENT.srs : 'var(--theme-text-secondary)',
-                backgroundColor: active ? `${ACCENT.srs}14` : undefined,
+                color: active ? 'var(--theme-text-primary)' : 'var(--theme-text-secondary)',
+                backgroundColor: active ? 'var(--theme-bg-card)' : undefined,
               }}
               onMouseEnter={e => showTooltip(item.key, e.currentTarget)}
               onMouseLeave={hideTooltip}
@@ -285,7 +285,7 @@ function SidebarComponent({ isCollapsed, onToggle }: SidebarProps) {
       className="fixed left-0 top-0 h-full z-40 flex flex-col border-r"
       style={{
         width: `${w}px`,
-        backgroundColor: 'var(--theme-bg-card)',
+        backgroundColor: 'var(--theme-bg-body)',
         borderColor: 'var(--theme-border)',
         transition: 'width .3s cubic-bezier(.4,0,.2,1)',
         willChange: 'width',
@@ -453,7 +453,7 @@ function ActiveBar() {
   return (
     <span
       className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 rounded-r-full"
-      style={{ background: `linear-gradient(180deg, ${ACCENT.srs}, ${ACCENT.vocab})` }}
+      style={{ background: 'var(--accent)' }}
     />
   );
 }
@@ -472,7 +472,11 @@ function IconWrap({ active, children }: { active: boolean; children: React.React
   return (
     <span
       className="shrink-0 w-5 h-5 flex items-center justify-center"
-      style={{ transform: active ? 'scale(1.1)' : undefined, transition: 'transform .2s' }}
+      style={{
+        transform: active ? 'scale(1.1)' : undefined,
+        transition: 'transform .2s, color .2s',
+        color: active ? 'var(--accent)' : undefined,
+      }}
     >
       {children}
     </span>

@@ -4,6 +4,16 @@
     "description": "Verfolge deine Serie, XP und Lernfortschritt."
   },
   "greeting": "Hallo, {name}!",
+  "v2": {
+    "sessionLabel": "Heutige Sitzung",
+    "sessionStart": "Sitzung starten",
+    "greetingSub": "Halte deine <s>{streak}-Tage-Serie</s> und erreiche <l>Level {level}</l>.",
+    "toNextLevel": "{xp} XP bis Lv.{level}",
+    "wordsReviewed": "Wörter wiederholt",
+    "avgPerDay": "Ø / Tag",
+    "currentStreak": "Aktuelle Serie",
+    "best": "Rekord"
+  },
   "statusPills": {
     "dayUnit": "Tag",
     "xpUnit": "XP",
@@ -92,14 +102,17 @@
     "title": "Schnell {count} Wörter wiederholen",
     "subtitle": "{total} Wörter insgesamt fällig — ein Klick und fertig",
     "viewAll": "Alle ansehen →",
-    "tapToReveal": "Tippen, um Bedeutung zu zeigen"
+    "tapToReveal": "Tippen, um Bedeutung zu zeigen",
+    "meaningLabel": "Bedeutung"
   },
   "studyPlanWidget": {
     "ctaTitle": "Lernplan einrichten",
     "ctaSubtitle": "Automatischer Goethe-/TELC-Fahrplan",
     "pausedTitle": "Fahrplan pausiert",
     "pausedSubtitle": "{exam} {level} · Jetzt fortsetzen",
-    "daysUntilExam": "Noch {days} Tage"
+    "daysUntilExam": "Noch {days} Tage",
+    "tasksToday": "{count} Aufgaben heute",
+    "currentTask": "Diese Aufgabe"
   },
   "weeklyChallenges": {
     "title": "Wöchentliche Herausforderungen",

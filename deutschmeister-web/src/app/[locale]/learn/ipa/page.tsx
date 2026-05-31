@@ -2,30 +2,44 @@
 
 import { useMemo, useRef, useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
-import Link from 'next/link';
-import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import { ACCENT, STATUS } from '@/lib/tokens';
 import { IPA_CHART, IPA_CATEGORY_LABELS, IPA_VIDEOS } from '@/lib/data/ipaChart';
 import type { IpaCategory, IpaSymbol } from '@/lib/data/ipaChart';
 import { IpaSymbolCard } from '@/components/ipa/IpaSymbolCard';
 import { IpaDetailPanel } from '@/components/ipa/IpaDetailPanel';
+import { FilterChip } from '@/components/ui/FilterChip';
 
 type Filter = 'all' | IpaCategory;
+type DiffFilter = 'all' | 'low' | 'medium' | 'high';
 
 const FILTER_CATEGORIES: IpaCategory[] = ['vowel-short', 'vowel-long', 'diphthong', 'consonant', 'affricate'];
+const DIFF_DOT: Record<Exclude<DiffFilter, 'all'>, string> = { high: STATUS.danger, medium: STATUS.warning, low: STATUS.success };
 
 export default function IpaChartPage() {
   const t = useTranslations('learn.ipa');
+  const tIpa = useTranslations('practice.pronunciation.ipa');
   const [filter, setFilter] = useState<Filter>('all');
+  const [diff, setDiff] = useState<DiffFilter>('all');
 
   const filters: { key: Filter; label: string }[] = [
     { key: 'all', label: t('filterAll') },
     ...FILTER_CATEGORIES.map((c) => ({ key: c, label: IPA_CATEGORY_LABELS[c] })),
   ];
+  const diffFilters: { key: DiffFilter; label: string }[] = [
+    { key: 'all', label: t('filterAll') },
+    { key: 'high', label: tIpa('diffShortHigh') },
+    { key: 'medium', label: tIpa('diffShortMed') },
+    { key: 'low', label: tIpa('diffShortLow') },
+  ];
   const [selected, setSelected] = useState<IpaSymbol | null>(null);
   const detailRef = useRef<HTMLDivElement | null>(null);
 
+  const countByDiff = (d: Exclude<DiffFilter, 'all'>) => IPA_CHART.filter(s => s.difficultyForVi === d).length;
+
   const groups = useMemo(() => {
-    const visible = filter === 'all' ? IPA_CHART : IPA_CHART.filter(s => s.category === filter);
+    const visible = IPA_CHART.filter(s =>
+      (filter === 'all' || s.category === filter) && (diff === 'all' || s.difficultyForVi === diff)
+    );
     const map = new Map<IpaCategory, IpaSymbol[]>();
     for (const s of visible) {
       const arr = map.get(s.category) ?? [];
@@ -33,72 +47,44 @@ export default function IpaChartPage() {
       map.set(s.category, arr);
     }
     return Array.from(map.entries()).map(([category, items]) => ({ category, items }));
-  }, [filter]);
+  }, [filter, diff]);
 
   useEffect(() => {
     if (!selected) return;
     detailRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }, [selected]);
 
-  const drillCount = IPA_CHART.filter(s => s.drillPhonemeKey).length;
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: 'var(--theme-bg-primary)' }}>
-      <div className="max-w-5xl mx-auto px-4 py-6">
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--theme-bg-body)' }}>
+      <div className="max-w-360 mx-auto py-2">
         {/* Header */}
-        <div className="mb-6">
-          <Link
-            href="/dashboard"
-            className="text-xs mb-2 inline-flex items-center gap-1"
-            style={{ color: 'var(--theme-text-muted)' }}
-          >
-            {t('back')}
-          </Link>
-          <div className="flex items-start gap-3">
-            <div
-              className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 text-white"
-              style={{ background: GRADIENT.pronunciation }}
-              aria-hidden
-            >
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M4 6h16M4 12h10M4 18h16" />
-                <circle cx="18" cy="12" r="2" />
-              </svg>
+        <header className="flex items-end justify-between gap-5 flex-wrap mb-5">
+          <div>
+            <div className="text-caption font-medium uppercase mb-1.5" style={{ color: 'var(--theme-text-muted)', letterSpacing: '.08em' }}>
+              {t('eyebrow')}
             </div>
-            <div className="min-w-0">
-              <h1
-                className="text-2xl md:text-3xl font-bold flex items-center gap-2 flex-wrap"
-                style={{ color: 'var(--theme-text-primary)' }}
-              >
-                {t('title')}
-              </h1>
-              <p
-                className="text-sm mt-1"
-                style={{ color: 'var(--theme-text-muted)' }}
-              >
-                {t('subtitle', { count: IPA_CHART.length })}
-              </p>
-            </div>
+            <h1 className="font-bold" style={{ fontSize: 30, letterSpacing: '-.02em', color: 'var(--theme-text-primary)' }}>
+              {t('title')}
+            </h1>
+            <p className="mt-1.5 text-body" style={{ color: 'var(--theme-text-secondary)' }}>
+              <span className="mono" style={{ color: 'var(--theme-text-primary)' }}>{IPA_CHART.length}</span> {t('subtitleUnit')}
+              {' · '}
+              <span className="mono" style={{ color: STATUS.danger }}>{countByDiff('high')}</span> {t('hardForVi')}
+            </p>
           </div>
-        </div>
-
-        {/* Legend + drill CTA */}
-        <div className="flex flex-wrap items-center gap-3 mb-5 text-xs" style={{ color: 'var(--theme-text-muted)' }}>
-          <span className="inline-flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full" style={{ backgroundColor: STATUS.danger }} />
-            {t('hardForVi')}
-          </span>
-          <span className="inline-flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full" style={{ backgroundColor: STATUS.warning }} />
-            {t('medium')}
-          </span>
-          <span className="inline-flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full" style={{ backgroundColor: STATUS.success }} />
-            {t('easy')}
-          </span>
-          <span className="hidden sm:inline" style={{ color: 'var(--theme-border)' }}>·</span>
-          <span>{t('drillCount', { count: drillCount })}</span>
-        </div>
+          <div className="flex gap-2">
+            {([['high', STATUS.danger], ['medium', STATUS.warning], ['low', STATUS.success]] as const).map(([d, c]) => (
+              <div key={d} className="flex flex-col gap-0.5 rounded-[10px] px-3.5 py-2.5" style={{ minWidth: 92, background: 'var(--theme-bg-card)', border: '1px solid var(--theme-border)' }}>
+                <div className="flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full" style={{ background: c }} />
+                  <span className="text-caption uppercase font-medium" style={{ color: 'var(--theme-text-muted)', letterSpacing: '.04em' }}>{tIpa(d === 'high' ? 'diffShortHigh' : d === 'medium' ? 'diffShortMed' : 'diffShortLow')}</span>
+                </div>
+                <span className="mono font-bold" style={{ fontSize: 20, color: 'var(--theme-text-primary)' }}>{countByDiff(d)}</span>
+              </div>
+            ))}
+          </div>
+        </header>
 
         {/* Video tutorials */}
         <section className="mb-6">
@@ -149,26 +135,23 @@ export default function IpaChartPage() {
           </div>
         </section>
 
-        {/* Filter chips */}
-        <div className="flex gap-2 mb-5 overflow-x-auto">
-          {filters.map(f => {
-            const active = filter === f.key;
-            return (
-              <button
-                key={f.key}
-                type="button"
-                onClick={() => setFilter(f.key)}
-                className="px-4 py-1.5 rounded-full text-xs font-semibold shrink-0 transition-all"
-                style={{
-                  background: active ? GRADIENT.pronunciation : 'var(--theme-bg-card)',
-                  color: active ? 'white' : 'var(--theme-text-secondary)',
-                  border: `1px solid ${active ? 'transparent' : 'var(--theme-border)'}`,
-                }}
-              >
+        {/* Filter bar (type + difficulty) */}
+        <div className="rounded-[14px] border p-3 mb-5 flex flex-wrap items-center gap-x-3 gap-y-2.5"
+          style={{ borderColor: 'var(--theme-border)', background: 'var(--theme-bg-card)' }}>
+          <div className="flex items-center gap-1.5 flex-wrap">
+            {filters.map(f => (
+              <FilterChip key={f.key} active={filter === f.key} size="sm" onClick={() => setFilter(f.key)}>{f.label}</FilterChip>
+            ))}
+          </div>
+          <span className="w-px h-5 hidden sm:block" style={{ background: 'var(--theme-border)' }} />
+          <div className="flex items-center gap-1.5">
+            {diffFilters.map(f => (
+              <FilterChip key={f.key} active={diff === f.key} size="sm" onClick={() => setDiff(f.key)}>
+                {f.key !== 'all' && <span className="w-1.5 h-1.5 rounded-full" style={{ background: DIFF_DOT[f.key as Exclude<DiffFilter, 'all'>] }} />}
                 {f.label}
-              </button>
-            );
-          })}
+              </FilterChip>
+            ))}
+          </div>
         </div>
 
         {/* Grid grouped by category */}

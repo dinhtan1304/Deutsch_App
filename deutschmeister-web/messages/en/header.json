@@ -5,7 +5,8 @@
     "ariaOpenPalette": "Open command palette"
   },
   "streak": {
-    "title": "Streak: {count} days in a row"
+    "title": "Streak: {count} days in a row",
+    "unit": "day streak"
   },
   "notifications": {
     "title": "Notifications",

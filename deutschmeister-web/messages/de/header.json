@@ -5,7 +5,8 @@
     "ariaOpenPalette": "Befehlspalette öffnen"
   },
   "streak": {
-    "title": "Serie: {count} Tage in Folge"
+    "title": "Serie: {count} Tage in Folge",
+    "unit": "Tage Serie"
   },
   "notifications": {
     "title": "Benachrichtigungen",

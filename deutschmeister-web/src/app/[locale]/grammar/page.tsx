@@ -7,6 +7,7 @@ import { useGrammarLessons, useGrammarProgress } from '@/hooks/useGrammar';
 import { GrammarProgress } from '@/types/grammar';
 import GrammarLessonCard from '@/components/grammar/GrammarLessonCard';
 import { GRADIENT, ACCENT, STATUS } from '@/lib/tokens';
+import { FilterChip } from '@/components/ui/FilterChip';
 
 const LEVELS = ['ALL', 'A1', 'A2', 'B1'] as const;
 
@@ -140,7 +141,7 @@ export default function GrammarDashboardPage() {
 
   if (lessonsLoading) {
     return (
-      <div className="max-w-5xl mx-auto px-4 py-8">
+      <div className="max-w-300 mx-auto px-4 py-8">
         <div className="animate-pulse space-y-6">
           <div className="h-32 rounded-[2.5rem]" style={{ backgroundColor: 'var(--theme-bg-secondary)' }} />
           <div className="grid grid-cols-3 gap-6">
@@ -157,52 +158,39 @@ export default function GrammarDashboardPage() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-8 pb-24">
+    <div className="max-w-300 mx-auto px-4 py-2 pb-24">
 
-      {/* ─── Hero Banner ─── */}
-      <div className="relative overflow-hidden rounded-[2.5rem] p-8 mb-10 border"
-        style={{
-          backgroundColor: 'var(--theme-bg-card)',
-          borderColor: 'var(--theme-border)',
-          boxShadow: '0 20px 40px rgba(0,0,0,0.04)',
-        }}>
-        <div className="absolute -right-8 -top-8 w-40 h-40 blur-3xl opacity-15 pointer-events-none"
-          style={{ backgroundColor: ACCENT.vocab }} />
-
-        <div className="relative z-10 flex flex-wrap items-center justify-between gap-6">
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 shadow-inner"
-              style={{ background: GRADIENT.writing, color: 'white' }}>
-              <IconBook size={24} />
-            </div>
-            <div>
-              <h1 className="text-2xl font-black tracking-tight" style={{ color: 'var(--theme-text-primary)' }}>
-                {t('pageTitle')}
-              </h1>
-              <p className="text-[11px] font-bold uppercase tracking-widest mt-0.5"
-                style={{ color: 'var(--theme-text-muted)', opacity: 0.6 }}>
-                {t('pageSubtitle', { done: completedCount, total: totalCount })}
-              </p>
-            </div>
+      {/* ─── Header ─── */}
+      <header className="flex items-end justify-between gap-5 flex-wrap mb-6">
+        <div>
+          <div className="text-caption font-medium uppercase mb-1.5" style={{ color: 'var(--theme-text-muted)', letterSpacing: '.08em' }}>
+            {t('eyebrow')}
           </div>
-
-          <div className="flex items-center gap-3">
-            <Link href="/grammar/cheatsheet"
-              className="px-5 py-3 rounded-xl text-xs font-black border transition-all hover:bg-black/3 dark:hover:bg-white/5"
-              style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-primary)' }}>
-              <span className="flex items-center gap-1.5"><IconList size={13} /> {t('cheatsheet')}</span>
-            </Link>
-            {ctaLesson && (
-              <Link href={`/grammar/${ctaLesson.slug}`}
-                className="flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-black text-white transition-all hover:scale-[1.02] active:scale-95 shadow-xl"
-                style={{ background: GRADIENT.writing, boxShadow: '0 10px 25px rgba(99,102,241,0.35)' }}>
-                {resumeLesson ? t('resumeStudying') : t('startNow')}
-                <IconArrowRight size={16} />
-              </Link>
-            )}
-          </div>
+          <h1 className="font-bold" style={{ fontSize: 30, letterSpacing: '-.02em', color: 'var(--theme-text-primary)' }}>
+            {t('pageTitle')}
+          </h1>
+          <p className="mt-1.5 text-body" style={{ color: 'var(--theme-text-secondary)' }}>
+            {t('pageSubtitle', { done: completedCount, total: totalCount })}
+            {' · '}
+            <span className="mono" style={{ color: 'var(--accent)' }}>{overallPct}%</span>
+          </p>
         </div>
-      </div>
+        <div className="flex items-center gap-2">
+          <Link href="/grammar/cheatsheet"
+            className="inline-flex items-center gap-1.5 h-9.5 px-3.5 rounded-[10px] text-caption font-medium border transition-transform hover:-translate-y-0.5"
+            style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)', background: 'var(--theme-bg-card)' }}>
+            <IconList size={13} /> {t('cheatsheet')}
+          </Link>
+          {ctaLesson && (
+            <Link href={`/grammar/${ctaLesson.slug}`}
+              className="inline-flex items-center gap-2 h-9.5 px-4 rounded-[10px] text-body font-bold transition-transform hover:-translate-y-0.5"
+              style={{ background: 'var(--accent)', color: 'var(--accent-on)', boxShadow: '0 4px 14px color-mix(in srgb, var(--accent) 40%, transparent)' }}>
+              {resumeLesson ? t('resumeStudying') : t('startNow')}
+              <IconArrowRight size={15} />
+            </Link>
+          )}
+        </div>
+      </header>
 
       {/* ─── Stats (practice style) ─── */}
       {totalCount > 0 && (
@@ -238,26 +226,13 @@ export default function GrammarDashboardPage() {
         </div>
       )}
 
-      {/* ─── Level filter (practice style) ─── */}
-      <div className="flex gap-3 overflow-x-auto no-scrollbar pb-1 mb-10">
-        {LEVELS.map(level => {
-          const isActive = filterLevel === level;
-          const lc = level !== 'ALL' ? LEVEL_COLORS[level] : null;
-          return (
-            <button key={level} onClick={() => setFilterLevel(level)}
-              className="px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all duration-300 whitespace-nowrap"
-              style={isActive ? {
-                background: lc ? lc.gradient : GRADIENT.writing,
-                color: 'white',
-                boxShadow: lc ? `0 10px 20px ${lc.shadow}` : '0 10px 20px rgba(99,102,241,0.3)',
-              } : {
-                backgroundColor: 'var(--theme-bg-secondary)',
-                color: 'var(--theme-text-muted)',
-              }}>
-              {level === 'ALL' ? t('filterAll') : level}
-            </button>
-          );
-        })}
+      {/* ─── Level filter ─── */}
+      <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1 mb-8">
+        {LEVELS.map(level => (
+          <FilterChip key={level} active={filterLevel === level} onClick={() => setFilterLevel(level)}>
+            {level === 'ALL' ? t('filterAll') : <span className="mono">{level}</span>}
+          </FilterChip>
+        ))}
       </div>
 
       {/* ─── Lesson cards grouped by level ─── */}

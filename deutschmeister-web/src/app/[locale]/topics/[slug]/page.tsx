@@ -221,17 +221,17 @@ export default function TopicDetailPage() {
           <div className="absolute -bottom-6 -left-6 w-24 h-24 rounded-full"
             style={{ backgroundColor: topicColor, opacity: 0.03 }} />
 
-          <div className="relative flex items-start justify-between">
-            <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-xl flex items-center justify-center text-3xl"
-                style={{ background: `linear-gradient(135deg, ${topicColor}25, ${topicColor}15)` }}>
+          <div className="relative flex items-start justify-between gap-4">
+            <div className="flex items-center gap-4 min-w-0">
+              <div className="w-15 h-15 rounded-2xl flex items-center justify-center text-3xl shrink-0"
+                style={{ background: `linear-gradient(135deg, ${topicColor}, #6F89FF)` }}>
                 {topic.icon || '📚'}
               </div>
-              <div>
+              <div className="min-w-0">
                 <h1 className="text-2xl font-bold" style={{ color: 'var(--theme-text-primary)' }}>
                   {topic.nameDe}
                 </h1>
-                <p className="text-sm" style={{ color: 'var(--theme-text-muted)' }}>{topic.nameVi}</p>
+                <p className="text-sm" style={{ color: 'var(--theme-text-secondary)' }}>{topic.nameVi}</p>
                 {topic.descriptionVi && (
                   <p className="text-xs mt-1" style={{ color: 'var(--theme-text-muted)' }}>
                     {topic.descriptionVi}
@@ -240,10 +240,10 @@ export default function TopicDetailPage() {
               </div>
             </div>
 
-            <div className="w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
-              style={{ background: `${topicColor}15`, color: topicColor }}>
+            <span className="mono px-3 py-1 rounded-lg text-body font-bold shrink-0"
+              style={{ background: `color-mix(in srgb, ${topicColor} 14%, transparent)`, color: topicColor }}>
               {topic.level}
-            </div>
+            </span>
           </div>
 
           {/* Progress bar */}
@@ -294,7 +294,7 @@ export default function TopicDetailPage() {
         {activeTab === 'words' && (
           <div className="mb-8">
             <h2 className="text-lg font-bold mb-4" style={{ color: 'var(--theme-text-primary)' }}>{t('chooseStudyMode')}</h2>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+            <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))' }}>
               {STUDY_MODES.map(mode => {
                 const Icon = mode.icon;
                 return (
@@ -302,28 +302,32 @@ export default function TopicDetailPage() {
                     key={mode.key}
                     onClick={() => !mode.disabled && setActiveTab(mode.key as TabKey)}
                     disabled={mode.disabled}
-                    className={`relative p-4 rounded-2xl text-left transition-all duration-200 overflow-hidden group 
-                      ${mode.disabled ? 'opacity-60 cursor-not-allowed' : 'hover:-translate-y-1 hover:shadow-lg'}`}
-                    style={{ background: mode.gradient }}
+                    className={`word-card-v2 relative p-4.5 rounded-[14px] text-left overflow-hidden
+                      ${mode.disabled ? 'opacity-60 cursor-default' : 'cursor-pointer'}`}
+                    style={{
+                      background: 'var(--theme-bg-card)',
+                      border: '1px solid var(--theme-border)',
+                      minHeight: 116,
+                      ['--card-accent' as string]: mode.disabled ? 'var(--theme-border)' : mode.color,
+                    } as React.CSSProperties}
                   >
-                    {/* Decorative faint icon */}
-                    <div className="absolute -right-2 -bottom-2 opacity-10 transform group-hover:scale-110 transition-transform">
-                      <Icon size={64} style={{ color: 'white' }} />
-                    </div>
-                    
+                    {/* decorative blob */}
+                    <div className="absolute -top-7 -right-7 w-22 h-22 rounded-full pointer-events-none"
+                      style={{ background: `${mode.color}12`, filter: 'blur(16px)' }} />
+
                     {mode.disabled && (
-                      <div className="absolute top-2 right-2 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase text-white"
-                        style={{ backgroundColor: 'rgba(0,0,0,0.2)' }}>
+                      <span className="absolute top-3 right-3 px-1.5 py-0.5 rounded text-[8.5px] font-bold uppercase tracking-wider"
+                        style={{ background: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)', border: '1px solid var(--theme-border)' }}>
                         {t('comingSoon')}
-                      </div>
+                      </span>
                     )}
 
-                    <div className="w-10 h-10 rounded-xl mb-3 flex items-center justify-center shadow-sm"
-                      style={{ backgroundColor: 'rgba(255,255,255,0.2)' }}>
-                      <Icon size={20} style={{ color: 'white' }} />
+                    <div className="relative z-10 w-10 h-10 rounded-xl mb-3 flex items-center justify-center"
+                      style={{ background: `${mode.color}1A`, color: mode.color }}>
+                      <Icon size={20} />
                     </div>
-                    <h3 className="font-bold text-white text-[15px] leading-tight mb-1">{t(mode.labelKey)}</h3>
-                    <p className="text-xs text-white opacity-80 leading-snug">{t(mode.descKey)}</p>
+                    <h3 className="relative z-10 font-bold text-[15px] leading-tight" style={{ color: 'var(--theme-text-primary)' }}>{t(mode.labelKey)}</h3>
+                    <p className="relative z-10 text-xs leading-snug mt-1" style={{ color: 'var(--theme-text-muted)' }}>{t(mode.descKey)}</p>
                   </button>
                 );
               })}

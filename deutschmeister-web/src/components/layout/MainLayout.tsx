@@ -22,6 +22,34 @@ const SIDEBAR_COLLAPSED_KEY = 'deutschmeister-sidebar-collapsed';
 // Routes that should render WITHOUT sidebar/header (full-screen)
 const BARE_ROUTES = ['/auth/login', '/auth/register', '/auth', '/', '/landing', '/admin', '/onboarding', '/privacy', '/terms', '/pricing'];
 
+// Per-route accent (v2 redesign). Maps a route prefix → an .acc-* class that
+// overrides --accent on the shell so the whole page picks up the right hue.
+// Default (no match) = indigo (dashboard/vocab/notebook/profile/settings).
+const ACCENT_ROUTES: { prefix: string; cls: string }[] = [
+  { prefix: '/practice-test/reading', cls: 'acc-green' },
+  { prefix: '/practice-test/listening', cls: 'acc-cyan' },
+  { prefix: '/practice-test/dictation', cls: 'acc-cyan' },
+  { prefix: '/practice-test/speaking-rooms', cls: 'acc-pink' },
+  { prefix: '/practice-test/speaking', cls: 'acc-orange' },
+  { prefix: '/resources', cls: 'acc-green' },
+  { prefix: '/grammar', cls: 'acc-violet' },
+  { prefix: '/games', cls: 'acc-violet' },
+  { prefix: '/leaderboard', cls: 'acc-violet' },
+  { prefix: '/topics', cls: 'acc-violet' },
+  { prefix: '/community/topics', cls: 'acc-violet' },
+  { prefix: '/achievements', cls: 'acc-violet' },
+  { prefix: '/arena', cls: 'acc-violet' },
+  { prefix: '/learn/ipa', cls: 'acc-violet' },
+  { prefix: '/challenges', cls: 'acc-amber' },
+];
+
+// Strip an optional leading locale segment (/en, /de) so prefixes match across locales.
+function accentClassFor(pathname: string): string {
+  const p = pathname.replace(/^\/(en|de)(?=\/|$)/, '') || '/';
+  const hit = ACCENT_ROUTES.find((r) => p === r.prefix || p.startsWith(r.prefix + '/') || p.startsWith(r.prefix));
+  return hit?.cls ?? '';
+}
+
 export function MainLayout({ children }: MainLayoutProps) {
   const t = useTranslations('common.ui');
   const pathname = usePathname();
@@ -79,10 +107,11 @@ export function MainLayout({ children }: MainLayoutProps) {
   }
 
   const sidebarMl = `${sidebarCollapsed ? SIDEBAR_COLLAPSED_WIDTH : SIDEBAR_WIDTH}px`;
+  const accentClass = accentClassFor(pathname);
 
   // ─── Normal pages: sidebar + header + bottom tab bar ───
   return (
-    <div className="min-h-screen" style={{ backgroundColor: 'var(--theme-bg-body)' }}>
+    <div className={`min-h-screen ${accentClass}`} style={{ backgroundColor: 'var(--theme-bg-body)' }}>
       {/* Sidebar — desktop only */}
       <div className="hidden md:block">
         <Sidebar isCollapsed={sidebarCollapsed} onToggle={toggleSidebar} />

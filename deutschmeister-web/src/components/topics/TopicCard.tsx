@@ -1,162 +1,107 @@
 'use client';
 
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
-import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import { ACCENT } from '@/lib/tokens';
+import { IconCheck, IconArrowRight } from '@/components/ui/Icons';
 import type { Topic, TopicWithProgress } from '@/types/topic';
 
-function IconChevronRight({ size = 18 }: { size?: number }) {
+// Progress ring with an emoji/icon centered (v2 topic card).
+function ProgressRing({ pct, size, color, icon, isDone }: {
+  pct: number; size: number; color: string; icon: React.ReactNode; isDone: boolean;
+}) {
+  const thickness = size >= 60 ? 4 : 3;
+  const r = (size - thickness) / 2;
+  const c = 2 * Math.PI * r;
+  const off = c - (Math.min(100, pct) / 100) * c;
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
-      strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}>
-      <polyline points="9 18 15 12 9 6" />
-    </svg>
+    <div className="relative shrink-0" style={{ width: size, height: size }}>
+      <svg width={size} height={size} style={{ transform: 'rotate(-90deg)' }}>
+        <circle cx={size / 2} cy={size / 2} r={r} stroke="var(--theme-bg-secondary)" strokeWidth={thickness} fill="none" />
+        <circle cx={size / 2} cy={size / 2} r={r} stroke={color} strokeWidth={thickness} fill="none"
+          strokeDasharray={c} strokeDashoffset={off} strokeLinecap="round"
+          style={{ transition: 'stroke-dashoffset .6s cubic-bezier(.4,0,.2,1)' }} />
+      </svg>
+      <div className="absolute inset-0 flex items-center justify-center" style={{ fontSize: size * 0.4, lineHeight: 1 }}>
+        {isDone ? <span style={{ color }}><IconCheck size={Math.round(size * 0.42)} /></span> : icon}
+      </div>
+    </div>
   );
-}
-function IconCheck({ size = 26 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
-      strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}>
-      <polyline points="20 6 9 17 4 12" />
-    </svg>
-  );
-}
-
-const LEVEL_COLOR: Record<string, string> = {
-  A1: ACCENT.reading,
-  A2: ACCENT.srs,
-  B1: ACCENT.xp,
-  B2: STATUS.danger,
-};
-
-function getScoreColor(pct: number) {
-  if (pct >= 80) return STATUS.success;
-  if (pct >= 50) return STATUS.warning;
-  return ACCENT.srs;
 }
 
 interface TopicCardProps {
   topic: Topic | TopicWithProgress;
   showProgress?: boolean;
+  large?: boolean;
 }
 
-export function TopicCard({ topic, showProgress = false }: TopicCardProps) {
+export function TopicCard({ topic, showProgress = false, large = false }: TopicCardProps) {
   const t = useTranslations('vocabulary.topicCard');
-  const masteryPct  = 'masteryPercent' in topic ? topic.masteryPercent : 0;
+  const masteryPct = 'masteryPercent' in topic ? topic.masteryPercent : 0;
   const wordsLearned = 'wordsLearned' in topic ? topic.wordsLearned : 0;
   const isCompleted = masteryPct >= 100;
   const isInProgress = masteryPct > 0 && masteryPct < 100;
+  const status = isCompleted ? 'done' : isInProgress ? 'active' : 'new';
   const topicColor = topic.color || ACCENT.srs;
-  const levelColor = LEVEL_COLOR[topic.level] ?? ACCENT.vocab;
 
-  // Status badge
-  const statusConfig = (() => {
-    if (isCompleted)   return { label: t('statusCompleted'), bg: `${STATUS.success}15`,  color: STATUS.success };
-    if (isInProgress)  return { label: t('statusInProgress'),   bg: `${ACCENT.srs}15`,      color: ACCENT.srs };
-    return               { label: t('statusNotStarted'),   bg: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' };
-  })();
+  // Ring + status color: done=green, active=amber, new=topic color.
+  const statusColor = isCompleted ? 'var(--m-learned)' : isInProgress ? 'var(--m-learning)' : 'var(--m-new)';
+  const ringColor = isCompleted ? 'var(--m-learned)' : isInProgress ? 'var(--m-learning)' : topicColor;
+  const statusLabel = isCompleted ? t('statusCompleted') : isInProgress ? t('statusInProgress') : t('statusNotStarted');
+  const cta = isCompleted ? t('ctaReview') : isInProgress ? t('ctaContinue') : t('ctaStart');
 
   return (
     <Link href={`/topics/${topic.slug}`} className="block outline-none">
-      <div
-        className="group relative overflow-hidden rounded-2xl p-4 transition-all duration-500 hover:-translate-y-1 hover:shadow-xl border border-transparent"
+      <article
+        className="word-card-v2 group relative overflow-hidden flex flex-col rounded-[14px] cursor-pointer"
         style={{
-          backgroundColor: 'var(--theme-bg-card)',
-          boxShadow: '0 4px 16px rgba(0,0,0,0.05), inset 0 0 0 1px rgba(255,255,255,0.05)',
-          // dynamic hover border via CSS not easily doable with inline — use Tailwind class below
-        }}
+          background: 'var(--theme-bg-card)',
+          border: '1px solid var(--theme-border)',
+          padding: large ? 22 : 16,
+          gap: large ? 14 : 10,
+          minHeight: large ? 176 : 140,
+          ['--card-accent' as string]: topicColor,
+        } as React.CSSProperties}
       >
-        {/* Hover border overlay via pseudo element isn't possible inline, use a wrapper div */}
-        <div className="absolute inset-0 rounded-[2.5rem] border border-transparent group-hover:border-[color]/20 transition-colors duration-500 pointer-events-none"
-          style={{ borderColor: `${topicColor}30` }}
-        />
+        {/* decorative blob */}
+        <div className="absolute -top-10 -right-10 w-36 h-36 rounded-full pointer-events-none opacity-50 group-hover:opacity-100 transition-opacity"
+          style={{ background: `${topicColor}10`, filter: 'blur(20px)' }} />
 
-        {/* Hover aura */}
-        <div className="absolute inset-0 opacity-0 group-hover:opacity-[0.04] transition-opacity duration-700 pointer-events-none rounded-[2.5rem]"
-          style={{ backgroundColor: topicColor }}
-        />
-
-        <div className="relative z-10 flex items-center gap-4">
-          {/* Icon badge */}
-          <div
-            className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 text-2xl shadow-md transition-all duration-500 group-hover:scale-110 group-hover:rotate-3"
-            style={{
-              background: isCompleted
-                ? `linear-gradient(135deg, ${topicColor}, ${topicColor}cc)`
-                : `${topicColor}18`,
-              boxShadow: isCompleted ? `0 10px 20px ${topicColor}30` : 'none',
-            }}
-          >
-            {isCompleted
-              ? <span className="text-white"><IconCheck size={28} /></span>
-              : (topic.icon || '📚')}
-          </div>
-
-          {/* Content */}
+        <header className="relative z-10 flex items-center gap-3">
+          <ProgressRing pct={status === 'new' ? 0 : masteryPct} size={large ? 64 : 52} color={ringColor}
+            icon={topic.icon || '📚'} isDone={isCompleted} />
           <div className="flex-1 min-w-0">
-            {/* Badges */}
-            <div className="flex items-center gap-2 mb-2 flex-wrap">
-              <span
-                className="text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg text-white shadow-sm"
-                style={{ backgroundColor: levelColor }}
-              >
+            <div className="flex items-center gap-1.5 mb-1">
+              <span className="mono text-caption font-bold px-1.5 py-px rounded"
+                style={{ background: 'var(--theme-bg-secondary)', color: 'var(--theme-text-secondary)', border: '1px solid var(--theme-border)' }}>
                 {topic.level}
               </span>
-              <span
-                className="text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg"
-                style={{ backgroundColor: statusConfig.bg, color: statusConfig.color }}
-              >
-                {statusConfig.label}
-              </span>
-              <span
-                className="text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg border"
-                style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-muted)' }}
-              >
-                {t('wordCount', { count: topic.wordCount })}
+              <span className="mono text-caption" style={{ color: 'var(--theme-text-muted)' }}>
+                {wordsLearned}/{topic.wordCount}
               </span>
             </div>
-
-            {/* Title */}
-            <p className="text-base font-black tracking-tight mb-0.5 truncate" style={{ color: 'var(--theme-text-primary)' }}>
+            <h3 className="font-bold truncate" style={{ fontSize: large ? 17 : 15, letterSpacing: '-.01em', color: 'var(--theme-text-primary)' }}>
               {topic.nameDe}
-            </p>
-
-            {/* Vietnamese name */}
-            <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest"
-              style={{ color: 'var(--theme-text-primary)', opacity: 0.4 }}>
-              <span className="normal-case">{topic.nameVi}</span>
-            </div>
-
-            {/* Progress bar (in_progress) */}
-            {showProgress && isInProgress && (
-              <div className="mt-3 h-1 rounded-full overflow-hidden" style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
-                <div className="h-full rounded-full transition-all duration-700"
-                  style={{ width: `${Math.round(masteryPct)}%`, backgroundColor: topicColor }} />
-              </div>
-            )}
+            </h3>
+            <p className="text-caption truncate mt-0.5" style={{ color: 'var(--theme-text-secondary)' }}>{topic.nameVi}</p>
           </div>
+        </header>
 
-          {/* Right: mastery % or chevron */}
-          {showProgress && masteryPct > 0 ? (
-            <div className="text-right shrink-0">
-              <div className="text-2xl font-black tracking-tight"
-                style={{ color: getScoreColor(masteryPct) }}>
-                {Math.round(masteryPct)}<span className="text-sm ml-0.5">%</span>
-              </div>
-              {isInProgress && (
-                <div className="text-[10px] font-bold uppercase tracking-widest mt-0.5"
-                  style={{ color: 'var(--theme-text-muted)', opacity: 0.6 }}>
-                  {wordsLearned}/{topic.wordCount}
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="shrink-0" style={{ color: 'var(--theme-text-muted)' }}>
-              <IconChevronRight size={18} />
-            </div>
-          )}
-        </div>
-      </div>
+        <div className="flex-1" />
+
+        <footer className="relative z-10 flex items-center justify-between">
+          <span className="inline-flex items-center gap-1.5 text-caption font-semibold" style={{ color: statusColor }}>
+            <span className="w-1.5 h-1.5 rounded-full" style={{ background: statusColor }} />
+            {statusLabel}
+            {showProgress && isInProgress && <span className="mono font-medium" style={{ color: 'var(--theme-text-muted)' }}> · {Math.round(masteryPct)}%</span>}
+          </span>
+          <span className="inline-flex items-center gap-1 text-caption font-semibold transition-colors"
+            style={{ color: 'var(--theme-text-muted)' }}>
+            {cta}
+            <IconArrowRight size={12} />
+          </span>
+        </footer>
+      </article>
     </Link>
   );
 }

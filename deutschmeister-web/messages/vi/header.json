@@ -5,7 +5,8 @@
     "ariaOpenPalette": "Mở command palette"
   },
   "streak": {
-    "title": "Streak: {count} ngày liên tiếp"
+    "title": "Streak: {count} ngày liên tiếp",
+    "unit": "ngày streak"
   },
   "notifications": {
     "title": "Thông báo",

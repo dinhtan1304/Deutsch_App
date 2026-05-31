@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import { ACCENT, STATUS } from '@/lib/tokens';
-import { PersonalWord, WordTypeInfo, GenderInfo, Gender, WordCollection } from '@/types/personalWord';
+import { PersonalWord, WordTypeInfo, WordCollection } from '@/types/personalWord';
 import { IconVolume, IconStar, IconCheck } from '@/components/ui/Icons';
 import { useWordCollections, useAddToCollection, useRemoveFromCollection } from '@/hooks/usePersonalWords';
 
@@ -89,25 +89,23 @@ interface WordBankCardProps {
   onSpeak?: (text: string) => void;
   collections?: WordCollection[];
   onClick?: () => void;
+  /** Bulk-select (v2): shows a checkbox on hover / when any card is selected. */
+  selected?: boolean;
+  onToggleSelect?: () => void;
+  anySelected?: boolean;
 }
 
-export function WordBankCard({ word, onToggleFavorite, onSpeak, collections = [], onClick }: WordBankCardProps) {
+export function WordBankCard({ word, onToggleFavorite, onSpeak, collections = [], onClick, selected = false, onToggleSelect, anySelected = false }: WordBankCardProps) {
   const t = useTranslations('vocabulary.wordBank.card');
   const [showCollPopover, setShowCollPopover] = useState(false);
   const typeInfo = WordTypeInfo[word.wordType] ?? WordTypeInfo['andere'];
 
-  const displayWord = () => {
-    if (word.wordType === 'nomen' && word.nomenData) {
-      const gc = GenderInfo[word.nomenData.gender as Gender] ?? GenderInfo['neuter'];
-      return (
-        <span>
-          <span style={{ color: gc.color }} className="font-bold">{word.nomenData.article}</span>{' '}
-          <span className="font-bold" style={{ color: 'var(--theme-text-primary)' }}>{word.word}</span>
-        </span>
-      );
-    }
-    return <span className="font-bold" style={{ color: 'var(--theme-text-primary)' }}>{word.word}</span>;
-  };
+  // v2 article color-code (nouns) / type color (others). The accent drives the
+  // POS chip, hover border (--card-accent), and speaker button tint.
+  const isNoun = word.wordType === 'nomen' && !!word.nomenData;
+  const GENDER_VAR: Record<string, string> = { masculine: 'var(--der)', feminine: 'var(--die)', neuter: 'var(--das)' };
+  const accentColor = isNoun ? (GENDER_VAR[word.nomenData!.gender] ?? 'var(--das)') : typeInfo.color;
+  const chipLabel = isNoun ? word.nomenData!.article : typeInfo.labelDe;
 
   const chipStyle = (bg: string, fg: string): React.CSSProperties => ({
     backgroundColor: bg, color: fg,
@@ -151,109 +149,114 @@ export function WordBankCard({ word, onToggleFavorite, onSpeak, collections = []
   };
 
   return (
-    <div 
-      onClick={onClick} 
-      className="group flex flex-col bg-[(--theme-bg-card)] rounded-3xl p-5 relative cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-xl overflow-hidden shadow-sm"
-      style={{ boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.05)' }}
+    <div
+      onClick={onClick}
+      className="word-card-v2 group relative flex flex-col gap-2.5 rounded-[14px] p-4 cursor-pointer"
+      style={{ background: 'var(--theme-bg-card)', border: '1px solid var(--theme-border)', ['--card-accent' as string]: accentColor } as React.CSSProperties}
     >
-      {/* Decorative Top Border Glow based on word type */}
-      <div className="absolute top-0 left-0 right-0 h-1" style={{ backgroundColor: typeInfo.color }} />
-
-      {/* Header: Actions (Star, Folder) & Tags */}
-      <div className="flex justify-between items-start mb-3">
-        <div className="flex flex-wrap gap-1.5">
-          <span className="px-2 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-wider whitespace-nowrap"
-            style={{ backgroundColor: typeInfo.color + '15', color: typeInfo.color }}>
-            {typeInfo.icon} {typeInfo.labelDe}
-          </span>
-          <span className="px-2 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-wider"
-            style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }}>
-            {word.level}
+      {/* Header: [select] POS/article chip + speaker */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2 min-w-0">
+          {onToggleSelect && (
+            <button
+              onClick={(e) => { e.stopPropagation(); onToggleSelect(); }}
+              aria-pressed={selected}
+              className={`${anySelected ? 'flex' : 'hidden group-hover:flex'} w-4.5 h-4.5 rounded-[5px] items-center justify-center shrink-0 transition-colors`}
+              style={{
+                border: `1.5px solid ${selected ? 'var(--accent)' : 'var(--theme-text-muted)'}`,
+                background: selected ? 'var(--accent)' : 'transparent',
+                color: 'var(--accent-on)',
+              }}
+            >
+              {selected && <IconCheck size={11} />}
+            </button>
+          )}
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11.5px] font-bold"
+            style={{ background: `color-mix(in srgb, ${accentColor} 14%, transparent)`, color: accentColor }}>
+            <span className="w-1.5 h-1.5 rounded-full" style={{ background: accentColor }} />
+            {chipLabel}
           </span>
         </div>
+        <button onClick={(e) => { e.stopPropagation(); handleSpeak(); }}
+          className="w-7.5 h-7.5 rounded-lg flex items-center justify-center shrink-0 transition-transform hover:scale-110"
+          style={{ background: 'var(--theme-bg-secondary)', color: accentColor }}
+          title={t('speak')}>
+          <IconVolume size={14} />
+        </button>
+      </div>
 
+      {/* Hero word + IPA */}
+      <div>
+        <h3 className="font-bold" style={{ fontSize: 26, letterSpacing: '-.02em', lineHeight: 1.1, color: 'var(--theme-text-primary)' }}>
+          {word.word}
+        </h3>
+        {word.pronunciation && (
+          <span className="mono inline-block mt-1 text-caption" style={{ color: 'var(--theme-text-muted)' }}>[{word.pronunciation}]</span>
+        )}
+      </div>
+
+      {/* Meaning */}
+      <div>
+        {word.translationVi && (
+          <div className="font-medium line-clamp-2" style={{ fontSize: 14.5, lineHeight: 1.3, color: 'var(--theme-text-primary)' }}>{word.translationVi}</div>
+        )}
+        {word.translationEn && (
+          <div className="text-caption italic line-clamp-1 mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>{word.translationEn}</div>
+        )}
+      </div>
+
+      {/* Plural (noun) — v2 mono box */}
+      {isNoun && word.nomenData!.plural && (
+        <div className="rounded-[7px] px-2.5 py-1.5 mono text-[11.5px]" style={{ background: 'var(--theme-bg-secondary)', color: 'var(--theme-text-secondary)' }}>
+          <span style={{ color: 'var(--theme-text-muted)' }} className="mr-1.5">Plural</span>die {word.nomenData!.plural}
+        </div>
+      )}
+
+      {/* User note (v2) */}
+      {word.notes && (
+        <div className="rounded-[7px] px-2.5 py-1.5 text-[11.5px] italic"
+          style={{ background: 'color-mix(in srgb, var(--m-learning) 8%, transparent)', borderLeft: '2px solid var(--m-learning)', color: 'var(--theme-text-secondary)' }}>
+          💭 {word.notes}
+        </div>
+      )}
+
+      {/* Non-noun grammar details / tags */}
+      {!isNoun && <div className="empty:hidden">{renderDetails()}</div>}
+      {word.tags && word.tags.length > 0 && (
+        <div className="flex flex-wrap gap-1">
+          {word.tags.slice(0, 3).map((tag, i) => (
+            <span key={i} className="px-2 py-0.5 rounded-md text-[10px] font-semibold" style={{ background: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }}>#{tag}</span>
+          ))}
+        </div>
+      )}
+
+      <div className="flex-1" />
+
+      {/* Footer: level + actions */}
+      <div className="flex items-center justify-between gap-2">
+        <span className="mono text-[10.5px] font-bold px-1.5 py-0.5 rounded" style={{ background: 'var(--theme-bg-secondary)', color: 'var(--theme-text-secondary)' }}>
+          {word.level}
+        </span>
         <div className="flex items-center gap-1">
           <button onClick={(e) => { e.stopPropagation(); onToggleFavorite(word.id); }}
-            className="w-8 h-8 flex items-center justify-center rounded-xl transition-all hover:scale-110 hover:bg-black/5"
+            className="w-7 h-7 flex items-center justify-center rounded-md transition-transform hover:scale-110"
+            style={{ color: word.isFavorite ? ACCENT.xp : 'var(--theme-text-muted)' }}
             title={t('favorite')}>
-            <IconStar size={16} style={word.isFavorite
-              ? { fill: ACCENT.xp, color: ACCENT.xp }
-              : { color: 'var(--theme-text-muted)', opacity: 0.5 }} />
+            <IconStar size={14} style={word.isFavorite ? { fill: ACCENT.xp } : undefined} />
           </button>
-          
           <div className="relative">
-            <button
-              onClick={(e) => { e.stopPropagation(); setShowCollPopover(v => !v); }}
-              className="w-8 h-8 flex items-center justify-center rounded-xl transition-all text-base hover:bg-black/5"
-              title={t('addToFolder')}
-              style={{ opacity: showCollPopover ? 1 : 0.6, color: 'var(--theme-text-secondary)' }}>
-              <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" /></svg>
+            <button onClick={(e) => { e.stopPropagation(); setShowCollPopover(v => !v); }}
+              className="w-7 h-7 flex items-center justify-center rounded-md transition-transform hover:scale-110"
+              style={{ color: 'var(--theme-text-muted)' }}
+              title={t('addToFolder')}>
+              <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" /></svg>
             </button>
             {showCollPopover && (
-              <div className="absolute right-0 top-full mt-1 z-50">
-                <CollectionPopover
-                  wordId={word.id}
-                  collections={collections}
-                  onClose={() => setShowCollPopover(false)}
-                />
-              </div>
+              <CollectionPopover wordId={word.id} collections={collections} onClose={() => setShowCollPopover(false)} />
             )}
           </div>
         </div>
       </div>
-
-      {/* Main Word + Pronunciation */}
-      <div className="flex items-center justify-between mb-2">
-        <span className="text-xl font-black truncate pr-2" style={{ color: 'var(--theme-text-primary)' }}>
-          {displayWord()}
-        </span>
-        <button onClick={(e) => { e.stopPropagation(); handleSpeak(); }}
-          className="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 transition-transform duration-300 hover:scale-110 shadow-sm"
-          style={{ backgroundColor: `${typeInfo.color}15`, color: typeInfo.color }}
-          title={t('speak')}>
-          <IconVolume size={18} />
-        </button>
-      </div>
-
-      {/* IPA */}
-      {word.pronunciation && (
-        <p className="text-xs mb-2 font-mono" style={{ color: 'var(--theme-text-muted)' }}>
-          [{word.pronunciation}]
-        </p>
-      )}
-
-      {/* Meaning & Secondary translation */}
-      <div className="flex flex-col gap-1 mb-4">
-        {word.translationVi && (
-          <span className="font-medium text-sm line-clamp-2" style={{ color: 'var(--theme-text-primary)' }}>
-            {word.translationVi}
-          </span>
-        )}
-        {word.translationEn && (
-          <span className="text-xs line-clamp-1 italic opacity-70" style={{ color: 'var(--theme-text-secondary)' }}>
-            {word.translationEn}
-          </span>
-        )}
-      </div>
-
-      {/* Details & Tags (Verbs info, noun plural, etc.) */}
-      <div className="mt-auto pt-3 flex flex-col gap-2 border-t border-[(--theme-border)]">
-        <div className="min-h-6">
-           {renderDetails()}
-        </div>
-        
-        {word.tags && word.tags.length > 0 && (
-          <div className="flex flex-wrap gap-1">
-            {word.tags.map((t, i) => (
-              <span key={i} className="px-2 py-0.5 rounded-md text-[10px] font-bold tracking-wide"
-                style={{ backgroundColor: 'var(--theme-bg-body)', color: 'var(--theme-text-muted)' }}>
-                #{t}
-              </span>
-            ))}
-          </div>
-        )}
-      </div>
-
     </div>
   );
 }

@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { Inter } from 'next/font/google';
+import { Plus_Jakarta_Sans, JetBrains_Mono } from 'next/font/google';
 import Script from 'next/script';
 import { notFound } from 'next/navigation';
 import { NextIntlClientProvider, hasLocale } from 'next-intl';
@@ -10,7 +10,17 @@ import { Providers } from './providers';
 import { GA_ID } from '@/lib/analytics';
 import { routing } from '@/i18n/routing';
 
-const inter = Inter({ subsets: ['latin', 'vietnamese'] });
+// v2 redesign typography: Plus Jakarta Sans (UI) + JetBrains Mono (numbers/XP/IPA via .mono).
+const jakarta = Plus_Jakarta_Sans({
+  subsets: ['latin', 'vietnamese'],
+  variable: '--font-jakarta',
+  display: 'swap',
+});
+const jetbrains = JetBrains_Mono({
+  subsets: ['latin'],
+  variable: '--font-jetbrains',
+  display: 'swap',
+});
 
 // Enables fully static rendering of locale-prefixed pages at build time.
 // Without this, every page would default to dynamic on the [locale] segment.
@@ -19,7 +29,7 @@ export function generateStaticParams() {
 }
 
 export const viewport: Viewport = {
-  themeColor: '#6366F1',
+  themeColor: '#0A0C11',
 };
 
 // next-intl resolves Open Graph locale codes from a small map — we keep it
@@ -98,7 +108,7 @@ export default async function LocaleLayout({
 
   return (
     <html lang={locale} suppressHydrationWarning>
-      <body className={inter.className} suppressHydrationWarning>
+      <body className={`${jakarta.className} ${jakarta.variable} ${jetbrains.variable}`} suppressHydrationWarning>
         {/* Blocking theme script — runs before paint to prevent FOUC. Mirrors applyTheme() in settingsStore.ts. */}
         <script
           dangerouslySetInnerHTML={{

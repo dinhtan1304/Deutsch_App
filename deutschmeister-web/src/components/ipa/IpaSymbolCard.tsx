@@ -2,14 +2,28 @@
 
 import type { KeyboardEvent, MouseEvent } from 'react';
 import { useTranslations } from 'next-intl';
-import { ACCENT, STATUS } from '@/lib/tokens';
+import { STATUS } from '@/lib/tokens';
 import { usePronunciation } from '@/hooks/usePronunciation';
-import type { IpaSymbol } from '@/lib/data/ipaChart';
+import type { IpaSymbol, IpaCategory } from '@/lib/data/ipaChart';
+
+// v2 group color-code (matches ipa.js GROUPS) — via CSS vars.
+const CATEGORY_COLOR: Record<IpaCategory, string> = {
+  'vowel-short': 'var(--v2-cyan)',
+  'vowel-long': 'var(--v2-violet)',
+  'diphthong': 'var(--die)',
+  'consonant': 'var(--v2-warn)',
+  'affricate': 'var(--streak)',
+};
 
 const DIFFICULTY_DOT: Record<NonNullable<IpaSymbol['difficultyForVi']>, string> = {
   high: STATUS.danger,
   medium: STATUS.warning,
   low: STATUS.success,
+};
+const DIFFICULTY_KEY: Record<NonNullable<IpaSymbol['difficultyForVi']>, 'diffShortHigh' | 'diffShortMed' | 'diffShortLow'> = {
+  high: 'diffShortHigh',
+  medium: 'diffShortMed',
+  low: 'diffShortLow',
 };
 
 interface IpaSymbolCardProps {
@@ -22,17 +36,15 @@ export function IpaSymbolCard({ symbol, active, onSelect }: IpaSymbolCardProps) 
   const t = useTranslations('practice.pronunciation.ipa');
   const { speak } = usePronunciation();
   const firstExample = symbol.examples[0]?.word;
+  const color = CATEGORY_COLOR[symbol.category] ?? 'var(--accent)';
+  const diff = symbol.difficultyForVi;
 
   const handlePlay = (e: MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
     if (firstExample) speak(firstExample);
   };
-
   const handleKey = (e: KeyboardEvent<HTMLDivElement>) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      onSelect(symbol);
-    }
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect(symbol); }
   };
 
   return (
@@ -42,73 +54,52 @@ export function IpaSymbolCard({ symbol, active, onSelect }: IpaSymbolCardProps) 
       onClick={() => onSelect(symbol)}
       onKeyDown={handleKey}
       aria-pressed={active}
-      className="relative rounded-2xl border p-3 sm:p-4 text-left transition-all hover:-translate-y-0.5 hover:shadow-sm cursor-pointer focus:outline-none focus-visible:ring-2"
+      className="word-card-v2 relative rounded-[13px] p-3.5 flex flex-col gap-2.5 cursor-pointer focus:outline-none focus-visible:ring-2"
       style={{
-        borderColor: active ? ACCENT.examWriting : 'var(--theme-border)',
         backgroundColor: 'var(--theme-bg-card)',
-        boxShadow: active ? `0 0 0 2px ${ACCENT.examWriting}33` : undefined,
-      }}
+        border: `1px solid ${active ? color : 'var(--theme-border)'}`,
+        ['--card-accent' as string]: color,
+      } as React.CSSProperties}
     >
-      {symbol.difficultyForVi && (
-        <span
-          className="absolute top-2 right-2 w-2 h-2 rounded-full"
-          style={{ backgroundColor: DIFFICULTY_DOT[symbol.difficultyForVi] }}
-          aria-label={t('difficultyAria', { level: symbol.difficultyForVi })}
-        />
-      )}
-
-      <div
-        className="font-mono font-bold leading-none mb-2"
-        style={{
-          color: ACCENT.examWriting,
-          fontSize: 'clamp(1.75rem, 4vw, 2.25rem)',
-        }}
-      >
-        /{symbol.ipa}/
-      </div>
-
-      <div
-        className="text-xs font-medium truncate mb-1"
-        style={{ color: 'var(--theme-text-primary)' }}
-      >
-        {symbol.nameVi}
-      </div>
-
-      <div className="flex flex-wrap gap-1 mb-2">
-        {symbol.spellings.slice(0, 2).map(sp => (
-          <span
-            key={sp}
-            className="px-1.5 py-0.5 rounded text-[10px] font-mono"
-            style={{
-              backgroundColor: 'var(--theme-bg-secondary)',
-              color: 'var(--theme-text-secondary)',
-            }}
-          >
-            {sp}
+      {/* Top: difficulty chip + dot */}
+      <div className="flex items-center justify-between">
+        {diff ? (
+          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold uppercase"
+            style={{ background: `color-mix(in srgb, ${DIFFICULTY_DOT[diff]} 14%, transparent)`, color: DIFFICULTY_DOT[diff], letterSpacing: '.04em' }}>
+            <span className="w-1.5 h-1.5 rounded-full" style={{ background: DIFFICULTY_DOT[diff] }} />
+            {t(DIFFICULTY_KEY[diff])}
           </span>
-        ))}
+        ) : <span />}
       </div>
 
-      <div className="flex items-center justify-between gap-2">
-        <span
-          className="text-[11px] truncate flex-1 min-w-0"
-          style={{ color: 'var(--theme-text-muted)' }}
-        >
-          {firstExample}
-        </span>
+      {/* IPA hero */}
+      <div className="text-center py-1.5">
+        <div className="mono font-bold leading-none" style={{ fontSize: 40, letterSpacing: '-.04em', color }}>
+          /{symbol.ipa}/
+        </div>
+        <div className="mt-1.5 text-caption font-medium truncate" style={{ color: 'var(--theme-text-secondary)' }}>{symbol.nameVi}</div>
+        <div className="mt-1 flex gap-1 justify-center flex-wrap">
+          {symbol.spellings.slice(0, 3).map(sp => (
+            <span key={sp} className="mono px-1.5 py-px rounded text-[10.5px]"
+              style={{ background: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)', border: '1px solid var(--theme-border)' }}>{sp}</span>
+          ))}
+        </div>
+      </div>
+
+      {/* Example + play */}
+      <div className="flex items-center justify-between gap-2 pt-2.5" style={{ borderTop: '1px solid var(--theme-border)' }}>
+        <div className="min-w-0 flex-1">
+          <div className="text-[11px]" style={{ color: 'var(--theme-text-muted)' }}>{t('exampleLabel')}</div>
+          <div className="text-caption font-semibold truncate" style={{ color: 'var(--theme-text-primary)' }}>{firstExample}</div>
+        </div>
         <button
           type="button"
           onClick={handlePlay}
           aria-label={t('pronounceAria', { word: firstExample ?? '' })}
-          className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-colors"
-          style={{
-            backgroundColor: `${ACCENT.examWriting}1A`,
-            color: ACCENT.examWriting,
-          }}
+          className="w-7.5 h-7.5 rounded-lg flex items-center justify-center shrink-0 transition-transform hover:scale-110"
+          style={{ background: `color-mix(in srgb, ${color} 18%, transparent)`, color, border: `1px solid color-mix(in srgb, ${color} 40%, transparent)` }}
         >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-            <path d="M8 5v14l11-7z" />
-          </svg>
+          <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M14 6c1.2 1 2 2.4 2 4s-.8 3-2 4M11 4c2.4 1.4 4 4 4 6s-1.6 4.6-4 6M3 8h2l4-3v10l-4-3H3V8Z" /></svg>
         </button>
       </div>
     </div>

@@ -8,7 +8,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { AuthGate } from '@/components/ui';
 import { CapacityBanner } from '@/components/subscription/CapacityBanner';
 import { aiVocabApi } from '@/lib/api/personal-words';
-import { ACCENT, GRADIENT } from '@/lib/tokens';
+import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 import { speakGerman } from '@/lib/utils';
 import { WordBankCard } from '@/components/word-bank/WordBankCard';
 import { WordDetailModal } from '@/components/word-bank/WordDetailModal';
@@ -18,6 +18,7 @@ import { WordBankFiltersBar } from '@/components/word-bank/WordBankFiltersBar';
 import { WordBankGamesLauncher } from '@/components/word-bank/WordBankGamesLauncher';
 import {
   IconNotebook, IconSearch, IconChevronLeft, IconChevronRight, IconDownload, IconUpload, IconSparkles,
+  IconCheck, IconStar, IconX, IconTrash,
 } from '@/components/ui/Icons';
 
 const ImportModal = dynamic(
@@ -38,6 +39,7 @@ import {
   useImportPersonalWords,
   useExportPersonalWords,
   useSRSStats,
+  useBatchDeletePersonalWords,
 } from '@/hooks/usePersonalWords';
 import { ImportRow, PersonalWord } from '@/types/personalWord';
 
@@ -50,6 +52,7 @@ export default function WordBankPage() {
   const [showFilters, setShowFilters] = useState(false);
   const [selectedWord, setSelectedWord] = useState<PersonalWord | null>(null);
   const [selectedView, setSelectedView] = useState<string>('all');
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   const baseApiParams = getApiParams();
   const finalApiParams = (selectedView !== 'all' && selectedView !== 'favorites')
@@ -62,6 +65,7 @@ export default function WordBankPage() {
   const toggleFavoriteMutation = useToggleFavorite();
   const importMutation = useImportPersonalWords();
   const exportMutation = useExportPersonalWords();
+  const batchDelete = useBatchDeletePersonalWords();
   const { data: srsStats } = useSRSStats();
   const { data: capacity } = useQuery({
     queryKey: ['word-bank-capacity'],
@@ -73,6 +77,40 @@ export default function WordBankPage() {
   const words = wordsData?.data ?? [];
   const total = wordsData?.total ?? 0;
   const totalPages = wordsData?.totalPages ?? 1;
+
+  // ── Bulk selection ──
+  const selectedCount = selectedIds.size;
+  const toggleSelect = useCallback((id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  }, []);
+  const clearSelection = useCallback(() => setSelectedIds(new Set()), []);
+  const allOnPageSelected = words.length > 0 && words.every((w) => selectedIds.has(w.id));
+  const toggleSelectAll = () => {
+    setSelectedIds((prev) => {
+      if (words.every((w) => prev.has(w.id))) {
+        const next = new Set(prev);
+        words.forEach((w) => next.delete(w.id));
+        return next;
+      }
+      const next = new Set(prev);
+      words.forEach((w) => next.add(w.id));
+      return next;
+    });
+  };
+  const handleBatchDelete = async () => {
+    const ids = Array.from(selectedIds);
+    if (ids.length === 0) return;
+    if (!confirm(t('bulk.deleteConfirm', { count: ids.length }))) return;
+    try { await batchDelete.mutateAsync(ids); clearSelection(); } catch { /* ignore */ }
+  };
+  const handleBatchFavorite = () => {
+    selectedIds.forEach((id) => toggleFavoriteMutation.mutate(id));
+    clearSelection();
+  };
 
   const speak = useCallback((text: string) => {
     speakGerman(text);
@@ -91,6 +129,7 @@ export default function WordBankPage() {
 
   const statTotal = stats?.total ?? 0;
   const statFavorites = stats?.favorites ?? 0;
+  const statLearned = srsStats?.mature ?? 0;
 
   const handleSelectAll = () => { setSelectedView('all'); setFilters({ favoritesOnly: false }); };
   const handleSelectFavorites = () => { setSelectedView('favorites'); setFilters({ favoritesOnly: true }); };
@@ -119,24 +158,21 @@ export default function WordBankPage() {
 
   return (
     <>
-      <div className="py-6">
+      <div className="py-6 max-w-360 mx-auto">
 
         {/* ─── Header ─── */}
-        <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-          <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-2xl flex items-center justify-center"
-              style={{ background: GRADIENT.history }}>
-              <IconNotebook size={22} className="text-white" />
+        <div className="flex flex-wrap items-end justify-between gap-4 mb-6">
+          <div>
+            <div className="text-caption font-medium uppercase mb-1.5" style={{ color: 'var(--theme-text-muted)', letterSpacing: '.08em' }}>
+              {t('eyebrow')}
             </div>
-            <div>
-              <h1 className="text-2xl font-bold" style={{ color: 'var(--theme-text-primary)' }}>
-                {t('pageTitle')}
-              </h1>
-              <p className="text-body mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>
-                {t('pageSubtitle', { total: statTotal, favorites: statFavorites })}
-                {isFetching && <span className="ml-2 text-blue-500 text-caption">{t('fetching')}</span>}
-              </p>
-            </div>
+            <h1 className="font-bold" style={{ fontSize: 30, letterSpacing: '-.02em', color: 'var(--theme-text-primary)' }}>
+              {t('pageTitle')}
+            </h1>
+            <p className="text-body mt-1.5" style={{ color: 'var(--theme-text-secondary)' }}>
+              {t('pageSubtitle', { total: statTotal, favorites: statFavorites, learned: statLearned })}
+              {isFetching && <span className="ml-2 text-caption" style={{ color: 'var(--accent)' }}>{t('fetching')}</span>}
+            </p>
           </div>
           <div className="flex gap-2">
             {selectedView !== 'all' && selectedView !== 'favorites' && (
@@ -190,6 +226,7 @@ export default function WordBankPage() {
             selectedView={selectedView}
             statTotal={statTotal}
             statFavorites={statFavorites}
+            srsStats={srsStats}
             onSelectAll={handleSelectAll}
             onSelectFavorites={handleSelectFavorites}
             onSelectCollection={handleSelectCollection}
@@ -262,6 +299,46 @@ export default function WordBankPage() {
               </div>
             ) : (
               <>
+                {/* Bulk actions bar */}
+                {selectedCount > 0 && (
+                  <div className="flex items-center gap-2 mb-3 px-3.5 py-2.5 rounded-xl sticky top-20 z-10 backdrop-blur-md"
+                    style={{ background: 'color-mix(in srgb, var(--accent) 10%, var(--theme-bg-card))', border: '1px solid color-mix(in srgb, var(--accent) 30%, transparent)' }}>
+                    <span className="text-body font-semibold" style={{ color: 'var(--accent)' }}>
+                      {t('bulk.selected', { count: selectedCount })}
+                    </span>
+                    <span className="w-px h-4" style={{ background: 'color-mix(in srgb, var(--accent) 30%, transparent)' }} />
+                    <button onClick={handleBatchFavorite}
+                      className="inline-flex items-center gap-1.5 h-8 px-2.5 rounded-lg text-caption font-medium transition-colors hover:bg-(--theme-overlay-soft)"
+                      style={{ color: 'var(--theme-text-secondary)' }}>
+                      <IconStar size={14} /> {t('bulk.favorite')}
+                    </button>
+                    <button onClick={handleBatchDelete} disabled={batchDelete.isPending}
+                      className="inline-flex items-center gap-1.5 h-8 px-2.5 rounded-lg text-caption font-medium transition-colors disabled:opacity-50"
+                      style={{ color: STATUS.danger }}>
+                      <IconTrash size={14} /> {t('bulk.delete')}
+                    </button>
+                    <div className="flex-1" />
+                    <button onClick={clearSelection}
+                      className="inline-flex items-center gap-1.5 h-8 px-2.5 rounded-lg text-caption font-medium border"
+                      style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-muted)' }}>
+                      <IconX size={12} /> {t('bulk.clear')}
+                    </button>
+                  </div>
+                )}
+
+                {/* Select-all toggle */}
+                <div className="flex justify-end mb-2">
+                  <button onClick={toggleSelectAll}
+                    className="inline-flex items-center gap-1.5 text-caption font-medium transition-colors"
+                    style={{ color: 'var(--theme-text-muted)' }}>
+                    <span className="w-4 h-4 rounded-xs flex items-center justify-center"
+                      style={{ border: `1.5px solid ${allOnPageSelected ? 'var(--accent)' : 'var(--theme-text-muted)'}`, background: allOnPageSelected ? 'var(--accent)' : 'transparent', color: 'var(--accent-on)' }}>
+                      {allOnPageSelected && <IconCheck size={10} />}
+                    </span>
+                    {allOnPageSelected ? t('bulk.deselectAll') : t('bulk.selectAll')}
+                  </button>
+                </div>
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                   {words.map(w => (
                     <WordBankCard
@@ -270,6 +347,9 @@ export default function WordBankPage() {
                       onClick={() => setSelectedWord(w)}
                       onToggleFavorite={id => toggleFavoriteMutation.mutate(id)}
                       onSpeak={speak}
+                      selected={selectedIds.has(w.id)}
+                      onToggleSelect={() => toggleSelect(w.id)}
+                      anySelected={selectedCount > 0}
                     />
                   ))}
                 </div>

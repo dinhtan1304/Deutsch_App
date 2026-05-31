@@ -2,30 +2,27 @@
 
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 import { useWeeklyChallenges } from '@/hooks/useChallenges';
-import { IconZap, IconCheck, IconArrowRight } from '@/components/ui/Icons';
+import { IconArrowRight } from '@/components/ui/Icons';
 
+// v2 "Thử thách tuần" — violet header, task rows with progress, details CTA.
 export function WeeklyChallengesWidget() {
   const t = useTranslations('dashboard.weeklyChallenges');
   const { data, isLoading } = useWeeklyChallenges();
+  const total = data?.length ?? 0;
   const completedCount = data?.filter((c) => c.completed).length ?? 0;
 
   return (
-    <div className="rounded-card p-5 border shadow-card" style={{ backgroundColor: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)', height: '100%', boxSizing: 'border-box' }}>
-      <div className="flex justify-between items-center mb-4">
+    <section className="rounded-2xl p-4.5" style={{ background: 'var(--theme-bg-card)', border: '1px solid var(--theme-border)' }}>
+      <div className="flex items-center justify-between mb-3.5">
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: GRADIENT.action }}>
-            <IconZap size={14} style={{ color: 'white' }} />
-          </div>
-          <h3 className="text-title font-bold m-0" style={{ color: 'var(--theme-text-primary)' }}>{t('title')}</h3>
+          <span className="w-5.5 h-5.5 rounded-md inline-flex items-center justify-center"
+            style={{ background: 'color-mix(in srgb, var(--v2-violet, #A78BFA) 16%, transparent)', color: 'var(--v2-violet, #A78BFA)' }}>
+            <svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m10 3 2.4 4.9L18 8.7l-4 3.9.9 5.4-4.9-2.5L5 18l.9-5.4-4-3.9 5.6-.8L10 3Z" /></svg>
+          </span>
+          <span className="text-body font-semibold" style={{ color: 'var(--theme-text-primary)' }}>{t('title')}</span>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>{completedCount}/3</span>
-          <Link href="/challenges" className="text-body font-semibold flex items-center gap-0.5" style={{ color: ACCENT.srs, textDecoration: 'none' }}>
-            {t('details')} <IconArrowRight size={13} />
-          </Link>
-        </div>
+        <span className="mono text-caption" style={{ color: 'var(--theme-text-muted)' }}>{completedCount}/{total || 3}</span>
       </div>
 
       {isLoading && (
@@ -38,27 +35,24 @@ export function WeeklyChallengesWidget() {
           return (
             <div key={c.id}>
               <div className="flex justify-between items-center mb-1.5">
-                <div className="text-body font-medium flex-1 pr-2" style={{ color: 'var(--theme-text-primary)' }}>
+                <span className="text-caption" style={{ color: c.completed ? 'var(--theme-text-muted)' : 'var(--theme-text-primary)', textDecoration: c.completed ? 'line-through' : 'none' }}>
                   {c.titleVi}
-                </div>
-                {c.completed
-                  ? <div className="shrink-0 w-4.5 h-4.5 rounded-full flex items-center justify-center" style={{ width: 18, height: 18, background: STATUS.success }}>
-                      <IconCheck size={10} style={{ color: 'white' }} />
-                    </div>
-                  : <div className="text-caption shrink-0" style={{ color: 'var(--theme-text-muted)' }}>{c.current}/{c.target}</div>
-                }
+                </span>
+                <span className="mono text-caption" style={{ color: 'var(--theme-text-muted)' }}>{c.current}/{c.target}</span>
               </div>
-              <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--theme-border)' }}>
-                <div style={{
-                  height: '100%', borderRadius: 999,
-                  background: c.completed ? STATUS.success : GRADIENT.actionH,
-                  width: `${pct}%`, transition: 'width 0.5s',
-                }} />
+              <div className="h-1 rounded-full overflow-hidden" style={{ background: 'var(--theme-bg-secondary)' }}>
+                <div className="h-full rounded-full transition-[width] duration-500" style={{ width: `${pct}%`, background: c.completed ? 'var(--m-learned)' : 'var(--accent)' }} />
               </div>
             </div>
           );
         })}
       </div>
-    </div>
+
+      <Link href="/challenges"
+        className="mt-3.5 w-full flex items-center justify-center gap-1.5 py-2.5 rounded-[9px] text-caption font-medium transition-colors"
+        style={{ background: 'var(--theme-bg-secondary)', border: '1px solid var(--theme-border)', color: 'var(--theme-text-secondary)' }}>
+        {t('details')} <IconArrowRight size={12} />
+      </Link>
+    </section>
   );
 }

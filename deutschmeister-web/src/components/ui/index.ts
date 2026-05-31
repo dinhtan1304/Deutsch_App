@@ -31,3 +31,8 @@ export { ToastProvider, useToast } from './ToastProvider';
 export type { ToastKind, ToastInput } from './ToastProvider';
 export { StaggerList } from './StaggerList';
 export { LoadingCrossfade } from './LoadingCrossfade';
+export { ArticleChip } from './ArticleChip';
+export type { Article } from './ArticleChip';
+export { MasteryDot } from './MasteryDot';
+export type { Mastery } from './MasteryDot';
+export { FilterChip } from './FilterChip';

@@ -36,6 +36,19 @@ export const ACCENT = {
   tealLight: '#5EEAD4',    // teal-300 — "das" chip text
   emeraldLight: '#34D399', // emerald-400 — card back accent text
   readingLight: '#4ADE80', // green-400 — completed task chip text
+
+  // ── v2 redesign (append-only; mirrors globals.css :root) ──
+  v2: '#6F89FF',           // default v2 accent (indigo) — = var(--accent)
+  v2Hi: '#8AA0FF',
+  v2Streak: '#FF7849',
+  v2Violet: '#A78BFA',
+  v2Cyan: '#22D3EE',
+  v2Pink: '#EC6B9C',
+  v2Amber: '#F5C249',
+  v2Green: '#4ADE80',
+  der: '#5B8DEF',          // masculine article dot
+  die: '#EC6B9C',          // feminine article dot
+  das: '#4ADE80',          // neuter article dot
 } as const;
 
 export const STATUS = {
@@ -112,6 +125,12 @@ export const GRADIENT = {
   premiumAuraBg: 'linear-gradient(135deg, rgba(99,102,241,0.25), rgba(168,85,247,0.25))', // premium membership card bg
   grayAuraBg: 'linear-gradient(135deg, rgba(107,114,128,0.15), rgba(75,85,99,0.15))',     // free-plan card bg
   vocabDeepBg: 'linear-gradient(135deg, rgba(139,92,246,0.18), rgba(99,102,241,0.12))',  // violet → indigo, paywall/premium overlay bg
+
+  // ── v2 redesign (append-only) ──
+  v2Logo: 'linear-gradient(135deg, #6F89FF 0%, #C56BFF 100%)',     // sidebar "D" logo + avatars
+  v2Level: 'linear-gradient(90deg, #A78BFA, #6F89FF)',             // level meter fill
+  v2Session: 'linear-gradient(135deg, #6F89FF 0%, #A063FF 100%)',  // primary-session "loud" surface
+  v2StreakPill: 'linear-gradient(180deg, rgba(255,120,73,.18) 0%, rgba(255,120,73,.08) 100%)', // topbar streak pill bg
 } as const;
 
 export const RADIUS = {

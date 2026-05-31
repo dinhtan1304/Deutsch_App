@@ -80,37 +80,65 @@
    by overriding with our own selectors
    ============================================ */
 
-/* Light Theme Colors */
+/* ── v2 redesign palette ──
+   Theme vars below were re-skinned to the Deutschmeister v2 handoff.
+   Dark = navy near-black (source of truth); Light = designed counterpart.
+   The handoff-named aliases (--bg-base, --bg-card, --text, --border, …) live
+   in the same blocks so ported v2 components can reference them verbatim. */
+
+/* Light Theme Colors (v2) */
 :root,
 html[data-theme="light"],
 html.light {
-  --theme-bg-body: #f9fafb;        /* gray-50 */
-  --theme-bg-card: #ffffff;         /* white */
-  --theme-bg-secondary: #f3f4f6;    /* gray-100 */
-  --theme-bg-tertiary: #e5e7eb;     /* gray-200 */
-  --theme-text-primary: #111827;    /* gray-900 */
-  --theme-text-secondary: #4b5563;  /* gray-600 */
-  --theme-text-muted: #6b7280;      /* gray-500 */
-  --theme-border: #e5e7eb;          /* gray-200 */
-  --theme-border-dark: #d1d5db;     /* gray-300 */
+  --theme-bg-body: #F7F8FB;
+  --theme-bg-card: #ffffff;
+  --theme-bg-secondary: #FFFFFF;
+  --theme-bg-tertiary: #F1F3F8;
+  --theme-text-primary: #11151D;
+  --theme-text-secondary: #566072;
+  --theme-text-muted: #8A93A6;
+  --theme-border: #E3E7EF;
+  --theme-border-dark: #ECEFF5;
   --theme-overlay-soft: rgba(0, 0, 0, 0.04);
   --theme-overlay-strong: rgba(0, 0, 0, 0.08);
+
+  /* handoff aliases */
+  --bg-base: #F7F8FB;
+  --bg-elev: #FFFFFF;
+  --bg-card: #FFFFFF;
+  --bg-card-hi: #F1F3F8;
+  --border: #E3E7EF;
+  --border-soft: #ECEFF5;
+  --text: #11151D;
+  --text-dim: #566072;
+  --text-mute: #8A93A6;
 }
 
-/* Dark Theme Colors */
+/* Dark Theme Colors (v2 navy — source of truth) */
 html[data-theme="dark"],
 html.dark {
-  --theme-bg-body: #111827;         /* gray-900 */
-  --theme-bg-card: #1f2937;         /* gray-800 */
-  --theme-bg-secondary: #374151;    /* gray-700 */
-  --theme-bg-tertiary: #4b5563;     /* gray-600 */
-  --theme-text-primary: #f9fafb;    /* gray-50 */
-  --theme-text-secondary: #d1d5db;  /* gray-300 */
-  --theme-text-muted: #b0b8c4;      /* raised from #9ca3af for WCAG AA on #111827 */
-  --theme-border: #374151;          /* gray-700 */
-  --theme-border-dark: #4b5563;     /* gray-600 */
-  --theme-overlay-soft: rgba(255, 255, 255, 0.06);
-  --theme-overlay-strong: rgba(255, 255, 255, 0.10);
+  --theme-bg-body: #0A0C11;
+  --theme-bg-card: #161A23;
+  --theme-bg-secondary: #11141B;
+  --theme-bg-tertiary: #1C2230;
+  --theme-text-primary: #F2F4F8;
+  --theme-text-secondary: #9099AB;
+  --theme-text-muted: #9099AB;       /* dim — WCAG AA on navy */
+  --theme-border: #232938;
+  --theme-border-dark: #1B2030;
+  --theme-overlay-soft: rgba(255, 255, 255, 0.05);
+  --theme-overlay-strong: rgba(255, 255, 255, 0.09);
+
+  /* handoff aliases */
+  --bg-base: #0A0C11;
+  --bg-elev: #11141B;
+  --bg-card: #161A23;
+  --bg-card-hi: #1C2230;
+  --border: #232938;
+  --border-soft: #1B2030;
+  --text: #F2F4F8;
+  --text-dim: #9099AB;
+  --text-mute: #5B6376;
 }
 
 /* ============================================
@@ -554,8 +582,87 @@ input[type="range"]::-webkit-slider-thumb {
   transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 @media (min-width: 768px) {
-  .header-left { left: var(--sidebar-ml, 260px); }
-  .main-ml { margin-left: var(--sidebar-ml, 260px); }
+  .header-left { left: var(--sidebar-ml, 232px); }
+  .main-ml { margin-left: var(--sidebar-ml, 232px); }
+}
+
+/* ============================================
+   v2 REDESIGN TOKENS — accent / semantic / article / mastery
+   Theme-independent (same in light & dark). --accent is overridden
+   per-route by the .acc-* classes set on the shell in MainLayout.
+   ============================================ */
+:root {
+  --accent: #6F89FF;
+  --accent-hi: #8AA0FF;
+  --accent-on: #F4F6FF;        /* text/icon color on an accent-filled surface */
+
+  --streak: #FF7849;
+  --streak-soft: rgba(255, 120, 73, 0.12);
+  --v2-success: #4ADE80;
+  --v2-warn: #F5C249;
+  --v2-violet: #A78BFA;
+  --v2-danger: #EF4444;
+  --v2-cyan: #22D3EE;
+  --v2-pink: #EC6B9C;
+
+  /* German articles (color-code throughout) */
+  --der: #5B8DEF;
+  --die: #EC6B9C;
+  --das: #4ADE80;
+
+  /* Mastery / learning state */
+  --m-learned: #4ADE80;
+  --m-learning: #F5C249;
+  --m-new: #5B6376;
+
+  /* v2 shape */
+  --v2-radius: 14px;
+  --v2-radius-sm: 10px;
+  --v2-radius-pill: 7px;
+
+  /* v2 shadow */
+  --v2-shadow-card-hover: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+
+/* Per-route accent overrides — set on the shell wrapper by pathname.
+   Dashboard/Vocab/Notebook/Profile/Settings use the default indigo. */
+.acc-violet  { --accent: #A78BFA; --accent-hi: #C4B5FD; }
+.acc-green   { --accent: #4ADE80; --accent-hi: #86EFAC; }
+.acc-cyan    { --accent: #22D3EE; --accent-hi: #67E8F9; }
+.acc-amber   { --accent: #F5C249; --accent-hi: #FCD34D; }
+.acc-pink    { --accent: #EC6B9C; --accent-hi: #F0A6C2; }
+.acc-orange  { --accent: #FF7849; --accent-hi: #FF9A73; }
+
+/* Mono helper — numbers, XP, IPA, %, level, codes */
+.mono { font-family: var(--font-jetbrains), ui-monospace, "JetBrains Mono", monospace; }
+
+/* v2 custom scrollbar (handoff global) — thumb tracks the theme border. */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--theme-border);
+  border-radius: 5px;
+  border: 2px solid var(--theme-bg-body);
+}
+::-webkit-scrollbar-thumb:hover { background: var(--theme-border-dark); }
+
+/* v2 left accent rail (fades the route accent downward) */
+.v2-accent-rail { background: linear-gradient(180deg, var(--accent), transparent); }
+
+/* v2 dashboard helpers (theme-var gradients can't be static GRADIENT tokens) */
+.v2-bar { background: linear-gradient(180deg, var(--theme-bg-tertiary), var(--theme-bg-secondary)); }
+.v2-bar-today { background: linear-gradient(180deg, var(--accent), color-mix(in srgb, var(--accent) 78%, transparent)); }
+.v2-flip-card { background: linear-gradient(180deg, var(--theme-bg-secondary) 0%, var(--theme-bg-tertiary) 100%); }
+.v2-node-done { background: linear-gradient(135deg, var(--m-learned), #10B981); }
+
+/* v2 word/entity card hover lift — border turns to the card's article/route
+   accent (--card-accent set inline). */
+.word-card-v2 { transition: border-color .2s, transform .2s, box-shadow .2s; }
+/* !important so the hover color beats the inline `border` shorthand set on each card. */
+.word-card-v2:hover {
+  border-color: var(--card-accent, var(--accent)) !important;
+  transform: translateY(-2px);
+  box-shadow: var(--v2-shadow-card-hover);
 }
 
 /* Hide reCAPTCHA badge — keeps UI clean; Google's terms still satisfied if reCAPTCHA is disclosed in privacy policy */

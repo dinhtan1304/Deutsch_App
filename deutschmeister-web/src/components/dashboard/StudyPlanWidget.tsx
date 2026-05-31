@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { ACCENT, STATUS, GRADIENT } from '@/lib/tokens';
+import { ACCENT, GRADIENT } from '@/lib/tokens';
 import { useStudyPlan } from '@/hooks/useStudyPlan';
 import { IconRocket, IconCalendar } from '@/app/[locale]/study-plan/icons';
 
@@ -48,7 +48,7 @@ export function StudyPlanWidget() {
     );
   }
 
-  const { plan, currentWeek, currentPhase, overallProgress, daysUntilExam, todayTasks } = data;
+  const { plan, currentWeek, currentPhase, daysUntilExam, todayTasks } = data;
   const completedToday = todayTasks?.filter((t) => t.completed).length ?? 0;
   const totalToday = todayTasks?.length ?? 0;
 
@@ -77,63 +77,51 @@ export function StudyPlanWidget() {
     );
   }
 
+  const currentTaskTitle = todayTasks?.find(tk => !tk.completed)?.title ?? todayTasks?.[0]?.title ?? '—';
+  const phaseColor = currentPhase.color;
+
+  // v2 CourseCard — icon box + W-badge + week pips + current task footer.
   return (
     <Link
       href="/study-plan"
-      className="flex flex-col gap-3 p-4 rounded-2xl border-2 transition-all group hover:-translate-y-1 relative overflow-hidden shadow-sm active:scale-95"
-      style={{
-        borderColor: `${currentPhase.color}15`,
-        backgroundColor: 'var(--theme-bg-card)',
-      }}
+      className="word-card-v2 block rounded-2xl p-4.5"
+      style={{ background: 'var(--theme-bg-card)', border: '1px solid var(--theme-border)', ['--card-accent' as string]: phaseColor } as React.CSSProperties}
     >
-      {/* Decorative level badge watermark */}
-      <div
-        className="absolute -right-2 -bottom-2 text-5xl font-black opacity-[0.03] pointer-events-none select-none leading-none"
-        style={{ color: currentPhase.color }}
-      >
-        {plan.targetLevel}
-      </div>
-      
-      <div className="flex items-center gap-3 relative z-10">
-        <div
-          className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-sm"
-          style={{ background: `${currentPhase.color}12`, border: `1px solid ${currentPhase.color}20`, color: currentPhase.color }}
-        >
-          <span className="text-lg">{currentPhase.icon}</span>
+      <div className="flex items-start gap-3 mb-3.5">
+        <div className="w-9 h-9 rounded-[10px] flex items-center justify-center shrink-0 text-white"
+          style={{ background: `linear-gradient(135deg, ${phaseColor}, #6F89FF)` }}>
+          <span className="text-base leading-none">{currentPhase.icon}</span>
         </div>
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 min-w-0">
-            <div className="text-sm font-black tracking-tight truncate" style={{ color: 'var(--theme-text-primary)' }}>
-              {plan.examFormat} {plan.targetLevel}
-            </div>
-            <div
-              className="shrink-0 text-[9px] font-black px-1.5 py-0.5 rounded-md uppercase tracking-wider"
-              style={{ background: `${currentPhase.color}12`, color: currentPhase.color, border: `1px solid ${currentPhase.color}20` }}
-            >
+          <div className="flex items-center gap-1.5">
+            <span className="text-body font-semibold truncate" style={{ color: 'var(--theme-text-primary)' }}>{plan.examFormat} {plan.targetLevel}</span>
+            <span className="mono text-[10px] font-bold px-1.5 py-0.5 rounded shrink-0" style={{ background: 'var(--streak-soft)', color: 'var(--streak)' }}>
               W{currentWeek}/{plan.totalWeeks}
-            </div>
+            </span>
           </div>
-          <div className="text-[11px] font-medium mt-0.5 opacity-60 flex items-center gap-1.5" style={{ color: 'var(--theme-text-muted)' }}>
-            <IconCalendar size={10} />
+          <div className="text-caption mt-0.5 flex items-center gap-1.5" style={{ color: 'var(--theme-text-muted)' }}>
+            <IconCalendar size={11} />
             <span>{t('daysUntilExam', { days: daysUntilExam })}</span>
-            {totalToday > 0 && (
-              <>
-                <span className="opacity-30">•</span>
-                <span style={{ color: completedToday === totalToday ? STATUS.success : 'inherit', fontWeight: completedToday === totalToday ? 800 : 500 }}>
-                  {completedToday}/{totalToday} Tasks
-                </span>
-              </>
-            )}
+            {totalToday > 0 && <><span>·</span><span>{t('tasksToday', { count: totalToday })}</span></>}
           </div>
         </div>
+        <span className="w-7 h-7 rounded-[7px] flex items-center justify-center shrink-0" style={{ border: '1px solid var(--theme-border)', color: 'var(--theme-text-muted)' }}>
+          <svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 14 14 6m-6 0h6v6" /></svg>
+        </span>
       </div>
-      
-      <div className="h-1.5 rounded-full overflow-hidden relative" style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
-        <div
-          className="h-full rounded-full transition-all duration-1000 ease-out"
-          style={{ width: `${overallProgress}%`, background: currentPhase.color }}
-        />
-        <div className="absolute inset-0 bg-white/10 animate-[pulse_2s_infinite] pointer-events-none" />
+
+      {/* Week pips */}
+      <div className="flex gap-1 mb-2.5">
+        {Array.from({ length: plan.totalWeeks }).map((_, i) => (
+          <span key={i} className="flex-1 h-1.5 rounded-full" style={{
+            background: i < currentWeek ? phaseColor : i === currentWeek ? `${phaseColor}55` : 'var(--theme-bg-secondary)',
+          }} />
+        ))}
+      </div>
+
+      <div className="flex items-center justify-between text-caption">
+        <span className="truncate pr-2" style={{ color: 'var(--theme-text-secondary)' }}>{t('currentTask')}: {currentTaskTitle}</span>
+        <span className="mono shrink-0" style={{ color: 'var(--theme-text-muted)' }}>{completedToday}/{totalToday}</span>
       </div>
     </Link>
   );

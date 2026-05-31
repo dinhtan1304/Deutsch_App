@@ -4,6 +4,16 @@
     "description": "Track your streak, XP and learning progress."
   },
   "greeting": "Hallo, {name}!",
+  "v2": {
+    "sessionLabel": "Today's session",
+    "sessionStart": "Start session",
+    "greetingSub": "Keep your <s>{streak}-day streak</s> alive and reach <l>Level {level}</l>.",
+    "toNextLevel": "{xp} XP to Lv.{level}",
+    "wordsReviewed": "words reviewed",
+    "avgPerDay": "Avg / day",
+    "currentStreak": "Current streak",
+    "best": "Best"
+  },
   "statusPills": {
     "dayUnit": "day",
     "xpUnit": "XP",
@@ -92,14 +102,17 @@
     "title": "Quick review {count} words",
     "subtitle": "{total} words due in total — one tap to finish",
     "viewAll": "View all →",
-    "tapToReveal": "Tap to reveal meaning"
+    "tapToReveal": "Tap to reveal meaning",
+    "meaningLabel": "Meaning"
   },
   "studyPlanWidget": {
     "ctaTitle": "Schedule your study plan",
     "ctaSubtitle": "Auto-generate a Goethe / TELC roadmap",
     "pausedTitle": "Roadmap paused",
     "pausedSubtitle": "{exam} {level} · Resume now",
-    "daysUntilExam": "{days} days left"
+    "daysUntilExam": "{days} days left",
+    "tasksToday": "{count} tasks today",
+    "currentTask": "This task"
   },
   "weeklyChallenges": {
     "title": "Weekly challenges",

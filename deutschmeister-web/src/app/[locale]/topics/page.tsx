@@ -5,55 +5,19 @@ import { useTranslations } from 'next-intl';
 import { TopicCard } from '@/components/topics/TopicCard';
 import { useTopics, useUserTopicsProgress, useTopicsStats } from '@/hooks/useTopics';
 import { useAuthStore } from '@/stores/authStore';
-import { GRADIENT, ACCENT, STATUS } from '@/lib/tokens';
+import { FilterChip } from '@/components/ui/FilterChip';
+import { IconLayers, IconBook, IconTarget, IconSearch, IconFlame } from '@/components/ui/Icons';
 
-// ─── Inline icons ───────────────────────────────────────────────────────────
-function IconBook({ size = 24 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
-      strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}>
-      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
-      <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
-    </svg>
-  );
-}
-function IconLayers({ size = 26 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
-      strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}>
-      <polygon points="12 2 2 7 12 12 22 7 12 2" />
-      <polyline points="2 17 12 22 22 17" />
-      <polyline points="2 12 12 17 22 12" />
-    </svg>
-  );
-}
-function IconBrain({ size = 26 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
-      strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}>
-      <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96-.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z" />
-      <path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96-.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z" />
-    </svg>
-  );
-}
-function IconTarget({ size = 26 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
-      strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}>
-      <circle cx="12" cy="12" r="10" /><circle cx="12" cy="12" r="6" /><circle cx="12" cy="12" r="2" />
-    </svg>
-  );
-}
-function IconArrowRight({ size = 16 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
-      strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}>
-      <path d="M5 12h14M12 5l7 7-7 7" />
-    </svg>
-  );
-}
+const LEVELS = ['A1', 'A2', 'B1', 'B2'] as const;
+type StatusKey = 'all' | 'active' | 'done' | 'new';
+const STATUS_KEYS: StatusKey[] = ['all', 'active', 'done', 'new'];
+const STATUS_DOT: Record<Exclude<StatusKey, 'all'>, string> = {
+  active: 'var(--m-learning)',
+  done: 'var(--m-learned)',
+  new: 'var(--m-new)',
+};
 
-// ─── Helper ─────────────────────────────────────────────────────────────────
+// localStorage fallback for word-level progress (mirrors previous behavior).
 function getLocalProgress(topicId: string, userId: string | undefined, totalWords: number) {
   try {
     const key = userId ? `topic-learned-${userId}-${topicId}` : `topic-learned-${topicId}`;
@@ -67,20 +31,16 @@ function getLocalProgress(topicId: string, userId: string | undefined, totalWord
   return { wordsLearned: 0, percent: 0 };
 }
 
-const LEVEL_COLORS: Record<string, { color: string; gradient: string; shadow: string }> = {
-  A1: { color: ACCENT.reading, gradient: `linear-gradient(135deg, ${ACCENT.reading}, #16A34A)`, shadow: 'rgba(34,197,94,0.3)' },
-  A2: { color: ACCENT.srs,     gradient: `linear-gradient(135deg, ${ACCENT.srs}, #2563EB)`,     shadow: 'rgba(59,130,246,0.3)' },
-  B1: { color: ACCENT.xp,      gradient: `linear-gradient(135deg, ${ACCENT.xp}, #D97706)`,      shadow: 'rgba(245,158,11,0.3)' },
-  B2: { color: STATUS.danger,  gradient: `linear-gradient(135deg, ${STATUS.danger}, #DC2626)`,  shadow: 'rgba(239,68,68,0.3)' },
-};
+const topicStatus = (pct: number): Exclude<StatusKey, 'all'> => pct >= 100 ? 'done' : pct > 0 ? 'active' : 'new';
 
-// ─── Page ────────────────────────────────────────────────────────────────────
 export default function TopicsPage() {
   const t = useTranslations('vocabulary.topics');
   const { isAuthenticated, user } = useAuthStore();
-  const [selectedLevel, setSelectedLevel] = useState<string>('A1');
+  const [level, setLevel] = useState<string>('all');
+  const [status, setStatus] = useState<StatusKey>('all');
+  const [query, setQuery] = useState('');
 
-  const { data: topicsData, isLoading } = useTopics({ level: selectedLevel, isActive: true });
+  const { data: topicsData, isLoading } = useTopics({ level: level === 'all' ? undefined : level, isActive: true });
   const { data: serverProgressData } = useUserTopicsProgress(isAuthenticated);
   const { data: stats } = useTopicsStats();
 
@@ -93,151 +53,149 @@ export default function TopicsPage() {
       const hasServer = sp && sp.wordsLearned > 0;
       return {
         ...topic,
-        wordsLearned:   hasServer ? sp.wordsLearned   : lp.wordsLearned,
-        wordsTotal:     topic.wordCount,
+        wordsLearned: hasServer ? sp.wordsLearned : lp.wordsLearned,
         masteryPercent: hasServer ? sp.masteryPercent : lp.percent,
-        lastStudiedAt:  sp?.lastStudiedAt || null,
-        completedAt:    sp?.completedAt   || null,
+        lastStudiedAt: sp?.lastStudiedAt || null,
+        completedAt: sp?.completedAt || null,
       };
     });
   }, [topicsData, serverProgressData, user?.id]);
 
-  const totalWords     = topicsWithProgress?.reduce((s, t) => s + t.wordCount, 0) ?? 0;
-  const learnedWords   = topicsWithProgress?.reduce((s, t) => s + t.wordsLearned, 0) ?? 0;
-  const completedCount = topicsWithProgress?.filter(t => t.masteryPercent >= 100).length ?? 0;
+  const totalWords = topicsWithProgress?.reduce((s, tp) => s + tp.wordCount, 0) ?? 0;
+  const learnedWords = topicsWithProgress?.reduce((s, tp) => s + tp.wordsLearned, 0) ?? 0;
+  const completedCount = topicsWithProgress?.filter(tp => tp.masteryPercent >= 100).length ?? 0;
 
-  // Find topic to resume (in-progress, highest mastery)
-  const resumeTopic = useMemo(() => {
-    if (!topicsWithProgress) return null;
+  const inProgress = useMemo(
+    () => (topicsWithProgress ?? []).filter(tp => topicStatus(tp.masteryPercent) === 'active'),
+    [topicsWithProgress],
+  );
+
+  const filtered = useMemo(() => {
+    if (!topicsWithProgress) return undefined;
     return topicsWithProgress
-      .filter(t => t.masteryPercent > 0 && t.masteryPercent < 100)
-      .sort((a, b) => b.masteryPercent - a.masteryPercent)[0] ?? null;
-  }, [topicsWithProgress]);
+      .filter(tp => {
+        if (status !== 'all' && topicStatus(tp.masteryPercent) !== status) return false;
+        if (query) {
+          const q = query.toLowerCase();
+          if (!tp.nameDe.toLowerCase().includes(q) && !tp.nameVi.toLowerCase().includes(q)) return false;
+        }
+        return true;
+      })
+      .sort((a, b) => {
+        const order = { active: 0, new: 1, done: 2 } as const;
+        return order[topicStatus(a.masteryPercent)] - order[topicStatus(b.masteryPercent)];
+      });
+  }, [topicsWithProgress, status, query]);
+
+  const showInProgressStrip = level === 'all' && status === 'all' && !query && inProgress.length > 0;
 
   const statItems = [
-    { label: t('statTopics'),   value: stats?.totalTopics ?? topicsData?.total ?? 0, color: ACCENT.srs,     icon: <IconLayers size={20} /> },
-    { label: t('statWords'),  value: stats?.totalWords ?? totalWords,              color: ACCENT.reading,  icon: <IconBrain size={20} /> },
-    { label: t('statLearned'),     value: learnedWords,                                 color: STATUS.success,  icon: <IconTarget size={20} /> },
+    { label: t('statTopics'), value: stats?.totalTopics ?? topicsData?.total ?? 0, color: 'var(--accent)', icon: <IconLayers size={14} /> },
+    { label: t('statWords'), value: (stats?.totalWords ?? totalWords).toLocaleString('de-DE'), color: 'var(--v2-violet, #A78BFA)', icon: <IconBook size={14} /> },
+    { label: t('statLearned'), value: learnedWords, color: 'var(--m-learned)', icon: <IconTarget size={14} /> },
   ];
 
+  const clearFilters = () => { setLevel('all'); setStatus('all'); setQuery(''); };
+
   return (
-    <div className="max-w-5xl mx-auto px-4 py-8 pb-24">
+    <div className="flex flex-col gap-5 max-w-360 mx-auto">
 
-      {/* ─── Hero Banner ─── */}
-      <div className="relative overflow-hidden rounded-[2.5rem] p-8 mb-10 border"
-        style={{
-          backgroundColor: 'var(--theme-bg-card)',
-          borderColor: 'var(--theme-border)',
-          boxShadow: '0 20px 40px rgba(0,0,0,0.04)',
-        }}>
-        <div className="absolute -right-8 -top-8 w-40 h-40 blur-3xl opacity-15 pointer-events-none"
-          style={{ backgroundColor: ACCENT.srs }} />
-
-        <div className="relative z-10 flex flex-wrap items-center justify-between gap-6">
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 shadow-inner"
-              style={{ background: GRADIENT.action, color: 'white' }}>
-              <IconBook size={24} />
-            </div>
-            <div>
-              <h1 className="text-2xl font-black tracking-tight" style={{ color: 'var(--theme-text-primary)' }}>
-                {t('pageTitle')}
-              </h1>
-              <p className="text-[11px] font-bold uppercase tracking-widest mt-0.5"
-                style={{ color: 'var(--theme-text-muted)', opacity: 0.6 }}>
-                {t('pageSubtitle', { completed: completedCount })}
-              </p>
-            </div>
+      {/* ─── Header ─── */}
+      <header className="flex items-end justify-between gap-5 flex-wrap">
+        <div>
+          <div className="text-caption font-medium uppercase mb-1.5" style={{ color: 'var(--theme-text-muted)', letterSpacing: '.08em' }}>
+            {t('eyebrow')}
           </div>
-
-          {resumeTopic && (
-            <a href={`/topics/${resumeTopic.slug}`}
-              className="flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-black text-white transition-all hover:scale-[1.02] active:scale-95 shadow-xl"
-              style={{ background: GRADIENT.action, boxShadow: '0 10px 25px rgba(59,130,246,0.35)' }}>
-              {t('resumeStudying')}
-              <IconArrowRight size={16} />
-            </a>
-          )}
-        </div>
-      </div>
-
-      {/* ─── Stats (practice style) ─── */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-        {statItems.map((s, i) => (
-          <div key={i}
-            className="relative overflow-hidden rounded-2xl px-5 py-4 border flex items-center gap-4 transition-all duration-300 hover:-translate-y-1"
-            style={{
-              backgroundColor: 'var(--theme-bg-card)',
-              borderColor: 'var(--theme-border)',
-              boxShadow: '0 8px 24px rgba(0,0,0,0.04)',
-            }}>
-            <div className="absolute -right-4 -bottom-4 w-20 h-20 blur-2xl opacity-20" style={{ backgroundColor: s.color }} />
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-              style={{ backgroundColor: `${s.color}18`, color: s.color }}>
-              {s.icon}
-            </div>
-            <div className="relative z-10 min-w-0">
-              <div className="text-[10px] font-black uppercase tracking-widest opacity-40"
-                style={{ color: 'var(--theme-text-primary)' }}>
-                {s.label}
-              </div>
-              <div className="text-2xl font-black tracking-tight" style={{ color: 'var(--theme-text-primary)' }}>
-                {s.value}
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* ─── Level filter (practice style) ─── */}
-      <div className="flex gap-3 overflow-x-auto no-scrollbar pb-1 mb-10">
-        {['A1', 'A2', 'B1', 'B2'].map(level => {
-          const lc = LEVEL_COLORS[level]!;
-          const isActive = selectedLevel === level;
-          return (
-            <button key={level} onClick={() => setSelectedLevel(level)}
-              className="px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all duration-300 whitespace-nowrap"
-              style={isActive ? {
-                background: lc.gradient,
-                color: 'white',
-                boxShadow: `0 10px 20px ${lc.shadow}`,
-              } : {
-                backgroundColor: 'var(--theme-bg-secondary)',
-                color: 'var(--theme-text-muted)',
-              }}>
-              {level}
-            </button>
-          );
-        })}
-      </div>
-
-      {/* ─── Topic list ─── */}
-      {isLoading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {[...Array(6)].map((_, i) => (
-            <div key={i} className="h-28 rounded-[2.5rem] animate-pulse"
-              style={{ backgroundColor: 'var(--theme-bg-secondary)' }} />
-          ))}
-        </div>
-      ) : topicsWithProgress && topicsWithProgress.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {topicsWithProgress.map(topic => (
-            <TopicCard key={topic.id} topic={topic} showProgress />
-          ))}
-        </div>
-      ) : (
-        <div className="text-center py-28 rounded-[3.5rem] border-2 border-dashed" style={{ borderColor: 'var(--theme-border)' }}>
-          <div className="w-24 h-24 rounded-4xl mx-auto flex items-center justify-center mb-8 shadow-2xl text-white"
-            style={{ background: GRADIENT.action }}>
-            <IconBook size={40} />
-          </div>
-          <h3 className="text-2xl font-black mb-3" style={{ color: 'var(--theme-text-primary)' }}>
-            {t('emptyTitle')}
-          </h3>
-          <p className="text-base mb-10 max-w-xs mx-auto font-medium"
-            style={{ color: 'var(--theme-text-muted)', opacity: 0.6 }}>
-            {t('emptyBody')}
+          <h1 className="font-bold" style={{ fontSize: 30, letterSpacing: '-.02em', color: 'var(--theme-text-primary)' }}>
+            {t('pageTitle')}
+          </h1>
+          <p className="mt-1.5 text-body" style={{ color: 'var(--theme-text-secondary)' }}>
+            {t('pageSubtitle', { completed: completedCount })}
           </p>
+        </div>
+
+        <div className="flex gap-2">
+          {statItems.map((s, i) => (
+            <div key={i} className="rounded-[10px] px-3.5 py-2.5 flex flex-col gap-0.5" style={{ minWidth: 104, background: 'var(--theme-bg-card)', border: '1px solid var(--theme-border)' }}>
+              <div className="flex items-center gap-1.5">
+                <span style={{ color: s.color }}>{s.icon}</span>
+                <span className="text-caption uppercase font-medium" style={{ color: 'var(--theme-text-muted)', letterSpacing: '.04em' }}>{s.label}</span>
+              </div>
+              <span className="mono font-bold" style={{ fontSize: 20, letterSpacing: '-.02em', color: 'var(--theme-text-primary)' }}>{s.value}</span>
+            </div>
+          ))}
+        </div>
+      </header>
+
+      {/* ─── In-progress strip ─── */}
+      {showInProgressStrip && (
+        <section>
+          <div className="flex items-center gap-2 mb-3">
+            <IconFlame size={14} style={{ color: 'var(--m-learning)' }} />
+            <h2 className="text-caption font-semibold uppercase" style={{ color: 'var(--theme-text-secondary)', letterSpacing: '.06em' }}>
+              {t('inProgressTitle', { count: inProgress.length })}
+            </h2>
+          </div>
+          <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))' }}>
+            {inProgress.slice(0, 3).map(tp => <TopicCard key={tp.id} topic={tp} showProgress large />)}
+          </div>
+        </section>
+      )}
+
+      {/* ─── Filter bar ─── */}
+      <div className="rounded-[14px] border p-3 flex flex-wrap items-center gap-x-3 gap-y-2.5"
+        style={{ borderColor: 'var(--theme-border)', background: 'var(--theme-bg-card)' }}>
+        <div className="flex items-center gap-2 h-8.5 px-3 rounded-lg flex-1 min-w-50" style={{ background: 'var(--theme-bg-secondary)', border: '1px solid var(--theme-border)' }}>
+          <span style={{ color: 'var(--theme-text-muted)' }}><IconSearch size={14} /></span>
+          <input value={query} onChange={e => setQuery(e.target.value)} placeholder={t('searchPlaceholder')}
+            className="flex-1 h-full bg-transparent text-sm outline-none" style={{ color: 'var(--theme-text-primary)' }} />
+        </div>
+
+        <div className="flex items-center gap-1.5">
+          <FilterChip active={level === 'all'} size="sm" onClick={() => setLevel('all')}>{t('levelAll')}</FilterChip>
+          {LEVELS.map(l => (
+            <FilterChip key={l} active={level === l} size="sm" onClick={() => setLevel(l)}>
+              <span className="mono">{l}</span>
+            </FilterChip>
+          ))}
+        </div>
+
+        <span className="w-px h-5 hidden sm:block" style={{ background: 'var(--theme-border)' }} />
+
+        <div className="flex items-center gap-1.5">
+          {STATUS_KEYS.map(k => (
+            <FilterChip key={k} active={status === k} size="sm" onClick={() => setStatus(k)}>
+              {k !== 'all' && <span className="w-1.5 h-1.5 rounded-full" style={{ background: STATUS_DOT[k as Exclude<StatusKey, 'all'>] }} />}
+              {t(`status${k.charAt(0).toUpperCase()}${k.slice(1)}` as 'statusAll')}
+            </FilterChip>
+          ))}
+        </div>
+      </div>
+
+      {/* ─── Results / grid ─── */}
+      {isLoading ? (
+        <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))' }}>
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="h-36 rounded-[14px] animate-pulse" style={{ backgroundColor: 'var(--theme-bg-secondary)' }} />
+          ))}
+        </div>
+      ) : filtered && filtered.length > 0 ? (
+        <>
+          <div className="text-body" style={{ color: 'var(--theme-text-secondary)' }}>
+            {t('showingCount', { shown: filtered.length, total: topicsWithProgress?.length ?? 0 })}
+          </div>
+          <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))' }}>
+            {filtered.map(tp => <TopicCard key={tp.id} topic={tp} showProgress />)}
+          </div>
+        </>
+      ) : (
+        <div className="text-center py-14 rounded-[14px]" style={{ background: 'var(--theme-bg-card)', border: '1px dashed var(--theme-border)' }}>
+          <div className="text-3xl mb-2">📚</div>
+          <h3 className="font-semibold mb-1" style={{ fontSize: 15, color: 'var(--theme-text-primary)' }}>{t('emptyFilterTitle')}</h3>
+          <p className="text-body mb-4" style={{ color: 'var(--theme-text-muted)' }}>{t('emptyFilterBody')}</p>
+          <button onClick={clearFilters} className="px-4 py-2 rounded-lg text-body font-semibold text-white" style={{ background: 'var(--accent)' }}>
+            {t('clearFilters')}
+          </button>
         </div>
       )}
     </div>

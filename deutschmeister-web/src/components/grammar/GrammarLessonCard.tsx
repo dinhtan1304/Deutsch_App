@@ -4,7 +4,7 @@ import { GrammarLesson } from '@/types/grammar';
 import Link from 'next/link';
 import { useTranslations, useLocale } from 'next-intl';
 import { pickField } from '@/i18n/pickLocale';
-import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import { ACCENT, STATUS } from '@/lib/tokens';
 
 interface GrammarLessonCardProps {
   lesson: GrammarLesson;
@@ -76,94 +76,62 @@ const GrammarLessonCard = ({ lesson, progress, locked, lockedReason }: GrammarLe
     return               { label: t('statusNotStarted'), bg: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' };
   })();
 
+  const nodeColor = isCompleted ? 'var(--m-learned)' : isInProgress ? 'var(--m-learning)' : isLocked ? 'var(--theme-text-muted)' : levelColor;
+
   const cardContent = (
     <div
-      className={`group relative overflow-hidden rounded-2xl p-4 transition-all duration-500 border border-transparent
-        ${isLocked ? 'opacity-70 cursor-not-allowed' : 'hover:-translate-y-1 hover:shadow-xl hover:border-violet-500/20'}`}
+      className={`word-card-v2 group relative rounded-[14px] p-4 ${isLocked ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}`}
       style={{
         backgroundColor: 'var(--theme-bg-card)',
-        boxShadow: '0 4px 16px rgba(0,0,0,0.05), inset 0 0 0 1px rgba(255,255,255,0.05)',
-      }}
+        border: '1px solid var(--theme-border)',
+        ['--card-accent' as string]: isLocked ? 'var(--theme-border)' : levelColor,
+      } as React.CSSProperties}
     >
-      {/* Hover aura */}
-      {!isLocked && (
-        <div className="absolute inset-0 opacity-0 group-hover:opacity-[0.03] transition-opacity duration-700 pointer-events-none"
-          style={{ background: GRADIENT.writing }} />
-      )}
-
       <div className="relative z-10 flex items-center gap-4">
-        {/* Icon badge */}
+        {/* Status node */}
         <div
-          className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 shadow-md transition-all duration-500 group-hover:scale-110 group-hover:rotate-3"
+          className={`w-11 h-11 rounded-full flex items-center justify-center shrink-0 ${isCompleted ? 'v2-node-done' : ''}`}
           style={{
-            background: isCompleted ? GRADIENT.writing : isLocked ? 'var(--theme-bg-secondary)' : `${levelColor}18`,
-            color: isCompleted ? 'white' : isLocked ? 'var(--theme-text-muted)' : levelColor,
-            boxShadow: isCompleted ? '0 6px 14px rgba(99,102,241,0.25)' : 'none',
+            background: isCompleted ? undefined : isLocked ? 'var(--theme-bg-secondary)' : `color-mix(in srgb, ${nodeColor} 16%, transparent)`,
+            color: isCompleted ? 'white' : nodeColor,
+            border: isLocked ? '1px dashed var(--theme-border)' : undefined,
           }}
         >
-          {isLocked
-            ? <IconLock size={22} />
-            : isCompleted
-              ? <IconCheck size={22} />
-              : <span className="text-lg font-black">{lesson.lessonNumber}</span>
-          }
+          {isLocked ? <IconLock size={18} /> : isCompleted ? <IconCheck size={20} /> : <span className="mono text-base font-bold">{lesson.lessonNumber}</span>}
         </div>
 
         {/* Content */}
         <div className="flex-1 min-w-0">
-          {/* Badges */}
-          <div className="flex items-center gap-2 mb-2 flex-wrap">
-            <span
-              className="text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg text-white shadow-sm"
-              style={{ backgroundColor: levelColor }}
-            >
-              {lesson.level}
-            </span>
-            <span
-              className="text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg"
-              style={{ backgroundColor: statusConfig.bg, color: statusConfig.color }}
-            >
-              {statusConfig.label}
-            </span>
+          <div className="flex items-center gap-1.5 mb-1.5 flex-wrap">
+            <span className="mono text-[10px] font-bold px-1.5 py-0.5 rounded text-white" style={{ background: levelColor }}>{lesson.level}</span>
+            <span className="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded" style={{ background: statusConfig.bg, color: statusConfig.color, letterSpacing: '.04em' }}>{statusConfig.label}</span>
             {lesson.estimatedMinutes && (
-              <span
-                className="text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg border"
-                style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-muted)' }}
-              >
+              <span className="mono text-[10px] px-1.5 py-0.5 rounded" style={{ background: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)', border: '1px solid var(--theme-border)' }}>
                 {t('minutesShortCard', { min: lesson.estimatedMinutes })}
               </span>
             )}
           </div>
 
-          {/* Title */}
-          <p className="text-base font-black tracking-tight mb-0.5 truncate" style={{ color: 'var(--theme-text-primary)' }}>
+          <p className="font-bold truncate" style={{ fontSize: 16, letterSpacing: '-.01em', color: isLocked ? 'var(--theme-text-secondary)' : 'var(--theme-text-primary)' }}>
             {pickField(lesson, 'title', locale)}
           </p>
-
-          {/* German subtitle + exercise count */}
-          <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest"
-            style={{ color: 'var(--theme-text-primary)', opacity: 0.4 }}>
-            <span className="italic normal-case">{lesson.titleDe}</span>
+          <div className="flex items-center gap-2 text-caption mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>
+            <span className="italic truncate">{lesson.titleDe}</span>
             {lesson.exerciseCount != null && lesson.exerciseCount > 0 && (
               <>
                 <span className="w-1 h-1 rounded-full bg-current shrink-0" />
-                <span>{t('exerciseCount', { count: lesson.exerciseCount })}</span>
+                <span className="shrink-0">{t('exerciseCount', { count: lesson.exerciseCount })}</span>
               </>
             )}
           </div>
 
-          {/* Lock reason — always visible, no hover needed */}
           {isLocked && lockedReason && (
-            <p className="text-xs mt-2 font-semibold" style={{ color: STATUS.danger }}>
-              🔒 {lockedReason}
-            </p>
+            <p className="text-caption mt-1.5 font-medium" style={{ color: 'var(--m-learning)' }}>🔒 {lockedReason}</p>
           )}
 
-          {/* Progress bar if in_progress */}
           {isInProgress && exercisePct > 0 && (
             <div className="mt-2 h-1 rounded-full overflow-hidden" style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
-              <div className="h-full rounded-full transition-all duration-700"
-                style={{ width: `${exercisePct}%`, background: GRADIENT.writing }} />
+              <div className="h-full rounded-full transition-all duration-700" style={{ width: `${exercisePct}%`, background: 'var(--m-learning)' }} />
             </div>
           )}
         </div>
@@ -171,8 +139,8 @@ const GrammarLessonCard = ({ lesson, progress, locked, lockedReason }: GrammarLe
         {/* Score or chevron */}
         {isCompleted && progress?.score !== undefined ? (
           <div className="text-right shrink-0">
-            <div className="text-2xl font-black tracking-tight" style={{ color: getScoreColor(progress.score) }}>
-              {Math.round(progress.score)}<span className="text-xs ml-0.5">{t('scoreSuffix')}</span>
+            <div className="mono text-2xl font-bold tracking-tight" style={{ color: getScoreColor(progress.score) }}>
+              {Math.round(progress.score)}<span className="text-caption ml-0.5">{t('scoreSuffix')}</span>
             </div>
           </div>
         ) : !isLocked ? (

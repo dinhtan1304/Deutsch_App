@@ -4,6 +4,16 @@
     "description": "Theo dõi streak, XP và tiến trình học tập của bạn."
   },
   "greeting": "Hallo, {name}!",
+  "v2": {
+    "sessionLabel": "Phiên học hôm nay",
+    "sessionStart": "Bắt đầu phiên",
+    "greetingSub": "Giữ chuỗi <s>{streak} ngày</s> và tiến tới <l>Level {level}</l>.",
+    "toNextLevel": "còn {xp} XP → Lv.{level}",
+    "wordsReviewed": "từ đã ôn",
+    "avgPerDay": "Trung bình/ngày",
+    "currentStreak": "Streak hiện tại",
+    "best": "Kỷ lục"
+  },
   "statusPills": {
     "dayUnit": "ngày",
     "xpUnit": "XP",
@@ -92,14 +102,17 @@
     "title": "Ôn nhanh {count} từ",
     "subtitle": "Tổng {total} từ chờ ôn — bấm 1 lần là xong",
     "viewAll": "Xem tất cả →",
-    "tapToReveal": "Nhấn để xem nghĩa"
+    "tapToReveal": "Nhấn để xem nghĩa",
+    "meaningLabel": "Nghĩa"
   },
   "studyPlanWidget": {
     "ctaTitle": "Lên lịch học cá nhân",
     "ctaSubtitle": "Tự động tạo lộ trình Goethe / TELC",
     "pausedTitle": "Lộ trình đang tạm nghỉ",
     "pausedSubtitle": "{exam} {level} · Tiếp tục ngay",
-    "daysUntilExam": "Còn {days} ngày"
+    "daysUntilExam": "Còn {days} ngày",
+    "tasksToday": "{count} task hôm nay",
+    "currentTask": "Task này"
   },
   "weeklyChallenges": {
     "title": "Thử thách tuần",
