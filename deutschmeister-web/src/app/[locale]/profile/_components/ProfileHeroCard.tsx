@@ -95,7 +95,7 @@ export function ProfileHeroCard({ user, xpInfo, isLoading, points, onEdit, reado
           {/* Avatar */}
           <div className="relative shrink-0 group w-fit self-start">
             <div className="rounded-full p-1 transition-all duration-500 group-hover:shadow-[0_0_30px_rgba(99,102,241,0.5)] w-fit"
-              style={{ background: 'linear-gradient(135deg, #6366F1, #10B981, #F59E0B)' }}>
+              style={{ background: 'conic-gradient(from 0deg, var(--accent), var(--v2-violet, #A78BFA), var(--m-learned, #4ADE80), var(--accent))' }}>
               <div className="rounded-full p-1 w-fit" style={{ backgroundColor: 'var(--theme-bg-card)' }}>
                 <div className="rounded-full flex items-center justify-center text-white text-4xl font-black overflow-hidden relative"
                   style={{
