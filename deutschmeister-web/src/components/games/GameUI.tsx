@@ -5,6 +5,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { useCreatePersonalWord } from '@/hooks/usePersonalWords';
 import { useAuthStore } from '@/stores/authStore';
 import { UpsellTrigger } from '@/components/subscription/UpsellTrigger';
@@ -207,6 +208,7 @@ export function AnswerReview<T extends { word: { word: string }; isCorrect: bool
   getCorrectArticle: (a: T) => { article: string; color: string };
   getSelectedLabel?: (a: T) => string | null;
 }) {
+  const t = useTranslations('games.gameUi');
   return (
     <div className="rounded-2xl border overflow-hidden"
       style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
@@ -214,7 +216,7 @@ export function AnswerReview<T extends { word: { word: string }; isCorrect: bool
         style={{ borderColor: 'var(--theme-border)' }}>
         <IconLightbulb size={16} style={{ color: ACCENT.xp }} />
         <h2 className="text-[15px] font-bold" style={{ color: 'var(--theme-text-primary)' }}>
-          Chi tiết câu trả lời
+          {t('answerDetails')}
         </h2>
       </div>
       <div className="max-h-96 overflow-y-auto divide-y" style={{ borderColor: 'var(--theme-border)' }}>
@@ -242,7 +244,7 @@ export function AnswerReview<T extends { word: { word: string }; isCorrect: bool
               </div>
               {!record.isCorrect && wrongLabel && (
                 <span className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>
-                  Bạn chọn: <span style={{ color: STATUS.danger }}>{wrongLabel}</span>
+                  {t('youChose')} <span style={{ color: STATUS.danger }}>{wrongLabel}</span>
                 </span>
               )}
             </div>
@@ -275,6 +277,7 @@ export function KBD({ children }: { children: React.ReactNode }) {
 
 /** CTA to batch-add wrong words to Word Bank after a game */
 export function AddWrongWordsToBank({ wrongWords }: { wrongWords: Word[] }) {
+  const t = useTranslations('games.gameUi');
   const createWord = useCreatePersonalWord();
   const [adding, setAdding] = useState(false);
   const [added, setAdded] = useState(false);
@@ -287,7 +290,7 @@ export function AddWrongWordsToBank({ wrongWords }: { wrongWords: Word[] }) {
       <div className="max-w-2xl mx-auto px-4 sm:px-6 mt-4">
         <div className="text-center py-3 rounded-xl text-body font-semibold"
           style={{ background: `${STATUS.success}14`, color: STATUS.success, border: `1px solid ${STATUS.success}26` }}>
-          ✓ Đã thêm {count} từ vào Word Bank
+          {t('addedWrong', { count })}
         </div>
       </div>
     );
@@ -323,7 +326,7 @@ export function AddWrongWordsToBank({ wrongWords }: { wrongWords: Word[] }) {
           opacity: adding ? 0.7 : 1,
           cursor: adding ? 'wait' : 'pointer',
         }}>
-        {adding ? 'Đang thêm...' : `+ Thêm ${count} từ sai vào Word Bank`}
+        {adding ? t('adding') : t('addWrongCta', { count })}
       </button>
     </div>
   );
@@ -335,6 +338,7 @@ export function AddWrongWordsToBank({ wrongWords }: { wrongWords: Word[] }) {
  * game-result container so it aligns with AnswerReview / AddWrongWordsToBank.
  */
 export function GameResultUpsell() {
+  const t = useTranslations('games.gameUi');
   const { isAuthenticated } = useAuthStore();
 
   if (!isAuthenticated) {
@@ -344,21 +348,21 @@ export function GameResultUpsell() {
           style={{ backgroundColor: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}>
           <div className="text-2xl mb-2">🎉</div>
           <p className="font-bold text-base mb-1" style={{ color: 'var(--theme-text-primary)' }}>
-            Đăng ký để lưu điểm và nhận XP!
+            {t('signupTitle')}
           </p>
           <p className="text-sm mb-4" style={{ color: 'var(--theme-text-muted)' }}>
-            Tạo tài khoản miễn phí để theo dõi tiến trình, tích XP và mở khóa thêm tính năng.
+            {t('signupDesc')}
           </p>
           <div className="flex gap-3 justify-center flex-wrap">
             <Link href="/auth/register"
               className="px-5 py-2.5 rounded-xl text-sm font-bold text-white transition-opacity hover:opacity-90"
               style={{ background: GRADIENT.brand }}>
-              Đăng ký miễn phí
+              {t('signupFree')}
             </Link>
             <Link href="/auth/login"
               className="px-5 py-2.5 rounded-xl text-sm font-semibold border transition-colors hover:opacity-80"
               style={{ color: 'var(--theme-text-secondary)', borderColor: 'var(--theme-border)' }}>
-              Đăng nhập
+              {t('login')}
             </Link>
           </div>
         </div>
@@ -370,9 +374,9 @@ export function GameResultUpsell() {
     <div className="max-w-2xl mx-auto px-4 sm:px-6 mt-4">
       <UpsellTrigger
         variant="compact"
-        title="Muốn thi thật Goethe/TELC?"
-        description="Mở khóa đề chuẩn + AI chấm không giới hạn"
-        ctaLabel="Xem Premium"
+        title={t('upsellTitle')}
+        description={t('upsellDesc')}
+        ctaLabel={t('upsellCta')}
         source="game_result"
       />
     </div>
@@ -399,9 +403,11 @@ export function useGameTimer(active: boolean): string {
 }
 
 /** SRS-style playing header with × close, game title, streak + timer pills */
-export function GamePlayHeader({ title, subtitle = 'Trò chơi', streak, timer, onExit }: {
+export function GamePlayHeader({ title, subtitle, streak, timer, onExit }: {
   title: string; subtitle?: string; streak?: number; timer?: string; onExit: () => void;
 }) {
+  const t = useTranslations('games.gameUi');
+  const subtitleText = subtitle ?? t('defaultSubtitle');
   return (
     <div className="flex items-center justify-between mb-5">
       <div className="flex items-center gap-3">
@@ -411,7 +417,7 @@ export function GamePlayHeader({ title, subtitle = 'Trò chơi', streak, timer, 
           <IconX size={16} />
         </button>
         <div>
-          <p className="text-caption font-medium" style={{ color: 'var(--theme-text-muted)' }}>{subtitle}</p>
+          <p className="text-caption font-medium" style={{ color: 'var(--theme-text-muted)' }}>{subtitleText}</p>
           <p className="text-[15px] font-bold leading-tight" style={{ color: 'var(--theme-text-primary)' }}>{title}</p>
         </div>
       </div>

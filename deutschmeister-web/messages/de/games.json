@@ -308,5 +308,20 @@
       "selectLeft": "Klicke ein Wort links, um zu beginnen",
       "selectRight": "Wähle nun die passende Bedeutung rechts →"
     }
+  },
+  "gameUi": {
+    "answerDetails": "Antwortdetails",
+    "youChose": "Du hast gewählt:",
+    "addedWrong": "✓ {count} Wörter zur Wortbank hinzugefügt",
+    "adding": "Wird hinzugefügt...",
+    "addWrongCta": "+ {count} falsche Wörter zur Wortbank hinzufügen",
+    "signupTitle": "Registriere dich, um Punkte zu speichern und XP zu sammeln!",
+    "signupDesc": "Erstelle ein kostenloses Konto, um Fortschritt zu verfolgen, XP zu sammeln und mehr freizuschalten.",
+    "signupFree": "Kostenlos registrieren",
+    "login": "Anmelden",
+    "upsellTitle": "Willst du eine echte Goethe/TELC-Prüfung?",
+    "upsellDesc": "Standardprüfungen + unbegrenzte KI-Bewertung freischalten",
+    "upsellCta": "Premium ansehen",
+    "defaultSubtitle": "Spiel"
   }
 }

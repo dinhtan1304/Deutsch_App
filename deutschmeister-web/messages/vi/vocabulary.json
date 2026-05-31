@@ -370,6 +370,15 @@
       }
     }
   },
+  "grammarAnalyzer": {
+    "floatButton": "Phân tích ngữ pháp",
+    "floatTitle": "Phân tích: \"{text}\"",
+    "analyzing": "AI đang phân tích ngữ pháp...",
+    "correctedPrefix": "Sửa: ",
+    "sentenceStructure": "Cấu trúc câu",
+    "explanation": "🇻🇳 Giải thích",
+    "rules": "📐 Quy tắc"
+  },
   "community": {
     "listTitle": "Khám phá bộ chủ đề cộng đồng",
     "listSubtitle": "Học từ vựng do cộng đồng tạo ra, follow tác giả yêu thích, hoặc sao chép về kho cá nhân",

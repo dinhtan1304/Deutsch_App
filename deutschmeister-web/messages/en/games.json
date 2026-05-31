@@ -308,5 +308,20 @@
       "selectLeft": "Click a word on the left to start matching",
       "selectRight": "Now pick the matching meaning on the right →"
     }
+  },
+  "gameUi": {
+    "answerDetails": "Answer details",
+    "youChose": "You chose:",
+    "addedWrong": "✓ Added {count} words to Word Bank",
+    "adding": "Adding...",
+    "addWrongCta": "+ Add {count} wrong words to Word Bank",
+    "signupTitle": "Sign up to save your score and earn XP!",
+    "signupDesc": "Create a free account to track progress, earn XP, and unlock more features.",
+    "signupFree": "Sign up free",
+    "login": "Log in",
+    "upsellTitle": "Want a real Goethe/TELC exam?",
+    "upsellDesc": "Unlock standard exams + unlimited AI grading",
+    "upsellCta": "View Premium",
+    "defaultSubtitle": "Game"
   }
 }

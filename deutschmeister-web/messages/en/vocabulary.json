@@ -370,6 +370,15 @@
       }
     }
   },
+  "grammarAnalyzer": {
+    "floatButton": "Analyze grammar",
+    "floatTitle": "Analyze: \"{text}\"",
+    "analyzing": "AI is analyzing the grammar...",
+    "correctedPrefix": "Fixed: ",
+    "sentenceStructure": "Sentence structure",
+    "explanation": "🇻🇳 Explanation",
+    "rules": "📐 Rules"
+  },
   "community": {
     "listTitle": "Discover community topic sets",
     "listSubtitle": "Learn vocabulary created by the community, follow your favourite authors, or copy them to your personal library",

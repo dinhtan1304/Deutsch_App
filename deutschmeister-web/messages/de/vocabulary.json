@@ -370,6 +370,15 @@
       }
     }
   },
+  "grammarAnalyzer": {
+    "floatButton": "Grammatik analysieren",
+    "floatTitle": "Analysieren: \"{text}\"",
+    "analyzing": "KI analysiert die Grammatik...",
+    "correctedPrefix": "Korrigiert: ",
+    "sentenceStructure": "Satzstruktur",
+    "explanation": "🇻🇳 Erklärung",
+    "rules": "📐 Regeln"
+  },
   "community": {
     "listTitle": "Community-Themensets entdecken",
     "listSubtitle": "Lerne von der Community erstellten Wortschatz, folge Lieblingsautoren oder kopiere Sets in deine persönliche Bibliothek",

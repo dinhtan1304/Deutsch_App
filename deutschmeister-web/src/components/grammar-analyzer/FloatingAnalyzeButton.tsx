@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { useGrammarAnalyzerStore } from '@/stores/grammarAnalyzerStore';
 import { useGrammarAnalyze } from '@/hooks/useGrammarAnalyze';
 
@@ -8,6 +9,7 @@ import { useGrammarAnalyze } from '@/hooks/useGrammarAnalyze';
  * Tự động định vị ngay dưới vùng text được chọn.
  */
 export function FloatingAnalyzeButton() {
+  const t = useTranslations('vocabulary.grammarAnalyzer');
   const { showButton, buttonPosition, selectedSentence } = useGrammarAnalyzerStore();
   const { analyze } = useGrammarAnalyze();
 
@@ -34,10 +36,10 @@ export function FloatingAnalyzeButton() {
           left: x,
           zIndex: 9998,
         }}
-        title={`Phân tích: "${selectedSentence.slice(0, 40)}${selectedSentence.length > 40 ? '...' : ''}"`}
+        title={t('floatTitle', { text: `${selectedSentence.slice(0, 40)}${selectedSentence.length > 40 ? '...' : ''}` })}
       >
         <span style={{ fontSize: '14px' }}>🔍</span>
-        <span>Phân tích ngữ pháp</span>
+        <span>{t('floatButton')}</span>
       </button>
 
       <style jsx global>{`

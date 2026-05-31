@@ -308,5 +308,20 @@
       "selectLeft": "Click một từ bên trái để bắt đầu ghép cặp",
       "selectRight": "Bây giờ chọn nghĩa tương ứng bên phải →"
     }
+  },
+  "gameUi": {
+    "answerDetails": "Chi tiết câu trả lời",
+    "youChose": "Bạn chọn:",
+    "addedWrong": "✓ Đã thêm {count} từ vào Word Bank",
+    "adding": "Đang thêm...",
+    "addWrongCta": "+ Thêm {count} từ sai vào Word Bank",
+    "signupTitle": "Đăng ký để lưu điểm và nhận XP!",
+    "signupDesc": "Tạo tài khoản miễn phí để theo dõi tiến trình, tích XP và mở khóa thêm tính năng.",
+    "signupFree": "Đăng ký miễn phí",
+    "login": "Đăng nhập",
+    "upsellTitle": "Muốn thi thật Goethe/TELC?",
+    "upsellDesc": "Mở khóa đề chuẩn + AI chấm không giới hạn",
+    "upsellCta": "Xem Premium",
+    "defaultSubtitle": "Trò chơi"
   }
 }

@@ -2,6 +2,7 @@
 /* eslint-disable no-restricted-syntax */
 
 import { useEffect, useRef } from 'react';
+import { useTranslations } from 'next-intl';
 import { ACCENT, STATUS } from '@/lib/tokens';
 import { useGrammarAnalyzerStore } from '@/stores/grammarAnalyzerStore';
 
@@ -30,6 +31,7 @@ function getRoleColor(role: string): string {
 }
 
 export function GrammarAnalysisPopup() {
+  const t = useTranslations('vocabulary.grammarAnalyzer');
   const { showPopup, isAnalyzing, result, error, popupPosition, closePopup } =
     useGrammarAnalyzerStore();
   const popupRef = useRef<HTMLDivElement>(null);
@@ -79,7 +81,7 @@ export function GrammarAnalysisPopup() {
         {isAnalyzing && (
           <div className="gp-body" style={{ textAlign: 'center', padding: '32px 24px' }}>
             <div className="gp-spinner" />
-            <p className="gp-muted" style={{ marginTop: '12px' }}>AI đang phân tích ngữ pháp...</p>
+            <p className="gp-muted" style={{ marginTop: '12px' }}>{t('analyzing')}</p>
           </div>
         )}
 
@@ -102,7 +104,7 @@ export function GrammarAnalysisPopup() {
               {result.hasErrors && result.correctedSentence !== result.sentence && (
                 <div style={{ marginTop: '6px', fontSize: '13px' }}>
                   <span style={{ color: STATUS.success }}>✓</span>{' '}
-                  <span className="gp-muted">Sửa: </span>
+                  <span className="gp-muted">{t('correctedPrefix')}</span>
                   <span className="gp-primary" style={{ fontStyle: 'italic' }}>{result.correctedSentence}</span>
                 </div>
               )}
@@ -116,7 +118,7 @@ export function GrammarAnalysisPopup() {
 
             {/* Components: Phân tích thành phần */}
             <div className="gp-section">
-              <div className="gp-label">Cấu trúc câu</div>
+              <div className="gp-label">{t('sentenceStructure')}</div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '8px' }}>
                 {result.components.map((comp, i) => (
                   <span
@@ -149,7 +151,7 @@ export function GrammarAnalysisPopup() {
 
             {/* Giải thích tổng quan */}
             <div className="gp-section gp-explain-box">
-              <div className="gp-label">🇻🇳 Giải thích</div>
+              <div className="gp-label">{t('explanation')}</div>
               <p className="gp-primary" style={{ fontSize: '14px', lineHeight: 1.6 }}>
                 {result.explanationVi}
               </p>
@@ -158,7 +160,7 @@ export function GrammarAnalysisPopup() {
             {/* Quy tắc ngữ pháp */}
             {result.grammarRules.length > 0 && (
               <div className="gp-section">
-                <div className="gp-label">📐 Quy tắc</div>
+                <div className="gp-label">{t('rules')}</div>
                 {result.grammarRules.map((rule, i) => (
                   <div key={i} className="gp-rule">
                     <span className="gp-primary" style={{ fontWeight: 600, fontSize: '13px' }}>
