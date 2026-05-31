@@ -310,6 +310,8 @@
   },
   "writing": {
     "list": {
+      "eyebrow": "Schreiben · Viết",
+      "heroNewTitle": "Tạo đề viết mới với AI",
       "title": "Luyện Viết",
       "subtitle": "AI tạo đề bài tiếng Đức — Viết và nhận phản hồi chi tiết",
       "examLink": "Theo đề chuẩn →",
@@ -550,6 +552,8 @@
   },
   "speaking": {
     "list": {
+      "eyebrow": "Sprechen · Nói",
+      "heroNewTitle": "Tạo đề nói mới với AI",
       "title": "Luyện Nói",
       "subtitle": "AI tạo prompt tiếng Đức, ghi âm và nhận phản hồi chi tiết (v3)",
       "examLink": "Theo đề chuẩn →",

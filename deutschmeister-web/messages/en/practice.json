@@ -310,6 +310,8 @@
   },
   "writing": {
     "list": {
+      "eyebrow": "Schreiben · Writing",
+      "heroNewTitle": "Generate a new writing prompt with AI",
       "title": "Writing Practice",
       "subtitle": "AI-generated German prompts — write and get detailed feedback",
       "examLink": "Mock exam →",
@@ -550,6 +552,8 @@
   },
   "speaking": {
     "list": {
+      "eyebrow": "Sprechen · Speaking",
+      "heroNewTitle": "Generate a new speaking prompt with AI",
       "title": "Speaking Practice",
       "subtitle": "AI generates German prompts — record and get detailed feedback (v3)",
       "examLink": "Mock exam →",

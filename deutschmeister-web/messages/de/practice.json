@@ -310,6 +310,8 @@
   },
   "writing": {
     "list": {
+      "eyebrow": "Schreiben · Viết",
+      "heroNewTitle": "Neue Schreibaufgabe mit KI erstellen",
       "title": "Schreibübung",
       "subtitle": "KI generiert deutsche Schreibaufgaben — schreiben und detailliertes Feedback erhalten",
       "examLink": "Modellprüfung →",
@@ -550,6 +552,8 @@
   },
   "speaking": {
     "list": {
+      "eyebrow": "Sprechen · Nói",
+      "heroNewTitle": "Neue Sprechaufgabe mit KI erstellen",
       "title": "Sprechübung",
       "subtitle": "KI generiert deutsche Prompts — aufnehmen und detailliertes Feedback erhalten (v3)",
       "examLink": "Modellprüfung →",
