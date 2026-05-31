@@ -1,27 +1,27 @@
 import type { Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
+import type { AppLocale } from '@/i18n/routing';
 import { RequireAuth } from '@/components/ui';
 
-export const metadata: Metadata = {
-  title: 'Luyện thi tiếng Đức Goethe & TELC — Đề chuẩn AI chấm | DeutschMeister',
-  description:
-    'Luyện 4 kỹ năng Lesen, Hören, Schreiben, Sprechen — đề chuẩn Goethe & TELC A1/A2/B1 với AI chấm bài chi tiết bằng tiếng Việt. Free practice + đề thi thử đầy đủ Teile.',
-  keywords: [
-    'luyện thi tiếng Đức',
-    'luyện đề Goethe',
-    'luyện đề TELC',
-    'thi A1 A2 B1 tiếng Đức',
-    'AI chấm Schreiben',
-    'AI chấm Sprechen',
-    'đề thi thử tiếng Đức',
-  ],
-  alternates: { canonical: '/practice-test' },
-  openGraph: {
-    title: 'Luyện thi Goethe & TELC A1/A2/B1 — Deutschmeister',
-    description:
-      'Đề thi chuẩn format 4 kỹ năng. AI chấm Schreiben/Sprechen và giải thích lỗi sai bằng tiếng Việt.',
-    url: '/practice-test',
-  },
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: AppLocale }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'metadata.pages.practiceTest' });
+  return {
+    title: t('title'),
+    description: t('description'),
+    keywords: t('keywords').split(',').map((k) => k.trim()),
+    alternates: { canonical: '/practice-test' },
+    openGraph: {
+      title: t('ogTitle'),
+      description: t('ogDescription'),
+      url: '/practice-test',
+    },
+  };
+}
 
 export default function PracticeTestLayout({ children }: { children: React.ReactNode }) {
   return <RequireAuth>{children}</RequireAuth>;

@@ -10,5 +10,11 @@
     "details": "Fehlerdetails (Dev-Modus)",
     "retry": "Erneut versuchen",
     "reload": "Seite neu laden"
+  },
+  "page": {
+    "title": "Ups! Etwas ist schiefgelaufen",
+    "body": "Diese Seite hatte ein Problem. Bitte versuche es erneut.",
+    "retry": "Erneut versuchen",
+    "home": "Zur Startseite"
   }
 }

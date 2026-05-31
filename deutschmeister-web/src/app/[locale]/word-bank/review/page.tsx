@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '@/stores/authStore';
@@ -26,6 +27,7 @@ interface ReviewSession {
 // Stats Component
 // ============================================
 function SRSStatsCard() {
+  const t = useTranslations('vocabulary.wordBank.review');
   const { data: stats, isLoading } = useSRSStats();
 
   if (isLoading) {
@@ -42,13 +44,13 @@ function SRSStatsCard() {
   if (!stats) return null;
 
   const items = [
-    { label: 'Cần ôn', value: stats.due, icon: IconFlame, color: STATUS.danger,
+    { label: t('statDue'), value: stats.due, icon: IconFlame, color: STATUS.danger,
       gradient: `linear-gradient(135deg, ${STATUS.danger}1F, ${STATUS.danger}0F)` },
-    { label: 'Mới', value: stats.new, icon: IconBookOpen, color: ACCENT.srs,
+    { label: t('statNew'), value: stats.new, icon: IconBookOpen, color: ACCENT.srs,
       gradient: `linear-gradient(135deg, ${ACCENT.srs}1F, ${ACCENT.srs}0F)` },
-    { label: 'Đang học', value: stats.learning, icon: IconBrain, color: ACCENT.xp,
+    { label: t('statLearning'), value: stats.learning, icon: IconBrain, color: ACCENT.xp,
       gradient: `linear-gradient(135deg, ${ACCENT.xp}1F, ${ACCENT.xp}0F)` },
-    { label: 'Thuộc lòng', value: stats.mature, icon: IconTarget, color: STATUS.success,
+    { label: t('statMature'), value: stats.mature, icon: IconTarget, color: STATUS.success,
       gradient: `linear-gradient(135deg, ${STATUS.success}1F, ${STATUS.success}0F)` },
   ];
 
@@ -86,6 +88,7 @@ interface ReviewCardProps {
 }
 
 function ReviewCard({ word, isFlipped, onFlip, onSpeak }: ReviewCardProps) {
+  const t = useTranslations('vocabulary.wordBank.review');
   const status = getSRSStatus(word);
   const statusInfo = SRSStatusInfo[status];
   const typeInfo = WordTypeInfo[word.wordType];
@@ -165,7 +168,7 @@ function ReviewCard({ word, isFlipped, onFlip, onSpeak }: ReviewCardProps) {
           </button>
 
           <div className="absolute bottom-4 text-body" style={{ color: 'var(--theme-text-muted)' }}>
-            Nhấn để xem nghĩa
+            {t('tapToReveal')}
           </div>
         </div>
 
@@ -196,7 +199,7 @@ function ReviewCard({ word, isFlipped, onFlip, onSpeak }: ReviewCardProps) {
                   : word.word;
                 onSpeak(text);
               }}
-              aria-label="Phát âm lại"
+              aria-label={t('replayAudio')}
               className="w-7 h-7 rounded-full flex items-center justify-center bg-white/20 hover:bg-white/30 transition-colors"
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white">
@@ -213,13 +216,13 @@ function ReviewCard({ word, isFlipped, onFlip, onSpeak }: ReviewCardProps) {
 
           {word.examples && word.examples.length > 0 && (
             <div className="relative mt-6 p-4 bg-white/10 rounded-xl max-w-full backdrop-blur-sm">
-              <div className="text-xs text-white/60 mb-1">Ví dụ:</div>
+              <div className="text-xs text-white/60 mb-1">{t('exampleLabel')}</div>
               <div className="text-white/90 italic text-sm">&quot;{word.examples[0]}&quot;</div>
             </div>
           )}
 
           <div className="absolute bottom-4 text-xs text-white/50">
-            Cấp độ hiện tại: {getIntervalText(word.interval)}
+            {t('currentLevel', { level: getIntervalText(word.interval) })}
           </div>
         </div>
       </div>
@@ -237,14 +240,15 @@ interface RatingButtonsProps {
 }
 
 function RatingButtons({ word, onRate, isLoading }: RatingButtonsProps) {
+  const t = useTranslations('vocabulary.wordBank.review');
   const { data: intervals, isLoading: intervalsLoading } = useIntervalPreview(word.id);
 
   /* eslint-disable no-restricted-syntax */
   const ratings: { rating: SRSRating; label: string; color: string; gradient: string; hotkey: string }[] = [
-    { rating: 'again', label: 'Quên', color: STATUS.danger, gradient: 'linear-gradient(135deg, #EF4444, #DC2626)', hotkey: '1' },
-    { rating: 'hard', label: 'Khó', color: ACCENT.xp,      gradient: 'linear-gradient(135deg, #F59E0B, #D97706)', hotkey: '2' },
-    { rating: 'good', label: 'Tốt', color: STATUS.success, gradient: 'linear-gradient(135deg, #22C55E, #16A34A)', hotkey: '3' },
-    { rating: 'easy', label: 'Dễ',  color: ACCENT.srs,     gradient: 'linear-gradient(135deg, #3B82F6, #2563EB)', hotkey: '4' },
+    { rating: 'again', label: t('rateAgain'), color: STATUS.danger, gradient: 'linear-gradient(135deg, #EF4444, #DC2626)', hotkey: '1' },
+    { rating: 'hard', label: t('rateHard'), color: ACCENT.xp,      gradient: 'linear-gradient(135deg, #F59E0B, #D97706)', hotkey: '2' },
+    { rating: 'good', label: t('rateGood'), color: STATUS.success, gradient: 'linear-gradient(135deg, #22C55E, #16A34A)', hotkey: '3' },
+    { rating: 'easy', label: t('rateEasy'),  color: ACCENT.srs,     gradient: 'linear-gradient(135deg, #3B82F6, #2563EB)', hotkey: '4' },
   ];
   /* eslint-enable no-restricted-syntax */
 
@@ -273,16 +277,17 @@ function RatingButtons({ word, onRate, isLoading }: RatingButtonsProps) {
 // Session Complete Component
 // ============================================
 function SessionComplete({ session, onRestart }: { session: ReviewSession; onRestart: () => void }) {
+  const t = useTranslations('vocabulary.wordBank.review');
   const accuracy = session.reviewed > 0
     ? Math.round((session.correct / session.reviewed) * 100) : 0;
 
   const resultItems = [
-    { label: 'Đã ôn', value: session.reviewed, color: 'var(--theme-text-primary)',
+    { label: t('statReviewed'), value: session.reviewed, color: 'var(--theme-text-primary)',
       // eslint-disable-next-line no-restricted-syntax
       gradient: 'linear-gradient(135deg, var(--theme-bg-secondary), var(--theme-bg-tertiary))' },
-    { label: 'Đúng', value: session.correct, color: STATUS.success,
+    { label: t('statCorrect'), value: session.correct, color: STATUS.success,
       gradient: `linear-gradient(135deg, ${STATUS.success}1F, ${STATUS.success}0F)` },
-    { label: 'Chính xác', value: `${accuracy}%`, color: ACCENT.srs,
+    { label: t('statAccuracy'), value: `${accuracy}%`, color: ACCENT.srs,
       gradient: `linear-gradient(135deg, ${ACCENT.srs}1F, ${ACCENT.srs}0F)` },
   ];
 
@@ -293,10 +298,10 @@ function SessionComplete({ session, onRestart }: { session: ReviewSession; onRes
         <IconTrophy size={36} style={{ color: STATUS.success }} />
       </div>
       <h2 className="text-2xl font-bold mb-2" style={{ color: 'var(--theme-text-primary)' }}>
-        Hoàn thành!
+        {t('completeTitle')}
       </h2>
       <p className="text-sm mb-6" style={{ color: 'var(--theme-text-muted)' }}>
-        Tuyệt vời, bạn đã hoàn thành phiên ôn tập
+        {t('completeSubtitle')}
       </p>
 
       <div className="grid grid-cols-3 gap-3 max-w-sm mx-auto mb-8">
@@ -313,13 +318,13 @@ function SessionComplete({ session, onRestart }: { session: ReviewSession; onRes
           className="flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm text-white
             transition-all hover:shadow-md hover:-translate-y-0.5"
           style={{ background: GRADIENT.action }}>
-          <IconRefresh size={16} /> Ôn tiếp
+          <IconRefresh size={16} /> {t('reviewMore')}
         </button>
         <Link href="/word-bank"
           className="flex items-center gap-2 px-6 py-3 rounded-xl font-medium text-sm border
             transition-all hover:-translate-y-0.5"
           style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)' }}>
-          <IconChevronLeft size={16} /> Về Word Bank
+          <IconChevronLeft size={16} /> {t('backToBank')}
         </Link>
       </div>
     </div>
@@ -330,17 +335,18 @@ function SessionComplete({ session, onRestart }: { session: ReviewSession; onRes
 // Empty State Component
 // ============================================
 function EmptyState({ mode = 'srs' }: { mode?: 'srs' | 'weak' }) {
+  const t = useTranslations('vocabulary.wordBank.review');
   const { data: stats } = useSRSStats();
 
   const title = mode === 'weak'
-    ? 'Chưa có từ yếu nào'
-    : stats?.total === 0 ? 'Chưa có từ nào' : 'Không có từ cần ôn!';
+    ? t('emptyWeakTitle')
+    : stats?.total === 0 ? t('emptyNoneTitle') : t('emptyDoneTitle');
 
   const description = mode === 'weak'
-    ? 'Cần ít nhất 3 lần ôn cho mỗi từ trước khi xuất hiện ở đây. Hãy ôn tập SRS thêm để có dữ liệu.'
+    ? t('emptyWeakDesc')
     : stats?.total === 0
-      ? 'Thêm từ vào Word Bank để bắt đầu học.'
-      : 'Tuyệt vời! Bạn đã ôn hết tất cả các từ cho hôm nay.';
+      ? t('emptyNoneDesc')
+      : t('emptyDoneDesc');
 
   return (
     <div className="text-center py-16">
@@ -360,13 +366,13 @@ function EmptyState({ mode = 'srs' }: { mode?: 'srs' | 'weak' }) {
           className="flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm text-white
             transition-all hover:shadow-md hover:-translate-y-0.5"
           style={{ background: GRADIENT.action }}>
-          Đi đến Word Bank
+          {t('goToBank')}
         </Link>
         <Link href="/words"
           className="flex items-center gap-2 px-6 py-3 rounded-xl font-medium text-sm border
             transition-all hover:-translate-y-0.5"
           style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)' }}>
-          Khám phá từ điển
+          {t('exploreDict')}
         </Link>
       </div>
     </div>
@@ -377,6 +383,7 @@ function EmptyState({ mode = 'srs' }: { mode?: 'srs' | 'weak' }) {
 // Main Review Page
 // ============================================
 export default function WordBankReviewPage() {
+  const t = useTranslations('vocabulary.wordBank.review');
   const { isAuthenticated } = useAuthStore();
   const searchParams = useSearchParams();
   const mode = searchParams.get('mode') === 'weak' ? 'weak' : 'srs';
@@ -456,12 +463,12 @@ export default function WordBankReviewPage() {
       });
       setIsFlipped(false);
     } catch {
-      setReviewError('Quá nhiều yêu cầu, vui lòng thử lại sau vài giây.');
+      setReviewError(t('rateError'));
       setTimeout(() => setReviewError(null), 3000);
     } finally {
       ratingInFlightRef.current = false;
     }
-  }, [playCorrect, playWrong]);
+  }, [playCorrect, playWrong, t]);
 
   // handleRate and handleFlip are now stable so this effect runs only once,
   // eliminating the keydown listener thrash that previously fired on every flip
@@ -501,8 +508,8 @@ export default function WordBankReviewPage() {
     <AuthGate
       icon={<IconRefresh size={28} className="text-white" />}
       gradient={GRADIENT.vocab}
-      title="Đăng nhập để ôn tập SRS"
-      description="Ôn tập từ vựng theo thuật toán ghi nhớ thông minh."
+      title={t('authTitle')}
+      description={t('authDesc')}
     />
   );
 
@@ -519,19 +526,17 @@ export default function WordBankReviewPage() {
             </div>
             <div>
               <h1 className="text-2xl font-bold" style={{ color: 'var(--theme-text-primary)' }}>
-                {mode === 'weak' ? 'Ôn từ yếu' : 'Ôn tập Word Bank'}
+                {mode === 'weak' ? t('headerWeak') : t('headerSrs')}
               </h1>
               <p className="text-body" style={{ color: 'var(--theme-text-muted)' }}>
-                {mode === 'weak'
-                  ? 'Tập trung vào những từ bạn hay sai nhất'
-                  : 'Spaced Repetition System (SM-2)'}
+                {mode === 'weak' ? t('subtitleWeak') : t('subtitleSrs')}
               </p>
             </div>
           </div>
           <Link href="/word-bank"
             className="flex items-center gap-1.5 text-body font-medium transition-all hover:opacity-70"
             style={{ color: ACCENT.srs }}>
-            <IconChevronLeft size={16} /> Word Bank
+            <IconChevronLeft size={16} /> {t('wordBankLink')}
           </Link>
         </div>
 
@@ -589,10 +594,12 @@ export default function WordBankReviewPage() {
             {/* Flip hint */}
             {!isFlipped && (
               <div className="text-center mt-6 text-body" style={{ color: 'var(--theme-text-muted)' }}>
-                Nhấn{' '}
-                <kbd className="px-2 py-0.5 rounded-md text-caption font-semibold"
-                  style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>Space</kbd>
-                {' '}hoặc click để lật thẻ
+                {t.rich('flipHint', {
+                  kbd: (chunks) => (
+                    <kbd className="px-2 py-0.5 rounded-md text-caption font-semibold"
+                      style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>{chunks}</kbd>
+                  ),
+                })}
               </div>
             )}
           </>
@@ -613,15 +620,15 @@ export default function WordBankReviewPage() {
               style={{ background: `linear-gradient(135deg, ${ACCENT.vocab}26, ${ACCENT.vocab}14)` }}>
               <IconKeyboard size={15} style={{ color: ACCENT.vocab }} />
             </span>
-            Phím tắt
+            {t('shortcuts')}
           </h3>
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 text-xs">
             {[
-              { key: 'Space', action: 'Lật thẻ' },
-              { key: '1', action: 'Quên' },
-              { key: '2', action: 'Khó' },
-              { key: '3', action: 'Tốt' },
-              { key: '4', action: 'Dễ' },
+              { key: 'Space', action: t('scFlip') },
+              { key: '1', action: t('rateAgain') },
+              { key: '2', action: t('rateHard') },
+              { key: '3', action: t('rateGood') },
+              { key: '4', action: t('rateEasy') },
             ].map(item => (
               <div key={item.key} className="flex items-center gap-2">
                 <kbd className="px-2 py-0.5 rounded-md font-semibold text-caption"

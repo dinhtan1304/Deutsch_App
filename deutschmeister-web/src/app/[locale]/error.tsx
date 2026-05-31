@@ -3,6 +3,7 @@
 
 import { useEffect } from 'react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { GRADIENT, STATUS } from '@/lib/tokens';
 
 export default function Error({
@@ -12,6 +13,7 @@ export default function Error({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const t = useTranslations('errors.page');
   useEffect(() => {
     // Log errors only in development — avoid leaking details in production
     if (process.env.NODE_ENV === 'development') {
@@ -33,22 +35,22 @@ export default function Error({
         </div>
 
         <h2 className="text-xl font-bold mb-2" style={{ color: 'var(--theme-text-primary)' }}>
-          Oops! Có lỗi xảy ra
+          {t('title')}
         </h2>
         <p className="text-body mb-6" style={{ color: 'var(--theme-text-muted)' }}>
-          Trang này gặp sự cố. Vui lòng thử lại.
+          {t('body')}
         </p>
 
         <div className="flex gap-3 justify-center">
           <button onClick={reset}
             className="px-5 py-2.5 rounded-xl font-semibold text-sm text-white transition-all duration-200 hover:-translate-y-0.5"
             style={{ background: GRADIENT.action, boxShadow: '0 4px 12px rgba(59,130,246,.25)' }}>
-            Thử lại
+            {t('retry')}
           </button>
           <Link href="/"
             className="px-5 py-2.5 rounded-xl font-semibold text-sm transition-all duration-200 hover:-translate-y-0.5"
             style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-secondary)', border: '1px solid var(--theme-border)' }}>
-            Về trang chủ
+            {t('home')}
           </Link>
         </div>
       </div>

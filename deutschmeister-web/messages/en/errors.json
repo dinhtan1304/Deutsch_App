@@ -10,5 +10,11 @@
     "details": "Error details (dev mode)",
     "retry": "Try again",
     "reload": "Reload page"
+  },
+  "page": {
+    "title": "Oops! Something went wrong",
+    "body": "This page ran into a problem. Please try again.",
+    "retry": "Try again",
+    "home": "Back to home"
   }
 }

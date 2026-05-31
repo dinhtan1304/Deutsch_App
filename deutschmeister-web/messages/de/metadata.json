@@ -11,6 +11,35 @@
       "ogTitle": "Deutsche Grammatik — Deutschmeister",
       "ogDescription": "Über 50 Lektionen zur deutschen Grammatik A1-B1. Kasus, Artikel, Modalverben und vieles mehr."
     },
+    "practiceTest": {
+      "title": "Deutsch-Prüfungsvorbereitung Goethe & TELC — KI-bewertete Tests | DeutschMeister",
+      "description": "Übe alle 4 Fertigkeiten — Lesen, Hören, Schreiben, Sprechen — mit Goethe- & TELC-Standardprüfungen A1/A2/B1 und detaillierter KI-Bewertung. Freies Üben + vollständige Musterprüfungen.",
+      "keywords": "Deutsch-Prüfungsvorbereitung, Goethe üben, TELC üben, Deutsch A1 A2 B1, KI Schreiben Bewertung, KI Sprechen Bewertung, Deutsch Musterprüfung",
+      "ogTitle": "Goethe & TELC A1/A2/B1 Vorbereitung — Deutschmeister",
+      "ogDescription": "Prüfungen im Standardformat über 4 Fertigkeiten. KI bewertet Schreiben/Sprechen und erklärt deine Fehler."
+    },
+    "games": {
+      "title": "Deutsch-Lern-Minispiele",
+      "description": "8 unterhaltsame Deutsch-Lernspiele: SRS-Karteikarten, Der/Die/Das-Quiz, Hörspiel, Spelling Bee, Wörter zuordnen und mehr. Baue Wortschatz-Reflexe effektiv auf.",
+      "ogTitle": "Deutsch-Lern-Minispiele — Deutschmeister",
+      "ogDescription": "8 Spiele für Wortschatz-Reflexe: Karteikarten, Der/Die/Das-Quiz, Spelling Bee, Hören und mehr."
+    },
+    "pricing": {
+      "title": "Preise",
+      "description": "Upgrade auf Premium für unbegrenztes Üben für Goethe & TELC. Ab nur 99.000₫/Monat — KI-Bewertung, Standardprüfungen A1/A2/B1. Lifetime-Deal auf 500 Plätze begrenzt.",
+      "ogTitle": "Preise — Deutschmeister",
+      "ogDescription": "Upgrade auf Premium für unbegrenztes Üben für Goethe & TELC. Ab nur 99.000₫/Monat."
+    },
+    "dictation": {
+      "title": "Deutsches Diktat",
+      "description": "Höre deutsche YouTube-Videos und fülle die fehlenden Wörter aus. Übe Hörverstehen & Rechtschreibung nach Niveau A1, A2, B1 mit automatischer KI-Bewertung.",
+      "ogTitle": "Deutsches Diktat — Deutschmeister",
+      "ogDescription": "Diktat: Höre YouTube-Videos und fülle die fehlenden Wörter aus. Unterstützt A1/A2/B1, automatische KI-Bewertung."
+    },
+    "dictationShadow": {
+      "title": "Shadowing-Übung — DeutschMeister",
+      "description": "Übe die deutsche Aussprache mit Shadowing: Höre einen Mustersatz und sprich ihn nach, um Rhythmus + Intonation von Muttersprachlern nachzuahmen."
+    },
     "guideB1": {
       "title": "B1-Prüfungsleitfaden für Goethe & TELC — Aufbau, Plan, Vorlagen | DeutschMeister",
       "description": "Ein vollständiger Leitfaden zur deutschen B1-Prüfung: Aufbau von Goethe-Zertifikat B1 & TELC Deutsch B1, 12-Wochen-Plan von A2 auf B1, Schreiben-Vorlagen, Sprechen-Redemittel, Sprachbausteine sowie wichtigste B1-Grammatik & -Wortschatz.",

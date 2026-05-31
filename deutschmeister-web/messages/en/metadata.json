@@ -11,6 +11,35 @@
       "ogTitle": "German grammar — Deutschmeister",
       "ogDescription": "50+ German grammar lessons A1-B1. Cases, articles, modal verbs and much more."
     },
+    "practiceTest": {
+      "title": "German exam prep Goethe & TELC — AI-graded mock tests | DeutschMeister",
+      "description": "Practice all 4 skills — Lesen, Hören, Schreiben, Sprechen — with standard Goethe & TELC A1/A2/B1 exams and detailed AI grading. Free practice + full mock exams.",
+      "keywords": "German exam prep, Goethe practice, TELC practice, German A1 A2 B1, AI Schreiben grading, AI Sprechen grading, German mock test",
+      "ogTitle": "Goethe & TELC A1/A2/B1 prep — Deutschmeister",
+      "ogDescription": "Standard-format exams across 4 skills. AI grades Schreiben/Sprechen and explains your mistakes."
+    },
+    "games": {
+      "title": "German learning mini-games",
+      "description": "8 fun German learning games: SRS flashcards, Der/Die/Das quiz, listening game, spelling bee, word match and more. Build vocabulary reflexes effectively.",
+      "ogTitle": "German learning mini-games — Deutschmeister",
+      "ogDescription": "8 games to sharpen vocabulary reflexes: flashcards, Der/Die/Das quiz, spelling bee, listening and more."
+    },
+    "pricing": {
+      "title": "Pricing",
+      "description": "Upgrade to Premium for unlimited Goethe & TELC practice. From just 99,000₫/month — AI grading, standard A1/A2/B1 exams. Lifetime deal limited to 500 spots.",
+      "ogTitle": "Pricing — Deutschmeister",
+      "ogDescription": "Upgrade to Premium for unlimited Goethe & TELC practice. From just 99,000₫/month."
+    },
+    "dictation": {
+      "title": "German dictation — Diktat",
+      "description": "Listen to German YouTube videos and fill in the missing words. Practice listening & spelling by level A1, A2, B1 with automatic AI grading.",
+      "ogTitle": "German dictation — Deutschmeister",
+      "ogDescription": "Diktat: listen to YouTube videos and fill in the missing words. Supports A1/A2/B1, automatic AI grading."
+    },
+    "dictationShadow": {
+      "title": "Shadowing practice — DeutschMeister",
+      "description": "Practice German pronunciation with shadowing: listen to a model sentence then repeat it to mimic native rhythm + intonation."
+    },
     "guideB1": {
       "title": "B1 exam prep guide for Goethe & TELC — structure, roadmap, templates | DeutschMeister",
       "description": "A complete guide to the German B1 exam: Goethe-Zertifikat B1 & TELC Deutsch B1 structure, a 12-week roadmap from A2 to B1, Schreiben templates, Sprechen Redemittel, Sprachbausteine, and key B1 grammar & vocabulary.",

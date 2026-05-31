@@ -1,15 +1,25 @@
 import type { Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
+import type { AppLocale } from '@/i18n/routing';
 
-export const metadata: Metadata = {
-  title: 'Bảng giá',
-  description: 'Nâng cấp Premium để luyện thi Goethe & TELC không giới hạn. Chỉ từ 99,000đ/tháng — AI chấm bài, đề thi A1/A2/B1 chuẩn format. Lifetime deal giới hạn 500 suất.',
-  openGraph: {
-    title: 'Bảng giá — Deutschmeister',
-    description: 'Nâng cấp Premium để luyện thi Goethe & TELC không giới hạn. Chỉ từ 99,000đ/tháng.',
-    url: '/pricing',
-  },
-  alternates: { canonical: '/pricing' },
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: AppLocale }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'metadata.pages.pricing' });
+  return {
+    title: t('title'),
+    description: t('description'),
+    openGraph: {
+      title: t('ogTitle'),
+      description: t('ogDescription'),
+      url: '/pricing',
+    },
+    alternates: { canonical: '/pricing' },
+  };
+}
 
 export default function PricingLayout({ children }: { children: React.ReactNode }) {
   return children;

@@ -10,5 +10,11 @@
     "details": "Chi tiết lỗi (dev mode)",
     "retry": "Thử lại",
     "reload": "Tải lại trang"
+  },
+  "page": {
+    "title": "Oops! Có lỗi xảy ra",
+    "body": "Trang này gặp sự cố. Vui lòng thử lại.",
+    "retry": "Thử lại",
+    "home": "Về trang chủ"
   }
 }
