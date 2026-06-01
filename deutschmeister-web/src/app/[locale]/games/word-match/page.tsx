@@ -12,14 +12,15 @@ import { useGameSession } from '@/hooks/useGameSession';
 import { GenderInfo, Word } from '@/types';
 import {
   GameSetupCard, GameResultCard, GameInfoBox,
-  GamePlayHeader, GameStatsBar,
+  GamePlayHeader, GameStatsBar, GameProgressBar,
   IconLink, IconRocket, IconChevronLeft, IconCheck, IconZap, IconTarget, IconFlame, IconClock,
 } from '@/components/games/GameUI';
 import { Button } from '@/components/ui';
 import { ACCENT, STATUS } from '@/lib/tokens';
 
 const PAIRS = 6;
-const AC: Record<string, string> = { masculine: ACCENT.srs, feminine: ACCENT.listening, neuter: STATUS.success };
+// Exact der/die/das article colors per design
+const AC: Record<string, string> = { masculine: 'var(--der)', feminine: 'var(--die)', neuter: 'var(--das)' };
 
 type Phase = 'setup' | 'playing' | 'result';
 
@@ -274,70 +275,70 @@ export default function WordMatchPage() {
         { label: t('wordMatch.stats.wrong'),      value: wrongCount,                  color: STATUS.danger, dot: true },
         { label: t('common.time'), value: formatTime(elapsedSec),     color: 'var(--theme-text-primary)' },
       ]} />
+      <GameProgressBar current={matchedIds.size} total={PAIRS} />
 
       {/* Match Grid */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-3 mt-2">
         {/* Left column - German words */}
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2.5">
           {leftItems.map(item => {
             const isMatched = matchedIds.has(item.id);
             const isSelected = selectedLeft === item.id;
             const isWrongLeft = wrongFlash?.left === item.id;
-            const artColor = AC[item.word.gender] || ACCENT.srs;
+            const artColor = AC[item.word.gender] || 'var(--der)';
+            const article = item.word.gender && GenderInfo[item.word.gender] ? GenderInfo[item.word.gender].article : '';
             return (
               <button key={item.id}
                 onClick={() => handleLeftClick(item.id)}
                 disabled={isMatched}
-                className="rounded-xl border px-3 py-3 text-left transition-all duration-200 text-sm font-semibold"
+                className="flex items-center gap-1.5 rounded-[11px] border-2 px-4 py-3.5 text-left text-[15px] font-semibold transition-all duration-150"
                 style={{
-                  borderColor: isMatched ? STATUS.success
+                  borderColor: isMatched ? `color-mix(in srgb, ${STATUS.success} 35%, transparent)`
                     : isWrongLeft ? STATUS.danger
                     : isSelected ? ACCENT.cyan
                     : 'var(--theme-border)',
-                  backgroundColor: isMatched ? 'rgba(34,197,94,.08)'
-                    : isWrongLeft ? 'rgba(239,68,68,.08)'
-                    : isSelected ? 'rgba(6,182,212,.1)'
+                  backgroundColor: isMatched ? `color-mix(in srgb, ${STATUS.success} 10%, transparent)`
+                    : isWrongLeft ? `color-mix(in srgb, ${STATUS.danger} 8%, transparent)`
+                    : isSelected ? `color-mix(in srgb, ${ACCENT.cyan} 12%, transparent)`
                     : 'var(--theme-bg-card)',
-                  color: isMatched ? STATUS.success
-                    : isSelected ? ACCENT.cyan
-                    : 'var(--theme-text-primary)',
+                  color: 'var(--theme-text-primary)',
                   cursor: isMatched ? 'default' : 'pointer',
-                  opacity: isMatched ? 0.6 : 1,
+                  opacity: isMatched ? 0.55 : 1,
                 }}>
-                <span style={{ color: isMatched ? STATUS.success : artColor }}>
-                  {item.word.gender && GenderInfo[item.word.gender] ? GenderInfo[item.word.gender].article : ''}
-                </span>{' '}
-                {item.word.word}
+                <span className="font-bold" style={{ color: artColor }}>{article}</span>
+                <span>{item.word.word}</span>
+                {isMatched && <IconCheck size={15} style={{ color: STATUS.success, marginLeft: 'auto' }} />}
               </button>
             );
           })}
         </div>
 
         {/* Right column - Meanings */}
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2.5">
           {rightItems.map(item => {
             const isMatched = matchedIds.has(item.id);
             const isWrongRight = wrongFlash?.right === item.id;
+            const clickable = !!selectedLeft && !isMatched;
             const label = (settings.showVietnamese && item.word.translationVi) || item.word.translationEn;
             return (
               <button key={item.id}
                 onClick={() => handleRightClick(item.id)}
                 disabled={isMatched || !selectedLeft}
-                className="rounded-xl border px-3 py-3 text-left transition-all duration-200 text-body"
+                className="flex items-center gap-1.5 rounded-[11px] border-2 px-4 py-3.5 text-left text-sm transition-all duration-150"
                 style={{
-                  borderColor: isMatched ? STATUS.success
+                  borderColor: isMatched ? `color-mix(in srgb, ${STATUS.success} 35%, transparent)`
                     : isWrongRight ? STATUS.danger
-                    : selectedLeft ? ACCENT.cyan
+                    : clickable ? `color-mix(in srgb, ${ACCENT.cyan} 35%, transparent)`
                     : 'var(--theme-border)',
-                  backgroundColor: isMatched ? 'rgba(34,197,94,.08)'
-                    : isWrongRight ? 'rgba(239,68,68,.08)'
-                    : selectedLeft ? 'rgba(6,182,212,.04)'
+                  backgroundColor: isMatched ? `color-mix(in srgb, ${STATUS.success} 10%, transparent)`
+                    : isWrongRight ? `color-mix(in srgb, ${STATUS.danger} 8%, transparent)`
                     : 'var(--theme-bg-card)',
-                  color: isMatched ? STATUS.success : 'var(--theme-text-secondary)',
-                  cursor: isMatched || !selectedLeft ? 'default' : 'pointer',
-                  opacity: isMatched ? 0.6 : 1,
+                  color: isMatched ? 'var(--theme-text-secondary)' : 'var(--theme-text-primary)',
+                  cursor: clickable ? 'pointer' : 'default',
+                  opacity: isMatched ? 0.55 : 1,
                 }}>
-                {label}
+                <span className="flex-1">{label}</span>
+                {isMatched && <IconCheck size={15} style={{ color: STATUS.success }} />}
               </button>
             );
           })}
@@ -345,16 +346,9 @@ export default function WordMatchPage() {
       </div>
 
       {/* Hint */}
-      {!selectedLeft && matchedIds.size < PAIRS && (
-        <p className="text-center text-xs mt-4" style={{ color: 'var(--theme-text-muted)' }}>
-          {t('wordMatch.hints.selectLeft')}
-        </p>
-      )}
-      {selectedLeft && (
-        <p className="text-center text-xs mt-4 font-semibold" style={{ color: ACCENT.cyan }}>
-          {t('wordMatch.hints.selectRight')}
-        </p>
-      )}
+      <p className="text-center text-xs mt-4.5" style={{ color: 'var(--theme-text-muted)' }}>
+        {selectedLeft ? t('wordMatch.hints.selectRight') : t('wordMatch.hints.selectLeft')}
+      </p>
     </div>
   );
 }
