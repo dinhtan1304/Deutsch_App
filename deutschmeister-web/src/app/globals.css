@@ -604,6 +604,13 @@ input[type="range"]::-webkit-slider-thumb {
   --v2-danger: #EF4444;
   --v2-cyan: #22D3EE;
   --v2-pink: #EC6B9C;
+  /* Short aliases — used directly as var(--success) etc. across v2 screens */
+  --success: #4ADE80;
+  --warn: #F5C249;
+  --violet: #A78BFA;
+  --danger: #EF4444;
+  --cyan: #22D3EE;
+  --pink: #EC6B9C;
 
   /* German articles (color-code throughout) */
   --der: #5B8DEF;
