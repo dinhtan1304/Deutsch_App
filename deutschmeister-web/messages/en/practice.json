@@ -853,6 +853,7 @@
       "emptyCta": "Open library",
       "session": {
         "title": "Shadowing Session",
+        "back": "Back",
         "notFound": "Shadowing session not found.",
         "tip": "Pause and read aloud. Focus on rhythm and pronunciation, not perfection. Start slow, then speed up.",
         "dismiss": "Dismiss",

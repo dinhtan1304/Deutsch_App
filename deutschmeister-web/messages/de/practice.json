@@ -853,6 +853,7 @@
       "emptyCta": "Bibliothek öffnen",
       "session": {
         "title": "Shadowing-Sitzung",
+        "back": "Zurück",
         "notFound": "Shadowing-Sitzung nicht gefunden.",
         "tip": "Pausiere und lies laut. Fokus auf Rhythmus und Aussprache, nicht Perfektion. Langsam starten, dann schneller.",
         "dismiss": "Schließen",

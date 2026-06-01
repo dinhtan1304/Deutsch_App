@@ -853,6 +853,7 @@
       "emptyCta": "Mở thư viện",
       "session": {
         "title": "Tập nói Shadowing",
+        "back": "Quay lại",
         "notFound": "Không tìm thấy phiên shadowing.",
         "tip": "Tạm dừng và đọc to. Tập trung vào nhịp điệu và phát âm, không cần hoàn hảo. Bắt đầu chậm rồi tăng tốc dần.",
         "dismiss": "Đóng",

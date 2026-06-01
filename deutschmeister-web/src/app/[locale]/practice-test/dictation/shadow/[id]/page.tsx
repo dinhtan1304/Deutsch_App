@@ -13,16 +13,11 @@ import { VideoUnavailableFallback } from '@/components/dictation/VideoUnavailabl
 import { RecordButton } from '@/components/shadowing/RecordButton';
 import { PhraseScoreBadge } from '@/components/shadowing/PhraseScoreBadge';
 import { AiReviewCounter } from '@/components/shadowing/AiReviewCounter';
-import { PageHeader } from '@/components/ui';
-import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import { ACCENT, STATUS } from '@/lib/tokens';
 import type { ShadowingAttempt, ShadowingSegment } from '@/lib/api/shadowing';
 
 const SPEED_OPTIONS = [0.75, 1, 1.25] as const;
 const TIP_DISMISS_KEY = 'shadowing-tip-dismissed-v1';
-
-const CEFR_COLORS: Record<string, string> = {
-  A1: STATUS.success, A2: ACCENT.srs, B1: ACCENT.vocab,
-};
 
 function formatTimestamp(ms: number): string {
   const total = Math.floor(ms / 1000);
@@ -54,14 +49,14 @@ function TipBanner({ onDismiss }: { onDismiss: () => void }) {
   const t = useTranslations('practice.dictation.shadow.session');
   return (
     <div
-      className="rounded-xl border px-4 py-3 mb-5 flex items-start gap-3"
+      className="rounded-md border px-4 py-3 mb-5 flex items-start gap-3"
       style={{
-        backgroundColor: `${ACCENT.reading}10`,
-        borderColor: `${ACCENT.reading}33`,
+        backgroundColor: `${STATUS.warning}12`,
+        borderColor: `${STATUS.warning}33`,
       }}
     >
       <span className="text-base shrink-0">💡</span>
-      <p className="flex-1 text-sm font-medium leading-relaxed" style={{ color: 'var(--theme-text-secondary)' }}>
+      <p className="flex-1 text-caption font-medium leading-relaxed" style={{ color: 'var(--theme-text-secondary)' }}>
         {t('tip')}
       </p>
       <button
@@ -110,13 +105,13 @@ function SegmentListRow({
       }}
     >
       <span
-        className="shrink-0 w-7 h-7 rounded-lg flex items-center justify-center"
+        className="shrink-0 w-6.5 h-6.5 rounded-[7px] flex items-center justify-center"
         style={{
           color: isCurrent ? 'white' : ACCENT.reading,
           backgroundColor: isCurrent ? ACCENT.reading : `${ACCENT.reading}15`,
         }}
       >
-        <IconHeadphones size={14} />
+        <IconHeadphones size={13} />
       </span>
       <span
         className="flex-1 min-w-0 text-sm font-medium truncate"
@@ -349,24 +344,21 @@ export default function ShadowingPlayPage() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto px-4 pb-24">
-      <div className="pt-2">
-        <PageHeader
-          backHref="/practice-test/dictation/shadow"
-          title={t('title')}
-          accent="reading"
-          right={
-            <span
-              className="text-[11px] font-black px-3 py-1 rounded-md border"
-              style={{
-                color: CEFR_COLORS[session.difficulty],
-                borderColor: 'var(--theme-border)',
-              }}
-            >
-              {session.difficulty}
-            </span>
-          }
-        />
+    <div className="max-w-360 mx-auto px-4 sm:px-6 pb-28">
+      {/* Back link + title */}
+      <div className="pt-4 mb-4">
+        <button
+          type="button"
+          onClick={() => router.push('/practice-test/dictation/shadow')}
+          className="mb-3 inline-flex items-center gap-1 text-caption font-semibold transition-opacity hover:opacity-70"
+          style={{ color: ACCENT.reading }}
+        >
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
+          {t('back')}
+        </button>
+        <h1 className="text-h2 font-extrabold leading-tight" style={{ letterSpacing: '-.02em', color: 'var(--theme-text-primary)' }}>
+          {t('title')}
+        </h1>
       </div>
 
       {!tipDismissed && <TipBanner onDismiss={dismissTip} />}
@@ -374,18 +366,12 @@ export default function ShadowingPlayPage() {
       {videoError ? (
         <VideoUnavailableFallback sessionId={id} />
       ) : (
-        <div
-          className="rounded-3xl border p-5 md:p-6 relative overflow-hidden"
-          style={{
-            backgroundColor: `${ACCENT.reading}0D`,
-            borderColor: `${ACCENT.reading}2A`,
-          }}
-        >
-          {/* Top: video + segment list ────────────────────────────── */}
-          <div className="flex flex-col md:flex-row gap-5 mb-6">
-            {/* Video + meta controls */}
-            <div className="md:w-72 lg:w-80 shrink-0">
-              <div className="rounded-2xl overflow-hidden shadow-xl border border-white/5 aspect-video bg-black/40">
+        <>
+          {/* Top: video + controls | segment list ─────────────────── */}
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-[300px_1fr] mb-5">
+            {/* Video + controls column */}
+            <div className="flex flex-col gap-2.5">
+              <div className="rounded-md overflow-hidden border aspect-video bg-black/40" style={{ borderColor: 'var(--theme-border)' }}>
                 <YouTubeEmbed
                   ref={playerRef}
                   youtubeId={session.video.youtubeId}
@@ -395,79 +381,40 @@ export default function ShadowingPlayPage() {
                   onAutoPaused={(segId) => setPausedAtSegmentId(segId)}
                 />
               </div>
-              {/* Subtitle source chip */}
-              <div className="mt-2 flex items-center gap-2">
-                <span
-                  className="text-[10px] font-black uppercase tracking-widest opacity-50"
-                  style={{ color: 'var(--theme-text-secondary)' }}
-                >
-                  {t('subtitleSourceLabel')}
-                </span>
-                <span
-                  className="text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md border"
-                  style={
-                    session.video.transcriptSource === 'ai'
-                      ? {
-                          backgroundColor: `${ACCENT.reading}15`,
-                          borderColor: `${ACCENT.reading}33`,
-                          color: ACCENT.reading,
-                        }
-                      : {
-                          backgroundColor: 'var(--theme-bg-secondary)',
-                          borderColor: 'var(--theme-border)',
-                          color: 'var(--theme-text-secondary)',
-                        }
-                  }
-                >
-                  {session.video.transcriptSource === 'ai' ? t('subtitleSourceAi') : t('subtitleSourceYoutube')}
-                </span>
-              </div>
-              {/* Speed + auto-pause */}
-              <div className="mt-3 flex items-center justify-between gap-2 flex-wrap">
-                <div className="flex items-center gap-1">
+              {/* Controls card */}
+              <div className="rounded-[11px] border p-3" style={{ background: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}>
+                <div className="mb-2.5 flex flex-wrap items-center gap-1.5">
+                  <span className="text-[9.5px] font-bold uppercase tracking-wider" style={{ color: 'var(--theme-text-muted)' }}>{t('subtitleSourceLabel')}</span>
+                  <span className="rounded-[5px] px-1.5 py-0.5 text-[9.5px] font-bold uppercase tracking-wider"
+                    style={session.video.transcriptSource === 'ai'
+                      ? { background: `${ACCENT.reading}18`, color: ACCENT.reading }
+                      : { background: `${STATUS.danger}18`, color: STATUS.danger }}>
+                    {session.video.transcriptSource === 'ai' ? t('subtitleSourceAi') : t('subtitleSourceYoutube')}
+                  </span>
+                </div>
+                <div className="mb-2.5 flex items-center gap-1.5">
                   {SPEED_OPTIONS.map((s) => (
-                    <button
-                      key={s}
-                      type="button"
-                      onClick={() => handleSpeedChange(s)}
-                      className="px-2 py-0.5 rounded-md text-[11px] font-black transition-all"
-                      style={{
-                        backgroundColor: speed === s ? ACCENT.reading : 'transparent',
-                        color: speed === s ? 'white' : 'var(--theme-text-secondary)',
-                        border: speed === s ? 'none' : '1px solid var(--theme-border)',
-                      }}
-                    >
+                    <button key={s} type="button" onClick={() => handleSpeedChange(s)}
+                      className="mono rounded-[6px] px-2 py-1 text-[11px] font-bold transition-colors"
+                      style={speed === s
+                        ? { background: ACCENT.reading, color: 'white', border: `1px solid ${ACCENT.reading}` }
+                        : { background: 'var(--theme-bg-secondary)', color: 'var(--theme-text-secondary)', border: '1px solid var(--theme-border)' }}>
                       {s}x
                     </button>
                   ))}
                 </div>
-                <label className="flex items-center gap-2 cursor-pointer select-none">
-                  <input
-                    type="checkbox"
-                    checked={autoPause}
-                    onChange={(e) => setAutoPause(e.target.checked)}
-                    className="w-3.5 h-3.5 rounded"
-                    style={{ accentColor: ACCENT.reading }}
-                  />
-                  <span
-                    className="text-[10px] font-black uppercase tracking-widest"
-                    style={{ color: 'var(--theme-text-secondary)' }}
-                  >
-                    {t('autoPause')}
+                <button type="button" onClick={() => setAutoPause((a) => !a)} className="flex items-center gap-2">
+                  <span className="flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded-[5px]"
+                    style={autoPause ? { background: ACCENT.reading, color: 'white' } : { background: 'var(--theme-bg-secondary)', border: '1px solid var(--theme-border)' }}>
+                    {autoPause && <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>}
                   </span>
-                </label>
+                  <span className="text-[10.5px] font-semibold uppercase tracking-wider" style={{ color: 'var(--theme-text-secondary)' }}>{t('autoPause')}</span>
+                </button>
               </div>
             </div>
 
             {/* Segment list */}
-            <div
-              className="flex-1 min-w-0 rounded-2xl border overflow-hidden flex flex-col"
-              style={{
-                backgroundColor: 'var(--theme-bg-card)',
-                borderColor: 'var(--theme-border)',
-                maxHeight: 240,
-              }}
-            >
+            <div className="rounded-md border overflow-hidden flex flex-col" style={{ background: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)', maxHeight: 240 }}>
               <div className="overflow-y-auto flex-1 divide-y" style={{ borderColor: 'var(--theme-border)' }}>
                 {segments.map((seg) => (
                   <SegmentListRow
@@ -485,36 +432,21 @@ export default function ShadowingPlayPage() {
 
           {/* Active segment text — big bold centered ────────────── */}
           {currentSegment && (
-            <div className="text-center my-6 md:my-8 px-2">
-              <p
-                className="text-xl md:text-2xl lg:text-3xl font-black leading-snug"
-                style={{ color: 'var(--theme-text-primary)' }}
-              >
+            <div key={currentSegment.id} className="text-center my-6 px-2">
+              <p className="text-2xl md:text-[32px] font-extrabold leading-snug" style={{ letterSpacing: '-.01em', color: 'var(--theme-text-primary)' }}>
                 {currentSegment.text}
               </p>
             </div>
           )}
 
-          {/* Recording panel ──────────────────────────────────────── */}
-          <div
-            className="rounded-2xl py-8 md:py-10 px-5 flex flex-col items-center"
-            style={{
-              backgroundColor: `${ACCENT.reading}08`,
-              border: `1px solid ${ACCENT.reading}1A`,
-            }}
-          >
-            {/* Replay current sample (above mic for affordance) */}
+          {/* Recording card ───────────────────────────────────────── */}
+          <div className="rounded-[18px] border py-8 px-5 flex flex-col items-center"
+            style={{ background: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}>
             {currentSegment && (
-              <button
-                type="button"
-                onClick={handleReplayCurrent}
-                className="mb-5 flex items-center gap-2 text-[11px] font-black uppercase tracking-widest px-4 py-2 rounded-lg border transition-all hover:bg-black/3 dark:hover:bg-white/5"
-                style={{
-                  borderColor: `${ACCENT.reading}33`,
-                  color: ACCENT.reading,
-                }}
-              >
-                <IconHeadphones size={13} />
+              <button type="button" onClick={handleReplayCurrent}
+                className="mb-5 flex items-center gap-2 text-caption font-bold px-4 py-2 rounded-[10px] border transition-colors"
+                style={{ borderColor: `${ACCENT.reading}55`, color: ACCENT.reading }}>
+                <IconHeadphones size={15} />
                 {t('replaySample')}
               </button>
             )}
@@ -530,119 +462,71 @@ export default function ShadowingPlayPage() {
 
             <div className="mt-5 text-center">
               {isProcessing ? (
-                <p className="text-base font-black" style={{ color: ACCENT.reading }}>
-                  {t('grading')}
-                </p>
+                <p className="text-base font-extrabold" style={{ color: ACCENT.reading }}>{t('grading')}</p>
               ) : currentAttempt ? (
                 <ScoreFeedback attempt={currentAttempt} />
               ) : (
                 <>
-                  <p
-                    className="text-base font-black mb-1"
-                    style={{ color: 'var(--theme-text-primary)' }}
-                  >
-                    {t('ready')}
-                  </p>
-                  <p
-                    className="text-sm font-medium"
-                    style={{ color: 'var(--theme-text-secondary)' }}
-                  >
-                    {t('readyHint')}
-                  </p>
-                  <p
-                    className="text-xs mt-3 italic opacity-60"
-                    style={{ color: 'var(--theme-text-muted)' }}
-                  >
-                    {t('headphoneTip')}
-                  </p>
+                  <p className="text-[15px] font-bold mb-1" style={{ color: 'var(--theme-text-primary)' }}>{t('ready')}</p>
+                  <p className="text-caption font-medium" style={{ color: 'var(--theme-text-secondary)' }}>{t('readyHint')}</p>
+                  <p className="text-[11px] mt-2 italic" style={{ color: 'var(--theme-text-muted)' }}>{t('headphoneTip')}</p>
                 </>
               )}
-
-              {recordError && (
-                <p
-                  className="mt-3 text-xs font-bold"
-                  style={{ color: STATUS.danger }}
-                >
-                  {recordError}
-                </p>
-              )}
+              {recordError && <p className="mt-3 text-xs font-bold" style={{ color: STATUS.danger }}>{recordError}</p>}
             </div>
 
-            {/* Bottom actions: retry + next */}
             {currentAttempt && !isProcessing && (
               <div className="mt-6 flex items-center gap-3 flex-wrap justify-center">
-                <span
-                  className="text-[11px] font-black uppercase tracking-widest opacity-50"
-                  style={{ color: 'var(--theme-text-muted)' }}
-                >
-                  {t('retryHint')}
-                </span>
-                <button
-                  type="button"
-                  onClick={handlePlayNext}
-                  className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-[11px] font-black uppercase tracking-widest text-white transition-all hover:brightness-110 active:scale-95"
-                  style={{ background: GRADIENT.reading }}
-                >
+                <span className="text-[11px] font-bold uppercase tracking-widest opacity-60" style={{ color: 'var(--theme-text-muted)' }}>{t('retryHint')}</span>
+                <button type="button" onClick={handlePlayNext}
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-[10px] text-caption font-bold text-white transition-transform active:scale-95"
+                  style={{ background: ACCENT.reading, boxShadow: `0 4px 14px ${ACCENT.reading}55` }}>
                   {t('nextSegment')}
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6" /></svg>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6" /></svg>
                 </button>
               </div>
             )}
-          </div>
 
-          {/* AI review quota counter ──────────────────────────────── */}
-          <div className="mt-5 text-center">
-            <AiReviewCounter />
+            <div className="mt-6 pt-4 w-full flex justify-center border-t" style={{ borderColor: 'var(--theme-border)' }}>
+              <AiReviewCounter />
+            </div>
           </div>
+        </>
+      )}
 
-          {/* Bottom: progress + Submit ─────────────────────────────── */}
-          <div className="mt-6 flex items-center justify-between gap-4 flex-wrap">
+      {/* Sticky bottom progress + submit ─────────────────────────── */}
+      {!videoError && (
+        <div className="sticky bottom-4 z-10 mt-6">
+          <div className="flex items-center gap-4 rounded-[14px] border px-4 py-3 backdrop-blur"
+            style={{ background: 'color-mix(in srgb, var(--theme-bg-card) 92%, transparent)', borderColor: 'var(--theme-border)', boxShadow: '0 -4px 20px rgba(0,0,0,.18)' }}>
             <div className="flex-1 min-w-0">
-              <div className="flex items-center justify-between text-[11px] font-black mb-1.5">
-                <span style={{ color: 'var(--theme-text-secondary)' }}>{t('progress')}</span>
-                <span style={{ color: ACCENT.reading }}>
-                  {session.completedSegments} / {session.totalSegments}
+              <div className="flex items-center gap-2 mb-1.5">
+                <span className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: 'var(--theme-text-muted)' }}>{t('progress')}</span>
+                <span className="mono text-caption font-bold" style={{ color: session.completedSegments === session.totalSegments ? STATUS.success : 'var(--theme-text-primary)' }}>
+                  {session.completedSegments}/{session.totalSegments}
                 </span>
               </div>
-              <div
-                className="h-2 rounded-full overflow-hidden"
-                style={{ backgroundColor: 'var(--theme-bg-secondary)' }}
-              >
-                <div
-                  className="h-full transition-all duration-500"
-                  style={{
-                    width: `${completedPct}%`,
-                    background: GRADIENT.reading,
-                  }}
-                />
+              <div className="h-1.5 rounded-full overflow-hidden max-w-90" style={{ background: 'var(--theme-bg-secondary)' }}>
+                <div className="h-full transition-all duration-500" style={{ width: `${completedPct}%`, background: session.completedSegments === session.totalSegments ? STATUS.success : ACCENT.reading }} />
               </div>
             </div>
-            <button
-              type="button"
-              onClick={handleSubmit}
-              disabled={isSubmitting || session.completedSegments === 0}
-              className="px-6 py-3 rounded-xl text-sm font-black text-white transition-all hover:brightness-110 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-              style={{ background: GRADIENT.reading }}
-            >
+            <button type="button" onClick={handleSubmit} disabled={isSubmitting || session.completedSegments === 0}
+              className="flex items-center gap-2 px-6 py-3 rounded-[11px] text-sm font-bold text-white transition-transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{ background: ACCENT.reading, boxShadow: `0 4px 14px ${ACCENT.reading}55` }}>
               {isSubmitting ? (
                 <>
                   <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                   {t('submitting')}
                 </>
               ) : (
-                t('submit')
+                <>
+                  {t('submit')}
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+                </>
               )}
             </button>
           </div>
-
-          {submitWarning && (
-            <p
-              className="mt-3 text-xs font-bold text-right"
-              style={{ color: STATUS.warning }}
-            >
-              {submitWarning}
-            </p>
-          )}
+          {submitWarning && <p className="mt-2 text-xs font-bold text-right" style={{ color: STATUS.warning }}>{submitWarning}</p>}
         </div>
       )}
     </div>
