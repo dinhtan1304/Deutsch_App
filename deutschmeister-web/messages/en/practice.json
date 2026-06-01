@@ -736,6 +736,8 @@
       "loading": "Loading session...",
       "notFound": "Session not found.",
       "title": "Dictation",
+      "eyebrow": "Diktat · Dictation",
+      "back": "Back",
       "subtitle": "Listen and fill in the missing words in the subtitles",
       "speedLabel": "Speed",
       "autoPause": "Auto-pause after each line",

@@ -9,15 +9,10 @@ import { DictationSegmentRow } from '@/components/dictation/DictationSegmentRow'
 import { DictationHeader } from '@/components/dictation/DictationHeader';
 import { VideoUnavailableFallback } from '@/components/dictation/VideoUnavailableFallback';
 import { STATUS, ACCENT, GRADIENT } from '@/lib/tokens';
-import { PageHeader } from '@/components/ui';
 
 const AUTOSAVE_DEBOUNCE_MS = 3000;
 const SPEED_OPTIONS = [0.5, 0.75, 1, 1.25, 1.5] as const;
 const NAVBAR_HEIGHT = 64;
-
-const CEFR_COLORS: Record<string, string> = {
-  A1: STATUS.success, A2: ACCENT.srs, B1: ACCENT.vocab,
-};
 
 export default function DictationPlayPage() {
   const { id } = useParams<{ id: string }>();
@@ -147,15 +142,16 @@ export default function DictationPlayPage() {
   const unansweredCount = session.totalBlanks - answeredCount;
 
   return (
-    <div className="max-w-5xl mx-auto px-4 pb-24">
+    <div className="max-w-6xl mx-auto px-4 pb-24">
       {/* Header Container — sentinel for collapse */}
-      <div ref={sentinelRef} className="pt-2">
-        <PageHeader
-          backHref="/practice-test/dictation"
-          title={session.video.title}
-          subtitle={t('subtitle')}
-          accent="listening"
-        />
+      <div ref={sentinelRef} className="pt-4 mb-5">
+        <button onClick={() => router.push('/practice-test/dictation')} className="mb-3 inline-flex items-center gap-1 text-caption font-medium transition-opacity hover:opacity-70" style={{ color: 'var(--accent)' }}>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
+          {t('back')}
+        </button>
+        <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.14em]" style={{ color: 'var(--theme-text-muted)' }}>{t('eyebrow')}</p>
+        <h1 className="text-h2 font-extrabold leading-tight" style={{ letterSpacing: '-.02em', color: 'var(--theme-text-primary)' }}>{session.video.title}</h1>
+        <p className="mt-1.5 text-body" style={{ color: 'var(--theme-text-secondary)' }}>{t('subtitle')}</p>
       </div>
 
       {videoError ? (
@@ -194,46 +190,37 @@ export default function DictationPlayPage() {
 
                 <div className="relative z-10 flex flex-col gap-4">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1">
-                      <span className="text-[10px] font-black uppercase tracking-widest mr-1 opacity-50" style={{ color: 'var(--theme-text-primary)' }}>{t('speedLabel')}</span>
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <span className="mr-1 text-[10px] font-semibold uppercase tracking-widest" style={{ color: 'var(--theme-text-muted)' }}>{t('speedLabel')}</span>
                       {SPEED_OPTIONS.map(s => (
                         <button key={s} type="button" onClick={() => handleSpeedChange(s)}
-                          className={`px-2 py-0.5 rounded-lg text-[11px] font-black transition-all ${speed === s ? 'text-white' : 'hover:bg-white/5'}`}
-                          style={{
-                            backgroundColor: speed === s ? ACCENT.dictation : 'transparent',
-                            color: speed === s ? 'white' : 'var(--theme-text-secondary)',
-                          }}>{s}x</button>
+                          className="mono rounded-[7px] px-2 py-1 text-[11px] font-bold transition-colors"
+                          style={speed === s
+                            ? { background: ACCENT.dictation, color: 'white', border: `1px solid ${ACCENT.dictation}` }
+                            : { background: 'var(--theme-bg-secondary)', color: 'var(--theme-text-secondary)', border: '1px solid var(--theme-border)' }}>{s}x</button>
                       ))}
                     </div>
-
-                    <div className="flex items-center gap-2">
-                       <span className="text-[11px] font-black px-2 py-0.5 rounded-md bg-white/5 border border-white/10" style={{ color: CEFR_COLORS[session.difficulty] }}>
-                         {session.difficulty}
-                       </span>
-                    </div>
+                    <span className="mono rounded-[5px] px-2 py-0.5 text-[10.5px] font-bold" style={{ background: 'color-mix(in srgb, var(--violet) 16%, transparent)', color: 'var(--violet)' }}>
+                      {session.difficulty}
+                    </span>
                   </div>
 
                   {/* Auto-pause + Next segment row */}
                   <div className="flex items-center justify-between gap-3 flex-wrap">
-                    <label className="flex items-center gap-2 cursor-pointer select-none">
-                      <input
-                        type="checkbox"
-                        checked={autoPause}
-                        onChange={e => setAutoPause(e.target.checked)}
-                        className="w-4 h-4 rounded accent-cyan-500"
-                      />
-                      <span className="text-[11px] font-black uppercase tracking-widest" style={{ color: 'var(--theme-text-secondary)' }}>
-                        {t('autoPause')}
+                    <button type="button" onClick={() => setAutoPause(a => !a)} className="flex items-center gap-2">
+                      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-sm" style={autoPause ? { background: ACCENT.dictation, color: 'white' } : { background: 'var(--theme-bg-secondary)', border: '1px solid var(--theme-border)' }}>
+                        {autoPause && <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>}
                       </span>
-                    </label>
+                      <span className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: 'var(--theme-text-secondary)' }}>{t('autoPause')}</span>
+                    </button>
                     <button
                       type="button"
                       onClick={handlePlayNext}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-black uppercase tracking-widest text-white transition-all hover:brightness-110 active:scale-95"
-                      style={{ background: GRADIENT.dictation }}
+                      className="inline-flex items-center gap-1.5 rounded-[9px] px-3.5 py-2 text-[11px] font-bold uppercase tracking-widest transition-colors"
+                      style={{ background: `color-mix(in srgb, ${ACCENT.dictation} 14%, transparent)`, color: ACCENT.dictation, border: `1px solid color-mix(in srgb, ${ACCENT.dictation} 45%, transparent)` }}
                     >
                       {t('nextSegment')}
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6" /></svg>
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6" /></svg>
                     </button>
                   </div>
 

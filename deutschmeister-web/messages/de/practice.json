@@ -736,6 +736,8 @@
       "loading": "Sitzung wird geladen...",
       "notFound": "Sitzung nicht gefunden.",
       "title": "Diktat",
+      "eyebrow": "Diktat · Chép chính tả",
+      "back": "Zurück",
       "subtitle": "Höre zu und fülle die fehlenden Wörter in den Untertiteln aus",
       "speedLabel": "Tempo",
       "autoPause": "Automatische Pause nach jeder Zeile",
