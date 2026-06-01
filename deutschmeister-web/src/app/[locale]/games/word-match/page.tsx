@@ -277,72 +277,66 @@ export default function WordMatchPage() {
       ]} />
       <GameProgressBar current={matchedIds.size} total={PAIRS} />
 
-      {/* Match Grid */}
-      <div className="grid grid-cols-2 gap-3 mt-2">
-        {/* Left column - German words */}
-        <div className="flex flex-col gap-2.5">
-          {leftItems.map(item => {
-            const isMatched = matchedIds.has(item.id);
-            const isSelected = selectedLeft === item.id;
-            const isWrongLeft = wrongFlash?.left === item.id;
-            const artColor = AC[item.word.gender] || 'var(--der)';
-            const article = item.word.gender && GenderInfo[item.word.gender] ? GenderInfo[item.word.gender].article : '';
-            return (
-              <button key={item.id}
-                onClick={() => handleLeftClick(item.id)}
-                disabled={isMatched}
-                className="flex items-center gap-1.5 rounded-[11px] border-2 px-4 py-3.5 text-left text-[15px] font-semibold transition-all duration-150"
+      {/* Match Grid — single row-major grid so each row's left+right cell share one height */}
+      <div className="grid grid-cols-2 gap-x-3 gap-y-2.5 mt-2 items-stretch">
+        {leftItems.map((left, i) => {
+          const right = rightItems[i];
+          // Left (German word)
+          const lMatched = matchedIds.has(left.id);
+          const lSelected = selectedLeft === left.id;
+          const lWrong = wrongFlash?.left === left.id;
+          const artColor = AC[left.word.gender] || 'var(--der)';
+          const article = left.word.gender && GenderInfo[left.word.gender] ? GenderInfo[left.word.gender].article : '';
+          // Right (meaning)
+          const rMatched = right ? matchedIds.has(right.id) : false;
+          const rWrong = right ? wrongFlash?.right === right.id : false;
+          const rClickable = !!right && !!selectedLeft && !rMatched;
+          const rLabel = right ? ((settings.showVietnamese && right.word.translationVi) || right.word.translationEn) : '';
+          return [
+            <button key={`l-${left.id}`}
+              onClick={() => handleLeftClick(left.id)}
+              disabled={lMatched}
+              className="flex h-full items-center gap-1.5 rounded-[11px] border-2 px-4 py-3.5 text-left text-[15px] font-semibold transition-all duration-150"
+              style={{
+                borderColor: lMatched ? `color-mix(in srgb, ${STATUS.success} 35%, transparent)`
+                  : lWrong ? STATUS.danger
+                  : lSelected ? ACCENT.cyan
+                  : 'var(--theme-border)',
+                backgroundColor: lMatched ? `color-mix(in srgb, ${STATUS.success} 10%, transparent)`
+                  : lWrong ? `color-mix(in srgb, ${STATUS.danger} 8%, transparent)`
+                  : lSelected ? `color-mix(in srgb, ${ACCENT.cyan} 12%, transparent)`
+                  : 'var(--theme-bg-card)',
+                color: 'var(--theme-text-primary)',
+                cursor: lMatched ? 'default' : 'pointer',
+                opacity: lMatched ? 0.55 : 1,
+              }}>
+              <span className="font-bold" style={{ color: artColor }}>{article}</span>
+              <span>{left.word.word}</span>
+              {lMatched && <IconCheck size={15} style={{ color: STATUS.success, marginLeft: 'auto' }} />}
+            </button>,
+            right ? (
+              <button key={`r-${right.id}`}
+                onClick={() => handleRightClick(right.id)}
+                disabled={rMatched || !selectedLeft}
+                className="flex h-full items-center gap-1.5 rounded-[11px] border-2 px-4 py-3.5 text-left text-sm transition-all duration-150"
                 style={{
-                  borderColor: isMatched ? `color-mix(in srgb, ${STATUS.success} 35%, transparent)`
-                    : isWrongLeft ? STATUS.danger
-                    : isSelected ? ACCENT.cyan
+                  borderColor: rMatched ? `color-mix(in srgb, ${STATUS.success} 35%, transparent)`
+                    : rWrong ? STATUS.danger
+                    : rClickable ? `color-mix(in srgb, ${ACCENT.cyan} 35%, transparent)`
                     : 'var(--theme-border)',
-                  backgroundColor: isMatched ? `color-mix(in srgb, ${STATUS.success} 10%, transparent)`
-                    : isWrongLeft ? `color-mix(in srgb, ${STATUS.danger} 8%, transparent)`
-                    : isSelected ? `color-mix(in srgb, ${ACCENT.cyan} 12%, transparent)`
+                  backgroundColor: rMatched ? `color-mix(in srgb, ${STATUS.success} 10%, transparent)`
+                    : rWrong ? `color-mix(in srgb, ${STATUS.danger} 8%, transparent)`
                     : 'var(--theme-bg-card)',
-                  color: 'var(--theme-text-primary)',
-                  cursor: isMatched ? 'default' : 'pointer',
-                  opacity: isMatched ? 0.55 : 1,
+                  color: rMatched ? 'var(--theme-text-secondary)' : 'var(--theme-text-primary)',
+                  cursor: rClickable ? 'pointer' : 'default',
+                  opacity: rMatched ? 0.55 : 1,
                 }}>
-                <span className="font-bold" style={{ color: artColor }}>{article}</span>
-                <span>{item.word.word}</span>
-                {isMatched && <IconCheck size={15} style={{ color: STATUS.success, marginLeft: 'auto' }} />}
+                <span className="flex-1">{rLabel}</span>
+                {rMatched && <IconCheck size={15} style={{ color: STATUS.success }} />}
               </button>
-            );
-          })}
-        </div>
-
-        {/* Right column - Meanings */}
-        <div className="flex flex-col gap-2.5">
-          {rightItems.map(item => {
-            const isMatched = matchedIds.has(item.id);
-            const isWrongRight = wrongFlash?.right === item.id;
-            const clickable = !!selectedLeft && !isMatched;
-            const label = (settings.showVietnamese && item.word.translationVi) || item.word.translationEn;
-            return (
-              <button key={item.id}
-                onClick={() => handleRightClick(item.id)}
-                disabled={isMatched || !selectedLeft}
-                className="flex items-center gap-1.5 rounded-[11px] border-2 px-4 py-3.5 text-left text-sm transition-all duration-150"
-                style={{
-                  borderColor: isMatched ? `color-mix(in srgb, ${STATUS.success} 35%, transparent)`
-                    : isWrongRight ? STATUS.danger
-                    : clickable ? `color-mix(in srgb, ${ACCENT.cyan} 35%, transparent)`
-                    : 'var(--theme-border)',
-                  backgroundColor: isMatched ? `color-mix(in srgb, ${STATUS.success} 10%, transparent)`
-                    : isWrongRight ? `color-mix(in srgb, ${STATUS.danger} 8%, transparent)`
-                    : 'var(--theme-bg-card)',
-                  color: isMatched ? 'var(--theme-text-secondary)' : 'var(--theme-text-primary)',
-                  cursor: clickable ? 'pointer' : 'default',
-                  opacity: isMatched ? 0.55 : 1,
-                }}>
-                <span className="flex-1">{label}</span>
-                {isMatched && <IconCheck size={15} style={{ color: STATUS.success }} />}
-              </button>
-            );
-          })}
-        </div>
+            ) : <div key={`r-empty-${i}`} />,
+          ];
+        })}
       </div>
 
       {/* Hint */}
