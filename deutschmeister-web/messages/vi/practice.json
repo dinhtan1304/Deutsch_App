@@ -686,6 +686,9 @@
       "defaultTopic": "Chép chính tả",
       "blanksCount": "{count} chỗ trống",
       "blanksUnit": "chỗ trống",
+      "filterSourceLabel": "Nguồn",
+      "filterLevelLabel": "Cấp độ",
+      "filterStatusLabel": "Trạng thái",
       "eyebrow": "Diktat · Chính tả",
       "cardReview": "Xem lại",
       "cardContinue": "Tiếp tục",
@@ -713,7 +716,11 @@
         "searching": "Đang tìm video...",
         "start": "Bắt đầu →",
         "startRandom": "Làm bài ngẫu nhiên",
-        "allLevels": "Tất cả"
+        "allLevels": "Tất cả",
+        "panelTitle": "Bắt đầu bài mới",
+        "tabUrl": "URL YouTube",
+        "tabRandom": "Ngẫu nhiên",
+        "levelLabel": "Level"
       },
       "requests": {
         "title": "Yêu cầu của tôi",
@@ -721,7 +728,8 @@
         "approved": "Đã duyệt",
         "rejected": "Từ chối",
         "reason": "Lý do: {reason}",
-        "start": "Bắt đầu →"
+        "start": "Bắt đầu →",
+        "newRequest": "Yêu cầu video mới"
       }
     },
     "session": {

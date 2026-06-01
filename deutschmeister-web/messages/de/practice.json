@@ -686,6 +686,9 @@
       "defaultTopic": "Diktat",
       "blanksCount": "{count} Lücken",
       "blanksUnit": "Lücken",
+      "filterSourceLabel": "Quelle",
+      "filterLevelLabel": "Niveau",
+      "filterStatusLabel": "Status",
       "eyebrow": "Diktat · Chính tả",
       "cardReview": "Ansehen",
       "cardContinue": "Fortsetzen",
@@ -713,7 +716,11 @@
         "searching": "Video wird gesucht...",
         "start": "Starten →",
         "startRandom": "Zufällige Sitzung",
-        "allLevels": "Alle"
+        "allLevels": "Alle",
+        "panelTitle": "Neue Sitzung starten",
+        "tabUrl": "YouTube-URL",
+        "tabRandom": "Zufällig",
+        "levelLabel": "Level"
       },
       "requests": {
         "title": "Meine Anfragen",
@@ -721,7 +728,8 @@
         "approved": "Genehmigt",
         "rejected": "Abgelehnt",
         "reason": "Grund: {reason}",
-        "start": "Starten →"
+        "start": "Starten →",
+        "newRequest": "Neues Video anfragen"
       }
     },
     "session": {

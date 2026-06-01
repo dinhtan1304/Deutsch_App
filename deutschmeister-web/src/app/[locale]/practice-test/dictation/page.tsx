@@ -13,9 +13,6 @@ import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 function IconVideo({ size = 20, style }: { size?: number; style?: React.CSSProperties }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}><path d="m22 8-6 4 6 4V8Z" /><rect width="14" height="12" x="2" y="6" rx="2" ry="2" /></svg>;
 }
-function IconDice({ size = 16, style }: { size?: number; style?: React.CSSProperties }) {
-  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}><rect width="12" height="12" x="2" y="10" rx="2" ry="2" /><path d="m17.92 14 3.5-3.5a2.24 2.24 0 0 0 0-3l-5-4.92a2.24 2.24 0 0 0-3 0L10 6" /><path d="M6 18h.01" /><path d="M10 14h.01" /><path d="M15 6h.01" /><path d="M18 9h.01" /></svg>;
-}
 function IconCheck({ size = 16, style }: { size?: number; style?: React.CSSProperties }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}><polyline points="20 6 9 17 4 12" /></svg>;
 }
@@ -30,9 +27,6 @@ function IconChevronLeft({ size = 14, style }: { size?: number; style?: React.CS
 }
 function IconChevronRight({ size = 14, style }: { size?: number; style?: React.CSSProperties }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}><polyline points="9 18 15 12 9 6" /></svg>;
-}
-function IconLink({ size = 16, style }: { size?: number; style?: React.CSSProperties }) {
-  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>;
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -69,6 +63,25 @@ function MiniStat({ label, value, total, color }: { label: string; value: string
         <span className="mono text-[18px] font-extrabold" style={{ letterSpacing: '-.02em', color: 'var(--theme-text-primary)' }}>{value}</span>
         {total != null && <span className="text-[11px]" style={{ color: 'var(--theme-text-muted)' }}>/ {total}</span>}
       </div>
+    </div>
+  );
+}
+
+function FChip({ label, on, onClick, dot, mono }: { label: string; on: boolean; onClick: () => void; dot?: string; mono?: boolean }) {
+  return (
+    <button onClick={onClick} className={`inline-flex items-center gap-1.5 rounded-[7px] px-2.5 py-1 text-caption font-semibold transition-colors ${mono ? 'mono' : ''}`}
+      style={on
+        ? { background: 'color-mix(in srgb, var(--accent) 14%, transparent)', color: 'var(--accent)', border: '1px solid var(--accent)' }
+        : { background: 'var(--theme-bg-secondary)', color: 'var(--theme-text-secondary)', border: '1px solid var(--theme-border)' }}>
+      {dot && <span className="h-1.5 w-1.5 rounded-full" style={{ background: dot }} />}{label}
+    </button>
+  );
+}
+function FGroup({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="flex items-center gap-2">
+      <span className="text-[11px] font-medium uppercase" style={{ color: 'var(--theme-text-muted)', letterSpacing: '.05em' }}>{label}</span>
+      <div className="flex flex-wrap gap-1.5">{children}</div>
     </div>
   );
 }
@@ -159,13 +172,13 @@ export default function DictationListPage() {
   const [filterLevel, setFilterLevel] = useState<string>('');
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
-  // Quick-start: URL
+  // Starter (URL / Random) — one panel, one shared level
+  const [starterMode, setStarterMode] = useState<'url' | 'rand'>('url');
+  const [starterLevel, setStarterLevel] = useState('');
+  const [filterSource, setFilterSource] = useState('');
   const [youtubeUrl, setYoutubeUrl] = useState('');
-  const [urlLevel, setUrlLevel] = useState('');
   const [urlError, setUrlError] = useState('');
   const [queuedMessage, setQueuedMessage] = useState('');
-  // Quick-start: Random
-  const [randomLevel, setRandomLevel] = useState('');
   const [isLoadingRandom, setIsLoadingRandom] = useState(false);
   const [randomError, setRandomError] = useState('');
 
@@ -196,7 +209,7 @@ export default function DictationListPage() {
     try {
       const result = await startFromUrlMutation.mutateAsync({
         youtubeUrl: youtubeUrl.trim(),
-        cefrLevel: urlLevel || undefined,
+        cefrLevel: starterLevel || undefined,
       });
       if ('status' in result && result.status === 'QUEUED') {
         setQueuedMessage(result.message);
@@ -214,7 +227,7 @@ export default function DictationListPage() {
     setIsLoadingRandom(true);
     setRandomError('');
     try {
-      const video = await dictationApi.getRandom({ cefrLevel: randomLevel || undefined });
+      const video = await dictationApi.getRandom({ cefrLevel: starterLevel || undefined });
       const session = await startSessionMutation.mutateAsync({ videoId: video.id });
       router.push(`/practice-test/dictation/${session.id}`);
     } catch {
@@ -253,159 +266,85 @@ export default function DictationListPage() {
         </div>
       </header>
 
-      {/* Quick Start */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-
-        {/* YouTube URL card */}
-        <div className="rounded-2xl p-5 border" style={{ backgroundColor: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)', boxShadow: '0 4px 16px rgba(0,0,0,0.05)' }}>
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: `${ACCENT.dictation}15`, color: ACCENT.dictation }}>
-              <IconLink size={18} />
-            </div>
-            <div>
-              <div className="text-sm font-black tracking-tight" style={{ color: 'var(--theme-text-primary)' }}>{tQuick('urlTitle')}</div>
-              <div className="text-[11px] opacity-50 font-medium" style={{ color: 'var(--theme-text-primary)' }}>{tQuick('urlSubtitle')}</div>
-            </div>
+      {/* Starter panel — one box, URL / Random toggle + shared level */}
+      <section className="v2-hero-accent mb-5 overflow-hidden rounded-[14px] p-4 sm:p-5" style={{ border: '1px solid color-mix(in srgb, var(--accent) 28%, transparent)' }}>
+        <div className="mb-3.5 flex flex-wrap items-center justify-between gap-3">
+          <span className="text-[11px] font-bold uppercase tracking-[0.08em]" style={{ color: 'var(--accent)' }}>{tQuick('panelTitle')}</span>
+          <div className="inline-flex gap-1 rounded-[8px] p-1" style={{ background: 'var(--theme-bg-secondary)', border: '1px solid var(--theme-border)' }}>
+            <button onClick={() => setStarterMode('url')} className="inline-flex items-center gap-1.5 rounded-sm px-3 py-1.5 text-caption font-semibold transition-colors" style={starterMode === 'url' ? { background: 'var(--theme-bg-tertiary)', color: 'var(--theme-text-primary)' } : { color: 'var(--theme-text-muted)' }}>🔗 {tQuick('tabUrl')}</button>
+            <button onClick={() => setStarterMode('rand')} className="inline-flex items-center gap-1.5 rounded-sm px-3 py-1.5 text-caption font-semibold transition-colors" style={starterMode === 'rand' ? { background: 'var(--theme-bg-tertiary)', color: 'var(--theme-text-primary)' } : { color: 'var(--theme-text-muted)' }}>🎲 {tQuick('tabRandom')}</button>
           </div>
-          <input
-            type="text"
-            value={youtubeUrl}
-            onChange={e => { setYoutubeUrl(e.target.value); setUrlError(''); setQueuedMessage(''); }}
-            onKeyDown={e => e.key === 'Enter' && handleStartFromUrl()}
-            placeholder={tQuick('urlPlaceholder')}
-            className="w-full px-4 py-3 rounded-xl text-sm font-medium outline-none border transition-all mb-2"
-            style={{
-              backgroundColor: 'var(--theme-bg-secondary)',
-              borderColor: urlError ? STATUS.danger : 'var(--theme-border)',
-              color: 'var(--theme-text-primary)',
-            }}
-          />
-          {urlError && <p className="text-xs mb-2 font-medium" style={{ color: STATUS.danger }}>{urlError}</p>}
-          {queuedMessage && (
-            <div className="flex items-start gap-2 mb-2 px-3 py-2.5 rounded-xl text-xs font-medium"
-              style={{ backgroundColor: `${STATUS.success}12`, color: STATUS.success }}>
-              <IconCheck size={14} style={{ marginTop: 1, flexShrink: 0 }} />
-              <span>{queuedMessage}</span>
-            </div>
-          )}
-          <div className="flex gap-2 mb-4 flex-wrap">
-            {['', 'A1', 'A2', 'B1'].map(lvl => (
-              <button key={lvl} onClick={() => setUrlLevel(lvl)}
-                className="px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all"
-                style={urlLevel === lvl
-                  ? { background: GRADIENT.dictation, color: 'white' }
-                  : { backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }}>
-                {lvl || tQuick('allLevels')}
-              </button>
-            ))}
-          </div>
-          <button
-            onClick={handleStartFromUrl}
-            disabled={startFromUrlMutation.isPending}
-            className="w-full py-3 rounded-xl text-sm font-black text-white transition-all hover:brightness-110 active:scale-95 disabled:opacity-60 flex items-center justify-center gap-2"
-            style={{ background: GRADIENT.dictation, boxShadow: '0 8px 20px rgba(6,182,212,0.2)' }}>
-            {startFromUrlMutation.isPending
-              ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> {tQuick('processing')}</>
-              : tQuick('start')}
-          </button>
         </div>
-
-        {/* Random card */}
-        <div className="rounded-2xl p-5 border" style={{ backgroundColor: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)', boxShadow: '0 4px 16px rgba(0,0,0,0.05)' }}>
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: `${ACCENT.xp}15`, color: ACCENT.xp }}>
-              <IconDice size={18} />
-            </div>
-            <div>
-              <div className="text-sm font-black tracking-tight" style={{ color: 'var(--theme-text-primary)' }}>{tQuick('randomTitle')}</div>
-              <div className="text-[11px] opacity-50 font-medium" style={{ color: 'var(--theme-text-primary)' }}>{tQuick('randomSubtitle')}</div>
-            </div>
-          </div>
-          <p className="text-xs opacity-50 mb-4 font-medium leading-relaxed" style={{ color: 'var(--theme-text-primary)' }}>
-            {tQuick('randomDescription')}
-          </p>
-          <div className="flex gap-2 mb-4 flex-wrap">
-            {['', 'A1', 'A2', 'B1'].map(lvl => (
-              <button key={lvl} onClick={() => setRandomLevel(lvl)}
-                className="px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all"
-                style={randomLevel === lvl
-                  ? { background: GRADIENT.dictation, color: 'white' }
-                  : { backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }}>
-                {lvl || tQuick('allLevels')}
-              </button>
-            ))}
-          </div>
-          {randomError && <p className="text-xs mb-3 font-medium" style={{ color: STATUS.danger }}>{randomError}</p>}
-          <button
-            onClick={handleStartRandom}
-            disabled={isLoadingRandom}
-            className="w-full py-3 rounded-xl text-sm font-black text-white transition-all hover:brightness-110 active:scale-95 disabled:opacity-60 flex items-center justify-center gap-2"
-            style={{ background: GRADIENT.dictation, boxShadow: '0 8px 20px rgba(6,182,212,0.2)' }}>
-            {isLoadingRandom
-              ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> {tQuick('searching')}</>
-              : <><IconDice size={14} /> {tQuick('startRandom')}</>}
-          </button>
-        </div>
-      </div>
-
-      {/* My Requests */}
-      {myRequests && myRequests.items.length > 0 && (
-        <div className="mb-8">
-          <h3 className="text-sm font-black uppercase tracking-widest mb-3 opacity-50" style={{ color: 'var(--theme-text-primary)' }}>
-            {tReq('title')}
-          </h3>
-          <div className="space-y-2">
-            {myRequests.items.map(req => {
-              const statusConfig = {
-                PENDING:  { label: tReq('pending'),  color: '#FBBF24', bg: 'rgba(245,158,11,0.12)' },
-                APPROVED: { label: tReq('approved'), color: '#4ADE80', bg: 'rgba(34,197,94,0.12)' },
-                REJECTED: { label: tReq('rejected'), color: '#FCA5A5', bg: 'rgba(239,68,68,0.12)' },
-              }[req.status];
-              return (
-                <div key={req.id}
-                  className="rounded-xl border p-3 flex items-center gap-3 flex-wrap"
-                  style={{ backgroundColor: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={`https://img.youtube.com/vi/${req.youtubeId}/default.jpg`}
-                    alt=""
-                    className="w-20 h-14 rounded-lg object-cover shrink-0 bg-black/20"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1 flex-wrap">
-                      <span className="text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded"
-                        style={{ backgroundColor: statusConfig.bg, color: statusConfig.color }}>
-                        {statusConfig.label}
-                      </span>
-                      <span className="text-[10px] opacity-40 font-medium" style={{ color: 'var(--theme-text-primary)' }}>
-                        {formatter.dateTime(new Date(req.createdAt), { dateStyle: 'short' })}
-                      </span>
-                    </div>
-                    <p className="text-xs font-bold truncate" style={{ color: 'var(--theme-text-secondary)' }}>
-                      {req.video?.title ?? req.youtubeUrl}
-                    </p>
-                    {req.status === 'REJECTED' && req.rejectionReason && (
-                      <p className="text-[11px] mt-0.5 font-medium" style={{ color: '#FCA5A5' }}>
-                        {tReq('reason', { reason: req.rejectionReason })}
-                      </p>
-                    )}
-                  </div>
-                  {req.status === 'APPROVED' && req.video && (
-                    <button
-                      onClick={() => startSessionMutation.mutate(
-                        { videoId: req.video!.id },
-                        { onSuccess: (s) => router.push(`/practice-test/dictation/${s.id}`) },
-                      )}
-                      disabled={startSessionMutation.isPending}
-                      className="px-4 py-2 rounded-lg text-xs font-black text-white shrink-0 disabled:opacity-60"
-                      style={{ background: GRADIENT.dictation }}>
-                      {tReq('start')}
-                    </button>
-                  )}
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-stretch">
+          <div className="flex flex-1 flex-col gap-2.5">
+            {starterMode === 'url' ? (
+              <>
+                <p className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>{tQuick('urlSubtitle')}</p>
+                <div className="flex gap-2">
+                  <input type="text" value={youtubeUrl}
+                    onChange={(e) => { setYoutubeUrl(e.target.value); setUrlError(''); setQueuedMessage(''); }}
+                    onKeyDown={(e) => e.key === 'Enter' && handleStartFromUrl()}
+                    placeholder={tQuick('urlPlaceholder')}
+                    className="h-10 min-w-0 flex-1 rounded-[9px] px-3.5 text-caption outline-none"
+                    style={{ background: 'var(--theme-bg-secondary)', border: `1px solid ${urlError ? 'var(--danger)' : 'var(--theme-border)'}`, color: 'var(--theme-text-primary)' }} />
+                  <button onClick={handleStartFromUrl} disabled={!youtubeUrl.trim() || startFromUrlMutation.isPending}
+                    className="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-[9px] px-5 text-caption font-bold disabled:opacity-50"
+                    style={youtubeUrl.trim() ? { background: 'var(--accent)', color: 'var(--accent-on)' } : { background: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)', border: '1px solid var(--theme-border)' }}>
+                    {startFromUrlMutation.isPending ? tQuick('processing') : tQuick('start')}
+                  </button>
                 </div>
-              );
-            })}
+                {urlError && <p className="text-[11px]" style={{ color: 'var(--danger)' }}>{urlError}</p>}
+                {queuedMessage && (
+                  <p className="inline-flex items-center gap-1.5 text-[11px]" style={{ color: 'var(--success)' }}><IconCheck size={13} />{queuedMessage}</p>
+                )}
+              </>
+            ) : (
+              <>
+                <p className="text-caption leading-relaxed" style={{ color: 'var(--theme-text-muted)' }}>{tQuick('randomDescription')}</p>
+                <button onClick={handleStartRandom} disabled={isLoadingRandom}
+                  className="v2-icongrad-accent inline-flex h-10 w-fit items-center gap-1.5 rounded-[9px] px-5 text-caption font-bold text-white disabled:opacity-60">
+                  🎲 {isLoadingRandom ? tQuick('searching') : tQuick('startRandom')} <IconChevronRight size={13} />
+                </button>
+                {randomError && <p className="text-[11px]" style={{ color: 'var(--danger)' }}>{randomError}</p>}
+              </>
+            )}
           </div>
+          <div className="hidden w-px lg:block" style={{ background: 'var(--theme-border)' }} />
+          <div className="lg:min-w-48">
+            <div className="mb-2 text-[10.5px] font-semibold uppercase" style={{ color: 'var(--theme-text-muted)', letterSpacing: '.06em' }}>{tQuick('levelLabel')}</div>
+            <div className="flex flex-wrap gap-1.5">
+              {['', 'A1', 'A2', 'B1', 'B2'].map((lvl) => (
+                <FChip key={lvl} label={lvl || tQuick('allLevels')} mono={!!lvl} on={starterLevel === lvl} onClick={() => setStarterLevel(lvl)} />
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* My Requests — compact chip row */}
+      {myRequests && myRequests.items.length > 0 && (
+        <div className="mb-5 flex flex-wrap items-center gap-2">
+          <span className="text-[11px] font-semibold uppercase" style={{ color: 'var(--theme-text-muted)', letterSpacing: '.06em' }}>{tReq('title')} · {myRequests.items.length}</span>
+          {myRequests.items.map((req) => {
+            const sc = req.status === 'APPROVED' ? 'var(--success)' : req.status === 'REJECTED' ? 'var(--danger)' : 'var(--warn)';
+            const label = req.status === 'APPROVED' ? tReq('approved') : req.status === 'REJECTED' ? tReq('rejected') : tReq('pending');
+            const inner = (
+              <>
+                <span className="inline-flex items-center gap-1 rounded-xs px-1.5 py-0.5 text-[10px] font-bold uppercase" style={{ background: `color-mix(in srgb, ${sc} 16%, transparent)`, color: sc, letterSpacing: '.04em' }}>
+                  <span className="h-1 w-1 rounded-full" style={{ background: sc }} />{label}
+                </span>
+                <span className="max-w-50 truncate text-caption" style={{ color: 'var(--theme-text-primary)' }}>{req.video?.title ?? req.youtubeUrl}</span>
+                <span className="mono text-[10.5px]" style={{ color: 'var(--theme-text-muted)' }}>{formatter.dateTime(new Date(req.createdAt), { day: '2-digit', month: '2-digit', year: 'numeric' })}</span>
+              </>
+            );
+            const cls = 'inline-flex items-center gap-2 rounded-[8px] px-2.5 py-1.5';
+            const st = { background: 'var(--theme-bg-card)', border: `1px solid color-mix(in srgb, ${sc} 30%, transparent)` } as React.CSSProperties;
+            return req.status === 'APPROVED' && req.video ? (
+              <button key={req.id} onClick={() => startSessionMutation.mutate({ videoId: req.video!.id }, { onSuccess: (s) => router.push(`/practice-test/dictation/${s.id}`) })} disabled={startSessionMutation.isPending} className={cls} style={st}>{inner}</button>
+            ) : (
+              <div key={req.id} className={cls} style={st}>{inner}</div>
+            );
+          })}
         </div>
       )}
 
@@ -426,40 +365,33 @@ export default function DictationListPage() {
         </div>
       )}
 
-      {/* Filters Bar */}
-      <div className="flex flex-col gap-5 mb-10">
-        <div className="flex gap-3 overflow-x-auto no-scrollbar pb-1">
-          {['', 'A1', 'A2', 'B1'].map(lvl => {
-            const isActive = filterLevel === lvl;
-            return (
-              <button key={lvl} onClick={() => { setFilterLevel(lvl); setPage(1); }}
-                className="px-5 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all duration-300"
-                style={isActive
-                  ? { background: GRADIENT.dictation, color: 'white', boxShadow: '0 10px 20px rgba(6,182,212,0.3)' }
-                  : { backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }
-                }>{lvl || tCommon('allLevels')}</button>
-            );
-          })}
-        </div>
-        <div className="flex gap-3 overflow-x-auto no-scrollbar pb-1">
-          {[
-            { id: '', label: tCommon('allStatuses') },
-            { id: 'DRAFT', label: t('statusDraft') },
-            { id: 'GRADED', label: t('statusGraded') },
-          ].map(status => {
-            const isActive = filterStatus === status.id;
-            const color = status.id === '' ? ACCENT.dictation : status.id === 'GRADED' ? STATUS.success : ACCENT.games;
-            return (
-              <button key={status.id} onClick={() => { setFilterStatus(status.id); setPage(1); }}
-                className="px-6 py-3 rounded-xl text-xs font-black transition-all duration-300 border shadow-sm"
-                style={isActive
-                  ? { background: 'var(--theme-bg-card)', borderColor: color, color, boxShadow: '0 4px 15px rgba(0,0,0,0.05)' }
-                  : { backgroundColor: 'transparent', borderColor: 'var(--theme-border)', color: 'var(--theme-text-muted)' }
-                }>{status.label}</button>
-            );
-          })}
-        </div>
-      </div>
+      {/* Filters — single v2 card */}
+      {(() => {
+        const sources = Array.from(new Set((history?.items ?? []).map((i) => i.video.topic).filter(Boolean))) as string[];
+        return (
+          <div className="mb-5 flex flex-wrap items-center gap-x-4 gap-y-3 rounded-xl p-3" style={{ background: 'var(--theme-bg-card)', border: '1px solid var(--theme-border)' }}>
+            {sources.length > 0 && (
+              <>
+                <FGroup label={t('filterSourceLabel')}>
+                  <FChip label={tCommon('all')} on={filterSource === ''} onClick={() => setFilterSource('')} />
+                  {sources.map((s) => <FChip key={s} label={s} on={filterSource === s} onClick={() => setFilterSource(s)} dot={CEFR_COLORS[''] ?? ACCENT.dictation} />)}
+                </FGroup>
+                <span className="h-5 w-px" style={{ background: 'var(--theme-border)' }} />
+              </>
+            )}
+            <FGroup label={t('filterLevelLabel')}>
+              <FChip label={tCommon('all')} on={filterLevel === ''} onClick={() => { setFilterLevel(''); setPage(1); }} />
+              {['A1', 'A2', 'B1', 'B2'].map((lvl) => <FChip key={lvl} label={lvl} mono on={filterLevel === lvl} onClick={() => { setFilterLevel(lvl); setPage(1); }} />)}
+            </FGroup>
+            <span className="h-5 w-px" style={{ background: 'var(--theme-border)' }} />
+            <FGroup label={t('filterStatusLabel')}>
+              <FChip label={tCommon('all')} on={filterStatus === ''} onClick={() => { setFilterStatus(''); setPage(1); }} />
+              <FChip label={t('statusGraded')} on={filterStatus === 'GRADED'} onClick={() => { setFilterStatus('GRADED'); setPage(1); }} dot="var(--success)" />
+              <FChip label={t('statusDraft')} on={filterStatus === 'DRAFT'} onClick={() => { setFilterStatus('DRAFT'); setPage(1); }} dot="var(--warn)" />
+            </FGroup>
+          </div>
+        );
+      })()}
 
       {/* List Content */}
       {isLoading ? (
@@ -476,7 +408,7 @@ export default function DictationListPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {history.items.map((item: DictationHistoryItem) => (
+          {history.items.filter((i) => !filterSource || i.video.topic === filterSource).map((item: DictationHistoryItem) => (
             <HistoryCard key={item.id} item={item} onDelete={() => setConfirmDeleteId(item.id)} />
           ))}
         </div>

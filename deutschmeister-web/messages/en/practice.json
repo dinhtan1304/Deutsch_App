@@ -686,6 +686,9 @@
       "defaultTopic": "Dictation",
       "blanksCount": "{count} blanks",
       "blanksUnit": "blanks",
+      "filterSourceLabel": "Source",
+      "filterLevelLabel": "Level",
+      "filterStatusLabel": "Status",
       "eyebrow": "Diktat · Dictation",
       "cardReview": "Review",
       "cardContinue": "Continue",
@@ -713,7 +716,11 @@
         "searching": "Finding video...",
         "start": "Start →",
         "startRandom": "Random session",
-        "allLevels": "All"
+        "allLevels": "All",
+        "panelTitle": "Start a new session",
+        "tabUrl": "YouTube URL",
+        "tabRandom": "Random",
+        "levelLabel": "Level"
       },
       "requests": {
         "title": "My requests",
@@ -721,7 +728,8 @@
         "approved": "Approved",
         "rejected": "Rejected",
         "reason": "Reason: {reason}",
-        "start": "Start →"
+        "start": "Start →",
+        "newRequest": "Request new video"
       }
     },
     "session": {
