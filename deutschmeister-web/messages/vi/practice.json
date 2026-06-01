@@ -685,6 +685,11 @@
       "statusDraft": "Chưa nộp",
       "defaultTopic": "Chép chính tả",
       "blanksCount": "{count} chỗ trống",
+      "blanksUnit": "chỗ trống",
+      "eyebrow": "Diktat · Chính tả",
+      "cardReview": "Xem lại",
+      "cardContinue": "Tiếp tục",
+      "cardStart": "Bắt đầu",
       "stats": {
         "total": "Tổng bài luyện",
         "accuracy": "Độ chính xác",

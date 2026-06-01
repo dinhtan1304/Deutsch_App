@@ -685,6 +685,11 @@
       "statusDraft": "Nicht abgegeben",
       "defaultTopic": "Diktat",
       "blanksCount": "{count} Lücken",
+      "blanksUnit": "Lücken",
+      "eyebrow": "Diktat · Chính tả",
+      "cardReview": "Ansehen",
+      "cardContinue": "Fortsetzen",
+      "cardStart": "Starten",
       "stats": {
         "total": "Sitzungen gesamt",
         "accuracy": "Genauigkeit",

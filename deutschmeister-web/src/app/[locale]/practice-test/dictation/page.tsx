@@ -6,7 +6,7 @@ import { Link } from '@/i18n/navigation';
 import { useRouter } from 'next/navigation';
 import * as DictationHooks from '@/hooks/useDictation';
 import { DictationHistoryItem, dictationApi } from '@/lib/api/dictation';
-import { PracticePageShell, GridSkeleton } from '@/components/ui';
+import { GridSkeleton } from '@/components/ui';
 import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 
 // ─── Local Icons ─────────────────────────────────────────────────────────────
@@ -46,81 +46,102 @@ function getScoreColor(s: number) {
   return STATUS.danger;
 }
 
-// ─── Component: HistoryCard ──────────────────────────────────────────────────
+// ─── Blank-density bars ───────────────────────────────────────────────────────
+function BlankBars({ n, color }: { n: number; color: string }) {
+  const filled = Math.min(5, Math.ceil(n / 12));
+  return (
+    <span className="inline-flex items-end gap-0.5" style={{ height: 12 }} aria-hidden>
+      {[1, 2, 3, 4, 5].map((i) => (
+        <span key={i} className="w-0.75 rounded-[1px]" style={{ height: 4 + i * 2, background: i <= filled ? color : 'var(--theme-bg-tertiary)', opacity: i <= filled ? 1 : 0.5 }} />
+      ))}
+    </span>
+  );
+}
+
+function MiniStat({ label, value, total, color }: { label: string; value: string | number; total?: number; color: string }) {
+  return (
+    <div className="flex min-w-22 flex-col gap-0.5 rounded-[10px] px-3.5 py-2" style={{ background: 'var(--theme-bg-card)', border: '1px solid var(--theme-border)' }}>
+      <div className="flex items-center gap-1.5">
+        <span className="h-1.5 w-1.5 rounded-full" style={{ background: color }} />
+        <span className="text-[10px] font-semibold uppercase" style={{ color: 'var(--theme-text-muted)', letterSpacing: '.05em' }}>{label}</span>
+      </div>
+      <div className="flex items-baseline gap-1">
+        <span className="mono text-[18px] font-extrabold" style={{ letterSpacing: '-.02em', color: 'var(--theme-text-primary)' }}>{value}</span>
+        {total != null && <span className="text-[11px]" style={{ color: 'var(--theme-text-muted)' }}>/ {total}</span>}
+      </div>
+    </div>
+  );
+}
+
+// ─── Component: HistoryCard (v2 thumbnail) ──────────────────────────────────
 function HistoryCard({ item, onDelete }: { item: DictationHistoryItem; onDelete: () => void }) {
   const t = useTranslations('practice.dictation.list');
   const formatter = useFormatter();
   const isGraded = item.status === 'GRADED';
+  const inProgress = !isGraded && item.correctBlanks > 0;
   const score = item.score ?? null;
-  const href = isGraded
-    ? `/practice-test/dictation/${item.id}/result`
-    : `/practice-test/dictation/${item.id}`;
+  const levelColor = CEFR_COLORS[item.difficulty] || ACCENT.vocab;
+  const statusColor = isGraded ? STATUS.success : inProgress ? ACCENT.xp : ACCENT.srs;
+  const statusLabel = isGraded ? t('statusGraded') : t('statusDraft');
+  const pct = item.totalBlanks > 0 ? Math.round((item.correctBlanks / item.totalBlanks) * 100) : 0;
+  const cta = isGraded ? t('cardReview') : inProgress ? t('cardContinue') : t('cardStart');
+  const href = isGraded ? `/practice-test/dictation/${item.id}/result` : `/practice-test/dictation/${item.id}`;
 
   return (
-    <Link href={href}
-      className="group block rounded-2xl p-4 transition-all duration-500 hover:-translate-y-1 hover:shadow-xl relative overflow-hidden border border-transparent hover:border-cyan-500/20"
-      style={{
-        backgroundColor: 'var(--theme-bg-card)',
-        boxShadow: '0 4px 16px rgba(0,0,0,0.05), inset 0 0 0 1px rgba(255,255,255,0.05)'
-      }}>
-
-      <div className="absolute inset-0 opacity-0 group-hover:opacity-[0.03] transition-opacity duration-700 pointer-events-none"
-        style={{ background: GRADIENT.dictation }} />
-
-      <div className="relative z-10 flex items-center gap-4">
-        <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 shadow-md transition-all duration-500 group-hover:scale-110 group-hover:rotate-3"
-          style={{ backgroundColor: `${ACCENT.dictation}15`, border: `1px solid ${ACCENT.dictation}33` }}>
-          <IconVideo size={22} style={{ color: ACCENT.dictation }} />
-        </div>
-
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-2 flex-wrap">
-            <span className="text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg text-white shadow-sm"
-              style={{ backgroundColor: CEFR_COLORS[item.difficulty] || ACCENT.vocab }}>
-              {item.difficulty}
-            </span>
-            <span className="text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg"
-              style={{
-                backgroundColor: isGraded ? `${STATUS.success}15` : `${ACCENT.games}15`,
-                color: isGraded ? STATUS.success : ACCENT.games,
-              }}>
-              {isGraded ? t('statusGraded') : t('statusDraft')}
-            </span>
-            <span className="text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg border bg-black/3 dark:bg-white/5"
-              style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-muted)' }}>
-              {item.video.topic ?? t('defaultTopic')}
-            </span>
+    <Link href={href} className="block h-full outline-none">
+      <article className="word-card-v2 flex h-full flex-col overflow-hidden rounded-[13px]"
+        style={{ background: 'var(--theme-bg-card)', border: '1px solid var(--theme-border)', ['--card-accent' as string]: levelColor } as React.CSSProperties}>
+        {/* Thumbnail */}
+        <div className="relative flex items-center justify-center"
+          style={{
+            aspectRatio: '16 / 9',
+            backgroundColor: `color-mix(in srgb, ${levelColor} 18%, var(--theme-bg-secondary))`,
+            backgroundImage: item.video.thumbnailUrl ? `url(${item.video.thumbnailUrl})` : undefined,
+            backgroundSize: 'cover', backgroundPosition: 'center',
+          }}>
+          {!item.video.thumbnailUrl && <span className="text-[44px] opacity-80">🎬</span>}
+          <div className="flex h-11 w-11 items-center justify-center rounded-full text-white" style={{ background: 'rgba(0,0,0,.6)' }}>
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><path d="M3 2v10l9-5z" /></svg>
           </div>
-
-          <p className="text-base font-black tracking-tight mb-1 truncate" style={{ color: 'var(--theme-text-primary)' }}>
-            {item.video.title}
-          </p>
-
-          <div className="flex items-center gap-3 text-[11px] font-bold opacity-40 uppercase tracking-widest" style={{ color: 'var(--theme-text-primary)' }}>
-            <span>{t('blanksCount', { count: item.totalBlanks })}</span>
-            <span className="w-1 h-1 rounded-full bg-current" />
-            <span>{item.difficulty}</span>
-            <span className="w-1 h-1 rounded-full bg-current" />
-            <span>{formatter.dateTime(new Date(item.createdAt), { dateStyle: 'short' })}</span>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-8 shrink-0">
-          {score !== null && (
-            <div className="text-right">
-              <div className="text-2xl font-black tracking-tight" style={{ color: getScoreColor(score) }}>
-                {Math.round(score)}<span className="text-sm ml-0.5">%</span>
-              </div>
+          {item.video.topic && (
+            <span className="absolute left-2 top-2 rounded-[5px] px-2 py-0.5 text-[10px] font-bold uppercase text-white" style={{ background: 'rgba(0,0,0,.6)', letterSpacing: '.04em' }}>{item.video.topic}</span>
+          )}
+          <span className="mono absolute right-2 top-2 rounded-[5px] px-2 py-0.5 text-[10.5px] font-bold text-white" style={{ background: levelColor }}>{item.difficulty}</span>
+          {inProgress && (
+            <div className="absolute inset-x-0 bottom-0 h-1" style={{ background: 'rgba(0,0,0,.4)' }}>
+              <div className="h-full" style={{ width: `${pct}%`, background: ACCENT.xp }} />
             </div>
           )}
-          <button
-            onClick={(e) => { e.preventDefault(); e.stopPropagation(); onDelete(); }}
-            className="w-12 h-12 rounded-xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-red-500/10 hover:text-red-500"
-            style={{ color: 'var(--theme-text-muted)' }}>
-            <IconTrash size={20} />
-          </button>
         </div>
-      </div>
+
+        {/* Body */}
+        <div className="flex flex-1 flex-col gap-2.5 p-4">
+          <div className="flex items-center gap-2">
+            <span className="inline-flex items-center gap-1.5 rounded-[5px] px-2 py-0.5 text-[10px] font-bold uppercase" style={{ background: `color-mix(in srgb, ${statusColor} 16%, transparent)`, color: statusColor, letterSpacing: '.04em' }}>
+              <span className="h-1 w-1 rounded-full" style={{ background: statusColor }} />{statusLabel}
+            </span>
+            {score !== null && (
+              <span className="mono ml-auto text-caption font-bold" style={{ color: getScoreColor(score) }}>{Math.round(score)}%</span>
+            )}
+          </div>
+          <h3 className="line-clamp-2 text-body font-bold leading-snug" style={{ letterSpacing: '-.01em', color: 'var(--theme-text-primary)' }}>{item.video.title}</h3>
+          <div className="flex items-center gap-2 text-[11.5px]" style={{ color: 'var(--theme-text-muted)' }}>
+            <BlankBars n={item.totalBlanks} color={levelColor} />
+            <span><b className="mono" style={{ color: 'var(--theme-text-secondary)' }}>{item.totalBlanks}</b> {t('blanksUnit')}</span>
+          </div>
+          <div className="mt-auto flex items-center justify-between gap-2 border-t border-dashed pt-2.5" style={{ borderColor: 'var(--theme-border)' }}>
+            <span className="mono text-[10.5px]" style={{ color: 'var(--theme-text-muted)' }}>{formatter.dateTime(new Date(item.createdAt), { day: '2-digit', month: '2-digit' })}</span>
+            <div className="flex items-center gap-1.5">
+              <span className="inline-flex items-center gap-1 text-[11px] font-bold" style={{ color: levelColor }}>
+                {cta}
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6" /></svg>
+              </span>
+              <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); onDelete(); }}
+                className="flex h-7 w-7 items-center justify-center rounded-lg opacity-60 transition-colors hover:text-red-500" style={{ color: 'var(--theme-text-muted)' }} aria-label="delete"><IconTrash size={15} /></button>
+            </div>
+          </div>
+        </div>
+      </article>
     </Link>
   );
 }
@@ -204,27 +225,34 @@ export default function DictationListPage() {
   };
 
   return (
-    <PracticePageShell
-      backHref="/practice-test"
-      title={t('title')}
-      subtitle={t('subtitle')}
-      accent="listening"
-      className="pb-32"
-      right={
-        <div className="flex items-center gap-3">
-          <Link href="/practice-test/dictation/shadow"
-            className="flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-black border transition-all hover:bg-black/3 dark:hover:bg-white/5"
-            style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-primary)' }}>
+    <div className="mx-auto max-w-360 px-4 py-6 pb-32 sm:px-6">
+      <Link href="/practice-test" className="mb-3 inline-flex items-center gap-1 text-caption font-medium transition-opacity hover:opacity-70" style={{ color: 'var(--accent)' }}>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
+        {tCommon('hub.back')}
+      </Link>
+      <header className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <div className="min-w-0">
+          <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.14em]" style={{ color: 'var(--theme-text-muted)' }}>{t('eyebrow')}</p>
+          <h1 className="text-h1 font-extrabold leading-tight" style={{ letterSpacing: '-.02em', color: 'var(--theme-text-primary)' }}>{t('title')}</h1>
+          <p className="mt-1.5 max-w-xl text-body leading-relaxed" style={{ color: 'var(--theme-text-secondary)' }}>{t('subtitle')}</p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <Link href="/practice-test/dictation/library" className="inline-flex h-11 items-center gap-1.5 rounded-[10px] px-4 text-caption font-bold text-white" style={{ background: GRADIENT.dictation }}>
+            <IconLibrary size={16} /> {t('newSession')}
+          </Link>
+          <Link href="/practice-test/dictation/shadow" className="inline-flex h-11 items-center gap-1.5 rounded-[10px] px-4 text-caption font-bold" style={{ background: 'var(--theme-bg-card)', color: 'var(--theme-text-secondary)', border: '1px solid var(--theme-border)' }}>
             {t('shadowingLink')}
           </Link>
-          <Link href="/practice-test/dictation/library"
-            className="flex items-center gap-2 px-7 py-3.5 rounded-xl text-sm font-black text-white transition-all hover:scale-[1.02] active:scale-95 shadow-xl shadow-cyan-500/30"
-            style={{ background: GRADIENT.dictation }}>
-            <IconLibrary size={20} /> {t('newSession')}
-          </Link>
+          {stats && stats.total > 0 && (
+            <>
+              <MiniStat label={t('stats.total')} value={stats.total} color="var(--accent)" />
+              <MiniStat label={t('stats.accuracy')} value={stats.avgScore ? `${Math.round(stats.avgScore)}%` : '—'} color="var(--warn)" />
+              <MiniStat label={t('stats.best')} value={stats.bestScore ? `${Math.round(stats.bestScore)}%` : '—'} color="var(--success)" />
+            </>
+          )}
         </div>
-      }
-    >
+      </header>
+
       {/* Quick Start */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
 
@@ -381,33 +409,6 @@ export default function DictationListPage() {
         </div>
       )}
 
-      {/* Stats Dashboard */}
-      {stats && stats.total > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-          {[
-            { label: t('stats.total'),    value: stats.total, color: ACCENT.dictation, icon: <IconVideo size={20} /> },
-            { label: t('stats.accuracy'), value: stats.avgScore ? `${Math.round(stats.avgScore)}%` : '—', color: ACCENT.xp, icon: <IconDice size={20} /> },
-            { label: t('stats.best'),     value: stats.bestScore ? `${Math.round(stats.bestScore)}%` : '—', color: STATUS.success, icon: <IconCheck size={20} /> },
-          ].map((s, i) => (
-            <div key={i} className="relative overflow-hidden rounded-2xl px-5 py-4 border shadow-sm backdrop-blur-xl flex items-center gap-4 transition-all duration-300 hover:-translate-y-1"
-              style={{
-                backgroundColor: 'var(--theme-bg-card)',
-                borderColor: 'var(--theme-border)',
-                boxShadow: '0 8px 24px rgba(0,0,0,0.04)'
-              }}>
-              <div className="absolute -right-4 -bottom-4 w-20 h-20 blur-2xl opacity-20" style={{ backgroundColor: s.color }} />
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: `${s.color}15`, color: s.color }}>
-                {s.icon}
-              </div>
-              <div className="relative z-10 min-w-0">
-                <div className="text-[10px] font-black uppercase tracking-widest opacity-40" style={{ color: 'var(--theme-text-primary)' }}>{s.label}</div>
-                <div className="text-2xl font-black tracking-tight" style={{ color: 'var(--theme-text-primary)' }}>{s.value}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
       {/* Action Banner for Deletion */}
       {confirmDeleteId && (
         <div className="mb-10 rounded-[2.5rem] border-2 p-8 flex items-center justify-between gap-8 flex-wrap animate-in fade-in slide-in-from-top-4 duration-500"
@@ -462,7 +463,7 @@ export default function DictationListPage() {
 
       {/* List Content */}
       {isLoading ? (
-        <GridSkeleton cols={1} count={4} height="h-44" gap="gap-8" />
+        <GridSkeleton cols={4} count={8} height="h-72" gap="gap-4" />
       ) : !history?.items.length ? (
         <div className="text-center py-28 rounded-[3.5rem] border-2 border-dashed" style={{ borderColor: 'var(--theme-border)' }}>
           <div className="w-24 h-24 rounded-4xl mx-auto flex items-center justify-center mb-8 shadow-2xl" style={{ background: GRADIENT.dictation }}>
@@ -474,7 +475,7 @@ export default function DictationListPage() {
             style={{ background: GRADIENT.dictation }}>{t('emptyCta')}</Link>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-8">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {history.items.map((item: DictationHistoryItem) => (
             <HistoryCard key={item.id} item={item} onDelete={() => setConfirmDeleteId(item.id)} />
           ))}
@@ -499,6 +500,6 @@ export default function DictationListPage() {
           </button>
         </div>
       )}
-    </PracticePageShell>
+    </div>
   );
 }

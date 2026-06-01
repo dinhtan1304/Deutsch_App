@@ -685,6 +685,11 @@
       "statusDraft": "Not submitted",
       "defaultTopic": "Dictation",
       "blanksCount": "{count} blanks",
+      "blanksUnit": "blanks",
+      "eyebrow": "Diktat · Dictation",
+      "cardReview": "Review",
+      "cardContinue": "Continue",
+      "cardStart": "Start",
       "stats": {
         "total": "Total sessions",
         "accuracy": "Accuracy",
