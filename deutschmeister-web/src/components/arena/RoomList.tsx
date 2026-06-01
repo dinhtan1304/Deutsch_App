@@ -7,10 +7,10 @@ import { useTranslations } from 'next-intl';
 import { arenaApi } from '@/lib/api/arena';
 import type { ArenaRoomSummary } from '@/types/arena-events.types';
 import { Button, Loading } from '@/components/ui';
-import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import { GRADIENT } from '@/lib/tokens';
 import { ARENA_MODE_LABEL } from '@/lib/arena/labels';
 import { parseArenaInviteCode } from '@/lib/arena/invite-code';
-import { IconLogIn, IconKey, IconPlus } from '@/components/ui/Icons';
+import { IconLogIn, IconPlus } from '@/components/ui/Icons';
 
 export function RoomList() {
   const t = useTranslations('arena.components');
@@ -52,87 +52,52 @@ export function RoomList() {
         border: '1px solid var(--theme-border)',
       }}
     >
-      <div className="flex items-center justify-between mb-3 gap-2 flex-wrap">
-        <h3
-          className="text-lead font-semibold flex items-center gap-2"
-          style={{ color: 'var(--theme-text-primary)' }}
+      {/* Private-room bar (design) */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+        <div className="flex min-w-0 flex-1 items-center gap-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px]" style={{ background: 'color-mix(in srgb, var(--accent) 16%, transparent)', color: 'var(--accent)' }}>
+            <svg width={18} height={18} viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round"><path d="M7 9a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Zm0 1.5a4 4 0 0 0-4 4M14 9a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Zm0 1.5a4 4 0 0 1 4 4M11 14.5a4 4 0 0 0-4-4 4 4 0 0 0-4 4" /></svg>
+          </div>
+          <div className="min-w-0">
+            <div className="text-body font-bold" style={{ color: 'var(--theme-text-primary)' }}>{t('playFriends')}</div>
+            <div className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>{t('playFriendsSub')}</div>
+          </div>
+        </div>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            setCodeError(null);
+            const code = parseArenaInviteCode(codeInput);
+            if (!code) { setCodeError(t('invalidCode')); return; }
+            router.push(`/arena/rooms/${code}`);
+          }}
+          className="flex min-w-0 flex-1 gap-2 sm:max-w-lg"
         >
-          <IconLogIn size={16} />
-          <span>{t('openRooms')}</span>
-          <span
-            className="text-caption font-normal"
-            style={{ color: 'var(--theme-text-muted)' }}
-          >
-            {t('friendlyNote')}
-          </span>
-        </h3>
-        <Link href="/arena/rooms/new">
-          <Button variant="primary" size="sm" style={{ background: GRADIENT.vocab }}>
-            <span className="inline-flex items-center gap-1">
-              <IconPlus size={14} />
-              <span>{t('createRoom')}</span>
-            </span>
-          </Button>
-        </Link>
-      </div>
-
-      {/* Join by code / link */}
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          setCodeError(null);
-          const code = parseArenaInviteCode(codeInput);
-          if (!code) {
-            setCodeError(t('invalidCode'));
-            return;
-          }
-          router.push(`/arena/rooms/${code}`);
-        }}
-        className="mb-3"
-      >
-        <div className="flex gap-2 flex-wrap sm:flex-nowrap">
           <input
             type="text"
             value={codeInput}
-            onChange={(e) => {
-              setCodeInput(e.target.value);
-              if (codeError) setCodeError(null);
-            }}
+            onChange={(e) => { setCodeInput(e.target.value); if (codeError) setCodeError(null); }}
             placeholder={t('codePlaceholder')}
             maxLength={200}
             autoComplete="off"
-            className="flex-1 min-w-0 px-3 py-2 rounded-lg font-mono"
-            style={{
-              background: 'var(--theme-bg-secondary)',
-              border: `1px solid ${codeError ? STATUS.danger : 'var(--theme-border)'}`,
-              color: 'var(--theme-text-primary)',
-              letterSpacing: '.08em',
-              textTransform: 'uppercase',
-            }}
+            className="mono min-w-0 flex-1 rounded-[8px] px-3 text-caption uppercase outline-none"
+            style={{ height: 38, background: 'var(--theme-bg-secondary)', border: `1px solid ${codeError ? 'var(--danger)' : 'var(--theme-border)'}`, color: 'var(--theme-text-primary)', letterSpacing: '.08em' }}
           />
-          <Button
-            type="submit"
-            variant="outline"
-            disabled={!codeInput.trim()}
-          >
-            <span className="inline-flex items-center gap-1.5">
-              <IconKey size={14} />
-              <span>{t('enterRoom')}</span>
-            </span>
-          </Button>
-        </div>
-        {codeError && (
-          <div className="text-caption mt-1" style={{ color: STATUS.danger }}>
-            {codeError}
-          </div>
-        )}
-        <div
-          className="text-caption mt-1"
-          style={{ color: 'var(--theme-text-muted)' }}
-        >
-          {t('haveCodeHint')}
-        </div>
-      </form>
+          <button type="submit" disabled={!codeInput.trim()} className="shrink-0 rounded-[8px] px-4 text-caption font-bold disabled:opacity-50"
+            style={codeInput.trim() ? { background: 'var(--accent)', color: 'var(--accent-on)' } : { background: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)', border: '1px solid var(--theme-border)' }}>
+            {t('enterRoom')}
+          </button>
+          <Link href="/arena/rooms/new" className="inline-flex shrink-0 items-center gap-1.5 rounded-[8px] px-3.5 text-caption font-bold transition-colors" style={{ border: '1px solid color-mix(in srgb, var(--accent) 55%, transparent)', color: 'var(--accent)' }}>
+            <IconPlus size={13} /> {t('createRoom')}
+          </Link>
+        </form>
+      </div>
+      {codeError && <p className="mt-2 text-caption" style={{ color: 'var(--danger)' }}>{codeError}</p>}
+
+      {/* Open rooms list */}
+      <h3 className="mt-4 mb-2 flex items-center gap-2 text-caption font-semibold uppercase tracking-widest" style={{ color: 'var(--theme-text-secondary)' }}>
+        <IconLogIn size={14} /> {t('openRooms')}
+      </h3>
 
       {loading ? (
         <div className="flex justify-center py-6"><Loading /></div>

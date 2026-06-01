@@ -188,6 +188,8 @@
   "components": {
     "openRooms": "Phòng đang mở",
     "friendlyNote": "(giao hữu, không tính rating)",
+    "playFriends": "Đấu với bạn bè",
+    "playFriendsSub": "Phòng riêng — giao hữu, không tính rating",
     "createRoom": "Tạo phòng",
     "invalidCode": "Mã không hợp lệ. Mã phòng có 6 ký tự (vd: K7M3Q2).",
     "codePlaceholder": "Nhập mã phòng hoặc dán link mời",

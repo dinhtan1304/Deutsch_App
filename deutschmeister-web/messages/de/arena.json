@@ -188,6 +188,8 @@
   "components": {
     "openRooms": "Offene Räume",
     "friendlyNote": "(freundschaftlich, ohne Wertung)",
+    "playFriends": "Mit Freunden spielen",
+    "playFriendsSub": "Privater Raum — freundschaftlich, ohne Wertung",
     "createRoom": "Raum erstellen",
     "invalidCode": "Ungültiger Code. Raumcodes haben 6 Zeichen (z. B. K7M3Q2).",
     "codePlaceholder": "Raumcode eingeben oder Einladungslink einfügen",

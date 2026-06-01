@@ -188,6 +188,8 @@
   "components": {
     "openRooms": "Open rooms",
     "friendlyNote": "(friendly, no rating)",
+    "playFriends": "Play with friends",
+    "playFriendsSub": "Private room — friendly, unranked",
     "createRoom": "Create room",
     "invalidCode": "Invalid code. Room codes are 6 characters (e.g. K7M3Q2).",
     "codePlaceholder": "Enter room code or paste invite link",
