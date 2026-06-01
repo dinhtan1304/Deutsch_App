@@ -170,10 +170,10 @@ export default function ReadingListPage() {
             <Link href={`/practice-test/reading/${inProgress.id}`} className="inline-flex h-10 items-center gap-1.5 rounded-[10px] px-4 text-caption font-bold text-white transition-transform hover:-translate-y-0.5" style={{ background: 'var(--warn)', boxShadow: '0 4px 14px color-mix(in srgb, var(--warn) 40%, transparent)' }}>
               {tHub('heroContinueCta')} <IconArrowRight size={14} />
             </Link>
-            <Link href="/practice-test/reading/new" className="inline-flex h-10 items-center rounded-[10px] px-4 text-caption font-bold" style={{ background: 'var(--theme-bg-card)', color: 'var(--theme-text-secondary)', border: '1px solid var(--theme-border)' }}>
+            <Link href="/practice-test/reading/new" className="v2-btn-soft inline-flex h-10 items-center rounded-[10px] px-4 text-caption font-bold" style={{ background: 'var(--theme-bg-card)', color: 'var(--theme-text-secondary)', border: '1px solid var(--theme-border)' }}>
               {tHub('newCta')}
             </Link>
-            <Link href="/practice-test/reading/exam" className="inline-flex h-10 items-center rounded-[10px] px-4 text-caption font-medium" style={{ background: 'transparent', color: 'var(--theme-text-muted)', border: '1px solid var(--theme-border)' }}>
+            <Link href="/practice-test/reading/exam" className="v2-btn-soft inline-flex h-10 items-center rounded-[10px] px-4 text-caption font-medium" style={{ background: 'transparent', color: 'var(--theme-text-muted)', border: '1px solid var(--theme-border)' }}>
               {tHub('examCta')}
             </Link>
           </div>
@@ -193,7 +193,7 @@ export default function ReadingListPage() {
             <Link href="/practice-test/reading/new" className="inline-flex h-10 items-center gap-1.5 rounded-[10px] px-5 text-caption font-bold text-white transition-transform hover:-translate-y-0.5" style={{ background: 'var(--accent)', boxShadow: '0 4px 14px color-mix(in srgb, var(--accent) 45%, transparent)' }}>
               {tHub('newCta')} <IconArrowRight size={14} />
             </Link>
-            <Link href="/practice-test/reading/exam" className="inline-flex h-10 items-center rounded-[10px] px-4 text-caption font-medium" style={{ background: 'var(--theme-bg-card)', color: 'var(--theme-text-secondary)', border: '1px solid var(--theme-border)' }}>
+            <Link href="/practice-test/reading/exam" className="v2-btn-soft inline-flex h-10 items-center rounded-[10px] px-4 text-caption font-medium" style={{ background: 'var(--theme-bg-card)', color: 'var(--theme-text-secondary)', border: '1px solid var(--theme-border)' }}>
               {tHub('examCta')}
             </Link>
           </div>

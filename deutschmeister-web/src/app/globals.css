@@ -679,6 +679,14 @@ input[type="range"]::-webkit-slider-thumb {
 .v2-game-cta { background: transparent; border: 1px solid color-mix(in srgb, var(--gc) 55%, transparent); color: var(--gc); transition: background .15s, color .15s, border-color .15s; }
 .word-card-v2:hover .v2-game-cta { background: var(--gc); color: #fff; border-color: var(--gc); }
 
+/* v2 soft/outline button — route-accent tint on hover (!important beats inline base styles) */
+.v2-btn-soft { transition: background .15s, border-color .15s, color .15s; }
+.v2-btn-soft:hover {
+  border-color: var(--accent) !important;
+  color: var(--accent) !important;
+  background: color-mix(in srgb, var(--accent) 10%, var(--theme-bg-card)) !important;
+}
+
 /* v2 word/entity card hover lift — border turns to the card's article/route
    accent (--card-accent set inline). */
 .word-card-v2 { transition: border-color .2s, transform .2s, box-shadow .2s; }
