@@ -237,7 +237,7 @@ export default function FillBlankPage() {
         <GameProgressBar current={index + 1} total={questionsCount} />
 
       {currentWord && (
-        <div className="rounded-3xl overflow-hidden mb-5 transition-all duration-300"
+        <div className="rounded-3xl overflow-hidden my-6 transition-all duration-300"
           style={{
             background: answered
               // eslint-disable-next-line no-restricted-syntax
@@ -289,9 +289,9 @@ export default function FillBlankPage() {
           <div className="grid grid-cols-3 gap-2.5">
             {/* eslint-disable no-restricted-syntax */}
             {([
-              { article: 'der', label: 'Maskulin', bg: 'linear-gradient(160deg, #0a1628, #1e3a8a)', border: `${ACCENT.srs}73`,       color: '#93C5FD' },
-              { article: 'die', label: 'Feminin',  bg: 'linear-gradient(160deg, #2a0a1e, #9d174d)', border: `${ACCENT.listening}73`, color: '#F9A8D4' },
-              { article: 'das', label: 'Neutrum',  bg: 'linear-gradient(160deg, #0a2218, #065f46)', border: `${ACCENT.teal}73`,      color: '#5EEAD4' },
+              { article: 'der', label: 'Maskulin', bg: 'linear-gradient(160deg, #0a1628, #1e3a8a)', border: 'color-mix(in srgb, var(--der) 50%, transparent)', color: 'var(--der)' },
+              { article: 'die', label: 'Feminin',  bg: 'linear-gradient(160deg, #2a0a1e, #9d174d)', border: 'color-mix(in srgb, var(--die) 50%, transparent)', color: 'var(--die)' },
+              { article: 'das', label: 'Neutrum',  bg: 'linear-gradient(160deg, #0a2218, #065f46)', border: 'color-mix(in srgb, var(--das) 50%, transparent)', color: 'var(--das)' },
             ]).map(btn => (
             /* eslint-enable no-restricted-syntax */
               <button key={btn.article} onClick={() => handleQuickAnswer(btn.article)}
