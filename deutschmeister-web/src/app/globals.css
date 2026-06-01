@@ -713,6 +713,10 @@ input[type="range"]::-webkit-slider-thumb {
 .v2-lifetime-hero { background: linear-gradient(135deg, color-mix(in srgb, var(--pink) 14%, transparent), color-mix(in srgb, var(--violet) 8%, transparent)); }
 .v2-pinkviolet-grad { background: linear-gradient(135deg, var(--pink), var(--violet)); }
 
+/* SRS rating button — calm bg-card, border + tint turn to --rate (set inline) on hover */
+.v2-rate-btn { background: var(--theme-bg-card); border-color: color-mix(in srgb, var(--rate) 30%, var(--theme-border)); }
+.v2-rate-btn:hover:not(:disabled) { border-color: var(--rate); background: color-mix(in srgb, var(--rate) 12%, var(--theme-bg-card)); box-shadow: 0 8px 20px color-mix(in srgb, var(--rate) 25%, transparent); }
+
 /* v2 word/entity card hover lift — border turns to the card's article/route
    accent (--card-accent set inline). */
 .word-card-v2 { transition: border-color .2s, transform .2s, box-shadow .2s; }

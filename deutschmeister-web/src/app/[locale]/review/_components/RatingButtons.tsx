@@ -1,5 +1,4 @@
 'use client';
-/* eslint-disable no-restricted-syntax */
 
 import { useTranslations } from 'next-intl';
 import { ACCENT, STATUS } from '@/lib/tokens';
@@ -12,19 +11,13 @@ interface RatingButtonsProps {
   disabled?: boolean;
 }
 
+// Calm design: bg-card + colored border/label/interval per rating, key badge top-right.
 const BUTTONS = [
-  { rating: 'again' as ReviewRating, labelKey: 'ratingAgain' as const, marker: '1', textColor: '#FCA5A5', bg: 'linear-gradient(160deg, #450a0a, #991b1b)', borderKey: 'danger' },
-  { rating: 'hard' as ReviewRating, labelKey: 'ratingHard' as const, marker: '2', textColor: '#FCD34D', bg: 'linear-gradient(160deg, #431407, #92400e)', borderKey: 'xp' },
-  { rating: 'good' as ReviewRating, labelKey: 'ratingGood' as const, marker: '3', textColor: '#86EFAC', bg: 'linear-gradient(160deg, #052e16, #166534)', borderKey: 'success' },
-  { rating: 'easy' as ReviewRating, labelKey: 'ratingEasy' as const, marker: '4', textColor: '#93C5FD', bg: 'linear-gradient(160deg, #0c1a3f, #1e40af)', borderKey: 'srs' },
+  { rating: 'again' as ReviewRating, labelKey: 'ratingAgain' as const, marker: '1', color: STATUS.danger },
+  { rating: 'hard' as ReviewRating, labelKey: 'ratingHard' as const, marker: '2', color: ACCENT.xp },
+  { rating: 'good' as ReviewRating, labelKey: 'ratingGood' as const, marker: '3', color: ACCENT.srs },
+  { rating: 'easy' as ReviewRating, labelKey: 'ratingEasy' as const, marker: '4', color: STATUS.success },
 ] as const;
-
-const BORDER_COLORS: Record<string, string> = {
-  danger: `${STATUS.danger}73`,
-  xp: `${ACCENT.xp}73`,
-  success: `${STATUS.success}73`,
-  srs: `${ACCENT.srs}73`,
-};
 
 export function RatingButtons({ intervals, onReview, disabled = false }: RatingButtonsProps) {
   const t = useTranslations('progress.review');
@@ -40,15 +33,13 @@ export function RatingButtons({ intervals, onReview, disabled = false }: RatingB
             disabled={disabled}
             title={t('seeAgainAfter', { delay: delayText })}
             aria-label={t('ratingAria', { label, delay: delayText })}
-            className="relative py-5 rounded-2xl transition-all duration-200 hover:-translate-y-1.5 hover:shadow-2xl active:scale-95 disabled:opacity-55 disabled:hover:translate-y-0 disabled:cursor-not-allowed"
-            style={{ background: btn.bg, border: `1.5px solid ${BORDER_COLORS[btn.borderKey]}` }}
+            style={{ ['--rate' as string]: btn.color } as React.CSSProperties}
+            className="v2-rate-btn relative flex h-[72px] flex-col items-center justify-center gap-1 rounded-[14px] border-[1.5px] transition-all duration-150 hover:-translate-y-0.5 active:scale-95 disabled:opacity-55 disabled:hover:translate-y-0 disabled:cursor-not-allowed"
           >
-            <span className="absolute top-2 right-2.5 text-caption font-bold" style={{ color: btn.textColor, opacity: 0.55 }}>{btn.marker}</span>
-            <div className="text-h2 mb-1.5 leading-none font-black" style={{ color: btn.textColor }}>{btn.marker}</div>
-            <div className="text-sm font-extrabold" style={{ color: btn.textColor }}>{label}</div>
-            <div className="text-caption mt-0.5 font-medium" style={{ color: btn.textColor, opacity: 0.65 }}>
-              {delayText}
-            </div>
+            <kbd className="mono absolute right-2.5 top-2 rounded-xs px-1.5 text-[10px] font-bold"
+              style={{ background: 'var(--theme-bg-secondary)', color: btn.color }}>{btn.marker}</kbd>
+            <span className="text-[17px] font-bold" style={{ color: 'var(--theme-text-primary)' }}>{label}</span>
+            <span className="mono text-[11px] font-medium" style={{ color: btn.color }}>⟲ {delayText}</span>
           </button>
         );
       })}
