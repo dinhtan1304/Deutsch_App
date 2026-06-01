@@ -93,7 +93,7 @@ function PrimaryPick({ game, due, onPlay }: { game: GameDef; due: number; onPlay
           </div>
         </div>
         <p className="text-body leading-relaxed" style={{ color: 'var(--theme-text-secondary)' }}>{t(`definitions.${game.id}.description` as 'definitions.gender-quiz.description')}</p>
-        <span className="mt-auto inline-flex h-10 items-center justify-center gap-1.5 rounded-[9px] text-body font-bold text-white" style={{ background: game.color, boxShadow: `0 4px 12px color-mix(in srgb, ${game.color} 40%, transparent)` }}>
+        <span className="mt-auto inline-flex h-10 items-center justify-center gap-1.5 rounded-[7px] text-body font-bold text-white" style={{ background: game.color, boxShadow: `0 4px 12px color-mix(in srgb, ${game.color} 40%, transparent)` }}>
           {tHub('play')} <IconChevronRight size={14} />
         </span>
       </div>
