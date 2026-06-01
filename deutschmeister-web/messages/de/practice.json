@@ -189,7 +189,8 @@
       "remaining": "noch {count}",
       "statDone": "Erledigt",
       "statAvg": "Ø Punkte",
-      "statBest": "Best"
+      "statBest": "Best",
+      "minutesUnit": "Min"
     },
     "allLevels": "Alle Niveaus",
     "allStatuses": "Alle Status",

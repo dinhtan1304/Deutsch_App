@@ -189,7 +189,8 @@
       "remaining": "còn {count} câu",
       "statDone": "Đã làm",
       "statAvg": "TB điểm",
-      "statBest": "Best"
+      "statBest": "Best",
+      "minutesUnit": "phút"
     },
     "allLevels": "Tất cả trình độ",
     "allStatuses": "Tất cả trạng thái",

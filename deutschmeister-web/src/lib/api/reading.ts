@@ -68,6 +68,7 @@ export interface ReadingHistoryItem {
   cefrLevel: string;
   textType: string;
   title: string;
+  passagePreview: string | null;
   totalQuestions: number;
   correctCount: number;
   score: number | null;

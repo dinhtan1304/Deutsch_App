@@ -254,6 +254,11 @@ export default function ReadingListPage() {
             const sColor = isGraded ? 'var(--success)' : 'var(--warn)';
             const statusLabel = tCommon(`status.${item.status}` as 'status.DRAFT');
             const targetHref = isGraded ? `/practice-test/reading/${item.id}/result` : `/practice-test/reading/${item.id}`;
+            const stamp = item.submittedAt ?? item.createdAt;
+            const minutes = item.submittedAt
+              ? Math.round((new Date(item.submittedAt).getTime() - new Date(item.createdAt).getTime()) / 60000)
+              : 0;
+            const showTime = isGraded && minutes > 0 && minutes < 600;
             return (
               <Link key={item.id} href={targetHref} className="block outline-none">
                 <article className="word-card-v2 flex h-full flex-col gap-2.5 rounded-[13px] p-4"
@@ -271,6 +276,13 @@ export default function ReadingListPage() {
                   </div>
                   {/* title */}
                   <h3 className="text-body font-bold leading-snug" style={{ letterSpacing: '-.01em', color: 'var(--theme-text-primary)' }}>{item.title || item.topic}</h3>
+                  {/* preview snippet */}
+                  {item.passagePreview && (
+                    <p className="rounded-[9px] px-3 py-2 text-caption leading-relaxed line-clamp-2"
+                      style={{ background: 'var(--theme-bg-secondary)', borderLeft: `2px solid color-mix(in srgb, ${tColor} 55%, transparent)`, color: 'var(--theme-text-muted)' }}>
+                      „{item.passagePreview}…”
+                    </p>
+                  )}
                   {/* score dots */}
                   {isGraded && item.totalQuestions > 0 && (
                     <div className="flex items-center gap-2">
@@ -284,9 +296,10 @@ export default function ReadingListPage() {
                   )}
                   {/* footer */}
                   <div className="mt-auto flex items-center justify-between gap-2 border-t border-dashed pt-2.5" style={{ borderColor: 'var(--theme-border)' }}>
-                    <div className="flex items-center gap-2.5 text-[11px]" style={{ color: 'var(--theme-text-muted)' }}>
+                    <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[11px]" style={{ color: 'var(--theme-text-muted)' }}>
                       <span className="inline-flex items-center gap-1"><IconLayers size={11} />{t('questionsCount', { count: item.totalQuestions })}</span>
-                      <span className="mono inline-flex items-center gap-1 opacity-70"><IconClock size={11} />{formatDate(item.createdAt)}</span>
+                      {showTime && <span className="inline-flex items-center gap-1"><IconClock size={11} />{minutes} {tHub('minutesUnit')}</span>}
+                      <span className="mono opacity-70">{formatDate(stamp)}</span>
                     </div>
                     <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); setConfirmDeleteId(item.id); }}
                       className="flex h-7 w-7 items-center justify-center rounded-lg opacity-60 transition-colors hover:text-red-500"

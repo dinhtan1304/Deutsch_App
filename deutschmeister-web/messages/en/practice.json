@@ -189,7 +189,8 @@
       "remaining": "{count} left",
       "statDone": "Done",
       "statAvg": "Avg",
-      "statBest": "Best"
+      "statBest": "Best",
+      "minutesUnit": "min"
     },
     "allLevels": "All levels",
     "allStatuses": "All statuses",
