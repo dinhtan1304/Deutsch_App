@@ -33,30 +33,6 @@ function polarToXY(angleDeg: number, radius: number): [number, number] {
   return [CX + radius * Math.cos(rad), CY + radius * Math.sin(rad)];
 }
 
-// ─── Trend Arrow ─────────────────────────────────────────────────────────────
-
-function TrendArrow({ trend }: { trend: 'up' | 'down' | 'flat' }) {
-  if (trend === 'up') {
-    return (
-      <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-        <path d="M5 1L9 6H1L5 1Z" fill="#22C55E" />
-      </svg>
-    );
-  }
-  if (trend === 'down') {
-    return (
-      <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-        <path d="M5 9L1 4H9L5 9Z" fill="#EF4444" />
-      </svg>
-    );
-  }
-  return (
-    <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-      <rect x="1" y="4" width="8" height="2" rx="1" fill="#94A3B8" />
-    </svg>
-  );
-}
-
 // ─── Radar SVG ───────────────────────────────────────────────────────────────
 
 function RadarChart({ data }: { data: SkillScores }) {
@@ -170,60 +146,6 @@ function RadarChart({ data }: { data: SkillScores }) {
   );
 }
 
-// ─── Legend Row ───────────────────────────────────────────────────────────────
-
-function SkillRow({
-  skill,
-  data,
-  isWeakest,
-}: {
-  skill: (typeof SKILLS)[number];
-  data: SkillScore;
-  isWeakest: boolean;
-}) {
-  const t = useTranslations('progress.profile.skillRadar');
-  return (
-    <div
-      className="group flex items-center gap-3 px-4 py-2.5 rounded-2xl transition-all duration-300"
-      style={{
-        backgroundColor: isWeakest ? 'rgba(239,68,68,.1)' : 'var(--theme-bg-secondary)44',
-        border: `1px solid ${isWeakest ? 'rgba(239,68,68,.25)' : 'var(--theme-border)'}`,
-      }}
-    >
-      {/* Color dot */}
-      <div
-        className="w-2.5 h-2.5 rounded-full shrink-0 shadow-[0_0_8px_currentColor]"
-        style={{ backgroundColor: skill.color, color: skill.color }}
-      />
-      {/* Label */}
-      <span
-        className="flex-1 text-[11px] font-black uppercase tracking-widest opacity-70 group-hover:opacity-100 transition-opacity"
-        style={{ color: 'var(--theme-text-primary)' }}
-      >
-        {t(`skills.${skill.key}` as 'skills.reading')}
-      </span>
-      {/* Score */}
-      <span
-        className="text-sm font-black min-w-10 text-right"
-        style={{ color: data.score !== null ? skill.color : 'var(--theme-text-muted)' }}
-      >
-        {data.score !== null ? data.score : '—'}
-      </span>
-      {/* Trend arrow */}
-      {data.sampleCount >= 4 && <TrendArrow trend={data.trend} />}
-      {/* Weakest badge */}
-      {isWeakest && (
-        <span
-          className="text-[9px] font-black px-2 py-0.5 rounded-lg uppercase tracking-tighter shrink-0"
-          style={{ background: STATUS.danger, color: 'white' }}
-        >
-          {t('weakest')}
-        </span>
-      )}
-    </div>
-  );
-}
-
 // ─── Main Widget ─────────────────────────────────────────────────────────────
 
 export function SkillRadar() {
@@ -307,9 +229,14 @@ export function SkillRadar() {
     ? SKILLS.find((s) => s.key === data.weakestSkill)
     : null;
 
+  // Skills sorted by score (desc) for the right-hand bars
+  const sorted = [...SKILLS]
+    .map((s) => ({ s, sd: data[s.key] as SkillScore }))
+    .sort((a, b) => (b.sd.score ?? 0) - (a.sd.score ?? 0));
+
   return (
     <div
-      className="rounded-2xl border p-5"
+      className="rounded-lg border p-5"
       style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}
     >
       {/* Header */}
@@ -342,19 +269,36 @@ export function SkillRadar() {
         )}
       </div>
 
-      {/* Radar chart */}
-      <RadarChart data={data} />
-
-      {/* Legend rows */}
-      <div className="space-y-1.5 mt-2">
-        {SKILLS.map((s) => (
-          <SkillRow
-            key={s.key}
-            skill={s}
-            data={data[s.key] as SkillScore}
-            isWeakest={data.weakestSkill === s.key}
-          />
-        ))}
+      {/* Radar + bars side by side (compact, one row) */}
+      <div className="flex items-center gap-3 sm:gap-5">
+        <div className="w-36 shrink-0 sm:w-52"><RadarChart data={data} /></div>
+        <div className="min-w-0 flex-1 space-y-2.5">
+          {sorted.map(({ s, sd }) => {
+            const isWeakest = data.weakestSkill === s.key;
+            return (
+              <div key={s.key}>
+                <div className="mb-1 flex items-center justify-between gap-2">
+                  <span className="flex items-center gap-1.5 text-caption font-semibold" style={{ color: 'var(--theme-text-primary)' }}>
+                    <span className="h-1.75 w-1.75 rounded-full" style={{ background: s.color }} />
+                    {t(`skills.${s.key}` as 'skills.reading')}
+                    {isWeakest && (
+                      <span className="rounded-[3px] px-1.5 py-px text-[8.5px] font-bold uppercase tracking-wide"
+                        style={{ background: 'color-mix(in srgb, var(--danger) 16%, transparent)', color: 'var(--danger)' }}>
+                        {t('weakest')}
+                      </span>
+                    )}
+                  </span>
+                  <span className="mono text-caption font-bold" style={{ color: sd.score !== null ? s.color : 'var(--theme-text-muted)' }}>
+                    {sd.score !== null ? sd.score : '—'}
+                  </span>
+                </div>
+                <div className="h-1 overflow-hidden rounded-full" style={{ background: 'var(--theme-bg-secondary)' }}>
+                  <div className="h-full rounded-full transition-all duration-700" style={{ width: `${sd.score ?? 0}%`, background: s.color }} />
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       {/* Weakest skill CTA */}

@@ -89,7 +89,7 @@ export default function ProfilePage() {
         ))}
       </div>
 
-      <div className="mb-5 grid grid-cols-1 gap-4 md:grid-cols-[1.3fr_1fr]">
+      <div className="mb-5 grid grid-cols-1 gap-4 md:grid-cols-[1.3fr_1fr] md:items-start">
         <SkillRadar />
         <ErrorPatternsWidget />
       </div>
