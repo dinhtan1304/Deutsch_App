@@ -705,6 +705,10 @@ input[type="range"]::-webkit-slider-thumb {
 /* v2 study-plan: today-task hero tint (accent → violet, theme-var gradient) */
 .v2-plan-hero { background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 13%, transparent), color-mix(in srgb, var(--violet) 6%, transparent)); }
 
+/* v2 leaderboard: per-user avatar gradient + podium pedestal tint (CSS-var driven) */
+.v2-rank-avatar { background: linear-gradient(135deg, var(--rank-color), color-mix(in srgb, var(--rank-color) 60%, transparent)); }
+.v2-podium-step { background: linear-gradient(180deg, color-mix(in srgb, var(--step-color) 22%, transparent), color-mix(in srgb, var(--step-color) 4%, transparent)); border: 1px solid color-mix(in srgb, var(--step-color) 22%, transparent); border-bottom: 0; }
+
 /* v2 upgrade/pricing: lifetime banner tint + crown / CTA gradient (pink → violet) */
 .v2-lifetime-hero { background: linear-gradient(135deg, color-mix(in srgb, var(--pink) 14%, transparent), color-mix(in srgb, var(--violet) 8%, transparent)); }
 .v2-pinkviolet-grad { background: linear-gradient(135deg, var(--pink), var(--violet)); }
