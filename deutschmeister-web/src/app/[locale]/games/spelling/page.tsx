@@ -24,7 +24,8 @@ import { useUmlautTrigger, UMLAUT_TRIGGER_HINT } from '@/hooks/useUmlautTrigger'
 type Phase = 'setup' | 'playing' | 'result';
 type Feedback = 'correct' | 'wrong' | null;
 
-const AC: Record<string, string> = { masculine: ACCENT.srs, feminine: ACCENT.listening, neuter: STATUS.success };
+// Exact der/die/das article colors per design
+const AC: Record<string, string> = { masculine: 'var(--der)', feminine: 'var(--die)', neuter: 'var(--das)' };
 const SPECIAL_CHARS = ['ä', 'ö', 'ü', 'Ä', 'Ö', 'Ü', 'ß'];
 
 interface AnswerRecord {
@@ -269,15 +270,15 @@ export default function SpellingBeePage() {
       {currentWord && (() => {
         const fbColor = feedback === 'correct' ? STATUS.success : feedback === 'wrong' ? STATUS.danger : null;
         const article = currentWord.gender && GenderInfo[currentWord.gender] ? GenderInfo[currentWord.gender].article : '';
+        // Accent follows the word's gender (der/die/das); falls back to listening pink.
+        const accent = AC[currentWord.gender] || ACCENT.listening;
         return (
         <>
-          {/* Calm word card with letter slots */}
-          <div key={index} className="my-6 rounded-[18px] border px-6 py-7 text-center transition-colors"
+          {/* Word card — full border in the article color, green/red on feedback */}
+          <div key={index} className="my-6 rounded-[18px] border-2 px-6 py-7 text-center transition-colors"
             style={{
               background: 'var(--theme-bg-card)',
-              borderColor: fbColor ? `color-mix(in srgb, ${fbColor} 45%, transparent)` : 'var(--theme-border)',
-              borderTopWidth: 3,
-              borderTopColor: ACCENT.listening,
+              borderColor: fbColor ?? accent,
             }}>
             {article && (
               <div className="mb-1.5 text-caption" style={{ color: 'var(--theme-text-muted)' }}>
@@ -323,7 +324,7 @@ export default function SpellingBeePage() {
             placeholder={t('spelling.placeholder')}
             title={t('spelling.umlautTooltip', { hint: UMLAUT_TRIGGER_HINT })}
             className="mb-3 h-13 w-full rounded-xl border-2 px-4 text-center text-base font-semibold outline-none transition-colors"
-            style={{ background: 'var(--theme-bg-card)', borderColor: fbColor ?? ACCENT.listening, color: 'var(--theme-text-primary)' }}
+            style={{ background: 'var(--theme-bg-card)', borderColor: fbColor ?? accent, color: 'var(--theme-text-primary)' }}
           />
 
           {/* Umlaut buttons */}
@@ -345,7 +346,7 @@ export default function SpellingBeePage() {
             className="flex h-13 w-full items-center justify-center gap-2 rounded-xl text-[15px] font-bold transition-transform active:scale-95 disabled:cursor-not-allowed"
             style={(feedback || !input.trim())
               ? { background: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }
-              : { background: ACCENT.listening, color: 'white', boxShadow: `0 4px 14px ${ACCENT.listening}44` }}>
+              : { background: accent, color: 'white', boxShadow: `0 4px 14px color-mix(in srgb, ${accent} 30%, transparent)` }}>
             <IconCheck size={16} /> {t('spelling.confirm')}
           </button>
         </>
