@@ -1,21 +1,18 @@
 'use client';
 
-import { ReactNode, useState } from 'react';
+import { ReactNode } from 'react';
 import { Link } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
 import {
   IconPenLine, IconHeadphones, IconBookOpen, IconMic,
   IconArrowRight, IconZap, IconGraduationCap, IconTarget,
 } from '@/components/ui/Icons';
-import { useIsExamUnlocked } from '@/hooks/useSubscription';
-import { UpgradeModal } from '@/components/subscription/UpgradeModal';
 import { ACCENT, GRADIENT, type AccentKey } from '@/lib/tokens';
 import { AppPageShell, SectionHeader, SurfaceCard } from '@/components/ui';
 import { ChooseExam } from './_sections/ChooseExam';
 
 type SkillKey = 'reading' | 'listening' | 'writing' | 'speaking';
 type AiKey = 'roleplay' | 'pronunciation' | 'dictation';
-type ExamKey = 'reading' | 'listening' | 'writing' | 'speaking';
 
 type PracticeCard = {
   i18nKey: string;
@@ -35,13 +32,6 @@ const aiCards: { key: AiKey; href: string; icon: PracticeCard['icon']; accent: A
   { key: 'roleplay',      href: '/practice-test/roleplay',      icon: IconZap,        accent: 'examWriting' },
   { key: 'pronunciation', href: '/practice-test/pronunciation', icon: IconMic,        accent: 'listening' },
   { key: 'dictation',     href: '/practice-test/dictation',     icon: IconHeadphones, accent: 'dictation' },
-];
-
-const examCards: { key: ExamKey; href: string; icon: PracticeCard['icon']; accent: AccentKey }[] = [
-  { key: 'reading',   href: '/practice-test/reading/exam',   icon: IconBookOpen,   accent: 'reading' },
-  { key: 'listening', href: '/practice-test/listening/exam', icon: IconHeadphones, accent: 'listening' },
-  { key: 'writing',   href: '/practice-test/writing/exam',   icon: IconPenLine,    accent: 'examWriting' },
-  { key: 'speaking',  href: '/practice-test/speaking/exam',  icon: IconMic,        accent: 'xp' },
 ];
 
 const quickStarts: { key: 'skill' | 'exam' | 'ai'; href: string; icon: ReactNode; accent: AccentKey }[] = [
@@ -192,25 +182,6 @@ function AiCardGrid() {
   );
 }
 
-function ExamCardGrid({ locked, onLockedClick }: { locked?: boolean; onLockedClick?: () => void }) {
-  const t = useTranslations('practice.landing.exam');
-  return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-      {examCards.map((card) => (
-        <PracticeActionCard
-          key={card.href}
-          card={card}
-          titleDe={t(`${card.key}.titleDe` as 'reading.titleDe')}
-          title={t(`${card.key}.title` as 'reading.title')}
-          description={t(`${card.key}.description` as 'reading.description')}
-          locked={locked}
-          onLockedClick={onLockedClick}
-        />
-      ))}
-    </div>
-  );
-}
-
 function Section({
   id,
   title,
@@ -239,8 +210,6 @@ function Section({
 }
 
 export default function PracticeTestPage() {
-  const examUnlocked = useIsExamUnlocked();
-  const [upgradeOpen, setUpgradeOpen] = useState(false);
   const t = useTranslations('practice.landing');
 
   return (
@@ -287,45 +256,36 @@ export default function PracticeTestPage() {
         <Section
           id="exam-practice"
           title={t('exam.title')}
-          subtitle={examUnlocked ? t('exam.subtitleUnlocked') : t('exam.subtitleLocked')}
+          subtitle={t('exam.subtitleUnlocked')}
           icon={<IconGraduationCap size={18} />}
           accent="xp"
           badge={t('exam.badge')}
-          extraBadge={!examUnlocked && (
-            <span className="rounded-full px-2.5 py-1 text-caption font-black text-white" style={{ background: GRADIENT.xp }}>
-              {t('exam.premiumBadge')}
-            </span>
-          )}
         >
-          <ExamCardGrid locked={!examUnlocked} onLockedClick={() => setUpgradeOpen(true)} />
-        </Section>
-
-        <div className="space-y-4">
           <ChooseExam />
           <Link href="/practice-test/huong-dan-b1" className="block">
             <SurfaceCard variant="interactive" accent="examWriting">
-              <div className="flex items-start gap-4">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-white" style={{ background: GRADIENT.examWriting }}>
-                  <IconBookOpen size={20} />
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex items-start gap-4">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[11px] text-white" style={{ background: GRADIENT.examWriting }}>
+                    <IconBookOpen size={20} />
+                  </div>
+                  <div className="min-w-0">
+                    <h3 className="text-h3 font-bold" style={{ color: 'var(--theme-text-primary)' }}>
+                      {t('guideB1Card.title')}
+                    </h3>
+                    <p className="mt-1 text-body leading-relaxed" style={{ color: 'var(--theme-text-muted)' }}>
+                      {t('guideB1Card.description')}
+                    </p>
+                  </div>
                 </div>
-                <div className="min-w-0 flex-1">
-                  <h3 className="text-h3 font-bold" style={{ color: 'var(--theme-text-primary)' }}>
-                    {t('guideB1Card.title')}
-                  </h3>
-                  <p className="mt-1 text-body leading-relaxed" style={{ color: 'var(--theme-text-muted)' }}>
-                    {t('guideB1Card.description')}
-                  </p>
-                  <span className="mt-4 inline-flex items-center gap-2 text-body font-bold" style={{ color: ACCENT.examWriting }}>
-                    {t('guideB1Card.cta')} <IconArrowRight size={16} />
-                  </span>
-                </div>
+                <span className="inline-flex shrink-0 items-center justify-center gap-2 rounded-[11px] px-5 py-3 text-body font-bold text-white" style={{ background: GRADIENT.examWriting }}>
+                  {t('guideB1Card.cta')} <IconArrowRight size={16} />
+                </span>
               </div>
             </SurfaceCard>
           </Link>
-        </div>
+        </Section>
       </div>
-
-      <UpgradeModal open={upgradeOpen} onClose={() => setUpgradeOpen(false)} defaultPeriod="yearly" />
     </AppPageShell>
   );
 }

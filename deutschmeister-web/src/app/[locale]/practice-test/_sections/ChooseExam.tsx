@@ -4,6 +4,16 @@ import { IconCheck, IconArrowRight } from '@/components/ui/Icons';
 import { GRADIENT } from '@/lib/tokens';
 import { examSummaries, comparisonRows, whyBenefits } from '../_data/b1-content';
 
+// Dot colours for the "why" benefit cards (matches the v2 design palette)
+const WHY_DOTS = ['var(--success)', 'var(--violet)', 'var(--cyan)', 'var(--warn)', 'var(--der)', 'var(--streak)'];
+
+// Colour comparison-table cells by their leading marker (✓ positive / ✗ absent)
+function cellColor(value: string) {
+  if (value.startsWith('✓')) return 'var(--success)';
+  if (value.startsWith('✗')) return 'var(--theme-text-muted)';
+  return 'var(--theme-text-secondary)';
+}
+
 export function ChooseExam() {
   const t = useTranslations('practice.guideB1.choose');
   return (
@@ -21,11 +31,8 @@ export function ChooseExam() {
         {examSummaries.map((exam) => (
           <article
             key={exam.id}
-            className="rounded-3xl p-6 relative overflow-hidden shadow-sm"
-            style={{
-              backgroundColor: 'var(--theme-bg-card)',
-              boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.05)',
-            }}
+            className="relative flex flex-col overflow-hidden rounded-2xl border p-6"
+            style={{ backgroundColor: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}
           >
             <div
               className="absolute top-0 left-0 right-0 h-1.5"
@@ -35,7 +42,7 @@ export function ChooseExam() {
               <h4 className="text-xl font-black" style={{ color: 'var(--theme-text-primary)' }}>
                 {exam.name}
               </h4>
-              <span className="text-caption font-bold uppercase tracking-wider px-2 py-0.5 rounded-full"
+              <span className="text-caption font-bold uppercase tracking-wider px-2 py-0.5 rounded-sm"
                 style={{ color: 'var(--theme-text-muted)', backgroundColor: 'var(--theme-bg-secondary)' }}>
                 {exam.shortName}
               </span>
@@ -43,21 +50,21 @@ export function ChooseExam() {
             <p className="text-body mb-5" style={{ color: 'var(--theme-text-secondary)', lineHeight: 1.7 }}>
               {exam.description}
             </p>
-            <ul className="space-y-2 mb-6">
+            <ul className="mb-6 flex-1 space-y-2.5">
               {exam.bullets.map((bullet) => (
                 <li key={bullet} className="flex items-start gap-2 text-body" style={{ color: 'var(--theme-text-secondary)' }}>
-                  <IconCheck size={16} style={{ color: 'var(--theme-text-muted)', marginTop: 3 }} />
+                  <IconCheck size={16} style={{ color: 'var(--success)', marginTop: 3, flexShrink: 0 }} />
                   <span>{bullet}</span>
                 </li>
               ))}
             </ul>
             <Link
               href={`/practice-test/huong-dan-b1?exam=${exam.id}#cau-truc-de`}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-body font-bold text-white shadow-md transition-transform hover:-translate-y-0.5"
+              className="flex w-full items-center justify-center gap-2 rounded-[11px] px-4 py-3 text-body font-bold text-white transition-transform hover:-translate-y-0.5"
               style={{ background: GRADIENT[exam.gradient] }}
             >
               {t('viewStructure')}
-              <IconArrowRight size={14} />
+              <IconArrowRight size={15} />
             </Link>
           </article>
         ))}
@@ -93,8 +100,8 @@ export function ChooseExam() {
                     }}
                   >
                     <td className="p-4 font-semibold" style={{ color: 'var(--theme-text-primary)' }}>{row.criterion}</td>
-                    <td className="p-4" style={{ color: 'var(--theme-text-secondary)' }}>{row.goethe}</td>
-                    <td className="p-4" style={{ color: 'var(--theme-text-secondary)' }}>{row.telc}</td>
+                    <td className="p-4 font-medium" style={{ color: cellColor(row.goethe) }}>{row.goethe}</td>
+                    <td className="p-4 font-medium" style={{ color: cellColor(row.telc) }}>{row.telc}</td>
                   </tr>
                 ))}
               </tbody>
@@ -112,7 +119,7 @@ export function ChooseExam() {
           {t('whyTitle')}
         </h4>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {whyBenefits.map((b) => (
+          {whyBenefits.map((b, i) => (
             <div
               key={b.title}
               className="rounded-2xl p-4"
@@ -121,7 +128,10 @@ export function ChooseExam() {
                 border: '1px solid var(--theme-border)',
               }}
             >
-              <p className="text-body font-bold mb-1" style={{ color: 'var(--theme-text-primary)' }}>{b.title}</p>
+              <p className="mb-1 flex items-center gap-2 text-body font-bold" style={{ color: 'var(--theme-text-primary)' }}>
+                <span className="h-1.75 w-1.75 shrink-0 rounded-full" style={{ background: WHY_DOTS[i % WHY_DOTS.length] }} />
+                {b.title}
+              </p>
               <p className="text-caption" style={{ color: 'var(--theme-text-muted)', lineHeight: 1.6 }}>{b.description}</p>
             </div>
           ))}
