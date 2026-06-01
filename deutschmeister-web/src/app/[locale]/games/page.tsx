@@ -185,7 +185,7 @@ function GameCard({ game, stat, onPlay }: { game: GameDef; stat?: GameStat; onPl
           ) : (
             <span className="text-[11.5px] italic" style={{ color: 'var(--theme-text-muted)' }}>{tHub('notTried')}</span>
           )}
-          <span className="v2-game-cta inline-flex h-8 shrink-0 items-center gap-1.5 rounded-lg px-3 text-caption font-semibold" style={{ ['--gc' as string]: game.color } as React.CSSProperties}>
+          <span className="v2-game-cta inline-flex h-8 shrink-0 items-center gap-1.5 rounded-[7px] px-3 text-caption font-semibold" style={{ ['--gc' as string]: game.color } as React.CSSProperties}>
             {plays > 0 ? tHub('playMore') : tHub('tryIt')} <IconChevronRight size={12} />
           </span>
         </footer>
