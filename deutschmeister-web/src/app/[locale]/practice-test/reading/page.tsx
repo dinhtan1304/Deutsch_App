@@ -132,7 +132,7 @@ export default function ReadingListPage() {
     KNOWN_TYPES.includes(type) ? t(`textTypes.${type}` as 'textTypes.artikel') : type;
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6">
+    <div className="mx-auto max-w-360 px-4 py-6 sm:px-6">
       {/* Back */}
       <Link href="/practice-test" className="mb-3 inline-flex items-center gap-1 text-caption font-medium transition-opacity hover:opacity-70" style={{ color: 'var(--accent)' }}>
         <IconChevronLeft size={15} /> {tHub('back')}

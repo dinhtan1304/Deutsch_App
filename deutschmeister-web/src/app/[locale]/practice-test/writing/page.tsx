@@ -131,7 +131,7 @@ export default function WritingListPage() {
   const inProgress = allItems.find((i) => i.status === 'DRAFT');
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6">
+    <div className="mx-auto max-w-360 px-4 py-6 sm:px-6">
       <Link href="/practice-test" className="mb-3 inline-flex items-center gap-1 text-caption font-medium transition-opacity hover:opacity-70" style={{ color: 'var(--accent)' }}>
         <IconChevronLeft size={15} /> {tHub('back')}
       </Link>

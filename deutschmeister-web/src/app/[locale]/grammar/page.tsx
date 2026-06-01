@@ -141,7 +141,7 @@ export default function GrammarDashboardPage() {
 
   if (lessonsLoading) {
     return (
-      <div className="max-w-300 mx-auto px-4 py-8">
+      <div className="max-w-360 mx-auto px-4 py-8">
         <div className="animate-pulse space-y-6">
           <div className="h-32 rounded-[2.5rem]" style={{ backgroundColor: 'var(--theme-bg-secondary)' }} />
           <div className="grid grid-cols-3 gap-6">
@@ -158,7 +158,7 @@ export default function GrammarDashboardPage() {
   }
 
   return (
-    <div className="max-w-300 mx-auto px-4 py-2 pb-24">
+    <div className="max-w-360 mx-auto px-4 py-2 pb-24">
 
       {/* ─── Header ─── */}
       <header className="flex items-end justify-between gap-5 flex-wrap mb-6">
