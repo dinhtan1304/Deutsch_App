@@ -273,16 +273,16 @@ export default function FlashcardsPage() {
             }}
           >
             {/* ─── FRONT (Word — article hidden intentionally) ─── */}
-            <div className="absolute inset-0 rounded-2xl border-2 p-6 flex flex-col items-center justify-center"
+            <div className="absolute inset-0 rounded-2xl border p-6 flex flex-col items-center justify-center"
               style={{
                 backfaceVisibility: 'hidden',
                 WebkitBackfaceVisibility: 'hidden',
                 backgroundColor: 'var(--theme-bg-card)',
-                borderColor: ACCENT.srs,
+                borderColor: 'var(--theme-border)',
               }}>
-              <p className="text-[10px] mb-2 opacity-40 uppercase tracking-widest" style={{ color: 'var(--theme-text-primary)' }}>{t('flashcards.front.label')}</p>
+              <p className="text-[10.5px] mb-2 font-bold uppercase tracking-widest" style={{ color: 'var(--theme-text-muted)' }}>{t('flashcards.front.label')}</p>
 
-              <h2 className="text-3xl md:text-4xl font-bold mb-1" style={{ color: 'var(--theme-text-primary)' }}>
+              <h2 className="text-4xl md:text-5xl font-extrabold mb-2 tracking-tight" style={{ color: 'var(--theme-text-primary)' }}>
                 {currentWord.word}
               </h2>
 
@@ -303,9 +303,9 @@ export default function FlashcardsPage() {
               {/* Audio button */}
               <button
                 onClick={(e) => { e.stopPropagation(); speakWord(currentWord.word, settings.speechRate < 0.7); }}
-                className="w-10 h-10 rounded-xl flex items-center justify-center transition-all hover:scale-110 mb-5"
-                style={{ backgroundColor: 'rgba(59,130,246,.1)', color: ACCENT.srs }}>
-                <IconVolume size={20} />
+                className="w-11 h-11 rounded-full border flex items-center justify-center transition-all hover:scale-110 mb-5"
+                style={{ backgroundColor: 'rgba(59,130,246,.12)', borderColor: 'rgba(59,130,246,.35)', color: ACCENT.srs }}>
+                <IconVolume size={18} />
               </button>
 
               <p className="text-body font-medium" style={{ color: ACCENT.srs }}>
@@ -313,37 +313,39 @@ export default function FlashcardsPage() {
               </p>
             </div>
 
-            {/* ─── BACK (Answer) ─── */}
-            <div className="absolute inset-0 rounded-2xl p-8 flex flex-col items-center justify-center"
+            {/* ─── BACK (Answer) — calm card with article-colour accent ─── */}
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 rounded-2xl border p-6"
               style={{
                 backfaceVisibility: 'hidden',
                 WebkitBackfaceVisibility: 'hidden',
                 transform: 'rotateY(180deg)',
-                background: `linear-gradient(135deg, ${genderColor}, ${genderColor}cc)`,
-                borderRadius: '1rem',
+                backgroundColor: 'var(--theme-bg-card)',
+                borderColor: `color-mix(in srgb, ${genderColor} 45%, transparent)`,
+                borderTopWidth: 3,
+                borderTopColor: genderColor,
               }}>
-              <p className="text-white/70 text-xs mb-2">{t('flashcards.back.answerLabel')}</p>
-              <h2 className="text-4xl md:text-5xl font-bold text-white mb-3">
-                {currentWord.article} {currentWord.word}
+              <p className="text-[10.5px] font-bold uppercase tracking-widest" style={{ color: genderColor }}>{t('flashcards.back.answerLabel')}</p>
+              <h2 className="text-center text-3xl md:text-4xl font-extrabold tracking-tight" style={{ color: 'var(--theme-text-primary)' }}>
+                <span style={{ color: genderColor }}>{currentWord.article}</span> {currentWord.word}
               </h2>
-              <p className="text-white/90 text-title mb-1">{currentWord.translationEn}</p>
-              {settings.showVietnamese && currentWord.translationVi && (
-                <p className="text-white/70 text-sm mb-3">{currentWord.translationVi}</p>
+              {currentWord.pronunciation && (
+                <p className="mono text-caption" style={{ color: 'var(--theme-text-muted)' }}>[{currentWord.pronunciation}]</p>
               )}
-              <div className="mb-3 px-4 py-1.5 bg-white/15 rounded-full">
-                <span className="text-white text-body font-medium">
-                  {currentWord.gender && GenderInfo[currentWord.gender]
-                    ? GenderInfo[currentWord.gender].label
-                    : t('flashcards.back.unknownGender')}
-                </span>
-              </div>
+              <p className="text-body font-medium" style={{ color: 'var(--theme-text-primary)' }}>{currentWord.translationEn}</p>
+              {settings.showVietnamese && currentWord.translationVi && (
+                <p className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>{currentWord.translationVi}</p>
+              )}
+              <span className="rounded-sm px-2.5 py-0.5 text-[11px] font-bold" style={{ background: `color-mix(in srgb, ${genderColor} 18%, transparent)`, color: genderColor }}>
+                {currentWord.gender && GenderInfo[currentWord.gender]
+                  ? GenderInfo[currentWord.gender].label
+                  : t('flashcards.back.unknownGender')}
+              </span>
 
               {/* Example sentence */}
               {currentWord.examples && currentWord.examples.length > 0 && (
-                <div className="w-full mt-1 px-4">
-                  <div className="text-xs italic text-center py-2 px-3 rounded-xl bg-white/15 text-white/80">
-                    &bdquo;{currentWord.examples[0]}&ldquo;
-                  </div>
+                <div className="mt-1 max-w-full rounded-[9px] px-3.5 py-2 text-center text-caption italic"
+                  style={{ background: 'var(--theme-bg-secondary)', borderLeft: `2px solid ${genderColor}`, color: 'var(--theme-text-muted)' }}>
+                  &bdquo;{currentWord.examples[0]}&ldquo;
                 </div>
               )}
             </div>
@@ -355,52 +357,50 @@ export default function FlashcardsPage() {
       {isFlipped ? (
         <div className="grid grid-cols-2 gap-3">
           <button onClick={() => handleResponse(false)}
-            className="py-5 rounded-2xl font-bold text-title text-white transition-all duration-200
-              hover:-translate-y-1 hover:shadow-lg active:scale-95 flex items-center justify-center gap-2"
-            // eslint-disable-next-line no-restricted-syntax
-            style={{ background: 'linear-gradient(135deg, #EF4444, #DC2626)', boxShadow: `0 4px 16px ${STATUS.danger}40` }}>
-            <IconX size={18} /> {t('flashcards.buttons.dontKnow')}
-            <span className="text-caption font-medium opacity-70 ml-1">← / 1</span>
+            className="flex h-14 items-center justify-center gap-2 rounded-[14px] border text-[15px] font-bold transition-transform active:scale-95"
+            style={{ background: `color-mix(in srgb, ${STATUS.danger} 12%, transparent)`, borderColor: `color-mix(in srgb, ${STATUS.danger} 40%, transparent)`, color: STATUS.danger }}>
+            <IconX size={17} /> {t('flashcards.buttons.dontKnow')}
+            <span className="mono text-[10px] font-medium opacity-70 ml-1">←</span>
           </button>
           <button onClick={() => handleResponse(true)}
-            className="py-5 rounded-2xl font-bold text-title text-white transition-all duration-200
-              hover:-translate-y-1 hover:shadow-lg active:scale-95 flex items-center justify-center gap-2"
-            // eslint-disable-next-line no-restricted-syntax
-            style={{ background: 'linear-gradient(135deg, #22C55E, #16A34A)', boxShadow: `0 4px 16px ${STATUS.success}40` }}>
-            <IconCheck size={18} /> {t('flashcards.buttons.know')}
-            <span className="text-caption font-medium opacity-70 ml-1">→ / 2</span>
+            className="flex h-14 items-center justify-center gap-2 rounded-[14px] text-[15px] font-bold text-white transition-transform active:scale-95"
+            style={{ background: STATUS.success, boxShadow: `0 6px 18px ${STATUS.success}59` }}>
+            <IconCheck size={17} /> {t('flashcards.buttons.know')}
+            <span className="mono text-[10px] font-medium opacity-80 ml-1">→</span>
           </button>
         </div>
       ) : (
-        <Button variant="game" accent="srs" onClick={flipCard} className="w-full" >
+        <button onClick={flipCard}
+          className="flex h-14 w-full items-center justify-center gap-2 rounded-[14px] text-[15px] font-bold text-white transition-transform active:scale-[.98]"
+          style={{ background: ACCENT.srs, boxShadow: `0 6px 18px ${ACCENT.srs}66` }}>
           <IconRefresh size={16} /> {t('flashcards.buttons.flip')}
-        </Button>
+        </button>
       )}
 
       {/* Navigation row */}
       <div className="flex justify-center items-center gap-2 mt-4">
         <button onClick={goToPrev} disabled={index === 0}
-          className="p-2.5 rounded-xl border transition-all disabled:opacity-30 hover:opacity-80"
+          className="flex h-10 w-10 items-center justify-center rounded-full border transition-all disabled:opacity-30 hover:opacity-80"
           style={{ color: 'var(--theme-text-muted)', borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}
           title={t('flashcards.nav.prev')}>
           <IconChevronLeft size={18} />
         </button>
         <button
           onClick={() => speakWord(currentWord?.word || '', settings.speechRate < 0.7)}
-          className="p-2.5 rounded-xl border transition-all hover:opacity-80"
+          className="flex h-10 w-10 items-center justify-center rounded-full border transition-all hover:opacity-80"
           style={{ color: 'var(--theme-text-muted)', borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}
           title={t('flashcards.nav.speak')}>
           <IconVolume size={18} />
         </button>
         <button
           onClick={() => { setIsFlipped(false); playClick(); startGame(); }}
-          className="p-2.5 rounded-xl border transition-all hover:opacity-80"
+          className="flex h-10 w-10 items-center justify-center rounded-full border transition-all hover:opacity-80"
           style={{ color: 'var(--theme-text-muted)', borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}
           title={t('flashcards.nav.shuffle')}>
           <IconShuffle size={18} />
         </button>
         <button onClick={goToNext} disabled={!words || index >= words.length - 1}
-          className="p-2.5 rounded-xl border transition-all disabled:opacity-30 hover:opacity-80"
+          className="flex h-10 w-10 items-center justify-center rounded-full border transition-all disabled:opacity-30 hover:opacity-80"
           style={{ color: 'var(--theme-text-muted)', borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}
           title={t('flashcards.nav.next')}>
           <IconChevronRight size={20} />
