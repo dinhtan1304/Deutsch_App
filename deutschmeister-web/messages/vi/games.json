@@ -137,7 +137,12 @@
     "soundLabel": "Âm thanh: {state}",
     "soundOn": "Bật",
     "soundOff": "Tắt",
-    "answerLabel": "Đáp án: {answer}"
+    "answerLabel": "Đáp án: {answer}",
+    "answeredCorrect": "Bạn trả lời đúng {correct}/{total} câu",
+    "gradeExcellent": "Xuất sắc!",
+    "gradeGreat": "Tốt lắm!",
+    "gradeGood": "Khá ổn",
+    "gradeKeepGoing": "Cần luyện thêm"
   },
   "quickQuiz": {
     "title": "Quick Quiz",

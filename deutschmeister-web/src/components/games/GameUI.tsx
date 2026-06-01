@@ -63,26 +63,23 @@ export function ComboBadge({ combo }: { combo: number }) {
   );
 }
 
-/** Stats card used in result screens */
+/** Stats card (horizontal: icon + value + label) — matches v2 result design */
 export function StatCard({ label, value, color = ACCENT.srs, icon: Icon }: {
   label: string; value: string | number; color?: string; icon?: React.FC<{ size?: number; style?: React.CSSProperties; className?: string }>;
 }) {
   return (
-    <div className="relative overflow-hidden rounded-2xl p-4 text-center border transition-all hover:scale-105"
-      style={{ 
-        background: `linear-gradient(135deg, ${color}10, ${color}05)`,
-        borderColor: `${color}20`,
-        boxShadow: `0 4px 12px ${color}05`
-      }}>
-      <div className="absolute -top-4 -right-4 w-12 h-12 rounded-full" style={{ backgroundColor: color, opacity: 0.05 }} />
+    <div className="flex items-center gap-2.5 rounded-md border p-3.5"
+      style={{ backgroundColor: 'var(--theme-bg-secondary)', borderColor: 'var(--theme-border)' }}>
       {Icon && (
-        <div className="w-8 h-8 rounded-xl mx-auto flex items-center justify-center mb-2"
-          style={{ background: `linear-gradient(135deg, ${color}, ${color}cc)`, boxShadow: `0 4px 12px ${color}40` }}>
-          <Icon size={16} style={{ color: 'white' }} />
-        </div>
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px]"
+          style={{ background: `color-mix(in srgb, ${color} 16%, transparent)`, color }}>
+          <Icon size={16} />
+        </span>
       )}
-      <div className="text-2xl font-black tracking-tight" style={{ color }}>{value}</div>
-      <div className="text-[10px] font-black uppercase tracking-widest mt-1 opacity-50" style={{ color: 'var(--theme-text-primary)' }}>{label}</div>
+      <div className="min-w-0 text-left">
+        <div className="mono text-lg font-bold leading-tight" style={{ color }}>{value}</div>
+        <div className="text-[10.5px]" style={{ color: 'var(--theme-text-muted)' }}>{label}</div>
+      </div>
     </div>
   );
 }
@@ -121,25 +118,81 @@ export function GameSetupCard({ icon: Icon, iconColor, title, loadError, childre
   );
 }
 
-/** Result screen wrapper */
-export function GameResultCard({ accuracy, title, children }: {
-  accuracy: number; title: string; children: React.ReactNode;
-}) {
-  const resultColor = accuracy >= 80 ? ACCENT.xp : accuracy >= 60 ? ACCENT.srs : ACCENT.vocab;
-  
+/** A single horizontal result stat (icon + value + label) — matches design */
+export type ResultStatItem = {
+  label: string; value: string | number; color: string;
+  icon?: React.FC<{ size?: number; style?: React.CSSProperties }>;
+};
+function ResultStat({ label, value, color, icon: Icon }: ResultStatItem) {
   return (
-    <div className="max-w-xl mx-auto px-4 py-8" style={{ animation: 'bounceIn .5s cubic-bezier(0.175, 0.885, 0.32, 1.275)' }}>
-      <div className="rounded-3xl border-2 p-7 text-center mb-4 relative overflow-hidden shadow-xl"
-        style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
-        
-        <div className="w-16 h-16 rounded-2xl mx-auto flex items-center justify-center mb-4 shadow-xl"
-          style={{
-            background: `linear-gradient(135deg, ${resultColor}, ${resultColor}cc)`,
-            boxShadow: `0 8px 24px ${resultColor}30`
-          }}>
-          <IconTrophy size={30} style={{ color: 'white' }} />
-        </div>
-        <h1 className="text-2xl font-black tracking-tight mb-1" style={{ color: 'var(--theme-text-primary)' }}>{title}</h1>
+    <div className="flex items-center gap-2.5 rounded-md border p-3.5"
+      style={{ backgroundColor: 'var(--theme-bg-secondary)', borderColor: 'var(--theme-border)' }}>
+      {Icon && (
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px]"
+          style={{ background: `color-mix(in srgb, ${color} 16%, transparent)`, color }}>
+          <Icon size={16} />
+        </span>
+      )}
+      <div className="min-w-0 text-left">
+        <div className="mono text-lg font-bold leading-tight" style={{ color }}>{value}</div>
+        <div className="text-[10.5px]" style={{ color: 'var(--theme-text-muted)' }}>{label}</div>
+      </div>
+    </div>
+  );
+}
+
+/** Result screen wrapper — emoji + grade + "đúng X/Y" + 2×2 stat grid + 2 buttons */
+export function GameResultCard({ accuracy, correct, total, stats, onRestart, onExit, children }: {
+  accuracy: number;
+  correct?: number; total?: number;
+  stats?: ResultStatItem[];
+  onRestart?: () => void; onExit?: () => void;
+  /** @deprecated kept for back-compat; no longer rendered (grade label shown instead) */
+  title?: string;
+  children?: React.ReactNode;
+}) {
+  const t = useTranslations('games.common');
+  const grade = accuracy >= 90 ? { label: t('gradeExcellent'), emoji: '🏆', color: ACCENT.xp }
+    : accuracy >= 70 ? { label: t('gradeGreat'), emoji: '🎉', color: STATUS.success }
+    : accuracy >= 50 ? { label: t('gradeGood'), emoji: '👍', color: ACCENT.srs }
+    : { label: t('gradeKeepGoing'), emoji: '💪', color: ACCENT.games };
+
+  return (
+    <div className="max-w-md mx-auto px-4 py-8" style={{ animation: 'bounceIn .5s cubic-bezier(0.175, 0.885, 0.32, 1.275)' }}>
+      <div className="rounded-[22px] border p-8 text-center"
+        // eslint-disable-next-line no-restricted-syntax
+        style={{ background: 'linear-gradient(180deg, var(--theme-bg-card), var(--theme-bg-tertiary))', borderColor: 'var(--theme-border)', boxShadow: '0 24px 60px rgba(0,0,0,.4)' }}>
+        <div className="mb-2 text-[56px] leading-none">{grade.emoji}</div>
+        <h1 className="text-h1 font-extrabold" style={{ color: grade.color }}>{grade.label}</h1>
+        {correct != null && total != null && (
+          <p className="mb-6 mt-1.5 text-body" style={{ color: 'var(--theme-text-muted)' }}>
+            {t('answeredCorrect', { correct, total })}
+          </p>
+        )}
+
+        {stats && (
+          <div className="mb-6 grid grid-cols-2 gap-2.5">
+            {stats.map((s, i) => <ResultStat key={i} {...s} />)}
+          </div>
+        )}
+
+        {(onRestart || onExit) && (
+          <div className="flex gap-3">
+            {onExit && (
+              <button onClick={onExit} className="h-11 flex-1 rounded-[11px] border text-sm font-semibold transition-colors hover:opacity-80"
+                style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)' }}>
+                {t('backToGames')}
+              </button>
+            )}
+            {onRestart && (
+              <button onClick={onRestart} className="flex h-11 flex-1 items-center justify-center gap-2 rounded-[11px] text-sm font-bold text-white transition-transform active:scale-95"
+                style={{ background: 'var(--accent)', boxShadow: '0 4px 14px color-mix(in srgb, var(--accent) 55%, transparent)' }}>
+                <IconRefresh size={15} /> {t('restart')}
+              </button>
+            )}
+          </div>
+        )}
+
         {children}
       </div>
     </div>
@@ -150,13 +203,11 @@ export function GameResultCard({ accuracy, title, children }: {
 /** Gender article answer buttons (der/die/das) — SRS rating button style */
 type GenderType = 'masculine' | 'feminine' | 'neuter';
 
-/* eslint-disable no-restricted-syntax */
 const GENDER_BTN = [
-  { gender: 'masculine' as GenderType, article: 'der', label: 'Maskulin', textColor: '#93C5FD', bg: 'linear-gradient(160deg, #0a1628, #1e3a8a)', border: `${ACCENT.srs}73`,       hotkey: '1' },
-  { gender: 'feminine'  as GenderType, article: 'die', label: 'Feminin',  textColor: '#F9A8D4', bg: 'linear-gradient(160deg, #2a0a1e, #9d174d)', border: `${ACCENT.listening}73`, hotkey: '2' },
-  { gender: 'neuter'    as GenderType, article: 'das', label: 'Neutrum',  textColor: '#5EEAD4', bg: 'linear-gradient(160deg, #0a2218, #065f46)', border: `${ACCENT.teal}73`,      hotkey: '3' },
+  { gender: 'masculine' as GenderType, article: 'der', label: 'Maskulin', color: 'var(--der)', hotkey: '1' },
+  { gender: 'feminine'  as GenderType, article: 'die', label: 'Feminin',  color: 'var(--die)', hotkey: '2' },
+  { gender: 'neuter'    as GenderType, article: 'das', label: 'Neutrum',  color: 'var(--das)', hotkey: '3' },
 ];
-/* eslint-enable no-restricted-syntax */
 
 export function GenderButtons({ onAnswer, answered, selectedAnswer, correctGender, disabled }: {
   onAnswer: (g: GenderType) => void; answered: boolean; selectedAnswer: GenderType | null;
@@ -166,35 +217,23 @@ export function GenderButtons({ onAnswer, answered, selectedAnswer, correctGende
     <div className="grid grid-cols-3 gap-3">
       {GENDER_BTN.map(btn => {
         const isSelected = selectedAnswer === btn.gender;
-        const isCorrect  = correctGender === btn.gender;
-        let bg = btn.bg, border = `2px solid ${btn.border}`, opacity = 1, textColor = btn.textColor;
-        
-        if (answered) {
-          if (isCorrect) {
-            // eslint-disable-next-line no-restricted-syntax
-            bg = 'linear-gradient(160deg, #052e16, #166534)';
-            border = `2px solid ${STATUS.success}99`;
-            // eslint-disable-next-line no-restricted-syntax
-            textColor = '#86EFAC';
-          }
-          else if (isSelected) {
-            // eslint-disable-next-line no-restricted-syntax
-            bg = 'linear-gradient(160deg, #450a0a, #991b1b)';
-            border = `2px solid ${STATUS.danger}99`;
-            // eslint-disable-next-line no-restricted-syntax
-            textColor = '#FCA5A5';
-          }
-          else { opacity = 0.25; }
-        }
-        
+        const isCorrectBtn = answered && correctGender === btn.gender;
+        const isWrongPick = answered && isSelected && correctGender !== btn.gender;
+        const dim = answered && !isCorrectBtn && !isWrongPick;
+        const bg = isCorrectBtn ? `color-mix(in srgb, ${STATUS.success} 18%, transparent)`
+          : isWrongPick ? `color-mix(in srgb, ${STATUS.danger} 18%, transparent)`
+            : `color-mix(in srgb, ${btn.color} 16%, transparent)`;
+        const bd = isCorrectBtn ? STATUS.success : isWrongPick ? STATUS.danger : `color-mix(in srgb, ${btn.color} 27%, transparent)`;
+        const col = isCorrectBtn ? STATUS.success : isWrongPick ? STATUS.danger : btn.color;
         return (
           <button key={btn.gender} onClick={() => onAnswer(btn.gender)} disabled={answered || disabled}
-            className="relative py-6 rounded-2xl transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl active:scale-95 disabled:cursor-not-allowed overflow-hidden"
-            style={{ background: bg, border, opacity }}>
-            {!answered && <span className="absolute top-2 right-2.5 text-[8px] font-black opacity-20 uppercase tracking-widest" style={{ color: textColor }}>{btn.hotkey}</span>}
-            
-            <div className="text-3xl md:text-4xl font-black mb-0.5" style={{ color: textColor }}>{btn.article}</div>
-            <div className="text-[9px] font-black uppercase tracking-widest opacity-50" style={{ color: textColor }}>{btn.label}</div>
+            className="relative flex flex-col items-center justify-center gap-1 rounded-[16px] py-6 transition-all duration-200 enabled:hover:-translate-y-0.5 disabled:cursor-default"
+            style={{ background: bg, border: `2px solid ${bd}`, color: col, opacity: dim ? 0.4 : 1 }}>
+            <kbd className="mono absolute left-2.5 top-2.5 rounded-xs px-1.5 text-[10px] opacity-60" style={{ background: 'rgba(255,255,255,.08)', color: 'currentColor' }}>{btn.hotkey}</kbd>
+            {isCorrectBtn && <span className="absolute right-2.5 top-2.5"><IconCheck size={16} /></span>}
+            {isWrongPick && <span className="absolute right-2.5 top-2.5"><IconX size={16} /></span>}
+            <span className="text-3xl font-extrabold leading-none" style={{ letterSpacing: '-.02em' }}>{btn.article}</span>
+            <span className="text-[10.5px] font-semibold uppercase tracking-wide opacity-75">{btn.label}</span>
           </button>
         );
       })}

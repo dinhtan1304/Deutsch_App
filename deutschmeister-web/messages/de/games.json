@@ -137,7 +137,12 @@
     "soundLabel": "Ton: {state}",
     "soundOn": "An",
     "soundOff": "Aus",
-    "answerLabel": "Antwort: {answer}"
+    "answerLabel": "Antwort: {answer}",
+    "answeredCorrect": "Du hast {correct}/{total} richtig",
+    "gradeExcellent": "Ausgezeichnet!",
+    "gradeGreat": "Sehr gut!",
+    "gradeGood": "Ganz ok",
+    "gradeKeepGoing": "Weiter üben"
   },
   "quickQuiz": {
     "title": "Quick Quiz",

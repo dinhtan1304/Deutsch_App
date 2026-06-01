@@ -13,9 +13,9 @@ import { personalWordsToGameWords, getEligibleWordsForGame } from '@/lib/persona
 import { Gender, GenderInfo, Word } from '@/types';
 import {
   GameSetupCard, GameResultCard, GameProgressBar,
-  StatCard, GenderButtons, AnswerReview, AddWrongWordsToBank, GameResultUpsell, GameInfoBox, KBD,
+  GenderButtons, AnswerReview, AddWrongWordsToBank, GameResultUpsell, GameInfoBox, KBD,
   GamePlayHeader, GameStatsBar, GameWordCard, useGameTimer,
-  IconTarget, IconRocket, IconKeyboard, IconVolume, IconRefresh, IconChevronLeft,
+  IconTarget, IconRocket, IconKeyboard, IconVolume, IconChevronLeft, IconZap, IconFlame, IconX,
 } from '@/components/games/GameUI';
 import { Button } from '@/components/ui';
 import { ACCENT, STATUS } from '@/lib/tokens';
@@ -185,25 +185,19 @@ export default function GenderQuizPage() {
 
     return (
       <>
-        <GameResultCard accuracy={accuracy} title={t('genderQuiz.result')}>
-          {/* Score */}
-          <div className="my-5">
-            <div className="text-5xl font-extrabold" style={{ color: ACCENT.srs }}>{score}</div>
-            <p className="text-body mt-1" style={{ color: 'var(--theme-text-muted)' }}>{t('genderQuiz.scoreUnit')}</p>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-6">
-            <StatCard label={t('common.correctLabel')} value={correctCount} color="#22C55E" />
-            <StatCard label={t('common.wrongLabel')} value={wrongCount} color="#EF4444" />
-            <StatCard label={t('common.accuracy')} value={`${accuracy}%`} />
-            <StatCard label={t('genderQuiz.bestCombo')} value={`x${bestCombo}`} color="#F59E0B" />
-          </div>
-
-          <div className="flex gap-3 justify-center">
-            <Button variant="game" accent="srs" onClick={startGame}><IconRefresh size={16} /> {t('common.restart')}</Button>
-            <Button variant="outline" onClick={() => router.push('/games')}><IconChevronLeft size={16} /> {t('common.menu')}</Button>
-          </div>
-        </GameResultCard>
+        <GameResultCard
+          accuracy={accuracy}
+          correct={correctCount}
+          total={questionsCount}
+          stats={[
+            { label: t('genderQuiz.scoreUnit'), value: score, color: ACCENT.vocab, icon: IconZap },
+            { label: t('common.accuracy'), value: `${accuracy}%`, color: STATUS.success, icon: IconTarget },
+            { label: t('genderQuiz.bestCombo'), value: `x${bestCombo}`, color: ACCENT.xp, icon: IconFlame },
+            { label: t('common.wrongLabel'), value: wrongCount, color: STATUS.danger, icon: IconX },
+          ]}
+          onRestart={startGame}
+          onExit={() => router.push('/games')}
+        />
 
         <div className="max-w-2xl mx-auto px-4 sm:px-6">
           <AnswerReview
