@@ -11,15 +11,18 @@ import { useSpeakingRoomPresence } from '@/hooks/useSpeakingRoomSocket';
 import { SpeakingRoomStatsCard, SpeakingRoomsActivityBar } from '@/components/speaking-rooms/SpeakingRoomStatsPanel';
 import { getApiErrorMessage } from '@/lib/api/client';
 
-const LEVELS = ['A1', 'A2', 'B1', 'B2'] as const;
+const LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1'] as const;
 const TOPIC_KEYS = ['travel', 'family', 'work', 'hobbies', 'food', 'study'] as const;
+const TOPIC_KEY_COLOR: Record<string, string> = {
+  travel: 'var(--success)', family: 'var(--die)', work: 'var(--streak)',
+  hobbies: 'var(--violet)', food: 'var(--die)', study: 'var(--der)',
+};
 const MATCH_QUEUE_TTL_SECONDS = 180;
 
 export default function MatchmakingPage() {
   const t = useTranslations('speakingRooms');
   const router = useRouter();
   const user = useAuthStore((s) => s.user);
-  const suggestedTopics = TOPIC_KEYS.map((k) => t(`topics.${k}` as 'topics.travel'));
   const [cefrLevel, setCefrLevel] = useState<string>('B1');
   const [topic, setTopic] = useState<string>(() => t('topics.travel'));
   const [searching, setSearching] = useState(false);
@@ -128,7 +131,7 @@ export default function MatchmakingPage() {
         <button
           onClick={handleStop}
           className="w-full py-3 rounded-2xl font-bold border-2"
-          style={{ borderColor: '#EF4444', color: '#EF4444' }}
+          style={{ borderColor: 'var(--danger)', color: 'var(--danger)' }}
         >
           {t('match.cancelSearch')}
         </button>
@@ -171,37 +174,41 @@ export default function MatchmakingPage() {
         <p className="text-xs font-bold uppercase tracking-wider mb-3" style={{ color: 'var(--theme-text-muted)' }}>
           {t('match.topic')}
         </p>
-        <div className="flex gap-2 flex-wrap mb-2">
-          {suggestedTopics.map((label) => (
-            <button
-              key={label}
-              onClick={() => setTopic(label)}
-              className="px-3 py-1.5 rounded-full text-sm border"
-              style={
-                topic === label
-                  ? { backgroundColor: ACCENT.speaking, borderColor: ACCENT.speaking, color: '#fff' }
-                  : { borderColor: 'var(--theme-border)', color: 'var(--theme-text-primary)' }
-              }
-            >
-              {label}
-            </button>
-          ))}
+        <div className="mb-2.5 flex flex-wrap gap-2">
+          {TOPIC_KEYS.map((key) => {
+            const label = t(`topics.${key}` as 'topics.travel');
+            const color = TOPIC_KEY_COLOR[key] ?? 'var(--accent)';
+            const on = topic === label;
+            return (
+              <button
+                key={key}
+                onClick={() => setTopic(label)}
+                className="inline-flex items-center gap-1.5 rounded-[7px] px-3 py-1.5 text-caption font-semibold transition-colors"
+                style={on
+                  ? { background: color, color: 'white', border: `1px solid ${color}` }
+                  : { background: 'var(--theme-bg-secondary)', color: 'var(--theme-text-secondary)', border: '1px solid var(--theme-border)' }}
+              >
+                <span className="h-1.5 w-1.5 rounded-full" style={{ background: on ? 'white' : color }} />
+                {label}
+              </button>
+            );
+          })}
         </div>
-        <input
-          value={topic}
-          onChange={(e) => setTopic(e.target.value)}
-          placeholder={t('match.topicPlaceholder')}
-          className="w-full px-3 py-2 rounded-lg border"
-          style={{
-            backgroundColor: 'var(--theme-bg-card)',
-            borderColor: 'var(--theme-border)',
-            color: 'var(--theme-text-primary)',
-          }}
-        />
+        {/* selected / custom topic display */}
+        <div className="flex h-11 items-center gap-2 rounded-[10px] px-3" style={{ background: 'var(--theme-bg-card)', border: '1px solid var(--theme-border)' }}>
+          <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: TOPIC_KEY_COLOR[TOPIC_KEYS.find((k) => t(`topics.${k}` as 'topics.travel') === topic) ?? ''] ?? 'var(--accent)' }} />
+          <input
+            value={topic}
+            onChange={(e) => setTopic(e.target.value)}
+            placeholder={t('match.topicPlaceholder')}
+            className="min-w-0 flex-1 bg-transparent text-body outline-none"
+            style={{ color: 'var(--theme-text-primary)' }}
+          />
+        </div>
       </div>
 
       {errorMsg && (
-        <p className="mb-4 text-sm" style={{ color: '#EF4444' }}>
+        <p className="mb-4 text-sm" style={{ color: 'var(--danger)' }}>
           {errorMsg}
         </p>
       )}
@@ -209,9 +216,10 @@ export default function MatchmakingPage() {
       <button
         onClick={handleStart}
         disabled={enqueueMut.isPending}
-        className="w-full py-3 rounded-2xl text-white font-bold text-[15px] disabled:opacity-60"
-        style={{ background: GRADIENT.speaking }}
+        className="flex w-full items-center justify-center gap-2 rounded-2xl py-3.5 text-[15px] font-bold text-white transition-transform hover:-translate-y-0.5 disabled:opacity-60"
+        style={{ background: GRADIENT.speaking, boxShadow: '0 6px 18px color-mix(in srgb, var(--streak) 35%, transparent)' }}
       >
+        <svg width={17} height={17} viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round"><path d="m6 4 1.2 2.8L10 8l-2.8 1.2L6 12 4.8 9.2 2 8l2.8-1.2L6 4Zm9 7 1 2 2 1-2 1-1 2-1-2-2-1 2-1 1-2Z" /></svg>
         {enqueueMut.isPending ? t('match.starting') : t('match.start')}
       </button>
 
