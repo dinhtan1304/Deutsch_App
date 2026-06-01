@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { ACCENT, GRADIENT, type AccentKey } from '@/lib/tokens';
 
-export type ShellMaxWidth = '4xl' | '5xl' | '6xl' | '7xl';
+export type ShellMaxWidth = '4xl' | '5xl' | '6xl' | '7xl' | 'wide';
 
 export interface AppPageShellProps {
   title: string;
@@ -25,6 +25,7 @@ const MAX_WIDTH_CLASS: Record<ShellMaxWidth, string> = {
   '5xl': 'max-w-5xl',
   '6xl': 'max-w-6xl',
   '7xl': 'max-w-7xl',
+  'wide': 'max-w-360', // = dashboard content width (1440px)
 };
 
 function BackChevron() {

@@ -83,6 +83,7 @@ export default function ResourcesPage() {
       subtitle={t('subtitle')}
       icon={<IconGlobe size={22} />}
       accent="reading"
+      maxWidth="wide"
       right={(
         <Link
           href="/dashboard"

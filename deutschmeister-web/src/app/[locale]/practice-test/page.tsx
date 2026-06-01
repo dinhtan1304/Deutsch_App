@@ -10,7 +10,7 @@ import {
 import { useIsExamUnlocked } from '@/hooks/useSubscription';
 import { UpgradeModal } from '@/components/subscription/UpgradeModal';
 import { ACCENT, GRADIENT, type AccentKey } from '@/lib/tokens';
-import { PracticePageShell, SectionHeader, SurfaceCard } from '@/components/ui';
+import { AppPageShell, SectionHeader, SurfaceCard } from '@/components/ui';
 import { ChooseExam } from './_sections/ChooseExam';
 
 type SkillKey = 'reading' | 'listening' | 'writing' | 'speaking';
@@ -244,11 +244,12 @@ export default function PracticeTestPage() {
   const t = useTranslations('practice.landing');
 
   return (
-    <PracticePageShell
+    <AppPageShell
       title={t('title')}
       subtitle={t('subtitle')}
       icon={<IconGraduationCap size={22} />}
       accent="writing"
+      maxWidth="wide"
     >
       <div className="space-y-10">
         <section>
@@ -325,6 +326,6 @@ export default function PracticeTestPage() {
       </div>
 
       <UpgradeModal open={upgradeOpen} onClose={() => setUpgradeOpen(false)} defaultPeriod="yearly" />
-    </PracticePageShell>
+    </AppPageShell>
   );
 }
