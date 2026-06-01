@@ -303,7 +303,8 @@
     "correctMark": "✓ Richtig!",
     "wrongMark": "✗ Falsch",
     "answerLabel": "Antwort:",
-    "pickPrompt": "Wähle das gehörte Wort:"
+    "pickPrompt": "Wähle das gehörte Wort:",
+    "keyHint": "<k>Space</k> erneut · <k>1–4</k> wählen · <k>Esc</k> beenden"
   },
   "fillBlank": {
     "title": "Lückentext",

@@ -303,7 +303,8 @@
     "correctMark": "✓ Correct!",
     "wrongMark": "✗ Wrong",
     "answerLabel": "Answer:",
-    "pickPrompt": "Pick the word you just heard:"
+    "pickPrompt": "Pick the word you just heard:",
+    "keyHint": "<k>Space</k> replay · <k>1–4</k> choose · <k>Esc</k> exit"
   },
   "fillBlank": {
     "title": "Fill in the Blank",

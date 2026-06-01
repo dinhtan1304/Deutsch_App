@@ -1,5 +1,4 @@
 'use client';
-/* eslint-disable no-restricted-syntax -- game pages use custom dark-theme gradients that don't map to design tokens */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -14,8 +13,8 @@ import { GenderInfo, Word } from '@/types';
 import {
   GameSetupCard, GameResultCard,
   AnswerReview, AddWrongWordsToBank, GameResultUpsell, GameInfoBox,
-  GamePlayHeader, GameStatsBar, useGameTimer,
-  IconHeadphones, IconRocket, IconChevronLeft, IconVolume, IconRefresh, IconZap, IconTarget, IconFlame, IconX,
+  GamePlayHeader, GameStatsBar, GameProgressBar, useGameTimer,
+  IconHeadphones, IconRocket, IconChevronLeft, IconVolume, IconRefresh, IconZap, IconTarget, IconFlame, IconX, IconCheck,
 } from '@/components/games/GameUI';
 import { Button } from '@/components/ui';
 import { ACCENT, STATUS } from '@/lib/tokens';
@@ -217,6 +216,24 @@ export default function ListeningQuizPage() {
 
   const timer = useGameTimer(phase === 'playing');
 
+  // Keyboard: Space = replay · 1–4 = choose · Esc = exit
+  useEffect(() => {
+    if (phase !== 'playing') return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') { window.speechSynthesis?.cancel(); router.push('/games'); return; }
+      if (answered) return;
+      const q = questions[index];
+      if (!q) return;
+      if (e.code === 'Space') { e.preventDefault(); handleReplay(); }
+      else if (['1', '2', '3', '4'].includes(e.key)) {
+        const opt = q.options[+e.key - 1];
+        if (opt) handleAnswer(opt);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [phase, answered, questions, index, handleReplay, handleAnswer, router]);
+
   // ─── Setup Screen ───
   if (phase === 'setup') {
     return (
@@ -309,109 +326,88 @@ export default function ListeningQuizPage() {
         { label: t('common.wrongLabel'),   value: index - correctCount,           color: STATUS.danger, dot: true },
         { label: t('common.questionLabel'),   value: `${index + 1}/${questionsCount}`, color: 'var(--theme-text-primary)' },
       ]} />
+      <GameProgressBar current={index} total={questionsCount} />
 
-      {/* Audio Card */}
-      <div className="rounded-3xl overflow-hidden mb-5 mt-3 transition-all duration-300"
-        style={{ background: 'linear-gradient(135deg, #1a0000 0%, #451a03 100%)' }}>
-        <div className="flex flex-col items-center justify-center px-6 py-6 text-center">
-          <button
-            onClick={answered ? undefined : handleReplay}
-            disabled={answered || replayCount >= MAX_REPLAYS || isSpeaking}
-            className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3 transition-all duration-300
-              disabled:opacity-40 disabled:cursor-not-allowed hover:scale-105 disabled:hover:scale-100 active:scale-95"
-            style={{
-              background: isSpeaking
-                ? 'linear-gradient(135deg, #F97316aa, #EF4444aa)'
-                : 'linear-gradient(135deg, #F97316, #EF4444)',
-              boxShadow: isSpeaking ? '0 0 0 6px rgba(249,115,22,.1)' : '0 4px 16px rgba(249,115,22,.2)',
-            }}>
-            <span style={{ color: 'white' }}><IconHeadphones size={28} /></span>
-          </button>
-
-          {!answered && (
-            <p className="text-body mb-1" style={{ color: 'rgba(255,255,255,0.6)' }}>
-              {isSpeaking
-                ? t('listening.playing')
-                : replayCount === 0
-                ? t('listening.tapToListen')
-                : t('listening.replayCount', { current: replayCount, max: MAX_REPLAYS })}
-            </p>
+      {/* Audio panel — calm card with glow + circular play button */}
+      <button
+        onClick={answered ? undefined : handleReplay}
+        disabled={answered || replayCount >= MAX_REPLAYS || isSpeaking}
+        className="relative mt-2 mb-4 flex w-full flex-col items-center gap-3 overflow-hidden rounded-xl px-6 py-9 text-center transition-colors disabled:cursor-default"
+        style={{ background: 'var(--theme-bg-card)', border: `1px solid ${ACCENT.games}44` }}>
+        <span aria-hidden className="pointer-events-none absolute inset-0"
+          style={{ background: `radial-gradient(circle at 50% 40%, ${ACCENT.games}14, transparent 70%)` }} />
+        <span className="relative flex h-18 w-18 items-center justify-center rounded-full"
+          style={{ background: `linear-gradient(135deg, ${ACCENT.games}, ${ACCENT.xp})`, boxShadow: `0 8px 24px ${ACCENT.games}55` }}>
+          {isSpeaking && (
+            <span aria-hidden className="absolute inset-0 animate-ping rounded-full" style={{ background: `${ACCENT.games}55` }} />
           )}
+          <span className="relative" style={{ color: 'white' }}><IconHeadphones size={30} /></span>
+        </span>
+        <span className="relative text-base font-bold" style={{ color: 'var(--theme-text-primary)' }}>
+          {isSpeaking ? t('listening.playing') : t('listening.tapToListen')}
+        </span>
+        <span className="relative text-xs" style={{ color: 'var(--theme-text-muted)' }}>
+          {answered
+            ? `${t('listening.answerLabel')} ${currentQ.correct.gender && GenderInfo[currentQ.correct.gender] ? GenderInfo[currentQ.correct.gender].article + ' ' : ''}${currentQ.correct.word}`
+            : replayCount === 0
+            ? t('listening.pointHint.first')
+            : t('listening.replayCount', { current: replayCount, max: MAX_REPLAYS })}
+        </span>
+        {!answered && replayCount > 0 && (
+          <span className="relative flex gap-1.5">
+            {Array.from({ length: MAX_REPLAYS }, (_, i) => (
+              <span key={i} className="h-2 w-2 rounded-full"
+                style={{ backgroundColor: i < replayCount ? ACCENT.games : 'var(--theme-border)' }} />
+            ))}
+          </span>
+        )}
+      </button>
 
-          {!answered && replayCount > 0 && (
-            <div className="flex justify-center gap-1.5 mt-1">
-              {Array.from({ length: MAX_REPLAYS }, (_, i) => (
-                <div key={i} className="w-2 h-2 rounded-full"
-                  style={{ backgroundColor: i < replayCount ? ACCENT.games : 'rgba(255,255,255,0.2)' }} />
-              ))}
-            </div>
-          )}
-
-          {!answered && (
-            <p className="text-caption mt-2" style={{ color: 'rgba(255,255,255,0.45)' }}>
-              {replayCount === 0
-                ? t('listening.pointHint.first')
-                : replayCount === 1
-                ? t('listening.pointHint.second')
-                : t('listening.pointHint.third')}
-            </p>
-          )}
-
-          {answered && currentQ && (
-            <div className="mt-2">
-              <p className="text-[15px] font-bold" style={{
-                color: selectedAnswer === `${GenderInfo[currentQ.correct.gender].article} ${currentQ.correct.word}` ? '#4ade80' : '#f87171'
-              }}>
-                {selectedAnswer === `${GenderInfo[currentQ.correct.gender].article} ${currentQ.correct.word}` ? t('listening.correctMark') : t('listening.wrongMark')}
-              </p>
-              <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.7)' }}>
-                {t('listening.answerLabel')} <span className="font-bold text-white">
-                  {currentQ.correct.gender && GenderInfo[currentQ.correct.gender] ? `${GenderInfo[currentQ.correct.gender].article} ` : ''}{currentQ.correct.word}
-                </span>
-              </p>
-            </div>
-          )}
-        </div>
-      </div>
-
-      <p className="text-body font-semibold mb-3 text-center" style={{ color: 'var(--theme-text-muted)' }}>
+      <p className="mb-3 text-center text-[12.5px] font-medium" style={{ color: 'var(--theme-text-secondary)' }}>
         {t('listening.pickPrompt')}
       </p>
+
+      {/* 4 options */}
       <div className="grid grid-cols-2 gap-3">
-        {currentQ.options.map(option => {
-          const label = `${GenderInfo[option.gender].article} ${option.word}`;
+        {currentQ.options.map((option, i) => {
+          const article = option.gender && GenderInfo[option.gender] ? GenderInfo[option.gender].article : '';
+          const label = `${article} ${option.word}`.trim();
           const isCorrectOption = option.id === currentQ.correct.id;
-          const isSelected = selectedAnswer === label;
-
-          let borderColor = 'var(--theme-border)';
-          let bgColor = 'var(--theme-bg-card)';
-          let textColor = 'var(--theme-text-primary)';
-
-          if (answered) {
-            if (isCorrectOption) { borderColor = STATUS.success; bgColor = 'rgba(34,197,94,.08)'; textColor = STATUS.success; }
-            else if (isSelected) { borderColor = STATUS.danger; bgColor = 'rgba(239,68,68,.08)'; textColor = STATUS.danger; }
-          }
-
+          const isSelectedWrong = answered && selectedAnswer === label && !isCorrectOption;
+          const isAns = answered && isCorrectOption;
+          const dim = answered && !isAns && !isSelectedWrong;
+          const artColor = AC[option.gender] || ACCENT.games;
           return (
             <button key={option.id}
               onClick={() => handleAnswer(option)}
               disabled={answered}
-              className="rounded-xl border px-4 py-4 text-center transition-all duration-200 font-semibold text-[15px]
-                disabled:cursor-default hover:scale-[1.02] active:scale-[0.98]"
-              style={{ borderColor, backgroundColor: bgColor, color: textColor }}>
-              <span style={{ color: answered && isCorrectOption ? STATUS.success : (AC[option.gender] || 'inherit') }}>
-                {option.gender && GenderInfo[option.gender] ? GenderInfo[option.gender].article : ''}
-              </span>{' '}
-              {option.word}
+              className="relative rounded-md border-2 px-4 py-4 text-left transition-all duration-200 disabled:cursor-default"
+              style={{
+                borderColor: isAns ? STATUS.success : isSelectedWrong ? STATUS.danger : 'var(--theme-border)',
+                backgroundColor: isAns ? `color-mix(in srgb, ${STATUS.success} 16%, transparent)`
+                  : isSelectedWrong ? `color-mix(in srgb, ${STATUS.danger} 16%, transparent)`
+                  : 'var(--theme-bg-card)',
+                color: 'var(--theme-text-primary)',
+                opacity: dim ? 0.4 : 1,
+              }}>
+              <kbd className="mono absolute right-2.5 top-2.5 rounded-xs border px-1.5 py-px text-[10px]"
+                style={{ background: 'var(--theme-bg-secondary)', borderColor: 'var(--theme-border)', color: 'var(--theme-text-muted)' }}>{i + 1}</kbd>
+              <div className="text-base font-bold">
+                <span style={{ color: artColor }}>{article}</span> {option.word}
+              </div>
               {settings.showVietnamese && option.translationVi && (
-                <span className="block text-caption font-normal mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>
-                  {option.translationVi}
-                </span>
+                <div className="mt-0.5 text-xs font-normal" style={{ color: 'var(--theme-text-muted)' }}>{option.translationVi}</div>
               )}
+              {isAns && <span className="absolute bottom-2.5 right-2.5" style={{ color: STATUS.success }}><IconCheck size={16} /></span>}
+              {isSelectedWrong && <span className="absolute bottom-2.5 right-2.5" style={{ color: STATUS.danger }}><IconX size={16} /></span>}
             </button>
           );
         })}
       </div>
+
+      <p className="mt-3.5 text-center text-[11.5px]" style={{ color: 'var(--theme-text-muted)' }}>
+        {t.rich('listening.keyHint', { k: (chunks) => <kbd className="mono">{chunks}</kbd> })}
+      </p>
     </div>
   );
 }

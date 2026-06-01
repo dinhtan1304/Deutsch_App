@@ -303,7 +303,8 @@
     "correctMark": "✓ Đúng!",
     "wrongMark": "✗ Sai",
     "answerLabel": "Đáp án:",
-    "pickPrompt": "Chọn từ bạn vừa nghe:"
+    "pickPrompt": "Chọn từ bạn vừa nghe:",
+    "keyHint": "<k>Space</k> nghe lại · <k>1–4</k> chọn · <k>Esc</k> thoát"
   },
   "fillBlank": {
     "title": "Fill in the Blank",
