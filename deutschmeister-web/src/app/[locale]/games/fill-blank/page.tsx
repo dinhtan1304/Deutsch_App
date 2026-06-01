@@ -287,18 +287,20 @@ export default function FillBlankPage() {
             <Button variant="game" accent="premium" onClick={checkAnswer} disabled={!userInput.trim()}>{t('fillBlank.check')}</Button>
           </div>
           <div className="grid grid-cols-3 gap-2.5">
-            {/* eslint-disable no-restricted-syntax */}
             {([
-              { article: 'der', label: 'Maskulin', bg: 'linear-gradient(160deg, #0a1628, #1e3a8a)', border: 'color-mix(in srgb, var(--der) 50%, transparent)', color: 'var(--der)' },
-              { article: 'die', label: 'Feminin',  bg: 'linear-gradient(160deg, #2a0a1e, #9d174d)', border: 'color-mix(in srgb, var(--die) 50%, transparent)', color: 'var(--die)' },
-              { article: 'das', label: 'Neutrum',  bg: 'linear-gradient(160deg, #0a2218, #065f46)', border: 'color-mix(in srgb, var(--das) 50%, transparent)', color: 'var(--das)' },
+              { article: 'der', label: 'Maskulin', color: 'var(--der)' },
+              { article: 'die', label: 'Feminin',  color: 'var(--die)' },
+              { article: 'das', label: 'Neutrum',  color: 'var(--das)' },
             ]).map(btn => (
-            /* eslint-enable no-restricted-syntax */
               <button key={btn.article} onClick={() => handleQuickAnswer(btn.article)}
-                className="flex flex-col items-center justify-center gap-1 py-4 rounded-[13px] transition-all duration-200 hover:-translate-y-1 hover:shadow-xl active:scale-95"
-                style={{ background: btn.bg, border: `1.5px solid ${btn.border}`, color: btn.color }}>
-                <span className="text-2xl font-extrabold leading-none">{btn.article}</span>
-                <span className="text-[10px] font-bold uppercase tracking-wider opacity-70">{btn.label}</span>
+                className="flex flex-col items-center justify-center gap-0.5 py-4 rounded-[13px] transition-transform duration-150 hover:-translate-y-0.5"
+                style={{
+                  background: `color-mix(in srgb, ${btn.color} 12%, transparent)`,
+                  border: `2px solid color-mix(in srgb, ${btn.color} 30%, transparent)`,
+                  color: btn.color,
+                }}>
+                <span className="text-h2 font-extrabold leading-none" style={{ letterSpacing: '-.02em' }}>{btn.article}</span>
+                <span className="text-[10px] font-semibold uppercase tracking-wide opacity-70">{btn.label}</span>
               </button>
             ))}
           </div>
