@@ -266,103 +266,91 @@ export default function SpellingBeePage() {
       ]} />
       <GameProgressBar current={index + 1} total={questionsCount} />
 
-      {currentWord && (
-        <div className="rounded-3xl overflow-hidden mb-5 mt-4 transition-all duration-300"
-          style={{
-            background: feedback === 'correct'
-              ? 'linear-gradient(135deg, #052e16 0%, #166534 100%)'
-              : feedback === 'wrong'
-              ? 'linear-gradient(135deg, #450a0a 0%, #991b1b 100%)'
-              : 'linear-gradient(135deg, #2a0a1e 0%, #9d174d 100%)',
-          }}>
-          <div className="flex flex-col items-center justify-center px-6 py-6 text-center" style={{ minHeight: 160 }}>
-            <div className="text-xs font-semibold mb-1" style={{ color: 'rgba(255,255,255,0.5)' }}>
-              {t('spelling.articleLabel')}{' '}
-              <span className="font-bold" style={{ color: AC[currentWord.gender] || ACCENT.listening }}>
-                {currentWord.gender && GenderInfo[currentWord.gender] ? GenderInfo[currentWord.gender].article : ''}
-              </span>
+      {currentWord && (() => {
+        const fbColor = feedback === 'correct' ? STATUS.success : feedback === 'wrong' ? STATUS.danger : null;
+        const article = currentWord.gender && GenderInfo[currentWord.gender] ? GenderInfo[currentWord.gender].article : '';
+        return (
+        <>
+          {/* Calm word card with letter slots */}
+          <div key={index} className="my-6 rounded-[18px] border px-6 py-7 text-center transition-colors"
+            style={{
+              background: 'var(--theme-bg-card)',
+              borderColor: fbColor ? `color-mix(in srgb, ${fbColor} 45%, transparent)` : 'var(--theme-border)',
+              borderTopWidth: 3,
+              borderTopColor: ACCENT.listening,
+            }}>
+            {article && (
+              <div className="mb-1.5 text-caption" style={{ color: 'var(--theme-text-muted)' }}>
+                {t('spelling.articleLabel')} <span className="font-bold" style={{ color: AC[currentWord.gender] || ACCENT.listening }}>{article}</span>
+              </div>
+            )}
+            <div className="text-2xl md:text-3xl font-bold" style={{ color: 'var(--theme-text-primary)' }}>{currentWord.translationEn}</div>
+            {settings.showVietnamese && currentWord.translationVi && (
+              <div className="mt-0.5 text-sm" style={{ color: 'var(--theme-text-muted)' }}>{currentWord.translationVi}</div>
+            )}
+
+            {/* Letter slots */}
+            <div className="mt-4 flex flex-wrap justify-center gap-1.5">
+              {currentWord.word.split('').map((ch, i) => (
+                <span key={i} className="mono inline-flex w-4.5 justify-center pb-0.5 text-lg font-bold"
+                  style={{
+                    borderBottom: `2px solid ${fbColor ?? 'var(--theme-border)'}`,
+                    color: feedback === 'correct' ? STATUS.success : feedback === 'wrong' ? 'var(--theme-text-primary)' : 'var(--theme-text-muted)',
+                  }}>
+                  {feedback ? ch : (input[i] ?? ' ')}
+                </span>
+              ))}
             </div>
 
-            <h2 className="text-2xl md:text-3xl font-bold mb-1 text-white">
-              {currentWord.translationEn}
-            </h2>
-            {settings.showVietnamese && currentWord.translationVi && (
-              <p className="text-sm mb-2" style={{ color: 'rgba(255,255,255,0.6)' }}>
-                {currentWord.translationVi}
-              </p>
-            )}
-
-            <p className="text-[10px] font-mono tracking-widest mb-3 opacity-40 text-white">
-              {lengthHint}
-            </p>
-
             {feedback === 'correct' && (
-              <div className="flex items-center justify-center gap-2 mb-3">
-                <IconCheck size={18} style={{ color: '#4ade80' }} />
-                <span className="font-bold text-base" style={{ color: '#4ade80' }}>{currentWord.word}</span>
-              </div>
+              <div className="mt-3 text-sm font-semibold" style={{ color: STATUS.success }}>✓ {currentWord.word}</div>
             )}
             {feedback === 'wrong' && (
-              <div className="mb-3">
-                <div className="flex items-center justify-center gap-2 mb-1">
-                  <IconX size={16} style={{ color: '#f87171' }} />
-                  <span className="text-sm line-through" style={{ color: '#f87171' }}>{input}</span>
-                </div>
-                <p className="text-sm" style={{ color: 'rgba(255,255,255,0.7)' }}>
-                  {t('spelling.answerLabel')} <span className="font-bold text-white">
-                    {currentWord.gender && GenderInfo[currentWord.gender] ? `${GenderInfo[currentWord.gender].article} ` : ''}{currentWord.word}
-                  </span>
-                </p>
+              <div className="mt-3 text-sm font-semibold" style={{ color: STATUS.danger }}>
+                {t('spelling.answerLabel')} <span style={{ color: 'var(--theme-text-primary)' }}>{article ? `${article} ` : ''}{currentWord.word}</span>
               </div>
             )}
-
-            {!feedback && (
-              <>
-                <input
-                  ref={inputRef}
-                  type="text"
-                  value={input}
-                  onChange={e => setInput(e.target.value)}
-                  onKeyDown={onUmlautKey}
-                  placeholder={t('spelling.placeholder')}
-                  title={t('spelling.umlautTooltip', { hint: UMLAUT_TRIGGER_HINT })}
-                  className="w-full rounded-xl px-4 py-3 text-center text-base font-semibold outline-none transition-all border-2"
-                  style={{
-                    borderColor: ACCENT.listening,
-                    backgroundColor: 'rgba(0,0,0,0.3)',
-                    color: 'white',
-                  }}
-                />
-                <div className="flex justify-center gap-1.5 mt-3 flex-wrap">
-                  {SPECIAL_CHARS.map(ch => (
-                    <button key={ch}
-                      onClick={() => insertSpecial(ch)}
-                      className="w-8 h-8 rounded-lg text-xs font-bold transition-all hover:scale-105"
-                      style={{
-                        border: '1px solid rgba(236,72,153,.3)',
-                        color: '#F9A8D4',
-                        backgroundColor: 'rgba(236,72,153,.1)',
-                      }}>
-                      {ch}
-                    </button>
-                  ))}
-                </div>
-                <p className="text-center text-[10px] mt-2 opacity-60" style={{ color: 'white' }}>
-                  {t.rich('spelling.orType', {
-                    hint: UMLAUT_TRIGGER_HINT,
-                    code: (chunks) => <span className="font-mono font-bold">{chunks}</span>,
-                  })}
-                </p>
-                <div className="mt-4">
-                  <Button variant="game" accent="listening" onClick={submitAnswer} disabled={!input.trim()}>
-                    <IconCheck size={16} /> {t('spelling.confirm')}
-                  </Button>
-                </div>
-              </>
-            )}
           </div>
-        </div>
-      )}
+
+          {/* Input */}
+          <input
+            ref={inputRef}
+            type="text"
+            value={input}
+            onChange={e => setInput(e.target.value)}
+            onKeyDown={onUmlautKey}
+            disabled={!!feedback}
+            placeholder={t('spelling.placeholder')}
+            title={t('spelling.umlautTooltip', { hint: UMLAUT_TRIGGER_HINT })}
+            className="mb-3 h-13 w-full rounded-xl border-2 px-4 text-center text-base font-semibold outline-none transition-colors"
+            style={{ background: 'var(--theme-bg-card)', borderColor: fbColor ?? ACCENT.listening, color: 'var(--theme-text-primary)' }}
+          />
+
+          {/* Umlaut buttons */}
+          <div className="mb-2 flex flex-wrap justify-center gap-1.5">
+            {SPECIAL_CHARS.map(ch => (
+              <button key={ch} onClick={() => insertSpecial(ch)} disabled={!!feedback}
+                className="mono flex h-10 w-10 items-center justify-center rounded-[9px] border text-base font-bold transition-colors enabled:hover:opacity-80"
+                style={{ background: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)', color: 'var(--theme-text-primary)' }}>
+                {ch}
+              </button>
+            ))}
+          </div>
+          <p className="mb-3.5 text-center text-[11px]" style={{ color: 'var(--theme-text-muted)' }}>
+            {t.rich('spelling.orType', { hint: UMLAUT_TRIGGER_HINT, code: (chunks) => <span className="font-mono font-bold">{chunks}</span> })}
+          </p>
+
+          {/* Submit */}
+          <button onClick={submitAnswer} disabled={!!feedback || !input.trim()}
+            className="flex h-13 w-full items-center justify-center gap-2 rounded-xl text-[15px] font-bold transition-transform active:scale-95 disabled:cursor-not-allowed"
+            style={(feedback || !input.trim())
+              ? { background: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }
+              : { background: ACCENT.listening, color: 'white', boxShadow: `0 4px 14px ${ACCENT.listening}44` }}>
+            <IconCheck size={16} /> {t('spelling.confirm')}
+          </button>
+        </>
+        );
+      })()}
     </div>
   );
 }
