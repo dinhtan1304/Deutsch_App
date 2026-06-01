@@ -16,17 +16,10 @@ import {
   useReopenSpeakingRoom,
 } from '@/hooks/useSpeakingRooms';
 import { QuotaBanner } from '@/components/speaking-rooms/QuotaBanner';
-import { RoomCard } from '@/components/speaking-rooms/RoomCard';
+import { RoomCard, topicColor } from '@/components/speaking-rooms/RoomCard';
 import { parseSpeakingRoomInviteCode } from '@/lib/api/speakingRooms';
 
 const CEFR_LEVELS = ['A1', 'A2', 'B1', 'B2'] as const;
-
-// Real topic ids → accent CSS var (mirror RoomCard).
-const TOPIC_COLOR: Record<string, string> = {
-  dailyLife: 'var(--cyan)', work: 'var(--streak)', travel: 'var(--success)',
-  study: 'var(--der)', family: 'var(--die)', hobbies: 'var(--violet)',
-  shopping: 'var(--warn)', health: 'var(--success)', food: 'var(--streak)',
-};
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
 function IconUsers({ size = 22 }: { size?: number }) {
@@ -73,7 +66,6 @@ function Chip({ label, on, onClick, dotColor, mono }: { label: string; on: boole
 export default function SpeakingRoomsListPage() {
   const t = useTranslations('speakingRooms.list');
   const tc = useTranslations('speakingRooms.components');
-  const tTopics = useTranslations('speakingRooms.topics');
   const router = useRouter();
   const user = useAuthStore((s) => s.user);
   const [level, setLevel] = useState<string | undefined>(undefined);
@@ -104,12 +96,8 @@ export default function SpeakingRoomsListPage() {
     catch { setCodeError(t('invalidCode')); }
   };
 
-  const presentTopics = useMemo(() => {
-    const set = new Set((rooms ?? []).map((r) => r.topic));
-    return Object.keys(TOPIC_COLOR).filter((id) => set.has(id));
-  }, [rooms]);
+  const presentTopics = useMemo(() => Array.from(new Set((rooms ?? []).map((r) => r.topic).filter(Boolean))), [rooms]);
   const filteredRooms = useMemo(() => (topic ? (rooms ?? []).filter((r) => r.topic === topic) : (rooms ?? [])), [rooms, topic]);
-  const topicLabel = (id: string) => { try { return tTopics(id as 'dailyLife'); } catch { return id; } };
 
   return (
     <div className="mx-auto max-w-360 px-4 py-6 sm:px-6">
@@ -208,7 +196,7 @@ export default function SpeakingRoomsListPage() {
             <span className="text-[11px] font-medium uppercase" style={{ color: 'var(--theme-text-muted)', letterSpacing: '.05em' }}>{t('filterByTopic')}</span>
             <div className="flex flex-wrap gap-1.5">
               <Chip label={t('filterAll')} on={!topic} onClick={() => setTopic(undefined)} />
-              {presentTopics.map((id) => <Chip key={id} label={topicLabel(id)} on={topic === id} onClick={() => setTopic(id)} dotColor={TOPIC_COLOR[id]} />)}
+              {presentTopics.map((tp) => <Chip key={tp} label={tp} on={topic === tp} onClick={() => setTopic(tp)} dotColor={topicColor(tp)} />)}
             </div>
           </div>
         )}

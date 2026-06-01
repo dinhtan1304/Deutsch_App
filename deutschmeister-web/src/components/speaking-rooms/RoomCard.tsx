@@ -3,12 +3,14 @@
 import { useTranslations, useNow } from 'next-intl';
 import type { SpeakingRoom } from '@/lib/api/speakingRooms';
 
-// Real topic ids (speakingRooms.topics.*) → accent CSS var.
-const TOPIC_COLOR: Record<string, string> = {
-  dailyLife: 'var(--cyan)', work: 'var(--streak)', travel: 'var(--success)',
-  study: 'var(--der)', family: 'var(--die)', hobbies: 'var(--violet)',
-  shopping: 'var(--warn)', health: 'var(--success)', food: 'var(--streak)',
-};
+// room.topic is a free-text label (e.g. "Cuộc sống hằng ngày"), not an id —
+// so derive a stable accent from the string itself.
+const TOPIC_PALETTE = ['var(--cyan)', 'var(--streak)', 'var(--success)', 'var(--der)', 'var(--die)', 'var(--violet)', 'var(--warn)'];
+export function topicColor(topic: string): string {
+  let h = 0;
+  for (let i = 0; i < topic.length; i++) h = (h * 31 + topic.charCodeAt(i)) >>> 0;
+  return TOPIC_PALETTE[h % TOPIC_PALETTE.length]!;
+}
 
 interface Props {
   room: SpeakingRoom;
@@ -27,13 +29,12 @@ function IconClock({ size = 11 }: { size?: number }) {
 
 export function RoomCard({ room, onJoin, onReopen, loading, variant = 'public' }: Props) {
   const t = useTranslations('speakingRooms.components');
-  const tTopics = useTranslations('speakingRooms.topics');
   const now = useNow();
 
   const activeCount = room.participants.filter((p) => !p.leftAt).length;
   const isFull = activeCount >= room.maxSeats;
   const isClosed = room.status === 'CLOSED';
-  const tColor = TOPIC_COLOR[room.topic] ?? 'var(--accent)';
+  const tColor = topicColor(room.topic);
 
   // Display status priority: closed > full > active/waiting.
   const sColor = isClosed ? 'var(--theme-text-muted)' : isFull ? 'var(--danger)' : room.status === 'ACTIVE' ? 'var(--success)' : 'var(--warn)';
@@ -41,7 +42,7 @@ export function RoomCard({ room, onJoin, onReopen, loading, variant = 'public' }
   const pulse = room.status === 'ACTIVE' && !isFull && !isClosed;
 
   const host = room.participants.find((p) => p.userId === room.ownerId)?.user;
-  const topicLabel = (() => { try { return tTopics(room.topic as 'dailyLife'); } catch { return room.topic; } })();
+  const topicLabel = room.topic;
 
   const startRef = room.startedAt ?? room.createdAt;
   const minutes = Math.max(0, Math.round((now.getTime() - new Date(startRef).getTime()) / 60000));
