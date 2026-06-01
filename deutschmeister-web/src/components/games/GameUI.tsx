@@ -142,11 +142,13 @@ function ResultStat({ label, value, color, icon: Icon }: ResultStatItem) {
 }
 
 /** Result screen wrapper — emoji + grade + "đúng X/Y" + 2×2 stat grid + 2 buttons */
-export function GameResultCard({ accuracy, correct, total, stats, onRestart, onExit, children }: {
+export function GameResultCard({ accuracy, correct, total, stats, onRestart, onExit, bare, children }: {
   accuracy: number;
   correct?: number; total?: number;
   stats?: ResultStatItem[];
   onRestart?: () => void; onExit?: () => void;
+  /** Render just the card (no centered max-w-md wrapper) — for 2-column layouts */
+  bare?: boolean;
   /** @deprecated kept for back-compat; no longer rendered (grade label shown instead) */
   title?: string;
   children?: React.ReactNode;
@@ -157,8 +159,7 @@ export function GameResultCard({ accuracy, correct, total, stats, onRestart, onE
     : accuracy >= 50 ? { label: t('gradeGood'), emoji: '👍', color: ACCENT.srs }
     : { label: t('gradeKeepGoing'), emoji: '💪', color: ACCENT.games };
 
-  return (
-    <div className="max-w-md mx-auto px-4 py-8" style={{ animation: 'bounceIn .5s cubic-bezier(0.175, 0.885, 0.32, 1.275)' }}>
+  const card = (
       <div className="rounded-[22px] border p-8 text-center"
         // eslint-disable-next-line no-restricted-syntax
         style={{ background: 'linear-gradient(180deg, var(--theme-bg-card), var(--theme-bg-tertiary))', borderColor: 'var(--theme-border)', boxShadow: '0 24px 60px rgba(0,0,0,.4)' }}>
@@ -195,6 +196,12 @@ export function GameResultCard({ accuracy, correct, total, stats, onRestart, onE
 
         {children}
       </div>
+  );
+
+  if (bare) return <div style={{ animation: 'bounceIn .5s cubic-bezier(0.175, 0.885, 0.32, 1.275)' }}>{card}</div>;
+  return (
+    <div className="max-w-md mx-auto px-4 py-8" style={{ animation: 'bounceIn .5s cubic-bezier(0.175, 0.885, 0.32, 1.275)' }}>
+      {card}
     </div>
   );
 }

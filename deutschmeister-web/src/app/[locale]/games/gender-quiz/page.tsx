@@ -184,31 +184,36 @@ export default function GenderQuizPage() {
     const accuracy = Math.round((correctCount / questionsCount) * 100);
 
     return (
-      <>
-        <GameResultCard
-          accuracy={accuracy}
-          correct={correctCount}
-          total={questionsCount}
-          stats={[
-            { label: t('genderQuiz.scoreUnit'), value: score, color: ACCENT.vocab, icon: IconZap },
-            { label: t('common.accuracy'), value: `${accuracy}%`, color: STATUS.success, icon: IconTarget },
-            { label: t('genderQuiz.bestCombo'), value: `x${bestCombo}`, color: ACCENT.xp, icon: IconFlame },
-            { label: t('common.wrongLabel'), value: wrongCount, color: STATUS.danger, icon: IconX },
-          ]}
-          onRestart={startGame}
-          onExit={() => router.push('/games')}
-        />
-
-        <div className="max-w-2xl mx-auto px-4 sm:px-6">
-          <AnswerReview
-            answers={answers}
-            getCorrectArticle={a => ({ article: a.word.article ?? GenderInfo[a.word.gender]?.article ?? '', color: AC[a.word.gender] || ACCENT.srs })}
-            getSelectedLabel={a => !a.isCorrect ? (GenderInfo[a.selectedAnswer]?.article ?? a.selectedAnswer) : null}
+      <div className="mx-auto max-w-360 px-4 py-6 sm:px-6">
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,440px)_minmax(0,1fr)] lg:items-start">
+          {/* Left: result summary */}
+          <GameResultCard
+            bare
+            accuracy={accuracy}
+            correct={correctCount}
+            total={questionsCount}
+            stats={[
+              { label: t('genderQuiz.scoreUnit'), value: score, color: ACCENT.vocab, icon: IconZap },
+              { label: t('common.accuracy'), value: `${accuracy}%`, color: STATUS.success, icon: IconTarget },
+              { label: t('genderQuiz.bestCombo'), value: `x${bestCombo}`, color: ACCENT.xp, icon: IconFlame },
+              { label: t('common.wrongLabel'), value: wrongCount, color: STATUS.danger, icon: IconX },
+            ]}
+            onRestart={startGame}
+            onExit={() => router.push('/games')}
           />
+
+          {/* Right: answer details */}
+          <div className="space-y-4">
+            <AnswerReview
+              answers={answers}
+              getCorrectArticle={a => ({ article: a.word.article ?? GenderInfo[a.word.gender]?.article ?? '', color: AC[a.word.gender] || ACCENT.srs })}
+              getSelectedLabel={a => !a.isCorrect ? (GenderInfo[a.selectedAnswer]?.article ?? a.selectedAnswer) : null}
+            />
+            {!isWordBankMode && <AddWrongWordsToBank wrongWords={answers.filter(a => !a.isCorrect).map(a => a.word)} />}
+          </div>
         </div>
-        {!isWordBankMode && <AddWrongWordsToBank wrongWords={answers.filter(a => !a.isCorrect).map(a => a.word)} />}
         <GameResultUpsell />
-      </>
+      </div>
     );
   }
 
