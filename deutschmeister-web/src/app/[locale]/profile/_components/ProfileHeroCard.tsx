@@ -1,18 +1,14 @@
 'use client';
-/* eslint-disable no-restricted-syntax */
 
 import Link from 'next/link';
 import { useTranslations, useLocale } from 'next-intl';
-import { GRADIENT, ACCENT } from '@/lib/tokens';
-import { IconMail, IconZap, IconStar, IconPencil, IconTrophy, IconCheckCircle, IconLock } from '@/components/ui/Icons';
-import { resolveCoverBackground } from '@/lib/coverPresets';
+import { IconMail, IconZap, IconStar, IconPencil, IconCheckCircle } from '@/components/ui/Icons';
 
 interface ProfileUser {
   name?: string | null;
   email?: string | null;
   avatar?: string | null;
   bio?: string | null;
-  coverImage?: string | null;
   isPublic?: boolean;
   createdAt?: string | null;
   subscription?: { plan?: string | null } | null;
@@ -21,6 +17,9 @@ interface ProfileUser {
 interface XpInfo {
   level: number;
   cefr: string;
+  nameVi?: string;
+  xp?: number;
+  nextLevelXp?: number;
 }
 
 interface Props {
@@ -32,209 +31,130 @@ interface Props {
   readonly?: boolean;
 }
 
-const PLAN_BADGES = {
-  lifetime: {
-    label: 'Lifetime',
-    style: { background: 'linear-gradient(135deg, #F59E0B, #D97706)' as string, color: '#fff' },
-    showStar: true,
-  },
-  premium: {
-    label: 'Premium',
-    style: { backgroundColor: '#6366F1', color: '#fff' },
-    showStar: true,
-  },
-  free: {
-    label: 'Free',
-    style: { backgroundColor: 'var(--theme-bg-tertiary)', color: 'var(--theme-text-secondary)', border: '1px solid var(--theme-border)' },
-    showStar: false,
-  },
+const PLAN_META = {
+  lifetime: { label: 'Lifetime', color: 'var(--warn)', star: true },
+  premium: { label: 'Premium', color: 'var(--accent)', star: true },
+  free: { label: 'Free', color: 'var(--theme-text-muted)', star: false },
 } as const;
+
+const mix = (c: string, pct: number) => `color-mix(in srgb, ${c} ${pct}%, transparent)`;
+
+function Pill({ color, label, dot, icon }: { color: string; label: string; dot?: boolean; icon?: React.ReactNode }) {
+  return (
+    <span
+      className="inline-flex items-center gap-1.5 rounded-sm px-2 py-1 text-[10.5px] font-bold uppercase tracking-wide"
+      style={{ background: mix(color, 16), color }}
+    >
+      {dot && <span className="h-1.5 w-1.5 rounded-full" style={{ background: color, boxShadow: `0 0 5px ${color}` }} />}
+      {icon}
+      {label}
+    </span>
+  );
+}
 
 export function ProfileHeroCard({ user, xpInfo, isLoading, points, onEdit, readonly = false }: Props) {
   const t = useTranslations('progress.profile.hero');
   const locale = useLocale();
-  const planRaw = (user?.subscription?.plan ?? 'free') as keyof typeof PLAN_BADGES;
-  const plan = PLAN_BADGES[planRaw] ?? PLAN_BADGES.free;
+  const planRaw = (user?.subscription?.plan ?? 'free') as keyof typeof PLAN_META;
+  const plan = PLAN_META[planRaw] ?? PLAN_META.free;
   const isFree = planRaw === 'free';
   const joinedDate = user?.createdAt
     ? new Date(user.createdAt).toLocaleDateString(locale, { day: '2-digit', month: '2-digit', year: 'numeric' })
     : '—';
 
-  const cover = resolveCoverBackground(user?.coverImage);
+  const totalXp = xpInfo?.xp ?? points;
+  const nextXp = xpInfo?.nextLevelXp ?? 0;
+  const xpPct = nextXp > 0 ? Math.min(100, Math.round((totalXp / nextXp) * 100)) : 0;
 
   return (
-    <div className="rounded-[18px] border mb-5 overflow-hidden shadow-lg relative"
+    <div className="relative mb-5 overflow-hidden rounded-[18px] border p-5 sm:p-6"
       style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
+      <div className="pointer-events-none absolute -left-10 -top-24 h-72 w-72 rounded-full" style={{ background: mix('var(--accent)', 8), filter: 'blur(60px)' }} />
 
-      {/* Banner */}
-      <div className="h-40 relative overflow-hidden"
-        style={cover.kind === 'gradient' ? { background: cover.css } : { backgroundImage: `url(${cover.url})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
-        {cover.kind === 'gradient' && (
-          <>
-            <div className="absolute top-[-50%] left-[-20%] w-[80%] h-[200%] rotate-12 opacity-30"
-              style={{ background: `radial-gradient(ellipse at center, ${ACCENT.writing} 0%, transparent 70%)` }} />
-            <div className="absolute bottom-[-50%] right-[-10%] w-[60%] h-[150%] -rotate-12 opacity-20"
-              style={{ background: `radial-gradient(ellipse at center, #22C55E 0%, transparent 70%)` }} />
-            <div className="absolute top-[20%] right-[10%] w-32 h-32 blur-[80px]"
-              style={{ backgroundColor: ACCENT.xp, opacity: 0.2 }} />
-          </>
-        )}
-        {/* Privacy lock indicator (own profile only) */}
-        {!readonly && user?.isPublic === false && (
-          <div className="absolute top-3 right-3 px-2.5 py-1 rounded-full flex items-center gap-1.5 backdrop-blur"
-            style={{ backgroundColor: 'rgba(0,0,0,0.45)', color: '#fff' }}>
-            <IconLock size={12} />
-            <span className="text-[10px] font-bold uppercase tracking-wider">{t('private')}</span>
-          </div>
-        )}
-      </div>
-
-      {/* Avatar + info */}
-      <div className="px-8 pb-8 relative">
-        <div className="-mt-16 mb-6 flex flex-col md:flex-row md:items-end justify-between gap-6">
-          {/* Avatar */}
-          <div className="relative shrink-0 group w-fit self-start">
-            <div className="rounded-full p-1 transition-all duration-500 group-hover:shadow-[0_0_30px_rgba(99,102,241,0.5)] w-fit"
-              style={{ background: 'conic-gradient(from 0deg, var(--accent), var(--v2-violet, #A78BFA), var(--m-learned, #4ADE80), var(--accent))' }}>
-              <div className="rounded-full p-1 w-fit" style={{ backgroundColor: 'var(--theme-bg-card)' }}>
-                <div className="rounded-full flex items-center justify-center text-white text-4xl font-black overflow-hidden relative"
-                  style={{
-                    width: 120, height: 120,
-                    background: user?.avatar ? undefined : 'linear-gradient(135deg, #4F46E5, #3730A3)',
-                    boxShadow: 'inset 0 0 20px rgba(0,0,0,0.2)',
-                  }}>
-                  {user?.avatar ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={user.avatar} alt={user.name ?? ''} className="w-full h-full object-cover" />
-                  ) : (
-                    user?.name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || 'U'
-                  )}
-                  <div className="absolute inset-0 bg-linear-to-t from-black/20 to-transparent pointer-events-none" />
-                </div>
+      <div className="relative flex flex-col gap-5 md:flex-row md:items-center">
+        {/* Avatar */}
+        <div className="relative shrink-0 self-start md:self-center">
+          <div className="rounded-full p-0.75" style={{ background: 'conic-gradient(from 0deg, var(--accent), var(--violet), var(--success), var(--accent))' }}>
+            <div className="rounded-full p-0.75" style={{ background: 'var(--theme-bg-card)' }}>
+              <div className={`flex items-center justify-center overflow-hidden rounded-full text-3xl font-extrabold text-white ${user?.avatar ? '' : 'v2-match-grad'}`}
+                style={{ width: 96, height: 96 }}>
+                {user?.avatar
+                  // eslint-disable-next-line @next/next/no-img-element
+                  ? <img src={user.avatar} alt={user.name ?? ''} className="h-full w-full object-cover" />
+                  : (user?.name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || 'U')}
               </div>
             </div>
-            {/* Plan badge marker on avatar (only for paid plans) */}
-            {plan.showStar && (
-              <div className="absolute bottom-2 right-2 w-10 h-10 rounded-full flex items-center justify-center border-4 border-theme-bg-card shadow-2xl"
-                style={planRaw === 'lifetime'
-                  ? { background: 'linear-gradient(135deg, #F59E0B, #D97706)' }
-                  : { background: 'linear-gradient(135deg, #6366F1, #4338CA)' }}>
-                <IconStar size={16} className="text-white" />
-              </div>
-            )}
           </div>
-
-          {/* Edit + Share buttons (hidden in readonly mode) */}
-          {!readonly && (
-            <div className="flex items-center gap-3 pb-2">
-              <Link href="/profile/share"
-                className="group flex items-center gap-2 px-6 py-2.5 rounded-2xl text-xs font-black uppercase tracking-widest text-white transition-all hover:-translate-y-1 hover:shadow-[0_10px_25px_rgba(99,102,241,0.4)]"
-                style={{ background: GRADIENT.brand }}>
-                <IconZap size={14} className="group-hover:animate-pulse" />
-                Share
-              </Link>
-              <button
-                type="button"
-                onClick={onEdit}
-                className="flex items-center gap-2 px-6 py-2.5 rounded-2xl text-xs font-black uppercase tracking-widest transition-all hover:-translate-y-1 hover:bg-theme-bg-tertiary"
-                style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-primary)', border: '1px solid var(--theme-border)' }}>
-                <IconPencil size={14} />
-                Edit
-              </button>
+          {plan.star && (
+            <div className="v2-beta-badge absolute bottom-1 right-1 flex h-7 w-7 items-center justify-center rounded-full"
+              style={{ border: '3px solid var(--theme-bg-card)' }}>
+              <IconStar size={13} style={{ color: 'white' }} />
             </div>
           )}
         </div>
 
-        {/* Name + Badges */}
-        <div className="flex flex-wrap items-center gap-3 mb-3">
-          <h1 className="text-4xl font-black tracking-tight" style={{ color: 'var(--theme-text-primary)' }}>
-            {user?.name || 'User'}
-          </h1>
-          <div className="flex items-center gap-2">
-            <div className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 flex items-center gap-1.5">
-              <IconZap size={11} className="animate-pulse" />
-              Active
+        {/* Info */}
+        <div className="min-w-0 flex-1">
+          <div className="mb-1.5 flex flex-wrap items-center gap-2.5">
+            <h1 className="text-h1 font-extrabold leading-none tracking-tight" style={{ color: 'var(--theme-text-primary)' }}>
+              {user?.name || 'User'}
+            </h1>
+            <Pill color="var(--success)" label="Active" dot />
+            <Pill color={plan.color} label={plan.label} icon={plan.star ? <IconStar size={11} /> : undefined} />
+            <Pill color="var(--accent)" label="Verified" icon={<IconCheckCircle size={11} />} />
+          </div>
+
+          <div className="mb-2.5 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-caption" style={{ color: 'var(--theme-text-muted)' }}>
+            {user?.email && (
+              <span className="flex items-center gap-1.5"><IconMail size={13} /> {user.email}</span>
+            )}
+            <span className="h-1 w-1 rounded-full" style={{ background: 'currentColor', opacity: 0.4 }} />
+            <span>{t('joined', { date: joinedDate })}</span>
+          </div>
+
+          {user?.bio && (
+            <p className="mb-3 max-w-2xl whitespace-pre-line text-caption" style={{ color: 'var(--theme-text-secondary)' }}>{user.bio}</p>
+          )}
+
+          {/* XP bar */}
+          {xpInfo && (
+            <div className="max-w-105">
+              <div className="mb-1.5 flex items-center justify-between gap-3">
+                <span className="text-caption font-semibold" style={{ color: 'var(--theme-text-secondary)' }}>
+                  <span className="mono">Lv.{xpInfo.level}</span> · {xpInfo.cefr}{xpInfo.nameVi ? ` — ${xpInfo.nameVi}` : ''}
+                </span>
+                <span className="mono text-[11px] whitespace-nowrap" style={{ color: 'var(--theme-text-muted)' }}>
+                  {isLoading ? '—' : `${totalXp.toLocaleString(locale)} / ${nextXp.toLocaleString(locale)} XP`}
+                </span>
+              </div>
+              <div className="h-1.5 overflow-hidden rounded-full" style={{ background: 'var(--theme-bg-secondary)' }}>
+                <div className="v2-match-grad h-full rounded-full transition-all duration-700" style={{ width: `${xpPct}%` }} />
+              </div>
             </div>
-            <div className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5"
-              style={plan.style}>
-              {plan.showStar && <IconStar size={11} />}
-              {plan.label}
-            </div>
-            {!readonly && isFree && (
-              <Link
-                href="/pricing"
-                className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest text-white shadow-lg transition-transform hover:-translate-y-0.5"
-                style={{ background: GRADIENT.brand }}
-              >
+          )}
+        </div>
+
+        {/* Actions */}
+        {!readonly && (
+          <div className="flex shrink-0 items-center gap-2 self-start md:self-center">
+            <Link href="/profile/share"
+              className="v2-match-grad flex items-center gap-2 rounded-[9px] px-4 py-2.5 text-caption font-bold text-white transition-transform active:scale-95"
+              style={{ boxShadow: `0 4px 12px ${mix('var(--accent)', 40)}` }}>
+              <IconZap size={14} /> {t('share')}
+            </Link>
+            <button type="button" onClick={onEdit}
+              className="flex items-center gap-2 rounded-[9px] border px-4 py-2.5 text-caption font-medium transition-colors hover:opacity-80"
+              style={{ background: 'var(--theme-bg-secondary)', borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)' }}>
+              <IconPencil size={14} /> {t('edit')}
+            </button>
+            {isFree && (
+              <Link href="/pricing"
+                className="v2-match-grad hidden items-center rounded-[9px] px-3 py-2.5 text-[10px] font-bold uppercase tracking-widest text-white lg:flex">
                 {t('upgrade')}
               </Link>
             )}
           </div>
-        </div>
-
-        {/* Bio */}
-        {user?.bio ? (
-          <p className="text-sm mb-4 max-w-2xl whitespace-pre-line"
-            style={{ color: 'var(--theme-text-secondary)' }}>
-            {user.bio}
-          </p>
-        ) : (
-          !readonly && (
-            <button
-              type="button"
-              onClick={onEdit}
-              className="text-sm mb-4 italic underline-offset-2 hover:underline transition-colors"
-              style={{ color: 'var(--theme-text-muted)' }}
-            >
-              {t('addBio')}
-            </button>
-          )
         )}
-
-        {/* Stats pills */}
-        <div className="flex flex-wrap items-center gap-4 text-sm font-medium opacity-60 mb-8"
-          style={{ color: 'var(--theme-text-muted)' }}>
-          {user?.email && (
-            <>
-              <span className="flex items-center gap-2"><IconMail size={14} /> {user.email}</span>
-              <span className="w-1 h-1 rounded-full bg-current opacity-30" />
-            </>
-          )}
-          <span className="flex items-center gap-2">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-              <line x1="16" y1="2" x2="16" y2="6" />
-              <line x1="8" y1="2" x2="8" y2="6" />
-              <line x1="3" y1="10" x2="21" y2="10" />
-            </svg>
-            {t('joined', { date: joinedDate })}
-          </span>
-        </div>
-
-        {/* Badges row */}
-        <div className="flex flex-wrap gap-2">
-          {xpInfo && (
-            <div className="px-4 py-2 rounded-2xl border flex items-center gap-2 transition-colors hover:bg-theme-bg-secondary"
-              style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-secondary)44' }}>
-              <IconTrophy size={14} className="text-indigo-500" />
-              <span className="text-[11px] font-black uppercase tracking-wider text-indigo-400">
-                Lv.{xpInfo.level} · {xpInfo.cefr}
-              </span>
-            </div>
-          )}
-          <div className="px-4 py-2 rounded-2xl border flex items-center gap-2 transition-colors hover:bg-theme-bg-secondary"
-            style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-secondary)44' }}>
-            <IconZap size={14} className="text-amber-500" />
-            <span className="text-[11px] font-black uppercase tracking-wider text-amber-500">
-              {isLoading ? '—' : points.toLocaleString(locale)} XP
-            </span>
-          </div>
-          <div className="px-4 py-2 rounded-2xl border flex items-center gap-2 transition-colors hover:bg-theme-bg-secondary"
-            style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-secondary)44' }}>
-            <IconCheckCircle size={14} className="text-emerald-500" />
-            <span className="text-[11px] font-black uppercase tracking-wider text-emerald-500">Verified</span>
-          </div>
-        </div>
       </div>
     </div>
   );

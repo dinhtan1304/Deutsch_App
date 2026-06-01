@@ -214,7 +214,9 @@
       "private": "Riêng tư",
       "upgrade": "Nâng cấp",
       "addBio": "+ Thêm mô tả về bạn...",
-      "joined": "Tham gia {date}"
+      "joined": "Tham gia {date}",
+      "share": "Chia sẻ",
+      "edit": "Sửa"
     },
     "editModal": {
       "title": "Chỉnh sửa hồ sơ",
