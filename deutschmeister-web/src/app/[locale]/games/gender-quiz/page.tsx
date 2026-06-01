@@ -202,8 +202,8 @@ export default function GenderQuizPage() {
         <div className="max-w-2xl mx-auto px-4 sm:px-6">
           <AnswerReview
             answers={answers}
-            getCorrectArticle={a => ({ article: GenderInfo[a.word.gender].article, color: AC[a.word.gender] || ACCENT.srs })}
-            getSelectedLabel={a => !a.isCorrect ? GenderInfo[a.selectedAnswer].article : null}
+            getCorrectArticle={a => ({ article: a.word.article ?? GenderInfo[a.word.gender]?.article ?? '', color: AC[a.word.gender] || ACCENT.srs })}
+            getSelectedLabel={a => !a.isCorrect ? (GenderInfo[a.selectedAnswer]?.article ?? a.selectedAnswer) : null}
           />
         </div>
         {!isWordBankMode && <AddWrongWordsToBank wrongWords={answers.filter(a => !a.isCorrect).map(a => a.word)} />}
@@ -231,10 +231,7 @@ export default function GenderQuizPage() {
       <GameProgressBar current={index + 1} total={questionsCount} />
 
       {currentWord && (
-        <GameWordCard
-          gradient="linear-gradient(135deg, #1e1b4b 0%, #4338ca 100%)"
-          feedback={answered ? (selectedAnswer === currentWord.gender ? 'correct' : 'wrong') : null}
-        >
+        <GameWordCard gradient="linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)">
           <h2 className="text-4xl md:text-5xl font-extrabold text-white mb-3">{currentWord.word}</h2>
           <p className="text-[15px]" style={{ color: 'rgba(255,255,255,0.65)' }}>{currentWord.translationEn}</p>
           {settings.showVietnamese && currentWord.translationVi && (
@@ -242,7 +239,7 @@ export default function GenderQuizPage() {
           )}
           {answered && (
             <p className="text-body mt-4 font-semibold" style={{ color: 'rgba(255,255,255,0.7)' }}>
-              {t('genderQuiz.answer')} <span className="font-extrabold text-white">{GenderInfo[currentWord.gender].article} {currentWord.word}</span>
+              {t('genderQuiz.answer')} <span className="font-extrabold text-white">{currentWord.article ?? GenderInfo[currentWord.gender]?.article} {currentWord.word}</span>
             </p>
           )}
         </GameWordCard>

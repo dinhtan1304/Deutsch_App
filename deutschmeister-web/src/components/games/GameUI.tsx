@@ -516,20 +516,20 @@ export function GameWordCard({ gradient = 'linear-gradient(135deg, #1e1b4b 0%, #
 /* eslint-enable no-restricted-syntax */
     
   return (
-    <div className={`rounded-4xl overflow-hidden mb-5 transition-all duration-500 relative ${feedback === 'wrong' ? 'animate-[shake_0.4s_ease-in-out]' : ''}`}
-      style={{ 
-        background: bg, 
-        cursor: onClick ? 'pointer' : 'default', 
+    <div className={`rounded-[20px] overflow-hidden my-6 transition-all duration-500 relative ${feedback === 'wrong' ? 'animate-[shake_0.4s_ease-in-out]' : ''}`}
+      style={{
+        background: bg,
+        cursor: onClick ? 'pointer' : 'default',
         minHeight: 180,
-        boxShadow: feedback === 'correct' ? '0 10px 30px rgba(34,197,94,0.15)' : feedback === 'wrong' ? '0 10px 30px rgba(239,68,68,0.15)' : '0 8px 24px rgba(0,0,0,0.1)'
+        boxShadow: feedback === 'correct' ? '0 16px 40px rgba(34,197,94,0.2)' : feedback === 'wrong' ? '0 16px 40px rgba(239,68,68,0.2)' : '0 16px 40px rgba(79,70,229,0.3)'
       }}
       onClick={onClick}>
-      
-      {/* Mesh gradient overlay for extra polish */}
-      <div className="absolute inset-0 opacity-30 pointer-events-none" 
-        style={{ background: 'radial-gradient(circle at 20% 30%, rgba(255,255,255,0.1) 0%, transparent 50%), radial-gradient(circle at 80% 70%, rgba(0,0,0,0.05) 0%, transparent 50%)' }} />
-        
-      <div className="flex flex-col items-center justify-center px-6 py-8 text-center relative z-10" style={{ minHeight: 180 }}>
+
+      {/* Soft corner glow (clean — no grain) */}
+      <div className="absolute -top-12 -right-12 w-44 h-44 rounded-full pointer-events-none"
+        style={{ background: 'rgba(255,255,255,0.08)' }} />
+
+      <div className="flex flex-col items-center justify-center px-6 py-10 text-center relative z-10" style={{ minHeight: 180 }}>
         {children}
       </div>
 
