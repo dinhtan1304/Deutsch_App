@@ -11,9 +11,9 @@ import { useSoundEffects } from '@/hooks/useSoundEffects';
 import { useGameSession } from '@/hooks/useGameSession';
 import { GenderInfo, Word } from '@/types';
 import {
-  GameSetupCard, GameResultCard, StatCard, GameInfoBox,
+  GameSetupCard, GameResultCard, GameInfoBox,
   GamePlayHeader, GameStatsBar,
-  IconLink, IconRocket, IconChevronLeft, IconRefresh, IconCheck,
+  IconLink, IconRocket, IconChevronLeft, IconCheck, IconZap, IconTarget, IconFlame, IconClock,
 } from '@/components/games/GameUI';
 import { Button } from '@/components/ui';
 import { ACCENT, STATUS } from '@/lib/tokens';
@@ -246,25 +246,19 @@ export default function WordMatchPage() {
     const accuracy = Math.round((correctCount / PAIRS) * 100);
     return (
       <>
-        <GameResultCard accuracy={accuracy} title={t('common.result')}>
-          <div className="my-5">
-            <div className="text-5xl font-extrabold" style={{ color: ACCENT.cyan }}>{score}</div>
-            <p className="text-body mt-1" style={{ color: 'var(--theme-text-muted)' }}>{t('common.scoreUnit')}</p>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-6">
-            <StatCard label={t('common.correctLabel')} value={correctCount} color={STATUS.success} />
-            <StatCard label={t('wordMatch.stats.pairs')} value={PAIRS} />
-            <StatCard label={t('common.accuracy')} value={`${accuracy}%`} color={ACCENT.srs} />
-            <StatCard label={t('common.bestCombo')} value={`x${bestCombo}`} color={ACCENT.xp} />
-          </div>
-          <div className="text-body mb-4" style={{ color: 'var(--theme-text-muted)' }}>
-            {t('wordMatch.timeLabel', { time: formatTime(elapsedSec) })}
-          </div>
-          <div className="flex gap-3 justify-center">
-            <Button variant="game" accent="srs" onClick={startGame}><IconRefresh size={16} /> {t('common.restart')}</Button>
-            <Button variant="outline" onClick={() => router.push('/games')}><IconChevronLeft size={16} /> {t('common.menu')}</Button>
-          </div>
-        </GameResultCard>
+        <GameResultCard
+          accuracy={accuracy}
+          correct={correctCount}
+          total={PAIRS}
+          stats={[
+            { label: t('common.score'), value: score, color: ACCENT.cyan, icon: IconZap },
+            { label: t('common.accuracy'), value: `${accuracy}%`, color: STATUS.success, icon: IconTarget },
+            { label: t('common.bestCombo'), value: `x${bestCombo}`, color: ACCENT.xp, icon: IconFlame },
+            { label: t('common.time'), value: formatTime(elapsedSec), color: ACCENT.srs, icon: IconClock },
+          ]}
+          onRestart={startGame}
+          onExit={() => router.push('/games')}
+        />
       </>
     );
   }

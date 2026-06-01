@@ -13,9 +13,9 @@ import { useGameSession } from '@/hooks/useGameSession';
 import { GenderInfo, Word } from '@/types';
 import {
   GameSetupCard, GameResultCard,
-  StatCard, AnswerReview, AddWrongWordsToBank, GameResultUpsell, GameInfoBox,
+  AnswerReview, AddWrongWordsToBank, GameResultUpsell, GameInfoBox,
   GamePlayHeader, GameStatsBar, useGameTimer,
-  IconHeadphones, IconRocket, IconChevronLeft, IconRefresh, IconVolume,
+  IconHeadphones, IconRocket, IconChevronLeft, IconVolume, IconRefresh, IconZap, IconTarget, IconFlame, IconX,
 } from '@/components/games/GameUI';
 import { Button } from '@/components/ui';
 import { ACCENT, STATUS } from '@/lib/tokens';
@@ -264,22 +264,19 @@ export default function ListeningQuizPage() {
     const accuracy = Math.round((correctCount / questionsCount) * 100);
     return (
       <>
-        <GameResultCard accuracy={accuracy} title={t('common.result')}>
-          <div className="my-5">
-            <div className="text-5xl font-extrabold" style={{ color: ACCENT.games }}>{score}</div>
-            <p className="text-body mt-1" style={{ color: 'var(--theme-text-muted)' }}>{t('common.scoreUnit')}</p>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-6">
-            <StatCard label={t('common.correctLabel')} value={correctCount} color={STATUS.success} />
-            <StatCard label={t('common.wrongLabel')} value={questionsCount - correctCount} color={STATUS.danger} />
-            <StatCard label={t('common.accuracy')} value={`${accuracy}%`} />
-            <StatCard label={t('common.bestCombo')} value={`x${bestCombo}`} color={ACCENT.xp} />
-          </div>
-          <div className="flex gap-3 justify-center">
-            <Button variant="game" accent="games" onClick={startGame}><IconRefresh size={16} /> {t('common.restart')}</Button>
-            <Button variant="outline" onClick={() => router.push('/games')}><IconChevronLeft size={16} /> {t('common.menu')}</Button>
-          </div>
-        </GameResultCard>
+        <GameResultCard
+          accuracy={accuracy}
+          correct={correctCount}
+          total={questionsCount}
+          stats={[
+            { label: t('common.score'), value: score, color: ACCENT.games, icon: IconZap },
+            { label: t('common.accuracy'), value: `${accuracy}%`, color: STATUS.success, icon: IconTarget },
+            { label: t('common.bestCombo'), value: `x${bestCombo}`, color: ACCENT.xp, icon: IconFlame },
+            { label: t('common.wrongLabel'), value: questionsCount - correctCount, color: STATUS.danger, icon: IconX },
+          ]}
+          onRestart={startGame}
+          onExit={() => router.push('/games')}
+        />
 
         <div className="max-w-2xl mx-auto px-4 sm:px-6">
           <AnswerReview

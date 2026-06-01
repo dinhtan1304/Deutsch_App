@@ -12,10 +12,10 @@ import { personalWordsToGameWords, getEligibleWordsForGame } from '@/lib/persona
 import { wordsApi } from '@/lib/api/words';
 import { Gender, Word } from '@/types';
 import {
-  GameSetupCard, GameResultCard, StatCard,
+  GameSetupCard, GameResultCard,
   GenderButtons, GameInfoBox, KBD,
   IconClock, IconTarget, IconCheck, IconX, IconRocket, IconKeyboard, IconVolume,
-  IconRefresh, IconChevronLeft, IconZap,
+  IconChevronLeft, IconZap, IconFlame,
 } from '@/components/games/GameUI';
 import { Button } from '@/components/ui';
 import { ACCENT, STATUS } from '@/lib/tokens';
@@ -233,29 +233,21 @@ export default function TimedChallengePage() {
   if (phase === 'result') {
     const total = correct + wrong;
     const acc = total > 0 ? Math.round((correct / total) * 100) : 0;
-    const wpm = Math.round((correct / duration) * 60);
 
     return (
-        <GameResultCard accuracy={acc} title={t('timeChallenge.timeUp')}>
-          <div className="my-5">
-            <div className="text-5xl font-extrabold" style={{ color: ACCENT.srs }}>{score}</div>
-            <p className="text-body mt-1" style={{ color: 'var(--theme-text-muted)' }}>{t('common.scoreUnit')}</p>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">
-            <StatCard label={t('common.correctLabel')} value={correct} color={STATUS.success} />
-            <StatCard label={t('common.wrongLabel')} value={wrong} />
-            <StatCard label={t('common.accuracy')} value={`${acc}%`} color={ACCENT.srs} />
-            <StatCard label={t('common.bestCombo')} value={`x${bestCombo}`} color={ACCENT.xp} />
-          </div>
-          <div className="flex items-center justify-center gap-1.5 mb-6 text-sm font-semibold"
-            style={{ color: 'var(--theme-text-secondary)' }}>
-            <IconZap size={16} style={{ color: ACCENT.xp }} /> {t('timeChallenge.speedLabel', { wpm })}
-          </div>
-          <div className="flex gap-3 justify-center">
-            <Button variant="game" accent="games" onClick={startGame}><IconRefresh size={16} /> {t('common.restart')}</Button>
-            <Button variant="outline" onClick={() => router.push('/games')}><IconChevronLeft size={16} /> {t('common.back')}</Button>
-          </div>
-        </GameResultCard>
+        <GameResultCard
+          accuracy={acc}
+          correct={correct}
+          total={total}
+          stats={[
+            { label: t('common.score'), value: score, color: ACCENT.srs, icon: IconZap },
+            { label: t('common.accuracy'), value: `${acc}%`, color: STATUS.success, icon: IconTarget },
+            { label: t('common.bestCombo'), value: `x${bestCombo}`, color: ACCENT.xp, icon: IconFlame },
+            { label: t('common.wrongLabel'), value: wrong, color: STATUS.danger, icon: IconX },
+          ]}
+          onRestart={startGame}
+          onExit={() => router.push('/games')}
+        />
     );
   }
 

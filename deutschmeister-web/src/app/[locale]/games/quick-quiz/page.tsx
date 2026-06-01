@@ -15,10 +15,10 @@ import { Word, Gender, GenderInfo } from '@/types';
 import { speakGerman } from '@/lib/utils';
 import {
   GameSetupCard, GameResultCard, GameProgressBar,
-  StatCard, AnswerReview, AddWrongWordsToBank, GameResultUpsell, GameInfoBox, KBD,
+  AnswerReview, AddWrongWordsToBank, GameResultUpsell, GameInfoBox, KBD,
   GamePlayHeader, GameStatsBar, GameWordCard, GenderButtons, useGameTimer,
   IconZap, IconTarget, IconRocket, IconKeyboard, IconVolume,
-  IconRefresh, IconChevronLeft,
+  IconChevronLeft, IconCheck, IconX,
 } from '@/components/games/GameUI';
 import { Button } from '@/components/ui';
 import { ACCENT, STATUS } from '@/lib/tokens';
@@ -158,20 +158,18 @@ export default function QuickQuizPage() {
 
     return (
       <>
-        <GameResultCard accuracy={percentage} title={t('common.completed')}>
-          <p className="text-[15px] mb-4" style={{ color: 'var(--theme-text-secondary)' }}>
-            {t('quickQuiz.resultSummary', { correct: score, total: TOTAL_QUESTIONS })}
-          </p>
-          <div className="grid grid-cols-3 gap-2 mb-6">
-            <StatCard label={t('common.correctLabel')} value={score} color="#22C55E" />
-            <StatCard label={t('common.wrongLabel')} value={TOTAL_QUESTIONS - score} color="#EF4444" />
-            <StatCard label={t('common.accuracy')} value={`${percentage}%`} color="#3B82F6" />
-          </div>
-          <div className="flex gap-3 justify-center">
-            <Button variant="game" accent="xp" onClick={handleStartGame}><IconRefresh size={16} /> {t('common.restart')}</Button>
-            <Button variant="outline" onClick={() => router.push('/games')}><IconChevronLeft size={16} /> {t('common.menu')}</Button>
-          </div>
-        </GameResultCard>
+        <GameResultCard
+          accuracy={percentage}
+          correct={score}
+          total={TOTAL_QUESTIONS}
+          stats={[
+            { label: t('common.correctLabel'), value: score, color: STATUS.success, icon: IconCheck },
+            { label: t('common.wrongLabel'), value: TOTAL_QUESTIONS - score, color: STATUS.danger, icon: IconX },
+            { label: t('common.accuracy'), value: `${percentage}%`, color: ACCENT.srs, icon: IconTarget },
+          ]}
+          onRestart={handleStartGame}
+          onExit={() => router.push('/games')}
+        />
 
         <div className="max-w-2xl mx-auto px-4 sm:px-6">
           <AnswerReview

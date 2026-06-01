@@ -11,10 +11,10 @@ import { useWordBankGameWords } from '@/hooks/usePersonalWords';
 import { personalWordsToGameWords, getEligibleWordsForGame } from '@/lib/personalWordAdapter';
 import { GenderInfo, Word } from '@/types';
 import {
-  GameSetupCard, GameResultCard, GameProgressBar, StatCard,
+  GameSetupCard, GameResultCard, GameProgressBar,
   AddWrongWordsToBank, GameResultUpsell, GameInfoBox, KBD,
   GamePlayHeader, GameStatsBar, useGameTimer,
-  IconLayers, IconCheck, IconX, IconRocket, IconKeyboard, IconVolume,
+  IconLayers, IconCheck, IconX, IconRocket, IconKeyboard, IconVolume, IconTarget, IconFlame,
   IconRefresh, IconChevronLeft, IconChevronRight,
 } from '@/components/games/GameUI';
 import { Button } from '@/components/ui';
@@ -197,17 +197,19 @@ export default function FlashcardsPage() {
 
     return (
       <>
-        <GameResultCard accuracy={accuracy} title={t('common.completed')}>
-          <div className="grid grid-cols-3 gap-2 my-5">
-            <StatCard label={t('flashcards.stats.known')} value={knewCount} />
-            <StatCard label={t('flashcards.stats.needReview')} value={didntKnowCount} color={STATUS.danger} />
-            <StatCard label={t('flashcards.stats.bestStreak')} value={bestStreak} color={ACCENT.xp} />
-          </div>
-          <div className="flex gap-3 justify-center">
-            <Button variant="game" accent="reading" onClick={startGame} ><IconRefresh size={16} /> {t('flashcards.restudy')}</Button>
-            <Button variant="outline" onClick={() => router.push('/games')}><IconChevronLeft size={16} /> {t('common.menu')}</Button>
-          </div>
-        </GameResultCard>
+        <GameResultCard
+          accuracy={accuracy}
+          correct={knewCount}
+          total={results.length}
+          stats={[
+            { label: t('flashcards.stats.known'), value: knewCount, color: STATUS.success, icon: IconCheck },
+            { label: t('flashcards.stats.needReview'), value: didntKnowCount, color: STATUS.danger, icon: IconX },
+            { label: t('flashcards.stats.bestStreak'), value: bestStreak, color: ACCENT.xp, icon: IconFlame },
+            { label: t('common.accuracy'), value: `${accuracy}%`, color: ACCENT.srs, icon: IconTarget },
+          ]}
+          onRestart={startGame}
+          onExit={() => router.push('/games')}
+        />
 
         {needReview.length > 0 && (
           <div className="max-w-2xl mx-auto px-4 sm:px-6">
