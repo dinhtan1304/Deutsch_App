@@ -78,7 +78,9 @@
     "leave": "Rời phòng",
     "chatPlaceholder": "Viết bằng tiếng Đức...",
     "loading": "Đang tải phòng...",
-    "opponent": "Đối phương"
+    "opponent": "Đối phương",
+    "partnerLabel": "Đối tác",
+    "partnerLevel": "Trình độ {level}"
   },
   "join": {
     "title": "Vào phòng riêng",

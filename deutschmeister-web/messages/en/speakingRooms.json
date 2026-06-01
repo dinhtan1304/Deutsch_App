@@ -78,7 +78,9 @@
     "leave": "Leave room",
     "chatPlaceholder": "Write in German...",
     "loading": "Loading room...",
-    "opponent": "Partner"
+    "opponent": "Partner",
+    "partnerLabel": "Partner",
+    "partnerLevel": "Level {level}"
   },
   "join": {
     "title": "Join a private room",

@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useParams, useRouter } from 'next/navigation';
 import { PageHeader } from '@/components/ui';
-import { ACCENT } from '@/lib/tokens';
+import { ACCENT, GRADIENT } from '@/lib/tokens';
 import { useAuthStore } from '@/stores/authStore';
 import {
   useSpeakingRoom,
@@ -89,14 +89,14 @@ export default function SpeakingRoomDetailPage() {
 
   if (isLoading || !room) {
     return (
-      <div className="max-w-5xl mx-auto px-4 py-6">
+      <div className="max-w-360 mx-auto px-4 py-6">
         <p style={{ color: 'var(--theme-text-muted)' }}>{t('detail.loading')}</p>
       </div>
     );
   }
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-6 flex flex-col" style={{ minHeight: 'calc(100vh - 120px)' }}>
+    <div className="max-w-360 mx-auto px-4 py-6 flex flex-col" style={{ minHeight: 'calc(100vh - 120px)' }}>
       <PageHeader
         backHref="/practice-test/speaking-rooms"
         title={room.title}
@@ -130,7 +130,7 @@ export default function SpeakingRoomDetailPage() {
               onClick={handleLeave}
               disabled={leaveMut.isPending}
               className="px-3 py-2 rounded-lg text-sm font-bold text-white disabled:opacity-60"
-              style={{ backgroundColor: '#EF4444' }}
+              style={{ backgroundColor: 'var(--danger)' }}
             >
               {leaveMut.isPending ? t('detail.leaving') : t('detail.leave')}
             </button>
@@ -166,6 +166,23 @@ export default function SpeakingRoomDetailPage() {
               sendText(text);
             }}
           />
+          {remoteParticipant && (
+            <div className="rounded-2xl p-4" style={{ background: 'var(--theme-bg-card)', border: '1px solid var(--theme-border)' }}>
+              <p className="mb-3 text-[10.5px] font-semibold uppercase tracking-widest" style={{ color: 'var(--theme-text-muted)' }}>{t('detail.partnerLabel')}</p>
+              <div className="flex items-center gap-3">
+                <div className="relative shrink-0">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-xl text-body font-bold text-white" style={{ background: GRADIENT.speaking }}>
+                    {(remoteParticipant.user.name ?? '?').charAt(0).toUpperCase()}
+                  </div>
+                  <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full" style={{ background: 'var(--success)', border: '2px solid var(--theme-bg-card)' }} />
+                </div>
+                <div className="min-w-0">
+                  <div className="truncate text-body font-bold" style={{ color: 'var(--theme-text-primary)' }}>{remoteParticipant.user.name ?? t('detail.opponent')}</div>
+                  <div className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>{t('detail.partnerLevel', { level: room.cefrLevel })}</div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
