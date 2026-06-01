@@ -28,6 +28,9 @@ const PODIUM_BG = {
   bronze: `linear-gradient(to top, rgba(180,107,40,0.2), transparent)`,
 } as const;
 
+// Medal tier colours for pedestal rank watermarks (gold/silver/bronze)
+const PODIUM_RANK_COLOR = { 1: ACCENT.xp, 2: 'rgb(192,200,212)', 3: 'rgb(224,137,77)' } as const;
+
 function RankBadge({ rank }: { rank: number }) {
   if (rank === 1) return (
     <div className="w-10 h-10 rounded-full flex items-center justify-center relative shadow-lg"
@@ -91,33 +94,42 @@ export default function LeaderboardPage() {
 
   const top3 = entries?.slice(0, 3) || [];
   const others = entries?.slice(3) || [];
+  const meIndex = entries?.findIndex((e) => e.userId === user?.id) ?? -1;
+  const meRank = meIndex >= 0 ? meIndex + 1 : null;
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: 'var(--theme-bg-body)', color: 'var(--theme-text-primary)' }}>
-      <div className="max-w-4xl mx-auto px-4 py-10">
+    <div className="mx-auto max-w-4xl px-4 py-6 sm:px-6">
 
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
           <div className="flex items-center gap-4">
-            <div className="v2-accent-grad w-14 h-14 rounded-2xl flex items-center justify-center shadow-2xl relative overflow-hidden">
+            <div className="v2-accent-grad w-12 h-12 rounded-[13px] flex items-center justify-center shadow-lg relative overflow-hidden">
               <div className="absolute inset-0 bg-white/10 animate-pulse" />
-              <IconBarChart size={28} className="text-white relative z-10" />
+              <IconBarChart size={24} className="text-white relative z-10" />
             </div>
             <div>
-              <h1 className="text-3xl font-black tracking-tight mb-0.5">{t('pageTitle')}</h1>
-              <p className="text-sm font-medium opacity-50">{t('pageSubtitle')}</p>
+              <h1 className="text-[26px] font-extrabold leading-tight tracking-tight" style={{ color: 'var(--theme-text-primary)' }}>{t('pageTitle')}</h1>
+              <p className="mt-0.5 text-body" style={{ color: 'var(--theme-text-secondary)' }}>{t('pageSubtitle')}</p>
             </div>
           </div>
 
-          <Link href="/"
-            className="flex items-center gap-2 px-6 py-3 rounded-2xl font-black text-[11px] uppercase tracking-widest border transition-all hover:bg-white/5"
-            style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)' }}>
-            <IconChevronLeft size={14} /> {t('back')}
-          </Link>
+          <div className="flex items-center gap-3">
+            {meRank && (
+              <div className="rounded-[10px] border px-4 py-2 text-center" style={{ background: 'color-mix(in srgb, var(--accent) 14%, transparent)', borderColor: 'color-mix(in srgb, var(--accent) 44%, transparent)' }}>
+                <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--theme-text-muted)' }}>{t('yourRank')}</div>
+                <div className="mono text-xl font-bold" style={{ color: 'var(--accent)' }}>#{meRank}</div>
+              </div>
+            )}
+            <Link href="/"
+              className="flex items-center gap-2 rounded-[10px] border px-4 py-2.5 text-[11px] font-bold uppercase tracking-widest transition-colors hover:opacity-80"
+              style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)' }}>
+              <IconChevronLeft size={14} /> {t('back')}
+            </Link>
+          </div>
         </div>
 
         {/* Period Selector */}
-        <div className="flex justify-center mb-16">
+        <div className="flex justify-center mb-8">
           <div className="inline-flex p-1.5 rounded-full backdrop-blur-xl border"
             style={{ backgroundColor: 'var(--theme-bg-secondary)', borderColor: 'var(--theme-border)' }}>
             {PERIOD_KEYS.map(key => (
@@ -161,7 +173,9 @@ export default function LeaderboardPage() {
                     <div className="text-[10px] font-bold" style={{ color: 'var(--theme-text-muted)' }}>{top3[1].xp.toLocaleString()} XP</div>
                   </ProfileLink>
                 )}
-                <div className="w-full h-24 rounded-t-2xl mt-4" style={{ background: PODIUM_BG.silver }} />
+                <div className="w-full h-24 rounded-t-md mt-4 flex items-start justify-center pt-3" style={{ background: PODIUM_BG.silver }}>
+                  <span className="mono text-3xl font-extrabold opacity-50" style={{ color: PODIUM_RANK_COLOR[2] }}>2</span>
+                </div>
               </div>
 
               {/* Rank 1 */}
@@ -185,7 +199,9 @@ export default function LeaderboardPage() {
                     </div>
                   </ProfileLink>
                 )}
-                <div className="w-full h-36 rounded-t-2xl mt-4" style={{ background: PODIUM_BG.gold }} />
+                <div className="w-full h-36 rounded-t-md mt-4 flex items-start justify-center pt-3" style={{ background: PODIUM_BG.gold }}>
+                  <span className="mono text-4xl font-extrabold opacity-50" style={{ color: PODIUM_RANK_COLOR[1] }}>1</span>
+                </div>
               </div>
 
               {/* Rank 3 */}
@@ -207,7 +223,9 @@ export default function LeaderboardPage() {
                     <div className="text-[10px] font-bold" style={{ color: ACCENT.xp }}>{top3[2].xp.toLocaleString()} XP</div>
                   </ProfileLink>
                 )}
-                <div className="w-full h-20 rounded-t-2xl mt-4" style={{ background: PODIUM_BG.bronze }} />
+                <div className="w-full h-20 rounded-t-md mt-4 flex items-start justify-center pt-2.5" style={{ background: PODIUM_BG.bronze }}>
+                  <span className="mono text-3xl font-extrabold opacity-50" style={{ color: PODIUM_RANK_COLOR[3] }}>3</span>
+                </div>
               </div>
             </div>
 
@@ -265,7 +283,6 @@ export default function LeaderboardPage() {
             </div>
           </div>
         )}
-      </div>
     </div>
   );
 }
