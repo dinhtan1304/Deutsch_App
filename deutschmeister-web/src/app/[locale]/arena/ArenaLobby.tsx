@@ -15,7 +15,7 @@ import {
 import { arenaApi, type ArenaPlayerStats, type ArenaMatchSummary, type ArenaLeaderboardRow } from '@/lib/api/arena';
 import { useAuthStore } from '@/stores/authStore';
 import { GRADIENT, ACCENT, STATUS } from '@/lib/tokens';
-import { Card, Button, Loading, BetaBadge } from '@/components/ui';
+import { Card, Loading, BetaBadge } from '@/components/ui';
 import { FeedbackModal } from '@/components/layout/FeedbackModal';
 import { RoomList } from '@/components/arena/RoomList';
 import { IconBug, IconFlame } from '@/components/ui/Icons';
@@ -26,15 +26,51 @@ const MODES: {
   subKey: 'modeViToDeSub' | 'modeDeToViSub' | 'modeMixedSub';
   badge: string;
   gradient: string;
+  icon: string;
+  color: string;
 }[] = [
-  { key: 'vi_to_de', labelKey: 'viToDe', subKey: 'modeViToDeSub', badge: 'VI→DE', gradient: GRADIENT.history },
-  { key: 'de_to_vi', labelKey: 'deToVi', subKey: 'modeDeToViSub', badge: 'DE→VI', gradient: GRADIENT.examWriting },
-  { key: 'mixed', labelKey: 'mixed', subKey: 'modeMixedSub', badge: 'MIX', gradient: GRADIENT.vocab },
+  { key: 'vi_to_de', labelKey: 'viToDe', subKey: 'modeViToDeSub', badge: 'VI→DE', gradient: GRADIENT.history, icon: '🇻🇳', color: 'var(--der)' },
+  { key: 'de_to_vi', labelKey: 'deToVi', subKey: 'modeDeToViSub', badge: 'DE→VI', gradient: GRADIENT.examWriting, icon: '🇩🇪', color: 'var(--success)' },
+  { key: 'mixed', labelKey: 'mixed', subKey: 'modeMixedSub', badge: 'MIX', gradient: GRADIENT.vocab, icon: '🎲', color: 'var(--violet)' },
 ];
 
 function formatWinRate(stats: ArenaPlayerStats | null): string {
   if (!stats || stats.totalMatches === 0) return '0%';
   return `${Math.round((stats.wins / stats.totalMatches) * 100)}%`;
+}
+
+// Rating ring — fills toward the next 100-point milestone.
+function RatingRing({ rating, size = 124 }: { rating: number; size?: number }) {
+  const t = useTranslations('arena');
+  const milestone = Math.ceil((rating + 1) / 100) * 100;
+  const base = milestone - 100;
+  const pct = Math.max(0, Math.min(100, ((rating - base) / 100) * 100));
+  const r = (size - 12) / 2;
+  const c = 2 * Math.PI * r;
+  const off = c - (pct / 100) * c;
+  return (
+    <div className="relative shrink-0" style={{ width: size, height: size }}>
+      <svg width={size} height={size} style={{ transform: 'rotate(-90deg)' }}>
+        <circle cx={size / 2} cy={size / 2} r={r} stroke="var(--theme-border)" strokeWidth="6" fill="none" />
+        <circle cx={size / 2} cy={size / 2} r={r} stroke="var(--accent)" strokeWidth="6" fill="none"
+          strokeDasharray={c} strokeDashoffset={off} strokeLinecap="round"
+          style={{ transition: 'stroke-dashoffset .8s cubic-bezier(.4,0,.2,1)', filter: 'drop-shadow(0 0 6px color-mix(in srgb, var(--accent) 55%, transparent))' }} />
+      </svg>
+      <div className="absolute inset-0 flex flex-col items-center justify-center">
+        <span className="mono text-[32px] font-extrabold leading-none" style={{ letterSpacing: '-.03em', color: 'var(--theme-text-primary)' }}>{rating}</span>
+        <span className="mt-1 text-[10px] font-semibold uppercase" style={{ color: 'var(--theme-text-muted)', letterSpacing: '.08em' }}>{t('lobby.statRating')}</span>
+      </div>
+    </div>
+  );
+}
+
+function Record({ label, value, color }: { label: string; value: string | number; color: string }) {
+  return (
+    <div className="min-w-[72px] rounded-[10px] px-3.5 py-2" style={{ background: 'var(--theme-bg-secondary)', border: '1px solid var(--theme-border)' }}>
+      <div className="text-[10px] font-semibold uppercase" style={{ color: 'var(--theme-text-muted)', letterSpacing: '.05em' }}>{label}</div>
+      <div className="mono text-[18px] font-extrabold" style={{ letterSpacing: '-.02em', color }}>{value}</div>
+    </div>
+  );
 }
 
 export default function ArenaLobby() {
@@ -146,62 +182,56 @@ export default function ArenaLobby() {
           ? t('lobby.connReconnecting')
           : t('lobby.connDisconnected');
 
+  // Opponents near your rating (real leaderboard rows, excluding you).
+  const myRating = stats?.rating ?? 1000;
+  const liveOpponents = useMemo(
+    () => [...topPlayers]
+      .filter((p) => p.userId !== myUserId)
+      .sort((a, b) => Math.abs(a.rating - myRating) - Math.abs(b.rating - myRating))
+      .slice(0, 4),
+    [topPlayers, myUserId, myRating],
+  );
+
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6">
-      <div
-        className="rounded-2xl p-6 sm:p-8 mb-6 text-white shadow-lifted"
-        style={{
-          background: GRADIENT.vocab,
-          backgroundSize: '200% 200%',
-          animation: 'arenaHeroShift 7s ease-in-out infinite',
-        }}
-      >
-        <div className="flex flex-col sm:flex-row sm:items-center gap-5">
-          <div className="flex-1">
-            <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="text-2xl sm:text-3xl font-bold leading-tight">
-                {t('lobby.heroTitle')}
-              </h1>
-              <BetaBadge size="md" />
-            </div>
-            <p className="text-body mt-1 opacity-90">
-              {t('lobby.heroSub')}
-            </p>
-            <div className="flex flex-wrap items-center gap-3 mt-2">
-              <button
-                type="button"
-                onClick={() => setFeedbackOpen(true)}
-                className="text-caption inline-flex items-center gap-1 underline-offset-2 hover:underline opacity-85 hover:opacity-100 transition-opacity"
-                style={{ color: '#fff' }}
-              >
-                <IconBug size={12} />
-                <span>{t('lobby.reportBug')}</span>
-              </button>
-              <span className="opacity-50" style={{ color: '#fff' }}>·</span>
-              <Link
-                href="/community/rules"
-                className="text-caption inline-flex items-center gap-1 underline-offset-2 hover:underline opacity-85 hover:opacity-100 transition-opacity"
-                style={{ color: '#fff' }}
-              >
-                <span>📜</span>
-                <span>{t('lobby.communityRules')}</span>
-              </Link>
-            </div>
+    <div className="mx-auto max-w-360 px-4 py-2 sm:px-6">
+      {/* Hero: rating ring + record + CTA */}
+      <section className="relative mb-5 flex flex-col gap-6 overflow-hidden rounded-2xl p-5 sm:p-6 lg:flex-row lg:items-center"
+        style={{ background: 'var(--theme-bg-card)', border: '1px solid var(--theme-border)' }}>
+        <div aria-hidden className="pointer-events-none absolute -left-16 -top-24 h-72 w-72 rounded-full blur-3xl" style={{ background: 'color-mix(in srgb, var(--accent) 9%, transparent)' }} />
+        {statsLoading ? <div className="flex h-31 w-31 items-center justify-center"><Loading /></div> : <RatingRing rating={stats?.rating ?? 1000} />}
+        <div className="relative z-10 min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2.5">
+            <h1 className="text-h2 font-extrabold" style={{ letterSpacing: '-.02em', color: 'var(--theme-text-primary)' }}>{t('lobby.heroTitle')}</h1>
+            <BetaBadge size="md" />
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 min-w-0 sm:min-w-[360px]">
-            {statsLoading ? (
-              <div className="col-span-4 flex justify-center py-3"><Loading /></div>
-            ) : (
-              <>
-                <Stat label={t('lobby.statRating')} value={stats?.rating ?? 1000} />
-                <Stat label={t('lobby.statWinRate')} value={formatWinRate(stats)} />
-                <Stat label={t('lobby.statWld')} value={`${stats?.wins ?? 0}-${stats?.losses ?? 0}-${stats?.draws ?? 0}`} />
-                <Stat label={t('lobby.statStreak')} value={stats?.currentStreak ?? 0} />
-              </>
-            )}
+          <p className="mt-1 text-caption" style={{ color: 'var(--theme-text-muted)' }}>
+            {(() => { const r = stats?.rating ?? 1000; const next = Math.ceil((r + 1) / 100) * 100; return t('lobby.toNextMilestone', { points: next - r, target: next }); })()} · {t('lobby.roundsInfo')}
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <Record label={t('lobby.recWins')} value={stats?.wins ?? 0} color="var(--success)" />
+            <Record label={t('lobby.recLosses')} value={stats?.losses ?? 0} color="var(--danger)" />
+            <Record label={t('lobby.recDraws')} value={stats?.draws ?? 0} color="var(--warn)" />
+            <Record label={t('lobby.statWinRate')} value={formatWinRate(stats)} color="var(--accent)" />
+            <Record label={t('lobby.statStreak')} value={`${stats?.currentStreak ?? 0} 🔥`} color="var(--streak)" />
+          </div>
+          <div className="mt-3 flex flex-wrap items-center gap-3 text-caption" style={{ color: 'var(--theme-text-muted)' }}>
+            <button type="button" onClick={() => setFeedbackOpen(true)} className="inline-flex items-center gap-1 underline-offset-2 hover:underline"><IconBug size={12} /><span>{t('lobby.reportBug')}</span></button>
+            <span style={{ opacity: 0.5 }}>·</span>
+            <Link href="/community/rules" className="inline-flex items-center gap-1 underline-offset-2 hover:underline"><span>📜</span><span>{t('lobby.communityRules')}</span></Link>
           </div>
         </div>
-      </div>
+        <div className="relative z-10 flex shrink-0 flex-col gap-2 lg:w-56">
+          {!isQueueing ? (
+            <button onClick={() => joinQueue(selectedMode)} className="v2-match-grad flex h-12 items-center justify-center gap-2 rounded-xl text-[15px] font-bold text-white transition-transform hover:-translate-y-0.5" style={{ boxShadow: '0 8px 24px color-mix(in srgb, var(--accent) 40%, transparent)' }}>
+              <IconFlame size={18} /> {t('lobby.rankedCta')}
+            </button>
+          ) : (
+            <button onClick={leaveQueue} className="flex h-12 items-center justify-center rounded-xl text-[15px] font-bold" style={{ border: '1px solid var(--danger)', color: 'var(--danger)' }}>
+              {t('lobby.cancelSearch', { seconds: Math.floor(elapsed / 1000) })}
+            </button>
+          )}
+        </div>
+      </section>
 
       {connectionCopy && (
         <Alert tone="warning" className="mb-4">
@@ -221,10 +251,10 @@ export default function ArenaLobby() {
         </Alert>
       )}
 
-      <h2 className="text-lead font-semibold mb-3" style={{ color: 'var(--theme-text-primary)' }}>
+      <h2 className="mb-3 text-caption font-semibold uppercase tracking-widest" style={{ color: 'var(--theme-text-secondary)' }}>
         {t('lobby.chooseMode')}
       </h2>
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
+      <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
         {MODES.map((m) => {
           const isSelected = selectedMode === m.key;
           return (
@@ -233,56 +263,31 @@ export default function ArenaLobby() {
               type="button"
               onClick={() => setSelectedMode(m.key)}
               disabled={isQueueing}
-              className="arena-mode-card text-left rounded-2xl p-4"
+              className="word-card-v2 relative rounded-[13px] p-4 text-left"
               style={{
-                background: isSelected ? m.gradient : 'var(--theme-bg-card)',
-                color: isSelected ? '#fff' : 'var(--theme-text-primary)',
-                border: `1px solid ${isSelected ? 'transparent' : 'var(--theme-border)'}`,
-                boxShadow: isSelected
-                  ? '0 0 0 2px rgba(168,85,247,.35), 0 12px 28px rgba(139,92,246,.35)'
-                  : 'var(--shadow-soft)',
+                background: 'var(--theme-bg-card)',
+                border: `1.5px solid ${isSelected ? m.color : 'var(--theme-border)'}`,
+                ['--card-accent']: m.color,
+                boxShadow: isSelected ? `0 6px 18px color-mix(in srgb, ${m.color} 22%, transparent)` : 'none',
                 opacity: isQueueing && !isSelected ? 0.4 : 1,
                 cursor: isQueueing ? 'not-allowed' : 'pointer',
-              }}
+              } as React.CSSProperties}
             >
-              <div className="text-caption font-bold mb-2 opacity-85">{m.badge}</div>
-              <div className="font-semibold">{t(`modes.${m.labelKey}` as 'modes.mixed')}</div>
-              <div
-                className="text-caption mt-1"
-                style={{ color: isSelected ? 'rgba(255,255,255,0.85)' : 'var(--theme-text-muted)' }}
-              >
-                {t(`lobby.${m.subKey}` as 'lobby.modeMixedSub')}
+              <div className="mb-2 flex items-center gap-2.5">
+                <span className="text-h2">{m.icon}</span>
+                <span className="mono rounded-[5px] px-2 py-0.5 text-[11px] font-bold" style={isSelected ? { background: m.color, color: 'white' } : { background: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }}>{m.badge}</span>
+                {isSelected && (
+                  <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full text-white" style={{ background: m.color }}>
+                    <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+                  </span>
+                )}
               </div>
+              <div className="text-body font-bold" style={{ color: 'var(--theme-text-primary)' }}>{t(`modes.${m.labelKey}` as 'modes.mixed')}</div>
+              <div className="mt-1 text-caption leading-relaxed" style={{ color: 'var(--theme-text-muted)' }}>{t(`lobby.${m.subKey}` as 'lobby.modeMixedSub')}</div>
             </button>
           );
         })}
       </div>
-
-      {!isQueueing ? (
-        <div
-          style={{
-            borderRadius: 16,
-            animation: 'marketingPulse 2.6s ease-in-out infinite',
-          }}
-        >
-          <Button
-            onClick={() => joinQueue(selectedMode)}
-            variant="primary"
-            size="lg"
-            fullWidth
-            style={{ background: GRADIENT.vocab }}
-          >
-            <span className="inline-flex items-center gap-2">
-              <IconFlame size={18} />
-              <span>{t('lobby.findMatch')}</span>
-            </span>
-          </Button>
-        </div>
-      ) : (
-        <Button onClick={leaveQueue} variant="outline" size="lg" fullWidth>
-          {t('lobby.cancelSearch', { seconds: Math.floor(elapsed / 1000) })}
-        </Button>
-      )}
 
       {isQueueing && (
         <div className="arena-queue-ring mt-4 rounded-2xl">
@@ -308,6 +313,42 @@ export default function ArenaLobby() {
         </div>
       )}
 
+      {/* Opponents near your rating */}
+      {liveOpponents.length > 0 && (
+        <section className="mt-6">
+          <div className="mb-3 flex items-center gap-2">
+            <span className="v2-pulse h-1.5 w-1.5 rounded-full" style={{ background: 'var(--success)' }} />
+            <h2 className="text-caption font-semibold uppercase tracking-widest" style={{ color: 'var(--theme-text-secondary)' }}>{t('lobby.liveOpponents')}</h2>
+          </div>
+          <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-4">
+            {liveOpponents.map((o) => {
+              const diff = o.rating - myRating;
+              return (
+                <div key={o.userId} className="word-card-v2 flex items-center gap-2.5 rounded-[11px] p-3"
+                  style={{ background: 'var(--theme-bg-card)', border: '1px solid var(--theme-border)', ['--card-accent']: 'var(--accent)' } as React.CSSProperties}>
+                  <div className="relative shrink-0">
+                    <div className="v2-avatar-grad flex h-9 w-9 items-center justify-center rounded-[9px] text-caption font-bold text-white">{(o.user.name ?? '?').charAt(0).toUpperCase()}</div>
+                    <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full" style={{ background: 'var(--success)', border: '2px solid var(--theme-bg-card)' }} />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate text-caption font-semibold" style={{ color: 'var(--theme-text-primary)' }}>{o.user.name ?? t('player')}</div>
+                    <div className="text-[11px]" style={{ color: 'var(--theme-text-muted)' }}>
+                      <span className="mono">{o.rating}</span>
+                      <span className="ml-1" style={{ color: Math.abs(diff) <= 30 ? 'var(--success)' : 'var(--theme-text-muted)' }}>({diff >= 0 ? '+' : ''}{diff})</span>
+                    </div>
+                  </div>
+                  <button onClick={() => joinQueue(selectedMode)} disabled={isQueueing}
+                    className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[7px] disabled:opacity-40"
+                    style={{ background: 'color-mix(in srgb, var(--accent) 16%, transparent)', color: 'var(--accent)' }} aria-label="match">
+                    <IconFlame size={13} />
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
       <RoomList />
 
       <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -318,44 +359,6 @@ export default function ArenaLobby() {
       {feedbackOpen && <FeedbackModal onClose={() => setFeedbackOpen(false)} />}
     </div>
   );
-}
-
-function Stat({ label, value }: { label: string; value: string | number }) {
-  const shown = useCountUp(value, 700);
-  return (
-    <div className="rounded-xl px-3 py-2" style={{ background: 'rgba(255,255,255,0.14)' }}>
-      <div className="text-caption opacity-80">{label}</div>
-      <div className="text-body font-bold tabular-nums">{shown}</div>
-    </div>
-  );
-}
-
-/**
- * Count-up from 0 to `target` over `durationMs`. Handles `"42%"` strings by
- * preserving the suffix while animating the leading number.
- */
-function useCountUp(target: string | number, durationMs: number): string | number {
-  const numeric = typeof target === 'number' ? target : Number.parseFloat(String(target));
-  const suffix = typeof target === 'string' ? String(target).replace(/^[-\d.]+/, '') : '';
-  const isAnimatable = Number.isFinite(numeric);
-  const [shown, setShown] = useState<number>(isAnimatable ? 0 : 0);
-
-  useEffect(() => {
-    if (!isAnimatable) return;
-    const start = performance.now();
-    let raf = 0;
-    const step = (t: number) => {
-      const progress = Math.min(1, (t - start) / durationMs);
-      const eased = 1 - Math.pow(1 - progress, 3);
-      setShown(Math.round(eased * numeric));
-      if (progress < 1) raf = requestAnimationFrame(step);
-    };
-    raf = requestAnimationFrame(step);
-    return () => cancelAnimationFrame(raf);
-  }, [numeric, durationMs, isAnimatable]);
-
-  if (!isAnimatable) return target;
-  return `${shown}${suffix}`;
 }
 
 function Alert({
@@ -545,7 +548,7 @@ function TopPlayersCard({
               >
                 <div
                   className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-caption shrink-0"
-                  style={{ background: medalBg, color: i < 3 ? '#fff' : 'var(--theme-text-secondary)' }}
+                  style={{ background: medalBg, color: i < 3 ? 'white' : 'var(--theme-text-secondary)' }}
                 >
                   {i + 1}
                 </div>
