@@ -22,6 +22,12 @@ const LEVEL_COLORS = [
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const DAYS = ['', 'Mon', '', 'Wed', '', 'Fri', ''];
 
+// Fixed pixel geometry so the month labels line up with their week columns.
+const CELL = 12;  // dot size
+const GAP = 3;    // gap between dots (rows + week columns)
+const PITCH = CELL + GAP; // per-week / per-row pitch
+const GUTTER = 30; // width of the Mon/Wed/Fri label column
+
 export function ActivityHeatmap({ data }: ActivityHeatmapProps) {
   const t = useTranslations('dashboard.activityHeatmap');
   const formatter = useFormatter();
@@ -57,14 +63,20 @@ export function ActivityHeatmap({ data }: ActivityHeatmapProps) {
   }, [data.data])
 
   const monthLabels = useMemo(() => {
-    const labels: { month: string; position: number }[] = []
+    const labels: { month: string; weekIndex: number }[] = []
     let lastMonth = -1
+    // Scan every day (not just the first of each week) so a month that starts
+    // mid-week — e.g. the current month — still gets labelled at its column.
     weeks.forEach((week, weekIndex) => {
-      const firstValidDay = week.find((d) => d.date)
-      if (firstValidDay) {
-        const month = parseLocalDate(firstValidDay.date).getMonth()
+      for (const d of week) {
+        if (!d.date) continue
+        const month = parseLocalDate(d.date).getMonth()
         if (month !== lastMonth) {
-          labels.push({ month: MONTHS[month]!, position: weekIndex })
+          const prev = labels[labels.length - 1]
+          // keep labels at least 2 columns apart so the 3-char text never overlaps
+          if (!prev || weekIndex - prev.weekIndex >= 2) {
+            labels.push({ month: MONTHS[month]!, weekIndex })
+          }
           lastMonth = month
         }
       }
@@ -116,45 +128,42 @@ export function ActivityHeatmap({ data }: ActivityHeatmapProps) {
       </div>
 
       {/* Heatmap */}
-      <div className="overflow-x-auto">
-        <div className="inline-block min-w-full">
-          <div className="flex mb-1 ml-8">
+      <div className="overflow-x-auto pb-1">
+        <div style={{ position: 'relative', minWidth: GUTTER + weeks.length * PITCH }}>
+          {/* Month labels — absolutely positioned over their week column */}
+          <div style={{ position: 'relative', height: 16, marginLeft: GUTTER }}>
             {monthLabels.map((label, i) => (
-              <div
+              <span
                 key={i}
                 className="text-caption font-medium"
-                style={{
-                  color: 'var(--theme-text-muted)',
-                  position: 'relative',
-                  left: `${label.position * 14}px`,
-                  marginRight: i < monthLabels.length - 1
-                    ? `${(monthLabels[i + 1]!.position - label.position - 3) * 14}px` : 0,
-                }}
+                style={{ position: 'absolute', left: label.weekIndex * PITCH, color: 'var(--theme-text-muted)' }}
               >
                 {label.month}
-              </div>
+              </span>
             ))}
           </div>
 
           <div className="flex">
-            <div className="flex flex-col mr-2">
+            {/* Mon / Wed / Fri gutter — same row pitch as the dots */}
+            <div className="flex flex-col" style={{ width: GUTTER, gap: GAP }}>
               {DAYS.map((day, i) => (
-                <div key={i} className="text-caption h-3.5 flex items-center"
-                  style={{ color: 'var(--theme-text-muted)' }}>
+                <div key={i} className="flex items-center text-[10px] leading-none"
+                  style={{ height: CELL, color: 'var(--theme-text-muted)' }}>
                   {day}
                 </div>
               ))}
             </div>
 
-            <div className="flex gap-px">
+            <div className="flex" style={{ gap: GAP }}>
               {weeks.map((week, weekIndex) => (
-                <div key={weekIndex} className="flex flex-col gap-px">
+                <div key={weekIndex} className="flex flex-col" style={{ gap: GAP }}>
                   {week.map((day, dayIndex) => (
                     <div
                       key={`${weekIndex}-${dayIndex}`}
-                      className={`w-3 h-3 rounded-sm transition-all cursor-pointer
-                        ${day.count >= 0 ? 'hover:ring-2 hover:ring-offset-1 hover:ring-blue-400/50' : ''}`}
+                      className={`rounded-full transition-all ${day.count >= 0 ? 'cursor-pointer hover:ring-2 hover:ring-offset-1 hover:ring-blue-400/50' : ''}`}
                       style={{
+                        width: CELL,
+                        height: CELL,
                         backgroundColor: day.count < 0 ? 'transparent' : LEVEL_COLORS[day.level],
                       }}
                       onMouseEnter={(e) => handleMouseEnter(day, e)}
@@ -172,7 +181,7 @@ export function ActivityHeatmap({ data }: ActivityHeatmapProps) {
       <div className="flex items-center justify-end gap-1.5 mt-4">
         <span className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>{t('less')}</span>
         {LEVEL_COLORS.map((color, i) => (
-          <div key={i} className="w-3 h-3 rounded-sm" style={{ backgroundColor: color }} />
+          <div key={i} className="rounded-full" style={{ width: CELL, height: CELL, backgroundColor: color }} />
         ))}
         <span className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>{t('more')}</span>
       </div>
