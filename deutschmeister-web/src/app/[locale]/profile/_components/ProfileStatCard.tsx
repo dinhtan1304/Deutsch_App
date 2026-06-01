@@ -12,25 +12,27 @@ export function ProfileStatCard({
 }) {
   return (
     <div
-      className="group rounded-3xl border p-5 text-center relative overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+      className="word-card-v2 relative flex items-center gap-3.5 overflow-hidden rounded-md border p-4"
       style={{
+        ...({ '--card-accent': color } as CSSProperties),
         borderColor: 'var(--theme-border)',
         backgroundColor: 'var(--theme-bg-card)',
-        backgroundImage: `radial-gradient(circle at 50% 0%, ${color}15, transparent 70%)`,
       }}
     >
-      <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+      <div className="pointer-events-none absolute -right-7 -top-7 h-22 w-22 rounded-full" style={{ background: `${color}18`, filter: 'blur(18px)' }} />
       <div
-        className="w-11 h-11 rounded-2xl mx-auto flex items-center justify-center mb-4 transition-transform group-hover:scale-110"
-        style={{ background: `linear-gradient(135deg, ${color}, ${color}cc)`, boxShadow: `0 8px 20px ${color}33` }}
+        className="relative z-10 flex h-11 w-11 shrink-0 items-center justify-center rounded-[11px]"
+        style={{ background: `${color}1A`, color }}
       >
-        <Icon size={20} className="text-white" />
+        <Icon size={21} />
       </div>
-      <div className="text-2xl font-black tracking-tight mb-1" style={{ color: 'var(--theme-text-primary)' }}>
-        {value}
-      </div>
-      <div className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40" style={{ color: 'var(--theme-text-muted)' }}>
-        {label}
+      <div className="relative z-10 min-w-0">
+        <div className="mono text-2xl font-bold leading-none tracking-tight" style={{ color: 'var(--theme-text-primary)' }}>
+          {value}
+        </div>
+        <div className="mt-1.5 text-[11.5px] font-semibold" style={{ color: 'var(--theme-text-secondary)' }}>
+          {label}
+        </div>
       </div>
     </div>
   );

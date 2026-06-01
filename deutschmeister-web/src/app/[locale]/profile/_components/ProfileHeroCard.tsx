@@ -63,7 +63,7 @@ export function ProfileHeroCard({ user, xpInfo, isLoading, points, onEdit, reado
   const cover = resolveCoverBackground(user?.coverImage);
 
   return (
-    <div className="rounded-[2.5rem] border mb-8 overflow-hidden shadow-2xl relative"
+    <div className="rounded-[18px] border mb-5 overflow-hidden shadow-lg relative"
       style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
 
       {/* Banner */}

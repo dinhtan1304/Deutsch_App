@@ -4,7 +4,7 @@ import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { useTranslations, useLocale } from 'next-intl';
 import { pickField } from '@/i18n/pickLocale';
-import { GRADIENT, ACCENT, STATUS } from '@/lib/tokens';
+import { ACCENT, STATUS } from '@/lib/tokens';
 import { useGrammarLessons, useGrammarProgress } from '@/hooks/useGrammar';
 import type { GrammarProgress } from '@/types/grammar';
 import {
@@ -97,16 +97,14 @@ export function ProfileLearningRoadmap() {
   const notPassed = selectedLessons.filter(l => l.status !== 'passed');
 
   return (
-    <div className="rounded-4xl border mb-8 overflow-hidden shadow-2xl backdrop-blur-md"
+    <div className="rounded-lg border overflow-hidden shadow-sm"
       style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
 
       {/* Header */}
       <div className="px-6 py-5 flex items-center justify-between"
-        // eslint-disable-next-line no-restricted-syntax
-        style={{ borderBottom: '1px solid var(--theme-border)', background: 'linear-gradient(to right, var(--theme-bg-secondary) 0%, transparent 100%)' }}>
+        style={{ borderBottom: '1px solid var(--theme-border)' }}>
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl flex items-center justify-center shadow-lg"
-            style={{ background: GRADIENT.writing }}>
+          <div className="v2-match-grad w-10 h-10 rounded-[11px] flex items-center justify-center shadow-lg">
             <IconGraduationCap size={20} className="text-white" />
           </div>
           <div>

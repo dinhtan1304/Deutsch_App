@@ -72,8 +72,7 @@ export default function ProfilePage() {
   ];
 
   return (
-    <div className="py-10 max-w-4xl mx-auto px-4 min-h-screen"
-      style={{ backgroundColor: 'var(--theme-bg-body)', color: 'var(--theme-text-primary)', backgroundImage: 'radial-gradient(circle at 50% -20%, var(--color-accent-brand)12, transparent 70%)' }}>
+    <div className="mx-auto max-w-360 px-4 py-6 sm:px-6">
 
       <ProfileHeroCard
         user={user}
@@ -84,24 +83,26 @@ export default function ProfilePage() {
       />
       <ProfileEditModal open={editOpen} onClose={() => setEditOpen(false)} user={user} />
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+      <div className="mb-5 grid grid-cols-2 gap-3 md:grid-cols-4">
         {statCards.map((card, i) => (
           <ProfileStatCard key={i} label={card.label} value={isLoading ? '—' : card.value} color={card.color} icon={card.icon} />
         ))}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+      <div className="mb-5 grid grid-cols-1 gap-4 md:grid-cols-[1.3fr_1fr]">
         <SkillRadar />
         <ErrorPatternsWidget />
       </div>
 
-      <div className="mb-8">
+      <div className="mb-5">
         <ActivityHeatmap data={heatmapData ?? getEmptyHeatmap()} />
       </div>
 
-      <ProfileLearningRoadmap />
+      <div className="mb-5">
+        <ProfileLearningRoadmap />
+      </div>
 
-      <div className="grid md:grid-cols-2 gap-4">
+      <div className="grid gap-4 md:grid-cols-2">
         <ProfileAnswerStats
           isLoading={isLoading}
           accuracyPct={accuracyPct}
