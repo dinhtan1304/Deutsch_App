@@ -60,8 +60,8 @@ export function VoiceCallPanel({ call, remotePeer }: Props) {
       <audio ref={call.remoteAudioRef} autoPlay playsInline />
 
       <div
-        className="w-12 h-12 rounded-full flex items-center justify-center shrink-0 relative"
-        style={{ backgroundColor: `${ACCENT.speaking}1A`, color: ACCENT.speaking }}
+        className="v2-match-grad w-12 h-12 rounded-full flex items-center justify-center shrink-0 relative text-white"
+        style={{ boxShadow: `0 6px 16px color-mix(in srgb, ${ACCENT.speaking} 35%, transparent)` }}
       >
         <svg width={22} height={22} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
           <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
@@ -71,7 +71,7 @@ export function VoiceCallPanel({ call, remotePeer }: Props) {
         {connected && (
           <span
             className="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full border-2"
-            style={{ backgroundColor: '#22C55E', borderColor: 'var(--theme-bg-card)' }}
+            style={{ backgroundColor: 'var(--success)', borderColor: 'var(--theme-bg-card)' }}
           />
         )}
       </div>
@@ -96,7 +96,7 @@ export function VoiceCallPanel({ call, remotePeer }: Props) {
           </div>
         )}
         {call.error && (
-          <p className="text-caption mt-1" style={{ color: '#EF4444' }}>{call.error}</p>
+          <p className="text-caption mt-1" style={{ color: 'var(--danger)' }}>{call.error}</p>
         )}
       </div>
 
@@ -114,7 +114,7 @@ export function VoiceCallPanel({ call, remotePeer }: Props) {
           <button
             onClick={call.stopCall}
             className="px-3 py-2 rounded-lg font-bold text-sm border"
-            style={{ borderColor: '#EF4444', color: '#EF4444' }}
+            style={{ borderColor: 'var(--danger)', color: 'var(--danger)' }}
           >
             {t('stopVoice')}
           </button>
@@ -135,9 +135,9 @@ export function VoiceCallPanel({ call, remotePeer }: Props) {
         disabled={!connected && call.callState !== 'connecting'}
         className="w-10 h-10 rounded-lg flex items-center justify-center border shrink-0 disabled:opacity-40 disabled:cursor-not-allowed"
         style={{
-          borderColor: call.isMuted ? '#EF4444' : 'var(--theme-border)',
-          backgroundColor: call.isMuted ? 'rgba(239,68,68,0.1)' : 'transparent',
-          color: call.isMuted ? '#EF4444' : 'var(--theme-text-primary)',
+          borderColor: call.isMuted ? 'var(--danger)' : 'var(--theme-border)',
+          backgroundColor: call.isMuted ? 'color-mix(in srgb, var(--danger) 12%, transparent)' : 'transparent',
+          color: call.isMuted ? 'var(--danger)' : 'var(--theme-text-primary)',
         }}
         title={call.isMuted ? t('unmute') : t('mute')}
         aria-label={call.isMuted ? t('unmute') : t('mute')}

@@ -700,6 +700,7 @@ input[type="range"]::-webkit-slider-thumb {
 /* v2 speaking-rooms: match-entry gradient + BETA badge (theme-var gradients) */
 .v2-match-grad { background: linear-gradient(135deg, var(--accent), var(--violet)); }
 .v2-beta-badge { background: linear-gradient(135deg, var(--warn), var(--streak)); color: #1a1505; }
+.v2-avatar-grad { background: linear-gradient(135deg, var(--der), var(--violet)); }
 
 /* v2 word/entity card hover lift — border turns to the card's article/route
    accent (--card-accent set inline). */

@@ -61,9 +61,9 @@ export function SuggestionsPanel({ suggestions, loading, onFetch, onPick }: Prop
           {!suggestions && !loading && (
             <button
               onClick={onFetch}
-              className="w-full py-2 rounded-lg text-sm font-bold text-white"
-              style={{ backgroundColor: ACCENT.speaking }}
+              className="v2-match-grad flex w-full items-center justify-center gap-2 rounded-lg py-2.5 text-sm font-bold text-white transition-transform hover:-translate-y-0.5"
             >
+              <svg width={15} height={15} viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round"><path d="m6 4 1.2 2.8L10 8l-2.8 1.2L6 12 4.8 9.2 2 8l2.8-1.2L6 4Zm9 7 1 2 2 1-2 1-1 2-1-2-2-1 2-1 1-2Z" /></svg>
               {tr('getAiSuggestions')}
             </button>
           )}
@@ -84,7 +84,7 @@ export function SuggestionsPanel({ suggestions, loading, onFetch, onPick }: Prop
                     className="flex-1 py-1.5 rounded-lg text-xs font-bold"
                     style={
                       tab === tabItem.key
-                        ? { backgroundColor: ACCENT.speaking, color: '#fff' }
+                        ? { backgroundColor: ACCENT.speaking, color: 'white' }
                         : { backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-primary)' }
                     }
                   >

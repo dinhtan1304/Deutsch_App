@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useParams, useRouter } from 'next/navigation';
 import { PageHeader } from '@/components/ui';
-import { ACCENT, GRADIENT } from '@/lib/tokens';
+import { ACCENT } from '@/lib/tokens';
 import { useAuthStore } from '@/stores/authStore';
 import {
   useSpeakingRoom,
@@ -171,7 +171,7 @@ export default function SpeakingRoomDetailPage() {
               <p className="mb-3 text-[10.5px] font-semibold uppercase tracking-widest" style={{ color: 'var(--theme-text-muted)' }}>{t('detail.partnerLabel')}</p>
               <div className="flex items-center gap-3">
                 <div className="relative shrink-0">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-xl text-body font-bold text-white" style={{ background: GRADIENT.speaking }}>
+                  <div className="v2-avatar-grad flex h-11 w-11 items-center justify-center rounded-xl text-body font-bold text-white">
                     {(remoteParticipant.user.name ?? '?').charAt(0).toUpperCase()}
                   </div>
                   <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full" style={{ background: 'var(--success)', border: '2px solid var(--theme-bg-card)' }} />

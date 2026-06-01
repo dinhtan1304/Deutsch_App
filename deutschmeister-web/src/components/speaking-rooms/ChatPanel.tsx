@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useFormatter } from 'next-intl';
 import type { SpeakingMessage } from '@/lib/api/speakingRooms';
 import { ACCENT } from '@/lib/tokens';
 
@@ -14,6 +14,7 @@ interface Props {
 
 export function ChatPanel({ messages, currentUserId, participantById, typingUserIds }: Props) {
   const t = useTranslations('speakingRooms.components');
+  const fmt = useFormatter();
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -55,24 +56,26 @@ export function ChatPanel({ messages, currentUserId, participantById, typingUser
           );
         }
         const sender = participantById.get(m.senderId ?? '');
+        const time = fmt.dateTime(new Date(m.createdAt), { hour: '2-digit', minute: '2-digit' });
         return (
-          <div key={m.id} className={`flex ${isMine ? 'justify-end' : 'justify-start'}`}>
+          <div key={m.id} className={`flex items-end gap-2 ${isMine ? 'justify-end' : 'justify-start'}`}>
+            {!isMine && (
+              <div className="v2-avatar-grad mb-5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-[11px] font-bold text-white">
+                {(sender?.name ?? '?').charAt(0).toUpperCase()}
+              </div>
+            )}
             <div className="max-w-[75%]">
-              {!isMine && (
-                <p className="text-caption mb-0.5 px-2" style={{ color: 'var(--theme-text-muted)' }}>
-                  {sender?.name ?? t('opponent')}
-                </p>
-              )}
               <div
-                className="px-3 py-2 rounded-2xl"
+                className="rounded-2xl px-3 py-2"
                 style={
                   isMine
-                    ? { backgroundColor: ACCENT.speaking, color: '#fff' }
+                    ? { backgroundColor: ACCENT.speaking, color: 'white' }
                     : { backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-primary)' }
                 }
               >
                 <p className="text-sm whitespace-pre-wrap">{m.text}</p>
               </div>
+              <p className="mono mt-1 px-1 text-[10.5px]" style={{ color: 'var(--theme-text-muted)', textAlign: isMine ? 'right' : 'left' }}>{time}</p>
             </div>
           </div>
         );
