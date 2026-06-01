@@ -811,6 +811,13 @@
       "how2Desc": "Hit record and shadow",
       "how3Label": "Compare",
       "how3Desc": "AI scores pronunciation + prosody",
+      "panelTitle": "Start a shadowing session",
+      "tabUrl": "URL",
+      "tabLib": "Library",
+      "tabRandom": "Random",
+      "levelLabel": "Level",
+      "filterLevelLabel": "Level",
+      "filterStatusLabel": "Status",
       "filterStatuses": {
         "DRAFT": "In progress",
         "SUBMITTED": "Done"

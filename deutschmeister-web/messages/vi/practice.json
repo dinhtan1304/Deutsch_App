@@ -811,6 +811,13 @@
       "how2Desc": "Bấm record và lặp lại",
       "how3Label": "Xem so sánh",
       "how3Desc": "AI chấm phát âm + ngữ điệu",
+      "panelTitle": "Bắt đầu phiên shadowing",
+      "tabUrl": "URL",
+      "tabLib": "Thư viện",
+      "tabRandom": "Ngẫu nhiên",
+      "levelLabel": "Level",
+      "filterLevelLabel": "Cấp độ",
+      "filterStatusLabel": "Trạng thái",
       "filterStatuses": {
         "DRAFT": "Đang luyện",
         "SUBMITTED": "Đã hoàn tất"

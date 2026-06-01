@@ -811,6 +811,13 @@
       "how2Desc": "Aufnehmen und wiederholen",
       "how3Label": "Vergleichen",
       "how3Desc": "KI bewertet Aussprache + Sprachmelodie",
+      "panelTitle": "Shadowing-Sitzung starten",
+      "tabUrl": "URL",
+      "tabLib": "Bibliothek",
+      "tabRandom": "Zufällig",
+      "levelLabel": "Level",
+      "filterLevelLabel": "Niveau",
+      "filterStatusLabel": "Status",
       "filterStatuses": {
         "DRAFT": "Läuft",
         "SUBMITTED": "Fertig"
