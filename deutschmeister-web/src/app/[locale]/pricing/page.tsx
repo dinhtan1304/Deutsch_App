@@ -1,9 +1,7 @@
 'use client';
-/* eslint-disable no-restricted-syntax */
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { ACCENT, STATUS } from '@/lib/tokens';
 import { usePlans, useLifetimeRemaining } from '@/hooks/useSubscription';
 import { useAuthStore } from '@/stores/authStore';
 import { UpgradeModal } from '@/components/subscription/UpgradeModal';
@@ -12,18 +10,25 @@ import { IconChevronLeft, IconCheck, IconZap, IconStar, IconMessageCircle, IconU
 import Link from 'next/link';
 import Image from 'next/image';
 
+// Per-tier accent — CSS vars so the palette tracks the v2 theme (free → muted slate).
+const TIER = {
+  free: 'var(--theme-text-muted)',
+  lite: 'var(--success)',
+  pro: 'var(--accent)',
+  exam: 'var(--violet)',
+  lifetime: 'var(--pink)',
+};
+const mix = (c: string, pct: number) => `color-mix(in srgb, ${c} ${pct}%, transparent)`;
+
 // Simple X icon for comparison
 const IconX = ({ size = 16 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.2 }}>
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.25 }}>
     <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
   </svg>
 );
 
-// Feature lists resolved by `useFeatureLists()` from i18n keys (defined inline in PricingPage).
-
 type Val = boolean | string;
 type Row = { featureKey: string; free: Val; lite: Val; premium: Val; lifetime: Val };
-// Comparison rows: values that are strings reference compareRows.* keys; raw booleans pass through.
 const COMPARISON_KEYS: Row[] = [
   { featureKey: 'miniGames', free: true, lite: true, premium: true, lifetime: true },
   { featureKey: 'grammarA1A2', free: true, lite: true, premium: true, lifetime: true },
@@ -49,16 +54,68 @@ function formatVND(n: number) {
 function ReferralRate({ label, pct, amount, highlight = false }: { label: string; pct: number; amount: string; highlight?: boolean }) {
   return (
     <div
-      className="p-3 rounded-2xl text-center transition"
+      className="rounded-[11px] p-3 text-center"
       style={{
-        background: highlight ? 'rgba(99,102,241,0.12)' : 'var(--theme-bg-secondary)',
-        border: `1px solid ${highlight ? 'rgba(99,102,241,0.35)' : 'var(--theme-border)'}`,
+        background: highlight ? mix('var(--accent)', 12) : 'var(--theme-bg-secondary)',
+        border: `1px solid ${highlight ? mix('var(--accent)', 35) : 'var(--theme-border)'}`,
       }}
     >
-      <div className="text-[10px] font-bold uppercase tracking-widest opacity-60">{label}</div>
-      <div className="text-2xl font-black mt-1" style={{ color: ACCENT.brand }}>{pct}%</div>
-      <div className="text-[10px] opacity-60 font-medium mt-0.5">{amount}</div>
+      <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--theme-text-muted)' }}>{label}</div>
+      <div className="mono mt-1 text-2xl font-extrabold" style={{ color: 'var(--accent)' }}>{pct}%</div>
+      <div className="mt-0.5 text-[10px] font-medium" style={{ color: 'var(--theme-text-muted)' }}>{amount}</div>
     </div>
+  );
+}
+
+// One tier card — keeps each card's bespoke price / CTA logic via the children-style props.
+function TierCard({
+  color, name, tagline, popular, popularLabel, metaBadge, price, features, FeatureIcon, cta,
+}: {
+  color: string;
+  name: string;
+  tagline: string;
+  popular?: boolean;
+  popularLabel?: string;
+  metaBadge?: React.ReactNode;
+  price: React.ReactNode;
+  features: string[];
+  FeatureIcon: React.ComponentType<{ size?: number; style?: React.CSSProperties }>;
+  cta: React.ReactNode;
+}) {
+  return (
+    <article
+      className="word-card-v2 relative flex flex-col gap-3.5 rounded-lg border p-5"
+      style={{
+        ...({ '--card-accent': color } as React.CSSProperties),
+        background: popular ? mix(color, 6) : 'var(--theme-bg-card)',
+        borderColor: popular ? color : 'var(--theme-border)',
+        borderWidth: 1.5,
+        boxShadow: popular ? `0 12px 32px ${mix(color, 14)}` : undefined,
+      }}
+    >
+      {popular && popularLabel && (
+        <span className="v2-match-grad absolute -top-2.5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-[8px] px-3.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">
+          ★ {popularLabel}
+        </span>
+      )}
+      <div>
+        <div className="flex items-center gap-2">
+          <span className="text-[11px] font-bold uppercase tracking-wide" style={{ color }}>{name}</span>
+          {metaBadge}
+        </div>
+        <p className="mt-1 text-caption" style={{ color: 'var(--theme-text-secondary)' }}>{tagline}</p>
+      </div>
+      <div>{price}</div>
+      {cta}
+      <ul className="flex flex-col gap-2.5">
+        {features.map((f, i) => (
+          <li key={i} className="flex gap-2 text-caption leading-snug" style={{ color: 'var(--theme-text-secondary)' }}>
+            <span className="mt-px shrink-0" style={{ color }}><FeatureIcon size={13} /></span>
+            {f}
+          </li>
+        ))}
+      </ul>
+    </article>
   );
 }
 
@@ -117,9 +174,7 @@ export default function PricingPage() {
     { key: 'yearly', label: t('period1Year'), savePct: savePctYearly },
   ];
 
-  const freeFeatures = [t('free.f1'), t('free.f2'), t('free.f3'), t('free.f4'), t('free.f5'), t('free.f6'), t('free.f7')];
-  const freeAi = t('free.fAi');
-  const freeRoleplay = t('free.fRoleplay');
+  const freeFeatures = [t('free.f1'), t('free.f2'), t('free.f3'), t('free.f4'), t('free.fAi'), t('free.fRoleplay')];
   const liteExtra = [t('lite.f1'), t('lite.f2'), t('lite.f3'), t('lite.f4'), t('lite.f5')];
   const premiumExtra = [t('premium.f1'), t('premium.f2'), t('premium.f3'), t('premium.f4'), t('premium.f5')];
   const examBundleExtra = [t('examBundle.f1'), t('examBundle.f2'), t('examBundle.f3'), t('examBundle.f4'), t('examBundle.f5')];
@@ -131,44 +186,76 @@ export default function PricingPage() {
     setUpgradeOpen(true);
   };
 
+  const compareCols: { id: keyof Pick<Row, 'free' | 'lite' | 'premium' | 'lifetime'>; label: string; color: string; Icon: React.ComponentType<{ size?: number; style?: React.CSSProperties }> }[] = [
+    { id: 'free', label: t('compareFree'), color: TIER.free, Icon: IconCheck },
+    { id: 'lite', label: t('compareLite'), color: TIER.lite, Icon: IconCheck },
+    { id: 'premium', label: t('comparePremium'), color: TIER.pro, Icon: IconZap },
+    { id: 'lifetime', label: t('compareLifetime'), color: TIER.lifetime, Icon: IconStar },
+  ];
+
+  const softCta = (color: string): React.CSSProperties => ({
+    background: mix(color, 12),
+    color,
+    border: `1px solid ${mix(color, 24)}`,
+  });
+
   return (
-    <div className="min-h-screen py-10 px-4" style={{ backgroundColor: 'var(--theme-bg-body)', color: 'var(--theme-text-primary)', backgroundImage: 'radial-gradient(circle at 50% -20%, var(--color-accent-brand)15, transparent 70%)' }}>
-      <div className="max-w-5xl mx-auto">
-        
-        {/* Header Section */}
-        <div className="text-center mb-12 animate-[slideUp_0.4s_ease-out_both]">
-          <div className="flex flex-col items-center mb-8">
-            <Image src="/logo-48.png" width={48} height={48} alt="Logo" priority className="rounded-2xl shadow-2xl mb-3" />
-            <span className="text-[10px] font-black uppercase tracking-[0.3em] opacity-60">{t('appName')}</span>
+    <div
+      className="min-h-screen px-4 py-10"
+      style={{
+        backgroundColor: 'var(--theme-bg-body)',
+        color: 'var(--theme-text-primary)',
+        backgroundImage: `radial-gradient(circle at 50% -10%, ${mix('var(--accent)', 12)}, transparent 70%)`,
+      }}
+    >
+      <div className="mx-auto max-w-6xl">
+
+        {/* ── Hero ── */}
+        <div className="mb-10 text-center animate-[slideUp_0.4s_ease-out_both]">
+          <div className="mb-7 flex flex-col items-center">
+            <Image src="/logo-48.png" width={44} height={44} alt="Logo" priority className="mb-3 rounded-[14px] shadow-lg" />
+            <span className="text-[10px] font-bold uppercase tracking-[0.3em]" style={{ color: 'var(--theme-text-muted)' }}>{t('appName')}</span>
           </div>
 
-          <h1 className="text-4xl md:text-5xl font-black tracking-tight mb-6 flex flex-col md:flex-row items-center justify-center gap-x-3">
+          <h1 className="mb-4 flex flex-col items-center justify-center gap-x-3 text-4xl font-extrabold tracking-tight md:flex-row md:text-5xl">
             <span style={{ color: 'var(--theme-text-primary)' }}>{t('titleStart')}</span>
-            <span className="text-indigo-500">{t('titleAccent')}</span>
+            <span style={{ color: 'var(--accent)' }}>{t('titleAccent')}</span>
           </h1>
 
-          <p className="text-sm md:text-base opacity-50 max-w-2xl mx-auto font-medium leading-relaxed mb-8">
+          <p className="mx-auto mb-6 max-w-2xl text-body font-medium leading-relaxed" style={{ color: 'var(--theme-text-secondary)' }}>
             {t('subtitle')}
           </p>
 
-          <Link href="/" className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-theme-bg-secondary border border-theme-border text-[10px] font-black uppercase tracking-widest opacity-60 hover:opacity-100 transition-all hover:bg-theme-bg-tertiary">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-1.5 rounded-[9px] border px-4 py-2 text-[10px] font-bold uppercase tracking-widest transition-colors hover:opacity-80"
+            style={{ background: 'var(--theme-bg-secondary)', borderColor: 'var(--theme-border)', color: 'var(--theme-text-muted)' }}
+          >
             <IconChevronLeft size={12} /> {t('backToDashboard')}
           </Link>
         </div>
 
-        {/* Pricing Toggle */}
-        <div className="flex justify-center mb-12 animate-[slideUp_0.5s_ease-out_0.1s_both]">
-          <div className="inline-flex p-1.5 rounded-xl bg-white/5 border border-white/10 backdrop-blur-xl shadow-inner"
-            style={{ backgroundColor: 'var(--theme-bg-secondary)', borderColor: 'var(--theme-border)' }}>
+        {/* ── Billing toggle ── */}
+        <div className="mb-10 flex justify-center animate-[slideUp_0.5s_ease-out_0.1s_both]">
+          <div className="inline-flex rounded-[12px] border p-1" style={{ background: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}>
             {PERIOD_OPTIONS.map(({ key, label, savePct }) => {
-              const isActive = activePeriod === key;
+              const active = activePeriod === key;
               return (
-                <button key={key} onClick={() => setActivePeriod(key)}
-                  className={`relative flex items-center gap-2 px-6 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all duration-300 ${isActive ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/30' : 'text-theme-muted hover:text-theme-text'}`}>
+                <button
+                  key={key}
+                  onClick={() => setActivePeriod(key)}
+                  className="relative flex items-center gap-2 rounded-[8px] px-5 py-2.5 text-[11px] font-bold uppercase tracking-widest transition-all"
+                  style={active
+                    ? { background: 'var(--accent)', color: 'white', boxShadow: `0 4px 12px ${mix('var(--accent)', 40)}` }
+                    : { color: 'var(--theme-text-muted)' }}
+                >
                   {label}
                   {savePct != null && savePct > 0 && (
-                    <span className="px-1.5 py-0.5 rounded-md text-[9px] font-black" style={{ backgroundColor: isActive ? 'rgba(255,255,255,0.2)' : 'rgba(34,197,94,0.1)', color: isActive ? 'white' : STATUS.success }}>
-                      -{savePct}%
+                    <span
+                      className="rounded-[5px] px-1.5 py-0.5 text-[9px] font-bold"
+                      style={active ? { background: 'rgba(255,255,255,.22)', color: 'white' } : { background: mix('var(--success)', 16), color: 'var(--success)' }}
+                    >
+                      −{savePct}%
                     </span>
                   )}
                 </button>
@@ -177,285 +264,236 @@ export default function PricingPage() {
           </div>
         </div>
 
-        {/* Plan Cards — Free / Premium Lite / Premium / Exam Bundle */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5 mb-12 animate-[slideUp_0.6s_ease-out_0.2s_both] items-stretch">
-          {/* Free Plan */}
-          <div className="group relative flex flex-col p-6 rounded-4xl border bg-theme-bg-card transition-all duration-500 hover:-translate-y-1" style={{ borderColor: 'var(--theme-border)' }}>
-            <div className="mb-6">
-              <div className="text-[10px] font-black uppercase tracking-widest opacity-60 mb-2">{t('freeTier')}</div>
-              <div className="text-2xl font-black mb-1">{t('freePrice')}</div>
-              <div className="text-xs opacity-60 font-medium">{t('freeDesc')}</div>
-            </div>
-            <ul className="space-y-3 mb-6 flex-1">
-              {freeFeatures.slice(0, 4).map((f, i) => (
-                <li key={i} className="flex items-start gap-2 text-xs font-medium opacity-70">
-                  <IconCheck size={14} style={{ color: 'var(--theme-text-muted)', marginTop: '2px', flexShrink: 0 }} />
-                  {f}
-                </li>
-              ))}
-              <li className="flex items-start gap-2 text-xs font-medium opacity-70">
-                <IconCheck size={14} style={{ color: 'var(--theme-text-muted)', marginTop: '2px', flexShrink: 0 }} />
-                {freeAi}
-              </li>
-              <li className="flex items-start gap-2 text-xs font-medium opacity-70">
-                <IconCheck size={14} style={{ color: 'var(--theme-text-muted)', marginTop: '2px', flexShrink: 0 }} />
-                {freeRoleplay}
-              </li>
-            </ul>
-            <button disabled={!isAuthenticated || isPremium}
-              className="w-full py-3 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all bg-theme-bg-secondary hover:bg-theme-border opacity-60">
-              {isPremium ? t('alreadyUpgraded') : t('currentPlan')}
-            </button>
-          </div>
-
-          {/* Premium Lite Plan — entry tier */}
-          <div className="group relative flex flex-col p-6 rounded-4xl border bg-theme-bg-card transition-all duration-500 hover:-translate-y-1"
-            style={{ borderColor: 'var(--theme-border)' }}>
-            <div className="mb-6">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="text-[10px] font-black uppercase tracking-widest text-emerald-500">{t('liteTier')}</div>
-                {liteEffectivePeriod === 'lite_quarterly' && savePctLiteQuarterly > 0 && (
-                  <span className="px-1.5 py-0.5 rounded-md bg-emerald-500/10 text-emerald-500 text-[9px] font-black">-{savePctLiteQuarterly}%</span>
-                )}
-              </div>
+        {/* ── Tier cards ── */}
+        <div className="mb-9 grid items-start gap-4 md:grid-cols-2 lg:grid-cols-4 animate-[slideUp_0.6s_ease-out_0.2s_both]">
+          {/* Free */}
+          <TierCard
+            color={TIER.free}
+            name={t('freeTier')}
+            tagline={t('freeDesc')}
+            FeatureIcon={IconCheck}
+            features={freeFeatures}
+            price={
               <div className="flex items-baseline gap-1">
-                <div className="text-3xl font-black text-emerald-500">
-                  {priceReady ? formatVND(liteCurrentPrice) : <span className="opacity-60">—</span>}
-                </div>
-                <div className="text-xs opacity-60 font-medium">{litePeriodLabel}</div>
+                <span className="mono text-[28px] font-bold tracking-tight" style={{ color: 'var(--theme-text-primary)' }}>{t('freePrice')}</span>
               </div>
-              <div className="text-[11px] opacity-60 font-medium mt-1">{t('liteDesc')}</div>
-            </div>
-            <ul className="space-y-3 mb-6 flex-1">
-              {liteExtra.map((f, i) => (
-                <li key={i} className="flex items-start gap-2 text-xs font-bold">
-                  <IconCheck size={14} className="text-emerald-500" style={{ marginTop: '2px', flexShrink: 0 }} />
-                  {f}
-                </li>
-              ))}
-            </ul>
-            {!isAuthenticated ? (
-              <Link href="/auth/login?returnTo=/pricing"
-                className="w-full py-3 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 hover:bg-emerald-500/20 flex items-center justify-center">
+            }
+            cta={
+              <button
+                disabled={!isAuthenticated || isPremium}
+                className="h-10.5 rounded-[10px] text-[11px] font-bold uppercase tracking-widest"
+                style={{ background: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)', border: '1px solid var(--theme-border)' }}
+              >
+                {isPremium ? t('alreadyUpgraded') : t('currentPlan')}
+              </button>
+            }
+          />
+
+          {/* Lite */}
+          <TierCard
+            color={TIER.lite}
+            name={t('liteTier')}
+            tagline={t('liteDesc')}
+            FeatureIcon={IconCheck}
+            features={liteExtra}
+            metaBadge={liteEffectivePeriod === 'lite_quarterly' && savePctLiteQuarterly > 0 ? (
+              <span className="rounded-[5px] px-1.5 py-0.5 text-[9px] font-bold" style={{ background: mix(TIER.lite, 16), color: TIER.lite }}>−{savePctLiteQuarterly}%</span>
+            ) : null}
+            price={
+              <div className="flex items-baseline gap-1">
+                <span className="mono text-[28px] font-bold tracking-tight" style={{ color: TIER.lite }}>{priceReady ? formatVND(liteCurrentPrice) : '—'}</span>
+                <span className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>{litePeriodLabel}</span>
+              </div>
+            }
+            cta={!isAuthenticated ? (
+              <Link href="/auth/login?returnTo=/pricing" className="flex h-10.5 items-center justify-center rounded-[10px] text-[11px] font-bold uppercase tracking-widest" style={softCta(TIER.lite)}>
                 {t('loginToBuy')}
               </Link>
             ) : (
-              <button onClick={() => openUpgrade(liteEffectivePeriod)}
-                className="w-full py-3 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 hover:bg-emerald-500/20 hover:scale-[1.02] active:scale-95">
+              <button onClick={() => openUpgrade(liteEffectivePeriod)} className="h-10.5 rounded-[10px] text-[11px] font-bold uppercase tracking-widest transition-transform active:scale-95" style={softCta(TIER.lite)}>
                 {isPremiumLite ? t('yourPlanLite') : t('startLite')}
               </button>
             )}
-          </div>
+          />
 
-          {/* Premium Full - Featured */}
-          <div className="group relative flex flex-col p-6 rounded-4xl border bg-theme-bg-card transition-all duration-500 hover:-translate-y-2 lg:scale-105 z-10"
-            style={{ borderColor: ACCENT.writing, boxShadow: '0 20px 50px -12px rgba(99,102,241,0.15)' }}>
-            <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full bg-indigo-500 text-white text-[10px] font-black uppercase tracking-widest shadow-lg whitespace-nowrap">
-              {t('mostPopular')}
-            </div>
-            <div className="mb-6">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="text-[10px] font-black uppercase tracking-widest text-indigo-500">{t('professionalTier')}</div>
-                {activePeriod !== 'monthly' && (
-                  <span className="px-1.5 py-0.5 rounded-md bg-indigo-500/10 text-indigo-500 text-[9px] font-black">-{activePeriod === 'quarterly' ? savePctQuarterly : savePctYearly}%</span>
-                )}
-              </div>
-              <div className="flex items-baseline gap-1">
-                <div className="text-3xl font-black text-indigo-500">
-                  {priceReady ? formatVND(currentPrice) : <span className="opacity-60">—</span>}
+          {/* Premium (popular) */}
+          <TierCard
+            color={TIER.pro}
+            name={t('professionalTier')}
+            tagline={t('mostPopular')}
+            popular
+            popularLabel={t('mostPopular')}
+            FeatureIcon={IconZap}
+            features={premiumExtra}
+            metaBadge={activePeriod !== 'monthly' ? (
+              <span className="rounded-[5px] px-1.5 py-0.5 text-[9px] font-bold" style={{ background: mix(TIER.pro, 14), color: TIER.pro }}>−{activePeriod === 'quarterly' ? savePctQuarterly : savePctYearly}%</span>
+            ) : null}
+            price={
+              <>
+                <div className="flex items-baseline gap-1">
+                  <span className="mono text-[28px] font-bold tracking-tight" style={{ color: TIER.pro }}>{priceReady ? formatVND(currentPrice) : '—'}</span>
+                  <span className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>{periodLabel}</span>
                 </div>
-                <div className="text-xs opacity-60 font-medium">{periodLabel}</div>
-              </div>
-              {priceReady && perMonthPrice ? <div className="text-[11px] opacity-60 font-medium mt-1">{t('onlyPerMonth', { price: formatVND(perMonthPrice) })}</div> : null}
-            </div>
-            <ul className="space-y-3 mb-6 flex-1">
-              {premiumExtra.map((f, i) => (
-                <li key={i} className="flex items-start gap-2 text-xs font-bold">
-                  <IconZap size={14} className="text-indigo-500" style={{ marginTop: '2px', flexShrink: 0 }} />
-                  {f}
-                </li>
-              ))}
-            </ul>
-            {!isAuthenticated ? (
-              <Link href="/auth/login?returnTo=/pricing"
-                className="w-full py-3 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all text-white shadow-xl shadow-indigo-500/20 hover:scale-[1.02] active:scale-95 flex items-center justify-center"
-                style={{ background: 'linear-gradient(135deg, #6366F1, #4F46E5)' }}>
+                {priceReady && perMonthPrice ? <div className="mt-1 text-[11px]" style={{ color: 'var(--theme-text-muted)' }}>{t('onlyPerMonth', { price: formatVND(perMonthPrice) })}</div> : null}
+              </>
+            }
+            cta={!isAuthenticated ? (
+              <Link href="/auth/login?returnTo=/pricing" className="v2-match-grad flex h-10.5 items-center justify-center rounded-[10px] text-[11px] font-bold uppercase tracking-widest text-white" style={{ boxShadow: `0 4px 14px ${mix(TIER.pro, 55)}` }}>
                 {t('loginToBuy')}
               </Link>
             ) : (
-              <button onClick={() => openUpgrade(activePeriod)}
-                className="w-full py-3 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all text-white shadow-xl shadow-indigo-500/20 hover:scale-[1.02] active:scale-95"
-                style={{ background: 'linear-gradient(135deg, #6366F1, #4F46E5)' }}>
+              <button onClick={() => openUpgrade(activePeriod)} className="v2-match-grad h-10.5 rounded-[10px] text-[11px] font-bold uppercase tracking-widest text-white transition-transform active:scale-95" style={{ boxShadow: `0 4px 14px ${mix(TIER.pro, 55)}` }}>
                 {userPlan === 'premium' ? t('yourPlanPremium') : t('upgradeNow')}
               </button>
             )}
-          </div>
+          />
 
-          {/* Exam Bundle — one-time 90-day */}
-          <div className="group relative flex flex-col p-6 rounded-4xl border bg-theme-bg-card transition-all duration-500 hover:-translate-y-1"
-            style={{ borderColor: '#A855F744' }}>
-            <div className="mb-6">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="text-[10px] font-black uppercase tracking-widest text-purple-500">{t('examBundleTier')}</div>
-                <span className="px-1.5 py-0.5 rounded-md bg-purple-500/10 text-purple-500 text-[9px] font-black">{t('examBundleBadge')}</span>
-              </div>
+          {/* Exam bundle */}
+          <TierCard
+            color={TIER.exam}
+            name={t('examBundleTier')}
+            tagline={t('examBundleDesc')}
+            FeatureIcon={IconStar}
+            features={examBundleExtra}
+            metaBadge={<span className="mono rounded-[5px] px-1.5 py-0.5 text-[9px] font-bold" style={{ background: mix(TIER.exam, 14), color: TIER.exam }}>{t('examBundleBadge')}</span>}
+            price={
               <div className="flex items-baseline gap-1">
-                <div className="text-3xl font-black text-purple-500">
-                  {priceReady ? formatVND(examBundlePrice) : <span className="opacity-60">—</span>}
-                </div>
+                <span className="mono text-[28px] font-bold tracking-tight" style={{ color: TIER.exam }}>{priceReady ? formatVND(examBundlePrice) : '—'}</span>
               </div>
-              <div className="text-[11px] opacity-60 font-medium mt-1">{t('examBundleDesc')}</div>
-            </div>
-            <ul className="space-y-3 mb-6 flex-1">
-              {examBundleExtra.map((f, i) => (
-                <li key={i} className="flex items-start gap-2 text-xs font-bold">
-                  <IconStar size={14} className="text-purple-500" style={{ marginTop: '2px', flexShrink: 0 }} />
-                  {f}
-                </li>
-              ))}
-            </ul>
-            {!isAuthenticated ? (
-              <Link href="/auth/login?returnTo=/pricing"
-                className="w-full py-3 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all bg-purple-500/10 text-purple-600 border border-purple-500/20 hover:bg-purple-500/20 flex items-center justify-center">
+            }
+            cta={!isAuthenticated ? (
+              <Link href="/auth/login?returnTo=/pricing" className="flex h-10.5 items-center justify-center rounded-[10px] text-[11px] font-bold uppercase tracking-widest" style={softCta(TIER.exam)}>
                 {t('loginToBuy')}
               </Link>
             ) : (
-              <button onClick={() => openUpgrade('exam_bundle')}
-                className="w-full py-3 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all bg-purple-500/10 text-purple-600 border border-purple-500/20 hover:bg-purple-500/20 hover:scale-[1.02] active:scale-95">
+              <button onClick={() => openUpgrade('exam_bundle')} className="h-10.5 rounded-[10px] text-[11px] font-bold uppercase tracking-widest transition-transform active:scale-95" style={softCta(TIER.exam)}>
                 {isExamBundle ? t('usingBundle') : t('buyExamBundle')}
               </button>
             )}
-          </div>
+          />
         </div>
 
-        {/* Lifetime — banner section below the main cards */}
-        <div className="mb-20 animate-[slideUp_0.6s_ease-out_0.25s_both]">
-          <div className="rounded-4xl border p-6 md:p-8 bg-theme-bg-card flex flex-col md:flex-row items-start md:items-center gap-6"
-            style={{ borderColor: '#EC489933' }}>
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="text-[11px] font-black uppercase tracking-widest text-pink-500">{t('lifetimeTier')}</div>
+        {/* ── Lifetime banner ── */}
+        <div className="mb-16 animate-[slideUp_0.6s_ease-out_0.25s_both]">
+          <section
+            className="v2-lifetime-hero relative flex flex-col items-start gap-6 overflow-hidden rounded-[18px] border p-6 md:flex-row md:items-center md:p-7"
+            style={{ borderColor: mix(TIER.lifetime, 35) }}
+          >
+            <div className="pointer-events-none absolute -top-20 right-20 h-64 w-64 rounded-full" style={{ background: mix(TIER.lifetime, 12), filter: 'blur(50px)' }} />
+            <div className="v2-pinkviolet-grad relative z-10 flex h-15 w-15 shrink-0 items-center justify-center rounded-[16px] text-3xl" style={{ boxShadow: `0 8px 24px ${mix(TIER.lifetime, 40)}` }}>👑</div>
+            <div className="relative z-10 flex-1">
+              <div className="mb-1 flex items-center gap-2.5">
+                <span className="text-[11px] font-bold uppercase tracking-wide" style={{ color: TIER.lifetime }}>{t('lifetimeTier')}</span>
                 {lifetimeInfo && !lifetimeSoldOut && (
-                  <span className="px-2 py-0.5 rounded-md bg-pink-500/10 text-pink-500 text-[9px] font-black">{t('lifetimeRemaining', { count: lifetimeInfo.remaining })}</span>
+                  <span className="rounded-[5px] px-2 py-0.5 text-[9.5px] font-bold uppercase tracking-wide" style={{ background: mix(TIER.lifetime, 18), color: TIER.lifetime }}>{t('lifetimeRemaining', { count: lifetimeInfo.remaining })}</span>
                 )}
               </div>
-              <div className="flex items-baseline gap-3 mb-2">
-                <div className="text-3xl md:text-4xl font-black text-pink-500">
-                  {priceReady ? formatVND(lifetimePrice) : <span className="opacity-60">—</span>}
-                </div>
-                <div className="text-sm opacity-60 font-medium">{t('lifetimeForever')}</div>
+              <div className="mb-2.5 flex items-baseline gap-2.5">
+                <span className="mono text-[30px] font-bold tracking-tight" style={{ color: TIER.lifetime }}>{priceReady ? formatVND(lifetimePrice) : '—'}</span>
+                <span className="text-caption" style={{ color: 'var(--theme-text-secondary)' }}>{t('lifetimeForever')}</span>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-3">
+              <div className="grid max-w-xl grid-cols-1 gap-x-6 gap-y-1 sm:grid-cols-2">
                 {lifetimeExtra.map((f, i) => (
-                  <div key={i} className="flex items-start gap-2 text-xs font-medium text-pink-500/80">
-                    <IconStar size={14} className="text-pink-500" style={{ marginTop: '2px', flexShrink: 0 }} />
+                  <span key={i} className="flex items-start gap-1.5 text-caption" style={{ color: 'var(--theme-text-secondary)' }}>
+                    <IconStar size={12} style={{ color: TIER.lifetime, marginTop: 2, flexShrink: 0 }} />
                     {f}
-                  </div>
+                  </span>
                 ))}
               </div>
             </div>
-            <div className="w-full md:w-auto md:min-w-50">
+            <div className="relative z-10 w-full md:w-auto md:min-w-50">
               {!isAuthenticated ? (
-                <Link href="/auth/login?returnTo=/pricing"
-                  className="w-full block py-3 px-6 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all bg-pink-500/10 text-pink-500 border border-pink-500/20 hover:bg-pink-500/20 text-center">
+                <Link href="/auth/login?returnTo=/pricing" className="block rounded-[12px] px-6 py-3 text-center text-[11px] font-bold uppercase tracking-widest" style={softCta(TIER.lifetime)}>
                   {t('loginToBuy')}
                 </Link>
+              ) : lifetimeSoldOut ? (
+                <button disabled className="w-full cursor-not-allowed rounded-[12px] px-6 py-3 text-[11px] font-bold uppercase tracking-widest" style={{ background: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }}>
+                  {t('lifetimeSoldOut')}
+                </button>
+              ) : isLifetime ? (
+                <button disabled className="flex w-full items-center justify-center gap-1.5 rounded-[12px] px-6 py-3 text-[11px] font-bold uppercase tracking-widest" style={softCta(TIER.lifetime)}>
+                  <IconCheck size={15} /> {t('lifetimeActive')}
+                </button>
               ) : (
-                <button onClick={() => openUpgrade('lifetime')} disabled={lifetimeSoldOut}
-                  className={`w-full py-3 px-6 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all ${lifetimeSoldOut ? 'bg-theme-bg-secondary opacity-60 cursor-not-allowed' : 'bg-pink-500/10 text-pink-500 border border-pink-500/20 hover:bg-pink-500/20 hover:scale-[1.02]'}`}>
-                  {isLifetime ? t('lifetimeActive') : lifetimeSoldOut ? t('lifetimeSoldOut') : t('buyLifetime')}
+                <button onClick={() => openUpgrade('lifetime')} className="v2-pinkviolet-grad w-full rounded-[12px] px-6 py-3 text-[11px] font-bold uppercase tracking-widest text-white transition-transform active:scale-95" style={{ boxShadow: `0 8px 24px ${mix(TIER.lifetime, 40)}` }}>
+                  {t('buyLifetime')}
                 </button>
               )}
             </div>
-          </div>
+          </section>
         </div>
 
-        {/* Referral Program Banner */}
-        <div className="mb-20 animate-[slideUp_0.6s_ease-out_0.28s_both]">
-          <div className="rounded-4xl border p-6 md:p-8 bg-theme-bg-card relative overflow-hidden"
-            style={{ borderColor: '#6366F133' }}>
-            <div className="absolute -top-20 -right-20 w-60 h-60 rounded-full opacity-30 blur-3xl"
-              style={{ background: 'radial-gradient(circle, #6366F1, transparent 70%)' }} />
-            <div className="relative flex flex-col md:flex-row items-start md:items-center gap-6">
+        {/* ── Referral banner ── */}
+        <div className="mb-16 animate-[slideUp_0.6s_ease-out_0.28s_both]">
+          <section className="relative overflow-hidden rounded-[18px] border p-6 md:p-7" style={{ background: 'var(--theme-bg-card)', borderColor: mix('var(--accent)', 25) }}>
+            <div className="pointer-events-none absolute -right-20 -top-20 h-60 w-60 rounded-full" style={{ background: mix('var(--accent)', 16), filter: 'blur(60px)' }} />
+            <div className="relative flex flex-col items-start gap-6 md:flex-row md:items-center">
               <div className="flex-1">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-9 h-9 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-500">
+                <div className="mb-2 flex items-center gap-2">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-[10px]" style={{ background: mix('var(--accent)', 12), color: 'var(--accent)' }}>
                     <IconUser size={18} />
-                  </div>
-                  <div className="text-[11px] font-black uppercase tracking-widest text-indigo-500">
-                    {t('refKicker')}
-                  </div>
+                  </span>
+                  <span className="text-[11px] font-bold uppercase tracking-widest" style={{ color: 'var(--accent)' }}>{t('refKicker')}</span>
                 </div>
-                <h2 className="text-xl md:text-2xl font-black mb-2" style={{ color: 'var(--theme-text-primary)' }}>
-                  {t('refHeading')}
-                </h2>
-                <p className="text-xs md:text-sm opacity-60 font-medium leading-relaxed mb-4 max-w-2xl">
-                  {t('refBody')}
-                </p>
+                <h2 className="mb-2 text-h2 font-extrabold" style={{ color: 'var(--theme-text-primary)' }}>{t('refHeading')}</h2>
+                <p className="mb-4 max-w-2xl text-caption font-medium leading-relaxed" style={{ color: 'var(--theme-text-secondary)' }}>{t('refBody')}</p>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+                <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
                   <ReferralRate label={t('refRate3m')} pct={5} amount={t('refRateAmount3m')} />
                   <ReferralRate label={t('refRate1y')} pct={10} amount={t('refRateAmount1y')} />
                   <ReferralRate label={t('refRateLifetime')} pct={15} amount={t('refRateAmountLifetime')} highlight />
                 </div>
 
-                <div className="text-[11px] opacity-50 font-medium">
-                  {t('refDisclaimer')}
-                </div>
+                <div className="text-[11px] font-medium" style={{ color: 'var(--theme-text-muted)' }}>{t('refDisclaimer')}</div>
               </div>
 
               <div className="w-full md:w-auto md:min-w-50">
-                {!isAuthenticated ? (
-                  <Link href="/auth/register"
-                    className="w-full block py-3 px-6 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all text-white text-center shadow-xl shadow-indigo-500/20 hover:scale-[1.02]"
-                    style={{ background: 'linear-gradient(135deg, #6366F1, #4F46E5)' }}>
-                    {t('refCtaRegister')}
-                  </Link>
-                ) : (
-                  <Link href="/referral"
-                    className="w-full block py-3 px-6 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all text-white text-center shadow-xl shadow-indigo-500/20 hover:scale-[1.02]"
-                    style={{ background: 'linear-gradient(135deg, #6366F1, #4F46E5)' }}>
-                    {t('refCtaGetCode')}
-                  </Link>
-                )}
+                <Link
+                  href={isAuthenticated ? '/referral' : '/auth/register'}
+                  className="v2-match-grad block rounded-[12px] px-6 py-3 text-center text-[11px] font-bold uppercase tracking-widest text-white transition-transform active:scale-95"
+                  style={{ boxShadow: `0 4px 14px ${mix('var(--accent)', 40)}` }}
+                >
+                  {isAuthenticated ? t('refCtaGetCode') : t('refCtaRegister')}
+                </Link>
               </div>
             </div>
-          </div>
+          </section>
         </div>
 
-        {/* Comparison Table Section */}
-        <div className="mb-24 animate-[slideUp_0.6s_ease-out_0.3s_both]">
-          <div className="text-center mb-10">
-            <h2 className="text-2xl font-black mb-2">{t('compareTitle')}</h2>
-            <p className="text-xs opacity-60 font-medium uppercase tracking-widest">{t('compareSubtitle')}</p>
+        {/* ── Comparison table ── */}
+        <div className="mb-16 animate-[slideUp_0.6s_ease-out_0.3s_both]">
+          <div className="mb-7 text-center">
+            <h2 className="mb-1.5 text-h2 font-extrabold tracking-tight" style={{ color: 'var(--theme-text-primary)' }}>{t('compareTitle')}</h2>
+            <p className="text-caption" style={{ color: 'var(--theme-text-secondary)' }}>{t('compareSubtitle')}</p>
           </div>
-          <div className="rounded-4xl border overflow-x-auto backdrop-blur-xl bg-theme-bg-card/50" style={{ borderColor: 'var(--theme-border)' }}>
-            <table className="w-full min-w-180">
+          <div className="overflow-x-auto rounded-[14px] border" style={{ borderColor: 'var(--theme-border)' }}>
+            <table className="w-full min-w-180 border-collapse text-caption">
               <thead>
-                <tr className="bg-theme-bg-secondary/50">
-                  <th className="text-left py-5 px-6 text-[11px] font-black uppercase tracking-widest opacity-60">{t('compareFeature')}</th>
-                  <th className="text-center py-5 px-3 text-[11px] font-black uppercase tracking-widest opacity-60 w-24">{t('compareFree')}</th>
-                  <th className="text-center py-5 px-3 text-[11px] font-black uppercase tracking-widest text-emerald-500 w-24">{t('compareLite')}</th>
-                  <th className="text-center py-5 px-3 text-[11px] font-black uppercase tracking-widest text-indigo-500 w-24">{t('comparePremium')}</th>
-                  <th className="text-center py-5 px-3 text-[11px] font-black uppercase tracking-widest text-pink-500 w-24">{t('compareLifetime')}</th>
+                <tr style={{ background: 'var(--theme-bg-card)' }}>
+                  <th className="px-5 py-3.5 text-left text-[11px] font-bold uppercase tracking-widest" style={{ color: 'var(--theme-text-muted)' }}>{t('compareFeature')}</th>
+                  {compareCols.map((c) => (
+                    <th key={c.id} className="w-28 px-3 py-3.5 text-center text-[11px] font-bold uppercase tracking-wide" style={{ color: c.color }}>{c.label}</th>
+                  ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/3">
-                {COMPARISON_KEYS.map((row) => (
-                  <tr key={row.featureKey} className="hover:bg-white/1 transition-colors">
-                    <td className="py-3 px-6 text-xs font-bold opacity-80">{tc(row.featureKey as CompareKey)}</td>
-                    <td className="text-center py-3 px-3">
-                      {row.free === true ? <div className="flex justify-center"><IconCheck size={14} className="opacity-60" /></div> : row.free === false ? <div className="flex justify-center"><IconX size={14} /></div> : <span className="text-[10px] font-black opacity-60">{cellKey(row.free)}</span>}
-                    </td>
-                    <td className="text-center py-3 px-3">
-                      {row.lite === true ? <div className="flex justify-center"><IconCheck size={14} className="text-emerald-500" /></div> : row.lite === false ? <div className="flex justify-center"><IconX size={14} /></div> : <span className="text-[10px] font-black text-emerald-500">{cellKey(row.lite)}</span>}
-                    </td>
-                    <td className="text-center py-3 px-3">
-                      {row.premium === true ? <div className="flex justify-center"><IconZap size={14} className="text-indigo-500" /></div> : row.premium === false ? <div className="flex justify-center"><IconX size={14} /></div> : <span className="text-[10px] font-black text-indigo-500">{cellKey(row.premium)}</span>}
-                    </td>
-                    <td className="text-center py-3 px-3">
-                      {row.lifetime === true ? <div className="flex justify-center"><IconStar size={14} className="text-pink-500" /></div> : row.lifetime === false ? <div className="flex justify-center"><IconX size={14} /></div> : <span className="text-[10px] font-black text-pink-500">{cellKey(row.lifetime)}</span>}
-                    </td>
+              <tbody>
+                {COMPARISON_KEYS.map((row, ri) => (
+                  <tr key={row.featureKey} style={{ background: ri % 2 === 0 ? 'var(--theme-bg-card)' : 'var(--theme-bg-secondary)', borderTop: '1px solid var(--theme-border)' }}>
+                    <td className="px-5 py-3 font-semibold" style={{ color: 'var(--theme-text-primary)' }}>{tc(row.featureKey as CompareKey)}</td>
+                    {compareCols.map((c) => {
+                      const v = row[c.id];
+                      return (
+                        <td key={c.id} className="px-3 py-3 text-center">
+                          {v === true ? (
+                            <span className="inline-flex justify-center" style={{ color: c.color }}><c.Icon size={15} /></span>
+                          ) : v === false ? (
+                            <span className="inline-flex justify-center" style={{ color: 'var(--theme-text-muted)' }}><IconX size={14} /></span>
+                          ) : (
+                            <span className="mono text-[11px] font-bold" style={{ color: c.color }}>{cellKey(v)}</span>
+                          )}
+                        </td>
+                      );
+                    })}
                   </tr>
                 ))}
               </tbody>
@@ -463,33 +501,31 @@ export default function PricingPage() {
           </div>
         </div>
 
-        {/* FAQ Section */}
-        <div className="max-w-3xl mx-auto mb-16 animate-[slideUp_0.6s_ease-out_0.4s_both]">
-          <div className="flex items-center gap-3 mb-10 justify-center">
-             <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-500">
-               <IconMessageCircle size={20} />
-             </div>
-             <h2 className="text-2xl font-black">{t('faqTitle')}</h2>
+        {/* ── FAQ ── */}
+        <div className="mx-auto mb-14 max-w-3xl animate-[slideUp_0.6s_ease-out_0.4s_both]">
+          <div className="mb-7 flex items-center justify-center gap-3">
+            <span className="flex h-10 w-10 items-center justify-center rounded-[11px]" style={{ background: mix('var(--accent)', 12), color: 'var(--accent)' }}>
+              <IconMessageCircle size={20} />
+            </span>
+            <h2 className="text-h2 font-extrabold" style={{ color: 'var(--theme-text-primary)' }}>{t('faqTitle')}</h2>
           </div>
-          <div className="grid gap-4">
+          <div className="grid gap-3">
             {faqEntries.map(({ q, a }) => (
-              <details key={q} className="group rounded-4xl border border-theme-border bg-theme-bg-card p-6 transition-all hover:bg-white/2">
-                <summary className="text-sm font-bold cursor-pointer list-none flex items-center justify-between opacity-80 group-open:opacity-100 group-open:mb-4">
+              <details key={q} className="group rounded-[14px] border p-5" style={{ background: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}>
+                <summary className="flex cursor-pointer list-none items-center justify-between text-body font-bold group-open:mb-3" style={{ color: 'var(--theme-text-primary)' }}>
                   {q}
-                  <div className="w-6 h-6 rounded-lg bg-theme-bg-secondary flex items-center justify-center transition-transform group-open:rotate-180">
+                  <span className="flex h-6 w-6 items-center justify-center rounded-[8px] transition-transform group-open:rotate-180" style={{ background: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }}>
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><path d="m6 9 6 6 6-6" /></svg>
-                  </div>
+                  </span>
                 </summary>
-                <div className="text-[13px] leading-relaxed opacity-50 font-medium">
-                  {a}
-                </div>
+                <div className="text-[13px] leading-relaxed" style={{ color: 'var(--theme-text-secondary)' }}>{a}</div>
               </details>
             ))}
           </div>
         </div>
 
-        {/* Footer Info */}
-        <div className="text-center py-10 opacity-60 text-[10px] font-black uppercase tracking-[0.2em]">
+        {/* ── Footer ── */}
+        <div className="py-8 text-center text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: 'var(--theme-text-muted)' }}>
           {t('footer')}
         </div>
       </div>

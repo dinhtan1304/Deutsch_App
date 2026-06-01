@@ -705,6 +705,10 @@ input[type="range"]::-webkit-slider-thumb {
 /* v2 study-plan: today-task hero tint (accent → violet, theme-var gradient) */
 .v2-plan-hero { background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 13%, transparent), color-mix(in srgb, var(--violet) 6%, transparent)); }
 
+/* v2 upgrade/pricing: lifetime banner tint + crown / CTA gradient (pink → violet) */
+.v2-lifetime-hero { background: linear-gradient(135deg, color-mix(in srgb, var(--pink) 14%, transparent), color-mix(in srgb, var(--violet) 8%, transparent)); }
+.v2-pinkviolet-grad { background: linear-gradient(135deg, var(--pink), var(--violet)); }
+
 /* v2 word/entity card hover lift — border turns to the card's article/route
    accent (--card-accent set inline). */
 .word-card-v2 { transition: border-color .2s, transform .2s, box-shadow .2s; }
