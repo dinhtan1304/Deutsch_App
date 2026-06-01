@@ -119,11 +119,11 @@ function QuestCard({
           <span className="text-[11px]" style={{ color: 'var(--theme-text-muted)' }}>XP</span>
         </span>
         {completed ? (
-          <span className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-[11.5px] font-bold" style={{ background: 'color-mix(in srgb, var(--success) 14%, transparent)', color: 'var(--success)' }}>
+          <span className="inline-flex items-center gap-1 rounded-[8px] px-2.5 py-1 text-[11.5px] font-bold" style={{ background: 'color-mix(in srgb, var(--success) 14%, transparent)', color: 'var(--success)' }}>
             <IconCheck size={12} /> {t('claimReward')}
           </span>
         ) : href ? (
-          <span className="inline-flex h-8 items-center gap-1.5 rounded-lg px-3.5 text-[12.5px] font-semibold text-white" style={{ background: color }}>
+          <span className="inline-flex h-8 items-center gap-1.5 rounded-[9px] px-3.5 text-[12.5px] font-semibold text-white" style={{ background: color }}>
             {t('doNow')} <IconArrowRight size={12} />
           </span>
         ) : null}

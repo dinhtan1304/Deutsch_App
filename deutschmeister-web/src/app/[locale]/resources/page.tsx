@@ -87,7 +87,7 @@ export default function ResourcesPage() {
       right={(
         <Link
           href="/dashboard"
-          className="inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-caption font-bold transition-colors hover:bg-theme-secondary"
+          className="inline-flex items-center gap-2 rounded-[9px] border px-3 py-2 text-caption font-bold transition-colors hover:bg-theme-secondary"
           style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)' }}
         >
           <IconChevronLeft size={14} />
@@ -117,7 +117,7 @@ export default function ResourcesPage() {
                       setSkillFilter('all');
                       setQuery('');
                     }}
-                    className="w-fit rounded-lg px-3 py-2 text-caption font-bold transition-colors hover:bg-theme-secondary"
+                    className="w-fit rounded-[9px] px-3 py-2 text-caption font-bold transition-colors hover:bg-theme-secondary"
                     style={{ color: 'var(--theme-text-secondary)' }}
                   >
                     {t('clear')}
@@ -169,7 +169,7 @@ export default function ResourcesPage() {
             <div className="flex h-full flex-col justify-between gap-5">
               <div className="flex items-start gap-3">
                 <div
-                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
+                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[9px]"
                   style={{ background: 'rgba(245,158,11,0.14)', color: ACCENT.xp }}
                   aria-hidden
                 >
@@ -211,7 +211,7 @@ export default function ResourcesPage() {
         {filtered.length === 0 ? (
           <SurfaceCard className="py-12 text-center">
             <div
-              className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl"
+              className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-[9px]"
               style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }}
             >
               <IconSearch size={24} />
@@ -265,7 +265,7 @@ function FilterGroup<T extends string>({
               key={option}
               type="button"
               onClick={() => onChange(option)}
-              className="rounded-lg border px-3 py-2 text-caption font-extrabold transition-all"
+              className="rounded-[7px] border px-3 py-2 text-caption font-extrabold transition-all"
               style={{
                 backgroundColor: active ? color : 'transparent',
                 borderColor: active ? color : 'var(--theme-border)',
@@ -297,7 +297,7 @@ function ResourceCard({ resource }: { resource: AuthenticResource }) {
         <div className="flex items-start justify-between gap-3">
           <div className="flex min-w-0 items-start gap-3">
             <div
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-white"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[9px] text-white"
               style={{ background: `linear-gradient(135deg, ${color}, ${color}cc)` }}
               aria-hidden
             >
@@ -305,7 +305,7 @@ function ResourceCard({ resource }: { resource: AuthenticResource }) {
             </div>
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="rounded-md px-2 py-0.5 text-caption font-black text-white" style={{ backgroundColor: color }}>
+                <span className="rounded-sm px-2 py-0.5 text-caption font-black text-white" style={{ backgroundColor: color }}>
                   {resource.level}
                 </span>
                 <span className="text-caption font-bold uppercase" style={{ color: 'var(--theme-text-muted)' }}>
@@ -338,7 +338,7 @@ function ResourceCard({ resource }: { resource: AuthenticResource }) {
 
         <div className="flex items-center justify-between gap-3 border-t pt-3" style={{ borderColor: 'var(--theme-border)' }}>
           <span
-            className="rounded-md px-2.5 py-1 text-caption font-bold"
+            className="rounded-sm px-2.5 py-1 text-caption font-bold"
             style={{
               backgroundColor: resource.free ? `${ACCENT.reading}14` : `${ACCENT.xp}16`,
               color: resource.free ? ACCENT.reading : ACCENT.xp,
@@ -371,7 +371,7 @@ function Stat({ label, value }: { label: string; value: string }) {
 function ActiveChip({ label, color }: { label: string; color: string }) {
   return (
     <span
-      className="rounded-lg px-2.5 py-1 text-caption font-bold"
+      className="rounded-[7px] px-2.5 py-1 text-caption font-bold"
       style={{ backgroundColor: `${color}16`, color }}
     >
       {label}
