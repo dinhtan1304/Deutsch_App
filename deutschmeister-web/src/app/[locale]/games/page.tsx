@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useState, useMemo } from 'react';
-import { useTranslations, useFormatter } from 'next-intl';
+import { useTranslations, useFormatter, useNow } from 'next-intl';
 import { ACCENT, type AccentKey } from '@/lib/tokens';
 import type { GameType } from '@/types';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
@@ -133,6 +133,7 @@ function GameCard({ game, stat, onPlay }: { game: GameDef; stat?: GameStat; onPl
   const t = useTranslations('games');
   const tHub = useTranslations('games.hub');
   const fmt = useFormatter();
+  const now = useNow();
   const Icon = game.icon;
   const plays = stat?.plays ?? 0;
   const hasScore = !!stat && plays > 0;
@@ -178,7 +179,7 @@ function GameCard({ game, stat, onPlay }: { game: GameDef; stat?: GameStat; onPl
               <div className="text-[10px] font-semibold uppercase" style={{ color: 'var(--theme-text-muted)', letterSpacing: '.04em' }}>{tHub('bestLabel')}</div>
               <div className="flex items-baseline gap-1">
                 <span className="mono text-body font-bold" style={{ color: bestColor }}>{stat.best}%</span>
-                <span className="truncate text-[10.5px]" style={{ color: 'var(--theme-text-muted)' }}>· {fmt.relativeTime(new Date(stat.last))}</span>
+                <span className="truncate text-[10.5px]" style={{ color: 'var(--theme-text-muted)' }}>· {fmt.relativeTime(new Date(stat.last), now)}</span>
               </div>
             </div>
           ) : (
