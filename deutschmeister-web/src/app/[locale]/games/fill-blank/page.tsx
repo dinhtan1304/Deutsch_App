@@ -243,10 +243,10 @@ export default function FillBlankPage() {
               // eslint-disable-next-line no-restricted-syntax
               ? (isCorrect ? 'linear-gradient(135deg, #052e16 0%, #166534 100%)' : 'linear-gradient(135deg, #450a0a 0%, #991b1b 100%)')
               // eslint-disable-next-line no-restricted-syntax
-              : 'linear-gradient(135deg, #1a1040 0%, #5b21b6 100%)',
+              : 'linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)',
           }}>
-          <div className="flex flex-col items-center justify-center px-6 py-6 text-center" style={{ minHeight: 150 }}>
-            <div className="text-2xl md:text-3xl font-extrabold mb-3 text-white">
+          <div className="flex flex-col items-center justify-center px-6 py-8 text-center" style={{ minHeight: 170 }}>
+            <div className="text-3xl md:text-4xl font-extrabold mb-3 text-white">
               <span className="inline-block min-w-16 border-b-2 mx-1.5 pb-0.5 transition-colors duration-300"
                 // eslint-disable-next-line no-restricted-syntax
                 style={{ borderColor: answered ? 'rgba(255,255,255,.3)' : '#A78BFA', color: 'white' }}>
@@ -260,8 +260,8 @@ export default function FillBlankPage() {
             )}
             {!answered && (
               <button onClick={() => setShowHint(true)}
-                className="mt-4 text-xs font-semibold flex items-center gap-1 mx-auto transition-opacity hover:opacity-80"
-                style={{ color: 'rgba(255,255,255,0.5)' }}>
+                className="mt-3 inline-flex items-center gap-1.5 rounded-[7px] px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-white/20"
+                style={{ background: 'rgba(255,255,255,0.14)' }}>
                 <IconLightbulb size={13} />
                 {showHint ? (currentWord.gender && GenderInfo[currentWord.gender] ? GenderInfo[currentWord.gender].label : t('fillBlank.hintFallback')) : t('fillBlank.hintToggle')}
               </button>
@@ -289,15 +289,16 @@ export default function FillBlankPage() {
           <div className="grid grid-cols-3 gap-2.5">
             {/* eslint-disable no-restricted-syntax */}
             {([
-              { article: 'der', bg: 'linear-gradient(160deg, #0a1628, #1e3a8a)', border: `${ACCENT.srs}73`,       color: '#93C5FD' },
-              { article: 'die', bg: 'linear-gradient(160deg, #2a0a1e, #9d174d)', border: `${ACCENT.listening}73`, color: '#F9A8D4' },
-              { article: 'das', bg: 'linear-gradient(160deg, #0a2218, #065f46)', border: `${ACCENT.teal}73`,      color: '#5EEAD4' },
+              { article: 'der', label: 'Maskulin', bg: 'linear-gradient(160deg, #0a1628, #1e3a8a)', border: `${ACCENT.srs}73`,       color: '#93C5FD' },
+              { article: 'die', label: 'Feminin',  bg: 'linear-gradient(160deg, #2a0a1e, #9d174d)', border: `${ACCENT.listening}73`, color: '#F9A8D4' },
+              { article: 'das', label: 'Neutrum',  bg: 'linear-gradient(160deg, #0a2218, #065f46)', border: `${ACCENT.teal}73`,      color: '#5EEAD4' },
             ]).map(btn => (
             /* eslint-enable no-restricted-syntax */
               <button key={btn.article} onClick={() => handleQuickAnswer(btn.article)}
-                className="py-5 rounded-2xl font-extrabold text-2xl transition-all duration-200 hover:-translate-y-1 hover:shadow-xl active:scale-95"
+                className="flex flex-col items-center justify-center gap-1 py-4 rounded-[13px] transition-all duration-200 hover:-translate-y-1 hover:shadow-xl active:scale-95"
                 style={{ background: btn.bg, border: `1.5px solid ${btn.border}`, color: btn.color }}>
-                {btn.article}
+                <span className="text-2xl font-extrabold leading-none">{btn.article}</span>
+                <span className="text-[10px] font-bold uppercase tracking-wider opacity-70">{btn.label}</span>
               </button>
             ))}
           </div>
