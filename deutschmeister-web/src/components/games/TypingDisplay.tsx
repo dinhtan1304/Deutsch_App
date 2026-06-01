@@ -28,15 +28,14 @@ export function TypingDisplay({
   const words = sentence.split(' ');
 
   return (
-    <div className="flex flex-col items-center gap-6 max-w-3xl mx-auto">
+    <div className="flex flex-col items-center gap-5 max-w-3xl mx-auto">
       <div
-        className="w-full rounded-2xl px-8 py-10 leading-relaxed"
+        className="mono w-full rounded-lg px-8 py-8 leading-relaxed"
         style={{
           backgroundColor: 'var(--theme-bg-card)',
           border: '1px solid var(--theme-border)',
-          boxShadow: '0 4px 16px rgba(0,0,0,0.05)',
-          fontFamily: 'Georgia, "Times New Roman", serif',
-          fontSize: '28px',
+          fontSize: '26px',
+          letterSpacing: '0.3px',
         }}
       >
         <div className="flex flex-wrap gap-x-2 gap-y-3 justify-center">
@@ -68,37 +67,9 @@ export function TypingDisplay({
         </div>
       </div>
 
-      <div className="flex items-center gap-3 px-6">
-        <span
-          aria-hidden
-          style={{
-            color: 'var(--theme-text-muted)',
-            opacity: 0.4,
-            letterSpacing: '0.4em',
-          }}
-        >
-          ———
-        </span>
-        <p
-          className="text-sm italic text-center"
-          style={{
-            color: 'var(--theme-text-muted)',
-            fontFamily: 'Georgia, "Times New Roman", serif',
-          }}
-        >
-          {translation}
-        </p>
-        <span
-          aria-hidden
-          style={{
-            color: 'var(--theme-text-muted)',
-            opacity: 0.4,
-            letterSpacing: '0.4em',
-          }}
-        >
-          ———
-        </span>
-      </div>
+      <p className="text-[13px] italic text-center px-6" style={{ color: 'var(--theme-text-secondary)' }}>
+        {translation}
+      </p>
     </div>
   );
 }
