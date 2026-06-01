@@ -208,7 +208,7 @@ export default function PricingPage() {
         backgroundImage: `radial-gradient(circle at 50% -10%, ${mix('var(--accent)', 12)}, transparent 70%)`,
       }}
     >
-      <div className="mx-auto max-w-6xl">
+      <div className="mx-auto max-w-360">
 
         {/* ── Hero ── */}
         <div className="mb-10 text-center animate-[slideUp_0.4s_ease-out_both]">

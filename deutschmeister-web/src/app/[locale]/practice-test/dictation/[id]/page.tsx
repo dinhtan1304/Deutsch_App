@@ -142,7 +142,7 @@ export default function DictationPlayPage() {
   const unansweredCount = session.totalBlanks - answeredCount;
 
   return (
-    <div className="max-w-6xl mx-auto px-4 pb-24">
+    <div className="max-w-360 mx-auto px-4 pb-24">
       {/* Header Container — sentinel for collapse */}
       <div ref={sentinelRef} className="pt-4 mb-5">
         <button onClick={() => router.push('/practice-test/dictation')} className="mb-3 inline-flex items-center gap-1 text-caption font-medium transition-opacity hover:opacity-70" style={{ color: 'var(--accent)' }}>

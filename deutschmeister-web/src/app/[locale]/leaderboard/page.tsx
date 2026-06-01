@@ -98,7 +98,7 @@ export default function LeaderboardPage() {
   const meRank = meIndex >= 0 ? meIndex + 1 : null;
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-6 sm:px-6">
+    <div className="mx-auto max-w-360 px-4 py-6 sm:px-6">
 
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
