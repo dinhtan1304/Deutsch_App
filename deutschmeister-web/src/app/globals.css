@@ -679,12 +679,18 @@ input[type="range"]::-webkit-slider-thumb {
 .v2-game-cta { background: transparent; border: 1px solid color-mix(in srgb, var(--gc) 55%, transparent); color: var(--gc); transition: background .15s, color .15s, border-color .15s; }
 .word-card-v2:hover .v2-game-cta { background: var(--gc); color: #fff; border-color: var(--gc); }
 
-/* v2 soft/outline button — route-accent tint on hover (!important beats inline base styles) */
-.v2-btn-soft { transition: background .15s, border-color .15s, color .15s; }
+/* v2 soft/outline button — self-contained base + route-accent tint on hover.
+   Colors live in the class (no inline style) so :hover always wins. */
+.v2-btn-soft {
+  background: var(--theme-bg-card);
+  color: var(--theme-text-secondary);
+  border: 1px solid var(--theme-border);
+  transition: background .15s, border-color .15s, color .15s;
+}
 .v2-btn-soft:hover {
-  border-color: var(--accent) !important;
-  color: var(--accent) !important;
-  background: color-mix(in srgb, var(--accent) 10%, var(--theme-bg-card)) !important;
+  border-color: var(--accent);
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, var(--theme-bg-card));
 }
 
 /* v2 word/entity card hover lift — border turns to the card's article/route
