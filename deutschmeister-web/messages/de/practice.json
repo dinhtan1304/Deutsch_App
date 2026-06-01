@@ -791,6 +791,13 @@
       "cardReview": "Nochmal üben",
       "cardContinue": "Fortsetzen",
       "cardStart": "Starten",
+      "eyebrow": "Shadowing",
+      "how1Label": "Mustersatz hören",
+      "how1Desc": "Muttersprachlich, langsam",
+      "how2Label": "Nachsprechen",
+      "how2Desc": "Aufnehmen und wiederholen",
+      "how3Label": "Vergleichen",
+      "how3Desc": "KI bewertet Aussprache + Sprachmelodie",
       "filterStatuses": {
         "DRAFT": "Läuft",
         "SUBMITTED": "Fertig"

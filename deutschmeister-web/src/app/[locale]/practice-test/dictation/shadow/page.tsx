@@ -13,7 +13,7 @@ import {
 } from '@/hooks/useShadowing';
 import { dictationApi } from '@/lib/api/dictation';
 import type { ShadowingHistoryItem } from '@/lib/api/shadowing';
-import { PageHeader, GridSkeleton } from '@/components/ui';
+import { GridSkeleton } from '@/components/ui';
 import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 
 const CEFR_COLORS: Record<string, string> = {
@@ -76,18 +76,48 @@ function IconTrash({ size = 14, style }: { size?: number; style?: React.CSSPrope
     </svg>
   );
 }
-function IconCheck({ size = 16, style }: { size?: number; style?: React.CSSProperties }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}>
-      <polyline points="20 6 9 17 4 12" />
-    </svg>
-  );
-}
 function IconChevronLeft({ size = 14, style }: { size?: number; style?: React.CSSProperties }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}><polyline points="15 18 9 12 15 6" /></svg>;
 }
 function IconChevronRight({ size = 14, style }: { size?: number; style?: React.CSSProperties }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}><polyline points="9 18 15 12 9 6" /></svg>;
+}
+
+function MiniStat({ label, value, color }: { label: string; value: string | number; color: string }) {
+  return (
+    <div className="flex min-w-22 flex-col gap-0.5 rounded-[10px] px-3.5 py-2" style={{ background: 'var(--theme-bg-card)', border: '1px solid var(--theme-border)' }}>
+      <div className="flex items-center gap-1.5">
+        <span className="h-1.5 w-1.5 rounded-full" style={{ background: color }} />
+        <span className="text-[10px] font-semibold uppercase" style={{ color: 'var(--theme-text-muted)', letterSpacing: '.05em' }}>{label}</span>
+      </div>
+      <span className="mono text-[18px] font-extrabold" style={{ letterSpacing: '-.02em', color: 'var(--theme-text-primary)' }}>{value}</span>
+    </div>
+  );
+}
+
+function HowItWorks() {
+  const t = useTranslations('practice.dictation.shadow');
+  const steps = [
+    { n: 1, icon: '👂', label: t('how1Label'), desc: t('how1Desc') },
+    { n: 2, icon: '🎙', label: t('how2Label'), desc: t('how2Desc') },
+    { n: 3, icon: '📊', label: t('how3Label'), desc: t('how3Desc') },
+  ];
+  return (
+    <div className="mb-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
+      {steps.map((s) => (
+        <div key={s.n} className="flex items-center gap-3 rounded-[11px] p-3" style={{ background: 'var(--theme-bg-card)', border: '1px solid var(--theme-border)' }}>
+          <div className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-[9px] text-[17px]" style={{ background: 'var(--theme-bg-secondary)', border: '1px solid var(--theme-border)' }}>
+            {s.icon}
+            <span className="mono absolute -left-1.5 -top-1.5 flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-bold text-white" style={{ background: 'var(--accent)' }}>{s.n}</span>
+          </div>
+          <div className="min-w-0">
+            <div className="text-caption font-semibold" style={{ color: 'var(--theme-text-primary)' }}>{s.label}</div>
+            <div className="text-[11px]" style={{ color: 'var(--theme-text-muted)' }}>{s.desc}</div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
 }
 
 // ─── HistoryCard ───────────────────────────────────────────────────────────
@@ -237,23 +267,25 @@ export default function ShadowingListPage() {
 
   return (
     <div className="max-w-360 mx-auto px-4 py-8 pb-32">
-      <PageHeader
-        backHref="/practice-test/dictation"
-        title={t('title')}
-        subtitle={t('subtitle')}
-        accent="reading"
-        right={
-          <div className="flex items-center gap-3">
-            <Link
-              href="/practice-test/dictation/library?mode=shadowing"
-              className="flex items-center gap-2 px-7 py-3.5 rounded-xl text-sm font-black text-white transition-all hover:scale-[1.02] active:scale-95 shadow-xl shadow-green-500/30"
-              style={{ background: GRADIENT.reading }}
-            >
-              <IconLibrary size={20} /> {t('chooseVideo')}
-            </Link>
+      <Link href="/practice-test/dictation" className="mb-3 inline-flex items-center gap-1 text-caption font-medium transition-opacity hover:opacity-70" style={{ color: 'var(--accent)' }}>
+        <IconChevronRight size={15} style={{ transform: 'rotate(180deg)' }} /> {tCommon('hub.back')}
+      </Link>
+      <header className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div className="min-w-0">
+          <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.14em]" style={{ color: 'var(--theme-text-muted)' }}>{t('eyebrow')}</p>
+          <h1 className="text-h1 font-extrabold leading-tight" style={{ letterSpacing: '-.02em', color: 'var(--theme-text-primary)' }}>{t('title')}</h1>
+          <p className="mt-1.5 max-w-xl text-body leading-relaxed" style={{ color: 'var(--theme-text-secondary)' }}>{t('subtitle')}</p>
+        </div>
+        {stats && stats.total > 0 && (
+          <div className="flex shrink-0 gap-2">
+            <MiniStat label={t('stats.total')} value={stats.total} color="var(--der)" />
+            <MiniStat label={t('stats.averageScore')} value={stats.avgScore ? `${Math.round(stats.avgScore)}%` : '—'} color="var(--accent)" />
+            <MiniStat label={t('stats.bestScore')} value={stats.bestScore ? `${Math.round(stats.bestScore)}%` : '—'} color="var(--violet)" />
           </div>
-        }
-      />
+        )}
+      </header>
+
+      <HowItWorks />
 
       {/* URL input — full width */}
       <div
@@ -460,51 +492,6 @@ export default function ShadowingListPage() {
         </div>
       </div>
 
-      {/* Stats */}
-      {stats && stats.total > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-          {[
-            { label: t('stats.total'),        value: stats.total, color: ACCENT.reading, icon: <IconMic size={20} /> },
-            { label: t('stats.averageScore'), value: stats.avgScore ? `${Math.round(stats.avgScore)}%` : '—', color: ACCENT.xp, icon: <IconDice size={20} /> },
-            { label: t('stats.bestScore'),    value: stats.bestScore ? `${Math.round(stats.bestScore)}%` : '—', color: STATUS.success, icon: <IconCheck size={20} /> },
-          ].map((s, i) => (
-            <div
-              key={i}
-              className="relative overflow-hidden rounded-2xl px-5 py-4 border shadow-sm flex items-center gap-4 transition-all duration-300 hover:-translate-y-1"
-              style={{
-                backgroundColor: 'var(--theme-bg-card)',
-                borderColor: 'var(--theme-border)',
-                boxShadow: '0 8px 24px rgba(0,0,0,0.04)',
-              }}
-            >
-              <div
-                className="absolute -right-4 -bottom-4 w-20 h-20 blur-2xl opacity-20"
-                style={{ backgroundColor: s.color }}
-              />
-              <div
-                className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-                style={{ backgroundColor: `${s.color}15`, color: s.color }}
-              >
-                {s.icon}
-              </div>
-              <div className="relative z-10 min-w-0">
-                <div
-                  className="text-[10px] font-black uppercase tracking-widest opacity-40"
-                  style={{ color: 'var(--theme-text-primary)' }}
-                >
-                  {s.label}
-                </div>
-                <div
-                  className="text-2xl font-black tracking-tight"
-                  style={{ color: 'var(--theme-text-primary)' }}
-                >
-                  {s.value}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
 
       {/* Confirm delete */}
       {confirmDeleteId && (

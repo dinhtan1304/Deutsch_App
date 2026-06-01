@@ -791,6 +791,13 @@
       "cardReview": "Practice again",
       "cardContinue": "Continue",
       "cardStart": "Start",
+      "eyebrow": "Shadowing",
+      "how1Label": "Listen to the model",
+      "how1Desc": "Native, slow pronunciation",
+      "how2Label": "Repeat",
+      "how2Desc": "Hit record and shadow",
+      "how3Label": "Compare",
+      "how3Desc": "AI scores pronunciation + prosody",
       "filterStatuses": {
         "DRAFT": "In progress",
         "SUBMITTED": "Done"

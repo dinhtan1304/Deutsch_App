@@ -791,6 +791,13 @@
       "cardReview": "Luyện lại",
       "cardContinue": "Tiếp tục",
       "cardStart": "Bắt đầu",
+      "eyebrow": "Shadowing",
+      "how1Label": "Nghe câu mẫu",
+      "how1Desc": "Native phát âm chậm",
+      "how2Label": "Nói theo",
+      "how2Desc": "Bấm record và lặp lại",
+      "how3Label": "Xem so sánh",
+      "how3Desc": "AI chấm phát âm + ngữ điệu",
       "filterStatuses": {
         "DRAFT": "Đang luyện",
         "SUBMITTED": "Đã hoàn tất"
