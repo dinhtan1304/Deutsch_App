@@ -702,6 +702,9 @@ input[type="range"]::-webkit-slider-thumb {
 .v2-beta-badge { background: linear-gradient(135deg, var(--warn), var(--streak)); color: #1a1505; }
 .v2-avatar-grad { background: linear-gradient(135deg, var(--der), var(--violet)); }
 
+/* v2 study-plan: today-task hero tint (accent → violet, theme-var gradient) */
+.v2-plan-hero { background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 13%, transparent), color-mix(in srgb, var(--violet) 6%, transparent)); }
+
 /* v2 word/entity card hover lift — border turns to the card's article/route
    accent (--card-accent set inline). */
 .word-card-v2 { transition: border-color .2s, transform .2s, box-shadow .2s; }

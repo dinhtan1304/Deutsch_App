@@ -1,43 +1,59 @@
 'use client';
-/* eslint-disable no-restricted-syntax */
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { ACCENT, STATUS } from '@/lib/tokens';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useStudyPlan, useStudyPlanWeek, usePauseStudyPlan, useResumeStudyPlan, useDeleteStudyPlan } from '@/hooks/useStudyPlan';
-import type { PhaseInfo, WeeklyTask } from '@/lib/api/studyPlan';
+import type { WeeklyTask } from '@/lib/api/studyPlan';
 
-import { 
-  IconVocab, IconGrammar, IconReading, IconWriting, 
-  IconListening, IconSpeaking, IconReview, IconGame, 
-  IconExam, IconRocket, IconCalendar 
+import {
+  IconVocab, IconGrammar, IconReading, IconWriting,
+  IconListening, IconSpeaking, IconReview, IconGame,
+  IconExam, IconRocket, IconCalendar,
 } from './icons';
 import { IconCheck } from '@/components/ui/Icons';
 
 const DAY_NAME_KEYS = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as const;
+type DayKey = (typeof DAY_NAME_KEYS)[number];
 
 const TASK_ICONS: Record<string, React.ReactNode> = {
-  vocab: <IconVocab size={18} />,
-  grammar: <IconGrammar size={18} />,
-  reading: <IconReading size={18} />,
-  writing: <IconWriting size={18} />,
-  listening: <IconListening size={18} />,
-  speaking: <IconSpeaking size={18} />,
-  review: <IconReview size={18} />,
-  game: <IconGame size={18} />,
-  exam: <IconExam size={18} />,
+  vocab: <IconVocab size={17} />,
+  grammar: <IconGrammar size={17} />,
+  reading: <IconReading size={17} />,
+  writing: <IconWriting size={17} />,
+  listening: <IconListening size={17} />,
+  speaking: <IconSpeaking size={17} />,
+  review: <IconReview size={17} />,
+  game: <IconGame size={17} />,
+  exam: <IconExam size={17} />,
 };
 
-type DayKey = (typeof DAY_NAME_KEYS)[number];
+// Per-skill accent (CSS vars → theme-correct; mirrors design's per-task colours)
+const SKILL_COLOR: Record<string, string> = {
+  vocab: 'var(--der)',
+  grammar: 'var(--violet)',
+  reading: 'var(--success)',
+  writing: 'var(--pink)',
+  listening: 'var(--cyan)',
+  speaking: 'var(--warn)',
+  review: 'var(--accent)',
+  game: 'var(--violet)',
+  exam: 'var(--streak)',
+};
+const skillOf = (type: string) => SKILL_COLOR[type] ?? 'var(--accent)';
+const mix = (c: string, pct: number) => `color-mix(in srgb, ${c} ${pct}%, transparent)`;
+
+// done / current / upcoming → status colour
+const statusColor = (s: 'done' | 'current' | 'upcoming') =>
+  s === 'done' ? 'var(--success)' : s === 'current' ? 'var(--accent)' : 'var(--theme-text-muted)';
 
 function StudyPlanSkeleton() {
   return (
-    <div className="max-w-5xl mx-auto px-4 py-6 space-y-6 animate-pulse">
-      <div className="h-10 w-64 rounded-xl" style={{ backgroundColor: 'var(--theme-bg-secondary)' }} />
-      <div className="h-48 rounded-2xl" style={{ backgroundColor: 'var(--theme-bg-secondary)' }} />
-      <div className="h-64 rounded-2xl" style={{ backgroundColor: 'var(--theme-bg-secondary)' }} />
+    <div className="mx-auto max-w-360 animate-pulse space-y-5 px-4 py-6 sm:px-6">
+      <div className="h-13 w-72 rounded-lg" style={{ backgroundColor: 'var(--theme-bg-secondary)' }} />
+      <div className="h-52 rounded-lg" style={{ backgroundColor: 'var(--theme-bg-secondary)' }} />
+      <div className="h-64 rounded-lg" style={{ backgroundColor: 'var(--theme-bg-secondary)' }} />
     </div>
   );
 }
@@ -58,21 +74,20 @@ export default function StudyPlanPage() {
 
   if (isLoading) return <StudyPlanSkeleton />;
 
-  // No plan — redirect to setup
+  // No plan — invite to setup
   if (!data) {
     return (
-      <div className="max-w-lg mx-auto px-4 py-20 text-center">
-        <div className="text-5xl mb-4">{'\uD83D\uDCCB'}</div>
-        <h1 className="text-xl font-bold mb-2" style={{ color: 'var(--theme-text-primary)' }}>
+      <div className="mx-auto max-w-lg px-4 py-20 text-center">
+        <div className="mb-4 text-5xl">{'📋'}</div>
+        <h1 className="mb-2 text-h3 font-extrabold" style={{ color: 'var(--theme-text-primary)' }}>
           {t('empty.title')}
         </h1>
-        <p className="text-sm mb-6" style={{ color: 'var(--theme-text-muted)' }}>
+        <p className="mb-6 text-body" style={{ color: 'var(--theme-text-muted)' }}>
           {t('empty.subtitle')}
         </p>
         <Link
           href="/study-plan/setup"
-          className="inline-block px-6 py-3 rounded-xl text-white font-bold text-sm"
-          style={{ background: 'linear-gradient(135deg, #3B82F6, #8B5CF6)' }}
+          className="v2-match-grad inline-block rounded-[11px] px-6 py-3 text-body font-bold text-white"
         >
           {t('empty.create')}
         </Link>
@@ -84,391 +99,341 @@ export default function StudyPlanPage() {
   const isPaused = plan.status === 'paused';
   const displayTasks = weekData?.tasks ?? weekTasks;
   const displayPhase = weekData?.phase ?? currentPhase;
+  const today = new Date().getDay();
+
+  // current-week completion (only week we can count cheaply, from getActive())
+  const weekDone = weekTasks.filter((task) => task.completed).length;
+  const weekTotal = weekTasks.length;
+  const currentPct = weekTotal ? Math.round((weekDone / weekTotal) * 100) : 0;
+
+  const todayDone = todayTasks.filter((task) => task.completed).length;
+  const todayAllDone = todayTasks.length > 0 && todayDone === todayTasks.length;
+
+  const stepCols = Math.min(plan.totalWeeks, 6);
+
+  const detailDone = displayTasks.filter((task) => task.completed).length;
+  const activeStatus: 'done' | 'current' | 'upcoming' =
+    activeWeek < currentWeek ? 'done' : activeWeek === currentWeek ? 'current' : 'upcoming';
 
   const handleDelete = async () => {
     await deleteMut.mutateAsync();
     router.push('/dashboard');
   };
 
-  const today = new Date().getDay();
-
   return (
-    <div className="max-w-5xl mx-auto px-4 py-5 space-y-5">
+    <div className="mx-auto max-w-360 space-y-5 px-4 py-5 sm:px-6">
 
       {/* ── Header ── */}
-      <div className="flex items-center justify-between flex-wrap gap-4 pb-2">
-        <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-white shadow-lg"
-            style={{ background: 'linear-gradient(135deg, #3B82F6, #8B5CF6)' }}>
-            <IconRocket size={28} />
-          </div>
-          <div>
-            <h1 className="text-2xl font-black tracking-tight" style={{ color: 'var(--theme-text-primary)' }}>
-              {plan.examFormat} {plan.targetLevel}
-            </h1>
-            <div className="flex items-center gap-2 mt-1 text-sm font-medium" style={{ color: 'var(--theme-text-muted)' }}>
-              <IconCalendar size={14} />
-              <span>{t('header.weekProgress', { current: currentWeek, total: plan.totalWeeks })}</span>
-              <span className="opacity-30">•</span>
-              <span style={{ color: daysUntilExam < 14 ? STATUS.danger : 'inherit' }}>
-                {t('header.daysUntilExam', { days: daysUntilExam })}
-              </span>
-            </div>
+      <header className="flex flex-wrap items-center gap-4">
+        <div
+          className="v2-match-grad flex h-13 w-13 shrink-0 items-center justify-center rounded-[14px] text-white"
+          style={{ boxShadow: `0 8px 20px ${mix('var(--accent)', 27)}` }}
+        >
+          <IconRocket size={26} />
+        </div>
+        <div className="min-w-0 flex-1">
+          <h1 className="text-[26px] font-extrabold leading-tight tracking-tight" style={{ color: 'var(--theme-text-primary)' }}>
+            {plan.examFormat} {plan.targetLevel}
+          </h1>
+          <div className="mt-1 flex flex-wrap items-center gap-x-3.5 gap-y-1 text-caption" style={{ color: 'var(--theme-text-secondary)' }}>
+            <span className="flex items-center gap-1.5">
+              <IconCalendar size={13} />
+              {t('header.weekProgress', { current: currentWeek, total: plan.totalWeeks })}
+            </span>
+            <span className="flex items-center gap-1.5" style={{ color: 'var(--streak)' }}>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" /></svg>
+              {t('header.daysUntilExam', { days: daysUntilExam })}
+            </span>
           </div>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           {isPaused ? (
             <button
               onClick={() => resumeMut.mutate()}
-              className="px-5 py-2.5 rounded-xl text-sm font-bold text-white shadow-lg transition-transform hover:scale-105"
-              style={{ background: 'linear-gradient(135deg, #22C55E, #14B8A6)' }}
+              className="v2-match-grad h-9.5 rounded-[9px] px-4 text-caption font-bold text-white"
             >
               {t('header.resume')}
             </button>
           ) : (
             <button
               onClick={() => pauseMut.mutate()}
-              className="px-5 py-2.5 rounded-xl text-sm font-bold border-2 transition-all hover:bg-black/5"
-              style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)' }}
+              className="h-9.5 rounded-[9px] border px-4 text-caption font-medium transition-colors"
+              style={{ background: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)' }}
             >
               {t('header.pause')}
             </button>
           )}
           <button
             onClick={() => setShowDelete(true)}
-            className="w-10 h-10 rounded-xl flex items-center justify-center transition-colors hover:bg-red-50"
-            style={{ color: STATUS.danger }}
+            className="flex h-9.5 w-9.5 items-center justify-center rounded-[9px] border transition-colors hover:opacity-80"
+            style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-muted)' }}
           >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /></svg>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /></svg>
           </button>
         </div>
-      </div>
+      </header>
 
       {isPaused && (
         <div
-          className="p-4 rounded-xl border text-sm font-medium"
-          style={{ borderColor: 'rgba(249,115,22,.3)', background: 'rgba(249,115,22,.06)', color: ACCENT.games }}
+          className="rounded-md border p-3.5 text-caption font-medium"
+          style={{ borderColor: mix('var(--streak)', 30), background: mix('var(--streak)', 8), color: 'var(--streak)' }}
         >
           {t('header.pausedBanner')}
         </div>
       )}
 
-      {/* ── Overall Progress & Journey ── */}
-      <div
-        className="p-6 rounded-3xl border shadow-sm relative overflow-hidden"
-        style={{ backgroundColor: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}
-      >
-        <div className="relative z-10">
-          <div className="flex items-end justify-between mb-4">
-            <div>
-              <span className="text-xs font-black uppercase tracking-[0.2em] opacity-50 mb-1 block" style={{ color: 'var(--theme-text-primary)' }}>
-                {t('progress.label')}
-              </span>
-              <span className="text-2xl font-black" style={{ color: 'var(--theme-text-primary)' }}>
-                {overallProgress}% <span className="text-sm font-medium opacity-50 ml-1">{t('progress.completed')}</span>
-              </span>
+      {/* ── Progress + week timeline ── */}
+      <section className="rounded-lg border p-5" style={{ background: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}>
+        <div className="mb-4 flex items-end justify-between gap-3">
+          <div>
+            <div className="mb-1 text-[11px] font-semibold uppercase tracking-widest" style={{ color: 'var(--theme-text-muted)' }}>
+              {t('progress.label')}
             </div>
-            <div className="text-right">
-              <span className="text-xs font-bold px-3 py-1 rounded-full bg-blue-50 text-blue-600 border border-blue-100">
-                {t('progress.totalWeeks', { weeks: plan.totalWeeks })}
-              </span>
+            <div className="flex items-baseline gap-2">
+              <span className="mono text-[30px] font-bold tracking-tight" style={{ color: 'var(--theme-text-primary)' }}>{overallProgress}%</span>
+              <span className="text-caption" style={{ color: 'var(--theme-text-secondary)' }}>{t('progress.completed')}</span>
             </div>
           </div>
-          
-          <div className="h-4 rounded-2xl overflow-hidden relative" style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
-            <div
-              className="h-full rounded-2xl transition-all duration-1000 ease-out relative"
-              style={{ width: `${overallProgress}%`, background: 'linear-gradient(90deg, #3B82F6, #8B5CF6, #EC4899)' }}
-            >
-              <div className="absolute inset-0 bg-white/20 animate-[pulse_2s_infinite]" />
-            </div>
-          </div>
-
-          {/* Phase Journey Map */}
-          <div className="flex mt-8 gap-2 relative">
-            {/* Connecting line background */}
-            <div className="absolute top-4 left-0 right-0 h-0.5 bg-gray-100 -z-1" />
-            
-            {phases.map((phase: PhaseInfo, i: number) => {
-              const widthPct = ((phase.weekEnd - phase.weekStart + 1) / plan.totalWeeks) * 100;
-              const isCurrent = currentWeek >= phase.weekStart && currentWeek <= phase.weekEnd;
-              const isPast = currentWeek > phase.weekEnd;
-              
-              return (
-                <div key={i} className="relative group" style={{ width: `${widthPct}%` }}>
-                  <div
-                    className={`h-9 rounded-2xl flex items-center justify-center text-xs font-black text-white transition-all duration-500 transform ${isCurrent ? 'scale-105 shadow-lg' : 'opacity-40 hover:opacity-70'}`}
-                    style={{
-                      background: isCurrent || isPast ? phase.color : 'var(--theme-bg-secondary)',
-                      color: isCurrent || isPast ? 'white' : 'var(--theme-text-muted)',
-                      boxShadow: isCurrent ? `0 8px 20px ${phase.color}40` : 'none',
-                    }}
-                  >
-                    <span className="mr-1.5">{phase.icon}</span>
-                    <span className="hidden sm:inline">{phase.name}</span>
-                  </div>
-                  <div className="text-[10px] font-bold text-center mt-2.5 uppercase tracking-wider" 
-                    style={{ color: isCurrent ? phase.color : 'var(--theme-text-muted)' }}>
-                    W{phase.weekStart}-{phase.weekEnd}
-                  </div>
-                  {isCurrent && (
-                    <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-white animate-ping" />
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-        
-        {/* Background Decorative Element */}
-        <div className="absolute -right-8 -bottom-8 w-48 h-48 rounded-full opacity-[0.03] pointer-events-none" 
-          style={{ background: 'linear-gradient(135deg, #3B82F6, #8B5CF6)' }} />
-      </div>
-
-      {/* ── Main Content ── */}
-      <div className="grid gap-5" style={{ gridTemplateColumns: 'minmax(0, 200px) minmax(0, 1fr)' }}>
-
-        {/* Week Selector Sidebar */}
-        <div
-          className="rounded-3xl border p-4 overflow-y-auto backdrop-blur-md"
-          style={{
-            backgroundColor: 'var(--theme-bg-card)',
-            borderColor: 'var(--theme-border)',
-            maxHeight: 600,
-            boxShadow: '0 4px 20px rgba(0,0,0,0.03)'
-          }}
-        >
-          <div className="text-[11px] font-black uppercase tracking-[0.15em] mb-4 px-2 opacity-50" style={{ color: 'var(--theme-text-primary)' }}>
-            {t('sidebar.title')}
-          </div>
-          <div className="space-y-1.5">
-            {Array.from({ length: plan.totalWeeks }, (_, i) => {
-              const w = i + 1;
-              const isSelected = activeWeek === w;
-              const isPast = w < currentWeek;
-              const isCurrent = w === currentWeek;
-              const phase = phases.find((p: PhaseInfo) => w >= p.weekStart && w <= p.weekEnd);
-              
-              return (
-                <button
-                  key={w}
-                  onClick={() => setSelectedWeek(w)}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-left transition-all relative group ${isSelected ? 'shadow-sm' : 'hover:bg-gray-50'}`}
-                  style={{
-                    backgroundColor: isSelected ? `${phase?.color || ACCENT.srs}12` : undefined,
-                    color: isSelected ? phase?.color || ACCENT.srs : isPast ? 'var(--theme-text-muted)' : 'var(--theme-text-secondary)',
-                  }}
-                >
-                  <div className="relative shrink-0">
-                    {isPast ? (
-                      <div className="w-5 h-5 rounded-full bg-green-100 flex items-center justify-center">
-                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="4" strokeLinecap="round"><polyline points="20 6 9 17 4 12" /></svg>
-                      </div>
-                    ) : (
-                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${isSelected ? 'border-current' : 'border-gray-200'}`}>
-                        {isCurrent && <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: phase?.color }} />}
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className={`text-sm ${isSelected ? 'font-black' : 'font-bold'}`}>{t('sidebar.week', { n: w })}</div>
-                    {isSelected && (
-                      <div className="text-[10px] font-medium opacity-70 truncate">{phase?.name}</div>
-                    )}
-                  </div>
-                  
-                  {isSelected && (
-                    <div className="absolute left-0 top-3 bottom-3 w-1 rounded-r-full" style={{ background: phase?.color }} />
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Week Tasks */}
-        <div className="space-y-4">
-          {/* Current phase info */}
-          <div
-            className="p-4 rounded-2xl border flex items-center gap-4"
-            style={{ backgroundColor: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}
+          <span
+            className="rounded-[7px] border px-2.5 py-1 text-caption font-semibold"
+            style={{ background: 'var(--theme-bg-secondary)', borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)' }}
           >
-            <div
-              className="w-11 h-11 rounded-xl flex items-center justify-center text-xl shrink-0"
-              style={{ background: `${displayPhase.color}18` }}
+            {t('progress.totalWeeks', { weeks: plan.totalWeeks })}
+          </span>
+        </div>
+
+        {/* overall bar */}
+        <div className="mb-4.5 h-1.5 overflow-hidden rounded-full" style={{ background: 'var(--theme-bg-secondary)' }}>
+          <div className="v2-match-grad h-full rounded-full transition-all duration-700" style={{ width: `${overallProgress}%` }} />
+        </div>
+
+        {/* week steps */}
+        <div className="grid gap-2.5" style={{ gridTemplateColumns: `repeat(${stepCols}, minmax(0,1fr))` }}>
+          {Array.from({ length: plan.totalWeeks }, (_, i) => {
+            const w = i + 1;
+            const status: 'done' | 'current' | 'upcoming' = w < currentWeek ? 'done' : w === currentWeek ? 'current' : 'upcoming';
+            const color = statusColor(status);
+            const phase = phases.find((p) => w >= p.weekStart && w <= p.weekEnd);
+            const isActive = activeWeek === w;
+            const pct = status === 'done' ? 100 : status === 'current' ? currentPct : 0;
+            return (
+              <button
+                key={w}
+                onClick={() => setSelectedWeek(w)}
+                className="rounded-[11px] p-3 text-left transition-colors"
+                style={{
+                  background: isActive ? mix(color, 12) : 'var(--theme-bg-secondary)',
+                  border: `1.5px solid ${isActive ? color : 'var(--theme-border)'}`,
+                }}
+              >
+                <div className="mb-2 flex items-center gap-2">
+                  <span
+                    className="flex h-6.5 w-6.5 shrink-0 items-center justify-center rounded-[7px] text-[13px] leading-none"
+                    style={status === 'done' ? { background: color, color: 'white' } : { background: mix(color, 16), color }}
+                  >
+                    {status === 'done' ? <IconCheck size={13} /> : (phase?.icon ?? '•')}
+                  </span>
+                  <div className="min-w-0">
+                    <div className="truncate text-[13px] font-bold" style={{ color: 'var(--theme-text-primary)' }}>{phase?.name}</div>
+                    <div className="mono text-[9.5px]" style={{ color: 'var(--theme-text-muted)' }}>W{w} · {phase?.nameEn}</div>
+                  </div>
+                </div>
+                <div className="h-[3px] overflow-hidden rounded-full" style={{ background: 'var(--theme-bg-tertiary)' }}>
+                  <div className="h-full rounded-full" style={{ width: `${pct}%`, background: color }} />
+                </div>
+                <div className="mt-1.5 flex items-center justify-between">
+                  <span className="text-[10px] font-semibold" style={{ color }}>{t(`stepStatus.${status}` as 'stepStatus.done')}</span>
+                  {status === 'current' && <span className="mono text-[10px]" style={{ color: 'var(--theme-text-muted)' }}>{weekDone}/{weekTotal}</span>}
+                  {status === 'done' && <IconCheck size={11} style={{ color }} />}
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* ── Today's tasks hero ── */}
+      {activeWeek === currentWeek && todayTasks.length > 0 && (
+        <section className="v2-plan-hero relative overflow-hidden rounded-lg border p-5" style={{ borderColor: mix('var(--accent)', 33) }}>
+          <div className="pointer-events-none absolute -right-12 -top-16 h-52 w-52 rounded-full" style={{ background: mix('var(--accent)', 12), filter: 'blur(40px)' }} />
+
+          <div className="relative z-10 mb-3.5 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="h-1.5 w-1.5 animate-pulse rounded-full" style={{ background: 'var(--accent)', boxShadow: '0 0 6px var(--accent)' }} />
+              <h2 className="text-[13px] font-bold uppercase tracking-wide" style={{ color: 'var(--accent)' }}>
+                {t('today.title', { day: t(`dayNames.${DAY_NAME_KEYS[today]!}` as 'dayNames.sun') })}
+              </h2>
+            </div>
+            <span className="mono text-caption font-bold" style={{ color: todayAllDone ? 'var(--success)' : 'var(--theme-text-secondary)' }}>
+              {t('today.doneBadge', { done: todayDone, total: todayTasks.length })}
+            </span>
+          </div>
+
+          <div className="relative z-10 space-y-2.5">
+            {todayTasks.map((task: WeeklyTask, i: number) => {
+              const skill = skillOf(task.type);
+              return (
+                <Link
+                  key={i}
+                  href={task.href}
+                  className="flex items-center gap-3.5 rounded-md border p-4 transition-colors hover:opacity-95"
+                  style={{ background: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}
+                >
+                  <span
+                    className="flex h-6.5 w-6.5 shrink-0 items-center justify-center rounded-[8px] border-2"
+                    style={task.completed
+                      ? { background: 'var(--success)', borderColor: 'var(--success)', color: 'white' }
+                      : { borderColor: 'var(--theme-border)' }}
+                  >
+                    {task.completed && <IconCheck size={14} />}
+                  </span>
+                  <span className="flex h-10.5 w-10.5 shrink-0 items-center justify-center rounded-[11px]" style={{ background: mix(skill, 16), color: skill }}>
+                    {TASK_ICONS[task.type] ?? <IconRocket size={20} />}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <div
+                      className={`text-[15px] font-bold ${task.completed ? 'line-through' : ''}`}
+                      style={{ color: task.completed ? 'var(--theme-text-muted)' : 'var(--theme-text-primary)' }}
+                    >
+                      {task.title}
+                    </div>
+                    <div className="truncate text-caption" style={{ color: 'var(--theme-text-secondary)' }}>{task.description}</div>
+                  </div>
+                  {!task.completed && (
+                    <span
+                      className="hidden shrink-0 items-center gap-1.5 rounded-[9px] px-4 py-2 text-caption font-semibold text-white sm:inline-flex"
+                      style={{ background: 'var(--accent)', boxShadow: `0 4px 12px ${mix('var(--accent)', 40)}` }}
+                    >
+                      {t('today.start')}
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+                    </span>
+                  )}
+                </Link>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
+      {/* ── Selected week detail ── */}
+      <section className="rounded-lg border p-5" style={{ background: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}>
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5">
+            <span
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] text-lg"
+              style={{ background: mix(statusColor(activeStatus), 16), color: statusColor(activeStatus) }}
             >
               {displayPhase.icon}
-            </div>
+            </span>
             <div>
-              <div className="text-sm font-bold" style={{ color: displayPhase.color }}>
-                {t('phase.label', { name: displayPhase.name })}
-              </div>
-              <div className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>
-                {t('phase.weekSub', { week: activeWeek, nameEn: displayPhase.nameEn })}
-              </div>
-            </div>
-          </div>
-
-          {/* Today's tasks highlight */}
-          {activeWeek === currentWeek && todayTasks.length > 0 && (
-            <div
-              className="p-6 rounded-3xl border relative overflow-hidden shadow-sm"
-              style={{ borderColor: 'rgba(59,130,246,.2)', background: 'rgba(59,130,246,.02)' }}
-            >
-              <div className="flex items-center justify-between mb-5 relative z-10">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
-                  <div className="text-xs font-black uppercase tracking-widest text-blue-600">
-                    {t('today.title', { day: t(`dayNames.${DAY_NAME_KEYS[today]!}` as 'dayNames.sun') })}
-                  </div>
-                </div>
-                {todayTasks.length > 0 && (
-                  <span className="text-[10px] font-black px-2.5 py-1 rounded-lg uppercase tracking-wider" style={{
-                    backgroundColor: todayTasks.filter((task: WeeklyTask) => task.completed).length === todayTasks.length ? 'rgba(34,197,94,.1)' : 'rgba(59,130,246,.1)',
-                    color: todayTasks.filter((task: WeeklyTask) => task.completed).length === todayTasks.length ? STATUS.success : ACCENT.srs,
-                  }}>
-                    {t('today.doneBadge', { done: todayTasks.filter((task: WeeklyTask) => task.completed).length, total: todayTasks.length })}
-                  </span>
-                )}
-              </div>
-              <div className="space-y-2">
-                {todayTasks.map((task: WeeklyTask, i: number) => (
-                  <Link
-                    key={i}
-                    href={task.href}
-                    className="flex items-center gap-3 p-3 rounded-xl transition-all group"
-                    style={{
-                      backgroundColor: task.completed ? 'rgba(34,197,94,.04)' : 'var(--theme-bg-card)',
-                      border: `1px solid ${task.completed ? 'rgba(34,197,94,.2)' : 'var(--theme-border)'}`,
-                    }}
-                  >
-                    {task.completed ? (
-                      <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0" style={{ background: 'linear-gradient(135deg, #22C55E, #10B981)' }}>
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                          <polyline points="20 6 9 17 4 12" />
-                        </svg>
-                      </div>
-                    ) : (
-                      <span className="text-lg">{TASK_ICONS[task.type] || '\uD83D\uDCCC'}</span>
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <div className="text-sm font-semibold" style={{ color: task.completed ? STATUS.success : 'var(--theme-text-primary)', textDecoration: task.completed ? 'line-through' : 'none' }}>
-                        {task.title}
-                      </div>
-                      <div className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>
-                        {task.description}
-                      </div>
-                    </div>
-                    {!task.completed && (
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="shrink-0 opacity-30 group-hover:opacity-70 transition-opacity" style={{ color: 'var(--theme-text-muted)' }}>
-                        <path d="M9 18l6-6-6-6" />
-                      </svg>
-                    )}
-                  </Link>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Full week grid */}
-          <div
-            className="rounded-3xl border overflow-hidden shadow-sm"
-            style={{ backgroundColor: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}
-          >
-            <div className="px-6 py-4 border-b flex items-center justify-between" style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-secondary)' }}>
-              <span className="text-sm font-black tracking-tight uppercase opacity-60" style={{ color: 'var(--theme-text-primary)' }}>
-                {t('week.details', { week: activeWeek })}
-              </span>
-              <div className="flex gap-1">
-                {[0, 1, 2].map(i => <div key={i} className="w-1 h-1 rounded-full bg-gray-300" />)}
-              </div>
-            </div>
-            <div className="relative py-4 px-6">
-              {/* Timeline background line */}
-              <div className="absolute left-[52px] top-8 bottom-8 w-0.5 bg-gray-100 dark:bg-white/5" />
-              
-              <div className="space-y-6 relative">
-                {displayTasks.map((task: WeeklyTask, i: number) => {
-                  const isToday = task.day === today && activeWeek === currentWeek;
-                  const isCompleted = task.completed;
-                  
-                  return (
-                    <Link
-                      key={i}
-                      href={task.href}
-                      className={`flex items-start gap-5 transition-all group relative ${isCompleted ? 'opacity-60 hover:opacity-100' : ''}`}
-                    >
-                      {/* Day Label */}
-                      <div className="w-10 pt-2 text-center shrink-0">
-                        <div className={`text-[10px] font-black uppercase tracking-widest ${isToday ? 'text-blue-600' : 'opacity-40'}`}>
-                          {DAY_NAME_KEYS[task.day] ? t(`dayNames.${DAY_NAME_KEYS[task.day] as DayKey}` as 'dayNames.sun') : t('week.allDays')}
-                        </div>
-                      </div>
-                      
-                      {/* Timeline Node & Icon */}
-                      <div className="relative">
-                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 relative z-10 transition-transform duration-300 group-hover:scale-110 shadow-sm
-                          ${isCompleted 
-                            ? 'bg-green-500 text-white shadow-green-500/40' 
-                            : isToday 
-                              ? 'bg-blue-50 text-blue-600 border border-blue-200 shadow-blue-500/20' 
-                              : 'bg-[var(--theme-bg-secondary)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]'}`}
-                        >
-                          {isCompleted ? <IconCheck size={20} /> : (TASK_ICONS[task.type] || <IconRocket size={20} />)}
-                        </div>
-                        
-                        {/* Glow effect for today */}
-                        {isToday && !isCompleted && (
-                          <div className="absolute inset-0 bg-blue-400 rounded-2xl blur-md opacity-30 animate-pulse" />
-                        )}
-                      </div>
-                      
-                      {/* Task Content */}
-                      <div className="flex-1 min-w-0 pt-1.5 pb-2 border-b border-[var(--theme-border)] group-last:border-0">
-                        <div className={`text-[15px] font-bold ${isCompleted ? 'line-through text-[var(--theme-text-muted)]' : isToday ? 'text-blue-600' : 'text-[var(--theme-text-primary)]'}`}>
-                          {task.title}
-                        </div>
-                        <div className="text-xs font-medium mt-1 opacity-60 line-clamp-2" style={{ color: 'var(--theme-text-muted)' }}>
-                          {task.description}
-                        </div>
-                      </div>
-                      
-                      {/* Action Arrow */}
-                      <div className="shrink-0 pt-2 opacity-0 group-hover:opacity-100 transition-all transform translate-x-2 group-hover:translate-x-0">
-                        <div className="w-8 h-8 rounded-full flex items-center justify-center bg-white dark:bg-black border shadow-sm"
-                          style={{ borderColor: 'var(--theme-border)' }}>
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{ color: 'var(--theme-text-muted)' }}>
-                            <path d="M9 18l6-6-6-6" />
-                          </svg>
-                        </div>
-                      </div>
-                    </Link>
-                  );
-                })}
-              </div>
+              <h3 className="text-h3 font-extrabold" style={{ color: 'var(--theme-text-primary)' }}>
+                {t('week.heading', { week: activeWeek, phase: displayPhase.name })}
+              </h3>
+              <p className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>
+                {displayPhase.nameEn} · {t('week.taskCount', { done: detailDone, total: displayTasks.length })}
+              </p>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Delete confirmation */}
+        {displayTasks.length === 0 ? (
+          <div className="rounded-[11px] border border-dashed py-8 text-center text-caption" style={{ borderColor: 'var(--theme-border)', background: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }}>
+            {t('week.noTasks')}
+          </div>
+        ) : (
+          <div className="relative">
+            {displayTasks.map((task: WeeklyTask, i: number) => {
+              const isToday = task.day === today && activeWeek === currentWeek;
+              const st: 'done' | 'current' | 'upcoming' = task.completed ? 'done' : isToday ? 'current' : 'upcoming';
+              const sc = statusColor(st);
+              const skill = skillOf(task.type);
+              const isLast = i === displayTasks.length - 1;
+              const dayLabel = DAY_NAME_KEYS[task.day]
+                ? t(`dayNames.${DAY_NAME_KEYS[task.day] as DayKey}` as 'dayNames.sun')
+                : t('week.allDays');
+              return (
+                <div key={i} className="flex gap-3.5">
+                  {/* timeline rail */}
+                  <div className="flex w-11 shrink-0 flex-col items-center">
+                    <div className="flex flex-col items-center pt-1">
+                      <span className="mono mb-1 text-[10px] font-semibold" style={{ color: 'var(--theme-text-muted)' }}>{dayLabel}</span>
+                      <div
+                        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full"
+                        style={st === 'done'
+                          ? { background: sc, color: 'white' }
+                          : st === 'current'
+                            ? { background: mix(sc, 22), border: `2px solid ${sc}`, color: sc }
+                            : { background: 'var(--theme-bg-secondary)', border: '1px dashed var(--theme-border)' }}
+                      >
+                        {st === 'done'
+                          ? <IconCheck size={13} />
+                          : <span className="h-1.5 w-1.5 rounded-full" style={{ background: st === 'current' ? sc : 'var(--theme-text-muted)' }} />}
+                      </div>
+                    </div>
+                    {!isLast && (
+                      <div
+                        className="mt-1 w-0.5 flex-1"
+                        style={{ minHeight: 30, background: st === 'done' ? sc : 'var(--theme-border)', opacity: st === 'done' ? 0.6 : 0.4 }}
+                      />
+                    )}
+                  </div>
+
+                  {/* task card */}
+                  <div className="mb-2.5 flex-1">
+                    <Link
+                      href={task.href}
+                      className="flex items-center gap-3 rounded-[11px] border p-3.5 transition-colors hover:opacity-95"
+                      style={st === 'current'
+                        ? { background: mix(skill, 9), borderColor: mix(skill, 27) }
+                        : { background: 'var(--theme-bg-secondary)', borderColor: 'var(--theme-border)' }}
+                    >
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[9px]" style={{ background: mix(skill, 16), color: skill }}>
+                        {TASK_ICONS[task.type] ?? <IconRocket size={17} />}
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <span
+                            className={`text-[14px] font-semibold ${task.completed ? 'line-through' : ''}`}
+                            style={{ color: task.completed ? 'var(--theme-text-muted)' : 'var(--theme-text-primary)' }}
+                          >
+                            {task.title}
+                          </span>
+                          {st === 'current' && (
+                            <span className="rounded-[3px] px-1.5 py-px text-[9px] font-bold uppercase tracking-wide" style={{ background: mix(skill, 18), color: skill }}>
+                              {t('week.todayBadge')}
+                            </span>
+                          )}
+                        </div>
+                        <div className="mt-0.5 truncate text-caption" style={{ color: 'var(--theme-text-muted)' }}>{task.description}</div>
+                      </div>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0" style={{ color: 'var(--theme-text-muted)' }}><path d="M9 18l6-6-6-6" /></svg>
+                    </Link>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </section>
+
+      {/* ── Delete confirmation ── */}
       {showDelete && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setShowDelete(false)}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4" onClick={() => setShowDelete(false)}>
           <div
-            className="p-6 rounded-2xl max-w-sm w-full mx-4"
-            style={{ backgroundColor: 'var(--theme-bg-card)' }}
+            className="w-full max-w-sm rounded-lg border p-6"
+            style={{ backgroundColor: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}
             onClick={(e) => e.stopPropagation()}
           >
-            <h3 className="text-lg font-bold mb-2" style={{ color: 'var(--theme-text-primary)' }}>
+            <h3 className="mb-2 text-h3 font-bold" style={{ color: 'var(--theme-text-primary)' }}>
               {t('delete.title')}
             </h3>
-            <p className="text-sm mb-5" style={{ color: 'var(--theme-text-muted)' }}>
+            <p className="mb-5 text-caption" style={{ color: 'var(--theme-text-muted)' }}>
               {t('delete.confirm')}
             </p>
             <div className="flex gap-3">
               <button
                 onClick={() => setShowDelete(false)}
-                className="flex-1 py-2.5 rounded-xl text-sm font-medium border"
+                className="flex-1 rounded-[9px] border py-2.5 text-caption font-medium"
                 style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)' }}
               >
                 {t('delete.cancel')}
@@ -476,8 +441,8 @@ export default function StudyPlanPage() {
               <button
                 onClick={handleDelete}
                 disabled={deleteMut.isPending}
-                className="flex-1 py-2.5 rounded-xl text-sm font-bold text-white"
-                style={{ background: STATUS.danger }}
+                className="flex-1 rounded-[9px] py-2.5 text-caption font-bold text-white"
+                style={{ background: 'var(--danger)' }}
               >
                 {deleteMut.isPending ? t('delete.deleting') : t('delete.submit')}
               </button>

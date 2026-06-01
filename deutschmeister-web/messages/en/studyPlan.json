@@ -21,9 +21,14 @@
     "pausedBanner": "Plan is paused. Click \"Resume\" to continue learning."
   },
   "progress": {
-    "label": "Progress",
+    "label": "Overall progress",
     "completed": "complete",
     "totalWeeks": "{weeks}-week plan"
+  },
+  "stepStatus": {
+    "done": "Done",
+    "current": "In progress",
+    "upcoming": "Upcoming"
   },
   "sidebar": {
     "title": "Learning path",
@@ -35,11 +40,16 @@
   },
   "today": {
     "title": "Today's tasks · {day}",
-    "doneBadge": "{done}/{total} Done"
+    "doneBadge": "{done}/{total} done",
+    "start": "Start"
   },
   "week": {
     "details": "Week {week} details",
-    "allDays": "ALL"
+    "allDays": "All week",
+    "heading": "Week {week}: {phase}",
+    "taskCount": "{done}/{total} tasks",
+    "todayBadge": "Today",
+    "noTasks": "No tasks for this week yet."
   },
   "delete": {
     "title": "Delete study plan?",

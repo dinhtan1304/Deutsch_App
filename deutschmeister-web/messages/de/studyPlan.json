@@ -21,9 +21,14 @@
     "pausedBanner": "Plan ist pausiert. Klicke auf \"Fortsetzen\", um weiterzulernen."
   },
   "progress": {
-    "label": "Fortschritt",
+    "label": "Gesamtfortschritt",
     "completed": "abgeschlossen",
     "totalWeeks": "{weeks}-Wochen-Plan"
+  },
+  "stepStatus": {
+    "done": "Fertig",
+    "current": "Aktiv",
+    "upcoming": "Bevorstehend"
   },
   "sidebar": {
     "title": "Lernpfad",
@@ -35,11 +40,16 @@
   },
   "today": {
     "title": "Aufgaben heute · {day}",
-    "doneBadge": "{done}/{total} erledigt"
+    "doneBadge": "{done}/{total} erledigt",
+    "start": "Starten"
   },
   "week": {
     "details": "Woche {week} im Detail",
-    "allDays": "ALLE"
+    "allDays": "Ganze Woche",
+    "heading": "Woche {week}: {phase}",
+    "taskCount": "{done}/{total} Aufgaben",
+    "todayBadge": "Heute",
+    "noTasks": "Noch keine Aufgaben für diese Woche."
   },
   "delete": {
     "title": "Lernplan löschen?",

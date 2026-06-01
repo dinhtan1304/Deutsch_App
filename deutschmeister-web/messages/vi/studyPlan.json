@@ -21,9 +21,14 @@
     "pausedBanner": "Lịch học đang tạm dừng. Nhấn \"Tiếp tục\" để học lại."
   },
   "progress": {
-    "label": "Progress",
+    "label": "Tiến độ tổng",
     "completed": "hoàn thành",
     "totalWeeks": "Lộ trình {weeks} tuần"
+  },
+  "stepStatus": {
+    "done": "Xong",
+    "current": "Đang học",
+    "upcoming": "Sắp tới"
   },
   "sidebar": {
     "title": "Lộ trình học",
@@ -35,11 +40,16 @@
   },
   "today": {
     "title": "Nhiệm vụ hôm nay · {day}",
-    "doneBadge": "{done}/{total} Done"
+    "doneBadge": "{done}/{total} xong",
+    "start": "Bắt đầu"
   },
   "week": {
     "details": "Chi tiết tuần {week}",
-    "allDays": "ALL"
+    "allDays": "Cả tuần",
+    "heading": "Tuần {week}: {phase}",
+    "taskCount": "{done}/{total} nhiệm vụ",
+    "todayBadge": "Hôm nay",
+    "noTasks": "Chưa có nhiệm vụ cho tuần này."
   },
   "delete": {
     "title": "Xóa lịch học?",
