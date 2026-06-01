@@ -22,6 +22,16 @@ import { ACCENT, STATUS } from '@/lib/tokens';
 
 const AC: Record<string, string> = { masculine: ACCENT.srs, feminine: ACCENT.listening, neuter: STATUS.success };
 
+/* eslint-disable no-restricted-syntax */
+// After answering, the word card takes the word's article colour
+// (der = blue, die = pink, das = green) instead of generic right/wrong tints.
+const ANSWERED_GRAD: Record<string, string> = {
+  masculine: 'linear-gradient(135deg, #0a1628 0%, #1e3a8a 100%)',
+  feminine: 'linear-gradient(135deg, #2a0a1e 0%, #9d174d 100%)',
+  neuter: 'linear-gradient(135deg, #0a2218 0%, #065f46 100%)',
+};
+/* eslint-enable no-restricted-syntax */
+
 type Phase = 'setup' | 'playing' | 'result';
 
 interface AnswerRecord {
@@ -240,12 +250,11 @@ export default function FillBlankPage() {
         <div className="rounded-3xl overflow-hidden my-6 transition-all duration-300"
           style={{
             background: answered
-              // eslint-disable-next-line no-restricted-syntax
-              ? (isCorrect ? 'linear-gradient(135deg, #052e16 0%, #166534 100%)' : 'linear-gradient(135deg, #450a0a 0%, #991b1b 100%)')
+              ? (ANSWERED_GRAD[currentWord.gender] ?? ANSWERED_GRAD.masculine)
               // eslint-disable-next-line no-restricted-syntax
               : 'linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)',
           }}>
-          <div className="flex flex-col items-center justify-center px-6 py-8 text-center" style={{ minHeight: 170 }}>
+          <div className="flex flex-col items-center justify-center px-6 py-10 text-center" style={{ minHeight: 200 }}>
             <div className="text-3xl md:text-4xl font-extrabold mb-3 text-white">
               <span className="inline-block min-w-16 border-b-2 mx-1.5 pb-0.5 transition-colors duration-300"
                 // eslint-disable-next-line no-restricted-syntax
