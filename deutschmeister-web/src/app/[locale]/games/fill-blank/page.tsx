@@ -14,7 +14,7 @@ import {
   GameSetupCard, GameResultCard, GameProgressBar,
   StatCard, AnswerReview, AddWrongWordsToBank, GameResultUpsell, GameInfoBox, KBD,
   GamePlayHeader, GameStatsBar, useGameTimer,
-  IconPenTool, IconTarget, IconCheck, IconRocket, IconKeyboard, IconVolume,
+  IconPenTool, IconTarget, IconRocket, IconKeyboard, IconVolume,
   IconRefresh, IconChevronLeft, IconLightbulb,
 } from '@/components/games/GameUI';
 import { Button } from '@/components/ui';
@@ -22,15 +22,10 @@ import { ACCENT, STATUS } from '@/lib/tokens';
 
 const AC: Record<string, string> = { masculine: ACCENT.srs, feminine: ACCENT.listening, neuter: STATUS.success };
 
-/* eslint-disable no-restricted-syntax */
-// After answering, the word card takes the word's article colour
-// (der = blue, die = pink, das = green) instead of generic right/wrong tints.
-const ANSWERED_GRAD: Record<string, string> = {
-  masculine: 'linear-gradient(135deg, #0a1628 0%, #1e3a8a 100%)',
-  feminine: 'linear-gradient(135deg, #2a0a1e 0%, #9d174d 100%)',
-  neuter: 'linear-gradient(135deg, #0a2218 0%, #065f46 100%)',
-};
-/* eslint-enable no-restricted-syntax */
+// Article colour per article string (der=blue, die=pink, das=green)
+const ART_COLOR: Record<string, string> = { der: 'var(--der)', die: 'var(--die)', das: 'var(--das)' };
+const ART_LABEL: Record<string, string> = { der: 'Maskulin', die: 'Feminin', das: 'Neutrum' };
+const mix = (c: string, p: number) => `color-mix(in srgb, ${c} ${p}%, transparent)`;
 
 type Phase = 'setup' | 'playing' | 'result';
 
@@ -167,6 +162,13 @@ export default function FillBlankPage() {
     }
   }, [phase, session]);
 
+  // After answering, briefly show the correct/wrong feedback, then advance.
+  useEffect(() => {
+    if (phase !== 'playing' || !answered) return;
+    const id = setTimeout(() => nextQuestion(), 1400);
+    return () => clearTimeout(id);
+  }, [phase, answered, nextQuestion]);
+
   const timer = useGameTimer(phase === 'playing');
 
   // ─── Setup ───
@@ -246,20 +248,21 @@ export default function FillBlankPage() {
       ]} />
         <GameProgressBar current={index + 1} total={questionsCount} />
 
-      {currentWord && (
+      {currentWord && (() => {
+        // light feedback colours (green when right, salmon when wrong) — card stays purple
+        const fbText = isCorrect ? 'color-mix(in srgb, var(--success) 72%, white)' : 'color-mix(in srgb, var(--danger) 55%, white)';
+        const blankBorder = !answered ? 'var(--accent)' : isCorrect ? 'var(--success)' : 'color-mix(in srgb, var(--danger) 55%, white)';
+        return (
         <div className="rounded-3xl overflow-hidden my-6 transition-all duration-300"
           style={{
-            background: answered
-              ? (ANSWERED_GRAD[currentWord.gender] ?? ANSWERED_GRAD.masculine)
-              // eslint-disable-next-line no-restricted-syntax
-              : 'linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)',
+            // eslint-disable-next-line no-restricted-syntax
+            background: 'linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)',
           }}>
           <div className="flex flex-col items-center justify-center px-6 py-10 text-center" style={{ minHeight: 200 }}>
             <div className="text-3xl md:text-4xl font-extrabold mb-3 text-white">
               <span className="inline-block min-w-16 border-b-2 mx-1.5 pb-0.5 transition-colors duration-300"
-                // eslint-disable-next-line no-restricted-syntax
-                style={{ borderColor: answered ? 'rgba(255,255,255,.3)' : '#A78BFA', color: 'white' }}>
-                {answered ? currentWord.article : '____'}
+                style={{ borderColor: blankBorder, color: answered ? fbText : 'white' }}>
+                {answered ? currentWord.article : ' '}
               </span>
               <span className="text-white">{currentWord.word}</span>
             </div>
@@ -276,49 +279,45 @@ export default function FillBlankPage() {
               </button>
             )}
             {answered && (
-              <p className="text-body mt-3 font-bold" style={{ color: 'rgba(255,255,255,0.85)' }}>
+              <p className="text-body mt-3 font-bold" style={{ color: fbText }}>
                 {isCorrect ? t('fillBlank.correctMark') : t('fillBlank.wrongMark', { answer: currentWord.article })}
               </p>
             )}
           </div>
         </div>
-      )}
+        );
+      })()}
 
-      {!answered ? (
-        <div className="space-y-3">
-          <div className="flex gap-2">
-            <input ref={inputRef} type="text" value={userInput}
-              onChange={e => setUserInput(e.target.value)} onKeyDown={handleKeyDown}
-              placeholder={t('fillBlank.placeholder')}
-              autoComplete="off" autoCapitalize="off"
-              className="flex-1 px-4 py-3 rounded-xl border-2 text-center text-title font-semibold focus:outline-none transition-all duration-200"
-              style={{ backgroundColor: 'var(--theme-bg-card)', borderColor: ACCENT.vocab, color: 'var(--theme-text-primary)' }} />
-            <Button variant="game" accent="premium" onClick={checkAnswer} disabled={!userInput.trim()}>{t('fillBlank.check')}</Button>
-          </div>
-          <div className="grid grid-cols-3 gap-2.5">
-            {([
-              { article: 'der', label: 'Maskulin', color: 'var(--der)' },
-              { article: 'die', label: 'Feminin',  color: 'var(--die)' },
-              { article: 'das', label: 'Neutrum',  color: 'var(--das)' },
-            ]).map(btn => (
-              <button key={btn.article} onClick={() => handleQuickAnswer(btn.article)}
-                className="flex flex-col items-center justify-center gap-0.5 py-4 rounded-[13px] transition-transform duration-150 hover:-translate-y-0.5"
-                style={{
-                  background: `color-mix(in srgb, ${btn.color} 12%, transparent)`,
-                  border: `2px solid color-mix(in srgb, ${btn.color} 30%, transparent)`,
-                  color: btn.color,
-                }}>
-                <span className="text-h2 font-extrabold leading-none" style={{ letterSpacing: '-.02em' }}>{btn.article}</span>
-                <span className="text-[10px] font-semibold uppercase tracking-wide opacity-70">{btn.label}</span>
-              </button>
-            ))}
-          </div>
+      <div className="space-y-3">
+        <div className="flex gap-2">
+          <input ref={inputRef} type="text" value={userInput} disabled={answered}
+            onChange={e => setUserInput(e.target.value)} onKeyDown={handleKeyDown}
+            placeholder={t('fillBlank.placeholder')}
+            autoComplete="off" autoCapitalize="off"
+            className="flex-1 px-4 py-3 rounded-xl border-2 text-center text-title font-semibold focus:outline-none transition-all duration-200"
+            style={{ backgroundColor: 'var(--theme-bg-card)', borderColor: answered ? (isCorrect ? STATUS.success : STATUS.danger) : ACCENT.vocab, color: 'var(--theme-text-primary)' }} />
+          <Button variant="game" accent="premium" onClick={checkAnswer} disabled={answered || !userInput.trim()}>{t('fillBlank.check')}</Button>
         </div>
-      ) : (
-        <Button variant="game" accent="premium" onClick={nextQuestion} className="w-full">
-          {index + 1 >= questionsCount ? <><IconCheck size={16} /> {t('fillBlank.viewResult')}</> : <>{t('fillBlank.nextQuestion')}</>}
-        </Button>
-      )}
+        <div className="grid grid-cols-3 gap-2.5">
+          {(['der', 'die', 'das'] as const).map(art => {
+            const color = ART_COLOR[art]!;
+            const isCorrectBtn = answered && currentWord?.article === art;
+            const isWrongPick = answered && userInput.trim().toLowerCase() === art && !isCorrect;
+            const dim = answered && !isCorrectBtn && !isWrongPick;
+            const bg = isCorrectBtn ? mix('var(--success)', 18) : isWrongPick ? mix('var(--danger)', 18) : mix(color, 12);
+            const bd = isCorrectBtn ? 'var(--success)' : isWrongPick ? 'var(--danger)' : mix(color, 30);
+            const col = isCorrectBtn ? 'var(--success)' : isWrongPick ? 'var(--danger)' : color;
+            return (
+              <button key={art} onClick={() => handleQuickAnswer(art)} disabled={answered}
+                className="flex flex-col items-center justify-center gap-0.5 py-4 rounded-[13px] transition-all duration-200 enabled:hover:-translate-y-0.5"
+                style={{ background: bg, border: `2px solid ${bd}`, color: col, opacity: dim ? 0.4 : 1 }}>
+                <span className="text-h2 font-extrabold leading-none" style={{ letterSpacing: '-.02em' }}>{art}</span>
+                <span className="text-[10px] font-semibold uppercase tracking-wide opacity-70">{ART_LABEL[art]}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 }
