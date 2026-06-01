@@ -693,6 +693,14 @@ input[type="range"]::-webkit-slider-thumb {
   background: color-mix(in srgb, var(--accent) 12%, var(--theme-bg-card));
 }
 
+/* v2 live "active" pulse dot */
+@keyframes v2-pulse { 0%, 100% { opacity: 1; } 50% { opacity: .4; } }
+.v2-pulse { animation: v2-pulse 2s infinite; }
+
+/* v2 speaking-rooms: match-entry gradient + BETA badge (theme-var gradients) */
+.v2-match-grad { background: linear-gradient(135deg, var(--accent), var(--violet)); }
+.v2-beta-badge { background: linear-gradient(135deg, var(--warn), var(--streak)); color: #1a1505; }
+
 /* v2 word/entity card hover lift — border turns to the card's article/route
    accent (--card-accent set inline). */
 .word-card-v2 { transition: border-color .2s, transform .2s, box-shadow .2s; }
