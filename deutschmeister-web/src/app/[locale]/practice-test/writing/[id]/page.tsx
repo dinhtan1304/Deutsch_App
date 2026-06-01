@@ -136,7 +136,7 @@ export default function WritingEditorPage() {
   const progressColor = wordCount > session.wordCountMax ? ACCENT.games : isInRange ? STATUS.success : STATUS.info;
 
   return (
-      <div className="max-w-5xl mx-auto px-4 pb-24">
+      <div className="max-w-360 mx-auto px-4 pb-24">
         {/* Immersive Header */}
         <div className="relative -mx-4 px-4 pt-8 pb-12 mb-6 overflow-hidden">
           <div className="absolute inset-0 opacity-10 pointer-events-none"

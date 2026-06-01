@@ -68,7 +68,7 @@ export default function PronunciationPage() {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: 'var(--theme-bg-primary)' }}>
-      <div className="max-w-5xl mx-auto px-4 py-6">
+      <div className="max-w-360 mx-auto px-4 py-6">
         {/* Header */}
         <div className="mb-6">
           <Link href="/practice-test" className="text-xs mb-2 inline-flex items-center gap-1"

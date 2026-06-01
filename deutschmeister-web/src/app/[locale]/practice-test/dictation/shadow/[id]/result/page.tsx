@@ -80,7 +80,7 @@ export default function ShadowingResultPage() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-8 pb-32">
+    <div className="max-w-360 mx-auto px-4 py-8 pb-32">
       <PageHeader
         backHref="/practice-test/dictation/shadow"
         title={t('title')}

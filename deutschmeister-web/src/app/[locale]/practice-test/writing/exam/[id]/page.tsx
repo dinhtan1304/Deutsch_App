@@ -304,7 +304,7 @@ export default function ExamWritingPage() {
 
   return (
     <div className="min-h-screen pb-10" style={{ backgroundColor: 'var(--theme-bg-primary)' }}>
-     <div className="max-w-5xl mx-auto px-4">
+     <div className="max-w-360 mx-auto px-4">
 
       {/* Immersive Header */}
       <div className="relative -mx-4 px-4 pt-8 pb-12 mb-6 overflow-hidden">

@@ -219,7 +219,7 @@ export default function FreeSpeakingResultPage() {
   const strengths = grading.strengths || [];
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-6 pb-28">
+    <div className="max-w-360 mx-auto px-4 py-6 pb-28">
       <PageHeader
         backHref="/practice-test/speaking"
         title={t('title')}

@@ -420,7 +420,7 @@ export default function ExamSpeakingResultPage() {
   const grade = getGrade(totalScore);
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-6">
+    <div className="max-w-360 mx-auto px-4 py-6">
 
       <PageHeader
         backHref="/practice-test/speaking/exam"
