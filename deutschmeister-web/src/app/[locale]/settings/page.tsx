@@ -9,7 +9,6 @@ import { useAuthStore } from '@/stores/authStore';
 import { useUpdateSettings } from '@/hooks/useUser';
 import type { UpdateSettingsPayload } from '@/lib/api/users';
 import { IconSettings } from '@/components/ui/Icons';
-import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 
 // Inline Icons
@@ -102,22 +101,22 @@ function IconBell({ size = 16, style, className }: { size?: number; style?: Reac
   );
 }
 
-// Tab + theme metadata is structural only (id, icon, color). Labels are
-// resolved per-locale at render via `settings.tabs.<id>` / `settings.display.themes.<value>`.
+// Tab + theme metadata is structural only (id, icon). Labels are resolved
+// per-locale at render. The v2 design uses one unified accent for every panel.
 const TABS = [
-  { id: 'display' as const, icon: IconPalette, color: ACCENT.vocab },
-  { id: 'sound' as const, icon: IconVolume2, color: ACCENT.srs },
-  { id: 'learning' as const, icon: IconGraduationCap, color: STATUS.success },
-  { id: 'notification' as const, icon: IconBell, color: ACCENT.xp },
-  { id: 'account' as const, icon: IconUser, color: 'var(--theme-text-muted)' },
+  { id: 'display' as const, icon: IconPalette },
+  { id: 'sound' as const, icon: IconVolume2 },
+  { id: 'learning' as const, icon: IconGraduationCap },
+  { id: 'notification' as const, icon: IconBell },
+  { id: 'account' as const, icon: IconUser },
 ];
 
-const monoGradient = (color: string) => `linear-gradient(135deg, ${color}, ${color}cc)`;
 const THEME_OPTIONS = [
-  { value: 'light' as const, icon: IconSun, color: ACCENT.xp },
-  { value: 'dark' as const, icon: IconMoon, color: ACCENT.writing },
-  { value: 'system' as const, icon: IconMonitor, color: ACCENT.srs },
+  { value: 'light' as const, icon: IconSun },
+  { value: 'dark' as const, icon: IconMoon },
+  { value: 'system' as const, icon: IconMonitor },
 ];
+const LEVELS = ['all', 'A1', 'A2', 'B1', 'B2', 'C1', 'C2'] as const;
 
 const BACKEND_SETTINGS_KEY_SET = new Set<string>(BACKEND_SETTINGS_KEYS as readonly string[]);
 
@@ -136,63 +135,65 @@ function SettingToggle({ label, desc, checked, onChange }: {
   label: string; desc: string; checked: boolean; onChange: (v: boolean) => void;
 }) {
   return (
-    <div className="flex items-center justify-between py-3.5 border-b last:border-b-0"
+    <div className="flex items-center justify-between gap-5 py-4 border-b last:border-b-0"
       style={{ borderColor: 'var(--theme-border)' }}>
-      <div className="flex-1 mr-4">
-        <div className="text-[13px] font-bold" style={{ color: 'var(--theme-text-primary)' }}>{label}</div>
-        <div className="text-[11px] mt-0.5 opacity-50 font-medium" style={{ color: 'var(--theme-text-muted)' }}>{desc}</div>
+      <div className="min-w-0 flex-1">
+        <div className="text-[14px] font-semibold" style={{ color: 'var(--theme-text-primary)' }}>{label}</div>
+        <div className="mt-0.5 text-caption font-medium" style={{ color: 'var(--theme-text-muted)' }}>{desc}</div>
       </div>
       <button onClick={() => onChange(!checked)}
-        className="relative w-11 h-6 rounded-full transition-all duration-300 shrink-0"
-        style={{ backgroundColor: checked ? 'var(--accent)' : 'var(--theme-bg-secondary)', boxShadow: checked ? '0 0 15px color-mix(in srgb, var(--accent) 30%, transparent)' : 'none' }}>
-        <div className="absolute top-1 w-4 h-4 rounded-full bg-white shadow-md transition-all duration-300"
-          style={{ left: checked ? '1.625rem' : '0.25rem' }} />
+        className="relative h-6.5 w-11 shrink-0 rounded-full transition-colors duration-200"
+        style={{ background: checked ? 'var(--accent)' : 'var(--theme-bg-tertiary)', boxShadow: checked ? '0 2px 8px color-mix(in srgb, var(--accent) 45%, transparent)' : 'none' }}>
+        <span className="absolute top-[3px] h-5 w-5 rounded-full bg-white shadow-md transition-[left] duration-200"
+          style={{ left: checked ? 21 : 3 }} />
       </button>
     </div>
   );
 }
 
-function SettingSlider({ label, value, min, max, step, unit, onChange, color = 'var(--accent)' }: {
+function SettingSlider({ label, value, min, max, step, unit, onChange, labels }: {
   label: string; value: number; min: number; max: number; step: number; unit: string;
-  onChange: (v: number) => void; color?: string;
+  onChange: (v: number) => void; labels?: string[];
 }) {
   const pct = ((value - min) / (max - min)) * 100;
   return (
     <div className="py-4 border-b last:border-b-0" style={{ borderColor: 'var(--theme-border)' }}>
-      <div className="flex justify-between mb-3">
-        <span className="text-[13px] font-bold" style={{ color: 'var(--theme-text-primary)' }}>{label}</span>
-        <span className="text-[11px] font-black px-2 py-0.5 rounded-lg"
-          style={{ background: `${color}12`, color }}>{value} {unit}</span>
+      <div className="mb-3 flex items-center justify-between">
+        <span className="text-[14px] font-semibold" style={{ color: 'var(--theme-text-primary)' }}>{label}</span>
+        <span className="mono rounded-sm px-2.5 py-0.5 text-[12px] font-bold"
+          style={{ background: 'color-mix(in srgb, var(--accent) 16%, transparent)', color: 'var(--accent)' }}>{value} {unit}</span>
       </div>
-      <div className="relative h-6 flex items-center">
-        <div className="absolute w-full h-1 rounded-full" style={{ backgroundColor: 'var(--theme-bg-secondary)' }} />
-        <div className="absolute h-1 rounded-full transition-all duration-300" style={{ width: `${pct}%`, backgroundColor: color, boxShadow: `0 0 10px ${color}44` }} />
+      <div className="relative flex h-4.5 items-center">
+        <div className="absolute h-1.5 w-full rounded-full" style={{ background: 'var(--theme-bg-tertiary)' }} />
+        <div className="absolute h-1.5 rounded-full" style={{ width: `${pct}%`, background: 'var(--accent)' }} />
         <input type="range" min={min} max={max} step={step} value={value}
-          onChange={e => onChange(parseInt(e.target.value))}
-          className="absolute w-full h-6 opacity-0 cursor-pointer z-10" />
-        <div className="absolute w-4 h-4 rounded-full border-2 bg-white shadow-lg pointer-events-none transition-all duration-150"
-          style={{ left: `calc(${pct}% - 8px)`, borderColor: color }} />
+          onChange={e => onChange(Number(e.target.value))}
+          className="absolute z-10 h-4.5 w-full cursor-pointer opacity-0" />
+        <div className="pointer-events-none absolute h-4.5 w-4.5 -translate-x-1/2 rounded-full bg-white"
+          style={{ left: `${pct}%`, boxShadow: '0 2px 6px color-mix(in srgb, var(--accent) 66%, transparent), 0 0 0 3px var(--accent)' }} />
       </div>
+      {labels && (
+        <div className="mt-2 flex justify-between text-[11px]" style={{ color: 'var(--theme-text-muted)' }}>
+          {labels.map((l, i) => <span key={i}>{l}</span>)}
+        </div>
+      )}
     </div>
   );
 }
 
-function SectionCard({ title, icon: Icon, color, children }: {
-  title: string; icon: React.FC<{ size?: number; style?: React.CSSProperties }>; color: string; children: React.ReactNode;
+function Panel({ title, icon: Icon, children }: {
+  title: string; icon: React.FC<{ size?: number; style?: React.CSSProperties }>; children: React.ReactNode;
 }) {
   return (
-    <div className="rounded-3xl border overflow-hidden mb-6 shadow-sm"
-      style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
-      <div className="flex items-center gap-3 px-5 pt-5 pb-2">
-        <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
-          style={{ background: `${color}15`, color }}>
+    <div className="rounded-lg border p-6" style={{ borderColor: 'var(--theme-border)', background: 'var(--theme-bg-card)' }}>
+      <div className="mb-3 flex items-center gap-2.5">
+        <span className="flex h-8 w-8 items-center justify-center rounded-[9px]"
+          style={{ background: 'color-mix(in srgb, var(--accent) 16%, transparent)', color: 'var(--accent)' }}>
           <Icon size={16} />
-        </div>
-        <h2 className="text-sm font-black uppercase tracking-widest opacity-60">{title}</h2>
+        </span>
+        <h2 className="text-h3 font-extrabold" style={{ color: 'var(--theme-text-primary)' }}>{title}</h2>
       </div>
-      <div className="px-5 pb-4">
-        {children}
-      </div>
+      {children}
     </div>
   );
 }
@@ -308,336 +309,252 @@ export default function SettingsPage() {
 
   if (!isLoaded) {
     return (
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <div className="w-12 h-12 rounded-2xl flex items-center justify-center animate-pulse"
-            style={{ background: GRADIENT.writing }}>
-            <IconSettings size={24} className="text-white" />
-          </div>
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <div className="v2-match-grad flex h-12 w-12 animate-pulse items-center justify-center rounded-[14px]">
+          <IconSettings size={24} className="text-white" />
         </div>
+      </div>
     );
   }
 
+  const plan = user?.subscription?.plan;
+  const isFreePlan = !plan || plan === 'free';
+
   return (
-    <div className="min-h-screen" style={{ backgroundColor: 'var(--theme-bg-body)', color: 'var(--theme-text-primary)', backgroundImage: 'radial-gradient(circle at 50% -20%, var(--color-accent-brand)15, transparent 70%)' }}>
-      <div className="max-w-3xl mx-auto px-4 py-10">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-xl relative overflow-hidden"
-              style={{ background: GRADIENT.writing }}>
-              <div className="absolute inset-0 bg-white/10 animate-pulse" />
-              <IconSettings size={28} className="text-white relative z-10" />
-            </div>
-            <div>
-              <h1 className="text-3xl font-black tracking-tight mb-0.5">{t('header.title')}</h1>
-              <p className="text-sm opacity-50 font-medium">{t('header.subtitle')}</p>
-            </div>
-          </div>
-
-          <div className="h-10 flex items-center">
-            {toast && (
-              <div className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black text-white animate-bounce shadow-lg"
-                style={{ background: GRADIENT.readingGreen }}>
-                <IconCheck size={14} /> {toast}
-              </div>
-            )}
-          </div>
+    <div className="mx-auto max-w-360 px-4 py-6 sm:px-6">
+      {/* ── Header ── */}
+      <header className="mb-6 flex flex-wrap items-center gap-4">
+        <div className="v2-match-grad flex h-12 w-12 shrink-0 items-center justify-center rounded-[13px] text-white"
+          style={{ boxShadow: '0 8px 20px color-mix(in srgb, var(--accent) 27%, transparent)' }}>
+          <IconSettings size={24} />
         </div>
+        <div className="flex-1">
+          <h1 className="text-[26px] font-extrabold leading-tight tracking-tight" style={{ color: 'var(--theme-text-primary)' }}>{t('header.title')}</h1>
+          <p className="mt-0.5 text-body" style={{ color: 'var(--theme-text-secondary)' }}>{t('header.subtitle')}</p>
+        </div>
+        {toast && (
+          <div className="v2-toast flex items-center gap-2 rounded-[9px] px-3.5 py-2 text-caption font-bold text-white"
+            style={{ background: 'var(--success)' }}>
+            <IconCheck size={14} /> {toast}
+          </div>
+        )}
+      </header>
 
-        <div className="flex gap-1.5 p-1.5 rounded-xl bg-white/5 border border-white/10 backdrop-blur-xl mb-10 overflow-x-auto"
-          style={{ backgroundColor: 'var(--theme-bg-secondary)', borderColor: 'var(--theme-border)' }}>
+      {/* ── Vertical tab nav + content ── */}
+      <div className="grid gap-5 md:grid-cols-[232px_1fr] md:items-start">
+        {/* Tab nav */}
+        <nav className="flex gap-1.5 overflow-x-auto rounded-[13px] border p-2 md:sticky md:top-20 md:flex-col md:gap-1 md:overflow-visible"
+          style={{ background: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}>
           {TABS.map(tab => {
             const Ic = tab.icon;
-            const isActive = activeTab === tab.id;
+            const on = activeTab === tab.id;
             return (
               <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-widest whitespace-nowrap transition-all duration-300 ${isActive ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/20' : 'text-theme-muted hover:text-theme-text'}`}>
-                <Ic size={14} /> {t(`tabs.${tab.id}` as 'tabs.display')}
+                className="flex shrink-0 items-center gap-2.5 whitespace-nowrap rounded-[9px] px-3 py-2.5 text-left text-[13.5px] transition-colors"
+                style={{
+                  background: on ? 'color-mix(in srgb, var(--accent) 14%, transparent)' : 'transparent',
+                  color: on ? 'var(--theme-text-primary)' : 'var(--theme-text-secondary)',
+                  fontWeight: on ? 600 : 500,
+                }}>
+                <Ic size={17} style={{ color: on ? 'var(--accent)' : 'var(--theme-text-muted)' }} />
+                {t(`tabs.${tab.id}` as 'tabs.display')}
               </button>
             );
           })}
-        </div>
+          <div className="mx-1 my-1.5 hidden h-px md:block" style={{ background: 'var(--theme-border)' }} />
+          <button onClick={handleReset}
+            className="hidden items-center gap-2.5 rounded-[9px] px-3 py-2.5 text-left text-[12.5px] font-medium transition-colors hover:opacity-80 md:flex"
+            style={{ color: 'var(--theme-text-muted)' }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8" /><path d="M3 3v5h5" /></svg>
+            {t('footer.reset')}
+          </button>
+        </nav>
 
-        <div className="animate-[slideUp_0.4s_ease-out_both]">
+        {/* Content */}
+        <div className="animate-[slideUp_0.3s_ease-out_both]">
           {activeTab === 'display' && (
-            <SectionCard title={t('tabs.display')} icon={IconPalette} color={ACCENT.vocab}>
-              <div className="mb-6">
-                <label className="block text-[11px] font-black uppercase tracking-widest opacity-40 mb-4 px-1">
+            <Panel title={t('tabs.display')} icon={IconPalette}>
+              <div className="mb-2">
+                <div className="mb-3 text-[11px] font-semibold uppercase tracking-widest" style={{ color: 'var(--theme-text-muted)' }}>
                   {t('display.themeLabel')}
-                </label>
-                <div className="grid grid-cols-3 gap-3">
+                </div>
+                <div className="grid grid-cols-3 gap-2.5">
                   {THEME_OPTIONS.map(opt => {
                     const Ic = opt.icon;
-                    const isActive = settings.theme === opt.value;
+                    const on = settings.theme === opt.value;
                     return (
                       <button key={opt.value} onClick={() => handleTheme(opt.value)}
-                        className={`relative p-3.5 rounded-2xl border transition-all duration-300 hover:scale-[1.02] text-center ${isActive ? 'shadow-md' : 'bg-theme-bg-secondary/30'}`}
+                        className="relative flex flex-col items-center gap-2.5 rounded-md px-3 py-5 transition-colors"
                         style={{
-                          borderColor: isActive ? opt.color : 'var(--theme-border)',
-                          backgroundColor: isActive ? `${opt.color}10` : 'transparent',
+                          background: on ? 'color-mix(in srgb, var(--accent) 14%, transparent)' : 'var(--theme-bg-secondary)',
+                          border: `1.5px solid ${on ? 'var(--accent)' : 'var(--theme-border)'}`,
                         }}>
-                        <div className="w-10 h-10 rounded-xl mx-auto flex items-center justify-center mb-2.5 transition-colors"
-                          style={{ background: isActive ? monoGradient(opt.color) : 'var(--theme-bg-secondary)', color: isActive ? 'white' : 'var(--theme-text-muted)' }}>
-                          <Ic size={18} />
-                        </div>
-                        <div className="text-caption font-black tracking-tight" style={{ color: isActive ? opt.color : 'var(--theme-text-primary)' }}>
-                          {t(`display.themes.${opt.value}` as 'display.themes.light')}
-                        </div>
-                        {isActive && (
-                          <div className="absolute top-2 right-2 w-4 h-4 rounded-full flex items-center justify-center shadow-sm"
-                            style={{ background: opt.color }}>
-                            <IconCheck size={9} style={{ color: 'white' }} />
-                          </div>
+                        {on && (
+                          <span className="absolute right-2 top-2 flex h-4.5 w-4.5 items-center justify-center rounded-full text-white" style={{ background: 'var(--accent)' }}>
+                            <IconCheck size={10} />
+                          </span>
                         )}
+                        <span className="flex h-10 w-10 items-center justify-center rounded-full"
+                          style={{ background: on ? 'var(--accent)' : 'var(--theme-bg-tertiary)', color: on ? 'white' : 'var(--theme-text-muted)' }}>
+                          <Ic size={18} />
+                        </span>
+                        <span className="text-[13px] font-semibold" style={{ color: on ? 'var(--theme-text-primary)' : 'var(--theme-text-secondary)' }}>
+                          {t(`display.themes.${opt.value}` as 'display.themes.light')}
+                        </span>
                       </button>
                     );
                   })}
                 </div>
               </div>
 
-              <div className="mb-6">
+              <div className="my-5">
                 <LanguageSwitcher />
               </div>
 
-              <SettingToggle
-                label={t('display.showVietnamese.label')}
-                desc={t('display.showVietnamese.desc')}
-                checked={settings.showVietnamese}
-                onChange={v => handleChange('showVietnamese', v)}
-              />
-              <SettingToggle
-                label={t('display.showPronunciation.label')}
-                desc={t('display.showPronunciation.desc')}
-                checked={settings.showPronunciation}
-                onChange={v => handleChange('showPronunciation', v)}
-              />
-              <SettingToggle
-                label={t('display.showExamples.label')}
-                desc={t('display.showExamples.desc')}
-                checked={settings.showExamples}
-                onChange={v => handleChange('showExamples', v)}
-              />
-            </SectionCard>
+              <SettingToggle label={t('display.showVietnamese.label')} desc={t('display.showVietnamese.desc')} checked={settings.showVietnamese} onChange={v => handleChange('showVietnamese', v)} />
+              <SettingToggle label={t('display.showPronunciation.label')} desc={t('display.showPronunciation.desc')} checked={settings.showPronunciation} onChange={v => handleChange('showPronunciation', v)} />
+              <SettingToggle label={t('display.showExamples.label')} desc={t('display.showExamples.desc')} checked={settings.showExamples} onChange={v => handleChange('showExamples', v)} />
+            </Panel>
           )}
 
           {activeTab === 'sound' && (
-            <SectionCard title={t('tabs.sound')} icon={IconVolume2} color={ACCENT.srs}>
-              <SettingToggle
-                label={t('sound.soundEnabled.label')}
-                desc={t('sound.soundEnabled.desc')}
-                checked={settings.soundEnabled}
-                onChange={v => handleChange('soundEnabled', v)}
+            <Panel title={t('tabs.sound')} icon={IconVolume2}>
+              <SettingToggle label={t('sound.soundEnabled.label')} desc={t('sound.soundEnabled.desc')} checked={settings.soundEnabled} onChange={v => handleChange('soundEnabled', v)} />
+              <SettingToggle label={t('sound.autoPlaySound.label')} desc={t('sound.autoPlaySound.desc')} checked={settings.autoPlaySound} onChange={v => handleChange('autoPlaySound', v)} />
+              <SettingSlider
+                label={t('sound.speechRate.label')}
+                value={settings.speechRate} min={0.5} max={1.5} step={0.1} unit="x"
+                onChange={v => handleChange('speechRate', v)}
+                labels={[t('sound.speechRate.slow'), t('sound.speechRate.normal'), t('sound.speechRate.fast')]}
               />
-              <SettingToggle
-                label={t('sound.autoPlaySound.label')}
-                desc={t('sound.autoPlaySound.desc')}
-                checked={settings.autoPlaySound}
-                onChange={v => handleChange('autoPlaySound', v)}
-              />
-
-              <div className="py-4 border-b" style={{ borderColor: 'var(--theme-border)' }}>
-                <div className="flex justify-between mb-3">
-                  <span className="text-[13px] font-bold" style={{ color: 'var(--theme-text-primary)' }}>
-                    {t('sound.speechRate.label')}
-                  </span>
-                  <span className="text-[11px] font-black px-2 py-0.5 rounded-lg mono"
-                    style={{ background: 'color-mix(in srgb, var(--accent) 12%, transparent)', color: 'var(--accent)' }}>
-                    {settings.speechRate}x
-                  </span>
-                </div>
-                {(() => {
-                  const pct = ((settings.speechRate - 0.5) / 1) * 100;
-                  return (
-                    <div className="relative h-6 flex items-center px-1">
-                      <div className="absolute left-1 right-1 h-1 rounded-full" style={{ backgroundColor: 'var(--theme-bg-secondary)' }} />
-                      <div className="absolute h-1 rounded-full transition-all duration-300" style={{ left: 4, width: `calc(${pct}% - 8px)`, backgroundColor: 'var(--accent)', boxShadow: '0 0 10px color-mix(in srgb, var(--accent) 30%, transparent)' }} />
-                      <input type="range" min="0.5" max="1.5" step="0.1"
-                        value={settings.speechRate}
-                        onChange={e => handleChange('speechRate', parseFloat(e.target.value))}
-                        className="absolute w-full h-6 opacity-0 cursor-pointer z-10" />
-                      <div className="absolute w-4 h-4 rounded-full border-2 bg-white shadow-lg pointer-events-none transition-all duration-150"
-                        style={{ left: `calc(${pct}% - 8px)`, borderColor: 'var(--accent)' }} />
-                    </div>
-                  );
-                })()}
-                <div className="flex justify-between text-[10px] font-bold opacity-40 uppercase tracking-widest mt-3">
-                  <span>{t('sound.speechRate.slow')}</span>
-                  <span>{t('sound.speechRate.normal')}</span>
-                  <span>{t('sound.speechRate.fast')}</span>
-                </div>
-              </div>
-            </SectionCard>
+            </Panel>
           )}
 
           {activeTab === 'learning' && (
-            <SectionCard title={t('tabs.learning')} icon={IconGraduationCap} color={ACCENT.reading}>
-              <SettingSlider
-                label={t('learning.dailyGoal')}
-                value={settings.dailyGoal} min={5} max={100} step={5} unit={t('learning.dailyGoalUnit')}
-                onChange={v => handleChange('dailyGoal', v)} color={ACCENT.reading}
-              />
-              <SettingSlider
-                label={t('learning.questionsPerGame')}
-                value={settings.questionsPerGame} min={5} max={50} step={5} unit={t('learning.questionsPerGameUnit')}
-                onChange={v => handleChange('questionsPerGame', v)} color="var(--accent)"
-              />
-              <SettingSlider
-                label={t('learning.timedChallenge')}
-                value={settings.timedChallengeSeconds} min={30} max={180} step={30} unit={t('learning.timedChallengeUnit')}
-                onChange={v => handleChange('timedChallengeSeconds', v)} color={ACCENT.xp}
-              />
+            <Panel title={t('tabs.learning')} icon={IconGraduationCap}>
+              <SettingSlider label={t('learning.dailyGoal')} value={settings.dailyGoal} min={5} max={100} step={5} unit={t('learning.dailyGoalUnit')} onChange={v => handleChange('dailyGoal', v)} labels={['5', '50', '100']} />
+              <SettingSlider label={t('learning.questionsPerGame')} value={settings.questionsPerGame} min={5} max={50} step={5} unit={t('learning.questionsPerGameUnit')} onChange={v => handleChange('questionsPerGame', v)} labels={['5', '25', '50']} />
+              <SettingSlider label={t('learning.timedChallenge')} value={settings.timedChallengeSeconds} min={30} max={180} step={30} unit={t('learning.timedChallengeUnit')} onChange={v => handleChange('timedChallengeSeconds', v)} labels={['30s', '90s', '180s']} />
 
-              <div className="py-5 border-b" style={{ borderColor: 'var(--theme-border)' }}>
-                <label className="block text-[11px] font-black uppercase tracking-widest opacity-40 mb-1 px-1">
+              <div className="pt-4">
+                <div className="mb-1 text-[11px] font-semibold uppercase tracking-widest" style={{ color: 'var(--theme-text-muted)' }}>
                   {t('learning.preferredLevel.label')}
-                </label>
-                <p className="text-[11px] font-medium mb-3 px-1 opacity-50" style={{ color: 'var(--theme-text-muted)' }}>
+                </div>
+                <p className="mb-3 text-caption font-medium" style={{ color: 'var(--theme-text-muted)' }}>
                   {t('learning.preferredLevel.desc')}
                 </p>
-                <div className="relative">
-                  <select value={settings.preferredLevel}
-                    onChange={e => handleChange('preferredLevel', e.target.value as 'A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C2' | 'all')}
-                    className="w-full px-4 py-3 rounded-2xl border text-sm font-bold appearance-none cursor-pointer transition-all focus:outline-none focus:ring-2"
-                    style={{ backgroundColor: 'var(--theme-bg-secondary)', borderColor: 'var(--theme-border)', color: 'var(--theme-text-primary)', '--tw-ring-color': STATUS.success } as React.CSSProperties}>
-                    <option value="all">{t('learning.preferredLevel.options.all')}</option>
-                    <option value="A1">{t('learning.preferredLevel.options.A1')}</option>
-                    <option value="A2">{t('learning.preferredLevel.options.A2')}</option>
-                    <option value="B1">{t('learning.preferredLevel.options.B1')}</option>
-                    <option value="B2">{t('learning.preferredLevel.options.B2')}</option>
-                    <option value="C1">{t('learning.preferredLevel.options.C1')}</option>
-                    <option value="C2">{t('learning.preferredLevel.options.C2')}</option>
-                  </select>
+                <div className="flex flex-wrap gap-1.5">
+                  {LEVELS.map(l => {
+                    const on = settings.preferredLevel === l;
+                    return (
+                      <button key={l} onClick={() => handleChange('preferredLevel', l)}
+                        className="mono flex-1 rounded-[9px] px-2 py-2.5 text-[13px] font-bold transition-colors"
+                        style={{
+                          background: on ? 'color-mix(in srgb, var(--accent) 14%, transparent)' : 'var(--theme-bg-secondary)',
+                          border: `1.5px solid ${on ? 'var(--accent)' : 'var(--theme-border)'}`,
+                          color: on ? 'var(--accent)' : 'var(--theme-text-secondary)',
+                        }}>
+                        {l === 'all' ? t('learning.preferredLevel.options.all') : l}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
-            </SectionCard>
+            </Panel>
           )}
 
           {activeTab === 'notification' && (
-            <SectionCard title={t('tabs.notification')} icon={IconBell} color={ACCENT.xp}>
-              <SettingToggle
-                label={t('notification.dailyReminder.label')}
-                desc={t('notification.dailyReminder.desc')}
-                checked={settings.dailyReminder}
-                onChange={v => handleChange('dailyReminder', v)}
-              />
-              <SettingToggle
-                label={t('notification.weeklyEmail.label')}
-                desc={t('notification.weeklyEmail.desc')}
-                checked={settings.weeklyEmailEnabled}
-                onChange={v => handleChange('weeklyEmailEnabled', v)}
-              />
-            </SectionCard>
+            <Panel title={t('tabs.notification')} icon={IconBell}>
+              <SettingToggle label={t('notification.dailyReminder.label')} desc={t('notification.dailyReminder.desc')} checked={settings.dailyReminder} onChange={v => handleChange('dailyReminder', v)} />
+              <SettingToggle label={t('notification.weeklyEmail.label')} desc={t('notification.weeklyEmail.desc')} checked={settings.weeklyEmailEnabled} onChange={v => handleChange('weeklyEmailEnabled', v)} />
+            </Panel>
           )}
 
           {activeTab === 'account' && (
-            <div className="space-y-6">
-              <SectionCard title={t('tabs.account')} icon={IconUser} color={'var(--theme-text-muted)'}>
-                {isAuthenticated ? (
-                  <div className="space-y-6 py-2">
-                    {/* User Profile Card */}
-                    <div className="flex items-center gap-5 p-6 rounded-4xl border border-theme-border bg-theme-bg-secondary/20 relative overflow-hidden group">
-                      <div className="absolute inset-0 bg-linear-to-br from-indigo-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-                      <div className="w-20 h-20 rounded-3xl flex items-center justify-center text-white text-3xl font-black shadow-2xl relative z-10"
-                        style={{ background: GRADIENT.writing }}>
-                        {user?.name?.[0]?.toUpperCase() || 'U'}
-                      </div>
-                      <div className="min-w-0 flex-1 relative z-10">
-                        <div className="text-xl font-black tracking-tight" style={{ color: 'var(--theme-text-primary)' }}>{user?.name || t('account.fallbackName')}</div>
-                        <div className="text-sm opacity-40 font-medium" style={{ color: 'var(--theme-text-muted)' }}>{user?.email}</div>
-                      </div>
+            <Panel title={t('tabs.account')} icon={IconUser}>
+              {isAuthenticated ? (
+                <div className="space-y-4">
+                  {/* User block */}
+                  <div className="flex items-center gap-3.5 rounded-md border p-4" style={{ background: 'var(--theme-bg-secondary)', borderColor: 'var(--theme-border)' }}>
+                    <div className="v2-match-grad flex h-14 w-14 shrink-0 items-center justify-center rounded-[14px] text-xl font-bold text-white">
+                      {user?.name?.[0]?.toUpperCase() || 'U'}
                     </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="truncate text-[16px] font-bold" style={{ color: 'var(--theme-text-primary)' }}>{user?.name || t('account.fallbackName')}</div>
+                      <div className="truncate text-caption" style={{ color: 'var(--theme-text-muted)' }}>{user?.email}</div>
+                    </div>
+                    <Link href="/profile" className="flex h-9 shrink-0 items-center gap-1.5 rounded-[8px] border px-3.5 text-caption font-medium transition-colors hover:opacity-80"
+                      style={{ background: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)' }}>
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9" /><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" /></svg>
+                      {t('account.editProfile')}
+                    </Link>
+                  </div>
 
-                    {/* Subscription Status Card */}
-                    <div className="space-y-3">
-                      <div className="text-[10px] font-black uppercase tracking-[0.2em] opacity-30 px-2">{t('account.currentPlanLabel')}</div>
-                      <div className="relative p-6 rounded-[2.5rem] border border-theme-border overflow-hidden transition-all hover:shadow-xl group"
-                        style={{ backgroundColor: 'var(--theme-bg-secondary)/30' }}>
-                        
-                        {/* Dynamic Background for Premium */}
-                        {user?.subscription?.plan !== 'free' && (
-                          <div className="absolute -right-10 -top-10 w-40 h-40 bg-amber-500/10 blur-[80px] animate-pulse" />
-                        )}
-
-                        <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-                          <div className="flex items-center gap-5">
-                            <div className="w-16 h-16 rounded-3xl flex items-center justify-center text-2xl shadow-inner border border-white/5"
-                              style={{ 
-                                backgroundColor: user?.subscription?.plan === 'free' ? 'var(--theme-bg-body)' : 'rgba(245,158,11,0.1)',
-                                color: user?.subscription?.plan === 'free' ? 'var(--theme-text-muted)' : ACCENT.xp
-                              }}>
-                              {user?.subscription?.plan === 'free' ? '🌱' : '👑'}
-                            </div>
-                            <div className="space-y-1">
-                              <div className="text-lg font-black tracking-tight flex items-center gap-2">
-                                {user?.subscription?.plan === 'free'
-                                  ? t('account.planNames.free')
-                                  : user?.subscription?.plan === 'premium'
-                                    ? t('account.planNames.premium')
-                                    : t('account.planNames.lifetime')}
-                                {user?.subscription?.plan !== 'free' && (
-                                  <span className="px-2 py-0.5 rounded-lg text-[9px] font-black uppercase bg-amber-500 text-white shadow-lg">PRO</span>
-                                )}
-                              </div>
-                              <p className="text-[11px] opacity-40 font-bold uppercase tracking-wider">
-                                {user?.subscription?.expiresAt
-                                  ? t('account.expiresOn', { date: formatter.dateTime(new Date(user.subscription.expiresAt), { dateStyle: 'medium' }) })
-                                  : user?.subscription?.plan === 'free' ? t('account.basicFeatures') : t('account.lifetimeBenefits')}
-                              </p>
-                            </div>
-                          </div>
-                          
-                          <Link href="/profile/subscription" 
-                            className="px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all hover:scale-105 active:scale-95 text-white shadow-xl shadow-indigo-500/20 text-center"
-                            style={{ background: user?.subscription?.plan === 'free' ? GRADIENT.brand : GRADIENT.xpGold }}>
-                            {user?.subscription?.plan === 'free' ? t('account.upgrade') : t('account.managePlan')}
-                          </Link>
+                  {/* Plan card */}
+                  <div>
+                    <div className="mb-2.5 text-[11px] font-semibold uppercase tracking-widest" style={{ color: 'var(--theme-text-muted)' }}>{t('account.currentPlanLabel')}</div>
+                    <div className="flex items-center gap-3.5 rounded-md border p-4"
+                      style={isFreePlan
+                        ? { background: 'var(--theme-bg-secondary)', borderColor: 'var(--theme-border)' }
+                        : { background: 'color-mix(in srgb, var(--warn) 12%, transparent)', borderColor: 'color-mix(in srgb, var(--warn) 30%, transparent)' }}>
+                      <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-[11px] text-xl ${isFreePlan ? '' : 'v2-beta-badge'}`}
+                        style={isFreePlan ? { background: 'var(--theme-bg-tertiary)' } : undefined}>
+                        {isFreePlan ? '🌱' : '👑'}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[15px] font-bold" style={{ color: 'var(--theme-text-primary)' }}>
+                            {isFreePlan ? t('account.planNames.free') : plan === 'premium' ? t('account.planNames.premium') : t('account.planNames.lifetime')}
+                          </span>
+                          {!isFreePlan && <span className="v2-beta-badge rounded-[4px] px-1.5 py-px text-[9.5px] font-bold uppercase tracking-wide">PRO</span>}
                         </div>
+                        <p className="mt-0.5 text-caption" style={{ color: 'var(--theme-text-muted)' }}>
+                          {user?.subscription?.expiresAt
+                            ? t('account.expiresOn', { date: formatter.dateTime(new Date(user.subscription.expiresAt), { dateStyle: 'medium' }) })
+                            : isFreePlan ? t('account.basicFeatures') : t('account.lifetimeBenefits')}
+                        </p>
                       </div>
+                      <Link href={isFreePlan ? '/pricing' : '/profile/subscription'}
+                        className={`flex h-9 shrink-0 items-center rounded-[9px] px-4 text-caption font-bold ${isFreePlan ? 'v2-match-grad text-white' : 'v2-beta-badge'}`}>
+                        {isFreePlan ? t('account.upgrade') : t('account.managePlan')}
+                      </Link>
                     </div>
+                  </div>
 
-                    {/* Logout Button */}
-                    <div className="pt-4">
-                      <button onClick={handleLogout} 
-                        className="w-full py-4 rounded-2xl flex items-center justify-center gap-3 transition-all duration-300 hover:bg-red-500 hover:text-white border border-red-500/20 text-red-500 font-black text-xs uppercase tracking-[0.2em] group">
-                        <IconLogOut size={18} className="group-hover:-translate-x-1 transition-transform" />
-                        {t('account.logout')}
-                      </button>
-                    </div>
+                  {/* Logout */}
+                  <button onClick={handleLogout}
+                    className="flex h-11 w-full items-center justify-center gap-2 rounded-[10px] border text-[13.5px] font-semibold transition-colors"
+                    style={{ background: 'color-mix(in srgb, var(--danger) 8%, transparent)', borderColor: 'color-mix(in srgb, var(--danger) 30%, transparent)', color: 'var(--danger)' }}>
+                    <IconLogOut size={16} />
+                    {t('account.logout')}
+                  </button>
+
+                  <p className="text-center text-caption" style={{ color: 'var(--theme-text-muted)' }}>
+                    {t('account.supportText')} <a href="mailto:support@deutschmeister.de" className="hover:underline" style={{ color: 'var(--accent)' }}>support@deutschmeister.de</a>
+                  </p>
+                </div>
+              ) : (
+                <div className="py-12 text-center">
+                  <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full" style={{ background: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }}>
+                    <IconUser size={32} />
                   </div>
-                ) : (
-                  <div className="text-center py-16">
-                     <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-4 opacity-20 border border-white/10">
-                        <IconUser size={32} />
-                     </div>
-                     <p className="text-sm font-black uppercase tracking-widest opacity-30">{t('account.guestPrompt')}</p>
-                     <Link href="/login" className="inline-block mt-6 px-8 py-3 rounded-2xl bg-indigo-500 text-white text-[10px] font-black uppercase tracking-widest">{t('account.guestLogin')}</Link>
-                  </div>
-                )}
-              </SectionCard>
-              
-              {isAuthenticated && (
-                <div className="px-4">
-                   <p className="text-[10px] leading-relaxed opacity-30 font-bold text-center uppercase tracking-widest">
-                    {t('account.supportText')} <a href="mailto:support@deutschmeister.de" className="text-indigo-500 hover:underline">support@deutschmeister.de</a>
-                   </p>
+                  <p className="text-caption font-bold uppercase tracking-widest" style={{ color: 'var(--theme-text-muted)' }}>{t('account.guestPrompt')}</p>
+                  <Link href="/auth/login" className="v2-match-grad mt-6 inline-block rounded-[10px] px-8 py-3 text-[10px] font-bold uppercase tracking-widest text-white">{t('account.guestLogin')}</Link>
                 </div>
               )}
-            </div>
+            </Panel>
           )}
-        </div>
 
-        <div className="flex items-center justify-between mt-4 px-2">
-          <button onClick={handleReset} className="text-[11px] font-black uppercase tracking-widest opacity-40 hover:opacity-100 transition-opacity">
+          {/* Mobile reset (nav reset is desktop-only) */}
+          <button onClick={handleReset} className="mt-4 text-[11px] font-bold uppercase tracking-widest md:hidden" style={{ color: 'var(--theme-text-muted)' }}>
             {t('footer.reset')}
           </button>
-          <Link href="/" className="text-[11px] font-black uppercase tracking-widest text-blue-500">
-            {t('footer.backHome')}
-          </Link>
         </div>
       </div>
 
       <style jsx global>{`
         @keyframes slideUp {
-          from { opacity: 0; transform: translateY(20px); }
+          from { opacity: 0; transform: translateY(12px); }
           to { opacity: 1; transform: translateY(0); }
         }
       `}</style>

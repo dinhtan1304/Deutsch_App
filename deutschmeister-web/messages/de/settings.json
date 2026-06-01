@@ -85,6 +85,7 @@
   },
   "account": {
     "fallbackName": "Benutzer",
+    "editProfile": "Bearbeiten",
     "currentPlanLabel": "Aktueller Plan",
     "planNames": {
       "free": "Kostenloser Plan",
