@@ -786,6 +786,11 @@
       "statusSubmitted": "Done",
       "statusDraft": "In progress",
       "segmentsCount": "{completed} / {total} lines",
+      "segmentsUnit": "lines",
+      "scorePron": "Pronunciation",
+      "cardReview": "Practice again",
+      "cardContinue": "Continue",
+      "cardStart": "Start",
       "filterStatuses": {
         "DRAFT": "In progress",
         "SUBMITTED": "Done"

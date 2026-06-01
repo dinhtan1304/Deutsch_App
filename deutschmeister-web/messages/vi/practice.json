@@ -786,6 +786,11 @@
       "statusSubmitted": "Đã hoàn tất",
       "statusDraft": "Đang luyện",
       "segmentsCount": "{completed} / {total} câu",
+      "segmentsUnit": "câu",
+      "scorePron": "Phát âm",
+      "cardReview": "Luyện lại",
+      "cardContinue": "Tiếp tục",
+      "cardStart": "Bắt đầu",
       "filterStatuses": {
         "DRAFT": "Đang luyện",
         "SUBMITTED": "Đã hoàn tất"

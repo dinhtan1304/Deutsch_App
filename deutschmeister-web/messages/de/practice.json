@@ -786,6 +786,11 @@
       "statusSubmitted": "Fertig",
       "statusDraft": "Läuft",
       "segmentsCount": "{completed} / {total} Zeilen",
+      "segmentsUnit": "Zeilen",
+      "scorePron": "Aussprache",
+      "cardReview": "Nochmal üben",
+      "cardContinue": "Fortsetzen",
+      "cardStart": "Starten",
       "filterStatuses": {
         "DRAFT": "Läuft",
         "SUBMITTED": "Fertig"

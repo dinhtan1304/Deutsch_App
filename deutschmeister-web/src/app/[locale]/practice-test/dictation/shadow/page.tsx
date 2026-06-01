@@ -100,102 +100,70 @@ function HistoryCard({ item, onDelete }: { item: ShadowingHistoryItem; onDelete:
     ? `/practice-test/dictation/shadow/${item.id}/result`
     : `/practice-test/dictation/shadow/${item.id}`;
 
+  const levelColor = CEFR_COLORS[item.difficulty] || ACCENT.vocab;
+  const inProgress = !isSubmitted && item.completedSegments > 0;
+  const statusColor = isSubmitted ? STATUS.success : inProgress ? ACCENT.xp : ACCENT.srs;
+  const statusLabel = isSubmitted ? t('statusSubmitted') : t('statusDraft');
+  const pct = item.totalSegments > 0 ? Math.round((item.completedSegments / item.totalSegments) * 100) : 0;
+  const cta = isSubmitted ? t('cardReview') : inProgress ? t('cardContinue') : t('cardStart');
+
   return (
-    <Link
-      href={href}
-      className="group block rounded-2xl p-4 transition-all duration-500 hover:-translate-y-1 hover:shadow-xl relative overflow-hidden border border-transparent hover:border-green-500/20"
-      style={{
-        backgroundColor: 'var(--theme-bg-card)',
-        boxShadow: '0 4px 16px rgba(0,0,0,0.05)',
-      }}
-    >
-      <div
-        className="absolute inset-0 opacity-0 group-hover:opacity-[0.03] transition-opacity duration-700 pointer-events-none"
-        style={{ background: GRADIENT.reading }}
-      />
-
-      <div className="relative z-10 flex items-center gap-4">
-        <div
-          className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 shadow-md transition-all duration-500 group-hover:scale-110 group-hover:rotate-3"
+    <Link href={href} className="block h-full outline-none">
+      <article className="word-card-v2 flex h-full flex-col overflow-hidden rounded-[13px]"
+        style={{ background: 'var(--theme-bg-card)', border: '1px solid var(--theme-border)', ['--card-accent' as string]: levelColor } as React.CSSProperties}>
+        {/* Thumbnail */}
+        <div className="relative flex items-center justify-center"
           style={{
-            backgroundColor: `${ACCENT.reading}15`,
-            border: `1px solid ${ACCENT.reading}33`,
-          }}
-        >
-          <IconMic size={20} style={{ color: ACCENT.reading }} />
+            aspectRatio: '16 / 9',
+            backgroundColor: `color-mix(in srgb, ${levelColor} 18%, var(--theme-bg-secondary))`,
+            backgroundImage: item.video.thumbnailUrl ? `url(${item.video.thumbnailUrl})` : undefined,
+            backgroundSize: 'cover', backgroundPosition: 'center',
+          }}>
+          {!item.video.thumbnailUrl && <span className="text-[44px] opacity-80">🎬</span>}
+          <div className="flex h-11 w-11 items-center justify-center rounded-full text-white" style={{ background: 'rgba(0,0,0,.55)', border: `2px solid ${levelColor}` }}>
+            <IconMic size={16} />
+          </div>
+          {item.video.topic && (
+            <span className="absolute left-2 top-2 rounded-[5px] px-2 py-0.5 text-[10px] font-bold uppercase text-white" style={{ background: 'rgba(0,0,0,.6)', letterSpacing: '.04em' }}>{item.video.topic}</span>
+          )}
+          <span className="mono absolute right-2 top-2 rounded-[5px] px-2 py-0.5 text-[10.5px] font-bold text-white" style={{ background: levelColor }}>{item.difficulty}</span>
+          {inProgress && (
+            <div className="absolute inset-x-0 bottom-0 h-1" style={{ background: 'rgba(0,0,0,.4)' }}>
+              <div className="h-full" style={{ width: `${pct}%`, background: ACCENT.xp }} />
+            </div>
+          )}
         </div>
 
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-2 flex-wrap">
-            <span
-              className="text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg text-white shadow-sm"
-              style={{ backgroundColor: CEFR_COLORS[item.difficulty] || ACCENT.vocab }}
-            >
-              {item.difficulty}
-            </span>
-            <span
-              className="text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg"
-              style={{
-                backgroundColor: isSubmitted ? `${STATUS.success}15` : `${ACCENT.games}15`,
-                color: isSubmitted ? STATUS.success : ACCENT.games,
-              }}
-            >
-              {isSubmitted ? t('statusSubmitted') : t('statusDraft')}
-            </span>
-            {item.video.topic && (
-              <span
-                className="text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg border"
-                style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-muted)' }}
-              >
-                {item.video.topic}
-              </span>
-            )}
+        {/* Body */}
+        <div className="flex flex-1 flex-col gap-2.5 p-4">
+          <span className="inline-flex w-fit items-center gap-1.5 rounded-[5px] px-2 py-0.5 text-[10px] font-bold uppercase" style={{ background: `color-mix(in srgb, ${statusColor} 16%, transparent)`, color: statusColor, letterSpacing: '.04em' }}>
+            <span className="h-1 w-1 rounded-full" style={{ background: statusColor }} />{statusLabel}
+          </span>
+          <h3 className="line-clamp-2 text-body font-bold leading-snug" style={{ letterSpacing: '-.01em', color: 'var(--theme-text-primary)' }}>{item.video.title}</h3>
+          <div className="text-[11.5px]" style={{ color: 'var(--theme-text-muted)' }}>
+            <span className="mono font-semibold" style={{ color: 'var(--theme-text-secondary)' }}>{item.totalSegments}</span> {t('segmentsUnit')}
           </div>
-
-          <p
-            className="text-base font-black tracking-tight mb-1 truncate"
-            style={{ color: 'var(--theme-text-primary)' }}
-          >
-            {item.video.title}
-          </p>
-
-          <div
-            className="flex items-center gap-3 text-[11px] font-bold opacity-40 uppercase tracking-widest"
-            style={{ color: 'var(--theme-text-primary)' }}
-          >
-            <span>
-              {t('segmentsCount', { completed: item.completedSegments, total: item.totalSegments })}
-            </span>
-            <span className="w-1 h-1 rounded-full bg-current" />
-            <span>{formatter.dateTime(new Date(item.createdAt), { dateStyle: 'short' })}</span>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-8 shrink-0">
           {score !== null && (
-            <div className="text-right">
-              <div
-                className="text-2xl font-black tabular-nums tracking-tight"
-                style={{ color: getScoreColor(score) }}
-              >
-                {Math.round(score)}
-                <span className="text-sm ml-0.5">%</span>
+            <div>
+              <div className="mb-1 flex items-baseline gap-1.5">
+                <span className="mono text-body font-bold" style={{ color: getScoreColor(score) }}>{Math.round(score)}%</span>
+                <span className="text-[10px]" style={{ color: 'var(--theme-text-muted)' }}>{t('scorePron')}</span>
+              </div>
+              <div className="h-0.75 overflow-hidden rounded-full" style={{ background: 'var(--theme-bg-secondary)' }}>
+                <div className="h-full rounded-full" style={{ width: `${Math.round(score)}%`, background: getScoreColor(score) }} />
               </div>
             </div>
           )}
-          <button
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              onDelete();
-            }}
-            className="w-12 h-12 rounded-xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-red-500/10 hover:text-red-500"
-            style={{ color: 'var(--theme-text-muted)' }}
-          >
-            <IconTrash size={20} />
-          </button>
+          <div className="mt-auto flex items-center justify-between gap-2 border-t border-dashed pt-2.5" style={{ borderColor: 'var(--theme-border)' }}>
+            <span className="mono text-[10.5px]" style={{ color: 'var(--theme-text-muted)' }}>{formatter.dateTime(new Date(item.createdAt), { day: '2-digit', month: '2-digit' })}</span>
+            <div className="flex items-center gap-1.5">
+              <span className="inline-flex items-center gap-1 text-[11px] font-bold" style={{ color: levelColor }}>{cta}<IconChevronRight size={12} /></span>
+              <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); onDelete(); }}
+                className="flex h-7 w-7 items-center justify-center rounded-lg opacity-60 transition-colors hover:text-red-500" style={{ color: 'var(--theme-text-muted)' }} aria-label="delete"><IconTrash size={15} /></button>
+            </div>
+          </div>
         </div>
-      </div>
+      </article>
     </Link>
   );
 }
@@ -268,7 +236,7 @@ export default function ShadowingListPage() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-8 pb-32">
+    <div className="max-w-360 mx-auto px-4 py-8 pb-32">
       <PageHeader
         backHref="/practice-test/dictation"
         title={t('title')}
@@ -625,7 +593,7 @@ export default function ShadowingListPage() {
 
       {/* List */}
       {isLoading ? (
-        <GridSkeleton cols={1} count={4} height="h-44" gap="gap-8" />
+        <GridSkeleton cols={4} count={8} height="h-72" gap="gap-4" />
       ) : !history?.items.length ? (
         <div
           className="text-center py-28 rounded-[3.5rem] border-2 border-dashed"
@@ -655,7 +623,7 @@ export default function ShadowingListPage() {
           </Link>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-8">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {history.items.map((item) => (
             <HistoryCard
               key={item.id}
