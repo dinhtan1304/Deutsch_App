@@ -156,8 +156,7 @@ export default function ReadingListPage() {
 
       {/* Hero: continue (if DRAFT) or generate */}
       {inProgress ? (
-        <Link href={`/practice-test/reading/${inProgress.id}`}
-          className="v2-hero-warn mb-6 flex items-center gap-4 overflow-hidden rounded-2xl p-5 transition-transform hover:-translate-y-0.5"
+        <section className="v2-hero-warn mb-6 flex flex-col gap-4 overflow-hidden rounded-2xl p-5 sm:flex-row sm:items-center"
           style={{ border: '1px solid color-mix(in srgb, var(--warn) 30%, transparent)' }}>
           <div className="v2-icongrad-warn flex h-12 w-12 shrink-0 items-center justify-center rounded-[13px] text-white" style={{ boxShadow: '0 8px 20px color-mix(in srgb, var(--warn) 40%, transparent)' }}>
             <IconBookOpen size={24} style={{ color: 'white' }} />
@@ -167,10 +166,18 @@ export default function ReadingListPage() {
             <h3 className="mt-0.5 truncate text-h3 font-bold" style={{ color: 'var(--theme-text-primary)' }}>{inProgress.title || inProgress.topic}</h3>
             <p className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>{typeLabel(inProgress.textType)} · {inProgress.cefrLevel}</p>
           </div>
-          <span className="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-[10px] px-4 text-caption font-bold text-white" style={{ background: 'var(--warn)', boxShadow: '0 4px 14px color-mix(in srgb, var(--warn) 40%, transparent)' }}>
-            {tHub('heroContinueCta')} <IconArrowRight size={14} />
-          </span>
-        </Link>
+          <div className="flex shrink-0 flex-wrap items-center gap-2">
+            <Link href={`/practice-test/reading/${inProgress.id}`} className="inline-flex h-10 items-center gap-1.5 rounded-[10px] px-4 text-caption font-bold text-white transition-transform hover:-translate-y-0.5" style={{ background: 'var(--warn)', boxShadow: '0 4px 14px color-mix(in srgb, var(--warn) 40%, transparent)' }}>
+              {tHub('heroContinueCta')} <IconArrowRight size={14} />
+            </Link>
+            <Link href="/practice-test/reading/new" className="inline-flex h-10 items-center rounded-[10px] px-4 text-caption font-bold" style={{ background: 'var(--theme-bg-card)', color: 'var(--theme-text-secondary)', border: '1px solid var(--theme-border)' }}>
+              {tHub('newCta')}
+            </Link>
+            <Link href="/practice-test/reading/exam" className="inline-flex h-10 items-center rounded-[10px] px-4 text-caption font-medium" style={{ background: 'transparent', color: 'var(--theme-text-muted)', border: '1px solid var(--theme-border)' }}>
+              {tHub('examCta')}
+            </Link>
+          </div>
+        </section>
       ) : (
         <section className="v2-hero-accent mb-6 flex flex-col items-start gap-4 overflow-hidden rounded-2xl p-5 sm:flex-row sm:items-center"
           style={{ border: '1px solid color-mix(in srgb, var(--accent) 28%, transparent)' }}>
