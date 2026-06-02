@@ -434,7 +434,7 @@ function SidebarComponent({ isCollapsed, onToggle }: SidebarProps) {
         )}
         {!isCollapsed && (
           <div className="text-caption text-center whitespace-nowrap" style={{ color: 'var(--theme-text-muted)' }}>
-            v1.0.0 · Made with Yuii ❤️
+            v2.0.1 · Made with Yuii ❤️
           </div>
         )}
       </div>
