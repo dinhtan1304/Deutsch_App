@@ -245,22 +245,35 @@
     },
     "setup": {
       "quotaLabel": "Reading-KI-Kontingent",
-      "title": "Neuen Lesetext erstellen",
-      "subtitle": "KI erstellt einen deutschen Lesetext nach deiner Konfiguration",
-      "stepLevel": "1. GER-Niveau",
-      "stepTopic": "2. Thema",
-      "stepTextType": "3. Textsorte",
-      "stepQuestionCount": "4. Anzahl Fragen",
-      "customTopicPlaceholder": "Oder ein eigenes Thema eingeben...",
-      "customLabel": "Eigen ✓",
-      "summary": "Konfiguration",
-      "summaryLevel": "Niveau:",
-      "summaryTopic": "Thema:",
-      "summaryTextType": "Textsorte:",
-      "summaryQuestionCount": "Fragen:",
-      "questionsUnit": "{count} Fragen",
-      "notSelected": "Nicht gewählt",
-      "generating": "KI erstellt den Text...",
+      "title": "Lesetext mit KI erstellen",
+      "subtitle": "Stelle es ein und die KI schreibt dir in Sekunden einen persönlichen Lesetext",
+      "stepLevel": "GER-Niveau",
+      "stepLength": "Länge",
+      "stepTopic": "Thema",
+      "stepTextType": "Textsorte",
+      "stepQuestionCount": "Anzahl Fragen",
+      "levelDescA1": "Anfänger",
+      "levelDescA2": "Grundstufe",
+      "levelDescB1": "Mittelstufe",
+      "levelDescB2": "Obere Mittelstufe",
+      "lengthShort": "Kurz",
+      "lengthMedium": "Mittel",
+      "lengthLong": "Lang",
+      "wordsApprox": "~{count} Wörter",
+      "readingTime": "{count} Min. Lesezeit",
+      "customTopicPlaceholder": "Oder ein eigenes Thema eingeben — z. B. 'Vorstellungsgespräch'…",
+      "promptWrite": "Schreibe einen Text",
+      "promptLevel": "Niveau",
+      "promptLength": "Länge",
+      "promptTopic": "Thema",
+      "promptWith": "mit",
+      "previewLabel": "Vorschau",
+      "previewPlaceholder": "Thema wählen…",
+      "previewTitle": "Ein Text über „{topic}“",
+      "chooseTopicHint": "Wähle ein Thema, um zu starten",
+      "questionsShort": "{count} Fragen",
+      "notSelected": "nicht gewählt",
+      "generating": "KI schreibt den Text…",
       "generate": "Text erstellen",
       "generateError": "Text konnte nicht erstellt werden. Bitte erneut versuchen."
     },
@@ -344,26 +357,33 @@
     },
     "setup": {
       "quotaLabel": "Writing-KI-Kontingent",
-      "title": "Neue Aufgabe erstellen",
-      "subtitle": "Konfiguration wählen, damit KI eine deutsche Schreibaufgabe erstellt",
-      "stepLevel": "1. GER-Niveau",
-      "stepTopic": "2. Thema",
-      "stepWritingType": "3. Textsorte",
-      "stepWordCount": "4. Länge",
-      "customTopicPlaceholder": "Oder ein eigenes Thema eingeben...",
-      "customLabel": "Eigen ✓",
-      "summary": "Konfiguration",
-      "summaryLevel": "Niveau:",
-      "summaryTopic": "Thema:",
-      "summaryWritingType": "Textsorte:",
-      "summaryWordCount": "Länge:",
-      "notSelected": "Nicht gewählt",
-      "noneDash": "—",
-      "generating": "KI erstellt die Aufgabe...",
+      "title": "Schreibaufgabe mit KI erstellen",
+      "subtitle": "Stelle es ein und die KI erstellt dir in Sekunden eine persönliche Schreibaufgabe",
+      "stepLevel": "GER-Niveau",
+      "stepTopic": "Thema",
+      "stepWritingType": "Aufgabentyp",
+      "stepWordCount": "Länge",
+      "customTopicPlaceholder": "Oder ein eigenes Thema eingeben — z. B. 'Vorstellungsgespräch'…",
+      "notSelected": "nicht gewählt",
+      "generating": "KI erstellt die Aufgabe…",
       "generate": "Aufgabe erstellen",
-      "generateError": "Aufgabe konnte nicht erstellt werden. Bitte erneut versuchen."
+      "generateError": "Aufgabe konnte nicht erstellt werden. Bitte erneut versuchen.",
+      "levelDescA1": "Anfänger",
+      "levelDescA2": "Grundstufe",
+      "levelDescB1": "Mittelstufe",
+      "levelDescB2": "Obere Mittelstufe",
+      "promptWrite": "Schreibe einen Text",
+      "promptLevel": "Niveau",
+      "promptLength": "Länge",
+      "promptTopic": "Thema",
+      "previewLabel": "Vorschau",
+      "previewPlaceholder": "Thema wählen…",
+      "previewTitle": "Eine Aufgabe über „{topic}“",
+      "previewAnswerHint": "Dein Text",
+      "chooseTopicHint": "Wähle ein Thema, um zu starten"
     },
     "answering": {
+      "title": "Schreibübung",
       "notFound": "Text nicht gefunden",
       "backToList": "Zurück zur Liste",
       "backShort": "← Schreibübung",
@@ -478,8 +498,8 @@
     },
     "setup": {
       "quotaLabel": "Listening-KI-Kontingent",
-      "title": "Neue Höraufgabe",
-      "subtitle": "KI erzeugt Audio-Skript + Fragen",
+      "title": "Hörübung mit KI erstellen",
+      "subtitle": "Die KI erstellt in Sekunden ein Audioskript + Verständnisfragen",
       "stepLevel": "Niveau",
       "stepScriptType": "Audio-Typ",
       "levels": {
@@ -488,15 +508,34 @@
         "B1": "Reicher Inhalt · 200–280 Wörter"
       },
       "scriptTypes": {
-        "dialogue": { "label": "Dialog", "desc": "Dialog zwischen zwei Personen" },
-        "monologue": { "label": "Monolog", "desc": "Monolog einer Person" },
-        "announcement": { "label": "Ansage", "desc": "Ansage / Werbung" },
-        "interview": { "label": "Interview", "desc": "Interview" },
-        "radio": { "label": "Radio", "desc": "Radio-Nachrichten" }
+        "dialogue": {
+          "label": "Dialog",
+          "desc": "Dialog zwischen zwei Personen"
+        },
+        "monologue": {
+          "label": "Monolog",
+          "desc": "Monolog einer Person"
+        },
+        "announcement": {
+          "label": "Ansage",
+          "desc": "Ansage / Werbung"
+        },
+        "interview": {
+          "label": "Interview",
+          "desc": "Interview"
+        },
+        "radio": {
+          "label": "Radio",
+          "desc": "Radio-Nachrichten"
+        }
       },
-      "generating": "Höraufgabe wird erstellt...",
-      "generate": "🎧 Höraufgabe erstellen",
-      "generateError": "Erstellung fehlgeschlagen. Bitte erneut versuchen."
+      "generating": "KI erstellt Audio…",
+      "generate": "Hörübung erstellen",
+      "generateError": "Erstellung fehlgeschlagen. Bitte erneut versuchen.",
+      "promptListen": "Erstelle eine Hörübung —",
+      "promptLevel": "Niveau",
+      "previewLabel": "Vorschau",
+      "previewTitle": "Hörtext: {type}"
     },
     "answering": {
       "loading": "Sitzung wird geladen...",
@@ -593,25 +632,60 @@
     },
     "setup": {
       "quotaLabel": "Speaking-KI-Kontingent",
-      "title": "Neue Sprechübung",
+      "title": "Sprechübung mit KI erstellen",
       "subtitle": "KI erzeugt einen deutschen Prompt → du nimmst auf → Gemini bewertet detailliert",
-      "stepLevel": "Schritt 1 — GER-Niveau",
-      "stepTopic": "Schritt 2 — Thema",
+      "stepLevel": "Niveau",
+      "stepTopic": "Thema",
       "topics": {
-        "sich_vorstellen": { "de": "Sich vorstellen", "vi": "Sich vorstellen" },
-        "alltag": { "de": "Alltag & Freizeit", "vi": "Alltag & Freizeit" },
-        "wohnen": { "de": "Wohnen", "vi": "Wohnen" },
-        "arbeit": { "de": "Arbeit & Beruf", "vi": "Arbeit & Beruf" },
-        "familie": { "de": "Familie & Freunde", "vi": "Familie & Freunde" },
-        "reisen": { "de": "Reisen", "vi": "Reisen" },
-        "einkaufen": { "de": "Einkaufen", "vi": "Einkaufen" },
-        "gesundheit": { "de": "Gesundheit & Sport", "vi": "Gesundheit & Sport" },
-        "meinung": { "de": "Meinungen äußern", "vi": "Meinungen äußern" }
+        "sich_vorstellen": {
+          "de": "Sich vorstellen",
+          "vi": "Sich vorstellen"
+        },
+        "alltag": {
+          "de": "Alltag & Freizeit",
+          "vi": "Alltag & Freizeit"
+        },
+        "wohnen": {
+          "de": "Wohnen",
+          "vi": "Wohnen"
+        },
+        "arbeit": {
+          "de": "Arbeit & Beruf",
+          "vi": "Arbeit & Beruf"
+        },
+        "familie": {
+          "de": "Familie & Freunde",
+          "vi": "Familie & Freunde"
+        },
+        "reisen": {
+          "de": "Reisen",
+          "vi": "Reisen"
+        },
+        "einkaufen": {
+          "de": "Einkaufen",
+          "vi": "Einkaufen"
+        },
+        "gesundheit": {
+          "de": "Gesundheit & Sport",
+          "vi": "Gesundheit & Sport"
+        },
+        "meinung": {
+          "de": "Meinungen äußern",
+          "vi": "Meinungen äußern"
+        }
       },
       "info": "Voraussetzung: Mikrofon + Chrome/Edge. KI erstellt eine Zufallsfrage, du nimmst auf, Gemini bewertet anhand Audio + Transkript.",
-      "generating": "Prompt wird erstellt...",
+      "generating": "KI erstellt einen Prompt…",
       "generate": "Sprechübung erstellen",
-      "generateError": "Erstellung fehlgeschlagen. Bitte erneut versuchen."
+      "generateError": "Erstellung fehlgeschlagen. Bitte erneut versuchen.",
+      "levelDescA1": "Anfänger",
+      "levelDescA2": "Grundstufe",
+      "levelDescB1": "Mittelstufe",
+      "promptSpeak": "Sprich über das Thema",
+      "promptLevel": "Niveau",
+      "previewLabel": "Vorschau",
+      "previewTitle": "Sprechen: {topic}",
+      "previewRecordHint": "Du nimmst deine Antwort auf"
     },
     "answering": {
       "loading": "Sitzung wird geladen...",
@@ -667,11 +741,26 @@
       "shareTitle": "Sprechergebnis",
       "shareText": "Ich habe {score}/100 Punkte erreicht!",
       "grades": {
-        "excellent": { "badge": "Ausgezeichnet", "title": "Perfekt! 🎉" },
-        "veryGood": { "badge": "Sehr gut", "title": "Du hast sehr gut gesprochen! 👏" },
-        "good": { "badge": "Gut", "title": "Fortschritte! 💪" },
-        "needsWork": { "badge": "Dranbleiben", "title": "Weiter üben! 🤗" },
-        "keepPracticing": { "badge": "Üben", "title": "Nicht aufgeben! 📚" }
+        "excellent": {
+          "badge": "Ausgezeichnet",
+          "title": "Perfekt! 🎉"
+        },
+        "veryGood": {
+          "badge": "Sehr gut",
+          "title": "Du hast sehr gut gesprochen! 👏"
+        },
+        "good": {
+          "badge": "Gut",
+          "title": "Fortschritte! 💪"
+        },
+        "needsWork": {
+          "badge": "Dranbleiben",
+          "title": "Weiter üben! 🤗"
+        },
+        "keepPracticing": {
+          "badge": "Üben",
+          "title": "Nicht aufgeben! 📚"
+        }
       }
     }
   },
@@ -908,11 +997,26 @@
         "youSaid": "Du sagtest: \"{text}\"",
         "noFiltered": "Keine Zeilen passen zum Filter.",
         "grades": {
-          "excellent": { "label": "Ausgezeichnet", "emoji": "🌟" },
-          "veryGood": { "label": "Sehr gut", "emoji": "✨" },
-          "good": { "label": "Nicht schlecht", "emoji": "👍" },
-          "needsWork": { "label": "Weiter versuchen", "emoji": "💪" },
-          "keepPracticing": { "label": "Weiter üben", "emoji": "🔄" }
+          "excellent": {
+            "label": "Ausgezeichnet",
+            "emoji": "🌟"
+          },
+          "veryGood": {
+            "label": "Sehr gut",
+            "emoji": "✨"
+          },
+          "good": {
+            "label": "Nicht schlecht",
+            "emoji": "👍"
+          },
+          "needsWork": {
+            "label": "Weiter versuchen",
+            "emoji": "💪"
+          },
+          "keepPracticing": {
+            "label": "Weiter üben",
+            "emoji": "🔄"
+          }
         }
       }
     }
@@ -1092,7 +1196,10 @@
       "minutesAbbr": "Min",
       "maxPoints": "Max. Punkte",
       "teilLine": "Teil {i}",
-      "createExam": "Prüfung erstellen"
+      "createExam": "Prüfung erstellen",
+      "examTypeLabel": "Prüfungstyp",
+      "levelLabel": "Niveau",
+      "previewLabel": "Vorschau"
     },
     "answering": {
       "loadingExam": "Prüfung wird geladen...",

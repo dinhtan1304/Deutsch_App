@@ -245,22 +245,35 @@
     },
     "setup": {
       "quotaLabel": "Lượt Reading AI",
-      "title": "Tạo bài đọc mới",
-      "subtitle": "AI tạo bài đọc hiểu tiếng Đức theo cấu hình của bạn",
-      "stepLevel": "1. Trình độ CEFR",
-      "stepTopic": "2. Chủ đề",
-      "stepTextType": "3. Loại văn bản",
-      "stepQuestionCount": "4. Số câu hỏi",
-      "customTopicPlaceholder": "Hoặc nhập chủ đề tùy chỉnh...",
-      "customLabel": "Tùy chỉnh ✓",
-      "summary": "Tóm tắt cấu hình",
-      "summaryLevel": "Trình độ:",
-      "summaryTopic": "Chủ đề:",
-      "summaryTextType": "Loại văn bản:",
-      "summaryQuestionCount": "Số câu hỏi:",
-      "questionsUnit": "{count} câu",
-      "notSelected": "Chưa chọn",
-      "generating": "AI đang tạo bài đọc...",
+      "title": "Tạo bài đọc với AI",
+      "subtitle": "Tùy chỉnh và AI sẽ viết một bài đọc hiểu riêng cho bạn trong vài giây",
+      "stepLevel": "Trình độ CEFR",
+      "stepLength": "Độ dài",
+      "stepTopic": "Chủ đề",
+      "stepTextType": "Loại văn bản",
+      "stepQuestionCount": "Số câu hỏi",
+      "levelDescA1": "Người mới bắt đầu",
+      "levelDescA2": "Sơ cấp",
+      "levelDescB1": "Trung cấp",
+      "levelDescB2": "Trên trung cấp",
+      "lengthShort": "Ngắn",
+      "lengthMedium": "Vừa",
+      "lengthLong": "Dài",
+      "wordsApprox": "~{count} từ",
+      "readingTime": "{count} phút đọc",
+      "customTopicPlaceholder": "Hoặc nhập chủ đề riêng — vd: 'phỏng vấn xin việc'…",
+      "promptWrite": "Viết một bài",
+      "promptLevel": "trình độ",
+      "promptLength": "độ dài",
+      "promptTopic": "chủ đề",
+      "promptWith": "kèm",
+      "previewLabel": "Xem trước",
+      "previewPlaceholder": "Chọn chủ đề…",
+      "previewTitle": "Bài đọc về “{topic}”",
+      "chooseTopicHint": "Chọn 1 chủ đề để bắt đầu",
+      "questionsShort": "{count} câu hỏi",
+      "notSelected": "chưa chọn",
+      "generating": "AI đang viết bài…",
       "generate": "Tạo bài đọc",
       "generateError": "Không thể tạo bài đọc. Vui lòng thử lại."
     },
@@ -344,26 +357,33 @@
     },
     "setup": {
       "quotaLabel": "Lượt Writing AI",
-      "title": "Tạo đề bài mới",
-      "subtitle": "Chọn cấu hình để AI tạo đề bài viết tiếng Đức",
-      "stepLevel": "1. Trình độ CEFR",
-      "stepTopic": "2. Chủ đề",
-      "stepWritingType": "3. Dạng bài",
-      "stepWordCount": "4. Độ dài bài viết",
-      "customTopicPlaceholder": "Hoặc nhập chủ đề tùy chỉnh...",
-      "customLabel": "Tùy chỉnh ✓",
-      "summary": "Tóm tắt cấu hình",
-      "summaryLevel": "Trình độ:",
-      "summaryTopic": "Chủ đề:",
-      "summaryWritingType": "Dạng bài:",
-      "summaryWordCount": "Độ dài:",
-      "notSelected": "Chưa chọn",
-      "noneDash": "—",
-      "generating": "AI đang tạo đề bài...",
+      "title": "Tạo đề bài với AI",
+      "subtitle": "Tùy chỉnh và AI sẽ ra một đề bài viết riêng cho bạn trong vài giây",
+      "stepLevel": "Trình độ CEFR",
+      "stepTopic": "Chủ đề",
+      "stepWritingType": "Dạng bài",
+      "stepWordCount": "Độ dài bài viết",
+      "customTopicPlaceholder": "Hoặc nhập chủ đề riêng — vd: 'phỏng vấn xin việc'…",
+      "notSelected": "chưa chọn",
+      "generating": "AI đang ra đề…",
       "generate": "Tạo đề bài",
-      "generateError": "Không thể tạo đề bài. Vui lòng thử lại."
+      "generateError": "Không thể tạo đề bài. Vui lòng thử lại.",
+      "levelDescA1": "Người mới bắt đầu",
+      "levelDescA2": "Sơ cấp",
+      "levelDescB1": "Trung cấp",
+      "levelDescB2": "Trên trung cấp",
+      "promptWrite": "Viết một bài",
+      "promptLevel": "trình độ",
+      "promptLength": "độ dài",
+      "promptTopic": "chủ đề",
+      "previewLabel": "Xem trước",
+      "previewPlaceholder": "Chọn chủ đề…",
+      "previewTitle": "Đề bài về “{topic}”",
+      "previewAnswerHint": "Bài viết của bạn",
+      "chooseTopicHint": "Chọn 1 chủ đề để bắt đầu"
     },
     "answering": {
+      "title": "Luyện Viết",
       "notFound": "Không tìm thấy bài viết",
       "backToList": "Quay lại danh sách",
       "backShort": "← Luyện Viết",
@@ -478,8 +498,8 @@
     },
     "setup": {
       "quotaLabel": "Lượt Listening AI",
-      "title": "Tạo Bài Nghe Mới",
-      "subtitle": "AI tạo audio script + câu hỏi",
+      "title": "Tạo bài nghe với AI",
+      "subtitle": "AI tạo audio script + câu hỏi nghe hiểu trong vài giây",
       "stepLevel": "Trình độ",
       "stepScriptType": "Loại bài nghe",
       "levels": {
@@ -488,15 +508,34 @@
         "B1": "Nội dung phong phú · 200-280 từ"
       },
       "scriptTypes": {
-        "dialogue": { "label": "Dialog", "desc": "Hội thoại 2 người" },
-        "monologue": { "label": "Monolog", "desc": "Bài nói một người" },
-        "announcement": { "label": "Ansage", "desc": "Thông báo / Quảng cáo" },
-        "interview": { "label": "Interview", "desc": "Phỏng vấn" },
-        "radio": { "label": "Radio", "desc": "Bản tin radio" }
+        "dialogue": {
+          "label": "Dialog",
+          "desc": "Hội thoại 2 người"
+        },
+        "monologue": {
+          "label": "Monolog",
+          "desc": "Bài nói một người"
+        },
+        "announcement": {
+          "label": "Ansage",
+          "desc": "Thông báo / Quảng cáo"
+        },
+        "interview": {
+          "label": "Interview",
+          "desc": "Phỏng vấn"
+        },
+        "radio": {
+          "label": "Radio",
+          "desc": "Bản tin radio"
+        }
       },
-      "generating": "Đang tạo bài nghe...",
-      "generate": "🎧 Tạo Bài Nghe",
-      "generateError": "Không thể tạo bài nghe. Vui lòng thử lại."
+      "generating": "AI đang tạo audio…",
+      "generate": "Tạo bài nghe",
+      "generateError": "Không thể tạo bài nghe. Vui lòng thử lại.",
+      "promptListen": "Tạo một bài nghe dạng",
+      "promptLevel": "trình độ",
+      "previewLabel": "Xem trước",
+      "previewTitle": "Bài nghe: {type}"
     },
     "answering": {
       "loading": "Đang tải bài nghe...",
@@ -593,25 +632,60 @@
     },
     "setup": {
       "quotaLabel": "Lượt Speaking AI",
-      "title": "Tạo bài Luyện Nói",
+      "title": "Tạo bài luyện nói với AI",
       "subtitle": "AI tạo prompt tiếng Đức → bạn ghi âm → AI chấm điểm chi tiết",
-      "stepLevel": "Bước 1 — Trình độ (CEFR)",
-      "stepTopic": "Bước 2 — Chủ đề",
+      "stepLevel": "Trình độ",
+      "stepTopic": "Chủ đề",
       "topics": {
-        "sich_vorstellen": { "de": "Sich vorstellen", "vi": "Giới thiệu bản thân" },
-        "alltag": { "de": "Alltag & Freizeit", "vi": "Cuộc sống & Giải trí" },
-        "wohnen": { "de": "Wohnen", "vi": "Nhà ở" },
-        "arbeit": { "de": "Arbeit & Beruf", "vi": "Công việc & Nghề nghiệp" },
-        "familie": { "de": "Familie & Freunde", "vi": "Gia đình & Bạn bè" },
-        "reisen": { "de": "Reisen", "vi": "Đi lại & Du lịch" },
-        "einkaufen": { "de": "Einkaufen", "vi": "Mua sắm" },
-        "gesundheit": { "de": "Gesundheit & Sport", "vi": "Sức khỏe & Thể thao" },
-        "meinung": { "de": "Meinungen äußern", "vi": "Bày tỏ quan điểm" }
+        "sich_vorstellen": {
+          "de": "Sich vorstellen",
+          "vi": "Giới thiệu bản thân"
+        },
+        "alltag": {
+          "de": "Alltag & Freizeit",
+          "vi": "Cuộc sống & Giải trí"
+        },
+        "wohnen": {
+          "de": "Wohnen",
+          "vi": "Nhà ở"
+        },
+        "arbeit": {
+          "de": "Arbeit & Beruf",
+          "vi": "Công việc & Nghề nghiệp"
+        },
+        "familie": {
+          "de": "Familie & Freunde",
+          "vi": "Gia đình & Bạn bè"
+        },
+        "reisen": {
+          "de": "Reisen",
+          "vi": "Đi lại & Du lịch"
+        },
+        "einkaufen": {
+          "de": "Einkaufen",
+          "vi": "Mua sắm"
+        },
+        "gesundheit": {
+          "de": "Gesundheit & Sport",
+          "vi": "Sức khỏe & Thể thao"
+        },
+        "meinung": {
+          "de": "Meinungen äußern",
+          "vi": "Bày tỏ quan điểm"
+        }
       },
       "info": "Yêu cầu: microphone + Chrome/Edge. AI sẽ tạo ngẫu nhiên một câu hỏi/prompt, bạn ghi âm trả lời, Gemini chấm điểm từ audio + transcript.",
-      "generating": "Đang tạo prompt...",
+      "generating": "AI đang tạo prompt…",
       "generate": "Tạo bài nói",
-      "generateError": "Không thể tạo bài nói. Vui lòng thử lại."
+      "generateError": "Không thể tạo bài nói. Vui lòng thử lại.",
+      "levelDescA1": "Người mới bắt đầu",
+      "levelDescA2": "Sơ cấp",
+      "levelDescB1": "Trung cấp",
+      "promptSpeak": "Luyện nói chủ đề",
+      "promptLevel": "trình độ",
+      "previewLabel": "Xem trước",
+      "previewTitle": "Bài nói: {topic}",
+      "previewRecordHint": "Bạn sẽ ghi âm câu trả lời của mình"
     },
     "answering": {
       "loading": "Đang tải bài nói...",
@@ -667,11 +741,26 @@
       "shareTitle": "Kết quả luyện nói",
       "shareText": "Tôi đạt {score}/100 điểm!",
       "grades": {
-        "excellent": { "badge": "Xuất sắc", "title": "Hoàn hảo! 🎉" },
-        "veryGood": { "badge": "Tốt lắm", "title": "Bạn nói rất tốt! 👏" },
-        "good": { "badge": "Khá tốt", "title": "Tiến bộ rồi đấy! 💪" },
-        "needsWork": { "badge": "Cố lên", "title": "Tiếp tục luyện tập! 🤗" },
-        "keepPracticing": { "badge": "Cần luyện", "title": "Đừng bỏ cuộc nhé! 📚" }
+        "excellent": {
+          "badge": "Xuất sắc",
+          "title": "Hoàn hảo! 🎉"
+        },
+        "veryGood": {
+          "badge": "Tốt lắm",
+          "title": "Bạn nói rất tốt! 👏"
+        },
+        "good": {
+          "badge": "Khá tốt",
+          "title": "Tiến bộ rồi đấy! 💪"
+        },
+        "needsWork": {
+          "badge": "Cố lên",
+          "title": "Tiếp tục luyện tập! 🤗"
+        },
+        "keepPracticing": {
+          "badge": "Cần luyện",
+          "title": "Đừng bỏ cuộc nhé! 📚"
+        }
       }
     }
   },
@@ -908,11 +997,26 @@
         "youSaid": "Bạn đã nói: \"{text}\"",
         "noFiltered": "Không có câu nào khớp bộ lọc.",
         "grades": {
-          "excellent": { "label": "Tuyệt vời", "emoji": "🌟" },
-          "veryGood": { "label": "Rất tốt", "emoji": "✨" },
-          "good": { "label": "Khá tốt", "emoji": "👍" },
-          "needsWork": { "label": "Cần cố gắng", "emoji": "💪" },
-          "keepPracticing": { "label": "Tiếp tục luyện", "emoji": "🔄" }
+          "excellent": {
+            "label": "Tuyệt vời",
+            "emoji": "🌟"
+          },
+          "veryGood": {
+            "label": "Rất tốt",
+            "emoji": "✨"
+          },
+          "good": {
+            "label": "Khá tốt",
+            "emoji": "👍"
+          },
+          "needsWork": {
+            "label": "Cần cố gắng",
+            "emoji": "💪"
+          },
+          "keepPracticing": {
+            "label": "Tiếp tục luyện",
+            "emoji": "🔄"
+          }
         }
       }
     }
@@ -1092,7 +1196,10 @@
       "minutesAbbr": "ph",
       "maxPoints": "Điểm tối đa",
       "teilLine": "Teil {i}",
-      "createExam": "Tạo đề thi"
+      "createExam": "Tạo đề thi",
+      "examTypeLabel": "Loại đề thi",
+      "levelLabel": "Trình độ",
+      "previewLabel": "Xem trước"
     },
     "answering": {
       "loadingExam": "Đang tải bài thi...",

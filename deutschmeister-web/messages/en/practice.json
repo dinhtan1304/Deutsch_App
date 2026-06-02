@@ -245,22 +245,35 @@
     },
     "setup": {
       "quotaLabel": "Reading AI quota",
-      "title": "Create new passage",
-      "subtitle": "AI generates a German reading comprehension based on your config",
-      "stepLevel": "1. CEFR level",
-      "stepTopic": "2. Topic",
-      "stepTextType": "3. Text type",
-      "stepQuestionCount": "4. Number of questions",
-      "customTopicPlaceholder": "Or enter a custom topic...",
-      "customLabel": "Custom ✓",
-      "summary": "Config summary",
-      "summaryLevel": "Level:",
-      "summaryTopic": "Topic:",
-      "summaryTextType": "Text type:",
-      "summaryQuestionCount": "Questions:",
-      "questionsUnit": "{count} questions",
-      "notSelected": "Not selected",
-      "generating": "AI is generating the passage...",
+      "title": "Create a reading with AI",
+      "subtitle": "Customize it and AI writes a personal reading passage for you in seconds",
+      "stepLevel": "CEFR level",
+      "stepLength": "Length",
+      "stepTopic": "Topic",
+      "stepTextType": "Text type",
+      "stepQuestionCount": "Number of questions",
+      "levelDescA1": "Beginner",
+      "levelDescA2": "Elementary",
+      "levelDescB1": "Intermediate",
+      "levelDescB2": "Upper intermediate",
+      "lengthShort": "Short",
+      "lengthMedium": "Medium",
+      "lengthLong": "Long",
+      "wordsApprox": "~{count} words",
+      "readingTime": "{count} min read",
+      "customTopicPlaceholder": "Or enter your own topic — e.g. 'job interview'…",
+      "promptWrite": "Write a",
+      "promptLevel": "at level",
+      "promptLength": "length",
+      "promptTopic": "topic",
+      "promptWith": "with",
+      "previewLabel": "Preview",
+      "previewPlaceholder": "Choose a topic…",
+      "previewTitle": "A passage about “{topic}”",
+      "chooseTopicHint": "Pick a topic to start",
+      "questionsShort": "{count} questions",
+      "notSelected": "not chosen",
+      "generating": "AI is writing…",
       "generate": "Generate passage",
       "generateError": "Couldn't generate the passage. Please try again."
     },
@@ -344,26 +357,33 @@
     },
     "setup": {
       "quotaLabel": "Writing AI quota",
-      "title": "Create new prompt",
-      "subtitle": "Choose config to let AI generate a German writing prompt",
-      "stepLevel": "1. CEFR level",
-      "stepTopic": "2. Topic",
-      "stepWritingType": "3. Format",
-      "stepWordCount": "4. Length",
-      "customTopicPlaceholder": "Or enter a custom topic...",
-      "customLabel": "Custom ✓",
-      "summary": "Config summary",
-      "summaryLevel": "Level:",
-      "summaryTopic": "Topic:",
-      "summaryWritingType": "Format:",
-      "summaryWordCount": "Length:",
-      "notSelected": "Not selected",
-      "noneDash": "—",
-      "generating": "AI is generating the prompt...",
-      "generate": "Generate prompt",
-      "generateError": "Couldn't generate the prompt. Please try again."
+      "title": "Create a writing task with AI",
+      "subtitle": "Customize it and AI writes a personal writing task for you in seconds",
+      "stepLevel": "CEFR level",
+      "stepTopic": "Topic",
+      "stepWritingType": "Task type",
+      "stepWordCount": "Length",
+      "customTopicPlaceholder": "Or enter your own topic — e.g. 'job interview'…",
+      "notSelected": "not chosen",
+      "generating": "AI is writing the task…",
+      "generate": "Create task",
+      "generateError": "Couldn't generate the prompt. Please try again.",
+      "levelDescA1": "Beginner",
+      "levelDescA2": "Elementary",
+      "levelDescB1": "Intermediate",
+      "levelDescB2": "Upper intermediate",
+      "promptWrite": "Write a",
+      "promptLevel": "at level",
+      "promptLength": "length",
+      "promptTopic": "topic",
+      "previewLabel": "Preview",
+      "previewPlaceholder": "Choose a topic…",
+      "previewTitle": "A task about “{topic}”",
+      "previewAnswerHint": "Your writing",
+      "chooseTopicHint": "Pick a topic to start"
     },
     "answering": {
+      "title": "Writing Practice",
       "notFound": "Essay not found",
       "backToList": "Back to list",
       "backShort": "← Writing",
@@ -478,8 +498,8 @@
     },
     "setup": {
       "quotaLabel": "Listening AI credits",
-      "title": "New Listening Session",
-      "subtitle": "AI generates an audio script + questions",
+      "title": "Create a listening exercise with AI",
+      "subtitle": "AI generates an audio script + comprehension questions in seconds",
       "stepLevel": "Level",
       "stepScriptType": "Audio type",
       "levels": {
@@ -488,15 +508,34 @@
         "B1": "Rich content · 200-280 words"
       },
       "scriptTypes": {
-        "dialogue": { "label": "Dialog", "desc": "Dialogue between two people" },
-        "monologue": { "label": "Monolog", "desc": "Monologue by one speaker" },
-        "announcement": { "label": "Ansage", "desc": "Announcement / ad" },
-        "interview": { "label": "Interview", "desc": "Interview" },
-        "radio": { "label": "Radio", "desc": "Radio news" }
+        "dialogue": {
+          "label": "Dialog",
+          "desc": "Dialogue between two people"
+        },
+        "monologue": {
+          "label": "Monolog",
+          "desc": "Monologue by one speaker"
+        },
+        "announcement": {
+          "label": "Ansage",
+          "desc": "Announcement / ad"
+        },
+        "interview": {
+          "label": "Interview",
+          "desc": "Interview"
+        },
+        "radio": {
+          "label": "Radio",
+          "desc": "Radio news"
+        }
       },
-      "generating": "Generating listening...",
-      "generate": "🎧 Generate listening",
-      "generateError": "Couldn't generate the session. Please try again."
+      "generating": "AI is generating audio…",
+      "generate": "Create listening",
+      "generateError": "Couldn't generate the session. Please try again.",
+      "promptListen": "Create a listening exercise —",
+      "promptLevel": "at level",
+      "previewLabel": "Preview",
+      "previewTitle": "Listening: {type}"
     },
     "answering": {
       "loading": "Loading session...",
@@ -593,25 +632,60 @@
     },
     "setup": {
       "quotaLabel": "Speaking AI credits",
-      "title": "New Speaking Session",
+      "title": "Create a speaking task with AI",
       "subtitle": "AI generates a German prompt → you record → AI grades it in detail",
-      "stepLevel": "Step 1 — CEFR level",
-      "stepTopic": "Step 2 — Topic",
+      "stepLevel": "Level",
+      "stepTopic": "Topic",
       "topics": {
-        "sich_vorstellen": { "de": "Sich vorstellen", "vi": "Introduce yourself" },
-        "alltag": { "de": "Alltag & Freizeit", "vi": "Everyday life & leisure" },
-        "wohnen": { "de": "Wohnen", "vi": "Housing" },
-        "arbeit": { "de": "Arbeit & Beruf", "vi": "Work & career" },
-        "familie": { "de": "Familie & Freunde", "vi": "Family & friends" },
-        "reisen": { "de": "Reisen", "vi": "Travel" },
-        "einkaufen": { "de": "Einkaufen", "vi": "Shopping" },
-        "gesundheit": { "de": "Gesundheit & Sport", "vi": "Health & sport" },
-        "meinung": { "de": "Meinungen äußern", "vi": "Express opinions" }
+        "sich_vorstellen": {
+          "de": "Sich vorstellen",
+          "vi": "Introduce yourself"
+        },
+        "alltag": {
+          "de": "Alltag & Freizeit",
+          "vi": "Everyday life & leisure"
+        },
+        "wohnen": {
+          "de": "Wohnen",
+          "vi": "Housing"
+        },
+        "arbeit": {
+          "de": "Arbeit & Beruf",
+          "vi": "Work & career"
+        },
+        "familie": {
+          "de": "Familie & Freunde",
+          "vi": "Family & friends"
+        },
+        "reisen": {
+          "de": "Reisen",
+          "vi": "Travel"
+        },
+        "einkaufen": {
+          "de": "Einkaufen",
+          "vi": "Shopping"
+        },
+        "gesundheit": {
+          "de": "Gesundheit & Sport",
+          "vi": "Health & sport"
+        },
+        "meinung": {
+          "de": "Meinungen äußern",
+          "vi": "Express opinions"
+        }
       },
       "info": "Requirements: microphone + Chrome/Edge. AI generates a random question/prompt, you record your answer, and Gemini grades it from audio + transcript.",
-      "generating": "Generating prompt...",
-      "generate": "Create speaking",
-      "generateError": "Couldn't create the session. Please try again."
+      "generating": "AI is creating a prompt…",
+      "generate": "Create speaking task",
+      "generateError": "Couldn't create the session. Please try again.",
+      "levelDescA1": "Beginner",
+      "levelDescA2": "Elementary",
+      "levelDescB1": "Intermediate",
+      "promptSpeak": "Practice speaking about",
+      "promptLevel": "at level",
+      "previewLabel": "Preview",
+      "previewTitle": "Speaking: {topic}",
+      "previewRecordHint": "You will record your answer"
     },
     "answering": {
       "loading": "Loading session...",
@@ -667,11 +741,26 @@
       "shareTitle": "Speaking result",
       "shareText": "I scored {score}/100!",
       "grades": {
-        "excellent": { "badge": "Excellent", "title": "Perfect! 🎉" },
-        "veryGood": { "badge": "Great", "title": "You spoke very well! 👏" },
-        "good": { "badge": "Good", "title": "Making progress! 💪" },
-        "needsWork": { "badge": "Hang in", "title": "Keep practicing! 🤗" },
-        "keepPracticing": { "badge": "Needs work", "title": "Don't give up! 📚" }
+        "excellent": {
+          "badge": "Excellent",
+          "title": "Perfect! 🎉"
+        },
+        "veryGood": {
+          "badge": "Great",
+          "title": "You spoke very well! 👏"
+        },
+        "good": {
+          "badge": "Good",
+          "title": "Making progress! 💪"
+        },
+        "needsWork": {
+          "badge": "Hang in",
+          "title": "Keep practicing! 🤗"
+        },
+        "keepPracticing": {
+          "badge": "Needs work",
+          "title": "Don't give up! 📚"
+        }
       }
     }
   },
@@ -908,11 +997,26 @@
         "youSaid": "You said: \"{text}\"",
         "noFiltered": "No lines match this filter.",
         "grades": {
-          "excellent": { "label": "Excellent", "emoji": "🌟" },
-          "veryGood": { "label": "Very good", "emoji": "✨" },
-          "good": { "label": "Not bad", "emoji": "👍" },
-          "needsWork": { "label": "Keep trying", "emoji": "💪" },
-          "keepPracticing": { "label": "Keep practicing", "emoji": "🔄" }
+          "excellent": {
+            "label": "Excellent",
+            "emoji": "🌟"
+          },
+          "veryGood": {
+            "label": "Very good",
+            "emoji": "✨"
+          },
+          "good": {
+            "label": "Not bad",
+            "emoji": "👍"
+          },
+          "needsWork": {
+            "label": "Keep trying",
+            "emoji": "💪"
+          },
+          "keepPracticing": {
+            "label": "Keep practicing",
+            "emoji": "🔄"
+          }
         }
       }
     }
@@ -1092,7 +1196,10 @@
       "minutesAbbr": "min",
       "maxPoints": "Max points",
       "teilLine": "Teil {i}",
-      "createExam": "Create exam"
+      "createExam": "Create exam",
+      "examTypeLabel": "Exam type",
+      "levelLabel": "Level",
+      "previewLabel": "Preview"
     },
     "answering": {
       "loadingExam": "Loading exam...",
