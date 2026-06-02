@@ -1,58 +1,48 @@
-# Coqui TTS service for German (Thorsten VITS).
+# Piper TTS service for German (Thorsten medium voice).
 #
-# Two-stage: model download in stage 1, slim runtime in stage 2.
-# Python 3.11 — Coqui TTS does not yet support 3.13/3.14 (PyTorch wheels lag).
+# Two-stage: install deps + download the voice in stage 1, slim runtime in
+# stage 2. Piper runs on onnxruntime (no torch), so the image is far smaller
+# and lighter on RAM than the old Coqui/torch build.
 FROM python:3.11-slim AS builder
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    PIP_NO_CACHE_DIR=1 \
-    COQUI_TOS_AGREED=1 \
-    TTS_HOME=/models
+    PIP_NO_CACHE_DIR=1
 
 WORKDIR /app
 
-# Build deps for some Python packages (numpy, scipy, etc). espeak-ng is the
-# phonemizer backend used by VITS — without it Coqui falls back to a worse
-# grapheme-only path. ffmpeg encodes WAV → MP3 at request time.
+# ffmpeg encodes WAV → MP3 at request time. Piper bundles its own espeak-ng
+# phonemizer in the wheel, so no system espeak-ng / build toolchain is needed.
 RUN apt-get update && apt-get install -y --no-install-recommends \
-        build-essential \
-        espeak-ng \
         ffmpeg \
-        git \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt ./
-# Install torch from the CPU-only index first (smaller — ~200 MB vs ~2 GB
-# CUDA build), then the rest. requirements.txt pins transformers<5 because
-# the 5.x release broke on torch 2.4 (needs torch >= 2.6).
-RUN pip install --upgrade pip && \
-    pip install --index-url https://download.pytorch.org/whl/cpu torch==2.4.1 torchaudio==2.4.1 && \
-    pip install -r requirements.txt
+RUN pip install --upgrade pip && pip install -r requirements.txt
 
-# Pre-download the Thorsten model so the first request doesn't pay the
-# ~150 MB download. Models go to /models, which is also a volume mount target.
-RUN mkdir -p /models && python -c "from TTS.api import TTS; TTS(model_name='tts_models/de/thorsten/vits', progress_bar=False)"
+# Pre-download the Thorsten medium voice (.onnx + .onnx.json) so the first
+# request — and container startup — doesn't need network. /models is also the
+# volume mount target (TTS_MODEL_CACHE).
+RUN mkdir -p /models && \
+    python -m piper.download_voices de_DE-thorsten-medium --data-dir /models
 
 # ── Runtime stage ─────────────────────────────────────────────────────────
 FROM python:3.11-slim AS runtime
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    COQUI_TOS_AGREED=1 \
-    TTS_HOME=/models \
+    TTS_MODEL=de_DE-thorsten-medium \
     TTS_MODEL_CACHE=/models
 
 WORKDIR /app
 
-# espeak-ng + ffmpeg also needed at runtime (phonemizer + MP3 encoding).
+# ffmpeg needed at runtime for MP3 encoding. (espeak-ng is bundled in the
+# piper wheel — no system package required.)
 RUN apt-get update && apt-get install -y --no-install-recommends \
-        espeak-ng \
         ffmpeg \
-        libsndfile1 \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy installed Python packages and pre-downloaded model from builder
+# Copy installed Python packages and the pre-downloaded voice from builder.
 COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
 COPY --from=builder /usr/local/bin /usr/local/bin
 COPY --from=builder /models /models
@@ -61,9 +51,8 @@ COPY app ./app
 
 EXPOSE 8001
 
-# 1 worker — the model holds ~500 MB of weights and serializes synthesis
-# internally, so multiple workers would just multiply RAM without speedup.
-# Scale by running multiple containers behind a load balancer.
+# 1 worker — synthesis is serialized via a lock in synthesizer.py, so extra
+# workers would only multiply RAM. Scale by running multiple containers.
 #
 # $PORT is set by Railway/Fly/Render at runtime; falls back to 8001 for local
 # `docker run` without -e PORT. Shell form is required so the env var expands.

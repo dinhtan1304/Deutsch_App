@@ -1,7 +1,8 @@
-# Local-dev launcher for the Coqui TTS service on Windows.
+# Local-dev launcher for the Piper TTS service on Windows.
 # Usage: .\start-local.ps1
 #
-# Loads .env, picks ffmpeg from winget if not on PATH, and starts uvicorn.
+# Loads .env, picks ffmpeg from winget if not on PATH, downloads the Piper
+# voice on first run, and starts uvicorn.
 
 $ErrorActionPreference = "Stop"
 Set-Location $PSScriptRoot
@@ -36,10 +37,25 @@ $venvPython = Join-Path $PSScriptRoot ".venv\Scripts\python.exe"
 if (-not (Test-Path $venvPython)) {
     Write-Host "[start] creating Python 3.12 venv..." -ForegroundColor Cyan
     & py -3.12 -m venv .venv
+}
+
+# --- Ensure dependencies are installed. Re-installs if `piper` is missing,
+#     which also covers an old venv from before the Coqui -> Piper switch. ---
+& $venvPython -c "import importlib.util, sys; sys.exit(0 if importlib.util.find_spec('piper') else 1)"
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "[start] installing dependencies (piper-tts)..." -ForegroundColor Cyan
     & $venvPython -m pip install --upgrade pip
-    & $venvPython -m pip install --index-url https://download.pytorch.org/whl/cpu torch==2.4.1 torchaudio==2.4.1
-    & $venvPython -m pip install "coqui-tts==0.27.0" "fastapi==0.115.6" "uvicorn[standard]==0.32.1" "pydantic==2.10.3" "numpy<2.0" "transformers==4.52.4" "tokenizers>=0.21,<0.22"
-    Write-Host "[start] venv ready" -ForegroundColor Green
+    & $venvPython -m pip install -r requirements.txt
+    Write-Host "[start] deps ready" -ForegroundColor Green
+}
+
+# --- Ensure the Piper voice model is downloaded ---
+$modelCache = if ($env:TTS_MODEL_CACHE) { $env:TTS_MODEL_CACHE } else { Join-Path $PSScriptRoot "models" }
+$voiceName = if ($env:TTS_MODEL) { $env:TTS_MODEL } else { "de_DE-thorsten-medium" }
+if (-not (Test-Path (Join-Path $modelCache "$voiceName.onnx"))) {
+    Write-Host "[start] downloading Piper voice $voiceName -> $modelCache" -ForegroundColor Cyan
+    New-Item -ItemType Directory -Force -Path $modelCache | Out-Null
+    & $venvPython -m piper.download_voices $voiceName --data-dir $modelCache
 }
 
 # --- Run ---

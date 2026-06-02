@@ -1,8 +1,9 @@
 # DeutschMeister TTS Service
 
-FastAPI wrapper around [Coqui TTS](https://github.com/idiap/coqui-ai-TTS)
-serving German speech using the **Thorsten VITS** model
-(`tts_models/de/thorsten/vits`, MPL-2.0 — usable in commercial products).
+FastAPI wrapper around [Piper TTS](https://github.com/OHF-Voice/piper1-gpl)
+serving German speech using the **Thorsten medium** voice
+(`de_DE-thorsten-medium`). Piper runs on onnxruntime (no torch) — ~6× real-time
+on CPU and a fraction of the RAM of the old Coqui/torch setup.
 
 ## Why this exists
 
@@ -24,7 +25,7 @@ NestJS side so repeat plays of the same word are free.
                                                 │
                                                 ▼
                                        [Python TTS service]
-                                       Coqui TTS — Thorsten VITS
+                                       Piper TTS — Thorsten medium
                                             ↓ WAV → ffmpeg → MP3
                                                 │
                                             audio bytes
@@ -51,8 +52,9 @@ cd deutschmeister-tts
 docker compose up --build
 ```
 
-First boot downloads the Thorsten model (~150 MB) into a named volume so
-restarts are instant. Service listens on `:8001`.
+The Thorsten medium voice (~60 MB `.onnx` + config) is downloaded at image
+build time into a named volume, so first request and restarts are instant.
+Service listens on `:8001`.
 
 Set a strong `TTS_SHARED_SECRET` before exposing this beyond localhost:
 
@@ -65,14 +67,16 @@ The same secret must be set on the NestJS API container.
 
 ## Run locally without Docker
 
-Requires Python 3.10–3.12 (Coqui TTS does not support 3.13+ as of late 2025)
-and `ffmpeg` + `espeak-ng` on `PATH`.
+Requires Python 3.10–3.12 and `ffmpeg` on `PATH`. (Piper bundles its own
+espeak-ng phonemizer, so no system espeak-ng is needed.)
 
 ```bash
 python -m venv .venv
 .venv\Scripts\activate    # Windows
 # source .venv/bin/activate  # Linux/macOS
 pip install -r requirements.txt
+# one-time: download the voice into TTS_MODEL_CACHE
+python -m piper.download_voices de_DE-thorsten-medium --data-dir ./models
 uvicorn app.main:app --host 0.0.0.0 --port 8001 --reload
 ```
 
@@ -80,26 +84,27 @@ uvicorn app.main:app --host 0.0.0.0 --port 8001 --reload
 
 | Var                  | Default                            | Notes                                       |
 |----------------------|------------------------------------|---------------------------------------------|
-| `TTS_MODEL`          | `tts_models/de/thorsten/vits`      | Any Coqui model id; non-German won't sound right. |
+| `TTS_MODEL`          | `de_DE-thorsten-medium`              | Piper voice key (resolved under `TTS_MODEL_CACHE`) or a path to an `.onnx`. |
 | `TTS_SHARED_SECRET`  | _(empty)_                          | When set, requests must include `X-TTS-Token`. |
-| `TTS_MAX_TEXT_LEN`   | `500`                              | Per-request character cap.                  |
-| `TTS_MODEL_CACHE`    | `/models`                          | Where Coqui downloads model weights.        |
+| `TTS_MAX_TEXT_LEN`   | `3000`                             | Per-request character cap.                  |
+| `TTS_MODEL_CACHE`    | `/models`                          | Where the Piper `.onnx` voice files live.   |
 | `TTS_CORS_ORIGINS`   | _(empty)_                          | Comma-separated origins if calling directly from browser. |
 
 ## Performance
 
-On a 4-core CPU, Thorsten VITS produces ~1× real-time (1 second of audio
-per ~1 second of compute). The first request after boot is slower because
-PyTorch warms up; the `/health` check warms it for you.
+On a modern CPU, Piper runs ~10× real-time (≈1 second of compute per 10
+seconds of audio), so even full B1 listening transcripts synthesize in a
+second or two. The model is warmed by the `/health` check on boot.
 
 For higher throughput:
 - Run multiple containers behind a reverse proxy.
-- A GPU container (CUDA + `torch` GPU build) brings synthesis to ~10× real-time.
+- For GPU, install `onnxruntime-gpu` (Piper picks it up automatically).
 
 ## License notes
 
-- Code: MPL-2.0 (Coqui TTS) + MIT (this wrapper).
-- Thorsten Müller's voice donation is under MPL-2.0 and explicitly permits
-  commercial use. Credit Thorsten in the app's "About" page.
-- Do **not** swap to XTTS v2 without reading its license — XTTS is CPML
-  (non-commercial only).
+- Engine: `OHF-Voice/piper1-gpl` is **GPL** (it statically links the espeak-ng
+  phonemizer). We run it as an internal backend service and do not distribute
+  the binary to end users, so the copyleft terms are not triggered. This
+  wrapper is MIT.
+- The Thorsten voice models are released by Thorsten Müller into the public
+  domain (CC0). Credit Thorsten in the app's "About" page.

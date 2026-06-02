@@ -1,9 +1,9 @@
-# Railway deployment for the Coqui TTS service.
+# Railway deployment for the Piper TTS service.
 # Deploy: `railway up` from this directory after `railway link`.
 #
-# Cost note: Coqui TTS holds ~500 MB of weights in RAM. Pick a Railway plan
-# with at least 1 GB RAM. CPU-only inference is fine for low traffic; for
-# high traffic, run multiple containers behind a load balancer.
+# Cost note: Piper (onnxruntime, no torch) is light — the Thorsten medium voice
+# needs only a few hundred MB of RAM and runs well on CPU (~10x real-time).
+# For high traffic, run multiple containers behind a load balancer.
 
 [build]
 builder = "DOCKERFILE"

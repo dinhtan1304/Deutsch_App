@@ -1,6 +1,6 @@
 # DeutschMeister TTS — Deployment Guide
 
-Hướng dẫn chạy Coqui TTS service ở local và deploy production.
+Hướng dẫn chạy Piper TTS service ở local và deploy production.
 
 ---
 
@@ -9,28 +9,26 @@ Hướng dẫn chạy Coqui TTS service ở local và deploy production.
 ### Lần đầu setup
 
 ```powershell
-# 1. Cài tools (1 lần duy nhất)
+# 1. Cài tools (1 lần duy nhất) — chỉ cần ffmpeg; Piper tự kèm espeak-ng
 winget install -e --id Gyan.FFmpeg
-winget install -e --id eSpeak-NG.eSpeak-NG
 
 # 2. Vào thư mục TTS service
 cd E:\Deutsch_App\deutschmeister-tts
 
-# 3. Chạy script — tự tạo venv + cài deps + start uvicorn
+# 3. Chạy script — tự tạo venv + cài deps + tải voice Piper + start uvicorn
 .\start-local.ps1
 ```
 
-Lần đầu: tạo venv ~5 phút, model download ~150MB lần request đầu tiên.
-Lần sau: chỉ cần `.\start-local.ps1` — instant.
+Lần đầu: tạo venv + tải voice Piper (~60MB). Lần sau: `.\start-local.ps1` — instant.
 
 ### Local Development (macOS/Linux)
 
 ```bash
-# Cài tools (Ubuntu/Debian)
-sudo apt install ffmpeg espeak-ng python3.12 python3.12-venv
+# Cài tools (Ubuntu/Debian) — espeak-ng đã bundle trong Piper, chỉ cần ffmpeg
+sudo apt install ffmpeg python3.12 python3.12-venv
 
 # macOS
-brew install ffmpeg espeak-ng python@3.12
+brew install ffmpeg python@3.12
 
 # Chạy
 cd deutschmeister-tts
@@ -82,19 +80,19 @@ docker compose up -d --build
 curl http://localhost:8001/health
 ```
 
-Volume `tts-models` lưu model weights — survive container restart, không phải re-download 150MB.
+Voice Piper được tải lúc build image vào volume `tts-models` — survive restart, không phải tải lại.
 
 ### Resource requirements
 
-- **RAM**: tối thiểu 1 GB (model ~500 MB + Python + FastAPI buffer)
-- **CPU**: 1-2 cores đủ cho ~5-10 req/phút (RTF ~3× = 1s audio mỗi 3s compute)
-- **Disk**: ~2 GB cho image + models
+- **RAM**: ~512 MB đủ (Piper onnxruntime nhẹ, không có torch)
+- **CPU**: 1 core đủ cho traffic thấp (Piper RTF ~10× = nhanh hơn realtime nhiều)
+- **Disk**: image nhỏ hơn hẳn build cũ; voice ~60 MB
 - **Network**: chỉ cần gọi internal từ NestJS (không expose public)
 
 ### Scale up khi cần
 
 - **Throughput cao**: chạy nhiều container behind nginx/Traefik
-- **Latency thấp**: dùng GPU container — sửa Dockerfile thay torch CPU bằng `torch==2.4.1+cu121`, RTF ~10× thay vì 3×
+- **Latency thấp hơn nữa**: cài `onnxruntime-gpu` để Piper chạy trên GPU
 - **Cache lớn**: NestJS đã cache audio đến disk, nên TTS chỉ gọi 1 lần/text. Cache layer phía API quan trọng hơn scale TTS.
 
 ---
@@ -117,7 +115,8 @@ railway up    # build & deploy
 
 # Set env vars trong dashboard hoặc CLI
 railway variables --set TTS_SHARED_SECRET=$(openssl rand -hex 32)
-railway variables --set COQUI_TOS_AGREED=1
+railway variables --set TTS_MODEL=de_DE-thorsten-medium
+railway variables --set TTS_MAX_TEXT_LEN=3000
 ```
 
 ### Resources cần đặt trên Railway

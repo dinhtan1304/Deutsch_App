@@ -1,11 +1,8 @@
-coqui-tts==0.27.0
+# Piper TTS — fast, local neural TTS (ONNX/onnxruntime, no torch). The
+# `piper-tts` wheel installs the `piper` package and bundles the espeak-ng
+# phonemizer, and pulls onnxruntime + numpy as deps. Switched off Coqui TTS,
+# which is no longer maintained and drags in a ~1-2 GB torch dependency.
+piper-tts==1.4.2
 fastapi==0.115.6
 uvicorn[standard]==0.32.1
 pydantic==2.10.3
-numpy<2.0
-torch==2.4.1
-torchaudio==2.4.1
-# coqui-tts requires transformers>=4.52.1 but transformers 5.x breaks on torch
-# 2.4 (uses torch.library APIs added in 2.6). Pin to last 4.x that works.
-transformers==4.52.4
-tokenizers>=0.21,<0.22

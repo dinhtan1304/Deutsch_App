@@ -1,4 +1,4 @@
-"""FastAPI server exposing Coqui TTS for German."""
+"""FastAPI server exposing Piper TTS for German."""
 
 from __future__ import annotations
 
@@ -26,7 +26,10 @@ ALLOW_INSECURE_LOCAL = os.environ.get("TTS_ALLOW_INSECURE_LOCAL", "").lower() ==
 if ENV.lower() == "production" and not SHARED_SECRET and not ALLOW_INSECURE_LOCAL:
     raise RuntimeError("TTS_SHARED_SECRET is required in production")
 
-MAX_TEXT_LEN = int(os.environ.get("TTS_MAX_TEXT_LEN", "1200"))
+# Piper handles long multi-sentence passages fast, so the cap exists only to
+# bound abuse, not to work around engine limits. Listening transcripts (B1 ≈
+# 1400-1960 chars) must fit comfortably.
+MAX_TEXT_LEN = int(os.environ.get("TTS_MAX_TEXT_LEN", "3000"))
 FFMPEG_BIN = os.environ.get("FFMPEG_BIN", "ffmpeg")
 TTS_CACHE_DIR = Path(os.environ.get("TTS_CACHE_DIR", "/tmp/deutschmeister-tts-cache"))
 MAX_QUEUE = max(1, int(os.environ.get("TTS_MAX_QUEUE", "2")))
@@ -61,7 +64,7 @@ def normalize_text(text: str) -> str:
 
 def cache_path(text: str) -> Path:
     key = hashlib.sha256(
-        f"{normalize_text(text)}|{DEFAULT_MODEL}|mp3-64k-mono".encode("utf-8")
+        f"{normalize_text(text)}|{DEFAULT_MODEL}|mp3-128k-mono".encode("utf-8")
     ).hexdigest()
     return TTS_CACHE_DIR / f"{key}.mp3"
 
@@ -136,7 +139,7 @@ def synthesize(req: SynthesizeRequest):
                     [
                         FFMPEG_BIN, "-y", "-loglevel", "error",
                         "-i", wav_path,
-                        "-ac", "1", "-b:a", "64k",
+                        "-ac", "1", "-b:a", "128k",
                         mp3_path,
                     ],
                     check=True,
