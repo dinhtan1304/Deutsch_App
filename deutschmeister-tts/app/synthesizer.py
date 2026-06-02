@@ -21,7 +21,7 @@ import threading
 import wave
 from pathlib import Path
 
-from piper import PiperVoice
+from piper import PiperVoice, SynthesisConfig
 
 logger = logging.getLogger(__name__)
 
@@ -35,6 +35,16 @@ DEFAULT_MODEL = os.environ.get("TTS_MODEL", "de_DE-thorsten-medium")
 # Local model cache directory (mounted as volume in Docker so models survive
 # container restarts and we don't re-download on every boot).
 MODEL_CACHE_DIR = os.environ.get("TTS_MODEL_CACHE", "/models")
+
+# ── Prosody (env-tunable; no code change needed to adjust on Railway) ─────────
+# length_scale > 1 slows speech for a more deliberate, clearer delivery.
+# noise_w_scale adds variation in phoneme durations → more natural rhythm and
+# emphasis ("nhấn nhá"). sentence_silence inserts a pause between sentences so
+# the audio has clear phrasing ("ngắt câu") instead of running sentences
+# together (Piper concatenates per-sentence audio with no gap by default).
+LENGTH_SCALE = float(os.environ.get("TTS_LENGTH_SCALE", "1.05"))
+NOISE_W_SCALE = float(os.environ.get("TTS_NOISE_W_SCALE", "0.9"))
+SENTENCE_SILENCE_SEC = float(os.environ.get("TTS_SENTENCE_SILENCE_SEC", "0.3"))
 
 _lock = threading.Lock()
 _voice: PiperVoice | None = None
@@ -86,8 +96,24 @@ def get_tts() -> PiperVoice:
 def synthesize_to_wav(text: str, out_path: str) -> None:
     """Synthesize `text` to a WAV file at `out_path`. Serialized — only one
     synthesis runs at a time to avoid races on the shared onnxruntime session.
-    Piper handles multi-sentence text internally, so long passages are fine."""
+
+    Piper yields one audio chunk per sentence; we write a short silence between
+    them for natural phrasing, and apply prosody (length/noise) via syn_config.
+    """
     voice = get_tts()
+    cfg = SynthesisConfig(length_scale=LENGTH_SCALE, noise_w_scale=NOISE_W_SCALE)
     with _lock:
         with wave.open(out_path, "wb") as wav_file:
-            voice.synthesize_wav(text, wav_file)
+            silence = b""
+            first = True
+            for chunk in voice.synthesize(text, syn_config=cfg):
+                if first:
+                    wav_file.setframerate(chunk.sample_rate)
+                    wav_file.setsampwidth(chunk.sample_width)
+                    wav_file.setnchannels(chunk.sample_channels)
+                    n = int(chunk.sample_rate * SENTENCE_SILENCE_SEC)
+                    silence = b"\x00" * (n * chunk.sample_width * chunk.sample_channels)
+                    first = False
+                elif silence:
+                    wav_file.writeframes(silence)  # gap before each new sentence
+                wav_file.writeframes(chunk.audio_int16_bytes)

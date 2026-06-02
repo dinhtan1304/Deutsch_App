@@ -15,7 +15,14 @@ from fastapi import Depends, FastAPI, Header, HTTPException, Response
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
-from .synthesizer import DEFAULT_MODEL, get_tts, synthesize_to_wav
+from .synthesizer import (
+    DEFAULT_MODEL,
+    LENGTH_SCALE,
+    NOISE_W_SCALE,
+    SENTENCE_SILENCE_SEC,
+    get_tts,
+    synthesize_to_wav,
+)
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s - %(message)s")
 logger = logging.getLogger("tts")
@@ -64,7 +71,10 @@ def normalize_text(text: str) -> str:
 
 def cache_path(text: str) -> Path:
     key = hashlib.sha256(
-        f"{normalize_text(text)}|{DEFAULT_MODEL}|mp3-128k-mono".encode("utf-8")
+        (
+            f"{normalize_text(text)}|{DEFAULT_MODEL}|mp3-128k-mono"
+            f"|ls={LENGTH_SCALE}|nw={NOISE_W_SCALE}|ss={SENTENCE_SILENCE_SEC}"
+        ).encode("utf-8")
     ).hexdigest()
     return TTS_CACHE_DIR / f"{key}.mp3"
 
