@@ -3,7 +3,7 @@
 /**
  * Progress (Built-in Word SRS) React Query Hooks
  *
- * Replaces the old Zustand srsStore with React Query for:
+ * React Query owns SRS card state for:
  * - Better caching & automatic invalidation
  * - Consistent pattern with usePersonalWords hooks
  * - No manual loadCards() needed
@@ -63,7 +63,13 @@ export function useProgressIntervalPreview(wordId?: string) {
     queryKey: progressKeys.preview(wordId),
     queryFn: () => progressApi.getIntervalPreview(wordId as string),
     enabled: !!wordId,
-    staleTime: 30 * 1000,
+    // A due card's SRS state is immutable until it's reviewed — and once reviewed
+    // it leaves the session — so the preview never goes stale mid-session. Caching
+    // it permanently fetches each card at most once and stops refetch storms from
+    // remounts (Fast Refresh / StrictMode) that can trip the global rate limiter.
+    staleTime: Infinity,
+    gcTime: 10 * 60 * 1000,
+    retry: false,
   });
 }
 
@@ -79,12 +85,13 @@ export function useReviewCard() {
     mutationFn: ({ wordId, rating }: { wordId: string; rating: ReviewRating }) =>
       progressApi.review(wordId, rating),
     onSuccess: (updatedCard) => {
-      // Optimistically update only the reviewed card in the due-cards cache
+      // Optimistically update the reviewed card in EVERY due-cards cache
+      // (the review page uses due(100), QuickReviewWidget uses due(5), etc.)
       // to avoid a full refetch during an active review session.
       // Stats and dashboard are marked stale but not immediately refetched.
-      queryClient.setQueryData(
-        progressKeys.due(100),
-        (old: Progress[] | undefined) =>
+      queryClient.setQueriesData<Progress[]>(
+        { queryKey: [...progressKeys.all, 'due'] },
+        (old) =>
           old?.map(c => c.wordId === updatedCard.wordId ? updatedCard : c) ?? old,
       );
       queryClient.invalidateQueries({ queryKey: progressKeys.stats(), refetchType: 'none' });
@@ -92,7 +99,7 @@ export function useReviewCard() {
     },
     onError: (error, variables) => {
       if (error instanceof ApiError && error.status === 409) {
-        queryClient.invalidateQueries({ queryKey: progressKeys.due(100) });
+        queryClient.invalidateQueries({ queryKey: [...progressKeys.all, 'due'] });
         queryClient.invalidateQueries({ queryKey: progressKeys.preview(variables.wordId) });
         queryClient.invalidateQueries({ queryKey: progressKeys.stats() });
       }

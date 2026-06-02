@@ -1,9 +1,7 @@
 'use client';
-// UI_REFRESH_FORCE_SYNC: 2026-05-01_v3
 
 import { useState, useMemo } from 'react';
 import { useTranslations, useFormatter } from 'next-intl';
-import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 import { useRouter } from 'next/navigation';
 import {
   useRoleplayScenarios,
@@ -14,11 +12,12 @@ import {
 import { useCheckQuota } from '@/hooks/useSubscription';
 import { ScenarioCard } from '@/components/roleplay/ScenarioCard';
 import { PracticePageShell, GridSkeleton } from '@/components/ui';
+import { FilterChip } from '@/components/ui/FilterChip';
 import { UpgradeModal } from '@/components/subscription/UpgradeModal';
 import type { RoleplayLevel, RoleplayScenario } from '@/lib/api/roleplay';
 
 // ─── Local Icons ─────────────────────────────────────────────────────────────
-function IconTrash({ size = 16, style }: { size?: number; style?: React.CSSProperties }) {
+function IconTrash({ size = 15, style }: { size?: number; style?: React.CSSProperties }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}><polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" /></svg>;
 }
 
@@ -48,28 +47,16 @@ export default function RoleplayPage() {
   }, [scenarios, levelFilter]);
 
   const handleStart = async (scenario: RoleplayScenario) => {
-    if (quotaExhausted) {
-      setUpgradeOpen(true);
-      return;
-    }
+    if (quotaExhausted) { setUpgradeOpen(true); return; }
     try {
-      const session = await startMut.mutateAsync({
-        scenario: scenario.code,
-        level: scenario.level,
-      });
+      const session = await startMut.mutateAsync({ scenario: scenario.code, level: scenario.level });
       router.push(`/practice-test/roleplay/${session.id}`);
-    } catch {
-      // Handled
-    }
+    } catch { /* handled */ }
   };
 
   const confirmDelete = async () => {
     if (!confirmDeleteId) return;
-    try {
-      await deleteMut.mutateAsync({ sessionId: confirmDeleteId });
-    } catch {
-      // Handled
-    }
+    try { await deleteMut.mutateAsync({ sessionId: confirmDeleteId }); } catch { /* handled */ }
     setConfirmDeleteId(null);
   };
 
@@ -78,77 +65,56 @@ export default function RoleplayPage() {
       backHref="/practice-test"
       title={t('title')}
       subtitle={t('subtitle')}
-      accent="speaking"
-      className="pb-32"
+      accent="writing"
+      className="pb-16"
       right={
         quota && (
-          <div className="flex items-center gap-3 px-4 py-2 rounded-2xl border backdrop-blur-md"
+          <span className="inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-[11px] font-bold uppercase tracking-wide"
             style={{
-              backgroundColor: quotaExhausted ? 'rgba(239,68,68,0.05)' : 'rgba(34,197,94,0.05)',
-              borderColor: quotaExhausted ? 'rgba(239,68,68,0.2)' : 'rgba(34,197,94,0.2)',
-              color: quotaExhausted ? STATUS.danger : STATUS.success
+              background: `color-mix(in srgb, ${quotaExhausted ? 'var(--danger)' : 'var(--success)'} 12%, transparent)`,
+              border: `1px solid color-mix(in srgb, ${quotaExhausted ? 'var(--danger)' : 'var(--success)'} 30%, transparent)`,
+              color: quotaExhausted ? 'var(--danger)' : 'var(--success)',
             }}>
-            <div className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: 'currentColor' }} />
-            <span className="text-xs font-black uppercase tracking-widest">{t('quotaLabel', { used: quota.used, limit: quota.limit })}</span>
-          </div>
+            <span className="h-1.5 w-1.5 rounded-full" style={{ background: 'currentColor' }} />
+            {t('quotaLabel', { used: quota.used, limit: quota.limit })}
+          </span>
         )
       }
     >
       {/* Level filter */}
-      <div className="flex gap-2.5 mb-10 overflow-x-auto no-scrollbar">
-        {LEVELS.map((lv) => {
-          const active = levelFilter === lv;
-          return (
-            <button key={lv} type="button" onClick={() => setLevelFilter(lv)}
-              className="px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all duration-300 shadow-sm"
-              style={{
-                background: active ? GRADIENT.speaking : 'var(--theme-bg-card)',
-                color: active ? 'white' : 'var(--theme-text-muted)',
-                border: active ? 'none' : '1px solid var(--theme-border)',
-                boxShadow: active ? '0 10px 20px rgba(99, 102, 241, 0.2)' : 'none'
-              }}>
-              {lv === 'all' ? t('allLevels') : lv}
-            </button>
-          );
-        })}
+      <div className="mb-6 flex flex-wrap items-center gap-1.5">
+        {LEVELS.map((lv) => (
+          <FilterChip key={lv} active={levelFilter === lv} size="sm" onClick={() => setLevelFilter(lv)}>
+            <span className={lv === 'all' ? '' : 'mono'}>{lv === 'all' ? t('allLevels') : lv}</span>
+          </FilterChip>
+        ))}
       </div>
 
       {/* Scenarios grid */}
-      <section className="mb-16">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-1.5 h-6 rounded-full" style={{ background: GRADIENT.speaking }} />
-          <h2 className="text-xl font-black tracking-tight" style={{ color: 'var(--theme-text-primary)' }}>{t('scenariosTitle')}</h2>
-        </div>
-        
+      <section className="mb-10">
+        <h2 className="mb-3 text-caption font-bold uppercase tracking-wider" style={{ color: 'var(--theme-text-muted)' }}>{t('scenariosTitle')}</h2>
         {isLoading ? (
-          <GridSkeleton cols={3} count={6} height="h-44" rounded="rounded-[2.5rem]" gap="gap-6" />
+          <GridSkeleton cols={3} count={6} height="h-36" gap="gap-4" />
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
             {filtered.map((sc) => (
-              <ScenarioCard
-                key={sc.code}
-                scenario={sc}
-                locked={!!quotaExhausted}
-                onClick={() => handleStart(sc)}
-              />
+              <ScenarioCard key={sc.code} scenario={sc} locked={!!quotaExhausted} onClick={() => handleStart(sc)} />
             ))}
           </div>
         )}
       </section>
 
-      {/* Delete Confirmation Banner */}
+      {/* Delete confirm */}
       {confirmDeleteId && (
-        <div className="mb-10 rounded-[2.5rem] border-2 p-8 flex items-center justify-between gap-8 flex-wrap animate-in fade-in slide-in-from-top-4 duration-500"
-          style={{ borderColor: `${STATUS.danger}40`, backgroundColor: `${STATUS.danger}05` }}>
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl p-5"
+          style={{ border: '1px solid color-mix(in srgb, var(--danger) 40%, transparent)', background: 'color-mix(in srgb, var(--danger) 6%, transparent)' }}>
           <div>
-            <h4 className="text-xl font-black mb-1.5" style={{ color: 'var(--theme-text-primary)' }}>{t('confirmDeleteTitle')}</h4>
-            <p className="text-base opacity-50 font-medium" style={{ color: 'var(--theme-text-primary)' }}>{t('confirmDeleteSubtitle')}</p>
+            <h4 className="text-body font-bold" style={{ color: 'var(--theme-text-primary)' }}>{t('confirmDeleteTitle')}</h4>
+            <p className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>{t('confirmDeleteSubtitle')}</p>
           </div>
-          <div className="flex gap-4">
-            <button onClick={() => setConfirmDeleteId(null)} className="px-6 py-3 rounded-xl text-xs font-black border transition-all hover:bg-white/5"
-              style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)' }}>{t('cancel')}</button>
-            <button onClick={confirmDelete} className="px-6 py-3 rounded-xl text-xs font-black text-white transition-all hover:brightness-110 shadow-xl shadow-red-500/30"
-              style={{ backgroundColor: STATUS.danger }}>{t('deletePermanently')}</button>
+          <div className="flex gap-2.5">
+            <button onClick={() => setConfirmDeleteId(null)} className="rounded-[10px] px-4 py-2 text-caption font-bold" style={{ border: '1px solid var(--theme-border)', color: 'var(--theme-text-secondary)' }}>{t('cancel')}</button>
+            <button onClick={confirmDelete} className="rounded-[10px] px-4 py-2 text-caption font-bold text-white" style={{ background: 'var(--danger)' }}>{t('deletePermanently')}</button>
           </div>
         </div>
       )}
@@ -156,58 +122,39 @@ export default function RoleplayPage() {
       {/* History */}
       {history && history.data.length > 0 && (
         <section>
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-1.5 h-6 rounded-full bg-slate-400/20" />
-            <h2 className="text-xl font-black tracking-tight" style={{ color: 'var(--theme-text-primary)' }}>{t('historyTitle')}</h2>
-          </div>
-          
-          <div className="grid grid-cols-1 gap-4">
-            {history.data.map((h) => (
-              <div key={h.id}
-                className="group rounded-4xl p-5 flex items-center gap-5 transition-all duration-500 hover:-translate-y-1 hover:shadow-2xl relative overflow-hidden border border-transparent hover:border-indigo-500/20"
-                style={{ 
-                  backgroundColor: 'var(--theme-bg-card)', 
-                  boxShadow: '0 10px 30px rgba(0, 0, 0, 0.03), inset 0 0 0 1px rgba(255, 255, 255, 0.05)' 
-                }}>
-                
-                <div className="text-4xl w-16 h-16 rounded-2xl flex items-center justify-center bg-black/3 dark:bg-white/5 transition-transform duration-500 group-hover:scale-110">
-                  {h.scenarioInfo?.icon ?? '💬'}
-                </div>
-
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2.5 mb-1.5 flex-wrap">
-                    <span className="text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-lg bg-black/5 dark:bg-white/10"
-                      style={{ color: 'var(--theme-text-primary)' }}>{h.level}</span>
-                    <span className="text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-lg"
-                      style={{
-                        backgroundColor: h.status === 'completed' ? `${STATUS.success}15` : `${ACCENT.srs}15`,
-                        color: h.status === 'completed' ? STATUS.success : ACCENT.srs,
-                      }}>
-                      {h.status === 'completed' ? t('statusCompleted') : t('statusActive')}
-                    </span>
+          <h2 className="mb-3 text-caption font-bold uppercase tracking-wider" style={{ color: 'var(--theme-text-muted)' }}>{t('historyTitle')}</h2>
+          <div className="grid grid-cols-1 gap-3">
+            {history.data.map((h) => {
+              const done = h.status === 'completed';
+              const sColor = done ? 'var(--success)' : 'var(--accent)';
+              return (
+                <div key={h.id}
+                  className="word-card-v2 flex items-center gap-4 rounded-[13px] p-4"
+                  style={{ background: 'var(--theme-bg-card)', border: '1px solid var(--theme-border)', ['--card-accent' as string]: 'var(--accent)' } as React.CSSProperties}>
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-md text-2xl" style={{ background: 'var(--theme-bg-tertiary)' }}>
+                    {h.scenarioInfo?.icon ?? '💬'}
                   </div>
-                  <button onClick={() => router.push(`/practice-test/roleplay/${h.id}`)} className="block text-left w-full group/title">
-                    <h3 className="text-lg font-black tracking-tight group-hover/title:text-indigo-500 transition-colors">{h.scenarioInfo?.titleDe ?? h.scenario}</h3>
-                  </button>
-                  <div className="text-[11px] font-bold opacity-40 uppercase tracking-widest mt-1" style={{ color: 'var(--theme-text-primary)' }}>
-                    {formatDate(h.updatedAt)}
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-6 shrink-0">
-                  {h.overallScore !== null && (
-                    <div className="text-2xl font-black tracking-tighter text-indigo-500">
-                      {h.overallScore}<span className="text-xs ml-0.5">%</span>
+                  <button onClick={() => router.push(`/practice-test/roleplay/${h.id}`)} className="min-w-0 flex-1 text-left">
+                    <div className="mb-1 flex flex-wrap items-center gap-1.5">
+                      <span className="mono rounded-[5px] px-1.5 py-0.5 text-[10px] font-bold" style={{ background: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)', border: '1px solid var(--theme-border)' }}>{h.level}</span>
+                      <span className="inline-flex items-center gap-1.5 rounded-[5px] px-2 py-0.5 text-[10px] font-bold uppercase" style={{ background: `color-mix(in srgb, ${sColor} 16%, transparent)`, color: sColor, letterSpacing: '.04em' }}>
+                        <span className="h-1 w-1 rounded-full" style={{ background: sColor }} />{done ? t('statusCompleted') : t('statusActive')}
+                      </span>
                     </div>
-                  )}
-                  <button onClick={() => setConfirmDeleteId(h.id)}
-                    className="w-10 h-10 rounded-xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-red-500/10 hover:text-red-500"
-                    style={{ color: 'var(--theme-text-muted)' }}>
-                    <IconTrash size={18} />
+                    <h3 className="truncate text-body font-bold" style={{ color: 'var(--theme-text-primary)' }}>{h.scenarioInfo?.titleDe ?? h.scenario}</h3>
+                    <div className="mono mt-0.5 text-[11px]" style={{ color: 'var(--theme-text-muted)' }}>{formatDate(h.updatedAt)}</div>
                   </button>
+                  <div className="flex shrink-0 items-center gap-2">
+                    {h.overallScore !== null && (
+                      <span className="mono text-lead font-bold" style={{ color: 'var(--accent)' }}>{h.overallScore}%</span>
+                    )}
+                    <button onClick={() => setConfirmDeleteId(h.id)}
+                      className="flex h-7 w-7 items-center justify-center rounded-lg opacity-60 transition-colors hover:text-red-500"
+                      style={{ color: 'var(--theme-text-muted)' }} aria-label="delete"><IconTrash size={15} /></button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </section>
       )}

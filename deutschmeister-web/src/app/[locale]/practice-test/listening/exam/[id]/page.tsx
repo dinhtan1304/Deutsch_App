@@ -9,7 +9,7 @@ import { ExamListeningTeil, ExamListeningQuestion } from '@/lib/api/examListenin
 import { EXAM_LISTENING_DISPLAY } from '@/lib/examConfig';
 import { PageHeader, FixedActionBar } from '@/components/ui';
 import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
-import { synthesizeAudio } from '@/lib/utils';
+import { synthesizeAudioSequence, type AudioSequenceHandle } from '@/lib/utils';
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
 function IconChevronLeft({ size = 16 }: { size?: number }) {
@@ -52,14 +52,11 @@ function TTSPlayer({ texts, speed, onSpeedChange, playCount, onPlay }: {
 }) {
   const t = useTranslations('practice.examListening.answering');
   const [playing, setPlaying] = useState(false);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const seqRef = useRef<AudioSequenceHandle | null>(null);
   const fullScript = texts.map(t => t.content).join('\n\n');
 
   const stopAll = useCallback(() => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-    }
+    seqRef.current?.stop();
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       window.speechSynthesis.cancel();
     }
@@ -68,27 +65,38 @@ function TTSPlayer({ texts, speed, onSpeedChange, playCount, onPlay }: {
 
   useEffect(() => () => stopAll(), [stopAll]);
 
-  const handlePlay = async () => {
+  // Keep speed in sync if the user changes it mid-playback.
+  useEffect(() => { seqRef.current?.setPlaybackRate(speed); }, [speed]);
+
+  const playViaBrowser = () => {
+    if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(fullScript);
+    u.lang = 'de-DE';
+    u.rate = speed;
+    u.onstart = () => setPlaying(true);
+    u.onend = () => { setPlaying(false); onPlay(); };
+    u.onerror = () => setPlaying(false);
+    window.speechSynthesis.speak(u);
+  };
+
+  // Chunked sequential playback keeps the long multi-text exam script on the
+  // natural Piper voice instead of being rejected and dropping to the browser.
+  const handlePlay = () => {
     if (playing) { stopAll(); return; }
-    try {
-      const audio = await synthesizeAudio(fullScript);
-      audio.playbackRate = speed;
-      audio.onplay = () => setPlaying(true);
-      audio.onended = () => { setPlaying(false); onPlay(); };
-      audio.onerror = () => setPlaying(false);
-      audioRef.current = audio;
-      await audio.play();
-    } catch (err) {
-      console.warn('[ExamListening] backend failed, falling back to Web Speech API:', err);
-      if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
-      const u = new SpeechSynthesisUtterance(fullScript);
-      u.lang = 'de-DE';
-      u.rate = speed;
-      u.onstart = () => setPlaying(true);
-      u.onend = () => { setPlaying(false); onPlay(); };
-      u.onerror = () => setPlaying(false);
-      window.speechSynthesis.speak(u);
-    }
+    seqRef.current?.stop();
+    const seq = synthesizeAudioSequence(fullScript, {
+      playbackRate: speed,
+      onStart: () => setPlaying(true),
+      onEnded: () => { setPlaying(false); onPlay(); },
+      onError: (err) => {
+        console.warn('[ExamListening] backend failed, falling back to Web Speech API:', err);
+        setPlaying(false);
+        playViaBrowser();
+      },
+    });
+    seqRef.current = seq;
+    void seq.play();
   };
 
   return (
@@ -100,9 +108,9 @@ function TTSPlayer({ texts, speed, onSpeedChange, playCount, onPlay }: {
       }}>
       <div className="flex flex-col items-center text-center gap-6">
         <button onClick={handlePlay}
-          className="w-24 h-24 rounded-full flex items-center justify-center text-white transition-all hover:scale-105 active:scale-95 shrink-0 shadow-2xl relative group"
+          className="w-24 h-24 rounded-[26px] flex items-center justify-center text-white transition-all hover:scale-105 active:scale-95 shrink-0 shadow-2xl relative group"
           style={{ background: playing ? PLAYING_GRADIENT : GRADIENT.listening }}>
-          <div className="absolute inset-0 rounded-full bg-white opacity-0 group-hover:opacity-10 transition-opacity" />
+          <div className="absolute inset-0 rounded-[26px] bg-white opacity-0 group-hover:opacity-10 transition-opacity" />
           {playing ? <IconSquare size={32} style={{ color: 'white' }} /> : <IconPlay size={36} style={{ color: 'white', marginLeft: 6 }} />}
         </button>
 
@@ -171,7 +179,7 @@ function RichtigFalschTeil({ teil, answers, onAnswer }: { teil: ExamListeningTei
               backgroundColor: 'var(--theme-bg-card)'
             }}>
             <div className="flex items-start gap-3 mb-4">
-              <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-black shrink-0"
+              <div className="w-7 h-7 rounded-[9px] flex items-center justify-center text-xs font-black shrink-0"
                 style={{ background: isAns ? GRADIENT.reading : 'var(--theme-bg-secondary)', color: isAns ? 'white' : 'var(--theme-text-muted)' }}>
                 {i + 1}
               </div>
@@ -212,7 +220,7 @@ function MCQTeil({ teil, answers, onAnswer }: { teil: ExamListeningTeil; answers
               backgroundColor: 'var(--theme-bg-card)'
             }}>
             <div className="flex items-start gap-3 mb-4">
-              <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-black shrink-0"
+              <div className="w-7 h-7 rounded-[9px] flex items-center justify-center text-xs font-black shrink-0"
                 style={{ background: isAns ? GRADIENT.reading : 'var(--theme-bg-secondary)', color: isAns ? 'white' : 'var(--theme-text-muted)' }}>
                 {i + 1}
               </div>
@@ -225,11 +233,11 @@ function MCQTeil({ teil, answers, onAnswer }: { teil: ExamListeningTeil; answers
                 const sel = answers[q.id] === opt.id;
                 return (
                   <button key={opt.id} onClick={() => onAnswer(q.id, opt.id)}
-                    className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl border-2 text-[15px] text-left transition-all hover:scale-[1.01] active:scale-[0.99]"
+                    className="w-full flex items-center gap-3 px-4 py-3.5 rounded-md border-2 text-[15px] text-left transition-all hover:scale-[1.01] active:scale-[0.99]"
                     style={sel
                       ? { borderColor: ACCENT.listening, backgroundColor: `${ACCENT.listening}14`, color: ACCENT.listening }
                       : { borderColor: 'var(--theme-border)', backgroundColor: 'transparent', color: 'var(--theme-text-secondary)' }}>
-                    <div className="w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 text-[10px] font-black"
+                    <div className="w-6 h-6 rounded-[8px] border-2 flex items-center justify-center shrink-0 text-[10px] font-black"
                       style={{ borderColor: sel ? ACCENT.listening : 'var(--theme-border)', backgroundColor: sel ? ACCENT.listening : 'transparent', color: sel ? 'white' : 'var(--theme-text-muted)' }}>
                       {opt.id.toUpperCase()}
                     </div>
@@ -260,7 +268,7 @@ function ZuordnungTeil({ teil, answers, onAnswer }: { teil: ExamListeningTeil; a
               backgroundColor: 'var(--theme-bg-card)'
             }}>
             <div className="flex items-start gap-3 mb-4">
-              <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-black shrink-0"
+              <div className="w-7 h-7 rounded-[9px] flex items-center justify-center text-xs font-black shrink-0"
                 style={{ background: isAns ? GRADIENT.reading : 'var(--theme-bg-secondary)', color: isAns ? 'white' : 'var(--theme-text-muted)' }}>
                 {i + 1}
               </div>
@@ -271,7 +279,7 @@ function ZuordnungTeil({ teil, answers, onAnswer }: { teil: ExamListeningTeil; a
             <select
               value={answers[q.id] || ''}
               onChange={e => onAnswer(q.id, e.target.value)}
-              className="w-full px-4 py-3 rounded-xl border-2 text-[15px] font-bold outline-none transition-all focus:ring-2"
+              className="w-full px-4 py-3 rounded-md border-2 text-[15px] font-bold outline-none transition-all focus:ring-2"
               style={{
                 borderColor: isAns ? ACCENT.listening : 'var(--theme-border)',
                 backgroundColor: isAns ? `${ACCENT.listening}0D` : 'var(--theme-bg-secondary)',
@@ -449,9 +457,9 @@ export default function ExamListeningPage() {
 
           return (
             <button key={t.number} onClick={() => setCurrentTeil(i)}
-              className="shrink-0 flex items-center gap-2 px-5 py-2.5 rounded-2xl text-xs font-black transition-all border uppercase tracking-widest"
+              className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-md text-xs font-black transition-all border uppercase tracking-widest"
               style={isCurrent
-                ? { background: GRADIENT.listening, color: 'white', borderColor: 'transparent', boxShadow: `0 8px 16px ${ACCENT.listening}40` }
+                ? { backgroundColor: `${ACCENT.listening}14`, color: ACCENT.listening, borderColor: ACCENT.listening }
                 : isDone
                   ? { backgroundColor: `${STATUS.success}14`, color: STATUS.success, borderColor: `${STATUS.success}33` }
                   : { backgroundColor: 'var(--theme-bg-card)', color: 'var(--theme-text-muted)', borderColor: 'var(--theme-border)' }}>
@@ -474,10 +482,10 @@ export default function ExamListeningPage() {
 
           <div className="rounded-3xl border p-6" style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
             <div className="flex items-center gap-2 mb-4">
-              <span className="w-8 h-8 rounded-xl flex items-center justify-center text-xs font-black text-white" style={{ background: GRADIENT.listening }}>{teil.number}</span>
+              <span className="w-8 h-8 rounded-[10px] flex items-center justify-center text-xs font-black text-white" style={{ background: GRADIENT.listening }}>{teil.number}</span>
               <h3 className="text-body font-black uppercase tracking-widest" style={{ color: 'var(--theme-text-primary)' }}>{tCommon('anweisungLabel')}</h3>
             </div>
-            <p className="text-[15px] italic leading-relaxed" style={{ color: 'var(--theme-text-secondary)', fontFamily: 'Georgia, serif' }}>
+            <p className="text-[15px] italic leading-relaxed" style={{ color: 'var(--theme-text-secondary)' }}>
               {teil.instruction}
             </p>
           </div>
@@ -500,7 +508,7 @@ export default function ExamListeningPage() {
           <div className="flex-1 flex gap-2 items-center">
             {currentTeil > 0 && (
               <button onClick={() => setCurrentTeil(currentTeil - 1)}
-                className="w-10 h-10 rounded-xl flex items-center justify-center border transition-all hover:bg-black/5"
+                className="w-10 h-10 rounded-md flex items-center justify-center border transition-all hover:bg-black/5"
                 style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)' }}>
                 <IconChevronLeft size={18} />
               </button>
@@ -510,7 +518,7 @@ export default function ExamListeningPage() {
             </span>
             {!isLastTeil && (
               <button onClick={() => setCurrentTeil(currentTeil + 1)}
-                className="w-10 h-10 rounded-xl flex items-center justify-center border transition-all hover:bg-black/5"
+                className="w-10 h-10 rounded-md flex items-center justify-center border transition-all hover:bg-black/5"
                 style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)' }}>
                 <IconChevronRight size={18} />
               </button>

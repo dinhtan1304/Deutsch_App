@@ -717,6 +717,14 @@ input[type="range"]::-webkit-slider-thumb {
 .v2-rate-btn { background: var(--theme-bg-card); border-color: color-mix(in srgb, var(--rate) 30%, var(--theme-border)); }
 .v2-rate-btn:hover:not(:disabled) { border-color: var(--rate); background: color-mix(in srgb, var(--rate) 12%, var(--theme-bg-card)); box-shadow: 0 8px 20px color-mix(in srgb, var(--rate) 25%, transparent); }
 
+/* SRS flashcard face — calm bg-card → bg-card-hi gradient */
+.v2-srs-card { background: linear-gradient(180deg, var(--theme-bg-card), var(--theme-bg-tertiary)); }
+
+/* SRS setup mode chip — calm bg-card; border + tint shift to --mode (set inline) on hover/active */
+.v2-mode-card { background: var(--theme-bg-card); border-color: var(--theme-border); transition: border-color .15s, background .15s, transform .15s; }
+.v2-mode-card:hover { transform: translateY(-2px); border-color: color-mix(in srgb, var(--mode) 55%, var(--theme-border)); }
+.v2-mode-card[data-active="true"] { border-color: var(--mode); background: color-mix(in srgb, var(--mode) 10%, var(--theme-bg-card)); }
+
 /* v2 word/entity card hover lift — border turns to the card's article/route
    accent (--card-accent set inline). */
 .word-card-v2 { transition: border-color .2s, transform .2s, box-shadow .2s; }

@@ -240,7 +240,14 @@ export function useIntervalPreview(id: string) {
     queryKey: srsKeys.preview(id),
     queryFn: () => personalWordsApi.getIntervalPreview(id),
     enabled: !!id,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    // A card's SRS state is immutable until it's reviewed — and once reviewed it
+    // leaves the session — so the preview never goes stale mid-session. Cache it
+    // permanently (fetch each word at most once, dedupe StrictMode/remount double
+    // calls) and never retry: a 429 from rapid rating must NOT fan out into 3 more
+    // requests and worsen the throttle storm. Matches useProgressIntervalPreview.
+    staleTime: Infinity,
+    gcTime: 10 * 60 * 1000,
+    retry: false,
   });
 }
 

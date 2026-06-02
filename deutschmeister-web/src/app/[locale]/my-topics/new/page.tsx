@@ -115,12 +115,10 @@ export default function NewUserTopicPage() {
               <button
                 key={item}
                 onClick={() => setLevel(item)}
-                className="px-4 py-2 rounded-xl text-sm font-bold transition-all"
-                style={{
-                  backgroundColor: level === item ? ACCENT.vocab : 'var(--theme-bg-secondary)',
-                  color: level === item ? 'white' : 'var(--theme-text-secondary)',
-                  border: '1px solid var(--theme-border)',
-                }}
+                className="px-4 py-2 rounded-md text-sm font-semibold transition-colors"
+                style={level === item
+                  ? { background: 'color-mix(in srgb, var(--accent) 14%, transparent)', color: 'var(--accent)', border: '1px solid var(--accent)' }
+                  : { background: 'var(--theme-bg-secondary)', color: 'var(--theme-text-secondary)', border: '1px solid var(--theme-border)' }}
               >
                 {item}
               </button>
@@ -137,7 +135,7 @@ export default function NewUserTopicPage() {
               <button
                 key={color}
                 onClick={() => setCoverColor(color)}
-                className="w-9 h-9 rounded-full transition-all"
+                className="w-9 h-9 rounded-lg transition-all"
                 style={{
                   backgroundColor: color,
                   outline:

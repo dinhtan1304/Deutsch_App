@@ -59,6 +59,7 @@ const ttsBlobUrlCache = new Map<string, string>();
 // burning the rate limit twice for one play.
 const ttsInflight = new Map<string, Promise<string>>();
 let currentAudio: HTMLAudioElement | null = null;
+let currentSequence: AudioSequenceHandle | null = null;
 
 const TTS_API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://deutschmeister-api-production.up.railway.app/api';
 
@@ -126,6 +127,180 @@ export function prefetchAudio(text: string): void {
   fetchTtsBlobUrl(trimmed).catch(() => undefined);
 }
 
+/** A controllable handle over a sequence of synthesized audio chunks. */
+export interface AudioSequenceHandle {
+  /** Start (or restart) playback from the current position. */
+  play(): Promise<void>;
+  /** Pause without resetting position. */
+  pause(): void;
+  /** Stop and reset to the first chunk. */
+  stop(): void;
+  /** Adjust playback speed for the current and subsequent chunks. */
+  setPlaybackRate(rate: number): void;
+  /** Whether the sequence is currently advancing. */
+  readonly playing: boolean;
+}
+
+interface AudioSequenceOptions {
+  playbackRate?: number;
+  /** Fired when the whole sequence starts playing. */
+  onStart?: () => void;
+  /** Fired when the last chunk finishes. */
+  onEnded?: () => void;
+  /** Fired when the backend fails before any audio could play, so the caller
+   *  can fall back (e.g. to the Web Speech API) for the whole passage. */
+  onError?: (err: unknown) => void;
+}
+
+// Split a single over-long sentence at the last comma/semicolon (or space)
+// before `maxLen` so we never exceed the TTS request limit.
+function sliceToLimit(s: string, maxLen: number): { head: string; rest: string } {
+  const slice = s.slice(0, maxLen);
+  let cut = Math.max(slice.lastIndexOf(', '), slice.lastIndexOf('; '));
+  if (cut < maxLen * 0.5) cut = slice.lastIndexOf(' ');
+  if (cut <= 0) cut = maxLen;
+  return { head: s.slice(0, cut).trim(), rest: s.slice(cut).trim() };
+}
+
+/**
+ * Split long German text into chunks of at most `maxLen` characters at
+ * sentence/line boundaries. Keeps each chunk well under the TTS service's
+ * character cap so long passages synthesize cleanly instead of being rejected.
+ */
+export function splitIntoChunks(text: string, maxLen = 600): string[] {
+  const normalized = text.replace(/\r\n/g, '\n').trim();
+  if (!normalized) return [];
+  if (normalized.length <= maxLen) return [normalized];
+
+  // Split after sentence enders or on line breaks (lookbehind keeps the punctuation).
+  const units = normalized
+    .split(/(?<=[.!?…])\s+|\n+/)
+    .map(u => u.trim())
+    .filter(Boolean);
+
+  const chunks: string[] = [];
+  let buf = '';
+  const flush = () => { if (buf) { chunks.push(buf); buf = ''; } };
+
+  for (const unit of units) {
+    let u = unit;
+    while (u.length > maxLen) {
+      flush();
+      const { head, rest } = sliceToLimit(u, maxLen);
+      if (head) chunks.push(head);
+      u = rest;
+    }
+    if (!u) continue;
+    if (buf && buf.length + 1 + u.length > maxLen) flush();
+    buf = buf ? `${buf} ${u}` : u;
+  }
+  flush();
+  return chunks.length ? chunks : [normalized.slice(0, maxLen)];
+}
+
+/**
+ * Synthesize `text` as a sequence of chunks played back-to-back through the
+ * backend TTS service, returning a handle to control playback.
+ *
+ * Chunking keeps every request well under the service's character limit, so
+ * long passages (listening transcripts) never get rejected and fall back to
+ * the robotic browser voice. The first chunk starts as soon as it's ready
+ * while later chunks prefetch in the background.
+ */
+export function synthesizeAudioSequence(
+  text: string,
+  opts: AudioSequenceOptions = {},
+): AudioSequenceHandle {
+  const chunks = splitIntoChunks(text);
+  let rate = opts.playbackRate ?? 1;
+  let idx = 0;
+  let current: HTMLAudioElement | null = null;
+  let stopped = false;
+  let playing = false;
+  let playedAny = false;
+
+  const teardown = () => {
+    if (current) {
+      current.onended = null;
+      current.onerror = null;
+      current.pause();
+      current = null;
+    }
+  };
+
+  const playFrom = async (i: number): Promise<void> => {
+    if (stopped) return;
+    if (i >= chunks.length) {
+      playing = false;
+      opts.onEnded?.();
+      return;
+    }
+    idx = i;
+    try {
+      const url = await fetchTtsBlobUrl(chunks[i]!);
+      if (stopped) return;
+      // Warm the next chunk so playback is gapless.
+      if (i + 1 < chunks.length) prefetchAudio(chunks[i + 1]!);
+      const audio = new Audio(url);
+      audio.playbackRate = rate;
+      current = audio;
+      audio.onended = () => { void playFrom(i + 1); };
+      audio.onerror = () => { void playFrom(i + 1); };
+      await audio.play();
+      playedAny = true;
+    } catch (err) {
+      if (!playedAny) {
+        // Total failure before any audio played — let the caller fall back.
+        playing = false;
+        opts.onError?.(err);
+      } else if (!stopped) {
+        // A later chunk failed; skip it rather than killing the whole passage.
+        void playFrom(i + 1);
+      }
+    }
+  };
+
+  return {
+    get playing() { return playing; },
+    async play() {
+      if (playing) return;
+      if (idx >= chunks.length) idx = 0;
+      stopped = false;
+      playing = true;
+      opts.onStart?.();
+      await playFrom(idx);
+    },
+    pause() {
+      playing = false;
+      if (current) current.pause();
+    },
+    stop() {
+      stopped = true;
+      playing = false;
+      idx = 0;
+      teardown();
+    },
+    setPlaybackRate(r: number) {
+      rate = r;
+      if (current) current.playbackRate = r;
+    },
+  };
+}
+
+// Stop whatever speakGerman started last — a chunk sequence, a single audio
+// element, or a Web Speech utterance.
+function stopCurrentPlayback(): void {
+  if (currentSequence) { currentSequence.stop(); currentSequence = null; }
+  if (currentAudio) {
+    currentAudio.pause();
+    currentAudio.currentTime = 0;
+    currentAudio = null;
+  }
+  if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
+  }
+}
+
 function speakViaBrowser(text: string, slow: boolean): void {
   if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
   try {
@@ -144,34 +319,27 @@ function speakViaBrowser(text: string, slow: boolean): void {
 }
 
 /**
- * Speak German text via the backend Coqui TTS service. Same sync API as
- * before — fire-and-forget; if the backend is down or slow, falls back to
- * the browser's Web Speech API so the feature still works.
+ * Speak German text via the backend TTS service. Fire-and-forget; long
+ * passages are chunked so they synthesize cleanly instead of being rejected
+ * and falling back to the robotic browser voice. If the backend is fully
+ * unreachable, falls back to the browser's Web Speech API so the feature
+ * still works.
  */
 export function speakGerman(text: string, slow = false): void {
   if (typeof window === 'undefined') return;
   const trimmed = text.trim();
   if (!trimmed) return;
 
-  // Stop anything currently playing
-  if (currentAudio) {
-    currentAudio.pause();
-    currentAudio.currentTime = 0;
-    currentAudio = null;
-  }
-  if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+  // Stop anything currently playing (sequence, single audio, or utterance).
+  stopCurrentPlayback();
 
-  const playUrl = (url: string) => {
-    const audio = new Audio(url);
-    audio.playbackRate = slow ? 0.7 : 1;
-    currentAudio = audio;
-    audio.play().catch(() => speakViaBrowser(trimmed, slow));
-  };
-
-  fetchTtsBlobUrl(trimmed)
-    .then(playUrl)
-    .catch(err => {
+  const seq = synthesizeAudioSequence(trimmed, {
+    playbackRate: slow ? 0.7 : 1,
+    onError: err => {
       console.warn('[speakGerman] backend failed, falling back to Web Speech API:', err);
       speakViaBrowser(trimmed, slow);
-    });
+    },
+  });
+  currentSequence = seq;
+  void seq.play();
 }

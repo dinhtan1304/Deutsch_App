@@ -52,6 +52,18 @@ function RankAvatar({ entry, size, radius }: { entry: LeaderboardEntry; size: nu
   );
 }
 
+// Rank change vs previous period: ▲ up (green) / ▼ down (red). Nothing for 0 or null.
+function RankDelta({ delta }: { delta: number | null }) {
+  if (delta === null || delta === 0) return null;
+  const up = delta > 0;
+  return (
+    <span className="mono inline-flex items-center gap-0.5 text-[10px] font-bold leading-none"
+      style={{ color: up ? 'var(--success)' : 'var(--danger)' }}>
+      {up ? '▲' : '▼'}{Math.abs(delta)}
+    </span>
+  );
+}
+
 function Podium({ top3, selfId, anonymous }: { top3: LeaderboardEntry[]; selfId?: string; anonymous: string }) {
   // Render order: 2nd, 1st, 3rd (1st tallest in the centre)
   const order = [top3[1], top3[0], top3[2]].filter(Boolean) as LeaderboardEntry[];
@@ -170,8 +182,11 @@ export default function LeaderboardPage() {
                   style={isMe
                     ? { background: mix('var(--accent)', 12), borderColor: mix('var(--accent)', 55) }
                     : { background: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}>
-                  <span className="mono w-9 shrink-0 text-center text-[15px] font-bold" style={{ color: isMe ? 'var(--accent)' : 'var(--theme-text-muted)' }}>
-                    {entry.rank}
+                  <span className="flex w-9 shrink-0 flex-col items-center gap-0.5">
+                    <span className="mono text-[15px] font-bold leading-none" style={{ color: isMe ? 'var(--accent)' : 'var(--theme-text-muted)' }}>
+                      {entry.rank}
+                    </span>
+                    <RankDelta delta={entry.rankDelta} />
                   </span>
                   <RankAvatar entry={entry} size={38} radius={10} />
                   <div className="flex min-w-0 flex-1 items-center gap-2">

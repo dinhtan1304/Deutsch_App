@@ -108,7 +108,7 @@ function TeilWriter({ teil, value, onChange, promptRef, hidePrompt = false }: {
         <div ref={promptRef} className="space-y-4">
           <div className="rounded-2xl p-4" style={{ background: `linear-gradient(135deg, ${ACCENT.examWriting}1A, ${ACCENT.writing}14)`, border: `1px solid ${ACCENT.examWriting}40` }}>
             <p className="text-caption font-extrabold uppercase tracking-widest mb-1" style={{ color: ACCENT.examWriting }}>{t('situationLabel')}</p>
-            <p className="text-body leading-relaxed" style={{ color: 'var(--theme-text-primary)', fontFamily: 'Georgia, serif' }}>
+            <p className="text-body leading-relaxed" style={{ color: 'var(--theme-text-primary)' }}>
               <HighlightedText text={teil.scenario} />
             </p>
           </div>
@@ -122,7 +122,7 @@ function TeilWriter({ teil, value, onChange, promptRef, hidePrompt = false }: {
               <div className="mt-3 space-y-1.5">
                 {teil.requiredPoints.map((pt, i) => (
                   <div key={i} className="flex items-start gap-2.5">
-                    <span className="w-5 h-5 rounded-full flex items-center justify-center text-caption font-extrabold text-white shrink-0 mt-0.5"
+                    <span className="w-5 h-5 rounded-[7px] flex items-center justify-center text-caption font-extrabold text-white shrink-0 mt-0.5"
                       style={{ background: GRADIENT.examWriting }}>{i + 1}</span>
                     <span className="text-xs leading-snug pt-0.5" style={{ color: 'var(--theme-text-secondary)' }}><HighlightedText text={pt} /></span>
                   </div>
@@ -176,7 +176,6 @@ function TeilWriter({ teil, value, onChange, promptRef, hidePrompt = false }: {
           className="w-full px-5 py-5 text-body leading-relaxed resize-none outline-none block bg-transparent"
           style={{
             color: 'var(--theme-text-primary)',
-            fontFamily: 'Georgia, serif',
             minHeight: '400px',
           }}
           title={t('umlautTip', { hint: UMLAUT_TRIGGER_HINT })}
@@ -357,11 +356,11 @@ export default function ExamWritingPage() {
             const active = i === activeTeil;
             return (
               <button key={teil.number} onClick={() => goToTeil(i)}
-                className="shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all border"
+                className="shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-md text-xs font-black uppercase tracking-widest transition-all border"
                 style={active
-                  ? { background: GRADIENT.examWriting, color: 'white', borderColor: 'transparent', boxShadow: `0 4px 12px ${ACCENT.examWriting}40` }
+                  ? { backgroundColor: `${ACCENT.examWriting}14`, color: ACCENT.examWriting, borderColor: ACCENT.examWriting }
                   : filled
-                    ? { backgroundColor: `${ACCENT.examWriting}14`, color: ACCENT.examWriting, borderColor: `${ACCENT.examWriting}4D` }
+                    ? { backgroundColor: `${ACCENT.examWriting}0D`, color: ACCENT.examWriting, borderColor: `${ACCENT.examWriting}4D` }
                     : { backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)', borderColor: 'var(--theme-border)' }}>
                 Teil {teil.number}
                 {filled && !active && <IconCheck size={10} />}
@@ -407,7 +406,7 @@ export default function ExamWritingPage() {
             {/* Situation */}
             <div className="rounded-2xl p-5 border" style={{ background: `linear-gradient(135deg, ${ACCENT.examWriting}14, ${ACCENT.writing}0D)`, borderColor: `${ACCENT.examWriting}33` }}>
               <p className="text-caption font-extrabold uppercase tracking-widest mb-2" style={{ color: ACCENT.examWriting }}>{t('situationLabelVi')}</p>
-              <p className="text-[15px] leading-relaxed" style={{ color: 'var(--theme-text-primary)', fontFamily: 'Georgia, serif' }}>
+              <p className="text-[15px] leading-relaxed" style={{ color: 'var(--theme-text-primary)' }}>
                 <HighlightedText text={currentTeil.scenario} />
               </p>
             </div>
@@ -422,7 +421,7 @@ export default function ExamWritingPage() {
                 <div className="space-y-2.5">
                   {currentTeil.requiredPoints.map((pt, i) => (
                     <div key={i} className="flex items-start gap-3">
-                      <span className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-extrabold text-white shrink-0 mt-0.5"
+                      <span className="w-5 h-5 rounded-[7px] flex items-center justify-center text-[10px] font-extrabold text-white shrink-0 mt-0.5"
                         style={{ background: GRADIENT.examWriting }}>{i + 1}</span>
                       <span className="text-body leading-snug" style={{ color: 'var(--theme-text-secondary)' }}><HighlightedText text={pt} /></span>
                     </div>

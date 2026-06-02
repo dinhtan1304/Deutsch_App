@@ -28,6 +28,14 @@ const skillCards: { key: SkillKey; href: string; icon: PracticeCard['icon']; acc
   { key: 'speaking',  href: '/practice-test/speaking',  icon: IconMic,        accent: 'speaking' },
 ];
 
+// Quick-access cards to the real Goethe/TELC exam practice (shown under the exam section header).
+const examCards: { key: SkillKey; href: string; icon: PracticeCard['icon']; accent: AccentKey }[] = [
+  { key: 'reading',   href: '/practice-test/reading/exam',   icon: IconBookOpen,   accent: 'reading' },
+  { key: 'listening', href: '/practice-test/listening/exam', icon: IconHeadphones, accent: 'listening' },
+  { key: 'writing',   href: '/practice-test/writing/exam',   icon: IconPenLine,    accent: 'examWriting' },
+  { key: 'speaking',  href: '/practice-test/speaking/exam',  icon: IconMic,        accent: 'speaking' },
+];
+
 const aiCards: { key: AiKey; href: string; icon: PracticeCard['icon']; accent: AccentKey }[] = [
   { key: 'roleplay',      href: '/practice-test/roleplay',      icon: IconZap,        accent: 'examWriting' },
   { key: 'pronunciation', href: '/practice-test/pronunciation', icon: IconMic,        accent: 'listening' },
@@ -165,6 +173,25 @@ function SkillCardGrid({ locked, onLockedClick }: { locked?: boolean; onLockedCl
   );
 }
 
+function ExamCardGrid({ locked, onLockedClick }: { locked?: boolean; onLockedClick?: () => void }) {
+  const t = useTranslations('practice.landing.exam');
+  return (
+    <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {examCards.map((card) => (
+        <PracticeActionCard
+          key={card.href}
+          card={card}
+          titleDe={t(`${card.key}.titleDe` as 'reading.titleDe')}
+          title={t(`${card.key}.title` as 'reading.title')}
+          description={t(`${card.key}.description` as 'reading.description')}
+          locked={locked}
+          onLockedClick={onLockedClick}
+        />
+      ))}
+    </div>
+  );
+}
+
 function AiCardGrid() {
   const t = useTranslations('practice.landing.ai');
   return (
@@ -261,6 +288,7 @@ export default function PracticeTestPage() {
           accent="xp"
           badge={t('exam.badge')}
         >
+          <ExamCardGrid />
           <ChooseExam />
           <Link href="/practice-test/huong-dan-b1" className="block">
             <SurfaceCard variant="interactive" accent="examWriting">

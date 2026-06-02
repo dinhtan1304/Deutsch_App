@@ -19,7 +19,7 @@ export default function FollowingTopicsPage() {
   const items = data?.items ?? [];
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6">
+    <div className="max-w-360 mx-auto px-4 sm:px-6 py-6">
       <PageHeader
         backHref="/my-topics"
         hideBackIcon
@@ -58,7 +58,7 @@ export default function FollowingTopicsPage() {
                 >
                   <div className="flex items-center gap-3">
                     <div
-                      className="w-12 h-12 rounded-xl flex items-center justify-center text-sm font-black shrink-0"
+                      className="w-12 h-12 rounded-xl flex items-center justify-center text-sm font-bold shrink-0"
                       style={{
                         background: topic.coverColor ? `${topic.coverColor}22` : `${levelColor}18`,
                         color: topic.coverColor || levelColor,
@@ -69,14 +69,14 @@ export default function FollowingTopicsPage() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
                         <span
-                          className="text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded text-white"
+                          className="text-caption font-semibold uppercase tracking-wide px-2 py-0.5 rounded-md text-white"
                           style={{ backgroundColor: levelColor }}
                         >
                           {topic.level}
                         </span>
                         {!topic.isAccessible && (
                           <span
-                            className="text-[10px] font-bold px-2 py-0.5 rounded"
+                            className="text-caption font-semibold px-2 py-0.5 rounded-md"
                             style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }}
                           >
                             {t('unavailable')}

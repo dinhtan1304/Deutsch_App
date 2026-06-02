@@ -8,7 +8,7 @@ import { useListeningSession, useSubmitListening } from '@/hooks/useListening';
 import { ListeningQuestion } from '@/lib/api/listening';
 import { PageHeader, FixedActionBar } from '@/components/ui';
 import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
-import { synthesizeAudio } from '@/lib/utils';
+import { synthesizeAudioSequence, type AudioSequenceHandle } from '@/lib/utils';
 
 function IconHeadphones({ size = 20, style }: { size?: number; style?: React.CSSProperties }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}><path d="M3 18v-6a9 9 0 0 1 18 0v6" /><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z" /></svg>;
@@ -29,22 +29,20 @@ function TTSPlayer({ text }: { text: string }) {
   const [playing, setPlaying] = useState(false);
   const [playCount, setPlayCount] = useState(0);
   const [speed, setSpeed] = useState(1.0);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const seqRef = useRef<AudioSequenceHandle | null>(null);
 
   const stop = useCallback(() => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-    }
+    seqRef.current?.stop();
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       window.speechSynthesis.cancel();
     }
     setPlaying(false);
   }, []);
 
-  // Web Speech API fallback when the backend TTS is unreachable.
+  // Web Speech API fallback when the backend TTS is fully unreachable.
   const playViaBrowser = useCallback(() => {
     if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+    window.speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text);
     u.lang = 'de-DE';
     u.rate = speed;
@@ -54,27 +52,26 @@ function TTSPlayer({ text }: { text: string }) {
     window.speechSynthesis.speak(u);
   }, [text, speed]);
 
-  const play = useCallback(async () => {
-    stop();
-    try {
-      const audio = await synthesizeAudio(text);
-      audio.playbackRate = speed;
-      audio.onplay = () => setPlaying(true);
-      audio.onended = () => { setPlaying(false); setPlayCount(c => c + 1); };
-      audio.onerror = () => setPlaying(false);
-      audioRef.current = audio;
-      await audio.play();
-    } catch (err) {
-      console.warn('[TTSPlayer] backend failed, falling back to Web Speech API:', err);
-      playViaBrowser();
-    }
-  }, [text, speed, stop, playViaBrowser]);
+  // Synthesize the transcript in chunks and play them back-to-back, so even
+  // long B1 passages play in the natural Piper voice instead of being rejected
+  // by the TTS service and dropping to the robotic browser voice.
+  const play = useCallback(() => {
+    seqRef.current?.stop();
+    const seq = synthesizeAudioSequence(text, {
+      playbackRate: speed,
+      onStart: () => setPlaying(true),
+      onEnded: () => { setPlaying(false); setPlayCount(c => c + 1); },
+      onError: () => { setPlaying(false); playViaBrowser(); },
+    });
+    seqRef.current = seq;
+    void seq.play();
+  }, [text, speed, playViaBrowser]);
+
+  // Keep speed in sync if the user changes it mid-playback.
+  useEffect(() => { seqRef.current?.setPlaybackRate(speed); }, [speed]);
 
   useEffect(() => () => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current = null;
-    }
+    seqRef.current?.stop();
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       window.speechSynthesis.cancel();
     }
@@ -89,9 +86,9 @@ function TTSPlayer({ text }: { text: string }) {
       }}>
       <div className="flex flex-col items-center text-center gap-6">
         <button onClick={playing ? stop : play}
-          className="w-24 h-24 rounded-full flex items-center justify-center text-white transition-all hover:scale-105 active:scale-95 shrink-0 shadow-2xl relative group"
+          className="w-24 h-24 rounded-[26px] flex items-center justify-center text-white transition-all hover:scale-105 active:scale-95 shrink-0 shadow-2xl relative group"
           style={{ background: GRADIENT.listening }}>
-          <div className="absolute inset-0 rounded-full bg-white opacity-0 group-hover:opacity-10 transition-opacity" />
+          <div className="absolute inset-0 rounded-[26px] bg-white opacity-0 group-hover:opacity-10 transition-opacity" />
           {playing ? <IconSquare size={32} style={{ color: 'white' }} /> : <IconPlay size={36} style={{ color: 'white', marginLeft: 6 }} />}
         </button>
 
@@ -163,7 +160,7 @@ function QuestionItem({ q, idx, answer, onAnswer }: {
           backgroundColor: 'var(--theme-bg-card)'
         }}>
         <div className="flex items-start gap-3 mb-4">
-          <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-black shrink-0"
+          <div className="w-7 h-7 rounded-[9px] flex items-center justify-center text-xs font-black shrink-0"
             style={{ background: isAnswered ? GRADIENT.reading : 'var(--theme-bg-secondary)', color: isAnswered ? 'white' : 'var(--theme-text-muted)' }}>
             {idx + 1}
           </div>
@@ -176,7 +173,7 @@ function QuestionItem({ q, idx, answer, onAnswer }: {
             const sel = answer === opt.id;
             return (
               <button key={opt.id} onClick={() => onAnswer(opt.id)}
-                className="flex-1 py-3 rounded-xl text-body font-bold border-2 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                className="flex-1 py-3 rounded-md text-body font-bold border-2 transition-all hover:scale-[1.02] active:scale-[0.98]"
                 style={sel
                   ? { borderColor: opt.id === 'richtig' ? STATUS.success : STATUS.danger, backgroundColor: opt.id === 'richtig' ? `${STATUS.success}1A` : `${STATUS.danger}1A`, color: opt.id === 'richtig' ? STATUS.success : STATUS.danger }
                   : { borderColor: 'var(--theme-border)', backgroundColor: 'transparent', color: 'var(--theme-text-secondary)' }}>
@@ -209,11 +206,11 @@ function QuestionItem({ q, idx, answer, onAnswer }: {
           const sel = answer === opt.id;
           return (
             <button key={opt.id} onClick={() => onAnswer(opt.id)}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl border-2 text-[15px] text-left transition-all hover:scale-[1.01] active:scale-[0.99]"
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-md border-2 text-[15px] text-left transition-all hover:scale-[1.01] active:scale-[0.99]"
               style={sel
                 ? { borderColor: ACCENT.listening, backgroundColor: `${ACCENT.listening}14`, color: ACCENT.listening }
                 : { borderColor: 'var(--theme-border)', backgroundColor: 'transparent', color: 'var(--theme-text-secondary)' }}>
-              <div className="w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 text-[10px] font-black"
+              <div className="w-6 h-6 rounded-[8px] border-2 flex items-center justify-center shrink-0 text-[10px] font-black"
                 style={{ borderColor: sel ? ACCENT.listening : 'var(--theme-border)', backgroundColor: sel ? ACCENT.listening : 'transparent', color: sel ? 'white' : 'var(--theme-text-muted)' }}>
                 {opt.id.toUpperCase()}
               </div>

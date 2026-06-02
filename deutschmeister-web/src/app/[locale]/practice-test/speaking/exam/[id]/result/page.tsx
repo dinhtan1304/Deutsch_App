@@ -144,7 +144,7 @@ function NativeSpeakerPlayer({ text }: { text: string }) {
   return (
     <div className="flex items-center gap-2.5">
       <button onClick={toggle}
-        className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-all hover:scale-105"
+        className="w-8 h-8 rounded-md flex items-center justify-center shrink-0 transition-all hover:scale-105"
         style={{ background: GRADIENT.reading, color: 'white' }}>
         {playing ? <IconPause size={12} /> : <IconPlay size={12} />}
       </button>
@@ -229,7 +229,7 @@ function TeilDetailCard({ teil, grading, transcript }: {
           <div className="p-4 space-y-4">
 
             {/* Instruction */}
-            <p className="text-xs italic leading-relaxed" style={{ color: 'var(--theme-text-muted)', fontFamily: 'Georgia, serif' }}>
+            <p className="text-xs italic leading-relaxed" style={{ color: 'var(--theme-text-muted)' }}>
               {teil.instruction}
             </p>
 
@@ -273,7 +273,7 @@ function TeilDetailCard({ teil, grading, transcript }: {
                         <span className="text-caption font-semibold" style={{ color: 'var(--theme-text-secondary)' }}>{t('youSaid')}</span>
                       </div>
                       <div className="flex items-center gap-2 opacity-60">
-                        <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0"
+                        <div className="w-7 h-7 rounded-[9px] flex items-center justify-center shrink-0"
                           style={{ backgroundColor: `${ACCENT.xp}40`, color: ACCENT.xp }}>
                           <IconPlay size={11} />
                         </div>
@@ -296,7 +296,7 @@ function TeilDetailCard({ teil, grading, transcript }: {
                     <p className="text-caption font-bold mb-1.5 flex items-center gap-1.5" style={{ color: 'var(--theme-text-muted)' }}>
                       {t('transcriptHeader')}
                     </p>
-                    <p className="text-xs leading-relaxed" style={{ color: 'var(--theme-text-secondary)', fontFamily: 'Georgia, serif' }}>
+                    <p className="text-xs leading-relaxed" style={{ color: 'var(--theme-text-secondary)' }}>
                       {transcript}
                     </p>
                   </div>
@@ -403,7 +403,7 @@ export default function ExamSpeakingResultPage() {
 
   if (session.status === 'GRADING') return (
     <div className="py-16 flex flex-col items-center gap-5">
-      <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{ backgroundColor: `${ACCENT.xp}1F` }}>
+      <div className="w-16 h-16 rounded-2xl flex items-center justify-center" style={{ backgroundColor: `${ACCENT.xp}1F` }}>
         <IconLoader size={28} style={{ color: ACCENT.xp }} />
       </div>
       <div className="text-center">

@@ -8,7 +8,7 @@ import { YouTubeEmbed, YouTubeEmbedRef } from '@/components/dictation/YouTubeEmb
 import { DictationSegmentRow } from '@/components/dictation/DictationSegmentRow';
 import { DictationHeader } from '@/components/dictation/DictationHeader';
 import { VideoUnavailableFallback } from '@/components/dictation/VideoUnavailableFallback';
-import { STATUS, ACCENT, GRADIENT } from '@/lib/tokens';
+import { STATUS } from '@/lib/tokens';
 
 const AUTOSAVE_DEBOUNCE_MS = 3000;
 const SPEED_OPTIONS = [0.5, 0.75, 1, 1.25, 1.5] as const;
@@ -125,7 +125,7 @@ export default function DictationPlayPage() {
   if (isLoading) {
     return (
       <div className="flex justify-center items-center min-h-100">
-        <div className="w-10 h-10 border-4 border-cyan-500/20 border-t-cyan-500 rounded-full animate-spin" />
+        <div className="w-10 h-10 border-4 rounded-full animate-spin" style={{ borderColor: 'var(--theme-border)', borderTopColor: 'var(--accent)' }} />
       </div>
     );
   }
@@ -165,7 +165,7 @@ export default function DictationPlayPage() {
             
             <div className="flex flex-col gap-4">
               {/* Video wrapper */}
-              <div className="relative shadow-2xl rounded-2xl overflow-hidden border border-white/5 w-full aspect-video">
+              <div className="relative rounded-2xl overflow-hidden border w-full aspect-video" style={{ borderColor: 'var(--theme-border)' }}>
                 <YouTubeEmbed
                   ref={playerRef}
                   youtubeId={session.video.youtubeId}
@@ -180,15 +180,12 @@ export default function DictationPlayPage() {
               </div>
 
               {/* Controls Card */}
-              <div className="rounded-2xl border p-4 shadow-xl backdrop-blur-md relative overflow-hidden"
-                style={{ 
-                  borderColor: 'var(--theme-border)', 
+              <div className="rounded-2xl border p-4"
+                style={{
+                  borderColor: 'var(--theme-border)',
                   backgroundColor: 'var(--theme-bg-card)',
-                  boxShadow: '0 10px 30px rgba(0,0,0,0.1)'
                 }}>
-                <div className="absolute top-0 right-0 w-32 h-32 opacity-[0.02] blur-3xl -mr-16 -mt-16" style={{ backgroundColor: ACCENT.dictation }} />
-
-                <div className="relative z-10 flex flex-col gap-4">
+                <div className="flex flex-col gap-4">
                   <div className="flex items-center justify-between">
                     <div className="flex flex-wrap items-center gap-1.5">
                       <span className="mr-1 text-[10px] font-semibold uppercase tracking-widest" style={{ color: 'var(--theme-text-muted)' }}>{t('speedLabel')}</span>
@@ -196,7 +193,7 @@ export default function DictationPlayPage() {
                         <button key={s} type="button" onClick={() => handleSpeedChange(s)}
                           className="mono rounded-[7px] px-2 py-1 text-[11px] font-bold transition-colors"
                           style={speed === s
-                            ? { background: ACCENT.dictation, color: 'white', border: `1px solid ${ACCENT.dictation}` }
+                            ? { background: 'color-mix(in srgb, var(--accent) 14%, transparent)', color: 'var(--accent)', border: '1px solid var(--accent)' }
                             : { background: 'var(--theme-bg-secondary)', color: 'var(--theme-text-secondary)', border: '1px solid var(--theme-border)' }}>{s}x</button>
                       ))}
                     </div>
@@ -208,7 +205,7 @@ export default function DictationPlayPage() {
                   {/* Auto-pause + Next segment row */}
                   <div className="flex items-center justify-between gap-3 flex-wrap">
                     <button type="button" onClick={() => setAutoPause(a => !a)} className="flex items-center gap-2">
-                      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-sm" style={autoPause ? { background: ACCENT.dictation, color: 'white' } : { background: 'var(--theme-bg-secondary)', border: '1px solid var(--theme-border)' }}>
+                      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-sm" style={autoPause ? { background: 'var(--accent)', color: 'var(--accent-on)' } : { background: 'var(--theme-bg-secondary)', border: '1px solid var(--theme-border)' }}>
                         {autoPause && <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>}
                       </span>
                       <span className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: 'var(--theme-text-secondary)' }}>{t('autoPause')}</span>
@@ -217,7 +214,7 @@ export default function DictationPlayPage() {
                       type="button"
                       onClick={handlePlayNext}
                       className="inline-flex items-center gap-1.5 rounded-[9px] px-3.5 py-2 text-[11px] font-bold uppercase tracking-widest transition-colors"
-                      style={{ background: `color-mix(in srgb, ${ACCENT.dictation} 14%, transparent)`, color: ACCENT.dictation, border: `1px solid color-mix(in srgb, ${ACCENT.dictation} 45%, transparent)` }}
+                      style={{ background: 'color-mix(in srgb, var(--accent) 14%, transparent)', color: 'var(--accent)', border: '1px solid color-mix(in srgb, var(--accent) 45%, transparent)' }}
                     >
                       {t('nextSegment')}
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6" /></svg>
@@ -239,24 +236,24 @@ export default function DictationPlayPage() {
           {/* Main Content: Segments List */}
           <div className="flex-1 min-w-0 w-full">
             {showSubmitWarning && (
-              <div className="mb-6 p-4 rounded-2xl border flex items-start gap-3 shadow-lg animate-in slide-in-from-top-4 duration-300"
-                style={{ borderColor: `${STATUS.warning}44`, backgroundColor: `${STATUS.warning}0A` }}>
+              <div className="mb-6 p-4 rounded-2xl border flex items-start gap-3"
+                style={{ borderColor: `color-mix(in srgb, ${STATUS.warning} 30%, transparent)`, backgroundColor: `color-mix(in srgb, ${STATUS.warning} 6%, transparent)` }}>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={STATUS.warning} strokeWidth="2.5" className="shrink-0 mt-0.5">
                   <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
                   <line x1="12" y1="9" x2="12" y2="13" />
                   <line x1="12" y1="17" x2="12.01" y2="17" />
                 </svg>
                 <div className="flex-1">
-                  <p className="text-sm font-black" style={{ color: STATUS.warning }}>{t('warnUnansweredTitle', { count: unansweredCount })}</p>
-                  <p className="text-xs mt-0.5 opacity-70" style={{ color: 'var(--theme-text-primary)' }}>{t('warnUnansweredSubtitle')}</p>
+                  <p className="text-body font-bold" style={{ color: STATUS.warning }}>{t('warnUnansweredTitle', { count: unansweredCount })}</p>
+                  <p className="text-caption mt-0.5" style={{ color: 'var(--theme-text-secondary)' }}>{t('warnUnansweredSubtitle')}</p>
                 </div>
                 <div className="flex gap-2 shrink-0">
                   <button type="button" onClick={() => setShowSubmitWarning(false)}
-                    className="text-xs px-3 py-1.5 rounded-xl border font-bold transition-colors hover:bg-white/5"
+                    className="text-caption px-3 py-1.5 rounded-md border font-semibold transition-colors hover:bg-(--theme-bg-secondary)"
                     style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)' }}>{t('continueWriting')}</button>
                   <button type="button" onClick={handleSubmit} disabled={isSubmitting}
-                    className="text-xs px-4 py-1.5 rounded-xl text-white font-black transition-all hover:scale-105 active:scale-95"
-                    style={{ background: GRADIENT.dictation }}>{t('submitNow')}</button>
+                    className="text-caption px-4 py-1.5 rounded-md font-semibold transition-transform hover:-translate-y-0.5 active:scale-95"
+                    style={{ background: 'var(--accent)', color: 'var(--accent-on)' }}>{t('submitNow')}</button>
                 </div>
               </div>
             )}

@@ -144,7 +144,7 @@ function NativeSpeakerPlayer({ text }: { text: string }) {
   );
 }
 
-// ─── Decorative user player (no audio URL available) ─────────────────────────
+// ─── Decorative user player (no recorded audio available — older sessions) ────
 function UserAudioPlayer() {
   return (
     <div className="flex items-center gap-2.5">
@@ -152,8 +152,58 @@ function UserAudioPlayer() {
         style={{ backgroundColor: `${ACCENT.speaking}33`, color: ACCENT.speaking }}>
         <IconPlay size={13} />
       </div>
-      <WaveformBars progress={0.72} color={ACCENT.speaking} />
+      <WaveformBars progress={0} color={ACCENT.speaking} />
       <span className="text-caption font-mono shrink-0" style={{ color: 'var(--theme-text-muted)' }}>—:——</span>
+    </div>
+  );
+}
+
+// ─── Real playback of the user's recorded answer ─────────────────────────────
+function RecordedAudioPlayer({ audioUrl }: { audioUrl: string }) {
+  const [playing, setPlaying] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    const audio = new Audio(audioUrl);
+    audioRef.current = audio;
+    // webm recordings sometimes report Infinity duration until fully buffered — guard it.
+    const onMeta = () => { if (Number.isFinite(audio.duration)) setDuration(audio.duration); };
+    const onTime = () => setProgress(Number.isFinite(audio.duration) && audio.duration > 0 ? audio.currentTime / audio.duration : 0);
+    const onEnd = () => { setPlaying(false); setProgress(1); };
+    audio.addEventListener('loadedmetadata', onMeta);
+    audio.addEventListener('durationchange', onMeta);
+    audio.addEventListener('timeupdate', onTime);
+    audio.addEventListener('ended', onEnd);
+    return () => {
+      audio.pause();
+      audio.removeEventListener('loadedmetadata', onMeta);
+      audio.removeEventListener('durationchange', onMeta);
+      audio.removeEventListener('timeupdate', onTime);
+      audio.removeEventListener('ended', onEnd);
+    };
+  }, [audioUrl]);
+
+  const toggle = useCallback(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    if (playing) { audio.pause(); setPlaying(false); }
+    else { audio.play().then(() => setPlaying(true)).catch(() => setPlaying(false)); }
+  }, [playing]);
+
+  const elapsed = Math.round(progress * duration);
+  const fmt = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+
+  return (
+    <div className="flex items-center gap-2.5">
+      <button onClick={toggle}
+        className="w-9 h-9 rounded-full flex items-center justify-center shrink-0 transition-all hover:scale-105 active:scale-95"
+        style={{ background: GRADIENT.speaking, color: 'white' }}>
+        {playing ? <IconPause size={13} /> : <IconPlay size={13} />}
+      </button>
+      <WaveformBars progress={progress} color={ACCENT.speaking} />
+      <span className="text-caption font-mono shrink-0" style={{ color: 'var(--theme-text-muted)' }}>{duration ? fmt(elapsed) : '—:——'}</span>
     </div>
   );
 }
@@ -316,7 +366,7 @@ export default function FreeSpeakingResultPage() {
                 <IconMic size={14} style={{ color: ACCENT.speaking }} />
                 <span className="text-[10px] font-black uppercase tracking-widest opacity-60">{t('yourVoice')}</span>
               </div>
-              <UserAudioPlayer />
+              {session.audioUrl ? <RecordedAudioPlayer audioUrl={session.audioUrl} /> : <UserAudioPlayer />}
             </div>
             <div className="rounded-2xl border p-5 shadow-lg"
               style={{ backgroundColor: 'var(--theme-bg-card)', borderColor: `${STATUS.success}33` }}>
@@ -340,7 +390,7 @@ export default function FreeSpeakingResultPage() {
               {session.transcript && (
                 <div className="relative mb-8 p-6 rounded-2xl bg-white/[0.02] border border-white/5">
                    <p className="text-lg font-semibold italic leading-relaxed" style={{ color: 'var(--theme-text-primary)' }}>
-                    "{session.transcript}"
+                    {'“'}{session.transcript}{'”'}
                   </p>
                 </div>
               )}

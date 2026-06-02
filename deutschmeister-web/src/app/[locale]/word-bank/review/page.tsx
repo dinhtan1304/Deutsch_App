@@ -44,14 +44,10 @@ function SRSStatsCard() {
   if (!stats) return null;
 
   const items = [
-    { label: t('statDue'), value: stats.due, icon: IconFlame, color: STATUS.danger,
-      gradient: `linear-gradient(135deg, ${STATUS.danger}1F, ${STATUS.danger}0F)` },
-    { label: t('statNew'), value: stats.new, icon: IconBookOpen, color: ACCENT.srs,
-      gradient: `linear-gradient(135deg, ${ACCENT.srs}1F, ${ACCENT.srs}0F)` },
-    { label: t('statLearning'), value: stats.learning, icon: IconBrain, color: ACCENT.xp,
-      gradient: `linear-gradient(135deg, ${ACCENT.xp}1F, ${ACCENT.xp}0F)` },
-    { label: t('statMature'), value: stats.mature, icon: IconTarget, color: STATUS.success,
-      gradient: `linear-gradient(135deg, ${STATUS.success}1F, ${STATUS.success}0F)` },
+    { label: t('statDue'), value: stats.due, icon: IconFlame, color: STATUS.danger },
+    { label: t('statNew'), value: stats.new, icon: IconBookOpen, color: ACCENT.srs },
+    { label: t('statLearning'), value: stats.learning, icon: IconBrain, color: ACCENT.xp },
+    { label: t('statMature'), value: stats.mature, icon: IconTarget, color: STATUS.success },
   ];
 
   return (
@@ -60,15 +56,13 @@ function SRSStatsCard() {
         const Ic = item.icon;
         return (
           <div key={item.label}
-            className="relative overflow-hidden p-4 rounded-2xl transition-all duration-200 hover:-translate-y-0.5"
-            style={{ background: item.gradient }}>
-            <div className="absolute -top-4 -right-4 w-16 h-16 rounded-full"
-              style={{ backgroundColor: item.color, opacity: 0.06 }} />
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center mb-2"
-              style={{ background: `linear-gradient(135deg, ${item.color}, ${item.color}cc)` }}>
-              <Ic size={16} className="text-white" />
+            className="p-4 rounded-[14px] border transition-transform duration-200 hover:-translate-y-0.5"
+            style={{ backgroundColor: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}>
+            <div className="w-8 h-8 rounded-[9px] flex items-center justify-center mb-2"
+              style={{ background: `color-mix(in srgb, ${item.color} 16%, transparent)`, color: item.color }}>
+              <Ic size={16} />
             </div>
-            <div className="text-2xl font-extrabold" style={{ color: item.color }}>{item.value}</div>
+            <div className="mono text-2xl font-bold" style={{ color: item.color }}>{item.value}</div>
             <div className="text-xs font-medium" style={{ color: 'var(--theme-text-muted)' }}>{item.label}</div>
           </div>
         );
@@ -107,21 +101,20 @@ function ReviewCard({ word, isFlipped, onFlip, onSpeak }: ReviewCardProps) {
         }}>
 
         {/* Front - German */}
-        <div className="absolute inset-0 w-full h-full rounded-3xl p-6 flex flex-col items-center justify-center border-2"
+        <div className="v2-srs-card absolute inset-0 w-full h-full rounded-[18px] p-6 flex flex-col items-center justify-center"
           style={{
-            backgroundColor: 'var(--theme-bg-card)',
-            borderColor: 'var(--theme-border)',
+            border: `1.5px solid ${genderColor}`,
             backfaceVisibility: 'hidden',
-            boxShadow: '0 8px 32px rgba(0,0,0,.08)',
+            boxShadow: '0 8px 24px rgba(0,0,0,.12)',
           }}>
           {/* Type badge */}
-          <div className="absolute top-4 left-4 px-3 py-1 rounded-lg text-caption font-semibold"
-            style={{ background: `linear-gradient(135deg, ${typeInfo.color}, ${typeInfo.color}cc)`, color: 'white' }}>
+          <div className="absolute top-4 left-4 px-2.5 py-1 rounded-md text-caption font-semibold"
+            style={{ background: `color-mix(in srgb, ${typeInfo.color} 14%, transparent)`, color: typeInfo.color }}>
             {typeInfo.labelDe}
           </div>
 
           {/* Status badge */}
-          <div className="absolute top-4 right-4 px-3 py-1 rounded-lg text-caption font-semibold"
+          <div className="absolute top-4 right-4 px-2.5 py-1 rounded-md text-caption font-semibold"
             style={{ backgroundColor: statusInfo.bgColor, color: statusInfo.color }}>
             {statusInfo.label}
           </div>
@@ -172,20 +165,17 @@ function ReviewCard({ word, isFlipped, onFlip, onSpeak }: ReviewCardProps) {
           </div>
         </div>
 
-        {/* Back - Translation */}
-        <div className="absolute inset-0 w-full h-full rounded-3xl p-6 flex flex-col items-center justify-center"
+        {/* Back - Translation (calm bg-card, gender-colored accents — no full gradient) */}
+        <div className="v2-srs-card absolute inset-0 w-full h-full rounded-[18px] p-6 flex flex-col items-center justify-center"
           style={{
-            background: `linear-gradient(135deg, ${genderColor}, ${genderColor}cc)`,
+            border: `1.5px solid ${genderColor}`,
             backfaceVisibility: 'hidden',
             transform: 'rotateY(180deg)',
-            boxShadow: '0 8px 32px rgba(0,0,0,.12)',
+            boxShadow: '0 8px 24px rgba(0,0,0,.12)',
           }}>
-          <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full bg-white/10" />
-          <div className="absolute -bottom-6 -left-6 w-24 h-24 rounded-full bg-white/5" />
-
           {/* German word reminder + replay audio */}
-          <div className="relative flex items-center gap-2 mb-3">
-            <span className="text-base font-semibold text-white/85">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-base font-semibold" style={{ color: 'var(--theme-text-secondary)' }}>
               {word.wordType === 'nomen' && word.nomenData
                 ? `${word.nomenData.article} ${word.word}`
                 : word.word}
@@ -200,28 +190,30 @@ function ReviewCard({ word, isFlipped, onFlip, onSpeak }: ReviewCardProps) {
                 onSpeak(text);
               }}
               aria-label={t('replayAudio')}
-              className="w-7 h-7 rounded-full flex items-center justify-center bg-white/20 hover:bg-white/30 transition-colors"
+              className="w-7 h-7 rounded-full flex items-center justify-center transition-transform hover:scale-110"
+              style={{ background: `color-mix(in srgb, ${genderColor} 16%, transparent)`, color: genderColor }}
             >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
                 <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
               </svg>
             </button>
           </div>
 
-          <div className="relative text-center">
-            <div className="text-3xl font-bold text-white mb-2">{word.translationVi}</div>
-            <div className="text-lg text-white/70">{word.translationEn}</div>
+          <div className="text-center">
+            <div className="text-3xl font-bold mb-2" style={{ color: genderColor }}>{word.translationVi}</div>
+            <div className="text-lg" style={{ color: 'var(--theme-text-muted)' }}>{word.translationEn}</div>
           </div>
 
           {word.examples && word.examples.length > 0 && (
-            <div className="relative mt-6 p-4 bg-white/10 rounded-xl max-w-full backdrop-blur-sm">
-              <div className="text-xs text-white/60 mb-1">{t('exampleLabel')}</div>
-              <div className="text-white/90 italic text-sm">&quot;{word.examples[0]}&quot;</div>
+            <div className="mt-6 p-4 rounded-xl max-w-full"
+              style={{ background: 'var(--theme-bg-secondary)', border: '1px solid var(--theme-border)' }}>
+              <div className="text-xs mb-1" style={{ color: 'var(--theme-text-muted)' }}>{t('exampleLabel')}</div>
+              <div className="italic text-sm" style={{ color: 'var(--theme-text-secondary)' }}>&quot;{word.examples[0]}&quot;</div>
             </div>
           )}
 
-          <div className="absolute bottom-4 text-xs text-white/50">
+          <div className="absolute bottom-4 text-xs" style={{ color: 'var(--theme-text-muted)' }}>
             {t('currentLevel', { level: getIntervalText(word.interval) })}
           </div>
         </div>
@@ -243,30 +235,25 @@ function RatingButtons({ word, onRate, isLoading }: RatingButtonsProps) {
   const t = useTranslations('vocabulary.wordBank.review');
   const { data: intervals, isLoading: intervalsLoading } = useIntervalPreview(word.id);
 
-  /* eslint-disable no-restricted-syntax */
-  const ratings: { rating: SRSRating; label: string; color: string; gradient: string; hotkey: string }[] = [
-    { rating: 'again', label: t('rateAgain'), color: STATUS.danger, gradient: 'linear-gradient(135deg, #EF4444, #DC2626)', hotkey: '1' },
-    { rating: 'hard', label: t('rateHard'), color: ACCENT.xp,      gradient: 'linear-gradient(135deg, #F59E0B, #D97706)', hotkey: '2' },
-    { rating: 'good', label: t('rateGood'), color: STATUS.success, gradient: 'linear-gradient(135deg, #22C55E, #16A34A)', hotkey: '3' },
-    { rating: 'easy', label: t('rateEasy'),  color: ACCENT.srs,     gradient: 'linear-gradient(135deg, #3B82F6, #2563EB)', hotkey: '4' },
+  const ratings: { rating: SRSRating; label: string; color: string; hotkey: string }[] = [
+    { rating: 'again', label: t('rateAgain'), color: STATUS.danger,  hotkey: '1' },
+    { rating: 'hard',  label: t('rateHard'),  color: ACCENT.xp,      hotkey: '2' },
+    { rating: 'good',  label: t('rateGood'),  color: STATUS.success, hotkey: '3' },
+    { rating: 'easy',  label: t('rateEasy'),  color: ACCENT.srs,     hotkey: '4' },
   ];
-  /* eslint-enable no-restricted-syntax */
 
   return (
-    <div className="grid grid-cols-4 gap-2 sm:gap-3 mt-6 max-w-lg mx-auto">
+    <div className="grid grid-cols-4 gap-2.5 mt-6 max-w-lg mx-auto">
       {ratings.map(({ rating, label, color, hotkey }) => (
         <button key={rating} onClick={() => onRate(rating)} disabled={isLoading}
-          className="flex flex-col items-center p-3 sm:p-4 rounded-2xl transition-all duration-200
-            hover:-translate-y-1 hover:shadow-lg active:translate-y-0 disabled:opacity-40"
-          style={{ background: `${color}12`, border: `2px solid ${color}30` }}>
-          <span className="font-bold text-sm" style={{ color }}>{label}</span>
-          <span className="text-caption mt-1" style={{ color: 'var(--theme-text-muted)' }}>
-            {intervals && !intervalsLoading ? getDelayText(intervals[rating].delayMinutes) : '...'}
+          style={{ ['--rate' as string]: color } as React.CSSProperties}
+          className="v2-rate-btn relative flex h-[72px] flex-col items-center justify-center gap-1 rounded-[14px] border-[1.5px] transition-all duration-150 hover:-translate-y-0.5 active:scale-95 disabled:opacity-55 disabled:hover:translate-y-0 disabled:cursor-not-allowed">
+          <kbd className="mono absolute right-2.5 top-2 rounded-xs px-1.5 text-[10px] font-bold"
+            style={{ background: 'var(--theme-bg-secondary)', color }}>{hotkey}</kbd>
+          <span className="text-[15px] font-bold" style={{ color: 'var(--theme-text-primary)' }}>{label}</span>
+          <span className="mono text-[11px] font-medium" style={{ color }}>
+            ⟲ {intervals && !intervalsLoading ? getDelayText(intervals[rating].delayMinutes) : '...'}
           </span>
-          <kbd className="mt-1.5 px-2 py-0.5 rounded-md text-caption font-semibold"
-            style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }}>
-            {hotkey}
-          </kbd>
         </button>
       ))}
     </div>
@@ -282,19 +269,15 @@ function SessionComplete({ session, onRestart }: { session: ReviewSession; onRes
     ? Math.round((session.correct / session.reviewed) * 100) : 0;
 
   const resultItems = [
-    { label: t('statReviewed'), value: session.reviewed, color: 'var(--theme-text-primary)',
-      // eslint-disable-next-line no-restricted-syntax
-      gradient: 'linear-gradient(135deg, var(--theme-bg-secondary), var(--theme-bg-tertiary))' },
-    { label: t('statCorrect'), value: session.correct, color: STATUS.success,
-      gradient: `linear-gradient(135deg, ${STATUS.success}1F, ${STATUS.success}0F)` },
-    { label: t('statAccuracy'), value: `${accuracy}%`, color: ACCENT.srs,
-      gradient: `linear-gradient(135deg, ${ACCENT.srs}1F, ${ACCENT.srs}0F)` },
+    { label: t('statReviewed'), value: session.reviewed, color: 'var(--theme-text-primary)' },
+    { label: t('statCorrect'), value: session.correct, color: STATUS.success },
+    { label: t('statAccuracy'), value: `${accuracy}%`, color: ACCENT.srs },
   ];
 
   return (
     <div className="text-center py-12">
-      <div className="w-20 h-20 rounded-3xl mx-auto flex items-center justify-center mb-4"
-        style={{ background: `linear-gradient(135deg, ${STATUS.success}26, ${STATUS.success}1A)` }}>
+      <div className="w-20 h-20 rounded-[18px] mx-auto flex items-center justify-center mb-4"
+        style={{ background: `color-mix(in srgb, ${STATUS.success} 16%, transparent)`, border: `1px solid color-mix(in srgb, ${STATUS.success} 30%, transparent)` }}>
         <IconTrophy size={36} style={{ color: STATUS.success }} />
       </div>
       <h2 className="text-2xl font-bold mb-2" style={{ color: 'var(--theme-text-primary)' }}>
@@ -306,8 +289,8 @@ function SessionComplete({ session, onRestart }: { session: ReviewSession; onRes
 
       <div className="grid grid-cols-3 gap-3 max-w-sm mx-auto mb-8">
         {resultItems.map((item, i) => (
-          <div key={i} className="p-4 rounded-2xl" style={{ background: item.gradient }}>
-            <div className="text-2xl font-extrabold" style={{ color: item.color }}>{item.value}</div>
+          <div key={i} className="p-4 rounded-[14px] border" style={{ backgroundColor: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}>
+            <div className="mono text-2xl font-bold" style={{ color: item.color }}>{item.value}</div>
             <div className="text-caption font-medium" style={{ color: 'var(--theme-text-muted)' }}>{item.label}</div>
           </div>
         ))}
@@ -315,14 +298,12 @@ function SessionComplete({ session, onRestart }: { session: ReviewSession; onRes
 
       <div className="flex gap-3 justify-center">
         <button onClick={onRestart}
-          className="flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm text-white
-            transition-all hover:shadow-md hover:-translate-y-0.5"
-          style={{ background: GRADIENT.action }}>
+          className="flex items-center gap-2 px-6 py-3 rounded-[11px] font-semibold text-sm transition-transform hover:-translate-y-0.5 active:scale-95"
+          style={{ background: 'var(--accent)', color: 'var(--accent-on)', boxShadow: '0 4px 14px color-mix(in srgb, var(--accent) 35%, transparent)' }}>
           <IconRefresh size={16} /> {t('reviewMore')}
         </button>
         <Link href="/word-bank"
-          className="flex items-center gap-2 px-6 py-3 rounded-xl font-medium text-sm border
-            transition-all hover:-translate-y-0.5"
+          className="flex items-center gap-2 px-6 py-3 rounded-[11px] font-medium text-sm border transition-transform hover:-translate-y-0.5"
           style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)' }}>
           <IconChevronLeft size={16} /> {t('backToBank')}
         </Link>
@@ -350,9 +331,9 @@ function EmptyState({ mode = 'srs' }: { mode?: 'srs' | 'weak' }) {
 
   return (
     <div className="text-center py-16">
-      <div className="w-20 h-20 rounded-3xl mx-auto flex items-center justify-center mb-4"
-        style={{ background: `linear-gradient(135deg, ${ACCENT.vocab}26, ${ACCENT.examWriting}1A)` }}>
-        <IconBrain size={36} style={{ color: ACCENT.vocab }} />
+      <div className="w-20 h-20 rounded-[18px] mx-auto flex items-center justify-center mb-4"
+        style={{ background: 'color-mix(in srgb, var(--accent) 14%, transparent)', border: '1px solid color-mix(in srgb, var(--accent) 28%, transparent)' }}>
+        <IconBrain size={36} style={{ color: 'var(--accent)' }} />
       </div>
       <h2 className="text-2xl font-bold mb-2" style={{ color: 'var(--theme-text-primary)' }}>
         {title}
@@ -363,14 +344,12 @@ function EmptyState({ mode = 'srs' }: { mode?: 'srs' | 'weak' }) {
 
       <div className="flex gap-3 justify-center">
         <Link href="/word-bank"
-          className="flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm text-white
-            transition-all hover:shadow-md hover:-translate-y-0.5"
-          style={{ background: GRADIENT.action }}>
+          className="flex items-center gap-2 px-6 py-3 rounded-[11px] font-semibold text-sm transition-transform hover:-translate-y-0.5 active:scale-95"
+          style={{ background: 'var(--accent)', color: 'var(--accent-on)', boxShadow: '0 4px 14px color-mix(in srgb, var(--accent) 35%, transparent)' }}>
           {t('goToBank')}
         </Link>
         <Link href="/words"
-          className="flex items-center gap-2 px-6 py-3 rounded-xl font-medium text-sm border
-            transition-all hover:-translate-y-0.5"
+          className="flex items-center gap-2 px-6 py-3 rounded-[11px] font-medium text-sm border transition-transform hover:-translate-y-0.5"
           style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)' }}>
           {t('exploreDict')}
         </Link>
@@ -513,16 +492,20 @@ export default function WordBankReviewPage() {
     />
   );
 
+  const headerColor = mode === 'weak' ? STATUS.danger : 'var(--accent)';
+
   return (
       <div className="max-w-4xl mx-auto py-6">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-2xl flex items-center justify-center"
-              style={{ background: mode === 'weak'
-                ? `linear-gradient(135deg, ${STATUS.danger}, ${ACCENT.xp})`
-                : GRADIENT.history }}>
-              <IconBrain size={22} className="text-white" />
+            <div className="w-11 h-11 rounded-md flex items-center justify-center"
+              style={{
+                background: `color-mix(in srgb, ${headerColor} 16%, transparent)`,
+                border: `1px solid color-mix(in srgb, ${headerColor} 30%, transparent)`,
+                color: headerColor,
+              }}>
+              <IconBrain size={22} />
             </div>
             <div>
               <h1 className="text-2xl font-bold" style={{ color: 'var(--theme-text-primary)' }}>
@@ -534,8 +517,8 @@ export default function WordBankReviewPage() {
             </div>
           </div>
           <Link href="/word-bank"
-            className="flex items-center gap-1.5 text-body font-medium transition-all hover:opacity-70"
-            style={{ color: ACCENT.srs }}>
+            className="flex items-center gap-1.5 text-body font-medium transition-opacity hover:opacity-70"
+            style={{ color: 'var(--accent)' }}>
             <IconChevronLeft size={16} /> {t('wordBankLink')}
           </Link>
         </div>
@@ -546,9 +529,9 @@ export default function WordBankReviewPage() {
         {/* Loading */}
         {isLoading && (
           <div className="flex items-center justify-center py-20">
-            <div className="w-12 h-12 rounded-2xl flex items-center justify-center animate-pulse"
-              style={{ background: GRADIENT.history }}>
-              <IconBrain size={24} className="text-white" />
+            <div className="w-12 h-12 rounded-[14px] flex items-center justify-center animate-pulse"
+              style={{ background: 'color-mix(in srgb, var(--accent) 16%, transparent)', color: 'var(--accent)' }}>
+              <IconBrain size={24} />
             </div>
           </div>
         )}
@@ -568,11 +551,8 @@ export default function WordBankReviewPage() {
               </div>
               <div className="h-2 rounded-full overflow-hidden"
                 style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
-                <div className="h-full rounded-full transition-all duration-500"
-                  style={{
-                    width: `${progress}%`,
-                    background: `linear-gradient(90deg, ${ACCENT.srs}, ${STATUS.success})`,
-                  }} />
+                <div className="v2-match-grad h-full rounded-full transition-all duration-500"
+                  style={{ width: `${progress}%` }} />
               </div>
             </div>
 
@@ -609,16 +589,13 @@ export default function WordBankReviewPage() {
         {isComplete && session && <SessionComplete session={session} onRestart={handleRestart} />}
 
         {/* Keyboard tips */}
-        <div className="mt-8 p-4 rounded-2xl border"
-          style={{
-            backgroundColor: `${ACCENT.vocab}0A`,
-            borderColor: `${ACCENT.vocab}26`,
-          }}>
+        <div className="mt-8 p-4 rounded-[14px] border"
+          style={{ backgroundColor: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}>
           <h3 className="font-bold text-sm mb-3 flex items-center gap-2"
-            style={{ color: ACCENT.vocab }}>
-            <span className="w-7 h-7 rounded-lg flex items-center justify-center"
-              style={{ background: `linear-gradient(135deg, ${ACCENT.vocab}26, ${ACCENT.vocab}14)` }}>
-              <IconKeyboard size={15} style={{ color: ACCENT.vocab }} />
+            style={{ color: 'var(--theme-text-primary)' }}>
+            <span className="w-7 h-7 rounded-[9px] flex items-center justify-center"
+              style={{ background: 'color-mix(in srgb, var(--accent) 14%, transparent)', color: 'var(--accent)' }}>
+              <IconKeyboard size={15} />
             </span>
             {t('shortcuts')}
           </h3>
@@ -631,8 +608,8 @@ export default function WordBankReviewPage() {
               { key: '4', action: t('rateEasy') },
             ].map(item => (
               <div key={item.key} className="flex items-center gap-2">
-                <kbd className="px-2 py-0.5 rounded-md font-semibold text-caption"
-                  style={{ backgroundColor: `${ACCENT.vocab}1A`, color: ACCENT.vocab }}>
+                <kbd className="mono px-2 py-0.5 rounded-md font-semibold text-caption"
+                  style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-secondary)', border: '1px solid var(--theme-border)' }}>
                   {item.key}
                 </kbd>
                 <span style={{ color: 'var(--theme-text-muted)' }}>{item.action}</span>

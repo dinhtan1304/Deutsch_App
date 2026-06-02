@@ -23,24 +23,25 @@ export function ScenarioCard({ scenario, locked, onClick }: Props) {
     <button
       type="button"
       onClick={onClick}
-      className="group relative text-left rounded-2xl border p-5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
+      className="word-card-v2 group relative h-full text-left rounded-[13px] border p-4"
       style={{
         borderColor: 'var(--theme-border)',
         backgroundColor: 'var(--theme-bg-card)',
-      }}
+        ['--card-accent' as string]: levelColor,
+      } as React.CSSProperties}
     >
       {locked && (
         <div
-          className="absolute top-3 right-3 px-2 py-0.5 rounded-full text-caption font-bold text-white"
+          className="absolute top-3 right-3 px-2 py-0.5 rounded-md text-caption font-bold text-white"
           style={{ background: 'linear-gradient(135deg, #F59E0B, #EF4444)' }}
         >
           PREMIUM
         </div>
       )}
 
-      <div className="flex items-start gap-4">
+      <div className="flex items-start gap-3.5">
         <div
-          className="w-14 h-14 rounded-2xl flex items-center justify-center text-3xl shrink-0"
+          className="w-14 h-14 rounded-[13px] flex items-center justify-center text-3xl shrink-0"
           style={{ background: `${levelColor}1a` }}
         >
           {scenario.icon}

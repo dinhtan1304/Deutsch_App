@@ -6,8 +6,7 @@ import {
   IconFlame, IconBookOpen, IconTarget,
   IconClock, IconLayers, IconBrain, IconGraduationCap,
 } from '@/components/ui/Icons';
-import { SurfaceCard } from '@/components/ui';
-import { ACCENT, GRADIENT, type AccentKey } from '@/lib/tokens';
+import { ACCENT, type AccentKey } from '@/lib/tokens';
 
 interface StatsCardsProps {
   stats: DashboardStats;
@@ -76,17 +75,6 @@ const cardConfigs: StatCardConfig[] = [
   },
 ];
 
-const statGradient: Partial<Record<AccentKey, string>> = {
-  brand: GRADIENT.brand,
-  games: GRADIENT.xp,
-  srs: GRADIENT.action,
-  emerald: GRADIENT.emerald,
-  vocab: GRADIENT.vocab,
-  listening: GRADIENT.listening,
-  xp: GRADIENT.xp,
-  cyan: GRADIENT.dictation,
-};
-
 export function StatsCards({ stats }: StatsCardsProps) {
   const t = useTranslations('dashboard.stats');
   const formatter = useFormatter();
@@ -121,69 +109,49 @@ export function StatsCards({ stats }: StatsCardsProps) {
   };
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
       {cardConfigs.map((card) => {
         const Icon = card.icon;
         const value = card.getValue(stats);
         const sub = subFor(card.id);
         const label = labelFor(card.id);
+        const color = ACCENT[card.accent];
         const isStreakCard = card.id === 'streak';
-        const isReviewCard = card.id === 'needsReview';
-
-        // Balance the 7-item grid:
-        // md & xl (4 cols): Streak takes 2 cols, others 1 col (2+1+1 + 1+1+1+1 = 8 slots = 2 rows)
-        // sm & lg (3 cols): Review takes 3 cols, others 1 col (1+1+1 + 1+1+1 + 3 = 9 slots = 3 rows)
-        // mobile (2 cols): Review takes 2 cols
-        const colSpanClass = isStreakCard
-          ? 'col-span-1 md:col-span-2 lg:col-span-1 xl:col-span-2'
-          : isReviewCard
-            ? 'col-span-2 sm:col-span-3 md:col-span-1 lg:col-span-3 xl:col-span-1'
-            : 'col-span-1';
 
         return (
-          <SurfaceCard
+          <div
             key={card.id}
-            variant="featured"
-            accent={card.accent}
-            className={`relative overflow-hidden cursor-default ${colSpanClass}`}
+            className="rounded-2xl p-4"
+            style={{ background: 'var(--theme-bg-card)', border: '1px solid var(--theme-border)' }}
           >
-            {/* Streak freeze badge — only on streak card */}
-            {isStreakCard && stats.streakFreezesAvailable > 0 && (
-              <div
-                className="absolute top-4 right-4 flex items-center gap-1 px-2 py-1 rounded-full text-xs font-black z-10 shadow-sm"
-                style={{
-                  background: 'rgba(59,130,246,.15)',
-                  color: ACCENT.srs,
-                  border: '1px solid rgba(59,130,246,.3)',
-                  backdropFilter: 'blur(4px)'
-                }}
-                title={t('streakFreezeTitle', { count: stats.streakFreezesAvailable })}
+            <div className="flex items-center justify-between mb-2.5">
+              {/* Accent-tinted icon tile */}
+              <span
+                className="w-9 h-9 rounded-md inline-flex items-center justify-center"
+                style={{ background: `color-mix(in srgb, ${color} 14%, transparent)`, color }}
               >
-                ❄️ {stats.streakFreezesAvailable}
-              </div>
-            )}
+                <Icon size={18} />
+              </span>
 
-            {/* Decorative orb */}
-            <div
-              className="absolute -right-6 -top-6 w-20 h-20 rounded-full opacity-[0.05]"
-              style={{ backgroundColor: ACCENT[card.accent] }}
-            />
-
-            {/* Icon container with gradient */}
-            <div
-              className="w-10 h-10 rounded-xl flex items-center justify-center mb-3 shadow-sm"
-              style={{ background: statGradient[card.accent] ?? GRADIENT.brand }}
-            >
-              <Icon size={20} className="text-white" />
+              {/* Streak freeze badge — only on streak card */}
+              {isStreakCard && stats.streakFreezesAvailable > 0 && (
+                <span
+                  className="text-caption font-semibold px-1.5 py-0.5 rounded-md"
+                  style={{ background: 'color-mix(in srgb, var(--accent) 12%, transparent)', color: 'var(--accent)' }}
+                  title={t('streakFreezeTitle', { count: stats.streakFreezesAvailable })}
+                >
+                  ❄️ {stats.streakFreezesAvailable}
+                </span>
+              )}
             </div>
 
             {/* Value */}
-            <div className="text-2xl font-extrabold tracking-tight mb-0.5" style={{ color: ACCENT[card.accent] }}>
+            <div className="mono font-bold" style={{ fontSize: 24, letterSpacing: '-.02em', color: 'var(--theme-text-primary)' }}>
               {value}
             </div>
 
             {/* Label */}
-            <div className="text-body font-medium" style={{ color: 'var(--theme-text-secondary)' }}>
+            <div className="text-body font-medium mt-0.5" style={{ color: 'var(--theme-text-secondary)' }}>
               {label}
             </div>
 
@@ -191,7 +159,7 @@ export function StatsCards({ stats }: StatsCardsProps) {
             <div className="text-caption mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>
               {sub}
             </div>
-          </SurfaceCard>
+          </div>
         );
       })}
     </div>

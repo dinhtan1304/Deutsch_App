@@ -113,7 +113,7 @@ function SidebarComponent({ isCollapsed, onToggle }: SidebarProps) {
             {isCollapsed ? (
               <Link
                 href={item.href}
-                className="sb-nav-link group relative flex items-center justify-center py-2.5 rounded-xl"
+                className="sb-nav-link group relative flex items-center justify-center py-2.5 rounded-lg"
                 data-active={active ? 'true' : 'false'}
                 style={{
                   color: active ? 'var(--theme-text-primary)' : 'var(--theme-text-secondary)',
@@ -131,7 +131,7 @@ function SidebarComponent({ isCollapsed, onToggle }: SidebarProps) {
             ) : (
               <button
                 onClick={() => toggleExpand(item.key)}
-                className="sb-nav-link group relative w-full flex items-center gap-3 px-3 py-2.5 rounded-xl outline-none"
+                className="sb-nav-link group relative w-full flex items-center gap-3 px-3 py-2.5 rounded-lg outline-none"
                 data-active={active ? 'true' : 'false'}
                 style={{
                   color: active ? 'var(--theme-text-primary)' : 'var(--theme-text-secondary)',
@@ -192,7 +192,7 @@ function SidebarComponent({ isCollapsed, onToggle }: SidebarProps) {
                       <Link
                         href={child.href}
                         aria-current={childActive ? 'page' : undefined}
-                        className="sb-nav-link flex items-center gap-2.5 px-3 py-2 rounded-lg text-body"
+                        className="sb-nav-link flex items-center gap-2.5 px-3 py-2 rounded-md text-body"
                         data-active={childActive ? 'true' : 'false'}
                         style={{
                           color: childActive ? 'var(--theme-text-primary)' : 'var(--theme-text-muted)',
@@ -227,7 +227,7 @@ function SidebarComponent({ isCollapsed, onToggle }: SidebarProps) {
               href={item.href}
               aria-current={active ? 'page' : undefined}
               aria-label={isCollapsed ? tNav(item.labelKey) : undefined}
-              className={`sb-nav-link group relative flex items-center ${isCollapsed ? 'justify-center' : 'gap-3 px-3'} py-2.5 rounded-xl`}
+              className={`sb-nav-link group relative flex items-center ${isCollapsed ? 'justify-center' : 'gap-3 px-3'} py-2.5 rounded-lg`}
               data-active={active ? 'true' : 'false'}
               style={{
                 color: active ? 'var(--theme-text-primary)' : 'var(--theme-text-secondary)',
@@ -404,9 +404,9 @@ function SidebarComponent({ isCollapsed, onToggle }: SidebarProps) {
                 ≈ {xpInfo.cefrLabel}
               </div>
             )}
-            <div className="relative h-1.75 rounded-full overflow-hidden" style={{ background: 'var(--theme-border)' }}>
+            <div className="relative h-1.75 rounded-[3px] overflow-hidden" style={{ background: 'var(--theme-border)' }}>
               <div
-                className="h-full rounded-full transition-[width] duration-700"
+                className="h-full rounded-[3px] transition-[width] duration-700"
                 style={{
                   width: `${xpInfo.progress}%`,
                   background: `linear-gradient(90deg, ${ACCENT.xp}, ${STATUS.danger})`,

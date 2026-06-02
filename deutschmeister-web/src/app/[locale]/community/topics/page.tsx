@@ -38,7 +38,7 @@ export default function CommunityTopicsPage() {
   const items = data?.items ?? [];
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6">
+    <div className="max-w-360 mx-auto px-4 sm:px-6 py-6">
       <PageHeader
         title={t('listTitle')}
         subtitle={t('listSubtitle')}
@@ -46,8 +46,8 @@ export default function CommunityTopicsPage() {
         right={
           <Link
             href="/my-topics/new"
-            className="inline-flex items-center px-4 py-2 rounded-xl text-sm font-bold transition-all"
-            style={{ background: `linear-gradient(135deg, ${ACCENT.vocab}, ${ACCENT.examWriting})`, color: 'white' }}
+            className="inline-flex items-center px-4 py-2 rounded-md text-sm font-semibold transition-transform hover:-translate-y-0.5"
+            style={{ background: 'var(--accent)', color: 'var(--accent-on)' }}
           >
             {t('createYours')}
           </Link>
@@ -72,12 +72,10 @@ export default function CommunityTopicsPage() {
             <button
               key={item}
               onClick={() => setLevel(item)}
-              className="px-3 py-2 rounded-xl text-xs font-bold uppercase tracking-wider"
-              style={{
-                backgroundColor: level === item ? `${ACCENT.vocab}18` : 'var(--theme-bg-card)',
-                color: level === item ? ACCENT.vocab : 'var(--theme-text-muted)',
-                border: '1px solid var(--theme-border)',
-              }}
+              className="px-2.5 py-1 rounded-[7px] text-caption font-semibold uppercase tracking-wide transition-colors"
+              style={level === item
+                ? { background: 'color-mix(in srgb, var(--accent) 14%, transparent)', color: 'var(--accent)', border: '1px solid var(--accent)' }
+                : { background: 'var(--theme-bg-secondary)', color: 'var(--theme-text-secondary)', border: '1px solid var(--theme-border)' }}
             >
               {item === 'all' ? t('filterAll') : item}
             </button>
@@ -88,12 +86,10 @@ export default function CommunityTopicsPage() {
             <button
               key={item.v}
               onClick={() => setSort(item.v)}
-              className="px-3 py-2 rounded-xl text-xs font-bold uppercase tracking-wider"
-              style={{
-                backgroundColor: sort === item.v ? `${ACCENT.brand}18` : 'var(--theme-bg-card)',
-                color: sort === item.v ? ACCENT.brand : 'var(--theme-text-muted)',
-                border: '1px solid var(--theme-border)',
-              }}
+              className="px-2.5 py-1 rounded-[7px] text-caption font-semibold uppercase tracking-wide transition-colors"
+              style={sort === item.v
+                ? { background: 'color-mix(in srgb, var(--accent) 14%, transparent)', color: 'var(--accent)', border: '1px solid var(--accent)' }
+                : { background: 'var(--theme-bg-secondary)', color: 'var(--theme-text-secondary)', border: '1px solid var(--theme-border)' }}
             >
               {t(item.labelKey)}
             </button>
@@ -135,15 +131,12 @@ function CommunityTopicCard({ topic }: { topic: UserTopicWithOwner }) {
     <Link href={`/community/topics/${topic.slug}`} className="block">
       <Card
         variant="default"
-        className="hover:-translate-y-1 transition-all duration-300 h-full"
-        style={{
-          boxShadow: '0 4px 16px rgba(0,0,0,.05)',
-          border: '1px solid var(--theme-border)',
-        }}
+        className="hover:-translate-y-0.5 transition-transform duration-200 h-full"
+        style={{ border: '1px solid var(--theme-border)' }}
       >
         <div className="flex items-start gap-3 mb-3">
           <div
-            className="w-12 h-12 rounded-xl flex items-center justify-center text-sm font-black shrink-0"
+            className="w-12 h-12 rounded-xl flex items-center justify-center text-sm font-bold shrink-0"
             style={{
               background: topic.coverColor
                 ? `${topic.coverColor}22`
@@ -155,7 +148,7 @@ function CommunityTopicCard({ topic }: { topic: UserTopicWithOwner }) {
           </div>
           <div className="flex-1 min-w-0">
             <span
-              className="text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md text-white inline-block mb-1"
+              className="text-caption font-semibold uppercase tracking-wide px-2 py-0.5 rounded-md text-white inline-block mb-1"
               style={{ backgroundColor: levelColor }}
             >
               {topic.level}

@@ -51,7 +51,7 @@ function QuestionItem({
       <button onClick={() => setOpen(v => !v)}
         className="w-full flex items-center gap-3 px-4 py-3.5 text-left"
         style={{ backgroundColor: isCorrect ? `${STATUS.success}0A` : `${STATUS.danger}0A` }}>
-        <div className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 text-white text-caption"
+        <div className="w-6 h-6 rounded-[8px] flex items-center justify-center shrink-0 text-white text-caption"
           style={{ backgroundColor: isCorrect ? STATUS.success : STATUS.danger }}>
           {isCorrect ? <IconCheck size={11} /> : <IconX size={11} />}
         </div>
@@ -85,9 +85,9 @@ function QuestionItem({
               if (isUser && !isCorrectOpt) { border = STATUS.danger;  bg = `${STATUS.danger}14`;  color = STATUS.danger; }
 
               return (
-                <div key={opt.id} className="flex items-center gap-2 px-3 py-2.5 rounded-xl border text-xs"
+                <div key={opt.id} className="flex items-center gap-2 px-3 py-2.5 rounded-md border text-xs"
                   style={{ borderColor: border, backgroundColor: bg, color }}>
-                  <span className="w-5 h-5 rounded-full border flex items-center justify-center text-caption font-bold shrink-0"
+                  <span className="w-5 h-5 rounded-[7px] border flex items-center justify-center text-caption font-bold shrink-0"
                     style={{ borderColor: border, color }}>
                     {LABELS[oi] ?? opt.id.toUpperCase()}
                   </span>

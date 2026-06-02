@@ -118,7 +118,7 @@ export function MaskedWordCard({ clue, serverClockSkewMs = 0 }: MaskedWordCardPr
               type="button"
               aria-label={t('pronounce')}
               onClick={() => speak(germanWord, 'de-DE', { fast: true })}
-              className="ml-2 w-9 h-9 rounded-full flex items-center justify-center transition-transform hover:scale-110"
+              className="ml-2 w-9 h-9 rounded-lg flex items-center justify-center transition-transform hover:scale-110"
               style={{ background: 'rgba(59,130,246,.1)', color: ACCENT.srs }}
             >
               <IconVolume size={18} />

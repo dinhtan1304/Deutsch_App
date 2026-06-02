@@ -43,7 +43,7 @@ function TextCard({ text }: { text: ExamReadingTeil['texts'][0] }) {
         </div>
       )}
       {text.author && <p className="text-caption mb-1.5" style={{ color: 'var(--theme-text-muted)' }}>{t('byAuthor', { author: text.author })}</p>}
-      <p className="text-body leading-relaxed whitespace-pre-wrap" style={{ color: 'var(--theme-text-primary)', fontFamily: 'Georgia, serif' }}>
+      <p className="text-body leading-relaxed whitespace-pre-wrap" style={{ color: 'var(--theme-text-primary)' }}>
         <HighlightedText text={text.content} />
       </p>
       <button onClick={() => speakText(text.content)}
@@ -132,7 +132,7 @@ function TeilRightContent({ teil, answers, onAnswer, cefrLevel }: {
             <div key={q.id} className="rounded-2xl border p-5 transition-all duration-300 shadow-sm"
               style={{ borderColor: answers[q.id] ? `${ACCENT.reading}4D` : 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
               <div className="flex items-start gap-3 mb-4">
-                 <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-black text-white shrink-0"
+                 <div className="w-7 h-7 rounded-[9px] flex items-center justify-center text-xs font-black text-white shrink-0"
                    style={{ background: answers[q.id] ? GRADIENT.reading : 'var(--theme-bg-secondary)', color: answers[q.id] ? 'white' : 'var(--theme-text-muted)' }}>
                    {i + 1}
                  </div>
@@ -173,7 +173,7 @@ function TeilRightContent({ teil, answers, onAnswer, cefrLevel }: {
                 {person && (
                   <div className="p-4 border-b" style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-secondary)' }}>
                     {person.label && <p className="text-xs font-black mb-2 uppercase tracking-widest" style={{ color: ACCENT.reading }}>{person.label}</p>}
-                    <p className="text-[15px] leading-relaxed" style={{ color: 'var(--theme-text-primary)', fontFamily: 'Georgia, serif' }}>
+                    <p className="text-[15px] leading-relaxed" style={{ color: 'var(--theme-text-primary)' }}>
                       <HighlightedText text={person.content} />
                     </p>
                   </div>
@@ -214,7 +214,7 @@ function TeilRightContent({ teil, answers, onAnswer, cefrLevel }: {
               <div key={q.id} className="rounded-2xl border p-5 transition-all duration-300 shadow-sm"
                 style={{ borderColor: isAns ? `${ACCENT.reading}4D` : 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
                 <div className="flex items-start gap-3 mb-4">
-                   <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-black text-white shrink-0"
+                   <div className="w-7 h-7 rounded-[9px] flex items-center justify-center text-xs font-black text-white shrink-0"
                      style={{ background: isAns ? GRADIENT.reading : 'var(--theme-bg-secondary)', color: isAns ? 'white' : 'var(--theme-text-muted)' }}>
                      {i + 1}
                    </div>
@@ -227,11 +227,11 @@ function TeilRightContent({ teil, answers, onAnswer, cefrLevel }: {
                     const sel = answers[q.id] === opt.id;
                     return (
                       <button key={opt.id} onClick={() => onAnswer(q.id, opt.id)}
-                        className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl border-2 text-[15px] text-left transition-all hover:scale-[1.01] active:scale-[0.99]"
+                        className="w-full flex items-center gap-3 px-4 py-3.5 rounded-md border-2 text-[15px] text-left transition-all hover:scale-[1.01] active:scale-[0.99]"
                         style={sel
                           ? { borderColor: ACCENT.reading, backgroundColor: `${ACCENT.reading}14`, color: ACCENT.reading }
                           : { borderColor: 'var(--theme-border)', backgroundColor: 'transparent', color: 'var(--theme-text-secondary)' }}>
-                        <div className="w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 text-[10px] font-black"
+                        <div className="w-6 h-6 rounded-[8px] border-2 flex items-center justify-center shrink-0 text-[10px] font-black"
                           style={{ borderColor: sel ? ACCENT.reading : 'var(--theme-border)', backgroundColor: sel ? ACCENT.reading : 'transparent', color: sel ? 'white' : 'var(--theme-text-muted)' }}>
                           {opt.id.toUpperCase()}
                         </div>
@@ -265,7 +265,7 @@ function TeilRightContent({ teil, answers, onAnswer, cefrLevel }: {
               <div key={q.id} className="rounded-2xl border p-5 transition-all duration-300 shadow-sm"
                 style={{ borderColor: isAns ? `${ACCENT.reading}4D` : 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
                 <div className="flex items-start gap-3 mb-4">
-                   <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-black text-white shrink-0"
+                   <div className="w-7 h-7 rounded-[9px] flex items-center justify-center text-xs font-black text-white shrink-0"
                      style={{ background: isAns ? GRADIENT.reading : 'var(--theme-bg-secondary)', color: isAns ? 'white' : 'var(--theme-text-muted)' }}>
                      {i + 1}
                    </div>
@@ -274,7 +274,7 @@ function TeilRightContent({ teil, answers, onAnswer, cefrLevel }: {
                    </p>
                 </div>
                 <select value={answers[q.id] || ''} onChange={e => onAnswer(q.id, e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border-2 text-[15px] font-bold outline-none transition-all focus:ring-2"
+                  className="w-full px-4 py-3 rounded-md border-2 text-[15px] font-bold outline-none transition-all focus:ring-2"
                   style={{
                     borderColor: isAns ? ACCENT.reading : 'var(--theme-border)',
                     backgroundColor: isAns ? `${ACCENT.reading}0D` : 'var(--theme-bg-secondary)',
@@ -297,7 +297,7 @@ function TeilRightContent({ teil, answers, onAnswer, cefrLevel }: {
       const parts = text.split(/\[GAP_(\d+)\]/g);
       return (
         <div className="rounded-3xl border p-6 leading-loose text-[15px] shadow-sm"
-          style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)', fontFamily: 'Georgia, serif', color: 'var(--theme-text-primary)' }}>
+          style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)', color: 'var(--theme-text-primary)' }}>
           {parts.map((part, idx) => {
             if (idx % 2 === 0) return <span key={idx}><HighlightedText text={part} /></span>;
             const gapNum = parseInt(part);
@@ -308,7 +308,7 @@ function TeilRightContent({ teil, answers, onAnswer, cefrLevel }: {
             return (
               <span key={idx} className="inline-block mx-1 align-middle">
                 <select value={val || ''} onChange={e => onAnswer(q.id, e.target.value)}
-                  className="px-3 py-1 rounded-xl border-2 text-[13px] font-bold outline-none transition-all"
+                  className="px-3 py-1 rounded-md border-2 text-[13px] font-bold outline-none transition-all"
                   style={{ borderColor: val ? ACCENT.reading : 'var(--theme-border)', backgroundColor: val ? `${ACCENT.reading}0D` : 'var(--theme-bg-secondary)', color: val ? ACCENT.reading : 'var(--theme-text-muted)', minWidth: '90px' }}>
                   <option value="">___</option>
                   {opts
@@ -443,11 +443,11 @@ export default function ExamReadingPage() {
 
           return (
             <button key={t.number} onClick={() => goToTeil(i)}
-              className="shrink-0 flex items-center gap-2 px-5 py-2.5 rounded-2xl text-xs font-black transition-all border uppercase tracking-widest"
+              className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-md text-xs font-black transition-all border uppercase tracking-widest"
               style={isCurrent
-                ? { background: GRADIENT.reading, color: 'white', borderColor: 'transparent', boxShadow: `0 8px 16px ${ACCENT.reading}40` }
+                ? { backgroundColor: `${ACCENT.reading}14`, color: ACCENT.reading, borderColor: ACCENT.reading }
                 : isDone
-                  ? { backgroundColor: `${ACCENT.reading}14`, color: ACCENT.reading, borderColor: `${ACCENT.reading}33` }
+                  ? { backgroundColor: `${ACCENT.reading}0D`, color: ACCENT.reading, borderColor: `${ACCENT.reading}33` }
                   : { backgroundColor: 'var(--theme-bg-card)', color: 'var(--theme-text-muted)', borderColor: 'var(--theme-border)' }}>
               <span>Teil {t.number}</span>
               {isDone && <IconCheck size={10} />}
@@ -477,10 +477,10 @@ export default function ExamReadingPage() {
         <div className={`${mobileView === 'task' ? 'block' : 'hidden'} lg:block lg:w-1/2 shrink-0 lg:sticky lg:top-20 lg:self-start lg:max-h-[calc(100vh-10rem)] lg:overflow-y-auto lg:pr-1 space-y-6`}>
           <div className="rounded-3xl border p-6" style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
             <div className="flex items-center gap-2 mb-4">
-               <span className="w-8 h-8 rounded-xl flex items-center justify-center text-xs font-black text-white" style={{ background: GRADIENT.reading }}>{teil.number}</span>
+               <span className="w-8 h-8 rounded-[10px] flex items-center justify-center text-xs font-black text-white" style={{ background: GRADIENT.reading }}>{teil.number}</span>
                <h3 className="text-body font-black uppercase tracking-widest" style={{ color: 'var(--theme-text-primary)' }}>{tCommon('anweisungLabel')}</h3>
             </div>
-            <p className="text-[15px] italic leading-relaxed" style={{ color: 'var(--theme-text-secondary)', fontFamily: 'Georgia, serif' }}>
+            <p className="text-[15px] italic leading-relaxed" style={{ color: 'var(--theme-text-secondary)' }}>
               {teil.instruction}
             </p>
           </div>
@@ -507,7 +507,7 @@ export default function ExamReadingPage() {
           <div className="flex-1 flex gap-2 items-center">
             {currentTeil > 0 && (
               <button onClick={() => goToTeil(currentTeil - 1)}
-                className="w-10 h-10 rounded-xl flex items-center justify-center border transition-all hover:bg-black/5"
+                className="w-10 h-10 rounded-md flex items-center justify-center border transition-all hover:bg-black/5"
                 style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)' }}>
                 <IconChevronLeft size={18} />
               </button>
@@ -517,7 +517,7 @@ export default function ExamReadingPage() {
             </span>
             {!isLastTeil && (
               <button onClick={() => goToTeil(currentTeil + 1)}
-                className="w-10 h-10 rounded-xl flex items-center justify-center border transition-all hover:bg-black/5"
+                className="w-10 h-10 rounded-md flex items-center justify-center border transition-all hover:bg-black/5"
                 style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)' }}>
                 <IconChevronRight size={18} />
               </button>

@@ -12,15 +12,17 @@ import {
 import { useCheckQuota } from '@/hooks/useSubscription';
 import { UpgradeModal } from '@/components/subscription/UpgradeModal';
 import type { PronunciationLevel } from '@/lib/api/pronunciation';
-import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import { ACCENT, STATUS } from '@/lib/tokens';
 import { GridSkeleton } from '@/components/ui';
+import { MiniStats, type MiniStat } from '@/components/ui/MiniStats';
+import { FilterChip } from '@/components/ui/FilterChip';
 
 const LEVELS: (PronunciationLevel | 'all')[] = ['all', 'A1', 'A2', 'B1'];
 
 const LEVEL_COLORS: Record<string, string> = {
   A1: STATUS.success,
   A2: ACCENT.srs,
-  B1: ACCENT.examWriting,
+  B1: 'var(--accent)',
 };
 
 function getScoreColor(score: number) {
@@ -58,6 +60,12 @@ export default function PronunciationPage() {
     return Array.from(map.entries()).map(([category, items]) => ({ category, items }));
   }, [targets]);
 
+  const statItems: MiniStat[] = stats && stats.totalAttempts > 0 ? [
+    { label: t('stats.totalAttempts'), value: stats.totalAttempts, color: 'var(--accent)' },
+    { label: t('stats.averageScore'), value: stats.averageScore, color: getScoreColor(stats.averageScore) },
+    { label: t('stats.levels'), value: Object.keys(stats.byLevel).length, color: ACCENT.srs },
+  ] : [];
+
   const handleSelect = (targetId: string) => {
     if (quotaExhausted) {
       setUpgradeOpen(true);
@@ -69,44 +77,42 @@ export default function PronunciationPage() {
   return (
     <div className="min-h-screen" style={{ backgroundColor: 'var(--theme-bg-primary)' }}>
       <div className="max-w-360 mx-auto px-4 py-6">
-        {/* Header */}
-        <div className="mb-6">
-          <Link href="/practice-test" className="text-xs mb-2 inline-flex items-center gap-1"
-            style={{ color: 'var(--theme-text-muted)' }}>
-            {t('back')}
-          </Link>
-          <div className="flex items-start justify-between gap-4 flex-wrap">
-            <div>
-              <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-2"
-                style={{ color: 'var(--theme-text-primary)' }}>
-                <span>🎙️</span> {t('title')}
-                {quota && (
-                  <span className="px-2 py-0.5 rounded-md text-caption font-bold"
-                    style={{
-                      backgroundColor: quotaExhausted ? `${STATUS.danger}1A` : `${STATUS.success}1A`,
-                      color: quotaExhausted ? STATUS.danger : STATUS.success,
-                    }}>
-                    {t('quotaLabel', { used: quota.used, limit: quota.limit })}
-                  </span>
-                )}
-              </h1>
-              <p className="text-sm mt-1" style={{ color: 'var(--theme-text-muted)' }}>
-                {t('subtitle')}
-              </p>
-            </div>
+        {/* Header — v2 eyebrow + MiniStats */}
+        <header className="mb-6 flex items-end justify-between gap-5 flex-wrap">
+          <div>
+            <Link href="/practice-test" className="text-caption mb-1.5 inline-flex items-center gap-1"
+              style={{ color: 'var(--theme-text-muted)' }}>
+              {t('back')}
+            </Link>
+            <h1 className="font-bold flex items-center gap-2" style={{ fontSize: 30, letterSpacing: '-.02em', color: 'var(--theme-text-primary)' }}>
+              {t('title')}
+              {quota && (
+                <span className="px-2 py-0.5 rounded-md text-caption font-bold"
+                  style={{
+                    backgroundColor: quotaExhausted ? `${STATUS.danger}1A` : `${STATUS.success}1A`,
+                    color: quotaExhausted ? STATUS.danger : STATUS.success,
+                  }}>
+                  {t('quotaLabel', { used: quota.used, limit: quota.limit })}
+                </span>
+              )}
+            </h1>
+            <p className="mt-1.5 text-body" style={{ color: 'var(--theme-text-secondary)' }}>
+              {t('subtitle')}
+            </p>
           </div>
-        </div>
+          {statItems.length > 0 && <MiniStats stats={statItems} />}
+        </header>
 
         {/* Phoneme drills CTA */}
         <Link href="/practice-test/pronunciation/drills"
           className="block mb-6 rounded-2xl border p-4 transition-all hover:-translate-y-0.5 hover:shadow-md"
           style={{
-            borderColor: `${ACCENT.examWriting}40`,
-            background: `linear-gradient(135deg, ${ACCENT.listening}0F, ${ACCENT.examWriting}0F)`,
+            borderColor: 'color-mix(in srgb, var(--accent) 25%, transparent)',
+            background: 'color-mix(in srgb, var(--accent) 6%, transparent)',
           }}>
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white shrink-0"
-              style={{ background: GRADIENT.pronunciation }}>
+              style={{ background: 'var(--accent)' }}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="10" />
                 <path d="m8 12 2 2 4-4" />
@@ -121,55 +127,20 @@ export default function PronunciationPage() {
               </p>
             </div>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
-              strokeLinecap="round" strokeLinejoin="round" style={{ color: ACCENT.examWriting, flexShrink: 0 }}>
+              strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--accent)', flexShrink: 0 }}>
               <polyline points="9 18 15 12 9 6" />
             </svg>
           </div>
         </Link>
 
-        {/* Stats */}
-        {stats && stats.totalAttempts > 0 && (
-          <div className="grid grid-cols-3 gap-3 mb-6">
-            <div className="rounded-xl border p-3 text-center"
-              style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
-              <div className="text-xl font-bold" style={{ color: ACCENT.writing }}>
-                {stats.totalAttempts}
-              </div>
-              <div className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>{t('stats.totalAttempts')}</div>
-            </div>
-            <div className="rounded-xl border p-3 text-center"
-              style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
-              <div className="text-xl font-bold" style={{ color: getScoreColor(stats.averageScore) }}>
-                {stats.averageScore}
-              </div>
-              <div className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>{t('stats.averageScore')}</div>
-            </div>
-            <div className="rounded-xl border p-3 text-center"
-              style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
-              <div className="text-xl font-bold" style={{ color: ACCENT.examWriting }}>
-                {Object.keys(stats.byLevel).length}
-              </div>
-              <div className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>{t('stats.levels')}</div>
-            </div>
-          </div>
-        )}
-
         {/* Level filter */}
-        <div className="flex gap-2 mb-5 overflow-x-auto">
-          {LEVELS.map((lv) => {
-            const active = levelFilter === lv;
-            return (
-              <button key={lv} type="button" onClick={() => setLevelFilter(lv)}
-                className="px-4 py-1.5 rounded-full text-xs font-semibold shrink-0 transition-all"
-                style={{
-                  background: active ? GRADIENT.pronunciation : 'var(--theme-bg-card)',
-                  color: active ? 'white' : 'var(--theme-text-secondary)',
-                  border: `1px solid ${active ? 'transparent' : 'var(--theme-border)'}`,
-                }}>
-                {lv === 'all' ? t('allLevels') : lv}
-              </button>
-            );
-          })}
+        <div className="flex gap-1.5 mb-5 overflow-x-auto">
+          {LEVELS.map((lv) => (
+            <FilterChip key={lv} active={levelFilter === lv} size="sm" onClick={() => setLevelFilter(lv)}>
+              {lv !== 'all' && <span className="w-1.5 h-1.5 rounded-full" style={{ background: LEVEL_COLORS[lv] ?? 'var(--accent)' }} />}
+              <span className={lv === 'all' ? '' : 'mono'}>{lv === 'all' ? t('allLevels') : lv}</span>
+            </FilterChip>
+          ))}
         </div>
 
         {/* Targets grouped by category */}
@@ -189,13 +160,13 @@ export default function PronunciationPage() {
                 </h3>
                 <div className="space-y-1.5">
                   {g.items.map((target) => {
-                    const lColor = LEVEL_COLORS[target.level] ?? ACCENT.writing;
+                    const lColor = LEVEL_COLORS[target.level] ?? 'var(--accent)';
                     return (
                       <button key={target.id} type="button" onClick={() => handleSelect(target.id)}
-                        className="w-full text-left rounded-xl border p-3 flex items-center gap-3 transition-all hover:-translate-y-0.5 hover:shadow-sm"
-                        style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
-                        <span className="px-1.5 py-0.5 rounded text-[9px] font-bold shrink-0"
-                          style={{ backgroundColor: `${lColor}1a`, color: lColor }}>
+                        className="word-card-v2 w-full text-left rounded-[13px] border p-3 flex items-center gap-3"
+                        style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)', ['--card-accent' as string]: lColor } as React.CSSProperties}>
+                        <span className="mono px-1.5 py-0.5 rounded text-[9px] font-bold shrink-0"
+                          style={{ backgroundColor: `color-mix(in srgb, ${lColor} 16%, transparent)`, color: lColor }}>
                           {target.level}
                         </span>
                         <div className="flex-1 min-w-0">

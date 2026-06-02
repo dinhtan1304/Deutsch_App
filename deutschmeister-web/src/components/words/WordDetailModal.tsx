@@ -116,21 +116,21 @@ export function WordDetailModal({
         role="dialog"
         aria-modal="true"
         aria-label={t('detailAria', { word: word?.word ?? '' })}
-        className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-3xl shadow-2xl"
+        className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl shadow-xl"
         style={{ backgroundColor: 'var(--theme-bg-card)', animation: 'modalIn 0.3s ease-out' }}
         onClick={e => e.stopPropagation()}
       >
         {/* ─── Header ─── */}
         <div className="relative p-6 pb-8 text-white overflow-hidden" style={{ background: gs.gradient }}>
-          <div className="absolute -top-12 -right-12 w-40 h-40 rounded-full bg-white/10" />
-          <div className="absolute -bottom-8 -left-8 w-28 h-28 rounded-full bg-white/5" />
+          <div className="absolute -top-12 -right-12 w-40 h-40 rounded-[2rem] bg-white/10" />
+          <div className="absolute -bottom-8 -left-8 w-28 h-28 rounded-[2rem] bg-white/5" />
 
           {/* Top actions */}
           <div className="relative flex items-center justify-between mb-6">
             {onFavoriteToggle ? (
               <button
                 onClick={() => onFavoriteToggle(word.id)}
-                className="w-10 h-10 rounded-xl flex items-center justify-center bg-white/15 hover:bg-white/25 transition-all"
+                className="w-10 h-10 rounded-[10px] flex items-center justify-center bg-white/15 hover:bg-white/25 transition-all"
                 title={isFavorite ? t('removeFavorite') : t('addFavorite')}>
                 <IconStar size={20} style={isFavorite ? { fill: ACCENT.xp, color: ACCENT.xp } : { color: 'white' }} />
               </button>
@@ -149,7 +149,7 @@ export function WordDetailModal({
               <span className="text-3xl md:text-4xl font-bold">{word.word}</span>
               <button
                 onClick={() => speak(`${word.article} ${word.word}`)}
-                className={`w-11 h-11 rounded-xl flex items-center justify-center bg-white/15 hover:bg-white/25 transition-all ${isSpeaking ? 'animate-pulse' : ''}`}
+                className={`w-11 h-11 rounded-[10px] flex items-center justify-center bg-white/15 hover:bg-white/25 transition-all ${isSpeaking ? 'animate-pulse' : ''}`}
                 disabled={isSpeaking}>
                 <IconVolume size={20} />
               </button>
@@ -168,7 +168,7 @@ export function WordDetailModal({
             {/* Badges */}
             <div className="flex justify-center gap-2 mt-4 flex-wrap">
               {[genderInfo.label, word.level, word.category].map((badge, i) => (
-                <span key={i} className="px-3 py-1 rounded-lg text-xs font-medium bg-white/15 backdrop-blur-sm">
+                <span key={i} className="px-3 py-1 rounded-md text-xs font-medium bg-white/15 backdrop-blur-sm">
                   {badge}
                 </span>
               ))}
@@ -183,7 +183,7 @@ export function WordDetailModal({
 
           {/* Image */}
           {word.imageUrl && !imageError && (
-            <div className="rounded-xl overflow-hidden shadow-md">
+            <div className="rounded-lg overflow-hidden shadow-md">
               <Image src={word.imageUrl} alt={word.word}
                 className="w-full h-48 object-cover"
                 onError={() => setImageErrorWordId(word.id)} />
@@ -194,16 +194,16 @@ export function WordDetailModal({
           <div>
             <h3 className="text-caption font-bold uppercase tracking-wider mb-3 flex items-center gap-2"
               style={{ color: gs.text }}>
-              <span className="w-6 h-6 rounded-md flex items-center justify-center shrink-0"
+              <span className="w-6 h-6 rounded-[7px] flex items-center justify-center shrink-0"
                 style={{ backgroundColor: gs.bg }}>
                 <IconBookOpen size={13} style={{ color: gs.text }} />
               </span>
               {t('meaning')}
             </h3>
             <div className="space-y-2">
-              <div className="flex items-center gap-3 p-3 rounded-xl"
+              <div className="flex items-center gap-3 p-3 rounded-md"
                 style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
-                <span className="text-caption font-bold px-2 py-0.5 rounded-md shrink-0"
+                <span className="text-caption font-bold px-2 py-0.5 rounded-sm shrink-0"
                   style={{ backgroundColor: gs.bg, color: gs.text }}>EN</span>
                 <span className="text-[15px]" style={{ color: 'var(--theme-text-primary)' }}>
                   {word.translationEn}
@@ -212,7 +212,7 @@ export function WordDetailModal({
               {settings.showVietnamese && word.translationVi && (
                 <div className="flex items-center gap-3 p-3 rounded-xl"
                   style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
-                  <span className="text-caption font-bold px-2 py-0.5 rounded-md shrink-0"
+                  <span className="text-caption font-bold px-2 py-0.5 rounded-sm shrink-0"
                     style={{ backgroundColor: `${STATUS.danger}14`, color: STATUS.danger }}>VN</span>
                   <span className="text-[15px]" style={{ color: 'var(--theme-text-primary)' }}>
                     {word.translationVi}
@@ -227,7 +227,7 @@ export function WordDetailModal({
             <div>
               <h3 className="text-caption font-bold uppercase tracking-wider mb-3 flex items-center gap-2"
                 style={{ color: gs.text }}>
-                <span className="w-6 h-6 rounded-md flex items-center justify-center shrink-0"
+                <span className="w-6 h-6 rounded-[7px] flex items-center justify-center shrink-0"
                   style={{ backgroundColor: gs.bg }}>
                   <IconVolume size={13} style={{ color: gs.text }} />
                 </span>
@@ -235,14 +235,14 @@ export function WordDetailModal({
               </h3>
               <div className="space-y-2">
                 {word.examples.map((example, i) => (
-                  <div key={i} className="p-3 rounded-xl"
+                  <div key={i} className="p-3 rounded-md"
                     style={{ backgroundColor: gs.light, borderLeft: `3px solid ${gs.text}` }}>
                     <div className="flex items-start justify-between gap-2">
                       <p className="italic flex-1 text-sm" style={{ color: 'var(--theme-text-primary)' }}>
                         {'„'}{example}{'"'}
                       </p>
                       <button onClick={() => speak(example)}
-                        className="shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-all hover:scale-110"
+                        className="shrink-0 w-8 h-8 rounded-md flex items-center justify-center transition-transform active:scale-95"
                         style={{ backgroundColor: gs.bg, color: gs.text }}>
                         <IconVolume size={14} />
                       </button>
@@ -258,7 +258,7 @@ export function WordDetailModal({
             <div>
               <h3 className="text-caption font-bold uppercase tracking-wider mb-3 flex items-center gap-2"
                 style={{ color: ACCENT.xp }}>
-                <span className="w-6 h-6 rounded-md flex items-center justify-center shrink-0"
+                <span className="w-6 h-6 rounded-[7px] flex items-center justify-center shrink-0"
                   style={{ backgroundColor: `${ACCENT.xp}1a` }}>
                   <IconLightbulb size={13} style={{ color: ACCENT.xp }} />
                 </span>
@@ -266,7 +266,7 @@ export function WordDetailModal({
               </h3>
               <div className="space-y-2">
                 {word.tips.map((tip, i) => (
-                  <div key={i} className="p-3 rounded-xl"
+                  <div key={i} className="p-3 rounded-md"
                     style={{ backgroundColor: `${ACCENT.xp}0f`, borderLeft: `3px solid ${ACCENT.xp}` }}>
                     <p className="text-sm" style={{ color: 'var(--theme-text-primary)' }}>{tip}</p>
                   </div>
@@ -281,7 +281,7 @@ export function WordDetailModal({
           <button
             onClick={(isAdded && !pendingWordId) ? undefined : handleAddToWordBank}
             disabled={(isAdded && !pendingWordId) || isAdding}
-            className="w-full py-2.5 rounded-xl font-semibold text-sm border-2 transition-all duration-200 flex items-center justify-center gap-2"
+            className="w-full py-2.5 rounded-md font-semibold text-sm border transition-colors duration-200 flex items-center justify-center gap-2"
             style={(isAdded && !pendingWordId)
               ? { borderColor: 'var(--theme-border)', color: 'var(--theme-text-muted)', cursor: 'default', backgroundColor: 'var(--theme-bg-secondary)' }
               : { borderColor: gs.text, color: gs.text, backgroundColor: 'transparent' }
@@ -299,7 +299,7 @@ export function WordDetailModal({
           )}
           <button
             onClick={onClose}
-            className="w-full py-3 rounded-xl font-semibold text-white text-sm transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0"
+            className="w-full py-3 rounded-md font-semibold text-white text-sm transition-transform duration-200 hover:-translate-y-0.5 active:translate-y-0"
             style={{ background: gs.gradient }}>
             {t('close')}
           </button>

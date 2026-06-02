@@ -8,6 +8,8 @@ export interface LeaderboardEntry {
   xp: number;
   level: number;
   levelName: string;
+  /** Rank change vs previous period: positive = moved up, negative = dropped, null = no prior data. */
+  rankDelta: number | null;
 }
 
 export const getLeaderboard = (period: 'weekly' | 'monthly' | 'all-time' = 'weekly', limit = 20) =>

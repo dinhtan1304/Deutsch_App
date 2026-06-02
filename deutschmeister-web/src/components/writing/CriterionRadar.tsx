@@ -25,6 +25,12 @@ export function CriterionRadar({ scores, size = 260 }: CriterionRadarProps) {
   const cx = size / 2;
   const cy = size / 2;
   const radius = size * 0.38;
+  // Labels sit at radius+28 from center, which lands at/just past the size×size
+  // box edges — so the side (E/W) and top labels get clipped. Pad the viewBox on
+  // every side and render at the padded size; `max-w-full h-auto` keeps it
+  // responsive so it never overflows a narrow container.
+  const pad = 34;
+  const dim = size + pad * 2;
   // 4 axes at N, E, S, W
   const angles = [-Math.PI / 2, 0, Math.PI / 2, Math.PI];
 
@@ -46,7 +52,7 @@ export function CriterionRadar({ scores, size = 260 }: CriterionRadarProps) {
 
   return (
     <div className="flex flex-col items-center gap-3">
-      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+      <svg width={dim} height={dim} viewBox={`${-pad} ${-pad} ${dim} ${dim}`} className="max-w-full h-auto">
         {/* Grid polygons (25, 50, 75, 100) */}
         {[0.25, 0.5, 0.75, 1].map((factor) => {
           const points = AXES.map((_, i) => {

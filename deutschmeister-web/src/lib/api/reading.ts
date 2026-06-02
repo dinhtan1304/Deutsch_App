@@ -119,6 +119,8 @@ export interface CreateReadingDto {
   topic: string;
   textType: string;
   questionCount: number;
+  /** Reading length: short ~150 / medium ~350 / long ~600 words. Defaults to medium. */
+  length?: 'short' | 'medium' | 'long';
 }
 
 // ── Helpers ──

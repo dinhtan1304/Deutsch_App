@@ -98,22 +98,22 @@ export function RecentActivityFeed({ data, initialCount = 2 }: RecentActivityFee
 
   return (
     <div
-      className="p-5 rounded-card border shadow-card"
+      className="p-5 rounded-2xl border"
       style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}
     >
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg flex items-center justify-center"
-            style={{ background: `linear-gradient(135deg, ${ACCENT.vocab}26, ${ACCENT.examWriting}1A)` }}>
-            <IconClock size={15} style={{ color: ACCENT.vocab }} />
+          <div className="w-7 h-7 rounded-md flex items-center justify-center"
+            style={{ background: 'color-mix(in srgb, var(--accent) 14%, transparent)' }}>
+            <IconClock size={15} style={{ color: 'var(--accent)' }} />
           </div>
-          <h3 className="text-title font-bold" style={{ color: 'var(--theme-text-primary)' }}>
+          <h3 className="text-lead font-semibold" style={{ color: 'var(--theme-text-primary)' }}>
             {t('title')}
           </h3>
         </div>
         {data.length > 0 && (
-          <span className="text-caption font-semibold px-2 py-0.5 rounded-full"
+          <span className="text-caption font-semibold px-2 py-0.5 rounded-md"
             style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }}>
             {data.length}
           </span>
@@ -143,16 +143,15 @@ export function RecentActivityFeed({ data, initialCount = 2 }: RecentActivityFee
               return (
                 <div
                   key={i}
-                  className="flex items-start gap-3 p-3 rounded-xl transition-all duration-200
-                    hover:bg-(--theme-bg-secondary) group"
+                  className="flex items-start gap-3 p-3 rounded-xl transition-colors
+                    hover:bg-(--theme-bg-secondary)"
                 >
                   {/* Icon */}
                   <div
-                    className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0
-                      transition-transform duration-200 group-hover:scale-110"
-                    style={{ background: config.gradient }}
+                    className="w-8 h-8 rounded-md flex items-center justify-center shrink-0"
+                    style={{ background: `color-mix(in srgb, ${config.accent} 16%, transparent)` }}
                   >
-                    <Icon size={15} className="text-white" />
+                    <Icon size={15} style={{ color: config.accent }} />
                   </div>
 
                   {/* Content */}
@@ -167,8 +166,8 @@ export function RecentActivityFeed({ data, initialCount = 2 }: RecentActivityFee
 
                   {/* Badge */}
                   <div
-                    className="px-2 py-0.5 rounded-full text-caption font-semibold shrink-0"
-                    style={{ backgroundColor: `${config.accent}15`, color: config.accent }}
+                    className="px-2 py-0.5 rounded-md text-caption font-semibold shrink-0"
+                    style={{ backgroundColor: `color-mix(in srgb, ${config.accent} 14%, transparent)`, color: config.accent }}
                   >
                     {label}
                   </div>

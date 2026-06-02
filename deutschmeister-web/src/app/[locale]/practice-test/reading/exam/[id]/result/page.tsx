@@ -79,16 +79,16 @@ function QuestionReview({ teil, details }: { teil: ExamReadingTeil; details: Tei
               {teil.texts.map(text => (
                 <div key={text.id}>
                   {(text.label || text.title) && (
-                    <div className="flex items-center gap-2 mb-1">
+                    <div className="flex items-center gap-2 mb-1 flex-wrap">
                       {text.label && (
-                        <span className="w-6 h-6 rounded-lg flex items-center justify-center text-caption font-extrabold text-white"
+                        <span className="shrink-0 inline-flex min-w-6 items-center justify-center rounded-md px-1.5 py-0.5 text-caption font-extrabold text-white"
                           style={{ background: GRADIENT.reading }}>{text.label}</span>
                       )}
-                      {text.title && <p className="text-xs font-bold" style={{ color: 'var(--theme-text-primary)' }}>{text.title}</p>}
+                      {text.title && <p className="min-w-0 text-xs font-bold" style={{ color: 'var(--theme-text-primary)' }}>{text.title}</p>}
                     </div>
                   )}
                   <p className="text-xs leading-relaxed whitespace-pre-wrap"
-                    style={{ color: 'var(--theme-text-primary)', fontFamily: 'Georgia, serif' }}>
+                    style={{ color: 'var(--theme-text-primary)' }}>
                     {text.content}
                   </p>
                 </div>
@@ -113,7 +113,7 @@ function QuestionReview({ teil, details }: { teil: ExamReadingTeil; details: Tei
               style={{ backgroundColor: isCorrect ? `${STATUS.success}0A` : `${STATUS.danger}0A` }}
               onClick={() => setExpandedQ(expanded ? null : q.id)}
             >
-              <div className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 text-white text-caption"
+              <div className="w-6 h-6 rounded-[8px] flex items-center justify-center shrink-0 text-white text-caption"
                 style={{ background: isCorrect ? STATUS.success : STATUS.danger }}>
                 {isCorrect ? <IconCheck size={11} /> : <IconX size={11} />}
               </div>
@@ -150,9 +150,9 @@ function QuestionReview({ teil, details }: { teil: ExamReadingTeil; details: Tei
                       if (isCorrectOpt)           { border = STATUS.success; bg = `${STATUS.success}14`; color = STATUS.success; }
                       if (isUser && !isCorrectOpt) { border = STATUS.danger;  bg = `${STATUS.danger}14`;  color = STATUS.danger; }
                       return (
-                        <div key={opt.id} className="flex items-center gap-2 px-3 py-2.5 rounded-xl border text-xs"
+                        <div key={opt.id} className="flex items-center gap-2 px-3 py-2.5 rounded-md border text-xs"
                           style={{ borderColor: border, backgroundColor: bg, color }}>
-                          <span className="w-5 h-5 rounded-full border flex items-center justify-center text-caption font-bold shrink-0"
+                          <span className="w-5 h-5 rounded-[7px] border flex items-center justify-center text-caption font-bold shrink-0"
                             style={{ borderColor: border, color }}>
                             {LABELS[oi] ?? opt.id.toUpperCase()}
                           </span>
@@ -317,7 +317,7 @@ export default function ExamReadingResultPage() {
                 style={{ backgroundColor: passed ? `${STATUS.success}0A` : `${STATUS.danger}0A` }}
                 onClick={() => setExpandedTeil(isExpanded ? null : teil.number)}
               >
-                <span className="w-8 h-8 rounded-xl flex items-center justify-center text-xs font-extrabold text-white shrink-0"
+                <span className="w-8 h-8 rounded-[10px] flex items-center justify-center text-xs font-extrabold text-white shrink-0"
                   style={{ background: GRADIENT.reading }}>{teil.number}</span>
                 <div className="flex-1 min-w-0">
                   <p className="text-body font-semibold" style={{ color: 'var(--theme-text-primary)' }}>
@@ -339,7 +339,7 @@ export default function ExamReadingResultPage() {
                 <div className="px-4 pb-4 border-t" style={{ borderColor: 'var(--theme-border)' }}>
                   {teil.instruction && (
                     <p className="text-xs italic py-3"
-                      style={{ color: 'var(--theme-text-muted)', fontFamily: 'Georgia, serif' }}>
+                      style={{ color: 'var(--theme-text-muted)' }}>
                       {teil.instruction}
                     </p>
                   )}

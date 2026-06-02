@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import * as DictationHooks from '@/hooks/useDictation';
 import { DictationHistoryItem, dictationApi } from '@/lib/api/dictation';
 import { GridSkeleton } from '@/components/ui';
-import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import { ACCENT, STATUS } from '@/lib/tokens';
 
 // ─── Local Icons ─────────────────────────────────────────────────────────────
 function IconVideo({ size = 20, style }: { size?: number; style?: React.CSSProperties }) {
@@ -113,7 +113,7 @@ function HistoryCard({ item, onDelete }: { item: DictationHistoryItem; onDelete:
             backgroundSize: 'cover', backgroundPosition: 'center',
           }}>
           {!item.video.thumbnailUrl && <span className="text-[44px] opacity-80">🎬</span>}
-          <div className="flex h-11 w-11 items-center justify-center rounded-full text-white" style={{ background: 'rgba(0,0,0,.6)' }}>
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl text-white" style={{ background: 'rgba(0,0,0,.6)' }}>
             <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><path d="M3 2v10l9-5z" /></svg>
           </div>
           {item.video.topic && (
@@ -250,7 +250,7 @@ export default function DictationListPage() {
           <p className="mt-1.5 max-w-xl text-body leading-relaxed" style={{ color: 'var(--theme-text-secondary)' }}>{t('subtitle')}</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <Link href="/practice-test/dictation/library" className="inline-flex h-11 items-center gap-1.5 rounded-[10px] px-4 text-caption font-bold text-white" style={{ background: GRADIENT.dictation }}>
+          <Link href="/practice-test/dictation/library" className="inline-flex h-11 items-center gap-1.5 rounded-[10px] px-4 text-caption font-bold" style={{ background: 'var(--accent)', color: 'var(--accent-on)' }}>
             <IconLibrary size={16} /> {t('newSession')}
           </Link>
           <Link href="/practice-test/dictation/shadow" className="inline-flex h-11 items-center gap-1.5 rounded-[10px] px-4 text-caption font-bold" style={{ background: 'var(--theme-bg-card)', color: 'var(--theme-text-secondary)', border: '1px solid var(--theme-border)' }}>
@@ -350,16 +350,16 @@ export default function DictationListPage() {
 
       {/* Action Banner for Deletion */}
       {confirmDeleteId && (
-        <div className="mb-10 rounded-[2.5rem] border-2 p-8 flex items-center justify-between gap-8 flex-wrap animate-in fade-in slide-in-from-top-4 duration-500"
-          style={{ borderColor: `${STATUS.danger}40`, backgroundColor: `${STATUS.danger}05` }}>
+        <div className="mb-6 rounded-2xl border p-5 flex items-center justify-between gap-6 flex-wrap"
+          style={{ borderColor: `color-mix(in srgb, ${STATUS.danger} 30%, transparent)`, backgroundColor: `color-mix(in srgb, ${STATUS.danger} 6%, transparent)` }}>
           <div>
-            <h4 className="text-xl font-black mb-1.5" style={{ color: 'var(--theme-text-primary)' }}>{tCommon('confirmDelete')}</h4>
-            <p className="text-base opacity-50 font-medium" style={{ color: 'var(--theme-text-primary)' }}>{tCommon('cannotUndo')}</p>
+            <h4 className="text-lead font-bold mb-1" style={{ color: 'var(--theme-text-primary)' }}>{tCommon('confirmDelete')}</h4>
+            <p className="text-body" style={{ color: 'var(--theme-text-muted)' }}>{tCommon('cannotUndo')}</p>
           </div>
-          <div className="flex gap-4">
-            <button onClick={() => setConfirmDeleteId(null)} className="px-6 py-3 rounded-xl text-xs font-black border transition-all hover:bg-white/5"
+          <div className="flex gap-2.5">
+            <button onClick={() => setConfirmDeleteId(null)} className="px-5 py-2.5 rounded-md text-body font-semibold border transition-colors hover:bg-(--theme-bg-secondary)"
               style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)' }}>{tCommon('cancel')}</button>
-            <button onClick={confirmDelete} className="px-6 py-3 rounded-xl text-xs font-black text-white transition-all hover:brightness-110 shadow-xl shadow-red-500/30"
+            <button onClick={confirmDelete} className="px-5 py-2.5 rounded-md text-body font-semibold text-white transition-transform hover:-translate-y-0.5 active:scale-95"
               style={{ backgroundColor: STATUS.danger }}>{tCommon('deletePermanently')}</button>
           </div>
         </div>
@@ -397,14 +397,15 @@ export default function DictationListPage() {
       {isLoading ? (
         <GridSkeleton cols={4} count={8} height="h-72" gap="gap-4" />
       ) : !history?.items.length ? (
-        <div className="text-center py-28 rounded-[3.5rem] border-2 border-dashed" style={{ borderColor: 'var(--theme-border)' }}>
-          <div className="w-24 h-24 rounded-4xl mx-auto flex items-center justify-center mb-8 shadow-2xl" style={{ background: GRADIENT.dictation }}>
-            <IconVideo size={40} style={{ color: 'white' }} />
+        <div className="text-center py-20 rounded-2xl border border-dashed" style={{ borderColor: 'var(--theme-border)' }}>
+          <div className="w-16 h-16 rounded-2xl mx-auto flex items-center justify-center mb-5"
+            style={{ background: 'color-mix(in srgb, var(--accent) 14%, transparent)', color: 'var(--accent)' }}>
+            <IconVideo size={32} />
           </div>
-          <h3 className="text-2xl font-black mb-3" style={{ color: 'var(--theme-text-primary)' }}>{t('emptyTitle')}</h3>
-          <p className="text-base opacity-50 mb-10 max-w-xs mx-auto font-medium">{t('emptySubtitle')}</p>
-          <Link href="/practice-test/dictation/library" className="inline-flex items-center gap-2 px-10 py-5 rounded-2xl text-base font-black text-white shadow-2xl shadow-cyan-500/30 transition-all hover:scale-105 active:scale-95"
-            style={{ background: GRADIENT.dictation }}>{t('emptyCta')}</Link>
+          <h3 className="text-lead font-bold mb-2" style={{ color: 'var(--theme-text-primary)' }}>{t('emptyTitle')}</h3>
+          <p className="text-body mb-6 max-w-xs mx-auto" style={{ color: 'var(--theme-text-muted)' }}>{t('emptySubtitle')}</p>
+          <Link href="/practice-test/dictation/library" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-body font-semibold transition-transform hover:-translate-y-0.5 active:scale-95"
+            style={{ background: 'var(--accent)', color: 'var(--accent-on)' }}>{t('emptyCta')}</Link>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -416,18 +417,18 @@ export default function DictationListPage() {
 
       {/* Pagination Controls */}
       {history && history.totalPages > 1 && (
-        <div className="flex items-center justify-center gap-4 mt-16">
+        <div className="flex items-center justify-center gap-3 mt-12">
           <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
-            className="flex items-center gap-2 px-6 py-3 rounded-xl text-xs font-black disabled:opacity-30 transition-all hover:bg-black/3 dark:hover:bg-white/5 border border-transparent hover:border-cyan-500/20"
-            style={{ backgroundColor: 'var(--theme-bg-card)', color: 'var(--theme-text-primary)', boxShadow: '0 8px 20px rgba(0,0,0,0.05)' }}>
+            className="flex items-center gap-2 px-5 py-2.5 rounded-md text-body font-semibold disabled:opacity-30 border transition-colors hover:bg-(--theme-bg-secondary)"
+            style={{ backgroundColor: 'var(--theme-bg-card)', color: 'var(--theme-text-primary)', borderColor: 'var(--theme-border)' }}>
             <IconChevronLeft size={18} /> {tCommon('previous')}
           </button>
-          <div className="px-8 py-3 rounded-xl bg-black/3 dark:bg-white/5 text-xs font-black tracking-widest" style={{ color: 'var(--theme-text-primary)' }}>
+          <div className="px-5 py-2.5 rounded-md text-body font-semibold mono" style={{ background: 'var(--theme-bg-secondary)', color: 'var(--theme-text-primary)' }}>
             {page} / {history.totalPages}
           </div>
           <button onClick={() => setPage(p => Math.min(history.totalPages, p + 1))} disabled={page === history.totalPages}
-            className="flex items-center gap-2 px-6 py-3 rounded-xl text-xs font-black disabled:opacity-30 transition-all hover:bg-black/3 dark:hover:bg-white/5 border border-transparent hover:border-cyan-500/20"
-            style={{ backgroundColor: 'var(--theme-bg-card)', color: 'var(--theme-text-primary)', boxShadow: '0 8px 20px rgba(0,0,0,0.05)' }}>
+            className="flex items-center gap-2 px-5 py-2.5 rounded-md text-body font-semibold disabled:opacity-30 border transition-colors hover:bg-(--theme-bg-secondary)"
+            style={{ backgroundColor: 'var(--theme-bg-card)', color: 'var(--theme-text-primary)', borderColor: 'var(--theme-border)' }}>
             {tCommon('next')} <IconChevronRight size={18} />
           </button>
         </div>

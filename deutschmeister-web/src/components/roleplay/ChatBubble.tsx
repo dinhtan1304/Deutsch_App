@@ -1,5 +1,4 @@
 ﻿'use client';
-/* eslint-disable no-restricted-syntax */
 
 import { useState } from 'react';
 import { ChatMessage } from '@/lib/api/roleplay';
@@ -17,19 +16,17 @@ export function ChatBubble({ message, aiIcon = '🤖' }: Props) {
     <div className={`flex gap-2 ${isUser ? 'justify-end' : 'justify-start'}`}>
       {!isUser && (
         <div
-          className="w-8 h-8 rounded-full flex items-center justify-center text-lg shrink-0"
-          style={{ background: 'rgba(99, 102, 241, 0.15)' }}
+          className="w-8 h-8 rounded-[10px] flex items-center justify-center text-lg shrink-0"
+          style={{ background: 'color-mix(in srgb, var(--accent) 14%, transparent)', border: '1px solid color-mix(in srgb, var(--accent) 28%, transparent)' }}
         >
           {aiIcon}
         </div>
       )}
       <div
-        className={`max-w-[78%] rounded-2xl px-4 py-2.5 ${isUser ? 'rounded-tr-md' : 'rounded-tl-md'}`}
+        className={`max-w-[78%] rounded-[13px] px-4 py-2.5 ${isUser ? 'rounded-tr-md' : 'rounded-tl-md'}`}
         style={{
-          background: isUser
-            ? 'linear-gradient(135deg, #6366F1, #8B5CF6)'
-            : 'var(--theme-bg-card)',
-          color: isUser ? 'white' : 'var(--theme-text-primary)',
+          background: isUser ? 'var(--accent)' : 'var(--theme-bg-card)',
+          color: isUser ? 'var(--accent-on)' : 'var(--theme-text-primary)',
           border: isUser ? 'none' : '1px solid var(--theme-border)',
         }}
       >

@@ -32,7 +32,7 @@ export default function MyTopicDetailPage() {
 
   if (isLoading || !topic) {
     return (
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6">
+      <div className="max-w-360 mx-auto px-4 sm:px-6 py-6">
         <Card className="h-32 animate-pulse opacity-60" />
       </div>
     );
@@ -58,7 +58,7 @@ export default function MyTopicDetailPage() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6">
+    <div className="max-w-360 mx-auto px-4 sm:px-6 py-6">
       <PageHeader
         backHref="/my-topics"
         hideBackIcon

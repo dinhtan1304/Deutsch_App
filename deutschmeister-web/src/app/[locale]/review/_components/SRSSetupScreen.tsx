@@ -2,7 +2,6 @@
 
 import { useTranslations } from 'next-intl';
 import { IconBrain, IconBookOpen, IconTarget, IconFlame, IconChevronLeft, IconPlus } from '@/components/ui/Icons';
-import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 
 type ProgressStats = { total: number; mastered: number; learning: number; due: number; new: number };
 
@@ -35,11 +34,12 @@ function IconZap({ size = 16 }: { size?: number }) {
   );
 }
 
+// Calm v2 palette routed through CSS vars (same set the immersive review screen uses).
 const QUIZ_MODES: { key: QuizMode; labelKey: 'modeGender' | 'modeDeVi' | 'modeViDe' | 'modeMixed'; descKey: 'modeGenderDesc' | 'modeDeViDesc' | 'modeViDeDesc' | 'modeMixedDesc'; icon: React.ComponentType<{ size?: number; style?: React.CSSProperties }>; color: string }[] = [
-  { key: 'gender', labelKey: 'modeGender', descKey: 'modeGenderDesc', icon: IconTarget,    color: ACCENT.srs },
-  { key: 'de-vi',  labelKey: 'modeDeVi',   descKey: 'modeDeViDesc',   icon: IconLanguages, color: ACCENT.vocab },
-  { key: 'vi-de',  labelKey: 'modeViDe',   descKey: 'modeViDeDesc',   icon: IconBookOpen,  color: ACCENT.xp },
-  { key: 'mixed',  labelKey: 'modeMixed',  descKey: 'modeMixedDesc',  icon: IconShuffle,   color: STATUS.success },
+  { key: 'gender', labelKey: 'modeGender', descKey: 'modeGenderDesc', icon: IconTarget,    color: 'var(--der)' },
+  { key: 'de-vi',  labelKey: 'modeDeVi',   descKey: 'modeDeViDesc',   icon: IconLanguages, color: 'var(--violet)' },
+  { key: 'vi-de',  labelKey: 'modeViDe',   descKey: 'modeViDeDesc',   icon: IconBookOpen,  color: 'var(--warn)' },
+  { key: 'mixed',  labelKey: 'modeMixed',  descKey: 'modeMixedDesc',  icon: IconShuffle,   color: 'var(--success)' },
 ];
 
 interface SRSSetupScreenProps {
@@ -54,19 +54,19 @@ interface SRSSetupScreenProps {
 export function SRSSetupScreen({ stats, quizMode, onSetMode, onStart, onBack, onAddWords }: SRSSetupScreenProps) {
   const t = useTranslations('progress.review');
   const statItems = [
-    { label: t('setupStatDue'), value: stats?.due ?? 0,      icon: IconFlame,    color: STATUS.danger,   bg: `linear-gradient(135deg, ${STATUS.danger}1F, ${STATUS.danger}0F)` },
-    { label: t('setupStatMastered'), value: stats?.mastered ?? 0, icon: IconTarget,   color: STATUS.success,  bg: `linear-gradient(135deg, ${STATUS.success}1F, ${STATUS.success}0F)` },
-    { label: t('setupStatLearning'), value: stats?.learning ?? 0, icon: IconBookOpen, color: ACCENT.xp,       bg: `linear-gradient(135deg, ${ACCENT.xp}1F, ${ACCENT.xp}0F)` },
-    { label: t('setupStatTotal'),     value: stats?.total ?? 0,    icon: IconBrain,    color: ACCENT.writing,  bg: `linear-gradient(135deg, ${ACCENT.writing}1F, ${ACCENT.writing}0F)` },
+    { label: t('setupStatDue'),      value: stats?.due ?? 0,      icon: IconFlame,    color: 'var(--streak)' },
+    { label: t('setupStatMastered'), value: stats?.mastered ?? 0, icon: IconTarget,   color: 'var(--success)' },
+    { label: t('setupStatLearning'), value: stats?.learning ?? 0, icon: IconBookOpen, color: 'var(--warn)' },
+    { label: t('setupStatTotal'),    value: stats?.total ?? 0,    icon: IconBrain,    color: 'var(--accent)' },
   ];
 
   return (
     <div className="max-w-2xl mx-auto py-12">
       <div className="rounded-3xl p-8 text-center border"
         style={{ backgroundColor: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}>
-        <div className="w-20 h-20 rounded-3xl mx-auto flex items-center justify-center mb-6"
-          style={{ background: `linear-gradient(135deg, ${ACCENT.srs}26, ${ACCENT.writing}1A)` }}>
-          <IconBrain size={36} style={{ color: ACCENT.srs }} />
+        <div className="w-16 h-16 rounded-2xl mx-auto flex items-center justify-center mb-5"
+          style={{ background: 'color-mix(in srgb, var(--accent) 14%, transparent)', border: '1px solid color-mix(in srgb, var(--accent) 25%, transparent)' }}>
+          <IconBrain size={30} style={{ color: 'var(--accent)' }} />
         </div>
         <h1 className="text-2xl font-bold mb-6" style={{ color: 'var(--theme-text-primary)' }}>{t('setupTitle')}</h1>
 
@@ -74,14 +74,14 @@ export function SRSSetupScreen({ stats, quizMode, onSetMode, onStart, onBack, on
           {statItems.map(item => {
             const Ic = item.icon;
             return (
-              <div key={item.label} className="relative overflow-hidden p-4 rounded-2xl" style={{ background: item.bg }}>
-                <div className="absolute -top-4 -right-4 w-14 h-14 rounded-full" style={{ backgroundColor: item.color, opacity: 0.06 }} />
-                <div className="w-7 h-7 rounded-lg flex items-center justify-center mb-2 mx-auto"
-                  style={{ background: `linear-gradient(135deg, ${item.color}, ${item.color}cc)` }}>
-                  <Ic size={14} className="text-white" />
+              <div key={item.label} className="rounded-2xl border p-4 text-center"
+                style={{ background: 'var(--theme-bg-tertiary)', borderColor: 'var(--theme-border)' }}>
+                <div className="w-9 h-9 rounded-xl flex items-center justify-center mb-2 mx-auto"
+                  style={{ background: `color-mix(in srgb, ${item.color} 15%, transparent)`, color: item.color }}>
+                  <Ic size={16} />
                 </div>
-                <div className="text-2xl font-extrabold" style={{ color: item.color }}>{item.value}</div>
-                <div className="text-caption font-medium" style={{ color: 'var(--theme-text-muted)' }}>{item.label}</div>
+                <div className="mono text-2xl font-bold leading-none" style={{ color: item.color }}>{item.value}</div>
+                <div className="text-caption font-medium mt-1.5" style={{ color: 'var(--theme-text-muted)' }}>{item.label}</div>
               </div>
             );
           })}
@@ -90,39 +90,39 @@ export function SRSSetupScreen({ stats, quizMode, onSetMode, onStart, onBack, on
         {(stats?.due ?? 0) > 0 ? (
           <>
             <p className="text-body font-semibold mb-3" style={{ color: 'var(--theme-text-secondary)' }}>{t('chooseMode')}</p>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-6 max-w-md mx-auto">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mb-6 max-w-md mx-auto">
               {QUIZ_MODES.map(mode => {
                 const active = quizMode === mode.key;
                 const Ic = mode.icon;
                 return (
                   <button key={mode.key} onClick={() => onSetMode(mode.key)}
-                    className="p-3 rounded-xl transition-all duration-200 hover:-translate-y-0.5 border-2"
-                    style={{ borderColor: active ? mode.color : 'var(--theme-border)', backgroundColor: active ? `${mode.color}10` : 'transparent' }}>
+                    data-active={active}
+                    style={{ ['--mode' as string]: mode.color } as React.CSSProperties}
+                    className="v2-mode-card p-3 rounded-xl border-[1.5px]">
                     <div className="w-8 h-8 rounded-lg flex items-center justify-center mx-auto mb-1.5"
-                      style={{ background: active ? `linear-gradient(135deg, ${mode.color}, ${mode.color}cc)` : 'var(--theme-bg-secondary)' }}>
-                      <Ic size={16} style={{ color: active ? 'white' : 'var(--theme-text-muted)' }} />
+                      style={{ background: active ? `color-mix(in srgb, ${mode.color} 18%, transparent)` : 'var(--theme-bg-tertiary)' }}>
+                      <Ic size={16} style={{ color: active ? mode.color : 'var(--theme-text-muted)' }} />
                     </div>
-                    <div className="text-xs font-bold" style={{ color: active ? mode.color : 'var(--theme-text-secondary)' }}>{t(mode.labelKey)}</div>
-                    <div className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>{t(mode.descKey)}</div>
+                    <div className="text-[13px] font-bold" style={{ color: active ? mode.color : 'var(--theme-text-secondary)' }}>{t(mode.labelKey)}</div>
+                    <div className="text-[10.5px] leading-tight mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>{t(mode.descKey)}</div>
                   </button>
                 );
               })}
             </div>
             <p className="text-sm mb-6" style={{ color: 'var(--theme-text-secondary)' }}>
-              {t.rich('dueCountMessage', { count: stats?.due ?? 0, b: (chunks) => <span className="font-bold" style={{ color: ACCENT.srs }}>{chunks}</span> })}
+              {t.rich('dueCountMessage', { count: stats?.due ?? 0, b: (chunks) => <span className="font-bold" style={{ color: 'var(--accent)' }}>{chunks}</span> })}
             </p>
             <button onClick={onStart}
-              className="flex items-center gap-2 mx-auto px-8 py-3 rounded-xl font-semibold text-[15px] text-white transition-all hover:shadow-lg hover:-translate-y-0.5"
-              style={{ background: GRADIENT.action }}>
+              className="flex items-center gap-2.5 mx-auto px-8 h-12 rounded-[14px] font-bold text-[15px] transition-transform hover:-translate-y-0.5 active:scale-95"
+              style={{ background: 'var(--accent)', color: 'var(--accent-on)', boxShadow: '0 8px 24px color-mix(in srgb, var(--accent) 40%, transparent)' }}>
               <IconZap size={18} /> {t('startReview')}
             </button>
           </>
         ) : (
           <>
-            <p className="text-sm mb-6" style={{ color: STATUS.success }}>{t('allDone')}</p>
+            <p className="text-sm mb-6" style={{ color: 'var(--success)' }}>{t('allDone')}</p>
             <button onClick={onAddWords}
-              className="flex items-center gap-2 mx-auto px-6 py-3 rounded-xl font-semibold text-sm border transition-all hover:-translate-y-0.5"
-              style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)' }}>
+              className="v2-btn-soft flex items-center gap-2 mx-auto px-6 h-11 rounded-md font-semibold text-sm">
               <IconPlus size={16} /> {t('addNewWords')}
             </button>
           </>

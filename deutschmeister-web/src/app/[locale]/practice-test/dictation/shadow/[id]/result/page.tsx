@@ -7,7 +7,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useShadowingSession, useStartShadowing } from '@/hooks/useShadowing';
 import { PageHeader, ScoreRing } from '@/components/ui';
 import { PhraseScoreBadge } from '@/components/shadowing/PhraseScoreBadge';
-import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import { ACCENT, STATUS } from '@/lib/tokens';
 
 type ScoreKey = 'excellent' | 'veryGood' | 'good' | 'needsWork' | 'keepPracticing';
 function getScoreKey(score: number): ScoreKey {
@@ -39,7 +39,7 @@ export default function ShadowingResultPage() {
   if (isLoading) {
     return (
       <div className="flex justify-center items-center min-h-100">
-        <div className="w-10 h-10 border-4 border-green-500/20 border-t-green-500 rounded-full animate-spin" />
+        <div className="w-10 h-10 border-4 rounded-full animate-spin" style={{ borderColor: `${ACCENT.reading}33`, borderTopColor: ACCENT.reading }} />
       </div>
     );
   }
@@ -90,11 +90,10 @@ export default function ShadowingResultPage() {
 
       {/* Hero score */}
       <div
-        className="rounded-3xl border p-8 mb-8 flex flex-col md:flex-row items-center gap-8"
+        className="rounded-2xl border p-6 mb-6 flex flex-col md:flex-row items-center gap-6"
         style={{
           backgroundColor: 'var(--theme-bg-card)',
           borderColor: 'var(--theme-border)',
-          boxShadow: '0 12px 32px rgba(34,197,94,0.08)',
         }}
       >
         <ScoreRing
@@ -107,39 +106,39 @@ export default function ShadowingResultPage() {
         />
         <div className="flex-1 text-center md:text-left">
           <div
-            className="text-[10px] font-black uppercase tracking-widest opacity-50 mb-1"
-            style={{ color: 'var(--theme-text-primary)' }}
+            className="text-caption font-semibold uppercase tracking-wide mb-1"
+            style={{ color: 'var(--theme-text-muted)' }}
           >
             {t('overallLabel')}
           </div>
-          <div className="flex items-center justify-center md:justify-start gap-2 mb-3">
+          <div className="flex items-center justify-center md:justify-start gap-2 mb-2">
             <span className="text-3xl">{meta.emoji}</span>
             <h2
-              className="text-2xl font-black"
+              className="text-h2 font-bold"
               style={{ color: 'var(--theme-text-primary)' }}
             >
               {meta.label}
             </h2>
           </div>
           <p
-            className="text-sm opacity-70 mb-4"
+            className="text-body mb-4"
             style={{ color: 'var(--theme-text-secondary)' }}
           >
             {t('summary', { completed: session.completedSegments, total: session.totalSegments })}
           </p>
-          <div className="flex flex-wrap gap-3 justify-center md:justify-start">
+          <div className="flex flex-wrap gap-2.5 justify-center md:justify-start">
             <button
               type="button"
               onClick={handleRetry}
               disabled={startMut.isPending}
-              className="px-6 py-3 rounded-xl text-sm font-black text-white transition-all hover:brightness-110 active:scale-95 disabled:opacity-60"
-              style={{ background: GRADIENT.reading }}
+              className="px-5 py-2.5 rounded-md text-body font-semibold text-white transition-transform hover:-translate-y-0.5 active:scale-95 disabled:opacity-60"
+              style={{ background: ACCENT.reading }}
             >
               {startMut.isPending ? t('retryPending') : t('retry')}
             </button>
             <Link
               href="/practice-test/dictation/shadow"
-              className="px-6 py-3 rounded-xl text-sm font-black border transition-all hover:bg-black/3 dark:hover:bg-white/5"
+              className="px-5 py-2.5 rounded-md text-body font-semibold border transition-colors hover:bg-(--theme-bg-secondary)"
               style={{
                 borderColor: 'var(--theme-border)',
                 color: 'var(--theme-text-primary)',
@@ -153,28 +152,29 @@ export default function ShadowingResultPage() {
 
       {/* Filter */}
       {weakCount > 0 && (
-        <div className="flex items-center gap-3 mb-6 flex-wrap">
+        <div className="flex items-center gap-2 mb-6 flex-wrap">
           <span
-            className="text-xs font-black uppercase tracking-widest opacity-50"
-            style={{ color: 'var(--theme-text-primary)' }}
+            className="text-caption font-semibold uppercase tracking-wide"
+            style={{ color: 'var(--theme-text-muted)' }}
           >
             {t('filterLabel')}
           </span>
           <button
             type="button"
             onClick={() => setFilterWeak(false)}
-            className="px-4 py-2 rounded-xl text-xs font-black transition-all border"
+            className="px-2.5 py-1 rounded-[7px] text-caption font-semibold transition-colors"
             style={
               !filterWeak
                 ? {
-                    background: GRADIENT.reading,
-                    color: 'white',
-                    borderColor: 'transparent',
+                    background: `color-mix(in srgb, ${ACCENT.reading} 14%, transparent)`,
+                    color: ACCENT.reading,
+                    border: `1px solid ${ACCENT.reading}`,
                   }
                 : {
-                    backgroundColor: 'transparent',
+                    background: 'var(--theme-bg-secondary)',
                     borderColor: 'var(--theme-border)',
-                    color: 'var(--theme-text-muted)',
+                    color: 'var(--theme-text-secondary)',
+                    border: '1px solid var(--theme-border)',
                   }
             }
           >
@@ -183,18 +183,18 @@ export default function ShadowingResultPage() {
           <button
             type="button"
             onClick={() => setFilterWeak(true)}
-            className="px-4 py-2 rounded-xl text-xs font-black transition-all border"
+            className="px-2.5 py-1 rounded-[7px] text-caption font-semibold transition-colors"
             style={
               filterWeak
                 ? {
-                    backgroundColor: STATUS.warning,
-                    color: 'white',
-                    borderColor: 'transparent',
+                    background: `color-mix(in srgb, ${STATUS.warning} 14%, transparent)`,
+                    color: STATUS.warning,
+                    border: `1px solid ${STATUS.warning}`,
                   }
                 : {
-                    backgroundColor: 'transparent',
-                    borderColor: 'var(--theme-border)',
-                    color: 'var(--theme-text-muted)',
+                    background: 'var(--theme-bg-secondary)',
+                    color: 'var(--theme-text-secondary)',
+                    border: '1px solid var(--theme-border)',
                   }
             }
           >
@@ -219,7 +219,7 @@ export default function ShadowingResultPage() {
             >
               <div className="flex items-center gap-3 mb-3 flex-wrap">
                 <span
-                  className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-black"
+                  className="w-7 h-7 rounded-md flex items-center justify-center text-caption font-bold mono"
                   style={{
                     backgroundColor: `${ACCENT.reading}15`,
                     color: ACCENT.reading,
@@ -230,7 +230,7 @@ export default function ShadowingResultPage() {
                 <PhraseScoreBadge score={score} size="sm" />
                 {a.attemptCount > 1 && (
                   <span
-                    className="text-[10px] font-black uppercase tracking-widest opacity-50"
+                    className="text-caption font-semibold uppercase tracking-wide opacity-60"
                     style={{ color: 'var(--theme-text-secondary)' }}
                   >
                     {t('attemptTries', { count: a.attemptCount })}
@@ -273,12 +273,12 @@ export default function ShadowingResultPage() {
 
         {visibleAttempts.length === 0 && (
           <div
-            className="text-center py-12 rounded-2xl border-2 border-dashed"
+            className="text-center py-12 rounded-2xl border border-dashed"
             style={{ borderColor: 'var(--theme-border)' }}
           >
             <p
-              className="text-sm opacity-70"
-              style={{ color: 'var(--theme-text-primary)' }}
+              className="text-body"
+              style={{ color: 'var(--theme-text-muted)' }}
             >
               {t('noFiltered')}
             </p>

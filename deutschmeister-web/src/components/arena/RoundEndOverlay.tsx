@@ -126,7 +126,7 @@ export function RoundEndOverlay({ reveal, myUserId }: RoundEndOverlayProps) {
               type="button"
               aria-label={t('replayPronunciation')}
               onClick={() => speak(wordReveal.word, 'de-DE', { fast: true })}
-              className="ml-1 w-9 h-9 rounded-full flex items-center justify-center transition-transform hover:scale-110"
+              className="ml-1 w-9 h-9 rounded-lg flex items-center justify-center transition-transform hover:scale-110"
               style={{ background: 'rgba(255,255,255,0.2)', color: '#fff' }}
             >
               <IconVolume size={18} />

@@ -1,8 +1,6 @@
 'use client';
-/* eslint-disable no-restricted-syntax */
 
 import { useEffect, useRef, useState } from 'react';
-import { ACCENT } from '@/lib/tokens';
 import { useParams, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
@@ -107,7 +105,7 @@ export default function RoleplayChatPage() {
           <Link
             href="/practice-test/roleplay"
             className="text-sm underline"
-            style={{ color: ACCENT.writing }}
+            style={{ color: 'var(--accent)' }}
           >
             {t('backToList')}
           </Link>
@@ -121,7 +119,7 @@ export default function RoleplayChatPage() {
 
   return (
     <div
-      className="min-h-screen flex flex-col"
+      className="mx-auto flex min-h-screen w-full max-w-360 flex-col"
       style={{ backgroundColor: 'var(--theme-bg-primary)' }}
     >
       {/* Header */}
@@ -129,23 +127,27 @@ export default function RoleplayChatPage() {
         className="border-b px-4 py-3 sticky top-0 z-10 backdrop-blur"
         style={{
           borderColor: 'var(--theme-border)',
-          backgroundColor: 'var(--theme-bg-primary)',
+          backgroundColor: 'color-mix(in srgb, var(--theme-bg-primary) 85%, transparent)',
         }}
       >
         <div className="max-w-3xl mx-auto flex items-center gap-3">
           <button
             type="button"
             onClick={() => router.push('/practice-test/roleplay')}
-            className="w-9 h-9 rounded-full flex items-center justify-center shrink-0"
+            className="w-9 h-9 rounded-[9px] flex items-center justify-center shrink-0 transition-opacity hover:opacity-80"
             style={{
               backgroundColor: 'var(--theme-bg-secondary)',
-              color: 'var(--theme-text-primary)',
+              color: 'var(--theme-text-secondary)',
+              border: '1px solid var(--theme-border)',
             }}
             aria-label={t('backAria')}
           >
-            ←
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
           </button>
-          <div className="text-2xl">{info?.icon ?? '💬'}</div>
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[11px] text-xl"
+            style={{ background: 'color-mix(in srgb, var(--accent) 14%, transparent)', border: '1px solid color-mix(in srgb, var(--accent) 28%, transparent)' }}>
+            {info?.icon ?? '💬'}
+          </div>
           <div className="flex-1 min-w-0">
             <div
               className="text-sm font-bold truncate"
@@ -167,9 +169,9 @@ export default function RoleplayChatPage() {
               disabled={endMut.isPending}
               className="px-3 py-1.5 rounded-lg text-xs font-semibold shrink-0"
               style={{
-                backgroundColor: 'rgba(168, 85, 247, 0.1)',
-                color: ACCENT.examWriting,
-                border: '1px solid rgba(168, 85, 247, 0.3)',
+                backgroundColor: 'color-mix(in srgb, var(--accent) 12%, transparent)',
+                color: 'var(--accent)',
+                border: '1px solid color-mix(in srgb, var(--accent) 30%, transparent)',
               }}
             >
               {endMut.isPending ? t('ending') : t('endButton')}
@@ -183,17 +185,17 @@ export default function RoleplayChatPage() {
         info?.tips &&
         info.tips.length > 0 &&
         !messages.some((m) => m.role === 'user') && (
-          <div
-            className="border-b px-4 py-3"
-            style={{
-              borderColor: 'var(--theme-border)',
-              backgroundColor: 'rgba(99, 102, 241, 0.05)',
-            }}
-          >
-            <div className="max-w-3xl mx-auto">
+          <div className="px-4 pt-4">
+            <div
+              className="max-w-3xl mx-auto rounded-xl border p-3"
+              style={{
+                borderColor: 'color-mix(in srgb, var(--accent) 25%, transparent)',
+                backgroundColor: 'color-mix(in srgb, var(--accent) 6%, transparent)',
+              }}
+            >
               <div
                 className="text-caption font-bold mb-1"
-                style={{ color: ACCENT.writing }}
+                style={{ color: 'var(--accent)' }}
               >
                 {t('tipsHeader')}
               </div>
@@ -224,28 +226,22 @@ export default function RoleplayChatPage() {
           {typing && (
             <div className="flex gap-2">
               <div
-                className="w-8 h-8 rounded-full flex items-center justify-center text-lg shrink-0"
-                style={{ background: 'rgba(99, 102, 241, 0.15)' }}
+                className="w-8 h-8 rounded-[10px] flex items-center justify-center text-lg shrink-0"
+                style={{ background: 'color-mix(in srgb, var(--accent) 14%, transparent)', border: '1px solid color-mix(in srgb, var(--accent) 28%, transparent)' }}
               >
                 🤖
               </div>
               <div
-                className="rounded-2xl rounded-tl-md px-4 py-3 border"
+                className="rounded-[13px] rounded-tl-md px-4 py-3 border"
                 style={{
                   borderColor: 'var(--theme-border)',
                   backgroundColor: 'var(--theme-bg-card)',
                 }}
               >
                 <div className="flex gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-gray-400 animate-bounce" />
-                  <span
-                    className="w-1.5 h-1.5 rounded-full bg-gray-400 animate-bounce"
-                    style={{ animationDelay: '0.15s' }}
-                  />
-                  <span
-                    className="w-1.5 h-1.5 rounded-full bg-gray-400 animate-bounce"
-                    style={{ animationDelay: '0.3s' }}
-                  />
+                  <span className="w-1.5 h-1.5 rounded-full animate-bounce" style={{ background: 'var(--theme-text-muted)' }} />
+                  <span className="w-1.5 h-1.5 rounded-full animate-bounce" style={{ background: 'var(--theme-text-muted)', animationDelay: '0.15s' }} />
+                  <span className="w-1.5 h-1.5 rounded-full animate-bounce" style={{ background: 'var(--theme-text-muted)', animationDelay: '0.3s' }} />
                 </div>
               </div>
             </div>
@@ -258,10 +254,10 @@ export default function RoleplayChatPage() {
               <div className="mt-4 flex gap-2">
                 <Link
                   href="/practice-test/roleplay"
-                  className="flex-1 py-3 rounded-xl text-center text-sm font-semibold"
+                  className="flex-1 py-3 rounded-md text-center text-sm font-semibold"
                   style={{
-                    background: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
-                    color: 'white',
+                    background: 'var(--accent)',
+                    color: 'var(--accent-on)',
                   }}
                 >
                   {t('newScenario')}
@@ -275,10 +271,10 @@ export default function RoleplayChatPage() {
       {/* Input */}
       {isActive && (
         <div
-          className="border-t px-4 py-3 sticky bottom-0"
+          className="border-t px-4 py-3 sticky bottom-0 backdrop-blur"
           style={{
             borderColor: 'var(--theme-border)',
-            backgroundColor: 'var(--theme-bg-primary)',
+            backgroundColor: 'color-mix(in srgb, var(--theme-bg-primary) 85%, transparent)',
           }}
         >
           <div className="max-w-3xl mx-auto">

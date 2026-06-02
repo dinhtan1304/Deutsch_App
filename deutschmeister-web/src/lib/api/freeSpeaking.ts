@@ -26,6 +26,8 @@ export interface FreeSpeakingSession {
   transcript?: string;
   grading?: FreeSpeakingGrading;
   totalScore?: number;
+  /** Absolute URL of the user's recorded answer (served from the API /uploads). */
+  audioUrl?: string;
   status: 'DRAFT' | 'GRADING' | 'GRADED' | 'ERROR';
   submittedAt?: string;
   gradedAt?: string;

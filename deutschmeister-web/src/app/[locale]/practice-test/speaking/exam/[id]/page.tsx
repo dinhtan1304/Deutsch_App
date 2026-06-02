@@ -331,9 +331,9 @@ export default function ExamSpeakingSessionPage() {
           const isCurrent = i === currentTeilIdx;
           return (
             <button key={t.number} onClick={() => setCurrentTeilIdx(i)}
-              className="shrink-0 flex items-center gap-2 px-5 py-2.5 rounded-2xl text-xs font-black transition-all border uppercase tracking-widest"
+              className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-md text-xs font-black transition-all border uppercase tracking-widest"
               style={isCurrent
-                ? { background: GRADIENT.speaking, color: 'white', borderColor: 'transparent', boxShadow: `0 8px 16px ${ACCENT.xp}40` }
+                ? { backgroundColor: `${ACCENT.xp}14`, color: ACCENT.xp, borderColor: ACCENT.xp }
                 : isDone
                   ? { backgroundColor: `${STATUS.success}14`, color: STATUS.success, borderColor: `${STATUS.success}33` }
                   : { backgroundColor: 'var(--theme-bg-card)', color: 'var(--theme-text-muted)', borderColor: 'var(--theme-border)' }}>
@@ -351,7 +351,7 @@ export default function ExamSpeakingSessionPage() {
         <div className="lg:w-1/2 shrink-0 lg:sticky lg:top-20 lg:self-start lg:max-h-[calc(100vh-10rem)] lg:overflow-y-auto lg:pr-1 space-y-6">
           <div className="rounded-3xl border p-6" style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
             <div className="flex items-center gap-2 mb-4">
-               <span className="w-8 h-8 rounded-xl flex items-center justify-center text-xs font-black text-white" style={{ background: GRADIENT.speaking }}>{currentTeil.number}</span>
+               <span className="w-8 h-8 rounded-[10px] flex items-center justify-center text-xs font-black text-white" style={{ background: GRADIENT.speaking }}>{currentTeil.number}</span>
                <h3 className="text-body font-black uppercase tracking-widest" style={{ color: 'var(--theme-text-primary)' }}>{tCommon('anweisungLabel')}</h3>
             </div>
             <p className="text-[15px] font-bold leading-relaxed mb-2" style={{ color: 'var(--theme-text-primary)' }}>
@@ -369,7 +369,7 @@ export default function ExamSpeakingSessionPage() {
               <p className="text-caption font-bold uppercase tracking-wider mb-4 opacity-40">{t('wordCardsLabel')}</p>
               <div className="flex flex-wrap gap-2">
                 {currentTeil.wordCards.map((card, i) => (
-                  <span key={i} className="px-4 py-2 rounded-xl text-body font-bold border-2"
+                  <span key={i} className="px-4 py-2 rounded-md text-body font-bold border-2"
                     style={{ borderColor: `${ACCENT.xp}4D`, backgroundColor: `${ACCENT.xp}0D`, color: ACCENT.xp }}>
                     {card}
                   </span>
@@ -385,7 +385,7 @@ export default function ExamSpeakingSessionPage() {
                 {currentTeil.partnerLines.map((line, i) => (
                   <div key={i} className="flex gap-3">
                     <div className="w-6 h-6 rounded-lg bg-purple-500 flex items-center justify-center shrink-0 text-[10px] font-black text-white">P</div>
-                    <p className="text-[15px] italic leading-relaxed" style={{ color: 'var(--theme-text-primary)', fontFamily: 'Georgia, serif' }}>{line}</p>
+                    <p className="text-[15px] italic leading-relaxed" style={{ color: 'var(--theme-text-primary)' }}>{line}</p>
                   </div>
                 ))}
               </div>
@@ -421,7 +421,7 @@ export default function ExamSpeakingSessionPage() {
                 ) : teilState === 'recording' ? (
                   <CountdownRing seconds={recCountdown} total={currentTeil.speakTimeSeconds} size={64} color={ACCENT.xp} />
                 ) : (
-                  <div className="w-16 h-16 rounded-full border-4 flex items-center justify-center" style={{ borderColor: 'var(--theme-border)' }}>
+                  <div className="w-16 h-16 rounded-[18px] border-4 flex items-center justify-center" style={{ borderColor: 'var(--theme-border)' }}>
                      <IconMic size={24} style={{ color: 'var(--theme-text-muted)' }} />
                   </div>
                 )}

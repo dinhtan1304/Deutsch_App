@@ -6,7 +6,7 @@ import { useTranslations, useFormatter } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { useWritingSession, useSaveDraft, useSubmitWriting } from '@/hooks/useWriting';
 import { IconBookOpen, IconChevronLeft, IconEye, IconEyeOff, IconLoader, IconPenLine, IconSave, IconSend } from '../icons';
-import { FixedActionBar, MobileSplitTabs } from '@/components/ui';
+import { PageHeader, FixedActionBar, MobileSplitTabs } from '@/components/ui';
 import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 import { useUmlautTrigger, UMLAUT_TRIGGER_HINT } from '@/hooks/useUmlautTrigger';
 
@@ -137,46 +137,31 @@ export default function WritingEditorPage() {
 
   return (
       <div className="max-w-360 mx-auto px-4 pb-24">
-        {/* Immersive Header */}
-        <div className="relative -mx-4 px-4 pt-8 pb-12 mb-6 overflow-hidden">
-          <div className="absolute inset-0 opacity-10 pointer-events-none"
-            style={{ background: GRADIENT.writing, maskImage: 'radial-gradient(circle at top right, white, transparent)' }} />
-
-          <div className="relative flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 shadow-lg"
-                style={{ background: GRADIENT.writing }}>
-                <IconPenLine size={28} style={{ color: 'white' }} />
-              </div>
-              <div>
-                <Link href="/practice-test/writing" className="text-xs font-bold uppercase tracking-widest mb-1 block opacity-60 hover:opacity-100 transition-opacity" style={{ color: 'var(--theme-text-primary)' }}>
-                  {t('backShort')}
-                </Link>
-                <h1 className="text-h2 font-black tracking-tight" style={{ color: 'var(--theme-text-primary)' }}>
-                  {session.topic}
-                </h1>
-                <div className="flex items-center gap-2 mt-1">
-                  <span className="px-2 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-widest"
-                    style={{ backgroundColor: `${ACCENT.writing}14`, color: ACCENT.writing, border: `1px solid ${ACCENT.writing}33` }}>
-                    {session.cefrLevel}
-                  </span>
-                  <span className="text-xs font-medium opacity-60">
-                    {WRITING_TYPE_LABELS[session.writingType] || session.writingType}
-                  </span>
-                </div>
-              </div>
+        <PageHeader
+          backHref="/practice-test/writing"
+          title={t('title')}
+          accent="writing"
+          right={
+            <div className="hidden text-xs font-bold sm:block" style={{ color: 'var(--theme-text-muted)' }}>
+              {saveDraftMutation.isPending
+                ? <span className="flex items-center gap-1.5"><IconLoader size={12} /> {t('saving')}</span>
+                : lastSaved
+                  ? <span className="flex items-center gap-1.5"><IconCheck size={12} style={{ color: STATUS.success }} /> {t('savedAt', { time: formatter.dateTime(lastSaved, { hour: '2-digit', minute: '2-digit' }) })}</span>
+                  : <span className="opacity-40">{t('ctrlSHint')}</span>}
             </div>
+          }
+        />
 
-            <div className="hidden sm:flex flex-col items-end text-right">
-              <div className="text-xs font-bold mb-1" style={{ color: 'var(--theme-text-muted)' }}>
-                {saveDraftMutation.isPending
-                  ? <span className="flex items-center gap-1.5"><IconLoader size={12} /> {t('saving')}</span>
-                  : lastSaved
-                    ? <span className="flex items-center gap-1.5"><IconCheck size={12} style={{ color: STATUS.success }} /> {t('savedAt', { time: formatter.dateTime(lastSaved, { hour: '2-digit', minute: '2-digit' }) })}</span>
-                    : <span className="opacity-40">{t('ctrlSHint')}</span>
-                }
-              </div>
-            </div>
+        {/* Exercise title + meta */}
+        <div className="mb-6 min-w-0">
+          <h1 className="text-h2 font-black tracking-tight mb-1" style={{ color: 'var(--theme-text-primary)' }}>
+            {session.topic}
+          </h1>
+          <div className="flex items-center gap-2 text-xs font-bold" style={{ color: 'var(--theme-text-muted)' }}>
+            <span className="px-1.5 py-0.5 rounded text-[10px] uppercase tracking-widest"
+              style={{ backgroundColor: `${ACCENT.writing}1A`, color: ACCENT.writing }}>{session.cefrLevel}</span>
+            <span className="opacity-40">·</span>
+            <span>{WRITING_TYPE_LABELS[session.writingType] || session.writingType}</span>
           </div>
         </div>
 
@@ -199,7 +184,7 @@ export default function WritingEditorPage() {
           {/* Left Side: Prompt + Hints */}
           <div className={`${mobileView === 'task' ? 'block' : 'hidden'} lg:block lg:w-1/2 shrink-0 lg:sticky lg:top-20 lg:self-start lg:max-h-[calc(100vh-10rem)] lg:overflow-y-auto lg:pr-1 space-y-4`}>
             {/* Prompt */}
-            <div className="rounded-xl border-2 p-4"
+            <div className="rounded-md border-2 p-4"
               style={{ borderColor: `${STATUS.info}4D`, backgroundColor: `${STATUS.info}0A` }}>
               <h3 className="text-xs font-bold uppercase tracking-wider mb-2 flex items-center gap-1.5" style={{ color: STATUS.info }}>
                 <IconBookOpen size={13} /> {t('promptHeader')}
@@ -219,7 +204,7 @@ export default function WritingEditorPage() {
             {showHints && (
               <>
                 {session.vocabHints && (session.vocabHints as string[]).length > 0 && (
-                  <div className="rounded-xl border p-4"
+                  <div className="rounded-md border p-4"
                     style={{ borderColor: `${STATUS.success}33`, backgroundColor: `${STATUS.success}08` }}>
                     <h4 className="text-caption font-bold uppercase tracking-wider mb-2" style={{ color: STATUS.success }}>
                       {t('vocabHints')}
@@ -234,7 +219,7 @@ export default function WritingEditorPage() {
                   </div>
                 )}
                 {session.grammarHints && (session.grammarHints as string[]).length > 0 && (
-                  <div className="rounded-xl border p-4"
+                  <div className="rounded-md border p-4"
                     style={{ borderColor: `${STATUS.warning}33`, backgroundColor: `${STATUS.warning}08` }}>
                     <h4 className="text-caption font-bold uppercase tracking-wider mb-2" style={{ color: STATUS.warning }}>
                       {t('grammarHints')}

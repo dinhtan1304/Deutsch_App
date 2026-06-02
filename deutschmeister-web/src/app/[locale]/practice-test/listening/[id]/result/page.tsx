@@ -115,7 +115,7 @@ function QuestionItem({ question, userAnswer, index }: {
       <button onClick={() => setOpen(v => !v)}
         className="w-full flex items-center gap-3 px-4 py-3.5 text-left"
         style={{ backgroundColor: isCorrect ? `${STATUS.success}0A` : `${STATUS.danger}0A` }}>
-        <div className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 text-white"
+        <div className="w-6 h-6 rounded-[8px] flex items-center justify-center shrink-0 text-white"
           style={{ backgroundColor: isCorrect ? STATUS.success : STATUS.danger }}>
           {isCorrect ? <IconCheck size={11} /> : <IconXMark size={11} />}
         </div>
@@ -279,7 +279,7 @@ export default function ListeningResultPage() {
               <IconVolume2 size={13} style={{ color: ACCENT.listening }} /> {t('transcriptListenAgain')}
             </button>
             <p className="text-body leading-relaxed whitespace-pre-wrap"
-              style={{ color: 'var(--theme-text-primary)', fontFamily: 'Georgia, serif' }}>
+              style={{ color: 'var(--theme-text-primary)' }}>
               {session.transcript}
             </p>
           </div>

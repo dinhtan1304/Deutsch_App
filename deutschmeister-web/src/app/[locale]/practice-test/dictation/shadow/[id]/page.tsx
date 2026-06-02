@@ -169,7 +169,7 @@ function ScoreFeedback({ attempt }: { attempt: ShadowingAttempt }) {
       )}
       {attempt.attemptCount > 1 && (
         <span
-          className="text-[10px] font-black uppercase tracking-widest opacity-50"
+          className="text-caption font-semibold uppercase tracking-wide opacity-60"
           style={{ color: 'var(--theme-text-muted)' }}
         >
           {t('attemptCount', { count: attempt.attemptCount })}
@@ -479,8 +479,8 @@ export default function ShadowingPlayPage() {
               <div className="mt-6 flex items-center gap-3 flex-wrap justify-center">
                 <span className="text-[11px] font-bold uppercase tracking-widest opacity-60" style={{ color: 'var(--theme-text-muted)' }}>{t('retryHint')}</span>
                 <button type="button" onClick={handlePlayNext}
-                  className="flex items-center gap-1.5 px-4 py-2 rounded-[10px] text-caption font-bold text-white transition-transform active:scale-95"
-                  style={{ background: ACCENT.reading, boxShadow: `0 4px 14px ${ACCENT.reading}55` }}>
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-[10px] text-caption font-bold text-white transition-transform hover:-translate-y-0.5 active:scale-95"
+                  style={{ background: ACCENT.reading }}>
                   {t('nextSegment')}
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6" /></svg>
                 </button>
@@ -511,8 +511,8 @@ export default function ShadowingPlayPage() {
               </div>
             </div>
             <button type="button" onClick={handleSubmit} disabled={isSubmitting || session.completedSegments === 0}
-              className="flex items-center gap-2 px-6 py-3 rounded-[11px] text-sm font-bold text-white transition-transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-              style={{ background: ACCENT.reading, boxShadow: `0 4px 14px ${ACCENT.reading}55` }}>
+              className="flex items-center gap-2 px-6 py-3 rounded-[11px] text-sm font-bold text-white transition-transform hover:-translate-y-0.5 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{ background: ACCENT.reading }}>
               {isSubmitting ? (
                 <>
                   <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />

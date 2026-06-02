@@ -1,25 +1,47 @@
-﻿'use client';
+'use client';
 
 import { useState } from 'react';
-import { ACCENT, STATUS } from '@/lib/tokens';
-import { useRouter } from 'next/navigation';
+import { Link, useRouter } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
 import { useReadingTopics, useGenerateReading } from '@/hooks/useReading';
 import { QuotaPaywall } from '@/components/subscription/QuotaPaywall';
 import { QuotaBanner } from '@/components/subscription/QuotaBanner';
-import { IconLoader, IconRobot } from '../icons';
-import { PageHeader } from '@/components/ui';
+import { SetupSection, PromptToken } from '../../_components/createSetup';
+import { IconSparkles, IconChevronLeft, IconLoader, IconCheck } from '../icons';
 
-const LEVEL_COLORS: Record<string, string> = {
-  A1: STATUS.success, A2: ACCENT.srs, B1: ACCENT.vocab, B2: ACCENT.games,
-};
+type LengthId = 'short' | 'medium' | 'long';
 
-const QUESTION_COUNT_OPTIONS = [3, 4, 5, 6, 7, 8];
+const LEVELS = [
+  { id: 'A1', descKey: 'levelDescA1' },
+  { id: 'A2', descKey: 'levelDescA2' },
+  { id: 'B1', descKey: 'levelDescB1' },
+  { id: 'B2', descKey: 'levelDescB2' },
+] as const;
+
+const LENGTHS: { id: LengthId; words: number; mins: number; labelKey: string }[] = [
+  { id: 'short', words: 150, mins: 1, labelKey: 'lengthShort' },
+  { id: 'medium', words: 350, mins: 2, labelKey: 'lengthMedium' },
+  { id: 'long', words: 600, mins: 4, labelKey: 'lengthLong' },
+];
+
+const QUESTION_COUNTS = [3, 4, 5, 6, 7, 8];
+
+function IconEdit({ size = 15, style }: { size?: number; style?: React.CSSProperties }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}>
+      <path d="M12 20h9" /><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+    </svg>
+  );
+}
 
 export default function NewReadingPage() {
-  const router = useRouter();
   const t = useTranslations('practice.reading.setup');
-  const [level, setLevel] = useState('A1');
+  const tType = useTranslations('practice.reading.list');
+  const tHub = useTranslations('practice.common.hub');
+  const router = useRouter();
+
+  const [level, setLevel] = useState('A2');
+  const [length, setLength] = useState<LengthId>('medium');
   const [selectedTopic, setSelectedTopic] = useState('');
   const [customTopic, setCustomTopic] = useState('');
   const [textType, setTextType] = useState('');
@@ -29,214 +51,235 @@ export default function NewReadingPage() {
   const generateMutation = useGenerateReading();
 
   const effectiveTextType = textType || suggestions?.textTypes[0]?.value || '';
-
+  const currentTypeObj = suggestions?.textTypes.find((tt) => tt.value === effectiveTextType);
+  const selectedTopicObj = suggestions?.topics.find((tp) => tp.topic === selectedTopic);
+  const topicLabel = customTopic.trim() || selectedTopicObj?.labelDe || '';
+  const lenObj = LENGTHS.find((l) => l.id === length)!;
+  const lengthLabel = t(lenObj.labelKey as 'lengthMedium');
+  const typeShort = effectiveTextType ? tType(`textTypes.${effectiveTextType}` as 'textTypes.brief') : '';
   const finalTopic = customTopic.trim() || selectedTopic;
-  const canGenerate = !!finalTopic && !!effectiveTextType;
-  const activeColor = LEVEL_COLORS[level] || STATUS.success;
+  const ready = !!finalTopic && !!effectiveTextType;
 
   const handleGenerate = async () => {
-    if (!canGenerate) return;
+    if (!ready || generateMutation.isPending) return;
     try {
       const session = await generateMutation.mutateAsync({
         cefrLevel: level,
         topic: finalTopic,
         textType: effectiveTextType,
         questionCount,
+        length,
       });
       router.push(`/practice-test/reading/${session.id}`);
-    } catch { /* handled */ }
+    } catch { /* handled below via isError */ }
   };
 
   return (
     <QuotaPaywall feature="reading">
-    <div className="py-6">
+      <div className="mx-auto max-w-360 px-4 py-6 sm:px-6">
+        <QuotaBanner feature="reading" label={t('quotaLabel')} featureContext="reading-new" />
 
-      <QuotaBanner feature="reading" label={t('quotaLabel')} featureContext="reading-new" />
+        {/* Back */}
+        <Link href="/practice-test/reading" className="mb-4 inline-flex items-center gap-1 text-caption font-semibold transition-opacity hover:opacity-70" style={{ color: 'var(--accent)' }}>
+          <IconChevronLeft size={16} /> {tHub('back')}
+        </Link>
 
-      <PageHeader
-        backHref="/practice-test/reading"
-        title={t('title')}
-        subtitle={t('subtitle')}
-        accent="reading"
-      />
+        {/* Hero */}
+        <header className="mb-5 flex items-center gap-3.5">
+          <div className="v2-icongrad-accent flex h-12 w-12 shrink-0 items-center justify-center rounded-[13px]"
+            style={{ color: 'var(--accent-on)', boxShadow: '0 8px 20px color-mix(in srgb, var(--accent) 35%, transparent)' }}>
+            <IconSparkles size={24} />
+          </div>
+          <div className="min-w-0">
+            <h1 className="text-h1 font-extrabold leading-tight" style={{ letterSpacing: '-.02em', color: 'var(--theme-text-primary)' }}>{t('title')}</h1>
+            <p className="mt-0.5 text-body" style={{ color: 'var(--theme-text-secondary)' }}>{t('subtitle')}</p>
+          </div>
+        </header>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-        {/* ─── Left: Level + Topic ─── */}
-        <div className="space-y-6">
-
-          {/* Step 1: Level */}
-          <section>
-            <h2 className="text-xs font-bold uppercase tracking-wider mb-3"
-              style={{ color: 'var(--theme-text-muted)' }}>{t('stepLevel')}</h2>
-            <div className="flex gap-2">
-              {['A1', 'A2', 'B1', 'B2'].map(l => {
-                const isActive = level === l;
-                const c = LEVEL_COLORS[l];
-                return (
-                  <button key={l} onClick={() => { setLevel(l); setSelectedTopic(''); setCustomTopic(''); setTextType(''); }}
-                    className="px-5 py-2.5 rounded-xl text-body font-bold border-2 transition-all duration-200 hover:-translate-y-0.5"
-                    style={isActive
-                      ? { background: `linear-gradient(135deg, ${c}, ${c}cc)`, color: 'white', borderColor: c, boxShadow: `0 4px 12px ${c}30` }
-                      : { borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)', backgroundColor: 'transparent' }
-                    }>
-                    {l}
-                  </button>
-                );
-              })}
-            </div>
-          </section>
-
-          {/* Step 2: Topic */}
-          <section>
-            <h2 className="text-xs font-bold uppercase tracking-wider mb-3"
-              style={{ color: 'var(--theme-text-muted)' }}>{t('stepTopic')}</h2>
-            {isLoading ? (
-              <div className="grid grid-cols-3 md:grid-cols-4 gap-2">
-                {Array.from({ length: 8 }).map((_, i) => (
-                  <div key={i} className="h-16 rounded-xl animate-pulse"
-                    style={{ backgroundColor: 'var(--theme-bg-secondary)' }} />
-                ))}
-              </div>
-            ) : (
-              <>
-                <div className="grid grid-cols-3 md:grid-cols-4 gap-2 mb-3">
-                  {suggestions?.topics.map(t => {
-                    const isActive = selectedTopic === t.topic && !customTopic;
-                    return (
-                      <button key={t.topic} onClick={() => { setSelectedTopic(t.topic); setCustomTopic(''); }}
-                        className="p-3 rounded-xl text-left border-2 transition-all duration-200 hover:-translate-y-0.5"
-                        style={{
-                          borderColor: isActive ? activeColor : 'var(--theme-border)',
-                          backgroundColor: isActive ? `${activeColor}08` : 'var(--theme-bg-card)',
-                          boxShadow: isActive ? `0 4px 12px ${activeColor}15` : 'none',
-                        }}>
-                        <span className="text-base">{t.icon}</span>
-                        <div className="text-xs font-semibold mt-1 truncate" style={{ color: 'var(--theme-text-primary)' }}>{t.labelDe}</div>
-                        <div className="text-caption truncate" style={{ color: 'var(--theme-text-muted)' }}>{t.labelVi}</div>
-                      </button>
-                    );
-                  })}
-                </div>
-                <div className="relative">
-                  <input type="text" value={customTopic}
-                    onChange={e => { setCustomTopic(e.target.value); if (e.target.value) setSelectedTopic(''); }}
-                    placeholder={t('customTopicPlaceholder')}
-                    className="w-full px-4 py-3 rounded-xl border-2 border-dashed text-sm focus:outline-none transition-colors"
-                    style={{
-                      borderColor: customTopic ? activeColor : 'var(--theme-border)',
-                      backgroundColor: 'var(--theme-bg-secondary)',
-                      color: 'var(--theme-text-primary)',
-                    }} />
-                  {customTopic && (
-                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold" style={{ color: activeColor }}>
-                      {t('customLabel')}
-                    </span>
-                  )}
-                </div>
-              </>
-            )}
-          </section>
+        {/* Live prompt sentence */}
+        <div className="v2-hero-accent mb-6 rounded-2xl px-5 py-4 text-[15px] leading-loose"
+          style={{ border: '1px solid color-mix(in srgb, var(--accent) 28%, transparent)', color: 'var(--theme-text-secondary)' }}>
+          {t('promptWrite')} <PromptToken on color="var(--der)" label={typeShort || '…'} /> ·{' '}
+          {t('promptLevel')} <PromptToken on mono color="var(--accent)" label={level} /> ·{' '}
+          {t('promptLength')} <PromptToken on color="var(--violet)" label={lengthLabel} /> ·{' '}
+          {t('promptTopic')} <PromptToken on={!!topicLabel} color="var(--warn)" label={topicLabel || t('notSelected')} /> ·{' '}
+          {t('promptWith')} <PromptToken on mono color="var(--cyan)" label={t('questionsShort', { count: questionCount })} />.
         </div>
 
-        {/* ─── Right: Text Type + Question Count + Summary + Generate ─── */}
-        <div className="space-y-6">
+        {/* Config + preview */}
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.6fr_1fr] lg:items-start">
+          {/* ── Config column ── */}
+          <div className="flex flex-col gap-6">
+            {/* 1 · CEFR level */}
+            <SetupSection n={1} label={t('stepLevel')}>
+              <div className="grid grid-cols-4 gap-2">
+                {LEVELS.map((l) => {
+                  const on = level === l.id;
+                  return (
+                    <button key={l.id} onClick={() => { setLevel(l.id); setSelectedTopic(''); setCustomTopic(''); setTextType(''); }}
+                      className="rounded-md border px-2 py-3 text-center transition-transform hover:-translate-y-0.5"
+                      style={on
+                        ? { background: 'var(--accent)', borderColor: 'var(--accent)', color: 'var(--accent-on)', boxShadow: '0 4px 12px color-mix(in srgb, var(--accent) 38%, transparent)' }
+                        : { background: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)' }}>
+                      <div className="mono text-lead font-bold">{l.id}</div>
+                      <div className="mt-0.5 text-[9px] leading-tight" style={{ opacity: on ? 0.9 : 0.7 }}>{t(l.descKey as 'levelDescA1')}</div>
+                    </button>
+                  );
+                })}
+              </div>
+            </SetupSection>
 
-          {/* Step 3: Text Type */}
-          <section>
-            <h2 className="text-xs font-bold uppercase tracking-wider mb-3"
-              style={{ color: 'var(--theme-text-muted)' }}>{t('stepTextType')}</h2>
-            <div className="grid grid-cols-2 gap-2">
-              {suggestions?.textTypes.map(t => {
-                const isActive = effectiveTextType === t.value;
-                return (
-                  <button key={t.value} onClick={() => setTextType(t.value)}
-                    className="p-3 rounded-xl border-2 text-left transition-all duration-200 hover:-translate-y-0.5"
-                    style={{
-                      borderColor: isActive ? activeColor : 'var(--theme-border)',
-                      backgroundColor: isActive ? `${activeColor}08` : 'var(--theme-bg-card)',
-                      boxShadow: isActive ? `0 4px 12px ${activeColor}15` : 'none',
-                    }}>
-                    <div className="flex items-center gap-2">
-                      <span className="text-base">{t.icon}</span>
-                      <div>
-                        <div className="text-xs font-semibold" style={{ color: 'var(--theme-text-primary)' }}>{t.labelDe}</div>
-                        <div className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>{t.labelVi}</div>
+            {/* 2 · Length */}
+            <SetupSection n={2} label={t('stepLength')}>
+              <div className="grid grid-cols-3 gap-2">
+                {LENGTHS.map((l) => {
+                  const on = length === l.id;
+                  return (
+                    <button key={l.id} onClick={() => setLength(l.id)}
+                      className="flex items-center justify-between rounded-md border px-3.5 py-3 transition-transform hover:-translate-y-0.5"
+                      style={on
+                        ? { background: 'color-mix(in srgb, var(--accent) 12%, transparent)', borderColor: 'var(--accent)' }
+                        : { background: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}>
+                      <span className="text-[13.5px] font-bold" style={{ color: on ? 'var(--theme-text-primary)' : 'var(--theme-text-secondary)' }}>{t(l.labelKey as 'lengthMedium')}</span>
+                      <span className="mono text-[11px]" style={{ color: on ? 'var(--accent)' : 'var(--theme-text-muted)' }}>{t('wordsApprox', { count: l.words })}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </SetupSection>
+
+            {/* 3 · Topic */}
+            <SetupSection n={3} label={t('stepTopic')}>
+              {isLoading ? (
+                <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
+                  {Array.from({ length: 8 }).map((_, i) => (
+                    <div key={i} className="h-22 animate-pulse rounded-md" style={{ background: 'var(--theme-bg-secondary)' }} />
+                  ))}
+                </div>
+              ) : (
+                <>
+                  <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
+                    {suggestions?.topics.map((tp) => {
+                      const on = selectedTopic === tp.topic && !customTopic.trim();
+                      return (
+                        <button key={tp.topic} onClick={() => { setSelectedTopic(tp.topic); setCustomTopic(''); }}
+                          className="relative rounded-md border p-3 text-center transition-transform hover:-translate-y-0.5"
+                          style={on
+                            ? { background: 'color-mix(in srgb, var(--accent) 14%, transparent)', borderColor: 'var(--accent)' }
+                            : { background: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}>
+                          {on && (
+                            <span className="absolute right-1.5 top-1.5 flex h-4 w-4 items-center justify-center rounded-full" style={{ background: 'var(--accent)', color: 'var(--accent-on)' }}>
+                              <IconCheck size={9} />
+                            </span>
+                          )}
+                          <div className="text-2xl">{tp.icon}</div>
+                          <div className="mt-1.5 truncate text-caption font-bold" style={{ color: on ? 'var(--accent)' : 'var(--theme-text-primary)' }}>{tp.labelDe}</div>
+                          <div className="truncate text-[10px]" style={{ color: 'var(--theme-text-muted)' }}>{tp.labelVi}</div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <div className="mt-2.5 flex h-12 items-center gap-2.5 rounded-[11px] border px-3.5"
+                    style={{ background: 'var(--theme-bg-card)', borderColor: customTopic.trim() ? 'var(--accent)' : 'var(--theme-border)' }}>
+                    <IconEdit size={15} style={{ color: customTopic.trim() ? 'var(--accent)' : 'var(--theme-text-muted)' }} />
+                    <input value={customTopic} onChange={(e) => { setCustomTopic(e.target.value); if (e.target.value.trim()) setSelectedTopic(''); }}
+                      placeholder={t('customTopicPlaceholder')}
+                      className="h-full flex-1 border-0 bg-transparent text-[13.5px] outline-none" style={{ color: 'var(--theme-text-primary)' }} />
+                  </div>
+                </>
+              )}
+            </SetupSection>
+
+            {/* 4 · Text type */}
+            <SetupSection n={4} label={t('stepTextType')}>
+              <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+                {suggestions?.textTypes.map((tt) => {
+                  const on = effectiveTextType === tt.value;
+                  return (
+                    <button key={tt.value} onClick={() => setTextType(tt.value)}
+                      className="flex items-center gap-2.5 rounded-[11px] border p-3 text-left transition-transform hover:-translate-y-0.5"
+                      style={on
+                        ? { background: 'color-mix(in srgb, var(--accent) 12%, transparent)', borderColor: 'var(--accent)' }
+                        : { background: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}>
+                      <span className="shrink-0 text-lg">{tt.icon}</span>
+                      <div className="min-w-0">
+                        <div className="truncate text-caption font-bold" style={{ color: 'var(--theme-text-primary)' }}>{tt.labelDe}</div>
+                        <div className="truncate text-[10.5px]" style={{ color: 'var(--theme-text-muted)' }}>{tType(`textTypes.${tt.value}` as 'textTypes.brief')}</div>
                       </div>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          </section>
+                    </button>
+                  );
+                })}
+              </div>
+            </SetupSection>
 
-          {/* Step 4: Question Count */}
-          <section>
-            <h2 className="text-xs font-bold uppercase tracking-wider mb-3"
-              style={{ color: 'var(--theme-text-muted)' }}>{t('stepQuestionCount')}</h2>
-            <div className="flex gap-2 flex-wrap">
-              {QUESTION_COUNT_OPTIONS.map(n => {
-                const isActive = questionCount === n;
-                return (
-                  <button key={n} onClick={() => setQuestionCount(n)}
-                    className="w-12 h-12 rounded-xl text-[15px] font-bold border-2 transition-all duration-200 hover:-translate-y-0.5"
-                    style={{
-                      borderColor: isActive ? activeColor : 'var(--theme-border)',
-                      backgroundColor: isActive ? `${activeColor}08` : 'transparent',
-                      color: isActive ? activeColor : 'var(--theme-text-secondary)',
-                      boxShadow: isActive ? `0 4px 12px ${activeColor}20` : 'none',
-                    }}>
-                    {n}
-                  </button>
-                );
-              })}
-            </div>
-          </section>
-
-          {/* Summary */}
-          <div className="rounded-2xl border p-5"
-            style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-secondary)' }}>
-            <h3 className="text-body font-bold mb-3" style={{ color: 'var(--theme-text-secondary)' }}>
-              {t('summary')}
-            </h3>
-            <div className="grid grid-cols-2 gap-y-2 text-body">
-              <span style={{ color: 'var(--theme-text-muted)' }}>{t('summaryLevel')}</span>
-              <span className="font-semibold" style={{ color: 'var(--theme-text-primary)' }}>{level}</span>
-              <span style={{ color: 'var(--theme-text-muted)' }}>{t('summaryTopic')}</span>
-              <span className="font-semibold" style={{ color: finalTopic ? 'var(--theme-text-primary)' : 'var(--theme-text-muted)' }}>
-                {finalTopic || t('notSelected')}
-              </span>
-              <span style={{ color: 'var(--theme-text-muted)' }}>{t('summaryTextType')}</span>
-              <span className="font-semibold" style={{ color: 'var(--theme-text-primary)' }}>
-                {suggestions?.textTypes.find(tt => tt.value === effectiveTextType)?.labelVi || t('notSelected')}
-              </span>
-              <span style={{ color: 'var(--theme-text-muted)' }}>{t('summaryQuestionCount')}</span>
-              <span className="font-semibold" style={{ color: 'var(--theme-text-primary)' }}>{t('questionsUnit', { count: questionCount })}</span>
-            </div>
+            {/* 5 · Question count */}
+            <SetupSection n={5} label={t('stepQuestionCount')}>
+              <div className="flex flex-wrap gap-2">
+                {QUESTION_COUNTS.map((n) => {
+                  const on = questionCount === n;
+                  return (
+                    <button key={n} onClick={() => setQuestionCount(n)}
+                      className="mono h-12 w-12 rounded-md border-[1.5px] text-[15px] font-bold transition-transform hover:-translate-y-0.5"
+                      style={on
+                        ? { background: 'color-mix(in srgb, var(--accent) 14%, transparent)', borderColor: 'var(--accent)', color: 'var(--accent)' }
+                        : { background: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)' }}>
+                      {n}
+                    </button>
+                  );
+                })}
+              </div>
+            </SetupSection>
           </div>
 
-          {/* Generate Button */}
-          <button onClick={handleGenerate} disabled={!canGenerate || generateMutation.isPending}
-            className="w-full py-3.5 rounded-xl font-bold text-base text-white transition-all duration-200 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-            style={{
-              background: `linear-gradient(135deg, ${activeColor}, ${activeColor}cc)`,
-              boxShadow: `0 4px 12px ${activeColor}30`,
-            }}>
-            {generateMutation.isPending
-              ? <><IconLoader size={18} /> {t('generating')}</>
-              : <><IconRobot size={18} /> {t('generate')}</>
-            }
-          </button>
+          {/* ── Preview column (sticky on desktop) ── */}
+          <div className="flex flex-col gap-3.5 lg:sticky lg:top-6">
+            <div className="text-[11px] font-bold uppercase tracking-wider" style={{ color: 'var(--theme-text-muted)' }}>{t('previewLabel')}</div>
 
-          {generateMutation.isError && (
-            <p className="text-body text-center" style={{ color: STATUS.danger }}>
-              {t('generateError')}
-            </p>
-          )}
+            {/* Document mockup */}
+            <div className="overflow-hidden rounded-2xl border" style={{ background: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)', boxShadow: 'var(--v2-shadow-card-hover)' }}>
+              <div className="px-4 py-4" style={{ borderBottom: '1px solid var(--theme-border)', background: 'color-mix(in srgb, var(--accent) 8%, transparent)' }}>
+                <div className="mb-2.5 flex items-center gap-2">
+                  <span className="text-base">{currentTypeObj?.icon ?? '📄'}</span>
+                  <span className="mono rounded-[5px] px-2 py-0.5 text-[10.5px] font-bold" style={{ background: 'color-mix(in srgb, var(--accent) 16%, transparent)', color: 'var(--accent)' }}>{level}</span>
+                  <span className="text-[10.5px] font-semibold uppercase tracking-wide" style={{ color: 'var(--theme-text-muted)' }}>{typeShort}</span>
+                </div>
+                <div className="text-[15px] font-bold" style={{ color: topicLabel ? 'var(--theme-text-primary)' : 'var(--theme-text-muted)' }}>
+                  {topicLabel ? t('previewTitle', { topic: topicLabel }) : t('previewPlaceholder')}
+                </div>
+                <div className="mt-1 text-[11px]" style={{ color: 'var(--theme-text-muted)' }}>
+                  {t('wordsApprox', { count: lenObj.words })} · {t('readingTime', { count: lenObj.mins })} · {t('questionsShort', { count: questionCount })}
+                </div>
+              </div>
+              <div className="flex flex-col gap-2.5 p-4">
+                {[100, 92, 96, 70, 88, 60].map((w, i) => (
+                  <div key={i} className={`h-2 rounded ${ready ? 'animate-pulse' : ''}`}
+                    style={{ width: `${w}%`, background: 'var(--theme-bg-secondary)', opacity: ready ? 1 : 0.5 }} />
+                ))}
+                <div className="mt-2 flex items-start gap-2 border-t pt-3" style={{ borderColor: 'var(--theme-border)' }}>
+                  <span className="mono flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded-[5px] text-[10px] font-bold" style={{ background: 'color-mix(in srgb, var(--accent) 18%, transparent)', color: 'var(--accent)' }}>1</span>
+                  <div className="flex flex-1 flex-col gap-1.5">
+                    <div className="h-1.75 w-4/5 rounded" style={{ background: 'var(--theme-bg-secondary)' }} />
+                    <div className="grid grid-cols-2 gap-1.5">
+                      {[0, 1, 2, 3].map((i) => <div key={i} className="h-4.5 rounded-md border" style={{ background: 'var(--theme-bg-secondary)', borderColor: 'var(--theme-border)' }} />)}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Generate */}
+            <button onClick={handleGenerate} disabled={!ready || generateMutation.isPending}
+              className={`flex h-13 items-center justify-center gap-2.5 rounded-[13px] text-[15px] font-bold transition-transform ${ready && !generateMutation.isPending ? 'hover:-translate-y-0.5 active:scale-95' : 'cursor-not-allowed'}`}
+              style={ready
+                ? { background: 'var(--accent)', color: 'var(--accent-on)', boxShadow: '0 6px 18px color-mix(in srgb, var(--accent) 40%, transparent)' }
+                : { background: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)', border: '1px solid var(--theme-border)' }}>
+              {generateMutation.isPending ? <><IconLoader size={17} /> {t('generating')}</> : <><IconSparkles size={17} /> {t('generate')}</>}
+            </button>
+            {!ready && <div className="-mt-1 text-center text-[11.5px]" style={{ color: 'var(--theme-text-muted)' }}>{t('chooseTopicHint')}</div>}
+            {generateMutation.isError && <p className="text-center text-caption" style={{ color: 'var(--danger)' }}>{t('generateError')}</p>}
+          </div>
         </div>
-
       </div>
-    </div>
     </QuotaPaywall>
   );
 }

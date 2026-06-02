@@ -9,7 +9,7 @@ import { ReadingQuestion, VocabHighlight } from '@/lib/api/reading';
 import { HighlightedText } from '@/components/word-highlight/HighlightedText';
 import { PageHeader, FixedActionBar, MobileSplitTabs } from '@/components/ui';
 import { ACCENT, GRADIENT } from '@/lib/tokens';
-import { synthesizeAudio } from '@/lib/utils';
+import { synthesizeAudioSequence, type AudioSequenceHandle } from '@/lib/utils';
 import {
   IconLoader, IconSend, IconCheck,
   IconPlay, IconPause, IconClock,
@@ -46,7 +46,7 @@ function AudioPlayer({ passage }: { passage: string }) {
   const [elapsed, setElapsed] = useState(0);
   const [speed, setSpeed] = useState(1.0);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const seqRef = useRef<AudioSequenceHandle | null>(null);
 
   const wordCount = passage.split(/\s+/).length;
   const duration = Math.max(30, Math.round(wordCount / 110 * 60));
@@ -54,10 +54,7 @@ function AudioPlayer({ passage }: { passage: string }) {
   const fmt = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
 
   const stop = useCallback(() => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-    }
+    seqRef.current?.stop();
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       window.speechSynthesis.cancel();
     }
@@ -65,40 +62,47 @@ function AudioPlayer({ passage }: { passage: string }) {
     if (intervalRef.current) clearInterval(intervalRef.current);
   }, []);
 
-  const toggle = useCallback(async () => {
+  // Web Speech API fallback when the backend TTS is fully unreachable.
+  const playViaBrowser = useCallback(() => {
+    if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(passage);
+    u.lang = 'de-DE';
+    u.rate = 0.85 * speed;
+    u.onend = () => {
+      setIsPlaying(false);
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+    window.speechSynthesis.speak(u);
+    setIsPlaying(true);
+    intervalRef.current = setInterval(() => setElapsed(e => e + 1), 1000);
+  }, [passage, speed]);
+
+  // Chunked sequential playback keeps long reading passages (B1 up to ~3500
+  // chars) on the natural Piper voice instead of being rejected and dropping
+  // to the robotic browser voice.
+  const toggle = useCallback(() => {
     if (isPlaying) { stop(); return; }
     setElapsed(0);
-    try {
-      const audio = await synthesizeAudio(passage);
-      audio.playbackRate = 0.85 * speed;
-      audio.onplay = () => {
+    seqRef.current?.stop();
+    const seq = synthesizeAudioSequence(passage, {
+      playbackRate: 0.85 * speed,
+      onStart: () => {
         setIsPlaying(true);
         intervalRef.current = setInterval(() => setElapsed(e => e + 1), 1000);
-      };
-      audio.onended = () => {
+      },
+      onEnded: () => {
         setIsPlaying(false);
         if (intervalRef.current) clearInterval(intervalRef.current);
-      };
-      audio.onerror = () => {
-        setIsPlaying(false);
-        if (intervalRef.current) clearInterval(intervalRef.current);
-      };
-      audioRef.current = audio;
-      await audio.play();
-    } catch (err) {
-      console.warn('[ReadingAudio] backend failed, falling back to Web Speech API:', err);
-      const u = new SpeechSynthesisUtterance(passage);
-      u.lang = 'de-DE';
-      u.rate = 0.85 * speed;
-      u.onend = () => {
-        setIsPlaying(false);
-        if (intervalRef.current) clearInterval(intervalRef.current);
-      };
-      window.speechSynthesis.speak(u);
-      setIsPlaying(true);
-      intervalRef.current = setInterval(() => setElapsed(e => e + 1), 1000);
-    }
-  }, [isPlaying, passage, speed, stop]);
+      },
+      onError: (err) => {
+        console.warn('[ReadingAudio] backend failed, falling back to Web Speech API:', err);
+        playViaBrowser();
+      },
+    });
+    seqRef.current = seq;
+    void seq.play();
+  }, [isPlaying, passage, speed, stop, playViaBrowser]);
 
   useEffect(() => () => stop(), [stop]);
 
@@ -107,7 +111,7 @@ function AudioPlayer({ passage }: { passage: string }) {
       style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-secondary)' }}>
       <div className="flex items-center gap-3">
         <button onClick={toggle}
-          className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 transition-all hover:scale-105 active:scale-95"
+          className="w-10 h-10 rounded-[13px] flex items-center justify-center shrink-0 transition-all hover:scale-105 active:scale-95"
           style={{ background: GRADIENT.reading, color: 'white' }}>
           {isPlaying ? <IconPause size={14} /> : <IconPlay size={14} />}
         </button>
@@ -177,7 +181,7 @@ function QuestionItem({ question, index, selectedAnswer, onSelect }: {
     <div className="rounded-2xl border p-5 transition-colors duration-200"
       style={{ borderColor: isAnswered ? `${ACCENT.reading}59` : 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
       <div className="flex items-start gap-3 mb-4">
-        <div className="w-7 h-7 rounded-full flex items-center justify-center text-body font-bold shrink-0 text-white"
+        <div className="w-7 h-7 rounded-[9px] flex items-center justify-center text-body font-bold shrink-0 text-white"
           style={{ background: isAnswered ? GRADIENT.reading : UNANSWERED_GRADIENT }}>
           {isAnswered ? <IconCheck size={13} /> : index + 1}
         </div>
@@ -191,13 +195,13 @@ function QuestionItem({ question, index, selectedAnswer, onSelect }: {
           return (
             <button key={opt.id}
               onClick={() => onSelect(question.id, opt.id)}
-              className="flex items-center gap-2.5 px-3 py-3 rounded-xl border-2 text-left transition-all duration-150 hover:scale-[1.01] active:scale-[0.99]"
+              className="flex items-center gap-2.5 px-3 py-3 rounded-md border-2 text-left transition-all duration-150 hover:scale-[1.01] active:scale-[0.99]"
               style={{
                 borderColor: isSelected ? ACCENT.reading : 'var(--theme-border)',
                 backgroundColor: isSelected ? `${ACCENT.reading}14` : 'transparent',
                 color: isSelected ? ACCENT.reading : 'var(--theme-text-primary)',
               }}>
-              <div className="w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 text-caption font-bold"
+              <div className="w-6 h-6 rounded-[8px] border-2 flex items-center justify-center shrink-0 text-caption font-bold"
                 style={{
                   borderColor: isSelected ? ACCENT.reading : 'var(--theme-border)',
                   backgroundColor: isSelected ? ACCENT.reading : 'transparent',
@@ -328,7 +332,7 @@ export default function ReadingSessionPage() {
           <AudioPlayer passage={session.passage} />
           <div className="rounded-2xl border p-5" style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
             <div className="text-[15px] leading-relaxed whitespace-pre-wrap"
-              style={{ color: 'var(--theme-text-primary)', fontFamily: 'Georgia, serif' }}>
+              style={{ color: 'var(--theme-text-primary)' }}>
               <HighlightedText text={session.passage} />
             </div>
           </div>

@@ -163,7 +163,7 @@ function ErrorCard({ error, sessionId }: { error: WritingError; sessionId: strin
 
   return (
     <button onClick={() => setExpanded(!expanded)}
-      className="w-full text-left rounded-xl border p-4 transition-all duration-200 hover:-translate-y-0.5"
+      className="w-full text-left rounded-md border p-4 transition-all duration-200 hover:-translate-y-0.5"
       style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
       <div className="flex items-start gap-3">
         <div className="w-2.5 h-2.5 rounded-full mt-1.5 shrink-0" style={{ backgroundColor: severityColor }} />
@@ -362,13 +362,13 @@ export default function WritingResultPage() {
 
       {/* General Feedback */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-5">
-        <div className="rounded-xl border p-4" style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
+        <div className="rounded-md border p-4" style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
           <h3 className="text-caption font-bold uppercase tracking-wider mb-2" style={{ color: 'var(--theme-text-muted)' }}>
             {t('feedbackDe')}
           </h3>
           <p className="text-body leading-relaxed" style={{ color: 'var(--theme-text-secondary)' }}>{session.feedbackDe}</p>
         </div>
-        <div className="rounded-xl border p-4" style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
+        <div className="rounded-md border p-4" style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
           <h3 className="text-caption font-bold uppercase tracking-wider mb-2" style={{ color: 'var(--theme-text-muted)' }}>
             {t('feedbackVi')}
           </h3>
@@ -398,7 +398,7 @@ export default function WritingResultPage() {
               })}
             </div>
           </div>
-          <div className="p-5 rounded-xl border min-h-64"
+          <div className="p-5 rounded-md border min-h-64"
             style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
             <p className="text-body leading-relaxed whitespace-pre-line" style={{ color: 'var(--theme-text-primary)' }}>
               {showOriginal ? session.userText : session.correctedText}

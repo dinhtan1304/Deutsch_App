@@ -1,15 +1,24 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { Link, useRouter } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
 import { useGenerateExamSpeaking } from '@/hooks/useExamSpeaking';
-import { PageHeader } from '@/components/ui';
 import { EXAM_SPEAKING_DISPLAY } from '@/lib/examConfig';
-import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import { SetupSection } from '../../../_components/createSetup';
 
-function IconLoader({ size = 18 }: { size?: number }) {
-  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="animate-spin" style={{ display: 'block' }}><path d="M21 12a9 9 0 1 1-6.219-8.56" /></svg>;
+type IconProps = { size?: number; style?: React.CSSProperties };
+function IconChevronLeft({ size = 16, style }: IconProps) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}><polyline points="15 18 9 12 15 6" /></svg>;
+}
+function IconLoader({ size = 16, style }: IconProps) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="animate-spin" style={{ display: 'block', ...style }}><path d="M21 12a9 9 0 1 1-6.219-8.56" /></svg>;
+}
+function IconCheck({ size = 16, style }: IconProps) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}><polyline points="20 6 9 17 4 12" /></svg>;
+}
+function IconMic({ size = 16, style }: IconProps) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}><rect x="9" y="2" width="6" height="12" rx="3" /><path d="M5 10a7 7 0 0 0 14 0" /><line x1="12" y1="19" x2="12" y2="22" /></svg>;
 }
 
 const LEVELS = ['A1', 'A2', 'B1'];
@@ -18,6 +27,7 @@ export default function ExamSpeakingNewPage() {
   const router = useRouter();
   const t = useTranslations('practice.examSpeaking.new');
   const tSetup = useTranslations('practice.examCommon.setup');
+  const tHub = useTranslations('practice.common.hub');
   const [examType, setExamType] = useState<string>('GOETHE');
   const [cefrLevel, setCefrLevel] = useState<string>('B1');
   const [errorMsg, setErrorMsg] = useState('');
@@ -25,15 +35,16 @@ export default function ExamSpeakingNewPage() {
   const generateMut = useGenerateExamSpeaking();
 
   const EXAM_TYPES = [
-    { id: 'GOETHE', label: tSetup('goetheLabel'), color: ACCENT.srs, desc: tSetup('goetheDesc') },
-    { id: 'TELC', label: tSetup('telcLabel'), color: ACCENT.vocab, desc: tSetup('telcDesc') },
+    { id: 'GOETHE', label: tSetup('goetheLabel'), color: 'var(--der)', desc: tSetup('goetheDesc') },
+    { id: 'TELC', label: tSetup('telcLabel'), color: 'var(--violet)', desc: tSetup('telcDesc') },
   ];
 
   const isTelcA1 = examType === 'TELC' && cefrLevel === 'A1';
   const examInfo = (EXAM_SPEAKING_DISPLAY as Record<string, Record<string, { teile: number; timeMin: number; totalPoints: number; structure: string[] }>>)[examType]?.[cefrLevel];
+  const ready = !isTelcA1 && !!examInfo;
 
   const handleGenerate = async () => {
-    if (isTelcA1) return;
+    if (!ready || generateMut.isPending) return;
     setErrorMsg('');
     try {
       const session = await generateMut.mutateAsync({ examType, cefrLevel });
@@ -44,119 +55,117 @@ export default function ExamSpeakingNewPage() {
   };
 
   return (
-    <div className="py-6">
-      <PageHeader
-        backHref="/practice-test/speaking/exam"
-        title={t('pageTitle')}
-        subtitle={t('pageSubtitle')}
-        accent="xp"
-      />
+    <div className="mx-auto max-w-360 px-4 py-6 sm:px-6">
+      <Link href="/practice-test/speaking/exam" className="mb-4 inline-flex items-center gap-1 text-caption font-semibold transition-opacity hover:opacity-70" style={{ color: 'var(--accent)' }}>
+        <IconChevronLeft size={16} /> {tHub('back')}
+      </Link>
 
-      {/* Step 1: Exam type */}
-      <div className="mb-6">
-        <p className="text-xs font-bold uppercase tracking-wider mb-3" style={{ color: 'var(--theme-text-muted)' }}>
-          {tSetup('step1Label')}
-        </p>
-        <div className="grid grid-cols-2 gap-3">
-          {EXAM_TYPES.map(et => (
-            <button key={et.id} onClick={() => setExamType(et.id)}
-              className="p-4 rounded-2xl border-2 text-left transition-all"
-              style={examType === et.id
-                ? { borderColor: et.color, backgroundColor: `${et.color}1A` }
-                : { borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
-              <div className="text-[15px] font-bold" style={{ color: examType === et.id ? et.color : 'var(--theme-text-primary)' }}>
-                {et.label}
+      <header className="mb-5 flex items-center gap-3.5">
+        <div className="v2-icongrad-accent flex h-12 w-12 shrink-0 items-center justify-center rounded-[13px]"
+          style={{ color: 'var(--accent-on)', boxShadow: '0 8px 20px color-mix(in srgb, var(--accent) 35%, transparent)' }}>
+          <IconMic size={24} />
+        </div>
+        <div className="min-w-0">
+          <h1 className="text-h1 font-extrabold leading-tight" style={{ letterSpacing: '-.02em', color: 'var(--theme-text-primary)' }}>{t('pageTitle')}</h1>
+          <p className="mt-0.5 text-body" style={{ color: 'var(--theme-text-secondary)' }}>{t('pageSubtitle')}</p>
+        </div>
+      </header>
+
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.6fr_1fr] lg:items-start">
+        <div className="flex flex-col gap-6">
+          <SetupSection n={1} label={tSetup('examTypeLabel')}>
+            <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+              {EXAM_TYPES.map((et) => {
+                const on = examType === et.id;
+                return (
+                  <button key={et.id} onClick={() => setExamType(et.id)}
+                    className="rounded-md border p-3.5 text-left transition-transform hover:-translate-y-0.5"
+                    style={on
+                      ? { background: `color-mix(in srgb, ${et.color} 12%, transparent)`, borderColor: et.color }
+                      : { background: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}>
+                    <div className="text-body font-bold" style={{ color: on ? et.color : 'var(--theme-text-primary)' }}>{et.label}</div>
+                    <div className="mt-0.5 text-[10.5px] leading-tight" style={{ color: 'var(--theme-text-muted)' }}>{et.desc}</div>
+                  </button>
+                );
+              })}
+            </div>
+          </SetupSection>
+
+          <SetupSection n={2} label={tSetup('levelLabel')}>
+            <div className="grid grid-cols-3 gap-2">
+              {LEVELS.map((lvl) => {
+                const unsupported = examType === 'TELC' && lvl === 'A1';
+                const on = cefrLevel === lvl && !unsupported;
+                return (
+                  <button key={lvl} onClick={() => !unsupported && setCefrLevel(lvl)} disabled={unsupported}
+                    className="rounded-md border px-2 py-3 text-center transition-transform enabled:hover:-translate-y-0.5 disabled:cursor-not-allowed"
+                    style={on
+                      ? { background: 'color-mix(in srgb, var(--accent) 12%, transparent)', borderColor: 'var(--accent)' }
+                      : unsupported
+                        ? { background: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)', opacity: 0.4 }
+                        : { background: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}>
+                    <div className="mono text-lead font-bold" style={{ color: on ? 'var(--accent)' : 'var(--theme-text-primary)' }}>{lvl}</div>
+                    {unsupported && <div className="text-[9px] font-medium" style={{ color: 'var(--theme-text-muted)' }}>{tSetup('naBadge')}</div>}
+                  </button>
+                );
+              })}
+            </div>
+          </SetupSection>
+        </div>
+
+        <div className="flex flex-col gap-3.5 lg:sticky lg:top-6">
+          <div className="text-[11px] font-bold uppercase tracking-wider" style={{ color: 'var(--theme-text-muted)' }}>{tSetup('previewLabel')}</div>
+
+          <div className="overflow-hidden rounded-2xl border" style={{ background: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)', boxShadow: 'var(--v2-shadow-card-hover)' }}>
+            <div className="px-4 py-4" style={{ borderBottom: '1px solid var(--theme-border)', background: 'color-mix(in srgb, var(--accent) 8%, transparent)' }}>
+              <div className="mb-1.5 flex items-center gap-2">
+                <IconMic size={16} style={{ color: 'var(--accent)' }} />
+                <span className="mono rounded-[5px] px-2 py-0.5 text-[10.5px] font-bold" style={{ background: 'color-mix(in srgb, var(--accent) 16%, transparent)', color: 'var(--accent)' }}>{cefrLevel}</span>
+                <span className="text-[10.5px] font-semibold uppercase tracking-wide" style={{ color: 'var(--theme-text-muted)' }}>{examType}</span>
               </div>
-              <div className="text-caption mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>{et.desc}</div>
-            </button>
-          ))}
+              <div className="text-lead font-bold" style={{ color: 'var(--theme-text-primary)' }}>{examType} {cefrLevel} — {t('skillLabel')}</div>
+            </div>
+
+            {ready && examInfo ? (
+              <div className="p-4">
+                <div className="grid grid-cols-3 gap-2 text-center">
+                  {[
+                    { v: examInfo.teile, l: tSetup('teile') },
+                    { v: examInfo.totalPoints, l: tSetup('maxPoints') },
+                    { v: `${examInfo.timeMin} ${tSetup('minutesAbbr')}`, l: tSetup('timeLabel') },
+                  ].map((s, i) => (
+                    <div key={i} className="rounded-md border p-2.5" style={{ background: 'var(--theme-bg-tertiary)', borderColor: 'var(--theme-border)' }}>
+                      <div className="mono text-lead font-extrabold leading-none" style={{ color: 'var(--accent)' }}>{s.v}</div>
+                      <div className="mt-1 text-[10px]" style={{ color: 'var(--theme-text-muted)' }}>{s.l}</div>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-3 space-y-1.5">
+                  {examInfo.structure.map((s: string, i: number) => (
+                    <div key={i} className="flex items-start gap-2 text-[11.5px]" style={{ color: 'var(--theme-text-secondary)' }}>
+                      <span className="mono shrink-0 rounded-[5px] px-1.5 py-0.5 text-[10px] font-bold" style={{ background: 'color-mix(in srgb, var(--accent) 14%, transparent)', color: 'var(--accent)' }}>{tSetup('teilLine', { i: i + 1 })}</span>
+                      <span className="pt-0.5">{s}</span>
+                    </div>
+                  ))}
+                </div>
+                <p className="mt-3 border-t pt-3 text-[11px]" style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-muted)' }}>{t('requirements')}</p>
+              </div>
+            ) : (
+              <div className="p-4 text-center text-caption" style={{ color: 'var(--theme-text-muted)' }}>{tSetup('naBadge')}</div>
+            )}
+          </div>
+
+          <button onClick={handleGenerate} disabled={!ready || generateMut.isPending}
+            className={`flex h-13 items-center justify-center gap-2.5 rounded-[13px] text-[15px] font-bold transition-transform ${ready && !generateMut.isPending ? 'hover:-translate-y-0.5 active:scale-95' : 'cursor-not-allowed'}`}
+            style={ready
+              ? { background: 'var(--accent)', color: 'var(--accent-on)', boxShadow: '0 6px 18px color-mix(in srgb, var(--accent) 40%, transparent)' }
+              : { background: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)', border: '1px solid var(--theme-border)' }}>
+            {generateMut.isPending ? <><IconLoader size={17} /> {t('loadingShort')}</> : <><IconCheck size={17} /> {tSetup('createExam')}</>}
+          </button>
+          {generateMut.isPending && <div className="-mt-1 text-center text-[11.5px]" style={{ color: 'var(--theme-text-muted)' }}>{t('loadingHint')}</div>}
+          {errorMsg && <p className="text-center text-caption" style={{ color: 'var(--danger)' }}>{errorMsg}</p>}
         </div>
       </div>
-
-      {/* Step 2: Level */}
-      <div className="mb-6">
-        <p className="text-xs font-bold uppercase tracking-wider mb-3" style={{ color: 'var(--theme-text-muted)' }}>
-          {tSetup('step2Label')}
-        </p>
-        <div className="flex gap-2">
-          {LEVELS.map(lvl => {
-            const unsupported = examType === 'TELC' && lvl === 'A1';
-            return (
-              <button key={lvl} onClick={() => !unsupported && setCefrLevel(lvl)}
-                disabled={unsupported}
-                className="flex-1 py-3 rounded-2xl border-2 font-bold text-[15px] transition-all"
-                style={cefrLevel === lvl && !unsupported
-                  ? { borderColor: ACCENT.xp, backgroundColor: `${ACCENT.xp}1A`, color: ACCENT.xp }
-                  : unsupported
-                    ? { borderColor: 'var(--theme-border)', color: 'var(--theme-text-muted)', opacity: 0.4, cursor: 'not-allowed', backgroundColor: 'transparent' }
-                    : { borderColor: 'var(--theme-border)', color: 'var(--theme-text-primary)', backgroundColor: 'transparent' }}>
-                {lvl}
-                {unsupported && <div className="text-[9px] font-normal">{tSetup('naBadge')}</div>}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Summary card */}
-      {examInfo && !isTelcA1 && (
-        <div className="rounded-2xl border p-4 mb-6"
-          style={{ borderColor: `${ACCENT.xp}4D`, backgroundColor: `${ACCENT.xp}0A` }}>
-          <p className="text-body font-bold mb-2" style={{ color: ACCENT.xp }}>
-            {examType} {cefrLevel} — {t('skillLabel')}
-          </p>
-          <div className="grid grid-cols-3 gap-2 text-center mb-3">
-            <div>
-              <div className="text-title font-extrabold" style={{ color: 'var(--theme-text-primary)' }}>{examInfo.teile}</div>
-              <div className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>{tSetup('teile')}</div>
-            </div>
-            <div>
-              <div className="text-title font-extrabold" style={{ color: 'var(--theme-text-primary)' }}>{examInfo.totalPoints}</div>
-              <div className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>{tSetup('maxPoints')}</div>
-            </div>
-            <div>
-              <div className="text-title font-extrabold" style={{ color: 'var(--theme-text-primary)' }}>{examInfo.timeMin} {tSetup('minutesAbbr')}</div>
-              <div className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>{tSetup('timeLabel')}</div>
-            </div>
-          </div>
-          <div className="space-y-1">
-            {examInfo.structure.map((s: string, i: number) => (
-              <div key={i} className="flex items-center gap-2 text-xs" style={{ color: 'var(--theme-text-secondary)' }}>
-                <span className="w-14 font-bold shrink-0" style={{ color: 'var(--theme-text-muted)' }}>{tSetup('teilLine', { i: i + 1 })}</span>
-                <span>{s}</span>
-              </div>
-            ))}
-          </div>
-          <div className="mt-3 pt-3 border-t" style={{ borderColor: `${ACCENT.xp}33` }}>
-            <p className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>
-              {t('requirements')}
-            </p>
-          </div>
-        </div>
-      )}
-
-      {errorMsg && (
-        <div className="p-3 rounded-xl text-body mb-4" style={{ backgroundColor: `${STATUS.danger}14`, color: STATUS.danger }}>
-          {errorMsg}
-        </div>
-      )}
-
-      <button onClick={handleGenerate}
-        disabled={generateMut.isPending || isTelcA1}
-        className="w-full py-3.5 rounded-2xl font-bold text-[15px] text-white flex items-center justify-center gap-2 transition-all hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-        style={{ background: GRADIENT.speaking, boxShadow: `0 4px 12px ${ACCENT.xp}4D` }}>
-        {generateMut.isPending ? (
-          <><IconLoader size={18} /> {t('loadingShort')}</>
-        ) : (
-          tSetup('createExam')
-        )}
-      </button>
-
-      {generateMut.isPending && (
-        <p className="text-center text-xs mt-3" style={{ color: 'var(--theme-text-muted)' }}>
-          {t('loadingHint')}
-        </p>
-      )}
     </div>
   );
 }

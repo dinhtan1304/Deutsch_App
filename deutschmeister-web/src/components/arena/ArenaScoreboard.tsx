@@ -29,7 +29,7 @@ function Avatar({ player, ring }: { player: ArenaPlayerLite; ring: boolean }) {
       <img
         src={player.avatar}
         alt={player.displayName}
-        className="w-10 h-10 rounded-full object-cover"
+        className="w-10 h-10 rounded-lg object-cover"
         style={ringStyle}
       />
     );
@@ -37,7 +37,7 @@ function Avatar({ player, ring }: { player: ArenaPlayerLite; ring: boolean }) {
   const initial = (player.displayName || '?').charAt(0).toUpperCase();
   return (
     <div
-      className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-body text-white"
+      className="w-10 h-10 rounded-lg flex items-center justify-center font-bold text-body text-white"
       style={{
         background: player.isBot ? GRADIENT.examWriting : GRADIENT.writing,
         ...ringStyle,

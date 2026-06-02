@@ -9,7 +9,7 @@ import { useStartShadowing } from '@/hooks/useShadowing';
 import { DictationSessionGraded, Part } from '@/lib/api/dictation';
 import { YouTubeEmbed, YouTubeEmbedRef } from '@/components/dictation/YouTubeEmbed';
 import { ScoreRing, PageHeader } from '@/components/ui';
-import { GRADIENT, ACCENT } from '@/lib/tokens';
+import { ACCENT } from '@/lib/tokens';
 
 type GradingDetail = DictationSessionGraded['gradingDetails'][number];
 type GradingMap = Map<string, GradingDetail>;
@@ -129,7 +129,7 @@ export default function DictationResultPage() {
   if (isLoading || isFetching) {
     return (
       <div className="flex justify-center items-center min-h-[60vh]">
-        <div className="w-10 h-10 border-4 border-pink-500/20 border-t-pink-500 rounded-full animate-spin" />
+        <div className="w-10 h-10 border-4 rounded-full animate-spin" style={{ borderColor: 'var(--theme-border)', borderTopColor: 'var(--accent)' }} />
       </div>
     );
   }
@@ -162,7 +162,7 @@ export default function DictationResultPage() {
 
       {/* ── Top row: video | score (50/50) ── */}
       <div className="mt-6 flex flex-col sm:flex-row gap-5">
-        <div className="sm:w-1/2 rounded-2xl overflow-hidden shadow-2xl border border-white/5 bg-black/20">
+        <div className="sm:w-1/2 rounded-2xl overflow-hidden border" style={{ borderColor: 'var(--theme-border)', background: 'var(--theme-bg-secondary)' }}>
           <YouTubeEmbed ref={playerRef} youtubeId={graded.video.youtubeId} />
         </div>
         <div className="sm:w-1/2">
@@ -201,31 +201,32 @@ function ScoreCard({ graded, emoji, label, color, onRetry, isRetrying, onShadow 
 }) {
   const t = useTranslations('practice.dictation.result');
   return (
-    <div className="rounded-3xl border p-8 flex flex-col items-center relative overflow-hidden"
-      style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)', boxShadow: '0 20px 50px rgba(0,0,0,0.15)' }}>
-      <div className="absolute top-0 inset-x-0 h-1.5" style={{ background: GRADIENT.listening }} />
+    <div className="rounded-2xl border p-6 flex flex-col items-center"
+      style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
       <ScoreRing value={graded.score ?? 0} accent="listening" variant="exam" size={150}
         label={`${Math.round(graded.score ?? 0)}%`}
         sublabel={`${graded.correctBlanks ?? 0}/${graded.totalBlanks ?? 0}`} />
-      <div className="text-center mt-6">
-        <h2 className="text-2xl font-black tracking-tight" style={{ color }}>{emoji} {label}</h2>
+      <div className="text-center mt-5">
+        <h2 className="text-h2 font-bold" style={{ color }}>{emoji} {label}</h2>
       </div>
-      <div className="grid grid-cols-1 gap-2 w-full mt-8">
+      <div className="grid grid-cols-1 gap-2 w-full mt-6">
         <button onClick={onRetry} disabled={isRetrying}
-          className="flex items-center justify-center gap-3 p-4 rounded-2xl border border-white/5 bg-white/5 transition-all hover:bg-white/10 disabled:opacity-50">
+          className="flex items-center justify-center gap-2.5 p-3.5 rounded-xl border transition-colors hover:bg-(--theme-bg-secondary) disabled:opacity-50"
+          style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-primary)' }}>
           <IconRetry size={18} />
-          <span className="text-xs font-black uppercase tracking-widest">{t('retry')}</span>
+          <span className="text-body font-semibold">{t('retry')}</span>
         </button>
         <Link href="/practice-test/dictation/library"
-          className="flex items-center justify-center gap-3 p-4 rounded-2xl border border-white/5 bg-white/5 transition-all hover:bg-white/10">
+          className="flex items-center justify-center gap-2.5 p-3.5 rounded-xl border transition-colors hover:bg-(--theme-bg-secondary)"
+          style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-primary)' }}>
           <IconLibrary size={18} />
-          <span className="text-xs font-black uppercase tracking-widest">{t('library')}</span>
+          <span className="text-body font-semibold">{t('library')}</span>
         </Link>
         <button onClick={onShadow}
-          className="flex items-center justify-center gap-3 p-4 rounded-2xl text-white transition-all hover:brightness-110 active:scale-95"
-          style={{ background: GRADIENT.reading, boxShadow: '0 8px 20px rgba(34,197,94,0.25)' }}>
+          className="flex items-center justify-center gap-2.5 p-3.5 rounded-xl transition-transform hover:-translate-y-0.5 active:scale-95"
+          style={{ background: 'var(--accent)', color: 'var(--accent-on)' }}>
           🎤
-          <span className="text-xs font-black uppercase tracking-widest">{t('shadowVideo')}</span>
+          <span className="text-body font-semibold">{t('shadowVideo')}</span>
         </button>
       </div>
     </div>
@@ -248,7 +249,7 @@ function MistakesSummary({
         <div className="flex items-center gap-2">
           <IconAlertTriangle size={16} />
           <span className="text-sm font-bold">{t('mistakesTitle')}</span>
-          <span className="text-[10px] font-black px-2 py-0.5 rounded-full"
+          <span className="text-caption font-semibold px-2 py-0.5 rounded-md"
             style={{ background: 'rgba(239,68,68,0.12)', color: 'var(--color-status-danger)' }}>
             {items.length}
           </span>
@@ -322,14 +323,14 @@ function SegmentList({ segments, gradingMap, onPlay, filter, onFilterChange, wro
   return (
     <div>
       {/* Filter tabs */}
-      <div className="flex gap-1 p-1 rounded-xl mb-4"
-        style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
+      <div className="flex gap-1 p-1 rounded-lg mb-4 border"
+        style={{ backgroundColor: 'var(--theme-bg-secondary)', borderColor: 'var(--theme-border)' }}>
         {TABS.map(tab => (
           <button key={tab.key} onClick={() => onFilterChange(tab.key)}
-            className="flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all"
+            className="flex-1 py-1.5 rounded-md text-body font-semibold transition-colors"
             style={filter === tab.key
-              ? { background: GRADIENT.listening, color: 'white', boxShadow: '0 2px 8px rgba(236,72,153,0.35)' }
-              : { color: 'var(--theme-text-muted)' }
+              ? { background: 'var(--theme-bg-card)', color: 'var(--accent)', border: '1px solid var(--accent)' }
+              : { color: 'var(--theme-text-muted)', border: '1px solid transparent' }
             }>
             {tab.label}
           </button>
@@ -371,8 +372,8 @@ function SegmentList({ segments, gradingMap, onPlay, filter, onFilterChange, wro
               <div className="flex items-start gap-3">
                 <button
                   onClick={() => onPlay(seg.start / 1000, seg.end / 1000)}
-                  className="shrink-0 w-9 h-9 rounded-xl flex items-center justify-center transition-transform hover:scale-110 active:scale-95"
-                  style={{ background: 'rgba(236,72,153,0.12)', color: ACCENT.listening }}>
+                  className="shrink-0 w-9 h-9 rounded-md flex items-center justify-center transition-transform active:scale-95"
+                  style={{ background: 'color-mix(in srgb, var(--accent) 14%, transparent)', color: 'var(--accent)' }}>
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
                     <polygon points="5 3 19 12 5 21 5 3" />
                   </svg>
@@ -388,7 +389,7 @@ function SegmentList({ segments, gradingMap, onPlay, filter, onFilterChange, wro
 
                 <div className="shrink-0 flex flex-col items-end gap-1 pt-1">
                   {total > 0 && (
-                    <span className="text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest"
+                    <span className="text-caption font-semibold px-2 py-0.5 rounded-md uppercase tracking-wide"
                       style={{ color: badgeColor, background: badgeBg }}>
                       {t('segmentCorrect', { correct, total })}
                     </span>

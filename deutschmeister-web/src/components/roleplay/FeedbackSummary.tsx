@@ -1,5 +1,4 @@
 ﻿'use client';
-/* eslint-disable no-restricted-syntax */
 
 import { useTranslations } from 'next-intl';
 import { RoleplayFeedback } from '@/lib/api/roleplay';
@@ -31,8 +30,8 @@ export function FeedbackSummary({ feedback }: Props) {
         }}
       >
         <div
-          className="text-5xl font-bold mb-1"
-          style={{ color: overallColor }}
+          className="mono font-bold mb-1"
+          style={{ color: overallColor, fontSize: 44, letterSpacing: '-.02em' }}
         >
           {feedback.overallScore}
           <span className="text-2xl opacity-60">/100</span>
@@ -58,7 +57,7 @@ export function FeedbackSummary({ feedback }: Props) {
             }}
           >
             <div
-              className="text-xl font-bold"
+              className="mono text-xl font-bold"
               style={{ color: getScoreColor(s.value) }}
             >
               {s.value}
@@ -102,8 +101,8 @@ export function FeedbackSummary({ feedback }: Props) {
         <div
           className="rounded-2xl border p-4"
           style={{
-            borderColor: '#22C55E40',
-            backgroundColor: 'rgba(34,197,94,0.05)',
+            borderColor: `color-mix(in srgb, ${STATUS.success} 25%, transparent)`,
+            backgroundColor: `color-mix(in srgb, ${STATUS.success} 6%, transparent)`,
           }}
         >
           <h4 className="text-sm font-bold mb-2" style={{ color: STATUS.success }}>
@@ -129,8 +128,8 @@ export function FeedbackSummary({ feedback }: Props) {
         <div
           className="rounded-2xl border p-4"
           style={{
-            borderColor: '#F59E0B40',
-            backgroundColor: 'rgba(245,158,11,0.05)',
+            borderColor: `color-mix(in srgb, ${ACCENT.xp} 25%, transparent)`,
+            backgroundColor: `color-mix(in srgb, ${ACCENT.xp} 6%, transparent)`,
           }}
         >
           <h4 className="text-sm font-bold mb-2" style={{ color: ACCENT.xp }}>

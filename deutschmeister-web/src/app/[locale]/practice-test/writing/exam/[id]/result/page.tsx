@@ -89,7 +89,7 @@ function TeilGradingCard({
     <div className="rounded-2xl border overflow-hidden"
       style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
       <button className="w-full flex items-center gap-3 p-4 transition-opacity hover:opacity-80" onClick={onToggle}>
-        <span className="w-8 h-8 rounded-xl flex items-center justify-center text-xs font-extrabold text-white shrink-0"
+        <span className="w-8 h-8 rounded-[10px] flex items-center justify-center text-xs font-extrabold text-white shrink-0"
           style={{ background: GRADIENT.examWriting }}>{teil.number}</span>
         <div className="flex-1 text-left">
           <p className="text-sm font-bold" style={{ color: 'var(--theme-text-primary)' }}>
@@ -196,7 +196,7 @@ function TeilGradingCard({
                 <div className="rounded-xl p-3 border"
                   style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-secondary)' }}>
                   <p className="text-xs leading-relaxed whitespace-pre-wrap"
-                    style={{ color: 'var(--theme-text-primary)', fontFamily: 'Georgia, serif' }}>
+                    style={{ color: 'var(--theme-text-primary)' }}>
                     {userText}
                   </p>
                 </div>
@@ -319,7 +319,7 @@ export default function ExamWritingResultPage() {
           </div>
           <div className="sm:w-1/2 flex flex-col justify-center p-6 gap-3">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full flex items-center justify-center shadow-inner"
+              <div className="w-10 h-10 rounded-md flex items-center justify-center shadow-inner"
                 style={{ backgroundColor: passed ? `${STATUS.success}26` : `${STATUS.danger}26`, color: passed ? STATUS.success : STATUS.danger }}>
                 <span className="text-xl font-bold">{passed ? '✓' : '✗'}</span>
               </div>

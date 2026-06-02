@@ -36,7 +36,7 @@ export default function CommunityTopicDetailPage() {
 
   if (isLoading || !topic) {
     return (
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6">
+      <div className="max-w-360 mx-auto px-4 sm:px-6 py-6">
         <Card className="h-40 animate-pulse opacity-60" />
       </div>
     );
@@ -75,7 +75,7 @@ export default function CommunityTopicDetailPage() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6">
+    <div className="max-w-360 mx-auto px-4 sm:px-6 py-6">
       <PageHeader
         backHref="/community/topics"
         hideBackIcon
@@ -95,7 +95,7 @@ export default function CommunityTopicDetailPage() {
       <Card variant="default" className="mb-5" style={{ border: '1px solid var(--theme-border)' }}>
         <div className="flex flex-col sm:flex-row gap-4">
           <div
-            className="w-16 h-16 rounded-2xl flex items-center justify-center text-base font-black shrink-0"
+            className="w-16 h-16 rounded-2xl flex items-center justify-center text-base font-bold shrink-0"
             style={{
               background: topic.coverColor
                 ? `${topic.coverColor}22`
@@ -109,14 +109,14 @@ export default function CommunityTopicDetailPage() {
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-2 flex-wrap">
               <span
-                className="text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded text-white"
+                className="text-caption font-semibold uppercase tracking-wide px-2 py-0.5 rounded-md text-white"
                 style={{ backgroundColor: levelColor }}
               >
                 {topic.level}
               </span>
               {topic.visibility === 'PUBLIC' && (
                 <span
-                  className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded"
+                  className="text-caption font-semibold uppercase tracking-wide px-2 py-0.5 rounded-md"
                   style={{ backgroundColor: `${ACCENT.reading}18`, color: ACCENT.reading }}
                 >
                   {t('public')}
@@ -184,11 +184,11 @@ export default function CommunityTopicDetailPage() {
             onClick={() => {
               navigator.clipboard.writeText(window.location.href);
             }}
-            className="px-4 py-2 rounded-xl text-sm font-semibold transition-all"
+            className="px-4 py-2 rounded-md text-sm font-semibold transition-colors hover:bg-(--theme-bg-secondary)"
             style={{
               backgroundColor: 'transparent',
               color: 'var(--theme-text-secondary)',
-              border: '2px solid var(--theme-border)',
+              border: '1px solid var(--theme-border)',
             }}
           >
             {t('copyLink')}
@@ -234,11 +234,11 @@ export default function CommunityTopicDetailPage() {
 function Stat({ label, value, color }: { label: string; value: number; color: string }) {
   return (
     <div className="text-center">
-      <div className="text-2xl font-black" style={{ color }}>
+      <div className="text-2xl font-bold mono" style={{ color }}>
         {value.toLocaleString('vi-VN')}
       </div>
       <div
-        className="text-[10px] font-bold uppercase tracking-wider"
+        className="text-caption font-semibold uppercase tracking-wide"
         style={{ color: 'var(--theme-text-muted)' }}
       >
         {label}

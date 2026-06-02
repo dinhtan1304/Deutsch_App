@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import { STATUS } from '@/lib/tokens';
 import { usePronunciation } from '@/hooks/usePronunciation';
 import type { IpaSymbol } from '@/lib/data/ipaChart';
 import { IPA_CATEGORY_LABELS } from '@/lib/data/ipaChart';
@@ -27,9 +27,9 @@ export function IpaDetailPanel({ symbol, onClose }: IpaDetailPanelProps) {
     <div
       className="rounded-2xl border p-5 shadow-2xl"
       style={{
-        borderColor: `${ACCENT.examWriting}40`,
-        // Solid card base + faint accent tint (opaque so it reads as a dialog).
-        background: `linear-gradient(135deg, color-mix(in srgb, ${ACCENT.examWriting} 7%, var(--theme-bg-card)), var(--theme-bg-card))`,
+        borderColor: 'color-mix(in srgb, var(--accent) 40%, transparent)',
+        // Calm solid card base with a faint accent tint (opaque — reads as a dialog).
+        background: 'color-mix(in srgb, var(--accent) 6%, var(--theme-bg-card))',
       }}
     >
       {/* Header */}
@@ -37,7 +37,7 @@ export function IpaDetailPanel({ symbol, onClose }: IpaDetailPanelProps) {
         <div className="flex items-center gap-3 min-w-0">
           <div
             className="font-mono font-bold leading-none shrink-0"
-            style={{ color: ACCENT.examWriting, fontSize: '2.5rem' }}
+            style={{ color: 'var(--accent)', fontSize: '2.5rem' }}
           >
             /{symbol.ipa}/
           </div>
@@ -108,7 +108,7 @@ export function IpaDetailPanel({ symbol, onClose }: IpaDetailPanelProps) {
       >
         <div
           className="text-[10px] font-bold uppercase tracking-wider mb-1"
-          style={{ color: ACCENT.examWriting }}
+          style={{ color: 'var(--accent)' }}
         >
           {t('tipTitle')}
         </div>
@@ -154,7 +154,7 @@ export function IpaDetailPanel({ symbol, onClose }: IpaDetailPanelProps) {
                 onClick={() => speak(ex.word)}
                 aria-label={t('pronounceAria', { word: ex.word })}
                 className="w-9 h-9 rounded-full flex items-center justify-center shrink-0 transition-transform hover:scale-105"
-                style={{ background: GRADIENT.pronunciation, color: 'white' }}
+                style={{ background: 'var(--accent)', color: 'var(--accent-on)' }}
               >
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
                   <path d="M8 5v14l11-7z" />
@@ -170,7 +170,7 @@ export function IpaDetailPanel({ symbol, onClose }: IpaDetailPanelProps) {
         <Link
           href={`/practice-test/pronunciation/drills/${symbol.drillPhonemeKey}`}
           className="block rounded-xl p-3 text-center font-semibold text-sm transition-transform hover:scale-[1.01]"
-          style={{ background: GRADIENT.pronunciation, color: 'white' }}
+          style={{ background: 'var(--accent)', color: 'var(--accent-on)' }}
         >
           {t('deepDrill')}
         </Link>

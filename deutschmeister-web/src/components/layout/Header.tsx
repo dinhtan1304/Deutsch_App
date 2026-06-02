@@ -203,76 +203,75 @@ function HeaderComponent({ sidebarCollapsed, onOpenPalette }: HeaderProps) {
                   <div className="fixed inset-0 z-40" onClick={() => setShowUserMenu(false)} />
                   <div
                     role="menu"
-                    className="absolute right-0 top-full mt-3 w-[min(22rem,calc(100vw-1.5rem))] rounded-[2.5rem] shadow-2xl border p-3 z-50 backdrop-blur-3xl animate-[slideUp_0.4s_cubic-bezier(0.16,1,0.3,1)_both]"
+                    className="absolute right-0 top-full mt-3 w-[min(22rem,calc(100vw-1.5rem))] rounded-2xl shadow-xl border p-3 z-50 backdrop-blur-2xl animate-[slideUp_0.4s_cubic-bezier(0.16,1,0.3,1)_both]"
                     style={{
                       background: 'color-mix(in srgb, var(--theme-bg-card) 96%, transparent)',
                       borderColor: 'var(--theme-border)',
-                      boxShadow: '0 40px 80px rgba(0,0,0,0.15)',
+                      boxShadow: '0 16px 40px rgba(0,0,0,0.14)',
                     }}
                   >
-                    {/* UI REFRESH TRIGGER: 1.0.1 */}
-                    {/* Premium Membership Card */}
-                    <div className="relative overflow-hidden rounded-4xl p-5 mb-3 group shadow-sm border border-black/5 dark:border-white/5">
-                      {/* Background Aura */}
-                      <div className="absolute inset-0 transition-transform duration-700 group-hover:scale-110"
-                        style={{
-                          background: isPremium
-                            ? GRADIENT.premiumAuraBg
-                            : GRADIENT.grayAuraBg
-                        }}
-                      />
-
-                      <div className="relative z-10 flex items-center gap-4">
-                        <div className="relative">
-                          <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-white font-black text-xl shadow-xl transition-transform group-hover:rotate-6"
-                            style={{ background: isPremium ? GRADIENT.brand : 'var(--theme-bg-secondary)' }}>
+                    {/* Membership Card */}
+                    <div className="rounded-2xl p-4 mb-3 border"
+                      style={{
+                        borderColor: isPremium ? 'color-mix(in srgb, var(--accent) 25%, transparent)' : 'var(--theme-border)',
+                        background: isPremium ? 'color-mix(in srgb, var(--accent) 10%, transparent)' : 'var(--theme-bg-secondary)',
+                      }}>
+                      <div className="flex items-center gap-3.5">
+                        <div className="relative shrink-0">
+                          <div className="w-12 h-12 rounded-xl flex items-center justify-center font-bold text-lead"
+                            style={isPremium
+                              ? { background: 'var(--accent)', color: 'var(--accent-on)' }
+                              : { background: 'var(--theme-bg-card)', color: 'var(--theme-text-primary)', border: '1px solid var(--theme-border)' }}>
                             {user?.name?.charAt(0).toUpperCase() || '?'}
                           </div>
                           {isPremium && (
-                            <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-lg bg-amber-500 border-2 border-white dark:border-gray-900 flex items-center justify-center shadow-lg">
-                              <IconStar size={10} className="text-white" />
+                            <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-md flex items-center justify-center"
+                              style={{ background: ACCENT.xp, color: 'white', border: '2px solid var(--theme-bg-card)' }}>
+                              <IconStar size={10} />
                             </div>
                           )}
                         </div>
                         <div className="min-w-0">
-                          <p className="font-black text-base truncate mb-0.5" style={{ color: 'var(--theme-text-primary)' }}>
+                          <p className="font-bold text-body truncate mb-1" style={{ color: 'var(--theme-text-primary)' }}>
                             {user?.name}
                           </p>
-                          <div className="flex items-center gap-2">
-                            <span className={`px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-widest ${isPremium ? 'bg-indigo-500 text-white' : 'bg-black/5 dark:bg-white/10 text-muted'}`}>
-                              {isPremium ? t('userBadge.premium') : t('userBadge.free')}
-                            </span>
-                          </div>
+                          <span className="inline-flex px-2 py-0.5 rounded-md text-caption font-semibold uppercase tracking-wide"
+                            style={isPremium
+                              ? { background: 'color-mix(in srgb, var(--accent) 16%, transparent)', color: 'var(--accent)' }
+                              : { background: 'var(--theme-bg-card)', color: 'var(--theme-text-muted)', border: '1px solid var(--theme-border)' }}>
+                            {isPremium ? t('userBadge.premium') : t('userBadge.free')}
+                          </span>
                         </div>
                       </div>
                     </div>
 
-                    {/* XP & Level Gamified Section */}
+                    {/* XP & Level Section */}
                     {xpInfo && (
-                      <div className="px-5 py-4 mb-3 rounded-[1.8rem] bg-black/2 dark:bg-white/3 border border-black/5 dark:border-white/5">
+                      <div className="px-4 py-3.5 mb-3 rounded-2xl border"
+                        style={{ background: 'var(--theme-bg-secondary)', borderColor: 'var(--theme-border)' }}>
                         <div className="flex items-center justify-between mb-2.5">
                           <div className="flex items-center gap-2">
-                            <div className="w-6 h-6 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-500">
-                              <IconZap size={14} className="animate-pulse" />
+                            <div className="w-6 h-6 rounded-md flex items-center justify-center"
+                              style={{ background: 'color-mix(in srgb, var(--accent) 14%, transparent)', color: 'var(--accent)' }}>
+                              <IconZap size={14} />
                             </div>
-                            <span className="text-sm font-black tracking-tight" style={{ color: 'var(--theme-text-primary)' }}>
-                              {formatter.number(xpInfo.xp)} <span className="opacity-40 text-[10px]">XP</span>
+                            <span className="text-body font-bold" style={{ color: 'var(--theme-text-primary)' }}>
+                              <span className="mono">{formatter.number(xpInfo.xp)}</span> <span className="opacity-40 text-caption">XP</span>
                             </span>
                           </div>
-                          <div className="px-2 py-0.5 rounded-lg bg-black/5 dark:bg-white/10">
-                            <span className="text-[10px] font-black tracking-tighter" style={{ color: 'var(--theme-text-primary)' }}>
-                              LEVEL {xpInfo.level}
-                            </span>
-                          </div>
+                          <span className="px-2 py-0.5 rounded-md text-caption font-semibold uppercase tracking-wide"
+                            style={{ background: 'var(--theme-bg-card)', color: 'var(--theme-text-secondary)', border: '1px solid var(--theme-border)' }}>
+                            LEVEL {xpInfo.level}
+                          </span>
                         </div>
-                        <div className="h-2 w-full bg-black/5 dark:bg-white/5 rounded-full overflow-hidden p-px">
-                          <div className="h-full rounded-full transition-all duration-1000 shadow-[0_0_12px_rgba(99,102,241,0.4)]"
+                        <div className="h-2 w-full rounded-[3px] overflow-hidden" style={{ background: 'var(--theme-bg-card)' }}>
+                          <div className="h-full rounded-[3px] transition-all duration-700"
                             style={{
                               width: `${Math.min(100, (xpInfo.xp % 1000) / 10)}%`,
-                              background: GRADIENT.writingH
+                              background: 'var(--accent)',
                             }} />
                         </div>
-                        <p className="text-[9px] mt-2 font-bold opacity-40 uppercase tracking-widest text-center" style={{ color: 'var(--theme-text-primary)' }}>
+                        <p className="text-caption mt-2 font-semibold uppercase tracking-wide text-center" style={{ color: 'var(--theme-text-muted)' }}>
                           {xpInfo.nameVi}
                         </p>
                       </div>
@@ -290,12 +289,12 @@ function HeaderComponent({ sidebarCollapsed, onOpenPalette }: HeaderProps) {
                         const isAction = 'action' in item;
 
                         const content = (
-                          <div className="flex items-center gap-3 px-3 py-2.5 rounded-2xl transition-all duration-300 hover:bg-black/3 dark:hover:bg-white/5 hover:translate-x-1.5 group">
-                            <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-black/5 dark:bg-white/5 group-hover:scale-110 transition-all"
-                              style={{ color: item.color }}>
+                          <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors hover:bg-(--theme-bg-secondary)">
+                            <div className="w-9 h-9 rounded-md flex items-center justify-center"
+                              style={{ background: `color-mix(in srgb, ${item.color} 12%, transparent)`, color: item.color }}>
                               <ItemIcon size={18} />
                             </div>
-                            <span className="text-[13px] font-bold opacity-70 group-hover:opacity-100 transition-opacity whitespace-nowrap" style={{ color: 'var(--theme-text-primary)' }}>
+                            <span className="text-body font-medium whitespace-nowrap" style={{ color: 'var(--theme-text-primary)' }}>
                               {item.label}
                             </span>
                           </div>
@@ -324,16 +323,17 @@ function HeaderComponent({ sidebarCollapsed, onOpenPalette }: HeaderProps) {
                         );
                       })}
 
-                      <div className="h-px bg-black/5 dark:bg-white/5 my-3 mx-4" />
+                      <div className="h-px my-2 mx-3" style={{ background: 'var(--theme-border)' }} />
 
                       <button
                         onClick={() => { logout(); setShowUserMenu(false); router.push('/'); }}
-                        className="flex items-center gap-3 px-3 py-2.5 rounded-2xl w-full text-left transition-all duration-300 hover:bg-red-500/5 hover:translate-x-1.5 group"
+                        className="flex items-center gap-3 px-3 py-2.5 rounded-xl w-full text-left transition-colors hover:bg-(--theme-bg-secondary)"
                       >
-                        <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-red-500/5 text-red-500 group-hover:bg-red-500 group-hover:text-white transition-all shadow-sm">
+                        <div className="w-9 h-9 rounded-md flex items-center justify-center"
+                          style={{ background: `color-mix(in srgb, ${STATUS.danger} 12%, transparent)`, color: STATUS.danger }}>
                           <IconLogOut size={18} />
                         </div>
-                        <span className="text-[13px] font-bold text-red-500 opacity-80 group-hover:opacity-100 whitespace-nowrap">
+                        <span className="text-body font-medium whitespace-nowrap" style={{ color: STATUS.danger }}>
                           {t('userMenu.logout')}
                         </span>
                       </button>

@@ -6,7 +6,8 @@ import { useTranslations } from 'next-intl';
 import { usePronunciationTargets, useScorePronunciation } from '@/hooks/usePronunciationScoring';
 import type { WordScore } from '@/lib/api/pronunciation';
 import { PageHeader, FixedActionBar } from '@/components/ui';
-import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import { RecordPanel } from '@/components/pronunciation/RecordPanel';
+import { ACCENT, STATUS } from '@/lib/tokens';
 
 const MAX_RECORD_SECS = 30;
 
@@ -174,14 +175,14 @@ export default function PronunciationPracticePage() {
         title={t('title')}
         accent="xp"
         right={
-          <span className="px-2.5 py-0.5 rounded-lg text-xs font-black text-white"
-            style={{ backgroundColor: ACCENT.listening }}>{target.level}</span>
+          <span className="px-2.5 py-0.5 rounded-lg text-xs font-bold text-white"
+            style={{ backgroundColor: 'var(--accent)' }}>{target.level}</span>
         }
       />
 
       <div className="flex items-start justify-between gap-3 mb-6">
         <div className="flex-1 min-w-0">
-          <h1 className="text-h2 font-black tracking-tight mb-1" style={{ color: 'var(--theme-text-primary)' }}>
+          <h1 className="text-h2 font-bold tracking-tight mb-1" style={{ color: 'var(--theme-text-primary)' }}>
              {target.category}
           </h1>
           <p className="text-xs font-bold" style={{ color: 'var(--theme-text-muted)' }}>{t('subtitle')}</p>
@@ -192,13 +193,13 @@ export default function PronunciationPracticePage() {
 
         {/* Left Side: Target Text (Sticky) */}
         <div className="lg:w-1/2 shrink-0 lg:sticky lg:top-20 lg:self-start space-y-6">
-           <div className="rounded-3xl border p-8 text-center" style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
-              <p className="text-caption font-black uppercase tracking-widest mb-4 opacity-40">{t('instruction')}</p>
-              <h2 className="text-2xl md:text-3xl font-black mb-4 leading-tight" style={{ color: 'var(--theme-text-primary)' }}>
+           <div className="rounded-[14px] border p-8 text-center" style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
+              <p className="text-caption font-bold uppercase tracking-widest mb-4 opacity-40">{t('instruction')}</p>
+              <h2 className="text-2xl md:text-3xl font-bold mb-4 leading-tight" style={{ color: 'var(--theme-text-primary)' }}>
                 {target.text}
               </h2>
               <div className="p-4 rounded-2xl italic text-[15px]"
-                style={{ backgroundColor: `${ACCENT.listening}0D`, border: `1px solid ${ACCENT.listening}1A`, color: 'var(--theme-text-secondary)' }}>
+                style={{ backgroundColor: `color-mix(in srgb, var(--accent) 5%, transparent)`, border: `1px solid color-mix(in srgb, var(--accent) 10%, transparent)`, color: 'var(--theme-text-secondary)' }}>
                 {target.translationVi}
               </div>
            </div>
@@ -206,10 +207,10 @@ export default function PronunciationPracticePage() {
            {/* Results Area */}
            {result && (
               <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <div className="rounded-3xl border p-6 flex items-center justify-between" style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
+                <div className="rounded-[14px] border p-6 flex items-center justify-between" style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
                    <div>
-                      <p className="text-caption font-black uppercase tracking-widest mb-1 opacity-40">{t('overallScore')}</p>
-                      <p className="text-4xl font-black" style={{ color: getScoreColor(result.overallScore) }}>
+                      <p className="text-caption font-bold uppercase tracking-widest mb-1 opacity-40">{t('overallScore')}</p>
+                      <p className="text-4xl font-bold" style={{ color: getScoreColor(result.overallScore) }}>
                         {result.overallScore}<span className="text-lg opacity-40">/100</span>
                       </p>
                    </div>
@@ -219,12 +220,12 @@ export default function PronunciationPracticePage() {
                    </div>
                 </div>
 
-                <div className="rounded-3xl border p-6" style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
-                  <p className="text-caption font-black uppercase tracking-widest mb-4 opacity-40">{t('wordAnalysis')}</p>
+                <div className="rounded-[14px] border p-6" style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
+                  <p className="text-caption font-bold uppercase tracking-widest mb-4 opacity-40">{t('wordAnalysis')}</p>
                   <div className="flex flex-wrap gap-2.5">
                     {result.wordScores.map((ws, i) => (
                       <div key={i} className="relative group">
-                         <div className="px-4 py-2 rounded-xl border-2 font-bold text-sm transition-all cursor-help"
+                         <div className="px-4 py-2 rounded-md border-2 font-bold text-sm transition-all cursor-help"
                            style={{
                              borderColor: `${getWordColor(ws.score)}30`,
                              backgroundColor: `${getWordColor(ws.score)}0D`,
@@ -249,53 +250,28 @@ export default function PronunciationPracticePage() {
 
         {/* Right Side: Recording Area */}
         <div className="lg:w-1/2 min-w-0 space-y-6">
-           <div className="rounded-3xl border p-8 text-center relative overflow-hidden"
-            style={{
-              borderColor: recState === 'recording' ? ACCENT.listening : 'var(--theme-border)',
-              backgroundColor: 'var(--theme-bg-card)',
-              boxShadow: recState === 'recording' ? `0 20px 40px ${ACCENT.listening}1A` : 'none'
-            }}>
-
-              <div className="mb-8">
-                 <p className="text-xs font-black uppercase tracking-widest mb-8 opacity-40">
-                   {recState === 'idle' ? t('recordReady') : recState === 'recording' ? t('recordListening') : t('recordDone')}
-                 </p>
-
-                 <div className="flex justify-center mb-8">
-                    <div className={`w-24 h-24 rounded-full flex items-center justify-center transition-all duration-500 ${recState === 'recording' ? 'scale-110' : ''}`}
-                      style={{ background: recState === 'recording' ? GRADIENT.pronunciation : 'var(--theme-bg-secondary)', color: recState === 'recording' ? 'white' : 'var(--theme-text-muted)' }}>
-                       <IconMic size={32} />
-                    </div>
-                 </div>
-
-                 {recState === 'recording' && (
-                    <div className="text-2xl font-black mb-6" style={{ color: ACCENT.listening }}>
-                       {elapsed}s
-                    </div>
-                 )}
-
-                 {recState === 'done' && audioUrl && (
-                    <div className="px-6">
-                       <audio src={audioUrl} controls className="w-full h-10 rounded-full" />
-                    </div>
-                 )}
-              </div>
-
-              {result?.suggestions && result.suggestions.length > 0 && (
-                <div className="text-left pt-6 border-t" style={{ borderColor: 'var(--theme-border)' }}>
-                   <p className="text-caption font-black uppercase tracking-widest mb-4 opacity-40">{t('suggestions')}</p>
-                   <ul className="space-y-3">
-                     {result.suggestions.map((s, i) => (
-                       <li key={i} className="flex gap-3 text-[13px] font-medium leading-relaxed" style={{ color: 'var(--theme-text-secondary)' }}>
-                          <span className="w-5 h-5 rounded-lg flex items-center justify-center shrink-0 text-[10px]"
-                            style={{ backgroundColor: `${ACCENT.listening}1A`, color: ACCENT.listening }}>💡</span>
-                          {s}
-                       </li>
-                     ))}
-                   </ul>
-                </div>
-              )}
-           </div>
+           <RecordPanel
+             state={recState}
+             elapsed={elapsed}
+             maxSecs={MAX_RECORD_SECS}
+             audioUrl={audioUrl}
+             labels={{ idle: t('recordReady'), recording: t('recordListening'), done: t('recordDone'), scoring: t('analyzing') }}
+           >
+             {result?.suggestions && result.suggestions.length > 0 && (
+               <>
+                 <p className="text-caption font-semibold uppercase tracking-widest mb-4" style={{ color: 'var(--theme-text-muted)', letterSpacing: '.12em' }}>{t('suggestions')}</p>
+                 <ul className="space-y-3">
+                   {result.suggestions.map((s, i) => (
+                     <li key={i} className="flex gap-3 text-[13px] font-medium leading-relaxed" style={{ color: 'var(--theme-text-secondary)' }}>
+                        <span className="w-5 h-5 rounded-lg flex items-center justify-center shrink-0 text-[10px]"
+                          style={{ backgroundColor: 'color-mix(in srgb, var(--accent) 10%, transparent)', color: 'var(--accent)' }}>💡</span>
+                        {s}
+                     </li>
+                   ))}
+                 </ul>
+               </>
+             )}
+           </RecordPanel>
         </div>
       </div>
 
@@ -303,15 +279,15 @@ export default function PronunciationPracticePage() {
       <FixedActionBar columns={recState === 'done' ? (result ? 2 : 2) : 1}>
         {recState === 'idle' && (
           <button onClick={startRecording}
-            className="w-full py-4 rounded-2xl font-black text-sm text-white flex items-center justify-center gap-3 transition-all hover:scale-[1.02] shadow-2xl"
-            style={{ background: GRADIENT.pronunciation, boxShadow: `0 12px 32px ${ACCENT.listening}4D` }}>
+            className="w-full py-4 rounded-2xl font-bold text-sm text-white flex items-center justify-center gap-3 transition-transform hover:-translate-y-0.5 active:scale-95"
+            style={{ background: 'var(--accent)', boxShadow: '0 8px 24px color-mix(in srgb, var(--accent) 35%, transparent)' }}>
             <IconMic size={18} /> {t('startRecord')}
           </button>
         )}
 
         {recState === 'recording' && (
           <button onClick={stopRecording}
-            className="w-full py-4 rounded-2xl font-black text-sm text-white flex items-center justify-center gap-3"
+            className="w-full py-4 rounded-2xl font-bold text-sm text-white flex items-center justify-center gap-3"
             style={{ backgroundColor: STATUS.danger }}>
             <IconStop size={18} /> {t('stopRecord')}
           </button>
@@ -320,13 +296,13 @@ export default function PronunciationPracticePage() {
         {recState === 'done' && !result && (
           <>
             <button onClick={handleRetry}
-              className="py-4 px-8 rounded-2xl font-black text-sm border-2 transition-all hover:bg-black/5"
+              className="py-4 px-8 rounded-2xl font-bold text-sm border-2 transition-all hover:bg-black/5"
               style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)' }}>
               {t('retry')}
             </button>
             <button onClick={handleScore}
-              className="flex-1 py-4 rounded-2xl font-black text-sm text-white flex items-center justify-center gap-2"
-              style={{ background: GRADIENT.pronunciation }}>
+              className="flex-1 py-4 rounded-2xl font-bold text-sm text-white flex items-center justify-center gap-2"
+              style={{ background: 'var(--accent)' }}>
               {t('score')}
             </button>
           </>
@@ -335,14 +311,14 @@ export default function PronunciationPracticePage() {
         {result && (
           <>
             <button onClick={handleRetry}
-              className="py-4 px-8 rounded-2xl font-black text-sm border-2 transition-all hover:bg-black/5"
+              className="py-4 px-8 rounded-2xl font-bold text-sm border-2 transition-all hover:bg-black/5"
               style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)' }}>
               {t('tryAgain')}
             </button>
             {currentIndex < allTargets.length - 1 && (
               <button onClick={handleNext}
-                className="flex-1 py-4 rounded-2xl font-black text-sm text-white flex items-center justify-center gap-2"
-                style={{ background: GRADIENT.pronunciation }}>
+                className="flex-1 py-4 rounded-2xl font-bold text-sm text-white flex items-center justify-center gap-2"
+                style={{ background: 'var(--accent)' }}>
                 {t('nextSentence')} <IconChevronRight size={18} />
               </button>
             )}
@@ -350,7 +326,7 @@ export default function PronunciationPracticePage() {
         )}
 
         {recState === 'scoring' && (
-          <div className="w-full py-4 flex items-center justify-center gap-3 font-black text-sm" style={{ color: ACCENT.listening }}>
+          <div className="w-full py-4 flex items-center justify-center gap-3 font-bold text-sm" style={{ color: 'var(--accent)' }}>
             <IconLoader size={18} /> {t('analyzing')}
           </div>
         )}

@@ -6,7 +6,8 @@ import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { usePhonemeDrill, useScorePronunciation } from '@/hooks/usePronunciationScoring';
 import type { WordScore } from '@/lib/api/pronunciation';
-import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import { STATUS } from '@/lib/tokens';
+import { MinimalPairCard } from '@/components/pronunciation/MinimalPairCard';
 
 const MAX_RECORD_SECS = 30;
 
@@ -130,37 +131,29 @@ export default function PhonemeDrillPage() {
       </Link>
 
       <div className="flex items-center gap-3 mb-6">
-        <div className="text-4xl font-extrabold" style={{ color: ACCENT.examWriting }}>{drill.label}</div>
+        <div className="mono text-4xl font-bold" style={{ color: 'var(--accent)', letterSpacing: '-.03em' }}>{drill.label}</div>
         <div>
           <h1 className="text-xl font-bold" style={{ color: 'var(--theme-text-primary)' }}>{drill.labelVi}</h1>
-          <p className="text-xs font-mono" style={{ color: ACCENT.examWriting }}>{drill.ipa}</p>
+          <p className="mono text-xs" style={{ color: 'var(--accent)' }}>{drill.ipa}</p>
           <p className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>{drill.description}</p>
         </div>
       </div>
 
       {/* Minimal pairs */}
       <section className="mb-6">
-        <h2 className="text-body font-bold uppercase tracking-wider mb-2" style={{ color: ACCENT.listening }}>
+        <h2 className="text-caption font-bold uppercase tracking-wider mb-2.5" style={{ color: 'var(--die)' }}>
           {t('minimalPairs')}
         </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
           {drill.minimalPairs.map((pair, i) => (
-            <div key={i} className="rounded-xl border p-3 flex items-center gap-3"
-              style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
-              <div className="flex items-center gap-2 flex-1 min-w-0">
-                <span className="font-bold text-sm" style={{ color: 'var(--theme-text-primary)' }}>{pair.wordA}</span>
-                <span style={{ color: 'var(--theme-text-muted)' }}>↔</span>
-                <span className="font-bold text-sm" style={{ color: ACCENT.examWriting }}>{pair.wordB}</span>
-              </div>
-              <span className="text-caption shrink-0" style={{ color: 'var(--theme-text-muted)' }}>{pair.noteVi}</span>
-            </div>
+            <MinimalPairCard key={i} wordA={pair.wordA} wordB={pair.wordB} note={pair.noteVi} />
           ))}
         </div>
       </section>
 
       {/* Practice words — clickable to select */}
       <section className="mb-6">
-        <h2 className="text-body font-bold uppercase tracking-wider mb-2" style={{ color: ACCENT.writing }}>
+        <h2 className="text-body font-bold uppercase tracking-wider mb-2" style={{ color: 'var(--accent)' }}>
           {t('practiceWords')}
         </h2>
         <div className="flex flex-wrap gap-2">
@@ -168,9 +161,9 @@ export default function PhonemeDrillPage() {
             <button key={w} onClick={() => { setSelectedText(w); handleRetry(); }}
               className="px-3 py-1.5 rounded-lg text-body font-medium transition-all"
               style={{
-                backgroundColor: selectedText === w ? ACCENT.examWriting : 'var(--theme-bg-card)',
-                color: selectedText === w ? 'white' : 'var(--theme-text-primary)',
-                border: `1px solid ${selectedText === w ? ACCENT.examWriting : 'var(--theme-border)'}`,
+                backgroundColor: selectedText === w ? 'var(--accent)' : 'var(--theme-bg-card)',
+                color: selectedText === w ? 'var(--accent-on)' : 'var(--theme-text-primary)',
+                border: `1px solid ${selectedText === w ? 'var(--accent)' : 'var(--theme-border)'}`,
               }}>
               {w}
             </button>
@@ -188,8 +181,8 @@ export default function PhonemeDrillPage() {
             <button key={s} onClick={() => { setSelectedText(s); handleRetry(); }}
               className="w-full text-left rounded-xl border p-3 text-body font-medium transition-all"
               style={{
-                backgroundColor: selectedText === s ? `${ACCENT.examWriting}14` : 'var(--theme-bg-card)',
-                borderColor: selectedText === s ? ACCENT.examWriting : 'var(--theme-border)',
+                backgroundColor: selectedText === s ? `color-mix(in srgb, var(--accent) 8%, transparent)` : 'var(--theme-bg-card)',
+                borderColor: selectedText === s ? 'var(--accent)' : 'var(--theme-border)',
                 color: 'var(--theme-text-primary)',
               }}>
               {s}
@@ -201,7 +194,7 @@ export default function PhonemeDrillPage() {
       {/* Selected text + recorder */}
       {selectedText && (
         <div className="rounded-2xl border p-6 mb-6"
-          style={{ borderColor: ACCENT.examWriting, backgroundColor: 'var(--theme-bg-card)' }}>
+          style={{ borderColor: 'var(--accent)', backgroundColor: 'var(--theme-bg-card)' }}>
           <p className="text-center text-lg font-bold mb-4" style={{ color: 'var(--theme-text-primary)' }}>
             {selectedText}
           </p>
@@ -223,7 +216,7 @@ export default function PhonemeDrillPage() {
             {recState === 'idle' && (
               <button onClick={startRecording}
                 className="px-6 py-3 rounded-xl text-white font-bold text-sm transition-all hover:-translate-y-0.5"
-                style={{ background: GRADIENT.pronunciation, boxShadow: `0 4px 12px ${ACCENT.examWriting}4D` }}>
+                style={{ background: 'var(--accent)', boxShadow: `0 4px 12px color-mix(in srgb, var(--accent) 30%, transparent)` }}>
                 {t('record')}
               </button>
             )}
@@ -243,7 +236,7 @@ export default function PhonemeDrillPage() {
                 </button>
                 <button onClick={handleScore}
                   className="px-6 py-2.5 rounded-xl text-white font-bold text-sm"
-                  style={{ background: GRADIENT.writing }}>
+                  style={{ background: 'var(--accent)' }}>
                   {t('score')}
                 </button>
               </div>
@@ -267,7 +260,7 @@ export default function PhonemeDrillPage() {
             <div className="mt-5 space-y-4">
               {/* Score */}
               <div className="text-center">
-                <div className="text-4xl font-extrabold" style={{ color: getWordColor(result.overallScore) }}>
+                <div className="mono text-4xl font-bold" style={{ color: getWordColor(result.overallScore), letterSpacing: '-.02em' }}>
                   {result.overallScore}
                 </div>
                 <div className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>/100</div>
@@ -290,12 +283,12 @@ export default function PhonemeDrillPage() {
 
               {/* Suggestions */}
               {result.suggestions.length > 0 && (
-                <div className="rounded-xl p-3" style={{ backgroundColor: `${ACCENT.examWriting}0F` }}>
-                  <p className="text-caption font-bold uppercase mb-1" style={{ color: ACCENT.examWriting }}>{t('suggestionsTitle')}</p>
+                <div className="rounded-xl p-3" style={{ backgroundColor: `color-mix(in srgb, var(--accent) 6%, transparent)` }}>
+                  <p className="text-caption font-bold uppercase mb-1" style={{ color: 'var(--accent)' }}>{t('suggestionsTitle')}</p>
                   <ul className="space-y-1">
                     {result.suggestions.map((s, i) => (
                       <li key={i} className="text-xs flex items-start gap-1.5" style={{ color: 'var(--theme-text-secondary)' }}>
-                        <span style={{ color: ACCENT.examWriting }}>•</span>{s}
+                        <span style={{ color: 'var(--accent)' }}>•</span>{s}
                       </li>
                     ))}
                   </ul>
@@ -305,7 +298,7 @@ export default function PhonemeDrillPage() {
               <div className="flex justify-center">
                 <button onClick={handleRetry}
                   className="px-5 py-2 rounded-xl font-semibold text-body transition-all"
-                  style={{ color: ACCENT.examWriting, backgroundColor: `${ACCENT.examWriting}14` }}>
+                  style={{ color: 'var(--accent)', backgroundColor: `color-mix(in srgb, var(--accent) 8%, transparent)` }}>
                   {t('tryAgain')}
                 </button>
               </div>

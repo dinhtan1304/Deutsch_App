@@ -14,7 +14,7 @@ import {
 import { dictationApi } from '@/lib/api/dictation';
 import type { ShadowingHistoryItem } from '@/lib/api/shadowing';
 import { GridSkeleton } from '@/components/ui';
-import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import { ACCENT, STATUS } from '@/lib/tokens';
 
 const CEFR_COLORS: Record<string, string> = {
   A1: STATUS.success, A2: ACCENT.srs, B1: ACCENT.vocab,
@@ -152,7 +152,7 @@ function HistoryCard({ item, onDelete }: { item: ShadowingHistoryItem; onDelete:
             backgroundSize: 'cover', backgroundPosition: 'center',
           }}>
           {!item.video.thumbnailUrl && <span className="text-[44px] opacity-80">🎬</span>}
-          <div className="flex h-11 w-11 items-center justify-center rounded-full text-white" style={{ background: 'rgba(0,0,0,.55)', border: `2px solid ${levelColor}` }}>
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl text-white" style={{ background: 'rgba(0,0,0,.55)', border: `2px solid ${levelColor}` }}>
             <IconMic size={16} />
           </div>
           {item.video.topic && (
@@ -359,27 +359,27 @@ export default function ShadowingListPage() {
       {/* Confirm delete */}
       {confirmDeleteId && (
         <div
-          className="mb-10 rounded-[2.5rem] border-2 p-8 flex items-center justify-between gap-8 flex-wrap"
-          style={{ borderColor: `${STATUS.danger}40`, backgroundColor: `${STATUS.danger}05` }}
+          className="mb-6 rounded-2xl border p-5 flex items-center justify-between gap-6 flex-wrap"
+          style={{ borderColor: `color-mix(in srgb, ${STATUS.danger} 30%, transparent)`, backgroundColor: `color-mix(in srgb, ${STATUS.danger} 6%, transparent)` }}
         >
           <div>
             <h4
-              className="text-xl font-black mb-1.5"
+              className="text-lead font-bold mb-1"
               style={{ color: 'var(--theme-text-primary)' }}
             >
               {tCommon('confirmDelete')}
             </h4>
             <p
-              className="text-base opacity-50 font-medium"
-              style={{ color: 'var(--theme-text-primary)' }}
+              className="text-body"
+              style={{ color: 'var(--theme-text-muted)' }}
             >
               {tCommon('cannotUndo')}
             </p>
           </div>
-          <div className="flex gap-4">
+          <div className="flex gap-2.5">
             <button
               onClick={() => setConfirmDeleteId(null)}
-              className="px-6 py-3 rounded-xl text-xs font-black border transition-all hover:bg-white/5"
+              className="px-5 py-2.5 rounded-md text-body font-semibold border transition-colors hover:bg-(--theme-bg-secondary)"
               style={{
                 borderColor: 'var(--theme-border)',
                 color: 'var(--theme-text-secondary)',
@@ -389,7 +389,7 @@ export default function ShadowingListPage() {
             </button>
             <button
               onClick={confirmDelete}
-              className="px-6 py-3 rounded-xl text-xs font-black text-white transition-all hover:brightness-110 shadow-xl shadow-red-500/30"
+              className="px-5 py-2.5 rounded-md text-body font-semibold text-white transition-transform hover:-translate-y-0.5 active:scale-95"
               style={{ backgroundColor: STATUS.danger }}
             >
               {tCommon('deletePermanently')}
@@ -417,28 +417,28 @@ export default function ShadowingListPage() {
         <GridSkeleton cols={4} count={8} height="h-72" gap="gap-4" />
       ) : !history?.items.length ? (
         <div
-          className="text-center py-28 rounded-[3.5rem] border-2 border-dashed"
+          className="text-center py-20 rounded-2xl border border-dashed"
           style={{ borderColor: 'var(--theme-border)' }}
         >
           <div
-            className="w-24 h-24 rounded-4xl mx-auto flex items-center justify-center mb-8 shadow-2xl"
-            style={{ background: GRADIENT.reading }}
+            className="w-16 h-16 rounded-2xl mx-auto flex items-center justify-center mb-5"
+            style={{ background: 'color-mix(in srgb, var(--accent) 14%, transparent)', color: 'var(--accent)' }}
           >
-            <IconMic size={40} style={{ color: 'white' }} />
+            <IconMic size={32} />
           </div>
           <h3
-            className="text-2xl font-black mb-3"
+            className="text-lead font-bold mb-2"
             style={{ color: 'var(--theme-text-primary)' }}
           >
             {t('emptyTitle')}
           </h3>
-          <p className="text-base opacity-50 mb-10 max-w-xs mx-auto font-medium">
+          <p className="text-body mb-6 max-w-xs mx-auto" style={{ color: 'var(--theme-text-muted)' }}>
             {t('emptySubtitle')}
           </p>
           <Link
             href="/practice-test/dictation/library?mode=shadowing"
-            className="inline-flex items-center gap-2 px-10 py-5 rounded-2xl text-base font-black text-white shadow-2xl shadow-green-500/30 transition-all hover:scale-105 active:scale-95"
-            style={{ background: GRADIENT.reading }}
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-body font-semibold transition-transform hover:-translate-y-0.5 active:scale-95"
+            style={{ background: 'var(--accent)', color: 'var(--accent-on)' }}
           >
             {t('emptyCta')}
           </Link>
@@ -457,33 +457,33 @@ export default function ShadowingListPage() {
 
       {/* Pagination */}
       {history && history.totalPages > 1 && (
-        <div className="flex items-center justify-center gap-4 mt-16">
+        <div className="flex items-center justify-center gap-3 mt-12">
           <button
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page === 1}
-            className="flex items-center gap-2 px-6 py-3 rounded-xl text-xs font-black disabled:opacity-30 transition-all hover:bg-black/3 dark:hover:bg-white/5 border border-transparent hover:border-green-500/20"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-md text-body font-semibold disabled:opacity-30 border transition-colors hover:bg-(--theme-bg-secondary)"
             style={{
               backgroundColor: 'var(--theme-bg-card)',
               color: 'var(--theme-text-primary)',
-              boxShadow: '0 8px 20px rgba(0,0,0,0.05)',
+              borderColor: 'var(--theme-border)',
             }}
           >
             <IconChevronLeft size={18} /> {tCommon('previous')}
           </button>
           <div
-            className="px-8 py-3 rounded-xl bg-black/3 dark:bg-white/5 text-xs font-black tracking-widest"
-            style={{ color: 'var(--theme-text-primary)' }}
+            className="px-5 py-2.5 rounded-md text-body font-semibold mono"
+            style={{ background: 'var(--theme-bg-secondary)', color: 'var(--theme-text-primary)' }}
           >
             {page} / {history.totalPages}
           </div>
           <button
             onClick={() => setPage((p) => Math.min(history.totalPages, p + 1))}
             disabled={page === history.totalPages}
-            className="flex items-center gap-2 px-6 py-3 rounded-xl text-xs font-black disabled:opacity-30 transition-all hover:bg-black/3 dark:hover:bg-white/5 border border-transparent hover:border-green-500/20"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-md text-body font-semibold disabled:opacity-30 border transition-colors hover:bg-(--theme-bg-secondary)"
             style={{
               backgroundColor: 'var(--theme-bg-card)',
               color: 'var(--theme-text-primary)',
-              boxShadow: '0 8px 20px rgba(0,0,0,0.05)',
+              borderColor: 'var(--theme-border)',
             }}
           >
             {tCommon('next')} <IconChevronRight size={18} />

@@ -6,17 +6,10 @@ import { Link } from '@/i18n/navigation';
 import { useExamListeningHistory, useExamListeningStats, useDeleteExamListening } from '@/hooks/useExamListening';
 import { ExamListeningHistoryItem, TeilScore } from '@/lib/api/examListening';
 import { PracticePageShell, GridSkeleton } from '@/components/ui';
-import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 
 // ─── Local Icons ─────────────────────────────────────────────────────────────
 function IconHeadphones({ size = 16, style }: { size?: number; style?: React.CSSProperties }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}><path d="M3 18v-6a9 9 0 0 1 18 0v6" /><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z" /></svg>;
-}
-function IconDice({ size = 16, style }: { size?: number; style?: React.CSSProperties }) {
-  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}><rect width="12" height="12" x="2" y="10" rx="2" ry="2" /><path d="m17.92 14 3.5-3.5a2.24 2.24 0 0 0 0-3l-5-4.92a2.24 2.24 0 0 0-3 0L10 6" /><path d="M6 18h.01" /><path d="M10 14h.01" /><path d="M15 6h.01" /><path d="M18 9h.01" /></svg>;
-}
-function IconCheck({ size = 16, style }: { size?: number; style?: React.CSSProperties }) {
-  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}><polyline points="20 6 9 17 4 12" /></svg>;
 }
 function IconPlus({ size = 16, style }: { size?: number; style?: React.CSSProperties }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>;
@@ -30,20 +23,34 @@ function IconChevronLeft({ size = 14, style }: { size?: number; style?: React.CS
 function IconChevronRight({ size = 14, style }: { size?: number; style?: React.CSSProperties }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}><polyline points="9 18 15 12 9 6" /></svg>;
 }
+function IconLayers({ size = 11, style }: { size?: number; style?: React.CSSProperties }) {
+  return <svg width={size} height={size} viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}><path d="m10 3 7 4-7 4-7-4 7-4Zm-7 7 7 4 7-4M3 13l7 4 7-4" /></svg>;
+}
 
-function getScoreColor(s: number) {
-  if (s >= 80) return STATUS.success;
-  if (s >= 60) return STATUS.warning;
-  if (s >= 40) return ACCENT.games;
-  return STATUS.danger;
+function scoreColor(s: number) {
+  if (s >= 80) return 'var(--success)';
+  if (s >= 50) return 'var(--warn)';
+  return 'var(--danger)';
+}
+
+function MiniStat({ label, value, color }: { label: string; value: string | number; color: string }) {
+  return (
+    <div className="flex min-w-22 flex-col gap-0.5 rounded-[10px] px-3.5 py-2" style={{ background: 'var(--theme-bg-card)', border: '1px solid var(--theme-border)' }}>
+      <div className="flex items-center gap-1.5">
+        <span className="h-1.5 w-1.5 rounded-full" style={{ background: color }} />
+        <span className="text-[10px] font-semibold uppercase" style={{ color: 'var(--theme-text-muted)', letterSpacing: '.05em' }}>{label}</span>
+      </div>
+      <span className="mono text-[18px] font-extrabold" style={{ letterSpacing: '-.02em', color: 'var(--theme-text-primary)' }}>{value}</span>
+    </div>
+  );
 }
 
 function ExamBadge({ examType, cefrLevel }: { examType: string; cefrLevel: string }) {
   const tCommon = useTranslations('practice.examCommon');
-  const color = examType === 'GOETHE' ? ACCENT.srs : ACCENT.vocab;
+  const color = examType === 'GOETHE' ? 'var(--der)' : 'var(--violet)';
   return (
-    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider"
-      style={{ backgroundColor: `${color}1A`, color }}>
+    <span className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-semibold"
+      style={{ background: `color-mix(in srgb, ${color} 16%, transparent)`, color }}>
       {tCommon('examLabel', { examType, cefrLevel })}
     </span>
   );
@@ -55,79 +62,50 @@ function HistoryCard({ item, onDelete }: { item: ExamListeningHistoryItem; onDel
   const formatter = useFormatter();
   const score = item.score ?? null;
   const isGraded = item.status === 'GRADED';
+  const sColor = isGraded ? 'var(--success)' : 'var(--warn)';
+  const accent = item.examType === 'GOETHE' ? 'var(--der)' : 'var(--violet)';
   const teilScores = (item.teilScores as TeilScore[] | null) ?? [];
 
   return (
-    <Link href={isGraded ? `/practice-test/listening/exam/${item.id}/result` : `/practice-test/listening/exam/${item.id}`}
-      className="group block rounded-2xl p-4 transition-all duration-500 hover:-translate-y-1 hover:shadow-xl relative overflow-hidden border border-transparent hover:border-blue-500/20"
-      style={{
-        backgroundColor: 'var(--theme-bg-card)',
-        boxShadow: '0 4px 16px rgba(0,0,0,0.05), inset 0 0 0 1px rgba(255,255,255,0.05)',
-      }}>
-
-      <div className="absolute inset-0 opacity-0 group-hover:opacity-[0.03] transition-opacity duration-700 pointer-events-none"
-        style={{ background: GRADIENT.listening }} />
-
-      <div className="relative z-10 flex items-center gap-4">
-        <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 shadow-md transition-all duration-500 group-hover:scale-110 group-hover:rotate-3"
-          style={{
-            background: isGraded ? GRADIENT.listening : 'var(--theme-bg-secondary)',
-            color: isGraded ? 'white' : ACCENT.listening,
-            boxShadow: isGraded ? '0 10px 20px rgba(59, 130, 246, 0.2)' : 'none',
-          }}>
-          <IconHeadphones size={22} />
+    <Link href={isGraded ? `/practice-test/listening/exam/${item.id}/result` : `/practice-test/listening/exam/${item.id}`} className="block outline-none">
+      <article className="word-card-v2 flex h-full flex-col gap-2.5 rounded-[13px] p-4"
+        style={{ background: 'var(--theme-bg-card)', border: '1px solid var(--theme-border)', ['--card-accent' as string]: accent } as React.CSSProperties}>
+        <div className="flex flex-wrap items-center gap-1.5">
+          <ExamBadge examType={item.examType} cefrLevel={item.cefrLevel} />
+          <span className="flex-1" />
+          <span className="inline-flex items-center gap-1.5 rounded-[5px] px-2 py-0.5 text-[10px] font-bold uppercase" style={{ background: `color-mix(in srgb, ${sColor} 16%, transparent)`, color: sColor, letterSpacing: '.04em' }}>
+            <span className="h-1 w-1 rounded-full" style={{ background: sColor }} />{isGraded ? tCommon('statusGraded') : tCommon('statusDraft')}
+          </span>
         </div>
-
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-2 flex-wrap">
-            <ExamBadge examType={item.examType} cefrLevel={item.cefrLevel} />
-            <span className="text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg"
-              style={{
-                backgroundColor: isGraded ? `${STATUS.success}15` : `${ACCENT.games}15`,
-                color: isGraded ? STATUS.success : ACCENT.games,
-              }}>
-              {isGraded ? tCommon('statusGraded') : tCommon('statusDraft')}
-            </span>
-          </div>
-          <p className="text-base font-black tracking-tight mb-1 truncate" style={{ color: 'var(--theme-text-primary)' }}>
-            {t('cardLine')}
-          </p>
-          <div className="flex items-center gap-3 text-[11px] font-bold opacity-40 uppercase tracking-widest" style={{ color: 'var(--theme-text-primary)' }}>
-            <span>{tCommon('questionsCount', { count: item.totalQuestions })}</span>
-            <span className="w-1 h-1 rounded-full bg-current" />
-            <span>{formatter.dateTime(new Date(item.createdAt), { dateStyle: 'short' })}</span>
-          </div>
-          {isGraded && teilScores.length > 0 && (
-            <div className="flex gap-1.5 mt-2 flex-wrap">
-              {teilScores.map(ts => (
-                <span key={ts.teil} className="text-[9px] font-black px-1.5 py-0.5 rounded-md"
-                  style={{
-                    backgroundColor: `${getScoreColor((ts.correct / ts.total) * 100)}0A`,
-                    color: getScoreColor((ts.correct / ts.total) * 100),
-                    border: `1px solid ${getScoreColor((ts.correct / ts.total) * 100)}20`,
-                  }}>
+        <h3 className="text-body font-bold leading-snug" style={{ letterSpacing: '-.01em', color: 'var(--theme-text-primary)' }}>{t('cardLine')}</h3>
+        {isGraded && teilScores.length > 0 && (
+          <div className="flex flex-wrap gap-1.5">
+            {teilScores.map(ts => {
+              const c = scoreColor((ts.correct / ts.total) * 100);
+              return (
+                <span key={ts.teil} className="mono rounded-[5px] px-1.5 py-0.5 text-[10px] font-bold"
+                  style={{ background: `color-mix(in srgb, ${c} 14%, transparent)`, color: c, border: `1px solid color-mix(in srgb, ${c} 30%, transparent)` }}>
                   T{ts.teil}: {ts.correct}/{ts.total}
                 </span>
-              ))}
-            </div>
-          )}
+              );
+            })}
+          </div>
+        )}
+        <div className="mt-auto flex items-center justify-between gap-2 border-t border-dashed pt-2.5" style={{ borderColor: 'var(--theme-border)' }}>
+          <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[11px]" style={{ color: 'var(--theme-text-muted)' }}>
+            <span className="inline-flex items-center gap-1"><IconLayers size={11} />{tCommon('questionsCount', { count: item.totalQuestions })}</span>
+            <span className="mono opacity-70">{formatter.dateTime(new Date(item.createdAt), { dateStyle: 'short' })}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            {isGraded && score !== null && (
+              <span className="mono text-[15px] font-bold" style={{ color: scoreColor(score) }}>{Math.round(score)}%</span>
+            )}
+            <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); onDelete(); }}
+              className="flex h-7 w-7 items-center justify-center rounded-lg opacity-60 transition-colors hover:text-red-500"
+              style={{ color: 'var(--theme-text-muted)' }} aria-label="delete"><IconTrash size={15} /></button>
+          </div>
         </div>
-
-        <div className="flex items-center gap-8 shrink-0">
-          {isGraded && score !== null && (
-            <div className="text-right">
-              <div className="text-2xl font-black tracking-tight" style={{ color: getScoreColor(score) }}>
-                {Math.round(score)}<span className="text-sm ml-0.5">%</span>
-              </div>
-            </div>
-          )}
-          <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); onDelete(); }}
-            className="w-12 h-12 rounded-xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-red-500/10 hover:text-red-500"
-            style={{ color: 'var(--theme-text-muted)' }}>
-            <IconTrash size={20} />
-          </button>
-        </div>
-      </div>
+      </article>
     </Link>
   );
 }
@@ -141,11 +119,7 @@ export default function ExamListeningListPage() {
   const [filterLevel, setFilterLevel] = useState<string>('');
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
-  const { data: history, isLoading } = useExamListeningHistory({
-    page, limit: 10,
-    status: filterStatus || undefined,
-    cefrLevel: filterLevel || undefined,
-  });
+  const { data: history, isLoading } = useExamListeningHistory({ page, limit: 12, status: filterStatus || undefined, cefrLevel: filterLevel || undefined });
   const { data: stats } = useExamListeningStats();
   const deleteMut = useDeleteExamListening();
 
@@ -155,137 +129,118 @@ export default function ExamListeningListPage() {
     setConfirmDeleteId(null);
   };
 
+  const statusFilters = [
+    { id: '', label: tCommon('filterAllStatuses'), color: 'var(--accent)' },
+    { id: 'DRAFT', label: tCommon('filterDraft'), color: 'var(--warn)' },
+    { id: 'GRADED', label: tCommon('filterGraded'), color: 'var(--success)' },
+  ];
+
   return (
     <PracticePageShell
       backHref="/practice-test/listening"
       title={t('title')}
       subtitle={t('subtitle')}
       accent="listening"
-      className="pb-32"
+      className="pb-16"
       right={
         <Link href="/practice-test/listening/exam/new"
-          className="flex items-center gap-2 px-7 py-3.5 rounded-xl text-sm font-black text-white transition-all hover:scale-[1.02] active:scale-95 shadow-xl shadow-blue-500/30"
-          style={{ background: GRADIENT.listening }}>
-          <IconPlus size={20} /> {tCommon('newSession')}
+          className="inline-flex h-11 items-center gap-2 rounded-md px-5 text-caption font-bold transition-transform hover:-translate-y-0.5 active:scale-95"
+          style={{ background: 'var(--accent)', color: 'var(--accent-on)', boxShadow: '0 6px 18px color-mix(in srgb, var(--accent) 40%, transparent)' }}>
+          <IconPlus size={18} /> {tCommon('newSession')}
         </Link>
       }
     >
-      {/* Stats Dashboard */}
       {stats && stats.total > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-          {[
-            { label: tCommon('stats.total'), value: stats.total, color: ACCENT.listening, icon: <IconHeadphones size={20} /> },
-            { label: tCommon('stats.averageScore'), value: stats.graded > 0 ? `${Math.round(stats.avgScore)}%` : '—', color: ACCENT.xp, icon: <IconDice size={20} /> },
-            { label: tCommon('stats.bestScore'), value: stats.graded > 0 ? `${Math.round(stats.bestScore)}%` : '—', color: STATUS.success, icon: <IconCheck size={20} /> },
-          ].map((s, i) => (
-            <div key={i} className="relative overflow-hidden rounded-2xl px-5 py-4 border shadow-sm backdrop-blur-xl flex items-center gap-4 transition-all duration-300 hover:-translate-y-1"
-              style={{
-                backgroundColor: 'var(--theme-bg-card)',
-                borderColor: 'var(--theme-border)',
-                boxShadow: '0 8px 24px rgba(0,0,0,0.04)',
-              }}>
-              <div className="absolute -right-4 -bottom-4 w-20 h-20 blur-2xl opacity-20" style={{ backgroundColor: s.color }} />
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: `${s.color}15`, color: s.color }}>
-                {s.icon}
-              </div>
-              <div className="relative z-10 min-w-0">
-                <div className="text-[10px] font-black uppercase tracking-widest opacity-40" style={{ color: 'var(--theme-text-primary)' }}>{s.label}</div>
-                <div className="text-2xl font-black tracking-tight" style={{ color: 'var(--theme-text-primary)' }}>{s.value}</div>
-              </div>
-            </div>
-          ))}
+        <div className="mb-5 flex flex-wrap gap-2">
+          <MiniStat label={tCommon('stats.total')} value={stats.total} color="var(--accent)" />
+          <MiniStat label={tCommon('stats.averageScore')} value={stats.graded > 0 ? `${Math.round(stats.avgScore)}%` : '—'} color="var(--warn)" />
+          <MiniStat label={tCommon('stats.bestScore')} value={stats.graded > 0 ? `${Math.round(stats.bestScore)}%` : '—'} color="var(--success)" />
         </div>
       )}
 
-      {/* Delete Confirmation Banner */}
       {confirmDeleteId && (
-        <div className="mb-10 rounded-[2.5rem] border-2 p-8 flex items-center justify-between gap-8 flex-wrap animate-in fade-in slide-in-from-top-4 duration-500"
-          style={{ borderColor: `${STATUS.danger}40`, backgroundColor: `${STATUS.danger}05` }}>
+        <div className="mb-5 flex flex-wrap items-center justify-between gap-4 rounded-2xl p-5"
+          style={{ border: '1px solid color-mix(in srgb, var(--danger) 40%, transparent)', background: 'color-mix(in srgb, var(--danger) 6%, transparent)' }}>
           <div>
-            <h4 className="text-xl font-black mb-1.5" style={{ color: 'var(--theme-text-primary)' }}>{tShared('confirmDelete')}</h4>
-            <p className="text-base opacity-50 font-medium" style={{ color: 'var(--theme-text-primary)' }}>{tShared('cannotUndo')}</p>
+            <h4 className="text-body font-bold" style={{ color: 'var(--theme-text-primary)' }}>{tShared('confirmDelete')}</h4>
+            <p className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>{tShared('cannotUndo')}</p>
           </div>
-          <div className="flex gap-4">
-            <button onClick={() => setConfirmDeleteId(null)} className="px-6 py-3 rounded-xl text-xs font-black border transition-all hover:bg-white/5"
-              style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)' }}>{tShared('cancel')}</button>
-            <button onClick={confirmDelete} className="px-6 py-3 rounded-xl text-xs font-black text-white transition-all hover:brightness-110 shadow-xl shadow-red-500/30"
-              style={{ backgroundColor: STATUS.danger }}>{tShared('deletePermanently')}</button>
+          <div className="flex gap-2.5">
+            <button onClick={() => setConfirmDeleteId(null)} className="rounded-[10px] px-4 py-2 text-caption font-bold" style={{ border: '1px solid var(--theme-border)', color: 'var(--theme-text-secondary)' }}>{tShared('cancel')}</button>
+            <button onClick={confirmDelete} className="rounded-[10px] px-4 py-2 text-caption font-bold text-white" style={{ background: 'var(--danger)' }}>{tShared('deletePermanently')}</button>
           </div>
         </div>
       )}
 
-      {/* Filters Bar */}
-      <div className="flex flex-col gap-5 mb-10">
-        <div className="flex gap-3 overflow-x-auto no-scrollbar pb-1">
+      {/* Filters */}
+      <div className="mb-4 flex flex-col gap-3">
+        <div className="flex flex-wrap items-center gap-2">
           {['', 'A1', 'A2', 'B1'].map(lvl => {
-            const isActive = filterLevel === lvl;
+            const on = filterLevel === lvl;
             return (
               <button key={lvl} onClick={() => { setFilterLevel(lvl); setPage(1); }}
-                className="px-5 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all duration-300"
-                style={isActive
-                  ? { background: GRADIENT.listening, color: 'white', boxShadow: '0 10px 20px rgba(59, 130, 246, 0.3)' }
-                  : { backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }
-                }>{lvl || tShared('allLevels')}</button>
+                className="mono rounded-[7px] px-2.5 py-1 text-caption font-semibold transition-colors"
+                style={on
+                  ? { background: 'color-mix(in srgb, var(--accent) 14%, transparent)', color: 'var(--accent)', border: '1px solid var(--accent)' }
+                  : { background: 'var(--theme-bg-secondary)', color: 'var(--theme-text-secondary)', border: '1px solid var(--theme-border)' }}>
+                {lvl || tShared('allLevels')}
+              </button>
             );
           })}
         </div>
-        <div className="flex gap-3 overflow-x-auto no-scrollbar pb-1">
-          {[
-            { id: '', label: tCommon('filterAllStatuses') },
-            { id: 'DRAFT', label: tCommon('filterDraft') },
-            { id: 'GRADED', label: tCommon('filterGraded') },
-          ].map(s => {
-            const isActive = filterStatus === s.id;
-            const color = s.id === 'GRADED' ? STATUS.success : s.id === 'DRAFT' ? ACCENT.games : ACCENT.listening;
+        <div className="flex flex-wrap items-center gap-2">
+          {statusFilters.map(s => {
+            const on = filterStatus === s.id;
             return (
               <button key={s.id} onClick={() => { setFilterStatus(s.id); setPage(1); }}
-                className="px-6 py-3 rounded-xl text-xs font-black transition-all duration-300 border shadow-sm"
-                style={isActive
-                  ? { background: 'var(--theme-bg-card)', borderColor: color, color, boxShadow: '0 4px 15px rgba(0,0,0,0.05)' }
-                  : { backgroundColor: 'transparent', borderColor: 'var(--theme-border)', color: 'var(--theme-text-muted)' }
-                }>{s.label}</button>
+                className="inline-flex items-center gap-1.5 rounded-[7px] px-2.5 py-1 text-caption font-semibold transition-colors"
+                style={on
+                  ? { background: `color-mix(in srgb, ${s.color} 14%, transparent)`, color: s.color, border: `1px solid ${s.color}` }
+                  : { background: 'var(--theme-bg-secondary)', color: 'var(--theme-text-secondary)', border: '1px solid var(--theme-border)' }}>
+                {s.id && <span className="h-1.5 w-1.5 rounded-full" style={{ background: s.color }} />}
+                {s.label}
+              </button>
             );
           })}
         </div>
       </div>
 
-      {/* List Content */}
       {isLoading ? (
-        <GridSkeleton cols={1} count={4} height="h-40" gap="gap-8" />
+        <GridSkeleton cols={3} count={6} height="h-36" gap="gap-4" />
       ) : !history?.items.length ? (
-        <div className="text-center py-28 rounded-[3.5rem] border-2 border-dashed" style={{ borderColor: 'var(--theme-border)' }}>
-          <div className="w-24 h-24 rounded-4xl mx-auto flex items-center justify-center mb-8 shadow-2xl" style={{ background: GRADIENT.listening }}>
-            <IconHeadphones size={40} style={{ color: 'white' }} />
+        <div className="rounded-2xl border border-dashed py-20 text-center" style={{ borderColor: 'var(--theme-border)' }}>
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl"
+            style={{ background: 'color-mix(in srgb, var(--accent) 14%, transparent)', border: '1px solid color-mix(in srgb, var(--accent) 25%, transparent)' }}>
+            <IconHeadphones size={30} style={{ color: 'var(--accent)' }} />
           </div>
-          <h3 className="text-2xl font-black mb-3" style={{ color: 'var(--theme-text-primary)' }}>{tCommon('emptyTitle')}</h3>
-          <p className="text-base opacity-50 mb-10 max-w-xs mx-auto font-medium">{t('emptySubtitle')}</p>
+          <h3 className="text-body font-bold" style={{ color: 'var(--theme-text-primary)' }}>{tCommon('emptyTitle')}</h3>
+          <p className="mx-auto mt-1 mb-6 max-w-xs text-caption" style={{ color: 'var(--theme-text-muted)' }}>{t('emptySubtitle')}</p>
           <Link href="/practice-test/listening/exam/new"
-            className="inline-flex items-center gap-2 px-10 py-5 rounded-2xl text-base font-black text-white shadow-2xl shadow-blue-500/30 transition-all hover:scale-105 active:scale-95"
-            style={{ background: GRADIENT.listening }}>{tCommon('startNow')}</Link>
+            className="inline-flex items-center gap-2 rounded-md px-6 h-11 text-body font-bold transition-transform hover:-translate-y-0.5 active:scale-95"
+            style={{ background: 'var(--accent)', color: 'var(--accent-on)', boxShadow: '0 6px 18px color-mix(in srgb, var(--accent) 40%, transparent)' }}>
+            <IconPlus size={18} /> {tCommon('startNow')}
+          </Link>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-8">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {history.items.map((item: ExamListeningHistoryItem) => (
             <HistoryCard key={item.id} item={item} onDelete={() => setConfirmDeleteId(item.id)} />
           ))}
         </div>
       )}
 
-      {/* Pagination Controls */}
       {history && history.totalPages > 1 && (
-        <div className="flex items-center justify-center gap-4 mt-16">
+        <div className="mt-8 flex items-center justify-center gap-3">
           <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
-            className="flex items-center gap-2 px-6 py-3 rounded-xl text-xs font-black disabled:opacity-30 transition-all hover:bg-black/3 dark:hover:bg-white/5 border border-transparent hover:border-blue-500/20"
-            style={{ backgroundColor: 'var(--theme-bg-card)', color: 'var(--theme-text-primary)', boxShadow: '0 8px 20px rgba(0,0,0,0.05)' }}>
-            <IconChevronLeft size={18} /> {tShared('previous')}
+            className="inline-flex items-center gap-1.5 rounded-[10px] px-4 py-2 text-caption font-bold transition-opacity disabled:opacity-30"
+            style={{ background: 'var(--theme-bg-card)', color: 'var(--theme-text-primary)', border: '1px solid var(--theme-border)' }}>
+            <IconChevronLeft size={16} /> {tShared('previous')}
           </button>
-          <div className="px-8 py-3 rounded-xl bg-black/3 dark:bg-white/5 text-xs font-black tracking-widest" style={{ color: 'var(--theme-text-primary)' }}>
-            {page} / {history.totalPages}
-          </div>
+          <span className="mono rounded-[10px] px-4 py-2 text-caption font-bold" style={{ background: 'var(--theme-bg-secondary)', color: 'var(--theme-text-primary)' }}>{page} / {history.totalPages}</span>
           <button onClick={() => setPage(p => Math.min(history.totalPages, p + 1))} disabled={page === history.totalPages}
-            className="flex items-center gap-2 px-6 py-3 rounded-xl text-xs font-black disabled:opacity-30 transition-all hover:bg-black/3 dark:hover:bg-white/5 border border-transparent hover:border-blue-500/20"
-            style={{ backgroundColor: 'var(--theme-bg-card)', color: 'var(--theme-text-primary)', boxShadow: '0 8px 20px rgba(0,0,0,0.05)' }}>
-            {tShared('next')} <IconChevronRight size={18} />
+            className="inline-flex items-center gap-1.5 rounded-[10px] px-4 py-2 text-caption font-bold transition-opacity disabled:opacity-30"
+            style={{ background: 'var(--theme-bg-card)', color: 'var(--theme-text-primary)', border: '1px solid var(--theme-border)' }}>
+            {tShared('next')} <IconChevronRight size={16} />
           </button>
         </div>
       )}

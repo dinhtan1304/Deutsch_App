@@ -3,12 +3,12 @@
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { usePhonemeDrills, usePhonemeDrillStats } from '@/hooks/usePronunciationScoring';
-import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import { STATUS } from '@/lib/tokens';
 
 const DIFFICULTY_KEYS = {
-  high:   { bg: 'rgba(239,68,68,.1)',  text: STATUS.danger,  key: 'high' as const },
-  medium: { bg: 'rgba(245,158,11,.1)', text: STATUS.warning, key: 'medium' as const },
-  low:    { bg: 'rgba(34,197,94,.1)',   text: STATUS.success, key: 'low' as const },
+  high:   { text: STATUS.danger,  key: 'high' as const },
+  medium: { text: STATUS.warning, key: 'medium' as const },
+  low:    { text: STATUS.success, key: 'low' as const },
 };
 
 function getScoreColor(score: number) {
@@ -26,30 +26,22 @@ export default function PhonemeDrillsPage() {
 
   return (
     <div className="max-w-360 mx-auto px-4 py-6">
-      {/* Header */}
-      <div className="mb-6">
+      {/* Header — v2 eyebrow */}
+      <header className="mb-6">
         <Link
           href="/practice-test/pronunciation"
-          className="text-xs mb-2 inline-flex items-center gap-1"
+          className="text-caption mb-1.5 inline-flex items-center gap-1"
           style={{ color: 'var(--theme-text-muted)' }}
         >
           {t('back')}
         </Link>
-        <h1 className="text-2xl font-bold flex items-center gap-2" style={{ color: 'var(--theme-text-primary)' }}>
-          <span className="w-10 h-10 rounded-xl flex items-center justify-center text-white shrink-0"
-            style={{ background: GRADIENT.pronunciation }}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
-              <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
-              <line x1="12" y1="19" x2="12" y2="22" />
-            </svg>
-          </span>
+        <h1 className="font-bold" style={{ fontSize: 30, letterSpacing: '-.02em', color: 'var(--theme-text-primary)' }}>
           {t('title')}
         </h1>
-        <p className="text-body mt-1" style={{ color: 'var(--theme-text-muted)' }}>
+        <p className="mt-1.5 text-body" style={{ color: 'var(--theme-text-secondary)' }}>
           {t('subtitle')}
         </p>
-      </div>
+      </header>
 
       {/* Drill grid */}
       {isLoading ? (
@@ -67,24 +59,25 @@ export default function PhonemeDrillsPage() {
               <Link
                 key={drill.phoneme}
                 href={`/practice-test/pronunciation/drills/${drill.phoneme}`}
-                className="rounded-2xl border p-5 transition-all duration-200 hover:-translate-y-1 hover:shadow-md block"
+                className="rounded-[13px] border p-5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm block"
                 style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}
               >
                 {/* Top: phoneme label + difficulty */}
                 <div className="flex items-start justify-between mb-3">
-                  <div className="text-3xl font-extrabold" style={{ color: ACCENT.examWriting }}>
+                  <div className="mono text-3xl font-bold" style={{ color: 'var(--accent)', letterSpacing: '-.03em' }}>
                     {drill.label}
                   </div>
                   <span
-                    className="px-2 py-0.5 rounded-md text-caption font-bold"
-                    style={{ backgroundColor: diff.bg, color: diff.text }}
+                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-caption font-bold"
+                    style={{ backgroundColor: `color-mix(in srgb, ${diff.text} 14%, transparent)`, color: diff.text }}
                   >
+                    <span className="w-1.5 h-1.5 rounded-full" style={{ background: diff.text }} />
                     {t(`difficulty.${diff.key}` as 'difficulty.high')}
                   </span>
                 </div>
 
                 {/* IPA + description */}
-                <div className="text-xs font-mono mb-1" style={{ color: ACCENT.examWriting }}>
+                <div className="mono text-xs mb-1" style={{ color: 'var(--accent)' }}>
                   {drill.ipa}
                 </div>
                 <p className="text-xs leading-relaxed mb-3" style={{ color: 'var(--theme-text-muted)' }}>
@@ -105,7 +98,7 @@ export default function PhonemeDrillsPage() {
                     </span>
                   </div>
                 ) : (
-                  <div className="text-caption font-medium" style={{ color: ACCENT.examWriting }}>
+                  <div className="text-caption font-medium" style={{ color: 'var(--accent)' }}>
                     {t('notPracticed')}
                   </div>
                 )}

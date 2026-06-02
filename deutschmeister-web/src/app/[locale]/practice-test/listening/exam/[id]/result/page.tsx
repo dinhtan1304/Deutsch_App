@@ -112,16 +112,16 @@ function TranscriptSection({ texts }: { texts: ExamListeningTeil['texts'] }) {
           {texts.map(text => (
             <div key={text.id}>
               {(text.label || text.title) && (
-                <div className="flex items-center gap-2 mb-1">
+                <div className="flex items-center gap-2 mb-1 flex-wrap">
                   {text.label && (
-                    <span className="w-6 h-6 rounded-lg flex items-center justify-center text-caption font-extrabold text-white"
+                    <span className="shrink-0 inline-flex min-w-6 items-center justify-center rounded-md px-1.5 py-0.5 text-caption font-extrabold text-white"
                       style={{ background: GRADIENT.listening }}>{text.label}</span>
                   )}
-                  {text.title && <p className="text-xs font-bold" style={{ color: 'var(--theme-text-primary)' }}>{text.title}</p>}
+                  {text.title && <p className="min-w-0 text-xs font-bold" style={{ color: 'var(--theme-text-primary)' }}>{text.title}</p>}
                 </div>
               )}
               <p className="text-xs leading-relaxed whitespace-pre-wrap"
-                style={{ color: 'var(--theme-text-primary)', fontFamily: 'Georgia, serif' }}>
+                style={{ color: 'var(--theme-text-primary)' }}>
                 {text.content}
               </p>
               <button onClick={() => speakText(text.content)}
@@ -156,7 +156,7 @@ function QuestionReview({ teil, details }: { teil: ExamListeningTeil; details: T
               className="w-full flex items-start gap-3 p-3 text-left transition-colors hover:opacity-80"
               style={{ backgroundColor: detail.isCorrect ? `${STATUS.success}0D` : `${STATUS.danger}0D` }}
               onClick={() => setExpandedQ(expanded ? null : q.id)}>
-              <span className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5 text-white"
+              <span className="w-6 h-6 rounded-[8px] flex items-center justify-center shrink-0 mt-0.5 text-white"
                 style={{ backgroundColor: detail.isCorrect ? STATUS.success : STATUS.danger }}>
                 {detail.isCorrect ? <IconCheck size={12} /> : <IconX size={12} />}
               </span>
@@ -379,7 +379,7 @@ export default function ExamListeningResultPage() {
                   className="w-full flex items-center justify-between p-4 transition-opacity hover:opacity-80"
                   onClick={() => setExpandedTeil(isExpanded ? null : teil.number)}>
                   <div className="flex items-center gap-3">
-                    <span className="w-8 h-8 rounded-xl flex items-center justify-center text-xs font-extrabold text-white"
+                    <span className="w-8 h-8 rounded-[10px] flex items-center justify-center text-xs font-extrabold text-white"
                       style={{ background: GRADIENT.listening }}>{teil.number}</span>
                     <div className="text-left">
                       <p className="text-sm font-bold" style={{ color: 'var(--theme-text-primary)' }}>
@@ -400,7 +400,7 @@ export default function ExamListeningResultPage() {
                 {isExpanded && (
                   <div className="px-4 pb-4 border-t" style={{ borderColor: 'var(--theme-border)' }}>
                     <div className="py-3">
-                      <p className="text-xs italic" style={{ color: 'var(--theme-text-muted)', fontFamily: 'Georgia, serif' }}>
+                      <p className="text-xs italic" style={{ color: 'var(--theme-text-muted)' }}>
                         {teil.instruction}
                       </p>
                     </div>

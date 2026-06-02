@@ -1,5 +1,4 @@
 'use client';
-/* eslint-disable no-restricted-syntax */
 
 import { useState, KeyboardEvent, useRef, useCallback, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
@@ -93,7 +92,7 @@ export function ChatInput({ onSend, onTypingChange, disabled, placeholder }: Pro
       <div className="flex gap-1 overflow-x-auto no-scrollbar pb-0.5">
         {SPECIAL_CHARS.map(char => (
           <button key={char} onClick={() => insertSpecial(char)} disabled={disabled}
-            className="w-7 h-7 shrink-0 rounded-lg text-xs font-bold transition-all hover:scale-110 active:scale-90 flex items-center justify-center border disabled:opacity-30"
+            className="w-7 h-7 shrink-0 rounded-md text-xs font-bold transition-colors flex items-center justify-center border disabled:opacity-30"
             style={{ 
               borderColor: 'var(--theme-border)', 
               backgroundColor: 'var(--theme-bg-card)',
@@ -105,7 +104,7 @@ export function ChatInput({ onSend, onTypingChange, disabled, placeholder }: Pro
       </div>
 
       <div
-        className="flex gap-2 items-end rounded-2xl border p-2"
+        className="flex gap-2 items-end rounded-[13px] border p-2"
         style={{
           borderColor: 'var(--theme-border)',
           backgroundColor: 'var(--theme-bg-card)',
@@ -130,10 +129,11 @@ export function ChatInput({ onSend, onTypingChange, disabled, placeholder }: Pro
           type="button"
           onClick={handleSend}
           disabled={disabled || !text.trim()}
-          className="shrink-0 w-10 h-10 rounded-xl flex items-center justify-center transition-all disabled:opacity-40 disabled:cursor-not-allowed hover:scale-105"
+          className="shrink-0 w-10 h-10 rounded-[11px] flex items-center justify-center transition-transform disabled:opacity-40 disabled:cursor-not-allowed enabled:hover:-translate-y-0.5 enabled:active:scale-95"
           style={{
-            background: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
-            color: 'white',
+            background: 'var(--accent)',
+            color: 'var(--accent-on)',
+            boxShadow: '0 4px 14px color-mix(in srgb, var(--accent) 35%, transparent)',
           }}
           aria-label={t('send')}
         >

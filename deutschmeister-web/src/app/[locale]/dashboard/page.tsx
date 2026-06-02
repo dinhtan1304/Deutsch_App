@@ -14,9 +14,13 @@ import { DashboardGreetingV2 } from '@/components/dashboard/DashboardGreetingV2'
 import { PrimarySessionV2 } from '@/components/dashboard/PrimarySessionV2';
 import { ProgressChartV2 } from '@/components/dashboard/ProgressChartV2';
 import { TopicMasteryV2 } from '@/components/dashboard/TopicMasteryV2';
+import { StatsCards } from '@/components/dashboard/StatsCards';
+import { ActivityHeatmap } from '@/components/dashboard/ActivityHeatmap';
+import { RecentActivityFeed } from '@/components/dashboard/RecentActivityFeed';
 import {
   useActivityHeatmap,
   useDashboardOverview,
+  useRecentActivity,
 } from '@/hooks/useDashboard';
 import { useXp } from '@/hooks/useXp';
 import { useMilestoneCheck } from '@/hooks/useMilestones';
@@ -62,10 +66,12 @@ export default function DashboardPage() {
   const router = useRouter();
   const t = useTranslations('dashboard');
   const [deferWidgets, setDeferWidgets] = useState(true);
+  const [activeTab, setActiveTab] = useState<'overview' | 'detailed'>('overview');
 
   const dashboardEnabled = _hasHydrated && isAuthenticated;
   const { data: overview, isLoading: overviewLoading } = useDashboardOverview(dashboardEnabled);
   const { data: heatmap } = useActivityHeatmap(dashboardEnabled);
+  const { data: recentActivity } = useRecentActivity(dashboardEnabled && activeTab === 'detailed');
   const { data: xpQuery } = useXp(dashboardEnabled && !bootstrap?.xp);
   const xpInfo = bootstrap?.xp ?? xpQuery;
   useMilestoneCheck(dashboardEnabled && !!overview);
@@ -134,12 +140,49 @@ export default function DashboardPage() {
 
       <StreakWarningBanner />
 
+      {/* View toggle — overview vs detailed stats */}
+      <div
+        className="flex items-center gap-1 p-1 rounded-lg w-fit"
+        style={{ background: 'var(--theme-bg-secondary)', border: '1px solid var(--theme-border)' }}
+        role="tablist"
+        aria-label={t('viewMode.ariaLabel')}
+      >
+        {(['overview', 'detailed'] as const).map((tab) => {
+          const active = activeTab === tab;
+          return (
+            <button
+              key={tab}
+              type="button"
+              role="tab"
+              aria-selected={active}
+              onClick={() => setActiveTab(tab)}
+              className="px-4 py-1.5 rounded-md text-body font-semibold transition-colors"
+              style={active
+                ? { background: 'var(--theme-bg-card)', color: 'var(--theme-text-primary)', border: '1px solid var(--theme-border)' }
+                : { background: 'transparent', color: 'var(--theme-text-muted)', border: '1px solid transparent' }}
+            >
+              {t(`viewMode.${tab}` as 'viewMode.overview')}
+            </button>
+          );
+        })}
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Main column */}
         <div className="lg:col-span-8 flex flex-col gap-6">
-          <PrimarySessionV2 nextAction={overview?.nextAction} dailyPath={overview?.dailyPath} />
+          {activeTab === 'overview' ? (
+            <PrimarySessionV2 nextAction={overview?.nextAction} dailyPath={overview?.dailyPath} />
+          ) : (
+            <StatsCards stats={stats} />
+          )}
           <ProgressChartV2 data={weeklyProgress} streak={stats.streak} bestStreak={heatmap?.longestStreak} />
           <TopicMasteryV2 data={topicProgress} />
+          {activeTab === 'detailed' && (
+            <>
+              {heatmap && <ActivityHeatmap data={heatmap} />}
+              <RecentActivityFeed data={recentActivity ?? []} initialCount={8} />
+            </>
+          )}
         </div>
 
         {/* Right rail — sticky on desktop so the review/challenge cards stay in view */}
