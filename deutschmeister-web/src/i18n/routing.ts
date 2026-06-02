@@ -17,6 +17,12 @@ export const routing = defineRouting({
     name: 'NEXT_LOCALE',
     // 1 year — long enough that users rarely re-detect from headers.
     maxAge: 60 * 60 * 24 * 365,
+    // MUST be '/' — without it next-intl falls back to `basePath || undefined`,
+    // which makes the browser scope the cookie to the request's directory
+    // (e.g. a cookie issued on /en/* is scoped to /en and is NOT sent on the
+    // unprefixed Vietnamese routes). That dropped the cookie on F5/navigation,
+    // so detection fell through to Accept-Language and reverted vi → en.
+    path: '/',
   },
 });
 
