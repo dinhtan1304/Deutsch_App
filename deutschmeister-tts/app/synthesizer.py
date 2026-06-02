@@ -15,6 +15,8 @@ from __future__ import annotations
 
 import logging
 import os
+import subprocess
+import sys
 import threading
 import wave
 from pathlib import Path
@@ -47,6 +49,23 @@ def _voice_path() -> str:
     return str(Path(MODEL_CACHE_DIR) / f"{model}.onnx")
 
 
+def _ensure_voice(onnx_path: str) -> None:
+    """Download the voice if it's missing. This covers the case where a runtime
+    volume is mounted over MODEL_CACHE_DIR and shadows the copy that was baked
+    into the image at build time (a common Railway/Docker gotcha)."""
+    if os.path.exists(onnx_path):
+        return
+    if DEFAULT_MODEL.endswith(".onnx"):
+        raise FileNotFoundError(f"Voice file not found: {onnx_path}")
+    logger.warning("Voice %s missing at %s — downloading...", DEFAULT_MODEL, onnx_path)
+    Path(MODEL_CACHE_DIR).mkdir(parents=True, exist_ok=True)
+    subprocess.run(
+        [sys.executable, "-m", "piper.download_voices", DEFAULT_MODEL, "--data-dir", MODEL_CACHE_DIR],
+        check=True,
+    )
+    logger.info("Voice %s downloaded", DEFAULT_MODEL)
+
+
 def get_tts() -> PiperVoice:
     """Lazy-init the Piper voice. Thread-safe via lock — synthesis itself is
     serialized too, since the onnxruntime session is reused across calls."""
@@ -55,6 +74,7 @@ def get_tts() -> PiperVoice:
         with _lock:
             if _voice is None:
                 path = _voice_path()
+                _ensure_voice(path)
                 logger.info("Loading Piper voice: %s", path)
                 # config_path defaults to "<path>.json" — matches the
                 # de_DE-thorsten-medium.onnx.json produced by download_voices.

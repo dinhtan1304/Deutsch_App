@@ -11,10 +11,13 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-# ffmpeg encodes WAV → MP3 at request time. Piper bundles its own espeak-ng
-# phonemizer in the wheel, so no system espeak-ng / build toolchain is needed.
+# ffmpeg encodes WAV → MP3 at request time. libgomp1 is the GNU OpenMP runtime
+# that onnxruntime (Piper's inference engine) links against — python:slim does
+# NOT ship it, and without it `import onnxruntime` fails. Piper bundles its own
+# espeak-ng phonemizer in the wheel, so no system espeak-ng is needed.
 RUN apt-get update && apt-get install -y --no-install-recommends \
         ffmpeg \
+        libgomp1 \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt ./
@@ -36,10 +39,11 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-# ffmpeg needed at runtime for MP3 encoding. (espeak-ng is bundled in the
-# piper wheel — no system package required.)
+# ffmpeg for MP3 encoding; libgomp1 is required by onnxruntime (Piper's engine)
+# and is not present in python:slim. (espeak-ng is bundled in the piper wheel.)
 RUN apt-get update && apt-get install -y --no-install-recommends \
         ffmpeg \
+        libgomp1 \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy installed Python packages and the pre-downloaded voice from builder.
