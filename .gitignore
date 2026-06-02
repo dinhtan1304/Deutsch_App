@@ -221,3 +221,9 @@ analyze/
 
 # Husky
 # .husky/
+
+# ================================
+# Local-only artifacts (never commit)
+# ================================
+/Deutsch_App.zip
+.claude/scheduled_tasks.lock
