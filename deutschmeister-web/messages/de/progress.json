@@ -13,9 +13,14 @@
     "filterLocked": "Gesperrt",
     "categories": {
       "vocabulary": "Wortschatz",
+      "grammar": "Grammatik",
+      "reading": "Lesen",
+      "listening": "Hören",
+      "writing": "Schreiben",
+      "speaking": "Sprechen",
       "games": "Spiele",
       "exams": "Prüfungen",
-      "writing": "Schreiben",
+      "streak": "Lernserie",
       "level": "Niveau"
     }
   },
@@ -85,7 +90,11 @@
       "game_sessions_10": "Spiele Wiederholungsspiele, um dein Wissen zu festigen.",
       "complete_exams_2": "Bestehe Prüfungen, um dein Niveau zu verfolgen.",
       "writing_sessions_3": "Übe Schreiben zu vielen Themen, um den Ausdruck zu verbessern.",
-      "grammar_lessons_3": "Beherrsche Satzstrukturen durch Grammatikstunden."
+      "grammar_lessons_3": "Beherrsche Satzstrukturen durch Grammatikstunden.",
+      "reading_sessions_3": "Übe Leseverständnis, um Wortschatz und Lesetempo zu steigern.",
+      "listening_sessions_3": "Schärfe dein Hörverständnis mit Übungsclips in dieser Woche.",
+      "review_words_50": "Wiederhole 50 Karten, um das Langzeitgedächtnis mit SRS zu stärken.",
+      "add_words_20": "Füge 20 neue Wörter zu deinem Notizbuch hinzu, um deinen Wortschatz zu erweitern."
     }
   },
   "review": {

@@ -13,9 +13,14 @@
     "filterLocked": "Chưa mở",
     "categories": {
       "vocabulary": "Từ vựng",
+      "grammar": "Ngữ pháp",
+      "reading": "Đọc hiểu",
+      "listening": "Nghe hiểu",
+      "writing": "Bài viết",
+      "speaking": "Nói",
       "games": "Games",
       "exams": "Bài thi",
-      "writing": "Bài viết",
+      "streak": "Chuỗi ngày",
       "level": "Cấp độ"
     }
   },
@@ -85,7 +90,11 @@
       "game_sessions_10": "Tham gia các trò chơi ôn tập để củng cố kiến thức.",
       "complete_exams_2": "Hoàn thành các bài kiểm tra đánh giá để theo dõi trình độ.",
       "writing_sessions_3": "Luyện viết qua nhiều chủ đề để cải thiện khả năng diễn đạt.",
-      "grammar_lessons_3": "Nắm vững cấu trúc câu qua các bài học ngữ pháp."
+      "grammar_lessons_3": "Nắm vững cấu trúc câu qua các bài học ngữ pháp.",
+      "reading_sessions_3": "Luyện đọc hiểu qua nhiều bài để nâng cao vốn từ và tốc độ đọc.",
+      "listening_sessions_3": "Rèn phản xạ nghe hiểu với các bài luyện nghe trong tuần.",
+      "review_words_50": "Ôn lại 50 thẻ từ để củng cố trí nhớ dài hạn bằng SRS.",
+      "add_words_20": "Thêm 20 từ mới vào sổ tay cá nhân để mở rộng vốn từ."
     }
   },
   "review": {

@@ -13,9 +13,14 @@
     "filterLocked": "Locked",
     "categories": {
       "vocabulary": "Vocabulary",
+      "grammar": "Grammar",
+      "reading": "Reading",
+      "listening": "Listening",
+      "writing": "Writing",
+      "speaking": "Speaking",
       "games": "Games",
       "exams": "Exams",
-      "writing": "Writing",
+      "streak": "Streak",
       "level": "Level"
     }
   },
@@ -85,7 +90,11 @@
       "game_sessions_10": "Play review games to reinforce knowledge.",
       "complete_exams_2": "Complete assessment exams to track your level.",
       "writing_sessions_3": "Practice writing on multiple topics to improve expression.",
-      "grammar_lessons_3": "Master sentence structures through grammar lessons."
+      "grammar_lessons_3": "Master sentence structures through grammar lessons.",
+      "reading_sessions_3": "Practice reading comprehension to build vocabulary and reading speed.",
+      "listening_sessions_3": "Sharpen your listening comprehension with practice clips this week.",
+      "review_words_50": "Review 50 flashcards to strengthen long-term memory with SRS.",
+      "add_words_20": "Add 20 new words to your personal notebook to grow your vocabulary."
     }
   },
   "review": {

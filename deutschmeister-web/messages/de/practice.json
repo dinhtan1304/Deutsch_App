@@ -2,6 +2,13 @@
   "landing": {
     "title": "Übung & Prüfungsvorbereitung",
     "subtitle": "Wähle deinen Weg: tägliche Skills üben, mit KI sprechen, oder offizielle Goethe/TELC-Modellprüfungen ablegen.",
+    "hub": {
+      "eyebrow": "Üben",
+      "modesUnit": "Übungsmodi",
+      "scoreLabel": "Punkte",
+      "categories": { "all": "Alle", "skill": "Fähigkeiten", "exam": "Prüfung", "ai": "KI-Hilfe" },
+      "rec": { "primaryLabel": "Schwächste Fähigkeit", "secondaryLabel": "Auch verbessern", "scoreReason": "aktuell {score}/100", "noData": "Üben, damit wir dein Niveau einschätzen" }
+    },
     "quickStart": {
       "title": "Schnellstart",
       "subtitle": "Ziel zuerst wählen, dann passende Übung starten.",

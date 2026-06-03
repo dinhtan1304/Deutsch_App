@@ -2,6 +2,13 @@
   "landing": {
     "title": "Luyện thi & kỹ năng",
     "subtitle": "Chọn hướng luyện phù hợp: củng cố kỹ năng hằng ngày, luyện giao tiếp với AI, hoặc làm đề chuẩn Goethe/TELC.",
+    "hub": {
+      "eyebrow": "Luyện tập",
+      "modesUnit": "chế độ luyện",
+      "scoreLabel": "Điểm",
+      "categories": { "all": "Tất cả", "skill": "Kỹ năng", "exam": "Đề chuẩn", "ai": "AI bổ trợ" },
+      "rec": { "primaryLabel": "Kỹ năng yếu nhất", "secondaryLabel": "Cũng nên cải thiện", "scoreReason": "điểm hiện tại {score}/100", "noData": "Luyện để hệ thống đánh giá trình độ" }
+    },
     "quickStart": {
       "title": "Bắt đầu nhanh",
       "subtitle": "Chọn mục tiêu trước, rồi đi vào bài luyện phù hợp.",

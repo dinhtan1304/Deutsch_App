@@ -2,6 +2,13 @@
   "landing": {
     "title": "Practice & Exam Prep",
     "subtitle": "Choose your path: build daily skills, practice conversation with AI, or take official Goethe/TELC mock exams.",
+    "hub": {
+      "eyebrow": "Practice",
+      "modesUnit": "practice modes",
+      "scoreLabel": "Score",
+      "categories": { "all": "All", "skill": "Skills", "exam": "Exam", "ai": "AI support" },
+      "rec": { "primaryLabel": "Weakest skill", "secondaryLabel": "Also improve", "scoreReason": "current score {score}/100", "noData": "Practice so we can assess your level" }
+    },
     "quickStart": {
       "title": "Quick start",
       "subtitle": "Pick a goal first, then jump into the right practice.",
