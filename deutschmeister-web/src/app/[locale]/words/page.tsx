@@ -244,13 +244,15 @@ export default function WordsPage() {
 
       {/* ─── Featured strip ─── */}
       {isAuthenticated && progressStats ? (
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
           <FeaturedCard href="/word-bank/review" icon={<IconFlame size={18} />} color="var(--streak)"
             value={progressStats.due} sub={t('featuredDueSub')} label={t('featuredDue')} />
           <FeaturedCard href="/review" icon={<IconSparkles size={18} />} color="var(--m-learned)"
             value={progressStats.new} sub={t('featuredNewSub')} label={t('featuredNew')} />
           <FeaturedCard href="/favorites" icon={<IconStar size={18} />} color="var(--die)"
             value={favCount} sub={t('favoritesSub')} label={t('linkFavorites')} />
+          <FeaturedCard href="/tips" icon={<IconLightbulb size={18} />} color="var(--v2-warn, #F5C249)"
+            sub={t('tipsSub')} label={t('linkTips')} />
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">

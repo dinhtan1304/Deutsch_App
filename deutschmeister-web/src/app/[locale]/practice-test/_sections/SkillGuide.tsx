@@ -1,10 +1,9 @@
 'use client';
-/* eslint-disable no-restricted-syntax */
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { IconPenLine, IconMic, IconBookOpen, IconList, IconLightbulb, IconCheck } from '@/components/ui/Icons';
-import { GRADIENT, type GradientKey } from '@/lib/tokens';
+import { ACCENT } from '@/lib/tokens';
 import {
   schreibenTemplateTelc, schreibenGoetheTeil1, schreibenGoetheTeil2, schreibenMistakes,
   sprechenRedemittel, sprechenGoetheCriteria, sprechenTelcTeile,
@@ -17,12 +16,12 @@ type GuideTab = 'schreiben' | 'sprechen' | 'lesen' | 'sprachbausteine';
 const TAB_META: Record<GuideTab, {
   label: string;
   icon: React.ComponentType<{ size?: number; className?: string }>;
-  gradient: GradientKey;
+  color: string;
 }> = {
-  schreiben: { label: 'Schreiben', icon: IconPenLine, gradient: 'writing' },
-  sprechen: { label: 'Sprechen', icon: IconMic, gradient: 'speaking' },
-  lesen: { label: 'Lesen', icon: IconBookOpen, gradient: 'reading' },
-  sprachbausteine: { label: 'Sprachbausteine', icon: IconList, gradient: 'vocab' },
+  schreiben: { label: 'Schreiben', icon: IconPenLine, color: ACCENT.writing },
+  sprechen: { label: 'Sprechen', icon: IconMic, color: ACCENT.speaking },
+  lesen: { label: 'Lesen', icon: IconBookOpen, color: 'var(--warn)' },
+  sprachbausteine: { label: 'Sprachbausteine', icon: IconList, color: ACCENT.vocab },
 };
 
 export function SkillGuide() {
@@ -58,10 +57,11 @@ export function SkillGuide() {
               role="tab"
               aria-selected={active}
               onClick={() => setTab(t)}
-              className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-body font-bold transition-all"
+              className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-body font-bold border transition-all"
               style={{
-                background: active ? GRADIENT[meta.gradient] : 'transparent',
-                color: active ? '#fff' : 'var(--theme-text-secondary)',
+                background: active ? `color-mix(in srgb, ${meta.color} 16%, transparent)` : 'transparent',
+                borderColor: active ? meta.color : 'transparent',
+                color: active ? meta.color : 'var(--theme-text-secondary)',
               }}
             >
               <Icon size={14} />
@@ -71,7 +71,7 @@ export function SkillGuide() {
         })}
       </div>
 
-      <div>
+      <div style={{ ['--skill' as string]: TAB_META[tab].color } as React.CSSProperties}>
         {tab === 'schreiben' && <SchreibenPanel />}
         {tab === 'sprechen' && <SprechenPanel />}
         {tab === 'lesen' && <LesenPanel />}
@@ -104,14 +104,15 @@ function SchreibenPanel() {
       />
 
       <div
-        className="rounded-2xl p-5 lg:col-span-3"
+        className="word-card-v2 rounded-2xl p-5 lg:col-span-3"
         style={{
           backgroundColor: 'var(--theme-bg-card)',
-          border: '1px solid var(--theme-border)',
-        }}
+          border: '1px solid color-mix(in srgb, var(--skill) 26%, var(--theme-border))',
+          ['--card-accent' as string]: 'var(--skill)',
+        } as React.CSSProperties}
       >
         <h4 className="text-h3 font-bold mb-3 inline-flex items-center gap-2" style={{ color: 'var(--theme-text-primary)' }}>
-          <IconLightbulb size={18} />
+          <IconLightbulb size={18} style={{ color: 'var(--warn)' }} />
           {t('mistakesTitle')}
         </h4>
         <ul className="space-y-2">
@@ -136,24 +137,25 @@ function TemplateBlock({
 }: { title: string; subtitle: string; steps: TemplateStep[] }) {
   return (
     <div
-      className="rounded-2xl p-5"
+      className="word-card-v2 rounded-2xl p-5"
       style={{
         backgroundColor: 'var(--theme-bg-card)',
-        border: '1px solid var(--theme-border)',
-      }}
+        border: '1px solid color-mix(in srgb, var(--skill) 26%, var(--theme-border))',
+        ['--card-accent' as string]: 'var(--skill)',
+      } as React.CSSProperties}
     >
       <div className="mb-4">
-        <h4 className="text-h3 font-bold" style={{ color: 'var(--theme-text-primary)' }}>{title}</h4>
+        <h4 className="text-h3 font-bold" style={{ color: 'var(--skill)' }}>{title}</h4>
         <p className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>{subtitle}</p>
       </div>
       <ol className="space-y-3">
         {steps.map((step, idx) => (
           <li key={step.label} className="flex gap-3">
             <span
-              className="w-6 h-6 rounded-full shrink-0 flex items-center justify-center text-caption font-bold mt-0.5"
+              className="mono w-6 h-6 rounded-full shrink-0 flex items-center justify-center text-caption font-bold mt-0.5"
               style={{
-                backgroundColor: 'var(--theme-bg-secondary)',
-                color: 'var(--theme-text-secondary)',
+                backgroundColor: 'color-mix(in srgb, var(--skill) 16%, transparent)',
+                color: 'var(--skill)',
               }}
             >
               {idx + 1}
@@ -186,13 +188,14 @@ function SprechenPanel() {
       {sprechenRedemittel.map((g) => (
         <div
           key={g.category}
-          className="rounded-2xl p-5"
+          className="word-card-v2 rounded-2xl p-5"
           style={{
             backgroundColor: 'var(--theme-bg-card)',
-            border: '1px solid var(--theme-border)',
-          }}
+            border: '1px solid color-mix(in srgb, var(--skill) 26%, var(--theme-border))',
+            ['--card-accent' as string]: 'var(--skill)',
+          } as React.CSSProperties}
         >
-          <h4 className="text-h3 font-bold mb-3" style={{ color: 'var(--theme-text-primary)' }}>{g.category}</h4>
+          <h4 className="text-h3 font-bold mb-3" style={{ color: 'var(--skill)' }}>{g.category}</h4>
           <ul className="space-y-1.5">
             {g.phrases.map((p) => (
               <li
@@ -214,13 +217,13 @@ function SprechenPanel() {
           border: '1px solid var(--theme-border)',
         }}
       >
-        <h4 className="text-h3 font-bold mb-3" style={{ color: 'var(--theme-text-primary)' }}>
+        <h4 className="text-h3 font-bold mb-3" style={{ color: 'var(--skill)' }}>
           {t('goetheCriteriaTitle')}
         </h4>
         <ul className="space-y-2">
           {sprechenGoetheCriteria.map((c) => (
             <li key={c.name} className="flex items-start gap-2">
-              <IconCheck size={16} style={{ color: 'var(--theme-text-muted)', marginTop: 3 }} />
+              <IconCheck size={16} style={{ color: 'var(--skill)', marginTop: 3 }} />
               <div>
                 <p className="text-body font-bold" style={{ color: 'var(--theme-text-primary)' }}>{c.name}</p>
                 <p className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>{c.description}</p>
@@ -237,7 +240,7 @@ function SprechenPanel() {
           border: '1px solid var(--theme-border)',
         }}
       >
-        <h4 className="text-h3 font-bold mb-3" style={{ color: 'var(--theme-text-primary)' }}>
+        <h4 className="text-h3 font-bold mb-3" style={{ color: 'var(--skill)' }}>
           {t('telcTeileTitle')}
         </h4>
         <div className="space-y-3">
@@ -271,23 +274,24 @@ function LesenPanel() {
       {lesenTips.map((tip, idx) => (
         <div
           key={tip.title}
-          className="rounded-2xl p-5"
+          className="word-card-v2 rounded-2xl p-5"
           style={{
             backgroundColor: 'var(--theme-bg-card)',
             border: '1px solid var(--theme-border)',
-          }}
+            ['--card-accent' as string]: 'var(--warn)',
+          } as React.CSSProperties}
         >
           <div className="flex items-baseline gap-2 mb-2">
             <span
-              className="w-6 h-6 rounded-full flex items-center justify-center text-caption font-black"
+              className="mono w-6 h-6 rounded-full flex items-center justify-center text-caption font-bold"
               style={{
-                background: GRADIENT.reading,
-                color: '#fff',
+                background: 'color-mix(in srgb, var(--warn) 18%, transparent)',
+                color: 'var(--warn)',
               }}
             >
               {idx + 1}
             </span>
-            <h4 className="text-h3 font-bold" style={{ color: 'var(--theme-text-primary)' }}>{tip.title}</h4>
+            <h4 className="text-h3 font-bold" style={{ color: 'var(--warn)' }}>{tip.title}</h4>
           </div>
           <p className="text-body" style={{ color: 'var(--theme-text-secondary)', lineHeight: 1.7 }}>
             {tip.description}
@@ -307,24 +311,26 @@ function SprachbausteinePanel() {
       <div
         className="rounded-2xl p-4 mb-4 text-body"
         style={{
-          backgroundColor: 'var(--theme-bg-secondary)',
+          background: 'color-mix(in srgb, var(--skill) 8%, var(--theme-bg-secondary))',
+          border: '1px solid color-mix(in srgb, var(--skill) 26%, transparent)',
           color: 'var(--theme-text-secondary)',
         }}
       >
-        <span className="font-bold" style={{ color: 'var(--theme-text-primary)' }}>{t('sprachHintLabel')}</span>{' '}
+        <span className="font-bold" style={{ color: 'var(--skill)' }}>{t('sprachHintLabel')}</span>{' '}
         {t.rich('sprachHintBody', { b: (chunks) => <span className="font-bold">{chunks}</span> })}
       </div>
       <div className="grid gap-3 md:grid-cols-2">
         {sprachbausteineGroups.map((g) => (
           <div
             key={g.title}
-            className="rounded-2xl p-5"
+            className="word-card-v2 rounded-2xl p-5"
             style={{
               backgroundColor: 'var(--theme-bg-card)',
-              border: '1px solid var(--theme-border)',
-            }}
+              border: '1px solid color-mix(in srgb, var(--skill) 26%, var(--theme-border))',
+              ['--card-accent' as string]: 'var(--skill)',
+            } as React.CSSProperties}
           >
-            <h4 className="text-h3 font-bold mb-3" style={{ color: 'var(--theme-text-primary)' }}>{g.title}</h4>
+            <h4 className="text-h3 font-bold mb-3" style={{ color: 'var(--skill)' }}>{g.title}</h4>
             <ul className="grid grid-cols-2 gap-x-4 gap-y-1.5">
               {g.items.map((item) => (
                 <li

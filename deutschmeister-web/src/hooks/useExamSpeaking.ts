@@ -14,11 +14,12 @@ export function useExamSpeakingHistory(params?: { page?: number; limit?: number;
   });
 }
 
-export function useExamSpeakingStats() {
+export function useExamSpeakingStats(enabled = true) {
   return useQuery({
     queryKey: keys.stats(),
     queryFn: () => examSpeakingApi.getStats(),
     staleTime: 5 * 60_000,
+    enabled,
   });
 }
 

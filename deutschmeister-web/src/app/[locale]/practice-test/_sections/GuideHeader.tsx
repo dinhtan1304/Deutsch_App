@@ -1,6 +1,5 @@
 import { useTranslations } from 'next-intl';
 import { IconBookOpen, IconGraduationCap, IconRocket, IconList, IconLightbulb } from '@/components/ui/Icons';
-import { GRADIENT } from '@/lib/tokens';
 
 const ANCHORS = [
   { href: '#chon-chung-chi', key: 'navChooseExam', icon: IconGraduationCap },
@@ -16,10 +15,10 @@ export function GuideHeader() {
     <section id="huong-dan-b1" className="mt-16 mb-8 scroll-mt-20">
       <div className="flex items-start gap-4 mb-4">
         <div
-          className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0"
-          style={{ background: GRADIENT.examWriting }}
+          className="w-12 h-12 rounded-md flex items-center justify-center shrink-0"
+          style={{ background: 'color-mix(in srgb, var(--violet) 16%, transparent)', border: '1px solid color-mix(in srgb, var(--violet) 30%, transparent)', color: 'var(--violet)' }}
         >
-          <IconBookOpen size={24} className="text-white" />
+          <IconBookOpen size={24} />
         </div>
         <div className="flex-1 min-w-0">
           <h2 className="text-2xl font-bold" style={{ color: 'var(--theme-text-primary)' }}>

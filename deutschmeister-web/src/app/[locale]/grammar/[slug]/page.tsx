@@ -12,12 +12,14 @@ import { IconArrowLeft, IconBookOpen, IconPenLine, IconSearch, IconCheck } from 
 import { usePronunciation } from '@/hooks/usePronunciation';
 import Link from 'next/link';
 
-const LEVEL_STYLE = {
-  A1: { bg: `${ACCENT.reading}12`, color: ACCENT.reading, gradient: `linear-gradient(135deg, ${ACCENT.reading}, #16A34A)`, glow: `${ACCENT.reading}33` },
-  A2: { bg: `${ACCENT.srs}12`,     color: ACCENT.srs,     gradient: `linear-gradient(135deg, ${ACCENT.srs}, #2563EB)`,     glow: `${ACCENT.srs}33` },
-  B1: { bg: `${ACCENT.xp}12`,      color: ACCENT.xp,      gradient: `linear-gradient(135deg, ${ACCENT.xp}, #D97706)`,      glow: `${ACCENT.xp}33` },
-  B2: { bg: `${ACCENT.vocab}12`,   color: ACCENT.vocab,   gradient: `linear-gradient(135deg, ${ACCENT.vocab}, #7C3AED)`,   glow: `${ACCENT.vocab}33` },
+// Calm per-level accent (single token color; tints derived via color-mix).
+const LEVEL_COLOR: Record<string, string> = {
+  A1: 'var(--success)',
+  A2: 'var(--der)',
+  B1: 'var(--warn)',
+  B2: 'var(--violet)',
 };
+const tintBg = (c: string, pct = 12) => `color-mix(in srgb, ${c} ${pct}%, transparent)`;
 
 function ProgressRing({ pct, color }: { pct: number; color: string }) {
   const r = 20;
@@ -111,7 +113,7 @@ export default function GrammarLessonPage() {
     );
   }
 
-  const ls = LEVEL_STYLE[lesson.level as keyof typeof LEVEL_STYLE] ?? LEVEL_STYLE.A1;
+  const color: string = LEVEL_COLOR[lesson.level] ?? 'var(--violet)';
   const lessonProgress = progressList?.find(p => p.lessonSlug === slug);
   const isCompleted = lessonProgress?.status === 'completed';
   const correctCount = lessonProgress?.correctCount ?? 0;
@@ -125,17 +127,10 @@ export default function GrammarLessonPage() {
   const theoryTabDone = theoryDone || isCompleted;
 
   return (
-    <div className="max-w-4xl mx-auto px-4" style={{ paddingBottom: 100 }}>
+    <div className="max-w-360 mx-auto px-4 sm:px-6" style={{ paddingBottom: 100 }}>
 
-      {/* ─── Immersive Header ─── */}
-      <div
-        className="relative -mx-4 mb-6 px-4 pt-5 pb-6 overflow-hidden"
-        style={{ background: `linear-gradient(180deg, ${ls.bg} 0%, transparent 100%)` }}
-      >
-        {/* Decorative blob */}
-        <div className="absolute top-0 right-0 w-48 h-48 pointer-events-none"
-          style={{ background: `radial-gradient(circle at 80% 10%, ${ls.glow}, transparent 60%)` }} />
-
+      {/* ─── Header (calm) ─── */}
+      <div className="mb-6 pt-5">
         {/* Back */}
         <Link
           href="/grammar"
@@ -148,8 +143,8 @@ export default function GrammarLessonPage() {
           <div className="flex-1 min-w-0">
             {/* Meta */}
             <div className="flex items-center gap-2 mb-2 flex-wrap">
-              <span className="px-2.5 py-0.5 rounded-lg text-xs font-bold"
-                style={{ backgroundColor: ls.bg, color: ls.color, border: `1px solid ${ls.color}30` }}>
+              <span className="mono px-2.5 py-0.5 rounded-md text-xs font-bold"
+                style={{ backgroundColor: tintBg(color, 14), color, border: `1px solid ${tintBg(color, 30)}` }}>
                 {lesson.level}
               </span>
               <span className="text-sm" style={{ color: 'var(--theme-text-muted)' }}>
@@ -165,20 +160,20 @@ export default function GrammarLessonPage() {
             </div>
 
             {/* Title */}
-            <h1 className="text-2xl font-extrabold leading-tight mb-1"
+            <h1 className="text-2xl font-bold leading-tight mb-1"
               style={{ color: 'var(--theme-text-primary)' }}>
               {pickField(lesson, 'title', locale)}
             </h1>
 
             {/* German subtitle + audio */}
             <div className="flex items-center gap-2">
-              <span className="text-base italic" style={{ color: ls.color }}>
+              <span className="text-base italic" style={{ color }}>
                 {lesson.titleDe}
               </span>
               <button
                 onClick={() => speak(lesson.titleDe)}
                 className="w-7 h-7 rounded-lg flex items-center justify-center transition-all hover:scale-110"
-                style={{ backgroundColor: ls.bg, color: ls.color }}
+                style={{ backgroundColor: tintBg(color, 14), color }}
                 title={t('lesson.listenPronunciation')}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
@@ -189,26 +184,24 @@ export default function GrammarLessonPage() {
           </div>
 
           {/* Progress ring */}
-          <ProgressRing pct={progressPct} color={ls.color} />
+          <ProgressRing pct={progressPct} color={color} />
         </div>
       </div>
 
-      {/* ─── Tab bar ─── */}
+      {/* ─── Tab bar (calm) ─── */}
       <div className="flex gap-1.5 mb-6 p-1 rounded-xl" style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
         {/* Theory tab */}
         <button
           onClick={() => setActiveTab('theory')}
-          className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200"
-          style={activeTab === 'theory' ? {
-            background: ls.gradient,
-            color: 'white',
-            boxShadow: `0 2px 10px ${ls.glow}`,
-          } : { color: 'var(--theme-text-muted)', backgroundColor: 'transparent' }}>
+          className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold border transition-all duration-200"
+          style={activeTab === 'theory'
+            ? { background: tintBg(color, 16), borderColor: color, color }
+            : { color: 'var(--theme-text-muted)', backgroundColor: 'transparent', borderColor: 'transparent' }}>
           <IconBookOpen size={15} />
           {t('lesson.tabTheory')}
           {theoryTabDone && (
-            <span className="w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold"
-              style={{ backgroundColor: 'rgba(255,255,255,.25)' }}>
+            <span className="w-4 h-4 rounded-full flex items-center justify-center"
+              style={{ backgroundColor: tintBg('var(--success)', 20), color: 'var(--success)' }}>
               <IconCheck size={9} />
             </span>
           )}
@@ -217,19 +210,17 @@ export default function GrammarLessonPage() {
         {/* Exercises tab */}
         <button
           onClick={() => setActiveTab('exercises')}
-          className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200"
-          style={activeTab === 'exercises' ? {
-            background: ls.gradient,
-            color: 'white',
-            boxShadow: `0 2px 10px ${ls.glow}`,
-          } : { color: 'var(--theme-text-muted)', backgroundColor: 'transparent' }}>
+          className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold border transition-all duration-200"
+          style={activeTab === 'exercises'
+            ? { background: tintBg(color, 16), borderColor: color, color }
+            : { color: 'var(--theme-text-muted)', backgroundColor: 'transparent', borderColor: 'transparent' }}>
           <IconPenLine size={15} />
           {t('lesson.tabExercises')}
           {totalExercises > 0 && (
             <span
-              className="px-1.5 py-0.5 rounded-md text-[10px] font-bold"
+              className="mono px-1.5 py-0.5 rounded-md text-[10px] font-bold"
               style={activeTab === 'exercises'
-                ? { backgroundColor: 'rgba(255,255,255,.25)', color: 'white' }
+                ? { backgroundColor: tintBg(color, 18), color }
                 : { backgroundColor: 'var(--theme-bg-tertiary)', color: 'var(--theme-text-muted)' }}>
               {correctCount}/{totalExercises}
             </span>
@@ -260,17 +251,17 @@ export default function GrammarLessonPage() {
             className="w-full max-w-xl pointer-events-auto rounded-2xl border px-4 py-3 flex gap-3"
             style={{
               backgroundColor: 'color-mix(in srgb, var(--theme-bg-card) 90%, transparent)',
-              borderColor: `${ls.color}25`,
+              borderColor: tintBg(color, 25),
               backdropFilter: 'blur(16px)',
-              boxShadow: `0 8px 32px rgba(0,0,0,.12), 0 0 0 1px ${ls.color}15`,
+              boxShadow: '0 8px 32px rgba(0,0,0,.18)',
             }}>
             <button
               onClick={() => setTheoryDone(!theoryDone)}
               className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all border"
               style={theoryDone ? {
-                backgroundColor: `${STATUS.success}1A`,
-                borderColor: `${STATUS.success}4D`,
-                color: STATUS.success,
+                backgroundColor: tintBg('var(--success)', 14),
+                borderColor: tintBg('var(--success)', 45),
+                color: 'var(--success)',
               } : {
                 backgroundColor: 'var(--theme-bg-secondary)',
                 borderColor: 'var(--theme-border)',
@@ -282,8 +273,8 @@ export default function GrammarLessonPage() {
 
             <button
               onClick={() => setActiveTab('exercises')}
-              className="flex-1 flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white transition-all hover:scale-[1.02]"
-              style={{ background: ls.gradient, boxShadow: `0 4px 14px ${ls.glow}` }}>
+              className="flex-1 flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white transition-transform hover:-translate-y-0.5"
+              style={{ background: color, boxShadow: `0 4px 14px ${tintBg(color, 35)}` }}>
               {t('lesson.toExercises')}
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
                 <path d="M5 12h14M12 5l7 7-7 7" />

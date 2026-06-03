@@ -33,7 +33,7 @@ const EVENT_ICONS: Record<EventType, ReactNode> = {
   LEARNING: <IconBookOpen size={20} />,
 };
 
-const CHALLENGE_DESC_KEYS = ['learn_words_30', 'streak_5', 'game_sessions_10', 'complete_exams_2', 'writing_sessions_3', 'grammar_lessons_3'] as const;
+const CHALLENGE_DESC_KEYS = ['learn_words_30', 'streak_5', 'game_sessions_10', 'complete_exams_2', 'writing_sessions_3', 'grammar_lessons_3', 'reading_sessions_3', 'listening_sessions_3', 'review_words_50', 'add_words_20'] as const;
 type ChallengeDescKey = typeof CHALLENGE_DESC_KEYS[number];
 
 function useChallengeDesc() {

@@ -7,7 +7,7 @@ import { pickField, pickLocale } from '@/i18n/pickLocale';
 import { Exercise, SubmitResult, GrammarLesson } from '@/types/grammar';
 import { HighlightedText } from '@/components/word-highlight/HighlightedText';
 import { usePronunciation } from '@/hooks/usePronunciation';
-import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import { ACCENT, STATUS } from '@/lib/tokens';
 import {
     IconCheck, IconX, IconArrowRight, IconRefresh,
     IconTrophy, IconLightbulb, IconLoader,
@@ -50,7 +50,6 @@ const OPTION_LABELS = ['A', 'B', 'C', 'D', 'E', 'F'];
 
 // ─── Client-side answer validation ──────────────────────────────────────────
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function checkClientSide(exercise: Exercise, answer: string | string[]): boolean {
     const ad = exercise.answerData as Record<string, unknown>;
     switch (exercise.exerciseType) {
@@ -79,7 +78,6 @@ function checkClientSide(exercise: Exercise, answer: string | string[]): boolean
     }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function getCorrectAnswerLabel(exercise: Exercise): string {
     const ad = exercise.answerData as Record<string, unknown>;
     switch (exercise.exerciseType) {
@@ -269,8 +267,8 @@ function ReorderInput({ words, value, onChange, disabled }: {
                 {value.length === 0 && <span className="text-body italic" style={{ color: 'var(--theme-text-muted)' }}>{t('reorderPrompt')}</span>}
                 {value.map((w, i) => (
                     <button key={i} onClick={() => { if (!disabled) { const n=[...value]; n.splice(i,1); onChange(n); } }} disabled={disabled}
-                        className="px-3.5 py-2 rounded-lg text-sm font-semibold transition-all hover:scale-105"
-                        style={{ background: GRADIENT.history, color: 'white', boxShadow: `0 2px 8px ${ACCENT.vocab}40` }}>
+                        className="px-3.5 py-2 rounded-lg text-sm font-semibold transition-transform hover:-translate-y-0.5"
+                        style={{ background: 'var(--violet)', color: 'white', boxShadow: '0 2px 8px color-mix(in srgb, var(--violet) 32%, transparent)' }}>
                         {w} <span className="ml-1 opacity-60 text-xs">×</span>
                     </button>
                 ))}
@@ -341,14 +339,14 @@ function ResultScreen({ result, exercises, onRetry, nextLesson }: {
     const t = useTranslations('vocabulary.grammar.exercise');
     const locale = useLocale();
     const accuracy = result.totalQuestions > 0 ? Math.round((result.correctCount / result.totalQuestions) * 100) : 0;
-    // eslint-disable-next-line no-restricted-syntax
-    const gradient = result.passed ? GRADIENT.writing : accuracy >= 50 ? GRADIENT.action : GRADIENT.vocab;
+    const headColor = result.passed ? 'var(--success)' : accuracy >= 50 ? 'var(--accent)' : 'var(--danger)';
 
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="rounded-2xl border p-8 text-center" style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
-                <div className="w-16 h-16 rounded-2xl mx-auto flex items-center justify-center mb-4" style={{ background: gradient }}>
-                    <IconTrophy size={28} style={{ color: 'white' }} />
+                <div className="w-16 h-16 rounded-2xl mx-auto flex items-center justify-center mb-4"
+                    style={{ background: `color-mix(in srgb, ${headColor} 16%, transparent)`, border: `1px solid color-mix(in srgb, ${headColor} 30%, transparent)`, color: headColor }}>
+                    <IconTrophy size={28} />
                 </div>
                 <h2 className="text-2xl font-bold mb-1" style={{ color: 'var(--theme-text-primary)' }}>
                     {result.passed ? t('excellent') : accuracy >= 50 ? t('tryHarder') : t('needPractice')}
@@ -358,12 +356,12 @@ function ResultScreen({ result, exercises, onRetry, nextLesson }: {
                 </p>
                 <div className="grid grid-cols-3 gap-3 mb-6">
                     {[
-                        { value: result.score,                                label: t('statScore'),    color: ACCENT.vocab,   bg: 'rgba(139,92,246,' },
-                        { value: `${result.correctCount}/${result.totalQuestions}`, label: t('statCorrect'),  color: STATUS.success, bg: 'rgba(34,197,94,' },
-                        { value: `${accuracy}%`,                              label: t('statAccuracy'), color: ACCENT.srs,     bg: 'rgba(59,130,246,' },
+                        { value: result.score,                                label: t('statScore'),    color: 'var(--violet)' },
+                        { value: `${result.correctCount}/${result.totalQuestions}`, label: t('statCorrect'),  color: 'var(--success)' },
+                        { value: `${accuracy}%`,                              label: t('statAccuracy'), color: 'var(--der)' },
                     ].map((s, i) => (
-                        <div key={i} className="rounded-xl p-3" style={{ background: `linear-gradient(135deg, ${s.bg}.1), ${s.bg}.05))` }}>
-                            <div className="text-2xl font-extrabold" style={{ color: s.color }}>{s.value}</div>
+                        <div key={i} className="rounded-[14px] border p-3" style={{ backgroundColor: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}>
+                            <div className="mono text-2xl font-bold" style={{ color: s.color }}>{s.value}</div>
                             <div className="text-caption font-medium" style={{ color: 'var(--theme-text-muted)' }}>{s.label}</div>
                         </div>
                     ))}
@@ -371,15 +369,15 @@ function ResultScreen({ result, exercises, onRetry, nextLesson }: {
 
                 <div className="flex items-center justify-center gap-3 flex-wrap">
                     <button onClick={onRetry}
-                        className="inline-flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-semibold text-white transition-all hover:-translate-y-0.5"
-                        style={{ background: GRADIENT.history, boxShadow: `0 4px 12px ${ACCENT.vocab}40` }}>
-                        <IconRefresh size={16} style={{ color: 'white' }} /> {t('retry')}
+                        className="inline-flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-semibold border transition-transform hover:-translate-y-0.5"
+                        style={{ backgroundColor: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)' }}>
+                        <IconRefresh size={16} /> {t('retry')}
                     </button>
 
                     {result.passed && nextLesson && (
                         <Link href={`/grammar/${nextLesson.slug}`}
-                            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold text-white transition-all hover:-translate-y-0.5 hover:scale-[1.02] shadow-xl"
-                            style={{ background: GRADIENT.writing, boxShadow: '0 8px 20px rgba(99,102,241,0.35)' }}>
+                            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold text-white transition-transform hover:-translate-y-0.5"
+                            style={{ background: 'var(--success)', boxShadow: '0 4px 14px color-mix(in srgb, var(--success) 35%, transparent)' }}>
                             {t('nextLesson', { title: pickField(nextLesson, 'title', locale) })}
                             <IconArrowRight size={14} style={{ color: 'white' }} />
                         </Link>
@@ -511,7 +509,7 @@ export const ExerciseList = ({ exercises, onSubmit, nextLesson }: ExerciseListPr
         } finally {
             setIsSubmitting(false);
         }
-    }, [answers, exercise, currentAnswer, onSubmit]);
+    }, [answers, exercise, currentAnswer, onSubmit, t]);
 
     // Last question after reveal: submit
     const handleNextOrSubmit = useCallback(() => {
@@ -596,8 +594,8 @@ export const ExerciseList = ({ exercises, onSubmit, nextLesson }: ExerciseListPr
                 <div className="px-5 py-4 border-b flex items-center justify-between gap-3"
                     style={{ borderColor: 'var(--theme-border)' }}>
                     <div className="flex items-center gap-2.5">
-                        <div className="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-extrabold text-white shrink-0"
-                            style={{ background: GRADIENT.action }}>
+                        <div className="mono w-9 h-9 rounded-[10px] flex items-center justify-center text-sm font-bold shrink-0"
+                            style={{ background: 'color-mix(in srgb, var(--violet) 16%, transparent)', color: 'var(--violet)' }}>
                             {index + 1}
                         </div>
                         <span className="flex items-center gap-1 text-caption font-bold px-2.5 py-1 rounded-lg"
@@ -685,12 +683,12 @@ export const ExerciseList = ({ exercises, onSubmit, nextLesson }: ExerciseListPr
 
                 {/* Hint panel (only when not revealed) */}
                 {showHint && !revealed && (
-                    <div className="mx-5 mb-4 rounded-xl overflow-hidden" style={{ border: `1.5px solid ${ACCENT.xp}59` }}>
-                        <div className="px-3.5 py-2 flex items-center gap-2" style={{ background: GRADIENT.xp }}>
-                            <IconLightbulb size={14} style={{ color: 'white' }} />
-                            <span className="text-xs font-bold text-white tracking-wide">{t('hint')}</span>
+                    <div className="mx-5 mb-4 rounded-xl overflow-hidden" style={{ border: '1.5px solid color-mix(in srgb, var(--warn) 35%, transparent)' }}>
+                        <div className="px-3.5 py-2 flex items-center gap-2" style={{ background: 'color-mix(in srgb, var(--warn) 16%, transparent)' }}>
+                            <IconLightbulb size={14} style={{ color: 'var(--warn)' }} />
+                            <span className="text-xs font-bold tracking-wide" style={{ color: 'var(--warn)' }}>{t('hint')}</span>
                         </div>
-                        <div className="px-4 py-3" style={{ background: `${ACCENT.xp}0F` }}>
+                        <div className="px-4 py-3" style={{ background: 'color-mix(in srgb, var(--warn) 6%, transparent)' }}>
                             <p className="text-[13.5px] leading-relaxed" style={{ color: 'var(--theme-text-primary)' }}>
                                 {(exercise as { hint?: string; hintVi?: string }).hint || (exercise as { hintVi?: string }).hintVi || t('defaultHint')}
                             </p>
@@ -716,8 +714,8 @@ export const ExerciseList = ({ exercises, onSubmit, nextLesson }: ExerciseListPr
                             <button onClick={() => setShowHint(h => !h)}
                                 className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold transition-all"
                                 style={showHint
-                                    ? { background: GRADIENT.xp, color: 'white' }
-                                    : { background: `${ACCENT.xp}1A`, color: ACCENT.xp, border: `1px solid ${ACCENT.xp}40` }}>
+                                    ? { background: 'color-mix(in srgb, var(--warn) 22%, transparent)', color: 'var(--warn)', border: '1px solid color-mix(in srgb, var(--warn) 50%, transparent)' }
+                                    : { background: 'color-mix(in srgb, var(--warn) 10%, transparent)', color: 'var(--warn)', border: '1px solid color-mix(in srgb, var(--warn) 40%, transparent)' }}>
                                 <IconLightbulb size={13} /> {t('hint')}
                             </button>
                         )}
@@ -726,21 +724,20 @@ export const ExerciseList = ({ exercises, onSubmit, nextLesson }: ExerciseListPr
                     {/* Right: primary CTA */}
                     {!revealed ? (
                         <button onClick={handleCheck} disabled={!hasAnswer()}
-                            className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-body font-bold transition-all hover:-translate-y-0.5 disabled:opacity-40 disabled:cursor-not-allowed disabled:transform-none"
+                            className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-body font-bold transition-transform hover:-translate-y-0.5 disabled:opacity-40 disabled:cursor-not-allowed disabled:transform-none"
                             style={{
-                                background: hasAnswer() ? GRADIENT.action : 'var(--theme-bg-tertiary)',
-                                color: hasAnswer() ? 'white' : 'var(--theme-text-muted)',
-                                boxShadow: hasAnswer() ? `0 4px 12px ${ACCENT.srs}4D` : 'none',
+                                background: hasAnswer() ? 'var(--accent)' : 'var(--theme-bg-tertiary)',
+                                color: hasAnswer() ? 'var(--accent-on)' : 'var(--theme-text-muted)',
+                                boxShadow: hasAnswer() ? '0 4px 12px color-mix(in srgb, var(--accent) 32%, transparent)' : 'none',
                             }}>
                             {!hasAnswer() ? t('chooseAnswer') : <><IconCheck size={14} /> {t('check')}</>}
                         </button>
                     ) : (
                         <button onClick={handleNextOrSubmit} disabled={isSubmitting}
-                            className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-body font-bold transition-all hover:-translate-y-0.5 disabled:opacity-40"
+                            className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-body font-bold text-white transition-transform hover:-translate-y-0.5 disabled:opacity-40"
                             style={{
-                                background: isLast ? GRADIENT.writing : GRADIENT.action,
-                                color: 'white',
-                                boxShadow: `0 4px 12px ${ACCENT.srs}4D`,
+                                background: isLast ? 'var(--success)' : 'var(--accent)',
+                                boxShadow: `0 4px 12px color-mix(in srgb, ${isLast ? 'var(--success)' : 'var(--accent)'} 32%, transparent)`,
                             }}>
                             {isSubmitting ? (
                                 <><IconLoader size={14} /> {t('grading')}</>

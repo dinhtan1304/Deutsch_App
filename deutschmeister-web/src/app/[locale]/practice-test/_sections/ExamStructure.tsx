@@ -1,5 +1,4 @@
 'use client';
-/* eslint-disable no-restricted-syntax */
 
 import { useState } from 'react';
 import Link from 'next/link';
@@ -8,7 +7,7 @@ import {
   IconBookOpen, IconHeadphones, IconPenLine, IconMic, IconLightbulb,
   IconArrowRight, IconClock, IconTarget, IconList,
 } from '@/components/ui/Icons';
-import { GRADIENT } from '@/lib/tokens';
+import { ACCENT } from '@/lib/tokens';
 import { examStructureGoethe, examStructureTelc, type SkillDetail, type SkillKey } from '../_data/b1-content';
 
 const SKILL_ICON: Record<SkillKey, React.ComponentType<{ size?: number; className?: string }>> = {
@@ -17,6 +16,14 @@ const SKILL_ICON: Record<SkillKey, React.ComponentType<{ size?: number; classNam
   sprachbausteine: IconList,
   schreiben: IconPenLine,
   sprechen: IconMic,
+};
+
+const SKILL_COLOR: Record<SkillKey, string> = {
+  lesen: ACCENT.reading,
+  hoeren: ACCENT.listening,
+  sprachbausteine: ACCENT.vocab,
+  schreiben: ACCENT.writing,
+  sprechen: ACCENT.speaking,
 };
 
 export type ExamTab = 'goethe' | 'telc';
@@ -53,8 +60,8 @@ export function ExamStructure({ initialTab = 'goethe' }: { initialTab?: ExamTab 
             onClick={() => setTab(t)}
             className="px-4 py-2 rounded-lg text-body font-bold transition-all"
             style={{
-              background: tab === t ? GRADIENT.brand : 'transparent',
-              color: tab === t ? '#fff' : 'var(--theme-text-secondary)',
+              background: tab === t ? 'var(--accent)' : 'transparent',
+              color: tab === t ? 'var(--accent-on)' : 'var(--theme-text-secondary)',
             }}
           >
             {t === 'goethe' ? 'Goethe B1' : 'TELC B1'}
@@ -77,25 +84,26 @@ function SkillCard({ skill }: { skill: SkillDetail }) {
 
   return (
     <details
-      className="group rounded-2xl overflow-hidden"
+      className="word-card-v2 group rounded-2xl overflow-hidden"
       style={{
         backgroundColor: 'var(--theme-bg-card)',
         border: '1px solid var(--theme-border)',
-      }}
+        ['--card-accent' as string]: SKILL_COLOR[skill.key],
+      } as React.CSSProperties}
     >
       <summary
         className="flex items-center gap-4 p-4 cursor-pointer list-none"
         style={{ color: 'var(--theme-text-primary)' }}
       >
         <div
-          className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0"
-          style={{ background: GRADIENT[skill.gradient] }}
+          className="w-11 h-11 rounded-[11px] flex items-center justify-center shrink-0"
+          style={{ background: `color-mix(in srgb, ${SKILL_COLOR[skill.key]} 16%, transparent)`, color: SKILL_COLOR[skill.key] }}
         >
-          <Icon size={20} className="text-white" />
+          <Icon size={20} />
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-baseline gap-2 flex-wrap">
-            <span className="text-h3 font-black">{skill.title}</span>
+            <span className="text-h3 font-bold">{skill.title}</span>
             <span className="text-caption font-semibold" style={{ color: 'var(--theme-text-muted)' }}>
               · {skill.titleDe}
             </span>
@@ -125,11 +133,11 @@ function SkillCard({ skill }: { skill: SkillDetail }) {
         <p className="text-body mb-3" style={{ lineHeight: 1.7 }}>{skill.summary}</p>
         <p className="text-body mb-4" style={{ lineHeight: 1.7 }}>{skill.parts}</p>
         <div
-          className="flex items-start gap-2 p-3 rounded-xl mb-4"
-          style={{ backgroundColor: 'var(--theme-bg-secondary)' }}
+          className="word-card-v2 flex items-start gap-2 p-3 rounded-[11px] mb-4"
+          style={{ background: 'color-mix(in srgb, var(--warn) 9%, transparent)', border: '1px solid color-mix(in srgb, var(--warn) 26%, transparent)', ['--card-accent' as string]: 'var(--warn)' } as React.CSSProperties}
         >
-          <IconLightbulb size={16} style={{ color: 'var(--theme-text-muted)', marginTop: 2 }} />
-          <p className="text-body" style={{ color: 'var(--theme-text-secondary)' }}>{skill.tip}</p>
+          <IconLightbulb size={16} style={{ color: 'var(--warn)', marginTop: 2 }} />
+          <p className="text-body font-medium" style={{ color: 'var(--warn)' }}>{skill.tip}</p>
         </div>
         <Link
           href={skill.practiceHref}

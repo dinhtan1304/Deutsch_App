@@ -57,12 +57,16 @@ function accentClassFor(pathname: string): string {
 export function MainLayout({ children }: MainLayoutProps) {
   const t = useTranslations('common.ui');
   const pathname = usePathname();
+  // usePathname() (next/navigation) keeps the locale prefix (/en, /de), so strip
+  // it before matching bare routes — otherwise /en/auth/login wrongly renders the
+  // full app shell. (vi is the default locale and has no prefix.)
+  const localelessPath = pathname.replace(/^\/(en|de)(?=\/|$)/, '') || '/';
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
 
   const isBareRoute = BARE_ROUTES.some(
-    (route) => pathname === route || pathname.startsWith(route + '/')
+    (route) => localelessPath === route || localelessPath.startsWith(route + '/')
   );
 
   useEffect(() => {
@@ -82,10 +86,10 @@ export function MainLayout({ children }: MainLayoutProps) {
       localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(next));
       return next;
     });
-  }, []);
+  }, [setSidebarCollapsed]);
 
-  const openPalette = useCallback(() => setPaletteOpen(true), []);
-  const closePalette = useCallback(() => setPaletteOpen(false), []);
+  const openPalette = useCallback(() => setPaletteOpen(true), [setPaletteOpen]);
+  const closePalette = useCallback(() => setPaletteOpen(false), [setPaletteOpen]);
 
   // ─── Auth/landing pages: full-screen, no chrome ───
   if (isBareRoute) {

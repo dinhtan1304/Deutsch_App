@@ -1,4 +1,4 @@
-import { apiGet, apiPost } from './client';
+import { apiGet, apiPost, apiDelete } from './client';
 
 export type PlanCode = 'free' | 'premium_lite' | 'premium' | 'lifetime' | 'exam_bundle';
 
@@ -102,6 +102,39 @@ export interface AdminSubscription {
   user: { id: string; email: string; name: string | null };
 }
 
+/** Result of admin creating a participant account + granting a plan. */
+export interface CreateUserWithPlanResponse {
+  /** false = email already existed; plan granted to existing user, no password returned. */
+  created: boolean;
+  user: { id: string; email: string; name: string | null };
+  /** One-time temp password — only present when a new account was created. */
+  tempPassword: string | null;
+  plan: string;
+  expiresAt: string | null;
+}
+
+export interface PendingGrant {
+  id: string;
+  email: string;
+  period: string;
+  note: string | null;
+  grantedBy: string | null;
+  status: 'pending' | 'applied';
+  appliedAt: string | null;
+  appliedUserId: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** Result of admin pre-granting a plan to an email. */
+export interface CreatePendingGrantResponse {
+  /** 'granted-existing' = a user with that email already existed, plan applied now. */
+  mode: 'granted-existing' | 'pending';
+  plan?: string;
+  expiresAt?: string | null;
+  grant?: PendingGrant;
+}
+
 export type PracticeFeat =
   | 'writing'
   | 'reading'
@@ -167,6 +200,16 @@ export const adminSubscriptionsApi = {
     apiPost(`/subscriptions/admin/grant/${userId}`, { period, note }),
   revokePremium: (userId: string) =>
     apiPost(`/subscriptions/admin/revoke/${userId}`, {}),
+
+  // Program access (grant without signup)
+  createUserWithPlan: (dto: { email: string; name?: string; period: BillingPeriod; note?: string }) =>
+    apiPost<CreateUserWithPlanResponse>('/subscriptions/admin/create-user', dto),
+  createPendingGrant: (dto: { email: string; period: BillingPeriod; note?: string }) =>
+    apiPost<CreatePendingGrantResponse>('/subscriptions/admin/pending-grants', dto),
+  listPendingGrants: () =>
+    apiGet<PendingGrant[]>('/subscriptions/admin/pending-grants'),
+  deletePendingGrant: (id: string) =>
+    apiDelete(`/subscriptions/admin/pending-grants/${id}`),
 
   // Promo code admin
   createPromoCode: (dto: {

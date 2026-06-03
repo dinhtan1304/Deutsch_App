@@ -1,8 +1,11 @@
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { IconCheck, IconArrowRight } from '@/components/ui/Icons';
-import { GRADIENT } from '@/lib/tokens';
+import { ACCENT } from '@/lib/tokens';
 import { examSummaries, comparisonRows, whyBenefits } from '../_data/b1-content';
+
+// Solid per-exam accent (Goethe = reading green, TELC = exam-writing purple).
+const EXAM_COLOR: Record<string, string> = { goethe: ACCENT.reading, telc: ACCENT.examWriting };
 
 // Dot colours for the "why" benefit cards (matches the v2 design palette)
 const WHY_DOTS = ['var(--success)', 'var(--violet)', 'var(--cyan)', 'var(--warn)', 'var(--der)', 'var(--streak)'];
@@ -28,46 +31,45 @@ export function ChooseExam() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 mb-8">
-        {examSummaries.map((exam) => (
-          <article
-            key={exam.id}
-            className="relative flex flex-col overflow-hidden rounded-2xl border p-6"
-            style={{ backgroundColor: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}
-          >
-            <div
-              className="absolute top-0 left-0 right-0 h-1.5"
-              style={{ background: GRADIENT[exam.gradient] }}
-            />
-            <div className="flex items-baseline justify-between gap-3 mb-2">
-              <h4 className="text-xl font-black" style={{ color: 'var(--theme-text-primary)' }}>
-                {exam.name}
-              </h4>
-              <span className="text-caption font-bold uppercase tracking-wider px-2 py-0.5 rounded-sm"
-                style={{ color: 'var(--theme-text-muted)', backgroundColor: 'var(--theme-bg-secondary)' }}>
-                {exam.shortName}
-              </span>
-            </div>
-            <p className="text-body mb-5" style={{ color: 'var(--theme-text-secondary)', lineHeight: 1.7 }}>
-              {exam.description}
-            </p>
-            <ul className="mb-6 flex-1 space-y-2.5">
-              {exam.bullets.map((bullet) => (
-                <li key={bullet} className="flex items-start gap-2 text-body" style={{ color: 'var(--theme-text-secondary)' }}>
-                  <IconCheck size={16} style={{ color: 'var(--success)', marginTop: 3, flexShrink: 0 }} />
-                  <span>{bullet}</span>
-                </li>
-              ))}
-            </ul>
-            <Link
-              href={`/practice-test/huong-dan-b1?exam=${exam.id}#cau-truc-de`}
-              className="flex w-full items-center justify-center gap-2 rounded-[11px] px-4 py-3 text-body font-bold text-white transition-transform hover:-translate-y-0.5"
-              style={{ background: GRADIENT[exam.gradient] }}
+        {examSummaries.map((exam) => {
+          const ec = EXAM_COLOR[exam.id] ?? 'var(--accent)';
+          return (
+            <article
+              key={exam.id}
+              className="word-card-v2 relative flex flex-col rounded-[14px] border p-6"
+              style={{ backgroundColor: 'var(--theme-bg-card)', borderColor: ec, ['--card-accent' as string]: ec } as React.CSSProperties}
             >
-              {t('viewStructure')}
-              <IconArrowRight size={15} />
-            </Link>
-          </article>
-        ))}
+              <div className="flex items-start justify-between gap-3 mb-2">
+                <h4 className="text-xl font-bold" style={{ color: 'var(--theme-text-primary)' }}>
+                  {exam.name}
+                </h4>
+                <span className="mono shrink-0 rounded-md px-2 py-0.5 text-caption font-bold uppercase tracking-wider"
+                  style={{ color: ec, backgroundColor: `color-mix(in srgb, ${ec} 14%, transparent)` }}>
+                  {exam.shortName}
+                </span>
+              </div>
+              <p className="text-body mb-5" style={{ color: 'var(--theme-text-secondary)', lineHeight: 1.7 }}>
+                {exam.description}
+              </p>
+              <ul className="mb-6 flex-1 space-y-2.5">
+                {exam.bullets.map((bullet) => (
+                  <li key={bullet} className="flex items-start gap-2 text-body" style={{ color: 'var(--theme-text-secondary)' }}>
+                    <IconCheck size={16} style={{ color: ec, marginTop: 3, flexShrink: 0 }} />
+                    <span>{bullet}</span>
+                  </li>
+                ))}
+              </ul>
+              <Link
+                href={`/practice-test/huong-dan-b1?exam=${exam.id}#cau-truc-de`}
+                className="flex w-full items-center justify-center gap-2 rounded-[11px] px-4 py-3 text-body font-bold text-white transition-transform hover:-translate-y-0.5"
+                style={{ background: ec, boxShadow: `0 4px 12px color-mix(in srgb, ${ec} 35%, transparent)` }}
+              >
+                {t('viewStructure')}
+                <IconArrowRight size={15} />
+              </Link>
+            </article>
+          );
+        })}
       </div>
 
       {/* Comparison table */}

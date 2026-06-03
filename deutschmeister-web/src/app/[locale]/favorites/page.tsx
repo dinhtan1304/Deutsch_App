@@ -35,26 +35,26 @@ export default function FavoritesPage() {
   );
 
   return (
-    <div className="py-6">
+    <div className="max-w-360 mx-auto py-6">
       {/* Header */}
-      <div className="flex items-start justify-between mb-6">
+      <div className="flex items-start justify-between gap-4 mb-6">
         <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-2xl flex items-center justify-center"
-            style={{ background: GRADIENT.xp }}>
-            <IconStar size={28} className="text-white" />
+          <div className="w-11 h-11 rounded-md flex items-center justify-center"
+            style={{ background: 'color-mix(in srgb, var(--warn) 16%, transparent)', border: '1px solid color-mix(in srgb, var(--warn) 30%, transparent)', color: 'var(--warn)' }}>
+            <IconStar size={22} />
           </div>
           <div>
-            <h1 className="text-2xl font-bold" style={{ color: 'var(--theme-text-primary)' }}>
+            <h1 className="font-bold" style={{ fontSize: 30, letterSpacing: '-.02em', color: 'var(--theme-text-primary)' }}>
               {t('pageTitle')}
             </h1>
-            <p className="text-body mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>
+            <p className="text-body mt-0.5" style={{ color: 'var(--theme-text-secondary)' }}>
               {t('pageSubtitle', { count: favorites?.length ?? 0 })}
             </p>
           </div>
         </div>
         <Link href="/words"
-          className="flex items-center gap-1 px-3 py-2 rounded-xl text-body font-semibold transition-all duration-200 hover:-translate-y-0.5"
-          style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }}>
+          className="flex items-center gap-1 px-3 py-2 rounded-[10px] border text-body font-semibold transition-transform duration-200 hover:-translate-y-0.5 shrink-0"
+          style={{ backgroundColor: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)' }}>
           <IconChevronLeft size={14} /> {t('backToDictionary')}
         </Link>
       </div>
@@ -67,18 +67,18 @@ export default function FavoritesPage() {
 
       {/* Error — Auth expired */}
       {error && isAuthError && (
-        <div className="text-center py-16 rounded-2xl border-2 border-dashed"
-          style={{ borderColor: `${STATUS.danger}33` }}>
-          <div className="w-14 h-14 rounded-2xl mx-auto flex items-center justify-center mb-4"
-            style={{ background: `${STATUS.danger}14` }}>
+        <div className="text-center py-16 rounded-2xl border border-dashed"
+          style={{ borderColor: `color-mix(in srgb, ${STATUS.danger} 33%, transparent)` }}>
+          <div className="w-14 h-14 rounded-[14px] mx-auto flex items-center justify-center mb-4"
+            style={{ background: `color-mix(in srgb, ${STATUS.danger} 14%, transparent)` }}>
             <IconLogIn size={24} style={{ color: STATUS.danger }} />
           </div>
           <h2 className="text-base font-bold mb-2" style={{ color: 'var(--theme-text-primary)' }}>{t('sessionExpiredTitle')}</h2>
           <p className="text-body mb-5" style={{ color: 'var(--theme-text-muted)' }}>{t('sessionExpiredBody')}</p>
           <div className="flex items-center justify-center gap-3">
             <Link href="/auth/login?returnTo=/favorites"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white"
-              style={{ background: GRADIENT.action }}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-[11px] text-sm font-semibold transition-transform hover:-translate-y-0.5"
+              style={{ background: 'var(--accent)', color: 'var(--accent-on)' }}
               onClick={() => logout()}>
               <IconLogIn size={16} /> {t('loginAgain')}
             </Link>
@@ -88,10 +88,10 @@ export default function FavoritesPage() {
 
       {/* Error — Network/Server */}
       {error && !isAuthError && (
-        <div className="text-center py-16 rounded-2xl border-2 border-dashed"
-          style={{ borderColor: `${STATUS.danger}33` }}>
-          <div className="w-14 h-14 rounded-2xl mx-auto flex items-center justify-center mb-4"
-            style={{ background: `${STATUS.danger}14` }}>
+        <div className="text-center py-16 rounded-2xl border border-dashed"
+          style={{ borderColor: `color-mix(in srgb, ${STATUS.danger} 33%, transparent)` }}>
+          <div className="w-14 h-14 rounded-[14px] mx-auto flex items-center justify-center mb-4"
+            style={{ background: `color-mix(in srgb, ${STATUS.danger} 14%, transparent)` }}>
             <IconRefresh size={24} style={{ color: STATUS.danger }} />
           </div>
           <h2 className="text-base font-bold mb-2" style={{ color: 'var(--theme-text-primary)' }}>{t('loadErrorTitle')}</h2>
@@ -115,18 +115,18 @@ export default function FavoritesPage() {
 
       {/* Empty */}
       {!isLoading && !error && favorites && favorites.length === 0 && (
-        <div className="text-center py-16 rounded-2xl border-2 border-dashed" style={{ borderColor: 'var(--theme-border)' }}>
-          <div className="w-16 h-16 rounded-2xl mx-auto flex items-center justify-center mb-4"
-            style={{ background: GRADIENT.xp }}>
-            <IconStar size={28} className="text-white" />
+        <div className="text-center py-16 rounded-2xl border border-dashed" style={{ borderColor: 'var(--theme-border)' }}>
+          <div className="w-16 h-16 rounded-[16px] mx-auto flex items-center justify-center mb-4"
+            style={{ background: 'color-mix(in srgb, var(--warn) 16%, transparent)', border: '1px solid color-mix(in srgb, var(--warn) 30%, transparent)', color: 'var(--warn)' }}>
+            <IconStar size={28} />
           </div>
           <h2 className="text-base font-bold mb-2" style={{ color: 'var(--theme-text-primary)' }}>{t('emptyTitle')}</h2>
           <p className="text-body mb-5" style={{ color: 'var(--theme-text-muted)' }}>
             {t('emptyBody')}
           </p>
           <Link href="/words"
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white"
-            style={{ background: GRADIENT.action }}>
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-[11px] text-sm font-semibold transition-transform hover:-translate-y-0.5"
+            style={{ background: 'var(--accent)', color: 'var(--accent-on)' }}>
             <IconBook size={16} /> {t('viewDictionary')}
           </Link>
         </div>

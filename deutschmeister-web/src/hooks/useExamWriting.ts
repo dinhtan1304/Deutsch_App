@@ -24,11 +24,12 @@ export function useExamWritingHistory(params?: {
   });
 }
 
-export function useExamWritingStats() {
+export function useExamWritingStats(enabled = true) {
   return useQuery<ExamWritingStats>({
     queryKey: examWritingKeys.stats(),
     queryFn: () => examWritingApi.getStats(),
     staleTime: 5 * 60 * 1000,
+    enabled,
   });
 }
 

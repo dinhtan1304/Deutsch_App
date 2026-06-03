@@ -24,11 +24,12 @@ export function useExamReadingHistory(params?: {
   });
 }
 
-export function useExamReadingStats() {
+export function useExamReadingStats(enabled = true) {
   return useQuery<ExamReadingStats>({
     queryKey: examReadingKeys.stats(),
     queryFn: () => examReadingApi.getStats(),
     staleTime: 5 * 60 * 1000,
+    enabled,
   });
 }
 

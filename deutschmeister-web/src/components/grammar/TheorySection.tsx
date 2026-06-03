@@ -257,17 +257,17 @@ function AlphabetCardGrid({ rows, onSpeak }: {
                 {/* ── BACK: memory tip ── */}
                 <div
                   className="alpha-card-face alpha-card-back absolute inset-0 rounded-xl flex flex-col items-center justify-center p-4 text-center gap-3"
-                  style={{ background: 'linear-gradient(135deg, #4F46E5, #7C3AED)', border: `1.5px solid rgba(139,92,246,.5)` }}
+                  style={{ background: 'color-mix(in srgb, var(--violet) 12%, var(--theme-bg-card))', border: '1.5px solid color-mix(in srgb, var(--violet) 45%, transparent)' }}
                 >
-                  <div style={{ color: 'rgba(255,255,255,.8)' }}><SparkleIcon /></div>
+                  <div style={{ color: 'var(--violet)' }}><SparkleIcon /></div>
                   <div>
-                    <div className="text-body font-extrabold text-white mb-1">{t('memoryTip')}</div>
-                    <div className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,.82)' }}>{tip}</div>
+                    <div className="text-body font-bold mb-1" style={{ color: 'var(--violet)' }}>{t('memoryTip')}</div>
+                    <div className="text-xs leading-relaxed" style={{ color: 'var(--theme-text-secondary)' }}>{tip}</div>
                   </div>
                   <button
                     onClick={(e) => { e.stopPropagation(); togglePin(idx); }}
                     className="mt-1 px-3 py-1 rounded-lg text-caption font-bold transition-all hover:scale-105"
-                    style={{ background: 'rgba(255,255,255,.18)', color: 'rgba(255,255,255,.9)' }}
+                    style={{ background: 'color-mix(in srgb, var(--violet) 18%, transparent)', color: 'var(--violet)' }}
                   >
                     {t('clickToFlipBack')}
                   </button>
@@ -350,13 +350,13 @@ export const TheorySection = ({ content }: TheorySectionProps) => {
               className="px-6 py-4 border-b flex items-center justify-between gap-3"
               style={{
                 borderColor: 'var(--theme-border)',
-                background: 'linear-gradient(135deg, rgba(139,92,246,.06), rgba(99,102,241,.03))',
+                background: 'color-mix(in srgb, var(--violet) 5%, transparent)',
               }}
             >
               <div className="flex items-center gap-3 min-w-0">
                 <div
-                  className="w-8 h-8 rounded-xl flex items-center justify-center text-sm font-bold text-white shrink-0"
-                  style={{ background: 'linear-gradient(135deg, #8B5CF6, #6366F1)' }}
+                  className="mono w-8 h-8 rounded-[10px] flex items-center justify-center text-sm font-bold shrink-0"
+                  style={{ background: 'color-mix(in srgb, var(--violet) 16%, transparent)', color: 'var(--violet)' }}
                 >
                   {sIdx + 1}
                 </div>
@@ -375,8 +375,8 @@ export const TheorySection = ({ content }: TheorySectionProps) => {
                 onClick={() => readingAll === sIdx ? setReadingAll(null) : handleReadAll(sIdx, section)}
                 className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all hover:scale-[1.03]"
                 style={readingAll === sIdx ? {
-                  background: 'rgba(139,92,246,.15)',
-                  color: ACCENT.vocab,
+                  background: 'color-mix(in srgb, var(--violet) 15%, transparent)',
+                  color: 'var(--violet)',
                 } : {
                   background: 'var(--theme-bg-secondary)',
                   color: 'var(--theme-text-muted)',

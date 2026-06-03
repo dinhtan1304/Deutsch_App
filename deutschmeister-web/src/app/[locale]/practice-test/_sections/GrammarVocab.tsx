@@ -72,11 +72,12 @@ export function GrammarVocab() {
           {vocabByTopic.map((topic) => (
             <div
               key={topic.titleDe}
-              className="rounded-2xl p-4"
+              className="word-card-v2 rounded-2xl p-4"
               style={{
                 backgroundColor: 'var(--theme-bg-card)',
                 border: '1px solid var(--theme-border)',
-              }}
+                ['--card-accent' as string]: 'var(--violet)',
+              } as React.CSSProperties}
             >
               <p className="text-caption font-bold uppercase tracking-wider mb-0.5" style={{ color: 'var(--theme-text-muted)' }}>
                 {topic.titleDe}

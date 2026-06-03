@@ -1,5 +1,4 @@
 ﻿'use client';
-/* eslint-disable no-restricted-syntax */
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
@@ -12,7 +11,6 @@ import {
   quickReference,
   GenderRule,
 } from '@/lib/genderRules';
-import { ACCENT, STATUS } from '@/lib/tokens';
 
 // ─── Inline SVG Icons ───
 function IconLightbulb({ size = 16, style }: { size?: number; style?: React.CSSProperties }) {
@@ -76,22 +74,24 @@ function IconAlertTriangle({ size = 16, style }: { size?: number; style?: React.
   );
 }
 
-// ─── Color map ───
+// ─── Gender color map — v2 article tokens (der=blue, die=pink, das=green) ───
 const GENDER_COLORS = {
-  masculine: { color: ACCENT.srs, bg: 'rgba(59,130,246,.08)', border: 'rgba(59,130,246,.2)', label: 'DER' },
-  feminine:  { color: ACCENT.listening, bg: 'rgba(236,72,153,.08)', border: 'rgba(236,72,153,.2)', label: 'DIE' },
-  neuter:    { color: STATUS.success, bg: 'rgba(34,197,94,.08)',  border: 'rgba(34,197,94,.2)',  label: 'DAS' },
+  masculine: { color: 'var(--der)', label: 'DER' },
+  feminine:  { color: 'var(--die)', label: 'DIE' },
+  neuter:    { color: 'var(--das)', label: 'DAS' },
 };
+// Subtle calm tint of a gender/accent color over the card surface.
+const tint = (c: string, pct = 6) => `color-mix(in srgb, ${c} ${pct}%, var(--theme-bg-card))`;
 
 type TabType = 'all' | 'der' | 'die' | 'das' | 'tricks';
 
 type TabKey = 'tabAll' | 'tabTricks';
 const TABS: { id: TabType; labelKey?: TabKey; literal?: string; color: string }[] = [
-  { id: 'all',    labelKey: 'tabAll',    color: '#6B7280' },
-  { id: 'der',    literal: 'der',        color: ACCENT.srs },
-  { id: 'die',    literal: 'die',        color: ACCENT.listening },
-  { id: 'das',    literal: 'das',        color: STATUS.success },
-  { id: 'tricks', labelKey: 'tabTricks', color: ACCENT.xp },
+  { id: 'all',    labelKey: 'tabAll',    color: 'var(--accent)' },
+  { id: 'der',    literal: 'der',        color: 'var(--der)' },
+  { id: 'die',    literal: 'die',        color: 'var(--die)' },
+  { id: 'das',    literal: 'das',        color: 'var(--das)' },
+  { id: 'tricks', labelKey: 'tabTricks', color: 'var(--warn)' },
 ];
 
 // ─── Rule Card ───
@@ -99,8 +99,8 @@ function RuleCard({ rule }: { rule: GenderRule }) {
   const t = useTranslations('learn.tips');
   const gc = GENDER_COLORS[rule.gender];
   return (
-    <div className="rounded-xl p-4 transition-all duration-200 hover:-translate-y-0.5"
-      style={{ backgroundColor: gc.bg, borderLeft: `4px solid ${gc.color}` }}>
+    <div className="rounded-[13px] border p-4 transition-transform duration-200 hover:-translate-y-0.5"
+      style={{ backgroundColor: tint(gc.color), borderColor: gc.color }}>
       <div className="flex items-start justify-between gap-2 mb-2">
         <h3 className="text-sm font-bold" style={{ color: gc.color }}>
           {rule.type === 'ending' && t('endingPrefix', { pattern: rule.pattern.replace('$', '') })}
@@ -108,8 +108,8 @@ function RuleCard({ rule }: { rule: GenderRule }) {
           {rule.type === 'category' && rule.description}
           {rule.type === 'special' && rule.description}
         </h3>
-        <span className="px-2 py-0.5 rounded-full text-caption font-bold text-white shrink-0"
-          style={{ backgroundColor: gc.color }}>
+        <span className="mono px-2 py-0.5 rounded-full text-caption font-bold shrink-0"
+          style={{ backgroundColor: `color-mix(in srgb, ${gc.color} 16%, transparent)`, color: gc.color }}>
           {rule.reliability}%
         </span>
       </div>
@@ -121,7 +121,7 @@ function RuleCard({ rule }: { rule: GenderRule }) {
       <div className="flex flex-wrap gap-1.5 mb-2">
         {rule.examples.map((ex, i) => (
           <span key={i} className="px-2 py-0.5 rounded-md text-xs font-semibold"
-            style={{ backgroundColor: `${gc.color}15`, color: gc.color }}>
+            style={{ backgroundColor: `color-mix(in srgb, ${gc.color} 14%, transparent)`, color: gc.color }}>
             {ex}
           </span>
         ))}
@@ -129,7 +129,7 @@ function RuleCard({ rule }: { rule: GenderRule }) {
 
       {rule.exceptions && rule.exceptions.length > 0 && (
         <p className="text-caption flex items-center gap-1" style={{ color: 'var(--theme-text-muted)' }}>
-          <IconAlertTriangle size={12} style={{ color: ACCENT.xp }} />
+          <IconAlertTriangle size={12} style={{ color: 'var(--warn)' }} />
           {t('exceptions', { list: rule.exceptions.join(', ') })}
         </p>
       )}
@@ -150,27 +150,27 @@ export default function TipsPage() {
   ];
 
   return (
-      <div className="py-6">
+      <div className="max-w-360 mx-auto py-6">
 
         {/* ─── Header ─── */}
-        <div className="flex items-start justify-between mb-6">
+        <div className="flex items-start justify-between gap-4 mb-6">
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-2xl flex items-center justify-center"
-              style={{ background: 'linear-gradient(135deg, #F59E0B, #F97316)' }}>
-              <IconLightbulb size={22} style={{ color: 'white' }} />
+            <div className="w-11 h-11 rounded-md flex items-center justify-center"
+              style={{ background: 'color-mix(in srgb, var(--warn) 16%, transparent)', border: '1px solid color-mix(in srgb, var(--warn) 30%, transparent)', color: 'var(--warn)' }}>
+              <IconLightbulb size={22} />
             </div>
             <div>
-              <h1 className="text-2xl font-bold" style={{ color: 'var(--theme-text-primary)' }}>
+              <h1 className="font-bold" style={{ fontSize: 30, letterSpacing: '-.02em', color: 'var(--theme-text-primary)' }}>
                 {t('title')}
               </h1>
-              <p className="text-body mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>
+              <p className="text-body mt-0.5" style={{ color: 'var(--theme-text-secondary)' }}>
                 {t('subtitle')}
               </p>
             </div>
           </div>
           <Link href="/words"
-            className="flex items-center gap-1 px-3 py-2 rounded-xl text-body font-semibold transition-all duration-200 hover:-translate-y-0.5"
-            style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }}>
+            className="flex items-center gap-1 px-3 py-2 rounded-[10px] border text-body font-semibold transition-transform duration-200 hover:-translate-y-0.5 shrink-0"
+            style={{ backgroundColor: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)' }}>
             <IconChevronLeft size={14} /> {t('dictionaryLink')}
           </Link>
         </div>
@@ -179,9 +179,9 @@ export default function TipsPage() {
         <div className="rounded-2xl border overflow-hidden mb-6"
           style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
           <div className="flex items-center gap-2.5 px-5 pt-5 pb-3">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center"
-              style={{ background: 'linear-gradient(135deg, #F59E0B, #F59E0Bcc)' }}>
-              <IconZap size={16} style={{ color: 'white' }} />
+            <div className="w-8 h-8 rounded-[9px] flex items-center justify-center"
+              style={{ background: 'color-mix(in srgb, var(--warn) 16%, transparent)', color: 'var(--warn)' }}>
+              <IconZap size={16} />
             </div>
             <h2 className="text-base font-bold" style={{ color: 'var(--theme-text-primary)' }}>{t('quickRef')}</h2>
           </div>
@@ -191,15 +191,15 @@ export default function TipsPage() {
               const gc = GENDER_COLORS[gender];
               const endings = quickReference[article];
               return (
-                <div key={article} className="rounded-xl p-4"
-                  style={{ backgroundColor: gc.bg, borderLeft: `4px solid ${gc.color}` }}>
+                <div key={article} className="rounded-[13px] border p-4"
+                  style={{ backgroundColor: tint(gc.color), borderColor: gc.color }}>
                   <div className="text-sm font-bold mb-2" style={{ color: gc.color }}>
                     {gc.label}
                   </div>
                   <div className="flex flex-wrap gap-1.5">
                     {endings.map((e, i) => (
                       <span key={i} className="px-2 py-0.5 rounded-md text-xs font-semibold"
-                        style={{ backgroundColor: `${gc.color}18`, color: gc.color }}>
+                        style={{ backgroundColor: `color-mix(in srgb, ${gc.color} 16%, transparent)`, color: gc.color }}>
                         {e}
                       </span>
                     ))}
@@ -216,10 +216,10 @@ export default function TipsPage() {
             const isActive = activeTab === tab.id;
             return (
               <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-body font-semibold whitespace-nowrap transition-all duration-200 hover:-translate-y-0.5"
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-[9px] border text-body font-semibold whitespace-nowrap transition-all duration-200 hover:-translate-y-0.5"
                 style={isActive
-                  ? { background: `linear-gradient(135deg, ${tab.color}, ${tab.color}cc)`, color: 'white', boxShadow: `0 4px 12px ${tab.color}30` }
-                  : { backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }
+                  ? { background: `color-mix(in srgb, ${tab.color} 14%, transparent)`, borderColor: tab.color, color: tab.color }
+                  : { background: 'var(--theme-bg-secondary)', borderColor: 'var(--theme-border)', color: 'var(--theme-text-muted)' }
                 }>
                 {tab.id === 'tricks' && <IconBrain size={14} />}
                 {tab.labelKey ? t(tab.labelKey) : tab.literal}
@@ -232,9 +232,9 @@ export default function TipsPage() {
         {(activeTab === 'all' || activeTab === 'tricks') && (
           <div className="mb-8">
             <div className="flex items-center gap-2 mb-4">
-              <div className="w-7 h-7 rounded-lg flex items-center justify-center"
-                style={{ background: 'linear-gradient(135deg, #F59E0B, #F59E0Bcc)' }}>
-                <IconBrain size={14} style={{ color: 'white' }} />
+              <div className="w-7 h-7 rounded-[9px] flex items-center justify-center"
+                style={{ background: 'color-mix(in srgb, var(--warn) 16%, transparent)', color: 'var(--warn)' }}>
+                <IconBrain size={14} />
               </div>
               <h2 className="text-title font-bold" style={{ color: 'var(--theme-text-primary)' }}>
                 {t('tricksTitle')}
@@ -244,8 +244,8 @@ export default function TipsPage() {
               {memoryTricks.map((trick, i) => {
                 const gc = GENDER_COLORS[trick.gender];
                 return (
-                  <div key={i} className="rounded-xl p-4 transition-all duration-200 hover:-translate-y-0.5"
-                    style={{ backgroundColor: gc.bg, borderLeft: `4px solid ${gc.color}` }}>
+                  <div key={i} className="rounded-[13px] border p-4 transition-transform duration-200 hover:-translate-y-0.5"
+                    style={{ backgroundColor: tint(gc.color), borderColor: gc.color }}>
                     <h3 className="text-sm font-bold mb-1.5" style={{ color: 'var(--theme-text-primary)' }}>
                       {trick.title}
                     </h3>
@@ -266,11 +266,11 @@ export default function TipsPage() {
         {(activeTab === 'all' || activeTab === 'der') && (
           <div className="mb-8">
             <div className="flex items-center gap-2 mb-4">
-              <div className="w-7 h-7 rounded-lg flex items-center justify-center"
-                style={{ background: 'linear-gradient(135deg, #3B82F6, #3B82F6cc)' }}>
-                <IconShield size={14} style={{ color: 'white' }} />
+              <div className="w-7 h-7 rounded-[9px] flex items-center justify-center"
+                style={{ background: 'color-mix(in srgb, var(--der) 16%, transparent)', color: 'var(--der)' }}>
+                <IconShield size={14} />
               </div>
-              <h2 className="text-title font-bold" style={{ color: ACCENT.srs }}>
+              <h2 className="text-title font-bold" style={{ color: 'var(--der)' }}>
                 {t('rulesDer')}
               </h2>
             </div>
@@ -284,11 +284,11 @@ export default function TipsPage() {
         {(activeTab === 'all' || activeTab === 'die') && (
           <div className="mb-8">
             <div className="flex items-center gap-2 mb-4">
-              <div className="w-7 h-7 rounded-lg flex items-center justify-center"
-                style={{ background: 'linear-gradient(135deg, #EC4899, #EC4899cc)' }}>
-                <IconShield size={14} style={{ color: 'white' }} />
+              <div className="w-7 h-7 rounded-[9px] flex items-center justify-center"
+                style={{ background: 'color-mix(in srgb, var(--die) 16%, transparent)', color: 'var(--die)' }}>
+                <IconShield size={14} />
               </div>
-              <h2 className="text-title font-bold" style={{ color: ACCENT.listening }}>
+              <h2 className="text-title font-bold" style={{ color: 'var(--die)' }}>
                 {t('rulesDie')}
               </h2>
             </div>
@@ -302,11 +302,11 @@ export default function TipsPage() {
         {(activeTab === 'all' || activeTab === 'das') && (
           <div className="mb-8">
             <div className="flex items-center gap-2 mb-4">
-              <div className="w-7 h-7 rounded-lg flex items-center justify-center"
-                style={{ background: 'linear-gradient(135deg, #22C55E, #22C55Ecc)' }}>
-                <IconShield size={14} style={{ color: 'white' }} />
+              <div className="w-7 h-7 rounded-[9px] flex items-center justify-center"
+                style={{ background: 'color-mix(in srgb, var(--das) 16%, transparent)', color: 'var(--das)' }}>
+                <IconShield size={14} />
               </div>
-              <h2 className="text-title font-bold" style={{ color: STATUS.success }}>
+              <h2 className="text-title font-bold" style={{ color: 'var(--das)' }}>
                 {t('rulesDas')}
               </h2>
             </div>
@@ -320,17 +320,17 @@ export default function TipsPage() {
         <div className="rounded-2xl border overflow-hidden"
           style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
           <div className="flex items-center gap-2.5 px-5 pt-5 pb-3">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center"
-              style={{ background: 'linear-gradient(135deg, #8B5CF6, #8B5CF6cc)' }}>
-              <IconBookOpen size={16} style={{ color: 'white' }} />
+            <div className="w-8 h-8 rounded-[9px] flex items-center justify-center"
+              style={{ background: 'color-mix(in srgb, var(--violet) 16%, transparent)', color: 'var(--violet)' }}>
+              <IconBookOpen size={16} />
             </div>
             <h2 className="text-base font-bold" style={{ color: 'var(--theme-text-primary)' }}>{t('learnTipsTitle')}</h2>
           </div>
           <div className="px-5 pb-5 space-y-3">
             {learnTips.map(tip => (
               <div key={tip.num} className="flex items-start gap-3 py-2">
-                <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 text-xs font-bold text-white"
-                  style={{ background: 'linear-gradient(135deg, #8B5CF6, #8B5CF6cc)' }}>
+                <div className="mono w-7 h-7 rounded-[9px] flex items-center justify-center shrink-0 text-xs font-bold"
+                  style={{ background: 'color-mix(in srgb, var(--violet) 16%, transparent)', color: 'var(--violet)' }}>
                   {tip.num}
                 </div>
                 <div>

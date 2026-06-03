@@ -1,5 +1,4 @@
 import { useTranslations } from 'next-intl';
-import { GRADIENT } from '@/lib/tokens';
 import { roadmap12w } from '../_data/b1-content';
 
 export function RoadmapB1() {
@@ -25,17 +24,18 @@ export function RoadmapB1() {
           <li key={phase.weeks} className="relative mb-4 last:mb-0">
             <span
               aria-hidden
-              className="absolute -left-8 top-3 w-7 h-7 rounded-full flex items-center justify-center text-caption font-black text-white shadow-md"
-              style={{ background: GRADIENT.brand }}
+              className="mono absolute -left-8 top-3 w-7 h-7 rounded-full flex items-center justify-center text-caption font-bold"
+              style={{ background: 'var(--accent)', color: 'var(--accent-on)' }}
             >
               {idx + 1}
             </span>
             <div
-              className="rounded-2xl p-4"
+              className="word-card-v2 rounded-2xl p-4"
               style={{
                 backgroundColor: 'var(--theme-bg-card)',
                 border: '1px solid var(--theme-border)',
-              }}
+                ['--card-accent' as string]: 'var(--accent)',
+              } as React.CSSProperties}
             >
               <div className="flex items-baseline gap-2 flex-wrap mb-2">
                 <span

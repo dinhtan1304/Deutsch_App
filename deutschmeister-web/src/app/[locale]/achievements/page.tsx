@@ -9,25 +9,36 @@ import { ACCENT } from '@/lib/tokens';
 import { GridSkeleton } from '@/components/ui';
 import {
   IconTrophy, IconLock, IconChevronLeft, IconCheck,
-  IconBook, IconGamepad, IconGraduationCap, IconPenLine, IconStar,
+  IconBook, IconBookOpen, IconGamepad, IconGraduationCap, IconPenLine, IconStar,
+  IconHeadphones, IconMic, IconSpellCheck, IconFlame,
 } from '@/components/ui/Icons';
 
-const CATEGORY_KEYS = ['vocabulary', 'games', 'exams', 'writing', 'level'] as const;
+const CATEGORY_KEYS = ['vocabulary', 'grammar', 'reading', 'listening', 'writing', 'speaking', 'games', 'exams', 'streak', 'level'] as const;
 type CategoryKey = typeof CATEGORY_KEYS[number];
 
 // Category color via CSS-var-ish tokens (kept as ACCENT tokens, used in color-mix).
 const CATEGORY_COLOR: Record<string, string> = {
   vocabulary: ACCENT.reading,
+  grammar: ACCENT.examWriting,
+  reading: ACCENT.teal,
+  listening: ACCENT.cyan,
+  writing: ACCENT.vocab,
+  speaking: ACCENT.speaking,
   games: ACCENT.xp,
   exams: ACCENT.srs,
-  writing: ACCENT.vocab,
+  streak: ACCENT.v2Streak,
   level: ACCENT.listening,
 };
 const CATEGORY_ICONS: Record<string, React.ReactNode> = {
   vocabulary: <IconBook size={13} />,
+  grammar: <IconSpellCheck size={13} />,
+  reading: <IconBookOpen size={13} />,
+  listening: <IconHeadphones size={13} />,
+  writing: <IconPenLine size={13} />,
+  speaking: <IconMic size={13} />,
   games: <IconGamepad size={13} />,
   exams: <IconGraduationCap size={13} />,
-  writing: <IconPenLine size={13} />,
+  streak: <IconFlame size={13} />,
   level: <IconStar size={13} />,
 };
 

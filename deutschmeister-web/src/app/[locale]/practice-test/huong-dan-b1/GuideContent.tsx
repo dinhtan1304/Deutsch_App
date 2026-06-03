@@ -14,7 +14,7 @@ import { B1FinalCta } from '../_sections/B1FinalCta';
 export function GuideContent({ initialTab }: { initialTab: ExamTab }) {
   const t = useTranslations('practice.guideB1');
   return (
-    <div className="py-6 max-w-7xl mx-auto px-4">
+    <div className="py-6 max-w-360 mx-auto px-4 sm:px-6">
       <Link
         href="/practice-test"
         className="inline-flex items-center gap-2 text-body font-semibold mb-4 transition-colors hover:opacity-80"

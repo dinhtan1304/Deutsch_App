@@ -17,11 +17,12 @@ export function useExamListeningHistory(params?: { page?: number; limit?: number
   });
 }
 
-export function useExamListeningStats() {
+export function useExamListeningStats(enabled = true) {
   return useQuery<ExamListeningStats>({
     queryKey: examListeningKeys.stats(),
     queryFn: () => examListeningApi.getStats(),
     staleTime: 5 * 60 * 1000,
+    enabled,
   });
 }
 
