@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect, useCallback } from 'react';
+import { useState, useMemo, useEffect, useCallback, Suspense } from 'react';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -93,7 +93,7 @@ function PasswordStrength({ password }: { password: string }) {
   );
 }
 
-export default function RegisterPage() {
+function RegisterForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { register, isLoading, isAuthenticated, _hasHydrated } = useAuthStore();
@@ -379,5 +379,13 @@ export default function RegisterPage() {
         })}
       </p>
     </FormLayout>
+  );
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen" style={{ backgroundColor: 'var(--marketing-bg)' }} />}>
+      <RegisterForm />
+    </Suspense>
   );
 }
