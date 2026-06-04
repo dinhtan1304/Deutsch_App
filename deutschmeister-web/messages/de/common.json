@@ -45,6 +45,10 @@
     "betaFeature": "Beta-Funktion",
     "guestText": "Du bist als Gast unterwegs — <a>kostenlos registrieren</a>, um deinen Fortschritt zu speichern",
     "guestDismiss": "Hinweis schließen",
+    "verifyEmailBanner": {
+      "text": "Deine E-Mail ist noch nicht bestätigt — bestätige sie, um Übungen und Upgrades freizuschalten.",
+      "dismiss": "Hinweis schließen"
+    },
     "skipNav": "Navigation überspringen",
     "taskLabelDefault": "Aufgabe / Aufgabe",
     "editorLabelDefault": "Antwort / Antwort",

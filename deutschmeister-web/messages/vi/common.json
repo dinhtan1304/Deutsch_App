@@ -45,6 +45,10 @@
     "betaFeature": "Tính năng beta",
     "guestText": "Bạn đang xem với tư cách khách — <a>Đăng ký miễn phí</a> để lưu tiến trình học",
     "guestDismiss": "Đóng thông báo",
+    "verifyEmailBanner": {
+      "text": "Email của bạn chưa được xác minh — xác minh để mở khóa luyện tập và nâng cấp.",
+      "dismiss": "Đóng thông báo"
+    },
     "skipNav": "Bỏ qua điều hướng",
     "taskLabelDefault": "Aufgabe / Đề bài",
     "editorLabelDefault": "Antwort / Trả lời",

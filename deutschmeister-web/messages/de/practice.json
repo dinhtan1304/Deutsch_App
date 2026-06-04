@@ -119,11 +119,11 @@
     },
     "choose": {
       "title": "Das passende Zertifikat wählen",
-      "subtitle": "Goethe und TELC sind beide international anerkannt. Wähle nach deinen Stärken.",
+      "subtitle": "Goethe, TELC, ÖSD und TestDaF sind alle anerkannt. Wähle nach deinem Ziel.",
       "viewStructure": "Prüfungsaufbau im Detail ansehen",
-      "compareTitle": "Goethe B1 vs. TELC B1 im Vergleich",
+      "compareTitle": "Deutschprüfungen im Vergleich: Goethe · TELC · ÖSD · TestDaF",
       "colCriterion": "Kriterium",
-      "recognizedNote": "Beide Zertifikate sind international anerkannt und für ein Aufenthaltsvisum in Deutschland gültig.",
+      "recognizedNote": "Goethe · TELC · ÖSD sind für Aufenthalt & Einbürgerung anerkannt; TestDaF (B2–C1) dient der Studienzulassung in Deutschland.",
       "whyTitle": "Warum B1 auf DeutschMeister üben?"
     },
     "structure": {
@@ -1196,6 +1196,10 @@
       "goetheDesc": "Goethe-Institut-Zertifikat",
       "telcLabel": "TELC Deutsch",
       "telcDesc": "The European Language Certificates",
+      "osdLabel": "ÖSD",
+      "osdDesc": "Österreichisches Sprachdiplom Deutsch",
+      "testdafLabel": "TestDaF",
+      "testdafDesc": "Akademisches Deutsch, B2–C1 (TDN 3–5)",
       "naBadge": "N/A",
       "teile": "Teile",
       "questions": "Fragen",
@@ -1363,7 +1367,8 @@
         "informal_email": "E-Mail (informell)",
         "formal_email": "E-Mail (formell)",
         "sms": "SMS / Kurznachricht",
-        "forum_comment": "Forumsbeitrag"
+        "forum_comment": "Forumsbeitrag",
+        "grafik_argument": "Grafik + Argumentation"
       }
     },
     "result": {
@@ -1392,7 +1397,8 @@
         "informal_email": "E-Mail (informell)",
         "formal_email": "E-Mail (formell)",
         "sms": "SMS / Kurznachricht",
-        "forum_comment": "Forumsbeitrag"
+        "forum_comment": "Forumsbeitrag",
+        "grafik_argument": "Grafik + Argumentation"
       }
     }
   },

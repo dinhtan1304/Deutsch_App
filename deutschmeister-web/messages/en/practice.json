@@ -119,11 +119,11 @@
     },
     "choose": {
       "title": "Choose the right certificate",
-      "subtitle": "Goethe and TELC are both internationally recognised. Choose based on your strengths.",
+      "subtitle": "Goethe, TELC, ÖSD and TestDaF are all recognised. Choose based on your goal.",
       "viewStructure": "See exam structure details",
-      "compareTitle": "Goethe B1 vs TELC B1 compared",
+      "compareTitle": "German exams compared: Goethe · TELC · ÖSD · TestDaF",
       "colCriterion": "Criterion",
-      "recognizedNote": "Both certificates are internationally recognised and valid for a residence visa in Germany.",
+      "recognizedNote": "Goethe · TELC · ÖSD are recognised for residence & naturalisation; TestDaF (B2–C1) is used for university admission in Germany.",
       "whyTitle": "Why prep for B1 on DeutschMeister?"
     },
     "structure": {
@@ -1196,6 +1196,10 @@
       "goetheDesc": "Goethe-Institut certificate",
       "telcLabel": "TELC Deutsch",
       "telcDesc": "The European Language Certificates",
+      "osdLabel": "ÖSD",
+      "osdDesc": "Austrian German language diploma",
+      "testdafLabel": "TestDaF",
+      "testdafDesc": "Academic German exam, B2–C1 (TDN 3–5)",
       "naBadge": "N/A",
       "teile": "Teile",
       "questions": "Questions",
@@ -1363,7 +1367,8 @@
         "informal_email": "E-Mail (informell)",
         "formal_email": "E-Mail (formell)",
         "sms": "SMS / Kurznachricht",
-        "forum_comment": "Forumsbeitrag"
+        "forum_comment": "Forumsbeitrag",
+        "grafik_argument": "Grafik + Argumentation"
       }
     },
     "result": {
@@ -1392,7 +1397,8 @@
         "informal_email": "E-Mail (informell)",
         "formal_email": "E-Mail (formell)",
         "sms": "SMS / Kurznachricht",
-        "forum_comment": "Forumsbeitrag"
+        "forum_comment": "Forumsbeitrag",
+        "grafik_argument": "Grafik + Argumentation"
       }
     }
   },

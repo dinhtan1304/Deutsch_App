@@ -45,6 +45,10 @@
     "betaFeature": "Beta feature",
     "guestText": "You're browsing as a guest — <a>sign up free</a> to save your progress",
     "guestDismiss": "Dismiss notice",
+    "verifyEmailBanner": {
+      "text": "Your email isn't verified yet — verify it to unlock practice and upgrades.",
+      "dismiss": "Dismiss notice"
+    },
     "skipNav": "Skip navigation",
     "taskLabelDefault": "Aufgabe / Task",
     "editorLabelDefault": "Antwort / Answer",

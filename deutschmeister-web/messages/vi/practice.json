@@ -119,11 +119,11 @@
     },
     "choose": {
       "title": "Chọn chứng chỉ phù hợp",
-      "subtitle": "Goethe và TELC đều được công nhận quốc tế. Chọn theo điểm mạnh của bạn.",
+      "subtitle": "Goethe, TELC, ÖSD và TestDaF đều được công nhận. Chọn theo mục tiêu của bạn.",
       "viewStructure": "Xem chi tiết cấu trúc đề",
-      "compareTitle": "So sánh Goethe B1 vs TELC B1",
+      "compareTitle": "So sánh các kỳ thi: Goethe · TELC · ÖSD · TestDaF",
       "colCriterion": "Tiêu chí",
-      "recognizedNote": "Cả hai chứng chỉ đều được công nhận quốc tế và dùng được cho visa định cư tại Đức.",
+      "recognizedNote": "Goethe · TELC · ÖSD được công nhận cho định cư & nhập tịch; TestDaF (B2–C1) dùng để nhập học đại học Đức.",
       "whyTitle": "Vì sao luyện B1 trên DeutschMeister?"
     },
     "structure": {
@@ -1196,6 +1196,10 @@
       "goetheDesc": "Chứng chỉ Goethe-Institut",
       "telcLabel": "TELC Deutsch",
       "telcDesc": "The European Language Certificates",
+      "osdLabel": "ÖSD",
+      "osdDesc": "Chứng chỉ tiếng Đức chuẩn Áo",
+      "testdafLabel": "TestDaF",
+      "testdafDesc": "Thi tiếng Đức học thuật bậc B2–C1 (TDN 3–5)",
       "naBadge": "N/A",
       "teile": "Teile",
       "questions": "Câu hỏi",
@@ -1363,7 +1367,8 @@
         "informal_email": "E-Mail (informell)",
         "formal_email": "E-Mail (formell)",
         "sms": "SMS / Kurznachricht",
-        "forum_comment": "Forumsbeitrag"
+        "forum_comment": "Forumsbeitrag",
+        "grafik_argument": "Grafik + Argumentation"
       }
     },
     "result": {
@@ -1392,7 +1397,8 @@
         "informal_email": "E-Mail (informell)",
         "formal_email": "E-Mail (formell)",
         "sms": "SMS / Kurznachricht",
-        "forum_comment": "Forumsbeitrag"
+        "forum_comment": "Forumsbeitrag",
+        "grafik_argument": "Grafik + Argumentation"
       }
     }
   },
