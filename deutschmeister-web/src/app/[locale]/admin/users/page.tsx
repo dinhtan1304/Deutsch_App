@@ -1,9 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAdminUsers, useUpdateAdminUser, useDeleteAdminUser } from '@/hooks/useAdmin';
 import { AdminUserItem } from '@/lib/api/admin';
+import { adminSubscriptionsApi } from '@/lib/api/subscriptions';
 
 function IconSearch({ size = 16 }: { size?: number }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>;
@@ -87,6 +89,117 @@ const FILTER_OPTS = [
   { value: 'inactive', label: 'Không hoạt động' },
 ];
 
+/** Admin campaign: gift Premium Lite (1 month) to all free users. Runs in the
+ *  background on the API; this card previews counts and polls progress. */
+function GiftLiteCampaignCard() {
+  const queryClient = useQueryClient();
+  const [confirm, setConfirm] = useState<{ limit?: number } | null>(null);
+  const prevRunning = useRef(false);
+
+  const { data: preview } = useQuery({
+    queryKey: ['admin-gift-lite-preview'],
+    queryFn: () => adminSubscriptionsApi.giftLitePreview(),
+  });
+
+  const { data: status } = useQuery({
+    queryKey: ['admin-gift-lite-status'],
+    queryFn: () => adminSubscriptionsApi.giftLiteStatus(),
+    refetchInterval: (query) => (query.state.data?.running ? 3000 : false),
+  });
+
+  const running = status?.running ?? false;
+
+  // When a run finishes, refresh the preview counts.
+  useEffect(() => {
+    if (prevRunning.current && !running) {
+      queryClient.invalidateQueries({ queryKey: ['admin-gift-lite-preview'] });
+    }
+    prevRunning.current = running;
+  }, [running, queryClient]);
+
+  const runMut = useMutation({
+    mutationFn: (limit?: number) => adminSubscriptionsApi.giftLiteRun(limit),
+    onSuccess: () => {
+      setConfirm(null);
+      queryClient.invalidateQueries({ queryKey: ['admin-gift-lite-status'] });
+    },
+    onError: (err: any) => {
+      setConfirm(null);
+      const msg = err?.response?.data?.message ?? err?.message ?? 'Không chạy được chiến dịch';
+      alert(Array.isArray(msg) ? msg.join('\n') : msg);
+    },
+  });
+
+  const emailedTotal = (status?.emailedVerified ?? 0) + (status?.emailedUnverified ?? 0);
+  const finished = !!status?.finishedAt && !running;
+
+  return (
+    <div style={{ marginBottom: 20, background: 'linear-gradient(90deg, rgba(16,185,129,.10), rgba(20,184,166,.06))', border: '1px solid rgba(16,185,129,.3)', borderRadius: 12, padding: 16 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
+        <div>
+          <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--theme-text-primary)', marginBottom: 4 }}>🎁 Tặng Premium Lite 1 tháng cho user free</div>
+          <div style={{ fontSize: 12, color: 'var(--theme-text-muted)', lineHeight: 1.6 }}>
+            {preview ? (
+              <>
+                <strong style={{ color: '#10B981' }}>{preview.freeVerified}</strong> đã xác minh (cấp ngay + email)
+                {' · '}
+                <strong style={{ color: '#F59E0B' }}>{preview.freeUnverified}</strong> chưa xác minh (email mời xác minh)
+                {preview.alreadyPendingUnverified > 0 && <> · {preview.alreadyPendingUnverified} đã pre-grant (bỏ qua)</>}
+              </>
+            ) : 'Đang tải số liệu...'}
+          </div>
+        </div>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button onClick={() => setConfirm({ limit: 5 })} disabled={running}
+            style={{ padding: '0 14px', height: 34, borderRadius: 8, border: '1px solid #10B981', backgroundColor: 'transparent', color: '#10B981', fontSize: 12, fontWeight: 700, cursor: running ? 'not-allowed' : 'pointer', opacity: running ? 0.5 : 1 }}>
+            Gửi thử (5 user)
+          </button>
+          <button onClick={() => setConfirm({})} disabled={running}
+            style={{ padding: '0 14px', height: 34, borderRadius: 8, border: 'none', backgroundColor: '#10B981', color: '#fff', fontSize: 12, fontWeight: 700, cursor: running ? 'not-allowed' : 'pointer', opacity: running ? 0.5 : 1, display: 'flex', alignItems: 'center', gap: 6 }}>
+            {running && <IconLoader size={14} />} Chạy toàn bộ
+          </button>
+        </div>
+      </div>
+
+      {(running || finished) && status && (
+        <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid rgba(16,185,129,.2)', fontSize: 12, color: 'var(--theme-text-secondary)', display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+          {running
+            ? <span style={{ color: '#10B981', display: 'inline-flex', alignItems: 'center', gap: 6 }}><IconLoader size={13} /> Đang chạy…</span>
+            : <span style={{ color: '#10B981', fontWeight: 700 }}>✓ Hoàn tất</span>}
+          <span>· Đã cấp: <strong>{status.grantedNow}</strong></span>
+          <span>· Pre-grant: <strong>{status.pendingCreated}</strong></span>
+          <span>· Email đã gửi: <strong>{emailedTotal}</strong></span>
+          {status.failed > 0 && <span style={{ color: '#EF4444' }}>· Lỗi: <strong>{status.failed}</strong></span>}
+          {status.lastError && <span style={{ color: '#EF4444' }}>· {status.lastError}</span>}
+        </div>
+      )}
+
+      {confirm && (
+        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50, padding: 16 }}>
+          <div style={{ backgroundColor: 'var(--theme-bg-card)', borderRadius: 12, padding: 24, maxWidth: 440, width: '100%', border: '1px solid var(--theme-border)' }}>
+            <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--theme-text-primary)', marginBottom: 8 }}>
+              {confirm.limit ? `Gửi thử cho ${confirm.limit} user?` : 'Chạy chiến dịch cho toàn bộ user free?'}
+            </h3>
+            <p style={{ fontSize: 13, color: 'var(--theme-text-muted)', marginBottom: 20, lineHeight: 1.6 }}>
+              {confirm.limit
+                ? `Chỉ xử lý ${confirm.limit} user đầu mỗi nhóm để kiểm tra trước khi chạy toàn bộ.`
+                : <>Sẽ cấp Lite ngay cho <strong style={{ color: '#10B981' }}>{preview?.freeVerified ?? '…'}</strong> user đã xác minh (kèm email + chuông), và gửi email mời xác minh cho <strong style={{ color: '#F59E0B' }}>{preview?.freeUnverified ?? '…'}</strong> user chưa xác minh. Thao tác chạy nền, không thể dừng giữa chừng.</>}
+            </p>
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+              <button onClick={() => setConfirm(null)} disabled={runMut.isPending}
+                style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid var(--theme-border)', backgroundColor: 'transparent', color: 'var(--theme-text-secondary)', fontSize: 13, cursor: 'pointer' }}>Hủy</button>
+              <button onClick={() => runMut.mutate(confirm.limit)} disabled={runMut.isPending}
+                style={{ padding: '8px 16px', borderRadius: 8, border: 'none', backgroundColor: '#10B981', color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
+                {runMut.isPending && <IconLoader size={14} />} {confirm.limit ? 'Gửi thử' : 'Chạy toàn bộ'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function AdminUsersPage() {
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('');
@@ -143,6 +256,9 @@ export default function AdminUsersPage() {
 
   return (
     <div>
+      {/* Gift-Lite campaign */}
+      <GiftLiteCampaignCard />
+
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20, flexWrap: 'wrap', gap: 10 }}>
         <div>

@@ -44,6 +44,7 @@ export interface User {
   role: string;
   createdAt: string;
   onboardingCompleted?: boolean;
+  emailVerified?: boolean;
   subscription?: {
     plan: 'free' | 'premium_lite' | 'premium' | 'lifetime' | 'exam_bundle';
     status: string;

@@ -10,13 +10,15 @@ import type { GradientKey } from '@/lib/tokens';
 // ─── 1. Choose Exam (Goethe vs TELC) ──────────────────────────────────────────
 
 export interface ExamSummary {
-  id: 'goethe' | 'telc';
+  id: 'goethe' | 'telc' | 'osd' | 'testdaf';
   name: string;
   shortName: string;
   description: string;
   bullets: string[];
   gradient: GradientKey;
   scrollAnchor: string;
+  /** Overrides the card link. B1 exams scroll to the structure tab; TestDaF has its own guide. */
+  href?: string;
 }
 
 export const examSummaries: ExamSummary[] = [
@@ -50,21 +52,56 @@ export const examSummaries: ExamSummary[] = [
     gradient: 'examWriting',
     scrollAnchor: 'cau-truc-de',
   },
+  {
+    id: 'osd',
+    name: 'ÖSD Zertifikat B1',
+    shortName: 'ÖSD',
+    description:
+      'Chứng chỉ tiếng Đức chuẩn của Áo, được công nhận tại Áo, Đức và Thụy Sĩ cho định cư, nhập tịch và học tập. Bản B1 được đồng phát triển với Goethe nên cấu trúc gần như giống hệt Goethe-Zertifikat B1 — chỉ khác ở bối cảnh và một số từ vựng tiếng Đức chuẩn Áo (z.B. "Jänner", "Erdäpfel", "Sackerl").',
+    bullets: [
+      'Lesen · Hören · Schreiben · Sprechen (4 kỹ năng độc lập)',
+      'Cấu trúc ≈ Goethe B1, tổ chức tại Áo & quốc tế',
+      'Điểm đạt: 60/100 mỗi kỹ năng',
+      'Được công nhận cho định cư & nhập tịch tại Áo',
+    ],
+    gradient: 'reading',
+    scrollAnchor: 'cau-truc-de',
+  },
+  {
+    id: 'testdaf',
+    name: 'TestDaF (B2–C1)',
+    shortName: 'TestDaF',
+    description:
+      'Kỳ thi tiếng Đức học thuật dành cho mục đích du học. Đánh giá ở bậc B2–C1 và chấm theo thang TDN 3/4/5. Gồm 4 phần độc lập, riêng phần Nói thi trên máy tính. Là điều kiện ngôn ngữ để nhập học hầu hết các trường đại học tại Đức.',
+    bullets: [
+      'Leseverstehen · Hörverstehen · Schreiben · Sprechen',
+      'Chấm theo thang TDN 3/4/5 (≈ B2–C1)',
+      'Phần Nói thi trên máy tính (7 nhiệm vụ)',
+      'Dùng để nhập học đại học tại Đức',
+    ],
+    gradient: 'reading',
+    scrollAnchor: 'cau-truc-de',
+    href: '/practice-test/huong-dan-testdaf',
+  },
 ];
 
 export interface ComparisonRow {
   criterion: string;
   goethe: string;
   telc: string;
+  osd: string;
+  testdaf: string;
 }
 
 export const comparisonRows: ComparisonRow[] = [
-  { criterion: 'Sprachbausteine', goethe: '✗ Không có', telc: '✓ Có (2 phần, 20 câu)' },
-  { criterion: 'Sprechen', goethe: 'Thi theo cặp', telc: 'Thi theo nhóm 3–4 người' },
-  { criterion: 'Thời gian Schreiben', goethe: '60 phút (2 đề)', telc: '30 phút (1 đề)' },
-  { criterion: 'Điểm đạt', goethe: '60/100 mỗi kỹ năng', telc: '60% tổng điểm' },
-  { criterion: 'Lệ phí (VN)', goethe: '~2.0–2.5 triệu', telc: '~1.8–2.2 triệu' },
-  { criterion: 'Dùng cho Einbürgerung', goethe: '✓ Được công nhận', telc: '✓ Được công nhận' },
+  { criterion: 'Bậc đánh giá',         goethe: 'B1',                    telc: 'B1',                  osd: 'B1 (cấp A1–C2)',         testdaf: 'B2–C1 (TDN 3–5)' },
+  { criterion: 'Mục đích chính',       goethe: 'Định cư · nhập tịch · học nghề', telc: 'Định cư · nhập tịch (Đức/EU)', osd: 'Định cư · nhập tịch tại Áo', testdaf: 'Nhập học đại học Đức' },
+  { criterion: 'Sprachbausteine',      goethe: '✗ Không có',            telc: '✓ Có (2 phần, 20 câu)', osd: '✗ Không có',            testdaf: '✗ Không có' },
+  { criterion: 'Sprechen',             goethe: 'Thi theo cặp',          telc: 'Nhóm 3–4 người',      osd: 'Thi theo cặp',           testdaf: '7 nhiệm vụ trên máy tính' },
+  { criterion: 'Schreiben',            goethe: '60 phút (2 đề)',        telc: '30 phút (1 đề)',      osd: '60 phút (2 đề)',         testdaf: '60 phút (Grafik + lập luận)' },
+  { criterion: 'Điểm đạt',             goethe: '60/100 mỗi kỹ năng',    telc: '60% tổng điểm',       osd: '60/100 mỗi kỹ năng',     testdaf: 'TDN 3/4/5 mỗi phần' },
+  { criterion: 'Lệ phí (VN)',          goethe: '~2.0–2.5 triệu',        telc: '~1.8–2.2 triệu',      osd: '~2.0–2.5 triệu',         testdaf: '~3.5–4.5 triệu' },
+  { criterion: 'Công nhận',            goethe: '✓ Toàn cầu (Đức)',      telc: '✓ Đức & EU',          osd: '✓ Áo · Đức · Thụy Sĩ',   testdaf: '✓ Đại học Đức' },
 ];
 
 // ─── 2. Exam Structure — per-skill breakdown for both exams ──────────────────

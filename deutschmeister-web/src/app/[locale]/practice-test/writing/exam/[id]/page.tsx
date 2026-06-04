@@ -33,12 +33,12 @@ function IconPenLine({ size = 16, style }: { size?: number; style?: React.CSSPro
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
-type TaskTypeKey = 'form_fill' | 'informal_email' | 'formal_email' | 'sms' | 'forum_comment';
+type TaskTypeKey = 'form_fill' | 'informal_email' | 'formal_email' | 'sms' | 'forum_comment' | 'grafik_argument';
 
 function useTaskTypeLabel() {
   const t = useTranslations('practice.examWriting.answering.taskTypes');
   return (type: string) => {
-    const keys: TaskTypeKey[] = ['form_fill', 'informal_email', 'formal_email', 'sms', 'forum_comment'];
+    const keys: TaskTypeKey[] = ['form_fill', 'informal_email', 'formal_email', 'sms', 'forum_comment', 'grafik_argument'];
     return (keys as string[]).includes(type) ? t(type as TaskTypeKey) : type;
   };
 }

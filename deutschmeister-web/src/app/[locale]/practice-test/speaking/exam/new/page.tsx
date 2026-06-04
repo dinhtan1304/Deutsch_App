@@ -5,6 +5,7 @@ import { Link, useRouter } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
 import { useGenerateExamSpeaking } from '@/hooks/useExamSpeaking';
 import { EXAM_SPEAKING_DISPLAY } from '@/lib/examConfig';
+import { EXAM_PROVIDERS, VISIBLE_LEVELS, providerLevels, coerceLevel } from '@/config/examProviders';
 import { SetupSection } from '../../../_components/createSetup';
 
 type IconProps = { size?: number; style?: React.CSSProperties };
@@ -21,8 +22,6 @@ function IconMic({ size = 16, style }: IconProps) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}><rect x="9" y="2" width="6" height="12" rx="3" /><path d="M5 10a7 7 0 0 0 14 0" /><line x1="12" y1="19" x2="12" y2="22" /></svg>;
 }
 
-const LEVELS = ['A1', 'A2', 'B1'];
-
 export default function ExamSpeakingNewPage() {
   const router = useRouter();
   const t = useTranslations('practice.examSpeaking.new');
@@ -34,14 +33,13 @@ export default function ExamSpeakingNewPage() {
 
   const generateMut = useGenerateExamSpeaking();
 
-  const EXAM_TYPES = [
-    { id: 'GOETHE', label: tSetup('goetheLabel'), color: 'var(--der)', desc: tSetup('goetheDesc') },
-    { id: 'TELC', label: tSetup('telcLabel'), color: 'var(--violet)', desc: tSetup('telcDesc') },
-  ];
-
-  const isTelcA1 = examType === 'TELC' && cefrLevel === 'A1';
   const examInfo = (EXAM_SPEAKING_DISPLAY as Record<string, Record<string, { teile: number; timeMin: number; totalPoints: number; structure: string[] }>>)[examType]?.[cefrLevel];
-  const ready = !isTelcA1 && !!examInfo;
+  const ready = !!examInfo;
+
+  const selectProvider = (id: string) => {
+    setExamType(id);
+    setCefrLevel((cur) => coerceLevel(id, cur));
+  };
 
   const handleGenerate = async () => {
     if (!ready || generateMut.isPending) return;
@@ -75,16 +73,16 @@ export default function ExamSpeakingNewPage() {
         <div className="flex flex-col gap-6">
           <SetupSection n={1} label={tSetup('examTypeLabel')}>
             <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
-              {EXAM_TYPES.map((et) => {
+              {EXAM_PROVIDERS.map((et) => {
                 const on = examType === et.id;
                 return (
-                  <button key={et.id} onClick={() => setExamType(et.id)}
+                  <button key={et.id} onClick={() => selectProvider(et.id)}
                     className="rounded-md border p-3.5 text-left transition-transform hover:-translate-y-0.5"
                     style={on
                       ? { background: `color-mix(in srgb, ${et.color} 12%, transparent)`, borderColor: et.color }
                       : { background: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}>
-                    <div className="text-body font-bold" style={{ color: on ? et.color : 'var(--theme-text-primary)' }}>{et.label}</div>
-                    <div className="mt-0.5 text-[10.5px] leading-tight" style={{ color: 'var(--theme-text-muted)' }}>{et.desc}</div>
+                    <div className="text-body font-bold" style={{ color: on ? et.color : 'var(--theme-text-primary)' }}>{tSetup(et.labelKey as Parameters<typeof tSetup>[0])}</div>
+                    <div className="mt-0.5 text-[10.5px] leading-tight" style={{ color: 'var(--theme-text-muted)' }}>{tSetup(et.descKey as Parameters<typeof tSetup>[0])}</div>
                   </button>
                 );
               })}
@@ -92,9 +90,9 @@ export default function ExamSpeakingNewPage() {
           </SetupSection>
 
           <SetupSection n={2} label={tSetup('levelLabel')}>
-            <div className="grid grid-cols-3 gap-2">
-              {LEVELS.map((lvl) => {
-                const unsupported = examType === 'TELC' && lvl === 'A1';
+            <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${VISIBLE_LEVELS.length}, minmax(0, 1fr))` }}>
+              {VISIBLE_LEVELS.map((lvl) => {
+                const unsupported = !providerLevels(examType).includes(lvl);
                 const on = cefrLevel === lvl && !unsupported;
                 return (
                   <button key={lvl} onClick={() => !unsupported && setCefrLevel(lvl)} disabled={unsupported}

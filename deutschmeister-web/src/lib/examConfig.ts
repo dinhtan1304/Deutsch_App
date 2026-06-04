@@ -128,3 +128,85 @@ export const EXAM_WRITING_DISPLAY: Record<string, Record<string, {
     },
   },
 };
+
+// ─── ÖSD (Österreichisches Sprachdiplom) ─────────────────────────────────────
+// ÖSD A1–B1 use the same format as Goethe (co-developed standard), so they reuse
+// the Goethe display configs. B2 has its own structure and is added in stage 2.
+EXAM_READING_DISPLAY.OESD = { ...EXAM_READING_DISPLAY.GOETHE! };
+EXAM_LISTENING_DISPLAY.OESD = { ...EXAM_LISTENING_DISPLAY.GOETHE! };
+EXAM_SPEAKING_DISPLAY.OESD = { ...EXAM_SPEAKING_DISPLAY.GOETHE! };
+EXAM_WRITING_DISPLAY.OESD = { ...EXAM_WRITING_DISPLAY.GOETHE! };
+
+// ─── ÖSD B2 + TestDaF (B2–C1) ────────────────────────────────────────────────
+// ÖSD B2 mirrors Goethe B2; TestDaF is one B2–C1 exam shown as two difficulty
+// tiers (results map to a TDN band — see lib/tdn.ts).
+EXAM_READING_DISPLAY.OESD!.B2 = {
+  teile: 4, questions: 24, timeMin: 90, totalPoints: 100,
+  structure: ['Bài báo dài → MCQ a/b/c (6 câu)', '6 người → 8 văn bản (Zuordnung)', 'Bài báo → Richtig/Falsch (6 câu)', 'Bài quan điểm → MCQ (6 câu)'],
+};
+EXAM_LISTENING_DISPLAY.OESD!.B2 = {
+  teile: 3, questions: 25, timeMin: 40, totalPoints: 100,
+  structure: ['Phỏng vấn → MCQ (8 câu)', 'Bản tin radio → Richtig/Falsch (10 câu)', 'Thảo luận → MCQ (7 câu, nghe 2×)'],
+};
+EXAM_SPEAKING_DISPLAY.OESD!.B2 = {
+  teile: 2, timeMin: 15, totalPoints: 100,
+  structure: ['Präsentation halten (60s chuẩn bị + 180s)', 'Diskussion / Dialog (120s)'],
+};
+EXAM_WRITING_DISPLAY.OESD!.B2 = {
+  teile: 2, timeMin: 90, totalPoints: 100,
+  structure: ['Formeller Brief ~100–150 từ', 'Stellungnahme / Erörterung ~100–150 từ'],
+};
+
+const TESTDAF_READING_STRUCTURE = ['8 đề mục → 10 đoạn (Zuordnung)', 'Văn bản chi tiết → MCQ a/b/c (10 câu)', 'Văn bản khoa học → Ja/Nein/Text dazu nichts (10 câu)'];
+const TESTDAF_LISTENING_STRUCTURE = ['Hội thoại → ghi chú / Richtig-Falsch (8 câu)', 'Phỏng vấn → Richtig/Falsch (10 câu)', 'Bài giảng chuyên gia → MCQ (7 câu)'];
+const TESTDAF_SPEAKING_STRUCTURE = ['Thông tin: hỏi/nhờ (30s)', 'Nói về bản thân (60s)', 'Mô tả Grafik (90s)', 'Stellung nehmen (120s)', 'Đưa giả thuyết (90s)', 'Cho lời khuyên (60s)', 'Cân nhắc & quyết định (120s)'];
+
+EXAM_READING_DISPLAY.TESTDAF = {
+  B2: { teile: 3, questions: 28, timeMin: 60, totalPoints: 100, structure: TESTDAF_READING_STRUCTURE },
+  C1: { teile: 3, questions: 28, timeMin: 60, totalPoints: 100, structure: TESTDAF_READING_STRUCTURE },
+};
+EXAM_LISTENING_DISPLAY.TESTDAF = {
+  B2: { teile: 3, questions: 25, timeMin: 40, totalPoints: 100, structure: TESTDAF_LISTENING_STRUCTURE },
+  C1: { teile: 3, questions: 25, timeMin: 40, totalPoints: 100, structure: TESTDAF_LISTENING_STRUCTURE },
+};
+EXAM_SPEAKING_DISPLAY.TESTDAF = {
+  B2: { teile: 7, timeMin: 35, totalPoints: 100, structure: TESTDAF_SPEAKING_STRUCTURE },
+  C1: { teile: 7, timeMin: 35, totalPoints: 100, structure: TESTDAF_SPEAKING_STRUCTURE },
+};
+EXAM_WRITING_DISPLAY.TESTDAF = {
+  B2: { teile: 1, timeMin: 60, totalPoints: 100, structure: ['Schriftlicher Ausdruck: mô tả Grafik/số liệu + lập luận (~250–350 từ)'] },
+  C1: { teile: 1, timeMin: 60, totalPoints: 100, structure: ['Schriftlicher Ausdruck: mô tả Grafik/số liệu + lập luận (~300–400 từ)'] },
+};
+
+// ─── B2 / C1 for Goethe · TELC · ÖSD (shared display) ────────────────────────
+const B2_READING_DISP = { teile: 4, questions: 24, timeMin: 90, totalPoints: 100, structure: ['Bài báo dài → MCQ a/b/c (6 câu)', '6 người → 8 văn bản (Zuordnung)', 'Bài báo → Richtig/Falsch (6 câu)', 'Bài quan điểm → MCQ (6 câu)'] };
+const C1_READING_DISP = { teile: 4, questions: 32, timeMin: 90, totalPoints: 100, structure: ['Văn bản học thuật → MCQ (8 câu)', '8 người → 10 văn bản (Zuordnung)', 'Bài báo dài → Richtig/Falsch (8 câu)', 'Bài bình luận → MCQ (8 câu)'] };
+EXAM_READING_DISPLAY.GOETHE!.B2 = B2_READING_DISP;
+EXAM_READING_DISPLAY.GOETHE!.C1 = C1_READING_DISP;
+EXAM_READING_DISPLAY.TELC!.B2 = B2_READING_DISP;
+EXAM_READING_DISPLAY.TELC!.C1 = C1_READING_DISP;
+EXAM_READING_DISPLAY.OESD!.C1 = C1_READING_DISP;
+
+const B2_LISTENING_DISP = { teile: 3, questions: 25, timeMin: 40, totalPoints: 100, structure: ['Phỏng vấn → MCQ (8 câu)', 'Bản tin radio → Richtig/Falsch (10 câu)', 'Thảo luận → MCQ (7 câu, nghe 2×)'] };
+const C1_LISTENING_DISP = { teile: 3, questions: 30, timeMin: 40, totalPoints: 100, structure: ['Phỏng vấn học thuật → MCQ (10 câu)', 'Phóng sự → Richtig/Falsch (12 câu)', 'Thảo luận chuyên môn → MCQ (8 câu)'] };
+EXAM_LISTENING_DISPLAY.GOETHE!.B2 = B2_LISTENING_DISP;
+EXAM_LISTENING_DISPLAY.GOETHE!.C1 = C1_LISTENING_DISP;
+EXAM_LISTENING_DISPLAY.TELC!.B2 = B2_LISTENING_DISP;
+EXAM_LISTENING_DISPLAY.TELC!.C1 = C1_LISTENING_DISP;
+EXAM_LISTENING_DISPLAY.OESD!.C1 = C1_LISTENING_DISP;
+
+const B2_SPEAKING_DISP = { teile: 2, timeMin: 15, totalPoints: 100, structure: ['Präsentation halten (60s chuẩn bị + 180s)', 'Diskussion / Dialog (120s)'] };
+const C1_SPEAKING_DISP = { teile: 3, timeMin: 20, totalPoints: 100, structure: ['Präsentation (60s + 240s)', 'Stellung nehmen (60s + 180s)', 'Diskussion / Dialog (120s)'] };
+EXAM_SPEAKING_DISPLAY.GOETHE!.B2 = B2_SPEAKING_DISP;
+EXAM_SPEAKING_DISPLAY.GOETHE!.C1 = C1_SPEAKING_DISP;
+EXAM_SPEAKING_DISPLAY.TELC!.B2 = B2_SPEAKING_DISP;
+EXAM_SPEAKING_DISPLAY.TELC!.C1 = C1_SPEAKING_DISP;
+EXAM_SPEAKING_DISPLAY.OESD!.C1 = C1_SPEAKING_DISP;
+
+const B2_WRITING_DISP = { teile: 2, timeMin: 90, totalPoints: 100, structure: ['Formeller Brief ~100–150 từ', 'Stellungnahme / Erörterung ~100–150 từ'] };
+const C1_WRITING_DISP = { teile: 2, timeMin: 100, totalPoints: 100, structure: ['Formeller Brief / Beschwerde ~150–220 từ', 'Erörterung ~200–280 từ'] };
+EXAM_WRITING_DISPLAY.GOETHE!.B2 = B2_WRITING_DISP;
+EXAM_WRITING_DISPLAY.GOETHE!.C1 = C1_WRITING_DISP;
+EXAM_WRITING_DISPLAY.TELC!.B2 = B2_WRITING_DISP;
+EXAM_WRITING_DISPLAY.TELC!.C1 = C1_WRITING_DISP;
+EXAM_WRITING_DISPLAY.OESD!.C1 = C1_WRITING_DISP;

@@ -12,7 +12,7 @@ interface PageProps {
 export default async function HuongDanB1Page({ params, searchParams }: PageProps) {
   const { locale } = await params;
   const { exam } = await searchParams;
-  const initialTab: ExamTab = exam === 'telc' ? 'telc' : 'goethe';
+  const initialTab: ExamTab = exam === 'telc' ? 'telc' : exam === 'osd' ? 'osd' : 'goethe';
   const t = await getTranslations({ locale, namespace: 'metadata.pages.guideB1' });
 
   return (

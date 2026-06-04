@@ -55,14 +55,11 @@ function LoginContent() {
       router.push(dest);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
-      if (msg === 'EMAIL_NOT_VERIFIED') {
-        setError(t('login.errors.emailNotVerified'));
-      } else {
-        // Backend still returns Vietnamese strings; pass through for now, else
-        // fall back to localized generic. The api/client.ts → error-code refactor
-        // is a separate task (see plan).
-        setError(msg || t('login.errors.generic'));
-      }
+      // Backend still returns Vietnamese strings; pass through for now, else
+      // fall back to localized generic. The api/client.ts → error-code refactor
+      // is a separate task (see plan). Unverified emails are no longer rejected
+      // here — login succeeds and a verify-email banner nudges the user instead.
+      setError(msg || t('login.errors.generic'));
     }
   }, [executeRecaptcha, email, password, login, router, returnTo, t]);
 

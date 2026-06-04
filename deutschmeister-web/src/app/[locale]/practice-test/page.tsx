@@ -342,6 +342,26 @@ export default function PracticeTestPage() {
               </div>
             </SurfaceCard>
           </Link>
+          <Link href="/practice-test/huong-dan-testdaf" className="mt-4 block">
+            <SurfaceCard variant="interactive" accent="reading">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex items-start gap-4">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[11px]"
+                    style={{ background: 'color-mix(in srgb, var(--der) 16%, transparent)', color: 'var(--der)' }}>
+                    <IconBookOpen size={20} />
+                  </div>
+                  <div className="min-w-0">
+                    <h3 className="text-h3 font-bold" style={{ color: 'var(--theme-text-primary)' }}>Cẩm nang TestDaF (B2–C1)</h3>
+                    <p className="mt-1 text-body leading-relaxed" style={{ color: 'var(--theme-text-muted)' }}>Cấu trúc 4 phần, thang điểm TDN 3/4/5 và lộ trình ôn cho mục tiêu du học Đức.</p>
+                  </div>
+                </div>
+                <span className="inline-flex shrink-0 items-center justify-center gap-2 rounded-[11px] px-5 py-3 text-body font-bold"
+                  style={{ background: 'var(--accent)', color: 'var(--accent-on)' }}>
+                  Xem cẩm nang <IconArrowRight size={16} />
+                </span>
+              </div>
+            </SurfaceCard>
+          </Link>
         </section>
       )}
     </div>

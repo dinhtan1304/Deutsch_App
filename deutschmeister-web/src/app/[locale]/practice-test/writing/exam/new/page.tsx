@@ -5,10 +5,9 @@ import { Link, useRouter } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
 import { useGenerateExamWriting } from '@/hooks/useExamWriting';
 import { EXAM_WRITING_DISPLAY } from '@/lib/examConfig';
+import { EXAM_PROVIDERS, VISIBLE_LEVELS, providerLevels, coerceLevel } from '@/config/examProviders';
 import { SetupSection } from '../../../_components/createSetup';
 import { IconPenLine, IconChevronLeft, IconLoader, IconCheck } from '../../icons';
-
-const LEVELS = ['A1', 'A2', 'B1'];
 
 export default function ExamWritingNewPage() {
   const router = useRouter();
@@ -21,14 +20,13 @@ export default function ExamWritingNewPage() {
 
   const generateMut = useGenerateExamWriting();
 
-  const EXAM_TYPES = [
-    { id: 'GOETHE', label: tSetup('goetheLabel'), color: 'var(--der)', desc: tSetup('goetheDesc') },
-    { id: 'TELC', label: tSetup('telcLabel'), color: 'var(--violet)', desc: tSetup('telcDesc') },
-  ];
-
-  const isTelcA1 = examType === 'TELC' && cefrLevel === 'A1';
   const examInfo = EXAM_WRITING_DISPLAY[examType]?.[cefrLevel];
-  const ready = !isTelcA1 && !!examInfo;
+  const ready = !!examInfo;
+
+  const selectProvider = (id: string) => {
+    setExamType(id);
+    setCefrLevel((cur) => coerceLevel(id, cur));
+  };
 
   const handleGenerate = async () => {
     if (!ready || generateMut.isPending) return;
@@ -62,16 +60,16 @@ export default function ExamWritingNewPage() {
         <div className="flex flex-col gap-6">
           <SetupSection n={1} label={tSetup('examTypeLabel')}>
             <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
-              {EXAM_TYPES.map((et) => {
+              {EXAM_PROVIDERS.map((et) => {
                 const on = examType === et.id;
                 return (
-                  <button key={et.id} onClick={() => setExamType(et.id)}
+                  <button key={et.id} onClick={() => selectProvider(et.id)}
                     className="rounded-md border p-3.5 text-left transition-transform hover:-translate-y-0.5"
                     style={on
                       ? { background: `color-mix(in srgb, ${et.color} 12%, transparent)`, borderColor: et.color }
                       : { background: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}>
-                    <div className="text-body font-bold" style={{ color: on ? et.color : 'var(--theme-text-primary)' }}>{et.label}</div>
-                    <div className="mt-0.5 text-[10.5px] leading-tight" style={{ color: 'var(--theme-text-muted)' }}>{et.desc}</div>
+                    <div className="text-body font-bold" style={{ color: on ? et.color : 'var(--theme-text-primary)' }}>{tSetup(et.labelKey as Parameters<typeof tSetup>[0])}</div>
+                    <div className="mt-0.5 text-[10.5px] leading-tight" style={{ color: 'var(--theme-text-muted)' }}>{tSetup(et.descKey as Parameters<typeof tSetup>[0])}</div>
                   </button>
                 );
               })}
@@ -79,9 +77,9 @@ export default function ExamWritingNewPage() {
           </SetupSection>
 
           <SetupSection n={2} label={tSetup('levelLabel')}>
-            <div className="grid grid-cols-3 gap-2">
-              {LEVELS.map((lvl) => {
-                const unsupported = examType === 'TELC' && lvl === 'A1';
+            <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${VISIBLE_LEVELS.length}, minmax(0, 1fr))` }}>
+              {VISIBLE_LEVELS.map((lvl) => {
+                const unsupported = !providerLevels(examType).includes(lvl);
                 const on = cefrLevel === lvl && !unsupported;
                 return (
                   <button key={lvl} onClick={() => !unsupported && setCefrLevel(lvl)} disabled={unsupported}

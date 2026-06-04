@@ -13,12 +13,11 @@ interface Props {
 const todayStr = () => new Date().toISOString().slice(0, 10);
 
 /** v2 seven-day vocab bar chart with hover tooltip + summary footer. */
-const RANGES = ['7N', '30N', '90N'] as const;
+const BAR_AREA = 120; // px – chiều cao vùng vẽ thanh
 
 export function ProgressChartV2({ data, streak, bestStreak }: Props) {
   const t = useTranslations('dashboard');
   const [hover, setHover] = useState<number | null>(null);
-  const [range, setRange] = useState<(typeof RANGES)[number]>('7N');
 
   const max = Math.max(1, ...data.map((d) => d.wordsLearned));
   const total = data.reduce((s, d) => s + d.wordsLearned, 0);
@@ -27,33 +26,19 @@ export function ProgressChartV2({ data, streak, bestStreak }: Props) {
 
   return (
     <section className="rounded-2xl p-5" style={{ background: 'var(--theme-bg-card)', border: '1px solid var(--theme-border)' }}>
-      <div className="flex items-start justify-between mb-5">
-        <div>
-          <h3 className="font-semibold text-lead" style={{ color: 'var(--theme-text-primary)' }}>{t('weeklyChart.title')}</h3>
-          <div className="flex items-baseline gap-2 mt-1.5">
-            <span className="mono font-bold" style={{ fontSize: 28, letterSpacing: '-.02em', color: 'var(--theme-text-primary)' }}>{total}</span>
-            <span className="text-body" style={{ color: 'var(--theme-text-secondary)' }}>{t('v2.wordsReviewed')}</span>
-          </div>
-        </div>
-        {/* Range toggle */}
-        <div className="flex gap-1.5">
-          {RANGES.map((r) => (
-            <button key={r} onClick={() => setRange(r)}
-              className="mono px-2.5 py-1.5 rounded-[7px] text-[11.5px] font-medium transition-colors"
-              style={r === range
-                ? { background: 'var(--theme-bg-secondary)', color: 'var(--theme-text-primary)', border: '1px solid var(--theme-border)' }
-                : { background: 'transparent', color: 'var(--theme-text-muted)', border: '1px solid transparent' }}>
-              {r}
-            </button>
-          ))}
+      <div className="mb-5">
+        <h3 className="font-semibold text-lead" style={{ color: 'var(--theme-text-primary)' }}>{t('weeklyChart.title')}</h3>
+        <div className="flex items-baseline gap-2 mt-1.5">
+          <span className="mono font-bold" style={{ fontSize: 28, letterSpacing: '-.02em', color: 'var(--theme-text-primary)' }}>{total}</span>
+          <span className="text-body" style={{ color: 'var(--theme-text-secondary)' }}>{t('v2.wordsReviewed')}</span>
         </div>
       </div>
 
       {/* Bars */}
-      <div className="flex gap-2.5 items-end" style={{ height: 140 }}>
+      <div className="flex gap-2.5 items-end">
         {data.map((d, i) => {
           const isToday = d.date === today;
-          const h = (d.wordsLearned / max) * 100;
+          const h = (d.wordsLearned / max) * BAR_AREA;
           const isHover = hover === i;
           return (
             <div
@@ -70,12 +55,12 @@ export function ProgressChartV2({ data, streak, bestStreak }: Props) {
                   <b className="mono">{d.wordsLearned}</b> · <b className="mono">{d.gamesPlayed}</b>🎮
                 </div>
               )}
-              <div className="w-full flex items-end justify-center" style={{ height: '100%' }}>
+              <div className="w-full flex items-end justify-center" style={{ height: BAR_AREA }}>
                 <div
                   className={`relative w-full rounded-md transition-transform ${isToday ? 'v2-bar-today' : 'v2-bar'}`}
                   style={{
                     maxWidth: 36,
-                    height: `${Math.max(4, h)}%`,
+                    height: Math.max(4, h),
                     border: isToday ? '1px solid var(--accent)' : '1px solid var(--theme-border)',
                     transform: isHover ? 'scaleY(1.02)' : undefined,
                     transformOrigin: 'bottom',

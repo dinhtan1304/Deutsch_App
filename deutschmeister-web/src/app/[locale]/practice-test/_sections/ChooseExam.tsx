@@ -5,7 +5,7 @@ import { ACCENT } from '@/lib/tokens';
 import { examSummaries, comparisonRows, whyBenefits } from '../_data/b1-content';
 
 // Solid per-exam accent (Goethe = reading green, TELC = exam-writing purple).
-const EXAM_COLOR: Record<string, string> = { goethe: ACCENT.reading, telc: ACCENT.examWriting };
+const EXAM_COLOR: Record<string, string> = { goethe: ACCENT.reading, telc: ACCENT.examWriting, osd: ACCENT.listening, testdaf: 'var(--der)' };
 
 // Dot colours for the "why" benefit cards (matches the v2 design palette)
 const WHY_DOTS = ['var(--success)', 'var(--violet)', 'var(--cyan)', 'var(--warn)', 'var(--der)', 'var(--streak)'];
@@ -60,7 +60,7 @@ export function ChooseExam() {
                 ))}
               </ul>
               <Link
-                href={`/practice-test/huong-dan-b1?exam=${exam.id}#cau-truc-de`}
+                href={exam.href ?? `/practice-test/huong-dan-b1?exam=${exam.id}#cau-truc-de`}
                 className="flex w-full items-center justify-center gap-2 rounded-[11px] px-4 py-3 text-body font-bold text-white transition-transform hover:-translate-y-0.5"
                 style={{ background: ec, boxShadow: `0 4px 12px color-mix(in srgb, ${ec} 35%, transparent)` }}
               >
@@ -91,6 +91,8 @@ export function ChooseExam() {
                   <th className="text-left p-4 font-bold" style={{ color: 'var(--theme-text-primary)' }}>{t('colCriterion')}</th>
                   <th className="text-left p-4 font-bold" style={{ color: 'var(--theme-text-primary)' }}>Goethe B1</th>
                   <th className="text-left p-4 font-bold" style={{ color: 'var(--theme-text-primary)' }}>TELC B1</th>
+                  <th className="text-left p-4 font-bold" style={{ color: 'var(--theme-text-primary)' }}>ÖSD B1</th>
+                  <th className="text-left p-4 font-bold" style={{ color: 'var(--theme-text-primary)' }}>TestDaF</th>
                 </tr>
               </thead>
               <tbody>
@@ -104,6 +106,8 @@ export function ChooseExam() {
                     <td className="p-4 font-semibold" style={{ color: 'var(--theme-text-primary)' }}>{row.criterion}</td>
                     <td className="p-4 font-medium" style={{ color: cellColor(row.goethe) }}>{row.goethe}</td>
                     <td className="p-4 font-medium" style={{ color: cellColor(row.telc) }}>{row.telc}</td>
+                    <td className="p-4 font-medium" style={{ color: cellColor(row.osd) }}>{row.osd}</td>
+                    <td className="p-4 font-medium" style={{ color: cellColor(row.testdaf) }}>{row.testdaf}</td>
                   </tr>
                 ))}
               </tbody>

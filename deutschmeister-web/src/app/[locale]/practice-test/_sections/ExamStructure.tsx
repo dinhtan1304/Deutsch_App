@@ -26,12 +26,15 @@ const SKILL_COLOR: Record<SkillKey, string> = {
   sprechen: ACCENT.speaking,
 };
 
-export type ExamTab = 'goethe' | 'telc';
+export type ExamTab = 'goethe' | 'telc' | 'osd';
+
+const TAB_LABEL: Record<ExamTab, string> = { goethe: 'Goethe B1', telc: 'TELC B1', osd: 'ÖSD B1' };
 
 export function ExamStructure({ initialTab = 'goethe' }: { initialTab?: ExamTab }) {
   const t = useTranslations('practice.guideB1.structure');
   const [tab, setTab] = useState<ExamTab>(initialTab);
-  const skills = tab === 'goethe' ? examStructureGoethe : examStructureTelc;
+  // ÖSD B1 is co-developed with Goethe and shares its structure.
+  const skills = tab === 'telc' ? examStructureTelc : examStructureGoethe;
 
   return (
     <section id="cau-truc-de" className="mb-12 scroll-mt-20">
@@ -51,7 +54,7 @@ export function ExamStructure({ initialTab = 'goethe' }: { initialTab?: ExamTab 
         role="tablist"
         aria-label={t('tabAria')}
       >
-        {(['goethe', 'telc'] as ExamTab[]).map((t) => (
+        {(['goethe', 'telc', 'osd'] as ExamTab[]).map((t) => (
           <button
             key={t}
             type="button"
@@ -64,7 +67,7 @@ export function ExamStructure({ initialTab = 'goethe' }: { initialTab?: ExamTab 
               color: tab === t ? 'var(--accent-on)' : 'var(--theme-text-secondary)',
             }}
           >
-            {t === 'goethe' ? 'Goethe B1' : 'TELC B1'}
+            {TAB_LABEL[t]}
           </button>
         ))}
       </div>

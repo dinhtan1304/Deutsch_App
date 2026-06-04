@@ -8,6 +8,7 @@ import { Sidebar, SIDEBAR_WIDTH, SIDEBAR_COLLAPSED_WIDTH } from './Sidebar';
 import { Header } from './Header';
 import { BottomTabBar } from './BottomTabBar';
 import { GuestBanner } from './GuestBanner';
+import { VerifyEmailBanner } from './VerifyEmailBanner';
 import { Breadcrumb } from '@/components/ui';
 import { GRADIENT } from '@/lib/tokens';
 
@@ -141,6 +142,7 @@ export function MainLayout({ children }: MainLayoutProps) {
         style={{ '--sidebar-ml': sidebarMl } as React.CSSProperties}
       >
         <GuestBanner />
+        <VerifyEmailBanner />
         <div className="min-h-[calc(100vh-4rem)] px-4 md:px-6 lg:px-8 xl:px-10 py-4">
           <Breadcrumb className="mb-3" />
           {children}

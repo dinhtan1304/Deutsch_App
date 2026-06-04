@@ -135,6 +135,30 @@ export interface CreatePendingGrantResponse {
   grant?: PendingGrant;
 }
 
+// ─── Gift-Lite campaign (tặng Premium Lite cho user free) ───────────────────
+export interface GiftLitePreview {
+  freeVerified: number;
+  freeUnverified: number;
+  alreadyPendingUnverified: number;
+}
+
+export interface GiftLiteRunResult extends GiftLitePreview {
+  started: boolean;
+}
+
+export interface GiftLiteStatus {
+  running: boolean;
+  total: number;
+  grantedNow: number;
+  pendingCreated: number;
+  emailedVerified: number;
+  emailedUnverified: number;
+  failed: number;
+  startedAt: string | null;
+  finishedAt: string | null;
+  lastError: string | null;
+}
+
 export type PracticeFeat =
   | 'writing'
   | 'reading'
@@ -210,6 +234,14 @@ export const adminSubscriptionsApi = {
     apiGet<PendingGrant[]>('/subscriptions/admin/pending-grants'),
   deletePendingGrant: (id: string) =>
     apiDelete(`/subscriptions/admin/pending-grants/${id}`),
+
+  // Gift-Lite campaign
+  giftLitePreview: () =>
+    apiGet<GiftLitePreview>('/subscriptions/admin/gift-lite/preview'),
+  giftLiteRun: (limit?: number) =>
+    apiPost<GiftLiteRunResult>('/subscriptions/admin/gift-lite/run', limit ? { limit } : {}),
+  giftLiteStatus: () =>
+    apiGet<GiftLiteStatus>('/subscriptions/admin/gift-lite/status'),
 
   // Promo code admin
   createPromoCode: (dto: {
