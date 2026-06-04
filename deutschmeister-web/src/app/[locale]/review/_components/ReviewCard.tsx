@@ -38,7 +38,9 @@ interface ReviewCardProps {
   onShowExampleTrans: () => void;
 }
 
-function Face({ a, back, children }: { a: { color: string; soft: string }; back?: boolean; children: React.ReactNode }) {
+function Face({ a, back, isFlipped, children }: { a: { color: string; soft: string }; back?: boolean; isFlipped: boolean; children: React.ReactNode }) {
+  // Which face currently points at the viewer.
+  const visible = back ? isFlipped : !isFlipped;
   return (
     // The 3D face carries backface-visibility + rotateY only. Keeping `overflow:hidden`
     // + a `filter:blur()` descendant on this same element makes iOS WebKit flatten it
@@ -52,6 +54,13 @@ function Face({ a, back, children }: { a: { color: string; soft: string }; back?
         backfaceVisibility: 'hidden',
         WebkitBackfaceVisibility: 'hidden',
         transform: back ? 'rotateY(180deg)' : 'none',
+        // Belt-and-suspenders for iOS Safari, which sometimes ignores
+        // backface-visibility under preserve-3d (both faces show, back mirrored).
+        // Also hide the away-facing side via opacity, swapped instantly at mid-flip
+        // (350ms = halfway of the 0.7s rotation, when the card is edge-on) so the
+        // swap is invisible and the animation still reads as a 3D flip.
+        opacity: visible ? 1 : 0,
+        transition: 'opacity 0s linear 350ms',
       }}
     >
       <div className="v2-srs-card absolute inset-0 flex flex-col overflow-hidden rounded-3xl p-9">
@@ -144,7 +153,7 @@ export function ReviewCard({
           transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
         }}>
         {/* ── FRONT ── */}
-        <Face a={a}>
+        <Face a={a} isFlipped={isFlipped}>
           {topRow}
           <div className="relative z-[1] flex flex-1 flex-col items-center justify-center gap-3.5 text-center">
             {currentMode === 'vi-de' ? (
@@ -179,7 +188,7 @@ export function ReviewCard({
         </Face>
 
         {/* ── BACK ── */}
-        <Face a={a} back>
+        <Face a={a} back isFlipped={isFlipped}>
           {topRow}
           <div className="relative z-[1] flex flex-1 flex-col items-center justify-center gap-2.5 text-center">
             {currentMode === 'vi-de' ? (
