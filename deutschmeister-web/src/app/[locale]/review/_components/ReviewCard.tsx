@@ -40,8 +40,12 @@ interface ReviewCardProps {
 
 function Face({ a, back, children }: { a: { color: string; soft: string }; back?: boolean; children: React.ReactNode }) {
   return (
+    // The 3D face carries backface-visibility + rotateY only. Keeping `overflow:hidden`
+    // + a `filter:blur()` descendant on this same element makes iOS WebKit flatten it
+    // into its own layer and ignore backface-visibility (both faces show, back mirrored).
+    // So the clip + blur live on a non-3D inner wrapper instead.
     <div
-      className="v2-srs-card absolute inset-0 flex flex-col overflow-hidden rounded-3xl p-9"
+      className="absolute inset-0 rounded-3xl"
       style={{
         border: `1px solid color-mix(in srgb, ${a.color} 35%, transparent)`,
         boxShadow: '0 20px 50px rgba(0,0,0,0.22)',
@@ -50,9 +54,11 @@ function Face({ a, back, children }: { a: { color: string; soft: string }; back?
         transform: back ? 'rotateY(180deg)' : 'none',
       }}
     >
-      <div aria-hidden className="pointer-events-none absolute -right-20 -top-20 h-60 w-60 rounded-full"
-        style={{ background: a.soft, filter: 'blur(40px)', opacity: 0.8 }} />
-      {children}
+      <div className="v2-srs-card absolute inset-0 flex flex-col overflow-hidden rounded-3xl p-9">
+        <div aria-hidden className="pointer-events-none absolute -right-20 -top-20 h-60 w-60 rounded-full"
+          style={{ background: a.soft, filter: 'blur(40px)', opacity: 0.8 }} />
+        {children}
+      </div>
     </div>
   );
 }
