@@ -42,6 +42,9 @@ function IconZap({ size = 18 }: { size?: number }) {
 function IconShield({ size = 20 }: { size?: number }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>;
 }
+function IconDumbbell({ size = 18 }: { size?: number }) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}><path d="m6.5 6.5 11 11" /><path d="m21 21-1-1" /><path d="m3 3 1 1" /><path d="m18 22 4-4" /><path d="m2 6 4-4" /><path d="m3 10 7-7" /><path d="m14 21 7-7" /></svg>;
+}
 
 const NAV_ITEMS = [
   { href: '/admin', label: 'Dashboard', icon: IconGrid, exact: true },
@@ -49,6 +52,7 @@ const NAV_ITEMS = [
   { href: '/admin/words', label: 'Từ vựng', icon: IconBook, exact: false },
   { href: '/admin/topics', label: 'Topics', icon: IconLayers, exact: false },
   { href: '/admin/grammar', label: 'Ngữ pháp', icon: IconPenTool, exact: false },
+  { href: '/admin/trainer', label: 'Grammar Trainer', icon: IconDumbbell, exact: false },
   { href: '/admin/subscriptions', label: 'Đăng ký', icon: IconCreditCard, exact: false },
   { href: '/admin/token-usage', label: 'Token AI', icon: IconZap, exact: false },
   { href: '/admin/feedback', label: 'Phản hồi', icon: IconMessageSquare, exact: false },

@@ -192,6 +192,18 @@ export default function GrammarDashboardPage() {
         </div>
       </header>
 
+      {/* ─── Grammar Trainer CTA ─── */}
+      <Link href="/grammar/trainer"
+        className="flex items-center gap-4 rounded-2xl px-5 py-4 mb-8 border transition-transform hover:-translate-y-0.5"
+        style={{ borderColor: 'var(--theme-border)', background: 'var(--theme-bg-card)', textDecoration: 'none' }}>
+        <span style={{ width: 46, height: 46, borderRadius: 12, background: GRADIENT.action, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, flexShrink: 0 }}>⚡</span>
+        <span style={{ flex: 1, minWidth: 0 }}>
+          <span style={{ display: 'block', fontSize: 15, fontWeight: 800, color: 'var(--theme-text-primary)' }}>Grammar Trainer</span>
+          <span style={{ display: 'block', fontSize: 13, color: 'var(--theme-text-secondary)' }}>Drill chia động từ, các thì &amp; các cách (Kasus) — chấm điểm tức thì</span>
+        </span>
+        <span style={{ color: ACCENT.srs, flexShrink: 0 }}><IconArrowRight size={18} /></span>
+      </Link>
+
       {/* ─── Stats (practice style) ─── */}
       {totalCount > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
