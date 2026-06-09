@@ -20,6 +20,7 @@ import type learn from '../../messages/vi/learn.json';
 import type arena from '../../messages/vi/arena.json';
 import type speakingRooms from '../../messages/vi/speakingRooms.json';
 import type subscription from '../../messages/vi/subscription.json';
+import type support from '../../messages/vi/support.json';
 
 type Messages = {
   common: typeof common;
@@ -42,6 +43,7 @@ type Messages = {
   arena: typeof arena;
   speakingRooms: typeof speakingRooms;
   subscription: typeof subscription;
+  support: typeof support;
 };
 
 declare module 'next-intl' {

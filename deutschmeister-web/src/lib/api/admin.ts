@@ -1,6 +1,7 @@
 'use client';
 
 import { apiGet, apiPost, apiDelete, api } from './client';
+import type { FeedbackThread, FeedbackMessageItem, PostMessagePayload } from './feedback';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -226,6 +227,8 @@ export interface AdminFeedbackItem {
   imageUrls: string[];
   status: 'new' | 'reviewed' | 'resolved';
   createdAt: string;
+  adminUnread: number;
+  messageCount: number;
   user: { id: string; email: string; name: string | null } | null;
 }
 
@@ -245,6 +248,11 @@ export const adminFeedbackApi = {
       method: 'PATCH',
       body: JSON.stringify({ status }),
     }),
+
+  getThread: (id: string) => apiGet<FeedbackThread>(`/feedback/admin/${id}/messages`),
+
+  sendMessage: (id: string, payload: PostMessagePayload) =>
+    apiPost<FeedbackMessageItem>(`/feedback/admin/${id}/messages`, payload),
 };
 
 // ─── Admin Grammar API ────────────────────────────────────────────────────────

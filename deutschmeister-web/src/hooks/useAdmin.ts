@@ -7,6 +7,7 @@ import {
   AdminFeedbackListResponse, AdminTokenStats,
   AdminDictationRequestListResponse, AdminDictationRequest, ApproveRequestPayload,
 } from '@/lib/api/admin';
+import type { FeedbackThread, PostMessagePayload } from '@/lib/api/feedback';
 
 // ─── Query keys ───────────────────────────────────────────────────────────────
 
@@ -82,6 +83,7 @@ export function useDeleteAdminUser() {
 export const adminFeedbackKeys = {
   all: ['admin-feedback'] as const,
   list: (params?: Record<string, unknown>) => [...adminFeedbackKeys.all, 'list', params] as const,
+  thread: (id: string) => [...adminFeedbackKeys.all, 'thread', id] as const,
 };
 
 export function useAdminFeedback(params?: { status?: string; type?: string; page?: number }) {
@@ -97,6 +99,26 @@ export function useUpdateFeedbackStatus() {
     mutationFn: ({ id, status }: { id: string; status: 'new' | 'reviewed' | 'resolved' }) =>
       adminFeedbackApi.updateStatus(id, status),
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: adminFeedbackKeys.all });
+    },
+  });
+}
+
+export function useAdminFeedbackThread(id: string | null, open: boolean) {
+  return useQuery<FeedbackThread>({
+    queryKey: adminFeedbackKeys.thread(id ?? ''),
+    queryFn: () => adminFeedbackApi.getThread(id!),
+    enabled: !!id && open,
+    refetchInterval: id && open ? 15_000 : false,
+  });
+}
+
+export function useSendAdminFeedbackMessage(id: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: PostMessagePayload) => adminFeedbackApi.sendMessage(id, payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: adminFeedbackKeys.thread(id) });
       queryClient.invalidateQueries({ queryKey: adminFeedbackKeys.all });
     },
   });

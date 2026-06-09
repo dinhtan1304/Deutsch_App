@@ -1,0 +1,34 @@
+{
+  "launcherAria": "Mở hỗ trợ & phản hồi",
+  "title": "Hỗ trợ & phản hồi",
+  "subtitle": "Trao đổi với đội ngũ để làm rõ vấn đề",
+  "close": "Đóng",
+  "back": "Quay lại",
+  "loading": "Đang tải...",
+  "loadError": "Không tải được. Thử lại sau.",
+  "empty": "Bạn chưa gửi phản hồi nào",
+  "emptyHint": "Gửi báo cáo lỗi hoặc góp ý để bắt đầu trò chuyện.",
+  "newReport": "Gửi phản hồi mới",
+  "you": "Bạn",
+  "team": "Đội ngũ",
+  "placeholder": "Nhập tin nhắn...",
+  "send": "Gửi",
+  "sending": "Đang gửi...",
+  "addImage": "Thêm ảnh",
+  "errors": {
+    "notImage": "Tệp không phải ảnh",
+    "tooLarge": "Ảnh tối đa {max}MB",
+    "tooManyImages": "Tối đa {max} ảnh",
+    "processFailed": "Không xử lý được ảnh"
+  },
+  "typeLabel": {
+    "bug": "Bug",
+    "suggestion": "Góp ý",
+    "other": "Khác"
+  },
+  "statusLabel": {
+    "new": "Mới",
+    "reviewed": "Đã xem",
+    "resolved": "Đã xử lý"
+  }
+}

@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
-import { useAdminFeedback, useUpdateFeedbackStatus } from '@/hooks/useAdmin';
+import { useState, useRef, useCallback } from 'react';
+import { useAdminFeedback, useUpdateFeedbackStatus, useAdminFeedbackThread, useSendAdminFeedbackMessage } from '@/hooks/useAdmin';
 import { AdminFeedbackItem } from '@/lib/api/admin';
+import { compressImage } from '@/lib/compressImage';
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 
@@ -335,10 +336,116 @@ function FeedbackRow({
                   );
                 })}
               </div>
+
+              {/* Conversation thread + reply composer */}
+              <AdminFeedbackThread feedbackId={item.id} onImageClick={onImageClick} />
             </div>
           </td>
         </tr>
       )}
     </>
+  );
+}
+
+// ─── Conversation thread (admin reply) ───────────────────────────────────────
+
+const MAX_IMAGES = 3;
+const MAX_SIZE_MB = 2;
+
+function AdminFeedbackThread({ feedbackId, onImageClick }: { feedbackId: string; onImageClick: (src: string) => void }) {
+  const { data: thread, isLoading } = useAdminFeedbackThread(feedbackId, true);
+  const send = useSendAdminFeedbackMessage(feedbackId);
+  const [text, setText] = useState('');
+  const [images, setImages] = useState<string[]>([]);
+  const [imgError, setImgError] = useState('');
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const handleFiles = useCallback(async (files: FileList | null) => {
+    if (!files) return;
+    setImgError('');
+    const remaining = MAX_IMAGES - images.length;
+    if (remaining <= 0) { setImgError(`Tối đa ${MAX_IMAGES} ảnh`); return; }
+    for (const file of Array.from(files).slice(0, remaining)) {
+      if (!file.type.startsWith('image/')) { setImgError('Tệp không phải ảnh'); continue; }
+      if (file.size > MAX_SIZE_MB * 1024 * 1024) { setImgError(`Ảnh tối đa ${MAX_SIZE_MB}MB`); continue; }
+      try { const uri = await compressImage(file); setImages(prev => [...prev, uri]); }
+      catch { setImgError('Không xử lý được ảnh'); }
+    }
+  }, [images.length]);
+
+  const canSend = (text.trim().length > 0 || images.length > 0) && !send.isPending;
+  const submit = () => {
+    if (!canSend) return;
+    send.mutate({ content: text.trim(), imageUrls: images }, { onSuccess: () => { setText(''); setImages([]); setImgError(''); } });
+  };
+
+  // The original report is message #0; only follow-up messages live in the thread.
+  const replies = thread?.messages ?? [];
+
+  return (
+    <div style={{ marginTop: 16, borderTop: '1px solid var(--theme-border)', paddingTop: 14 }}>
+      <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--theme-text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 10px' }}>
+        Trao đổi {replies.length > 0 ? `(${replies.length})` : ''}
+      </p>
+
+      {isLoading && !thread ? (
+        <p style={{ fontSize: 12, color: 'var(--theme-text-muted)' }}>Đang tải...</p>
+      ) : replies.length === 0 ? (
+        <p style={{ fontSize: 12, color: 'var(--theme-text-muted)', margin: '0 0 12px' }}>Chưa có trao đổi nào. Gửi tin nhắn để hỏi thêm về lỗi.</p>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 12 }}>
+          {replies.map(m => {
+            const admin = m.senderRole === 'admin';
+            return (
+              <div key={m.id} style={{ display: 'flex', flexDirection: 'column', alignItems: admin ? 'flex-end' : 'flex-start' }}>
+                <span style={{ fontSize: 10, color: 'var(--theme-text-muted)', marginBottom: 2 }}>
+                  {admin ? 'Admin' : 'Người dùng'} · {new Date(m.createdAt).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' })}
+                </span>
+                <div style={{ maxWidth: '78%', padding: '8px 12px', borderRadius: 12, fontSize: 13, lineHeight: 1.6, whiteSpace: 'pre-wrap', background: admin ? 'rgba(99,102,241,0.16)' : 'var(--theme-bg-card)', color: 'var(--theme-text-primary)', border: '1px solid var(--theme-border)' }}>
+                  {m.content}
+                  {m.imageUrls.length > 0 && (
+                    <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 6 }}>
+                      {m.imageUrls.map((src, i) => (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img key={i} src={src} alt={`Ảnh ${i + 1}`} onClick={() => onImageClick(src)} style={{ width: 90, height: 64, objectFit: 'cover', borderRadius: 6, cursor: 'zoom-in', border: '1px solid var(--theme-border)' }} />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Composer */}
+      {images.length > 0 && (
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 8 }}>
+          {images.map((src, i) => (
+            <div key={i} style={{ position: 'relative', width: 52, height: 52 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={src} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 6, border: '1px solid var(--theme-border)' }} />
+              <button onClick={() => setImages(prev => prev.filter((_, idx) => idx !== i))} style={{ position: 'absolute', top: -6, right: -6, width: 16, height: 16, borderRadius: '50%', background: '#EF4444', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 10, lineHeight: 1 }}>×</button>
+            </div>
+          ))}
+        </div>
+      )}
+      {imgError && <p style={{ fontSize: 11, color: '#F87171', margin: '0 0 6px' }}>{imgError}</p>}
+      <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end' }}>
+        <input ref={fileRef} type="file" accept="image/*" multiple style={{ display: 'none' }} onChange={e => { handleFiles(e.target.files); e.target.value = ''; }} />
+        <button onClick={() => fileRef.current?.click()} title="Đính kèm ảnh" style={{ flexShrink: 0, width: 36, height: 36, borderRadius: 8, border: '1px solid var(--theme-border)', background: 'var(--theme-bg-body)', color: 'var(--theme-text-secondary)', cursor: 'pointer', fontSize: 16 }}>＋</button>
+        <textarea
+          value={text}
+          onChange={e => setText(e.target.value)}
+          onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submit(); } }}
+          rows={1}
+          placeholder="Nhập câu trả lời..."
+          style={{ flex: 1, resize: 'none', maxHeight: 96, padding: '8px 12px', borderRadius: 8, border: '1px solid var(--theme-border)', background: 'var(--theme-bg-body)', color: 'var(--theme-text-primary)', fontSize: 13, outline: 'none' }}
+        />
+        <button onClick={submit} disabled={!canSend} style={{ flexShrink: 0, padding: '0 16px', height: 36, borderRadius: 8, border: 'none', fontSize: 13, fontWeight: 700, color: '#fff', background: canSend ? 'linear-gradient(135deg,#6366F1,#8B5CF6)' : 'var(--theme-bg-card)', cursor: canSend ? 'pointer' : 'not-allowed' }}>
+          {send.isPending ? 'Đang gửi...' : 'Gửi'}
+        </button>
+      </div>
+    </div>
   );
 }

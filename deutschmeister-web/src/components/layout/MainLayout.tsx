@@ -11,8 +11,10 @@ import { GuestBanner } from './GuestBanner';
 import { VerifyEmailBanner } from './VerifyEmailBanner';
 import { Breadcrumb } from '@/components/ui';
 import { GRADIENT } from '@/lib/tokens';
+import { useIsAuthenticated } from '@/stores/authStore';
 
 const CommandPalette = dynamic(() => import('./CommandPalette').then((mod) => mod.CommandPalette), { ssr: false });
+const FeedbackChatWidget = dynamic(() => import('./FeedbackChatWidget').then((mod) => mod.FeedbackChatWidget), { ssr: false });
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -57,6 +59,7 @@ function accentClassFor(pathname: string): string {
 
 export function MainLayout({ children }: MainLayoutProps) {
   const t = useTranslations('common.ui');
+  const isAuthenticated = useIsAuthenticated();
   const pathname = usePathname();
   // usePathname() (next/navigation) keeps the locale prefix (/en, /de), so strip
   // it before matching bare routes — otherwise /en/auth/login wrongly renders the
@@ -154,6 +157,9 @@ export function MainLayout({ children }: MainLayoutProps) {
 
       {/* Global command palette — Cmd/Ctrl+K */}
       <CommandPalette open={paletteOpen} onClose={closePalette} />
+
+      {/* Floating support / feedback chat — signed-in users only */}
+      <FeedbackChatWidget enabled={isAuthenticated} />
     </div>
   );
 }
