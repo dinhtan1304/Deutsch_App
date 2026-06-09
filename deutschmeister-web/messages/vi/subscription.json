@@ -79,6 +79,12 @@
     "upgrade": "Nâng cấp Premium",
     "footnote": "Mở khoá đề Goethe/TELC A1–B1, AI chấm điểm, giải thích lỗi"
   },
+  "levelLock": {
+    "title": "Nội dung cấp độ {level}",
+    "description": "Tài khoản miễn phí chỉ học được chủ đề & từ vựng cấp độ A1. Nâng cấp để mở khóa toàn bộ A2–C2.",
+    "upgrade": "Nâng cấp để mở khóa",
+    "footnote": "Mở khóa toàn bộ chủ đề, từ vựng và mini-game ở mọi cấp độ"
+  },
   "upgradeModal": {
     "close": "Đóng",
     "title": "Nâng cấp Premium",

@@ -16,9 +16,11 @@ import { STATUS } from '@/lib/tokens';
 import { speakGerman } from '@/lib/utils';
 import { GridSkeleton } from '@/components/ui';
 import { FilterChip } from '@/components/ui/FilterChip';
+import { useAllLevelsUnlocked } from '@/hooks/useSubscription';
+import { UpgradeModal } from '@/components/subscription/UpgradeModal';
 import {
   IconBook, IconSearch, IconLightbulb, IconStar, IconHistory, IconX, IconArrowRight,
-  IconFlame, IconSparkles,
+  IconFlame, IconSparkles, IconLock,
 } from '@/components/ui/Icons';
 
 const CATEGORY_KEYS = [
@@ -132,6 +134,8 @@ export default function WordsPage() {
   const [category, setCategory] = useState('');
   const [level, setLevel] = useState<CEFRLevel | ''>('');
   const [langOverride, setLangOverride] = useState<TranslateLang | undefined>(undefined);
+  const allLevelsUnlocked = useAllLevelsUnlocked();
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
 
   const { data: translated, isLoading: isTranslating, isPhrase, from: tlFrom, to: tlTo } =
     useAutoTranslate(searchInput, langOverride);
@@ -184,7 +188,11 @@ export default function WordsPage() {
   };
 
   const toggleGender = (g: Gender) => setGender(prev => prev === g ? '' : g);
-  const toggleLevel = (l: CEFRLevel) => setLevel(prev => prev === l ? '' : l);
+  const toggleLevel = (l: CEFRLevel) => {
+    // Free/guest can only filter A1. Picking a locked level opens the paywall.
+    if (!allLevelsUnlocked && l !== 'A1') { setUpgradeOpen(true); return; }
+    setLevel(prev => prev === l ? '' : l);
+  };
 
   // ─── Infinite scroll sentinel ───
   const sentinelRef = useRef<HTMLDivElement>(null);
@@ -320,11 +328,15 @@ export default function WordsPage() {
 
           {/* Level chips */}
           <div className="flex items-center gap-1.5">
-            {LEVELS.map(l => (
-              <FilterChip key={l} active={level === l} size="sm" onClick={() => toggleLevel(l as CEFRLevel)}>
-                <span className="mono">{l}</span>
-              </FilterChip>
-            ))}
+            {LEVELS.map(l => {
+              const levelLocked = !allLevelsUnlocked && l !== 'A1';
+              return (
+                <FilterChip key={l} active={level === l} size="sm" onClick={() => toggleLevel(l as CEFRLevel)}>
+                  <span className="mono">{l}</span>
+                  {levelLocked && <IconLock size={10} style={{ marginLeft: 3, opacity: 0.7 }} />}
+                </FilterChip>
+              );
+            })}
           </div>
 
           <div className="flex-1" />
@@ -504,6 +516,8 @@ export default function WordsPage() {
           </button>
         </div>
       )}
+
+      <UpgradeModal open={upgradeOpen} onClose={() => setUpgradeOpen(false)} defaultPeriod="yearly" featureContext="words" />
     </div>
   );
 }

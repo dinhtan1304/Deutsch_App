@@ -11,6 +11,8 @@ import type {
   CefrLevel,
 } from '@/types/arena-events.types';
 import { useSettingsStore } from '@/stores/settingsStore';
+import { useAllLevelsUnlocked } from '@/hooks/useSubscription';
+import { UpgradeModal } from '@/components/subscription/UpgradeModal';
 import { Card, Button, BetaBadge } from '@/components/ui';
 import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 import {
@@ -46,10 +48,15 @@ export default function CreateArenaRoomPage() {
   const t = useTranslations('arena');
   const router = useRouter();
   const preferredLevel = useSettingsStore((s) => s.settings.preferredLevel);
+  const allLevelsUnlocked = useAllLevelsUnlocked();
   // 'all' is a learning-filter option, not a CEFR target — fall back to B1.
-  const defaultLevel: CefrLevel = preferredLevel === 'all' ? 'B1' : preferredLevel;
+  // Free/guest can only host A1 rooms, so force A1 as the default for them.
+  const defaultLevel: CefrLevel = !allLevelsUnlocked
+    ? 'A1'
+    : preferredLevel === 'all' ? 'B1' : preferredLevel;
   const [mode, setMode] = useState<ArenaMode>('mixed');
   const [level, setLevel] = useState<CefrLevel>(defaultLevel);
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
   const [visibility, setVisibility] = useState<ArenaRoomVisibility>('public');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
@@ -80,6 +87,10 @@ export default function CreateArenaRoomPage() {
         setError(t('roomNew.errAlreadyQueued'));
       } else if (code === 'ALREADY_OWNS_ROOM') {
         setError(t('roomNew.errAlreadyOwns'));
+      } else if (code === 'LEVEL_LOCKED') {
+        setUpgradeOpen(true);
+        setSubmitting(false);
+        return;
       } else {
         setError(e?.message ?? t('roomNew.errCreateFailed'));
       }
@@ -151,19 +162,22 @@ export default function CreateArenaRoomPage() {
           <div className="flex flex-wrap gap-2">
             {LEVELS.map((lv) => {
               const sel = level === lv;
+              const locked = !allLevelsUnlocked && lv !== 'A1';
               return (
                 <button
                   key={lv}
                   type="button"
-                  onClick={() => setLevel(lv)}
-                  className="px-4 py-2 rounded-lg font-bold text-body"
+                  onClick={() => (locked ? setUpgradeOpen(true) : setLevel(lv))}
+                  className="px-4 py-2 rounded-lg font-bold text-body inline-flex items-center gap-1.5"
                   style={{
                     background: sel ? GRADIENT.vocab : 'var(--theme-bg-card)',
                     color: sel ? '#fff' : 'var(--theme-text-secondary)',
                     border: `1px solid ${sel ? 'transparent' : 'var(--theme-border)'}`,
+                    opacity: locked ? 0.6 : 1,
                   }}
                 >
                   {lv}
+                  {locked && <IconLock size={11} />}
                 </button>
               );
             })}
@@ -295,6 +309,8 @@ export default function CreateArenaRoomPage() {
           </span>
         </Button>
       </form>
+
+      <UpgradeModal open={upgradeOpen} onClose={() => setUpgradeOpen(false)} defaultPeriod="yearly" featureContext="arena" />
     </div>
   );
 }

@@ -728,7 +728,9 @@
     "wordCount": "{count} words",
     "ctaStart": "Start",
     "ctaContinue": "Continue",
-    "ctaReview": "Review"
+    "ctaReview": "Review",
+    "lockedBadge": "Locked",
+    "lockedCta": "Unlock"
   },
   "topicWord": {
     "core": "Core",

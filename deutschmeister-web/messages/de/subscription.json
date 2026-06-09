@@ -79,6 +79,12 @@
     "upgrade": "Auf Premium upgraden",
     "footnote": "Schalte Goethe/TELC-A1–B1-Prüfungen, KI-Bewertung und Fehlererklärungen frei"
   },
+  "levelLock": {
+    "title": "Inhalte der Stufe {level}",
+    "description": "Kostenlose Konten können nur A1-Themen & -Vokabeln lernen. Upgrade, um alle Inhalte von A2 bis C2 freizuschalten.",
+    "upgrade": "Zum Freischalten upgraden",
+    "footnote": "Schalte alle Themen, Vokabeln und Minispiele aller Stufen frei"
+  },
   "upgradeModal": {
     "close": "Schließen",
     "title": "Auf Premium upgraden",

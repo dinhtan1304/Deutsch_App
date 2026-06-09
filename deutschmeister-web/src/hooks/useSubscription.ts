@@ -140,6 +140,17 @@ export function useBetaOpen(): boolean {
 }
 
 /**
+ * Whether the user can access ALL content levels (A1–C2). Free/guest are
+ * restricted to A1 only. Mirrors backend `getAllowedLevels`: any active paid
+ * plan unlocks every level, and BETA_OPEN unlocks everything for everyone.
+ */
+export function useAllLevelsUnlocked(): boolean {
+  const isPremium = useIsPremium();
+  const betaOpen = useBetaOpen();
+  return isPremium || betaOpen;
+}
+
+/**
  * Exam "đề chuẩn" features are unlocked either when the user has exam access
  * (premium/lifetime/exam_bundle) or when the backend has BETA_OPEN=true.
  * Premium Lite does NOT unlock exam routes — they hit PremiumGuard.

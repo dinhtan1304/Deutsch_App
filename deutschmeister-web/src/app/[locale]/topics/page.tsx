@@ -5,8 +5,10 @@ import { useTranslations } from 'next-intl';
 import { TopicCard } from '@/components/topics/TopicCard';
 import { useTopics, useUserTopicsProgress, useTopicsStats } from '@/hooks/useTopics';
 import { useAuthStore } from '@/stores/authStore';
+import { useAllLevelsUnlocked } from '@/hooks/useSubscription';
+import { UpgradeModal } from '@/components/subscription/UpgradeModal';
 import { FilterChip } from '@/components/ui/FilterChip';
-import { IconLayers, IconBook, IconTarget, IconSearch, IconFlame } from '@/components/ui/Icons';
+import { IconLayers, IconBook, IconTarget, IconSearch, IconFlame, IconLock } from '@/components/ui/Icons';
 
 const LEVELS = ['A1', 'A2', 'B1', 'B2'] as const;
 type StatusKey = 'all' | 'active' | 'done' | 'new';
@@ -36,9 +38,11 @@ const topicStatus = (pct: number): Exclude<StatusKey, 'all'> => pct >= 100 ? 'do
 export default function TopicsPage() {
   const t = useTranslations('vocabulary.topics');
   const { isAuthenticated, user } = useAuthStore();
+  const allLevelsUnlocked = useAllLevelsUnlocked();
   const [level, setLevel] = useState<string>('all');
   const [status, setStatus] = useState<StatusKey>('all');
   const [query, setQuery] = useState('');
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
 
   const { data: topicsData, isLoading } = useTopics({ level: level === 'all' ? undefined : level, isActive: true });
   const { data: serverProgressData } = useUserTopicsProgress(isAuthenticated);
@@ -137,7 +141,7 @@ export default function TopicsPage() {
             </h2>
           </div>
           <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))' }}>
-            {inProgress.slice(0, 3).map(tp => <TopicCard key={tp.id} topic={tp} showProgress large />)}
+            {inProgress.slice(0, 3).map(tp => <TopicCard key={tp.id} topic={tp} showProgress large onLockedClick={() => setUpgradeOpen(true)} />)}
           </div>
         </section>
       )}
@@ -153,11 +157,15 @@ export default function TopicsPage() {
 
         <div className="flex items-center gap-1.5">
           <FilterChip active={level === 'all'} size="sm" onClick={() => setLevel('all')}>{t('levelAll')}</FilterChip>
-          {LEVELS.map(l => (
-            <FilterChip key={l} active={level === l} size="sm" onClick={() => setLevel(l)}>
-              <span className="mono">{l}</span>
-            </FilterChip>
-          ))}
+          {LEVELS.map(l => {
+            const levelLocked = !allLevelsUnlocked && l !== 'A1';
+            return (
+              <FilterChip key={l} active={level === l} size="sm" onClick={() => setLevel(l)}>
+                <span className="mono">{l}</span>
+                {levelLocked && <IconLock size={10} style={{ marginLeft: 3, opacity: 0.7 }} />}
+              </FilterChip>
+            );
+          })}
         </div>
 
         <span className="w-px h-5 hidden sm:block" style={{ background: 'var(--theme-border)' }} />
@@ -185,7 +193,7 @@ export default function TopicsPage() {
             {t('showingCount', { shown: filtered.length, total: topicsWithProgress?.length ?? 0 })}
           </div>
           <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))' }}>
-            {filtered.map(tp => <TopicCard key={tp.id} topic={tp} showProgress />)}
+            {filtered.map(tp => <TopicCard key={tp.id} topic={tp} showProgress onLockedClick={() => setUpgradeOpen(true)} />)}
           </div>
         </>
       ) : (
@@ -198,6 +206,8 @@ export default function TopicsPage() {
           </button>
         </div>
       )}
+
+      <UpgradeModal open={upgradeOpen} onClose={() => setUpgradeOpen(false)} defaultPeriod="yearly" featureContext="topics" />
     </div>
   );
 }

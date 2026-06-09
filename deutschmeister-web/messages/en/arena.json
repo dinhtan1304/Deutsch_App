@@ -145,6 +145,7 @@
     "errRoomClosed": "Room has closed.",
     "errOwnerLeft": "The host left. The room is closed.",
     "errCannotJoinOwn": "You can't join your own room.",
+    "errLevelLocked": "This room's level requires a paid plan. Upgrade to join.",
     "errJoinFailed": "Couldn't join the room. Try again later."
   },
   "match": {

@@ -79,6 +79,12 @@
     "upgrade": "Upgrade to Premium",
     "footnote": "Unlock Goethe/TELC A1–B1 exams, AI grading, error explanations"
   },
+  "levelLock": {
+    "title": "{level} level content",
+    "description": "Free accounts can only study A1 topics & vocabulary. Upgrade to unlock all A2–C2 content.",
+    "upgrade": "Upgrade to unlock",
+    "footnote": "Unlock all topics, vocabulary and mini-games at every level"
+  },
   "upgradeModal": {
     "close": "Close",
     "title": "Upgrade to Premium",

@@ -145,6 +145,7 @@
     "errRoomClosed": "Raum wurde geschlossen.",
     "errOwnerLeft": "Der Host hat den Raum verlassen. Der Raum ist geschlossen.",
     "errCannotJoinOwn": "Du kannst deinem eigenen Raum nicht beitreten.",
+    "errLevelLocked": "Die Stufe dieses Raums erfordert ein kostenpflichtiges Paket. Upgrade zum Beitreten.",
     "errJoinFailed": "Beitritt zum Raum nicht möglich. Versuche es später erneut."
   },
   "match": {

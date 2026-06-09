@@ -404,7 +404,7 @@ function visibilityKey(v: string): 'visPublic' | 'visLink' | 'visPassword' {
 
 type JoinErrorKey =
   | 'errWrongPassword' | 'errRoomFull' | 'errRoomClosed'
-  | 'errOwnerLeft' | 'errCannotJoinOwn' | 'errJoinFailed';
+  | 'errOwnerLeft' | 'errCannotJoinOwn' | 'errLevelLocked' | 'errJoinFailed';
 
 function joinErrorKey(code: string): JoinErrorKey {
   if (code === 'WRONG_PASSWORD') return 'errWrongPassword';
@@ -412,5 +412,6 @@ function joinErrorKey(code: string): JoinErrorKey {
   if (code === 'ROOM_CLOSED') return 'errRoomClosed';
   if (code === 'OWNER_LEFT') return 'errOwnerLeft';
   if (code === 'CANNOT_JOIN_OWN_ROOM') return 'errCannotJoinOwn';
+  if (code === 'LEVEL_LOCKED') return 'errLevelLocked';
   return 'errJoinFailed';
 }

@@ -145,6 +145,7 @@
     "errRoomClosed": "Phòng đã đóng.",
     "errOwnerLeft": "Chủ phòng đã rời. Phòng đóng.",
     "errCannotJoinOwn": "Bạn không thể tự tham gia phòng của chính mình.",
+    "errLevelLocked": "Cấp độ phòng này yêu cầu gói trả phí. Nâng cấp để tham gia.",
     "errJoinFailed": "Không thể vào phòng. Thử lại sau."
   },
   "match": {

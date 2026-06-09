@@ -23,6 +23,9 @@ export interface Topic {
   wordCount: number;
   createdAt: string;
   updatedAt: string;
+  /** True when the caller's plan can't access this level (free = A1 only).
+   *  Locked topics omit their word list (see TopicWithWords). */
+  locked?: boolean;
 }
 
 export interface TopicWord {

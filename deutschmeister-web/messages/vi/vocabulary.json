@@ -728,7 +728,9 @@
     "wordCount": "{count} từ",
     "ctaStart": "Bắt đầu",
     "ctaContinue": "Tiếp tục",
-    "ctaReview": "Ôn lại"
+    "ctaReview": "Ôn lại",
+    "lockedBadge": "Đã khóa",
+    "lockedCta": "Mở khóa"
   },
   "topicWord": {
     "core": "Core",

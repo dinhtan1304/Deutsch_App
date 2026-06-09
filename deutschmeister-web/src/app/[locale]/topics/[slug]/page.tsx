@@ -19,6 +19,7 @@ import { TopicFlashcard } from '@/components/topics/TopicFlashcard';
 import { TopicQuiz } from '@/components/topics/TopicQuiz';
 import { TopicMatching } from '@/components/topics/TopicMatching';
 import { TopicWordDetailModal } from '@/components/topics/TopicWordDetailModal';
+import { LevelLockCard } from '@/components/subscription/LevelLockCard';
 
 // ─── Level-based Learning Tips ───
 type TipKey = 'tipsA1Title' | 'tipsA1_1' | 'tipsA1_2' | 'tipsA1_3'
@@ -207,6 +208,20 @@ export default function TopicDetailPage() {
             <IconChevronLeft size={16} /> {t('backToList')}
           </Link>
         </div>
+    );
+  }
+
+  // Level-locked (free tier = A1 only): backend returns metadata with no words.
+  if (topic.locked) {
+    return (
+      <div className="py-6 max-w-360 mx-auto">
+        <Link href="/topics"
+          className="inline-flex items-center gap-1.5 text-body font-medium mb-4 transition-opacity hover:opacity-70"
+          style={{ color: ACCENT.srs }}>
+          <IconChevronLeft size={16} /> {t('backToList')}
+        </Link>
+        <LevelLockCard level={topic.level} variant="page" featureContext="topics" />
+      </div>
     );
   }
 
