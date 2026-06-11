@@ -14,7 +14,6 @@ import { useSettingsStore } from '@/stores/settingsStore';
 import { useAllLevelsUnlocked } from '@/hooks/useSubscription';
 import { UpgradeModal } from '@/components/subscription/UpgradeModal';
 import { Card, Button, BetaBadge } from '@/components/ui';
-import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 import {
   IconGlobe,
   IconLink,
@@ -99,7 +98,7 @@ export default function CreateArenaRoomPage() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto px-4 sm:px-6">
+    <div className="max-w-360 mx-auto px-4 sm:px-6 py-6">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <h1 className="text-2xl font-bold" style={{ color: 'var(--theme-text-primary)' }}>
@@ -115,9 +114,9 @@ export default function CreateArenaRoomPage() {
       <div
         className="rounded-xl px-4 py-3 mb-4 text-caption flex items-start gap-2"
         style={{
-          background: 'rgba(245,158,11,.1)',
-          border: '1px solid rgba(245,158,11,.3)',
-          color: ACCENT.xp,
+          background: 'color-mix(in srgb, var(--warn) 10%, transparent)',
+          border: '1px solid color-mix(in srgb, var(--warn) 30%, transparent)',
+          color: 'var(--warn)',
         }}
       >
         <IconZap size={16} className="shrink-0 mt-0.5" />
@@ -137,18 +136,13 @@ export default function CreateArenaRoomPage() {
                   key={m.key}
                   type="button"
                   onClick={() => setMode(m.key)}
-                  className="text-left rounded-xl p-3"
-                  style={{
-                    background: sel ? GRADIENT.vocab : 'var(--theme-bg-card)',
-                    color: sel ? '#fff' : 'var(--theme-text-primary)',
-                    border: `1px solid ${sel ? 'transparent' : 'var(--theme-border)'}`,
-                  }}
+                  className="text-left rounded-[11px] p-3 border transition-all"
+                  style={sel
+                    ? { background: 'color-mix(in srgb, var(--accent) 14%, transparent)', borderColor: 'var(--accent)' }
+                    : { background: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}
                 >
-                  <div className="font-semibold">{t(`modes.${m.labelKey}` as 'modes.mixed')}</div>
-                  <div
-                    className="text-caption mt-0.5"
-                    style={{ color: sel ? 'rgba(255,255,255,.8)' : 'var(--theme-text-muted)' }}
-                  >
+                  <div className="font-semibold" style={{ color: sel ? 'var(--accent)' : 'var(--theme-text-primary)' }}>{t(`modes.${m.labelKey}` as 'modes.mixed')}</div>
+                  <div className="text-caption mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>
                     {t(`roomNew.${m.subKey}` as 'roomNew.modeMixedSub')}
                   </div>
                 </button>
@@ -168,11 +162,11 @@ export default function CreateArenaRoomPage() {
                   key={lv}
                   type="button"
                   onClick={() => (locked ? setUpgradeOpen(true) : setLevel(lv))}
-                  className="px-4 py-2 rounded-lg font-bold text-body inline-flex items-center gap-1.5"
+                  className="mono px-4 py-2 rounded-[10px] font-bold text-body inline-flex items-center gap-1.5 border transition-all"
                   style={{
-                    background: sel ? GRADIENT.vocab : 'var(--theme-bg-card)',
-                    color: sel ? '#fff' : 'var(--theme-text-secondary)',
-                    border: `1px solid ${sel ? 'transparent' : 'var(--theme-border)'}`,
+                    background: sel ? 'color-mix(in srgb, var(--accent) 14%, transparent)' : 'var(--theme-bg-card)',
+                    color: sel ? 'var(--accent)' : 'var(--theme-text-secondary)',
+                    borderColor: sel ? 'var(--accent)' : 'var(--theme-border)',
                     opacity: locked ? 0.6 : 1,
                   }}
                 >
@@ -195,10 +189,10 @@ export default function CreateArenaRoomPage() {
                   key={v.key}
                   type="button"
                   onClick={() => setVisibility(v.key)}
-                  className="w-full text-left rounded-xl p-3 flex items-center gap-3"
+                  className="w-full text-left rounded-md p-3 flex items-center gap-3 border transition-all"
                   style={{
-                    background: sel ? 'rgba(139,92,246,.12)' : 'var(--theme-bg-card)',
-                    border: `1px solid ${sel ? 'rgba(139,92,246,.45)' : 'var(--theme-border)'}`,
+                    background: sel ? 'color-mix(in srgb, var(--accent) 12%, transparent)' : 'var(--theme-bg-card)',
+                    borderColor: sel ? 'var(--accent)' : 'var(--theme-border)',
                   }}
                 >
                   <div
@@ -207,8 +201,8 @@ export default function CreateArenaRoomPage() {
                       width: 36,
                       height: 36,
                       borderRadius: 10,
-                      background: sel ? 'rgba(139,92,246,.18)' : 'var(--theme-bg-secondary)',
-                      color: sel ? ACCENT.vocab : 'var(--theme-text-secondary)',
+                      background: sel ? 'color-mix(in srgb, var(--accent) 18%, transparent)' : 'var(--theme-bg-secondary)',
+                      color: sel ? 'var(--accent)' : 'var(--theme-text-secondary)',
                     }}
                   >
                     <Icon size={18} />
@@ -216,7 +210,7 @@ export default function CreateArenaRoomPage() {
                   <div className="flex-1">
                     <div
                       className="font-semibold"
-                      style={{ color: sel ? ACCENT.vocab : 'var(--theme-text-primary)' }}
+                      style={{ color: sel ? 'var(--accent)' : 'var(--theme-text-primary)' }}
                     >
                       {t(`roomNew.${v.labelKey}` as 'roomNew.visPublic')}
                     </div>
@@ -225,10 +219,7 @@ export default function CreateArenaRoomPage() {
                     </div>
                   </div>
                   {sel && (
-                    <span
-                      aria-hidden="true"
-                      style={{ color: ACCENT.vocab, display: 'inline-flex' }}
-                    >
+                    <span aria-hidden="true" style={{ color: 'var(--accent)', display: 'inline-flex' }}>
                       <IconCheck size={18} />
                     </span>
                   )}
@@ -250,7 +241,7 @@ export default function CreateArenaRoomPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder={t('roomNew.passwordPlaceholder')}
                 maxLength={32}
-                className="w-full px-3 py-2 rounded-lg"
+                className="w-full px-3.5 py-2.5 rounded-[11px] outline-none"
                 style={{
                   background: 'var(--theme-bg-card)',
                   border: '1px solid var(--theme-border)',
@@ -285,9 +276,9 @@ export default function CreateArenaRoomPage() {
           <div
             className="rounded-xl px-3 py-2 mb-3 text-body"
             style={{
-              background: 'rgba(239,68,68,.1)',
-              border: '1px solid rgba(239,68,68,.35)',
-              color: STATUS.danger,
+              background: 'color-mix(in srgb, var(--danger) 10%, transparent)',
+              border: '1px solid color-mix(in srgb, var(--danger) 35%, transparent)',
+              color: 'var(--danger)',
             }}
           >
             {error}
@@ -301,7 +292,7 @@ export default function CreateArenaRoomPage() {
           fullWidth
           disabled={!canSubmit}
           isLoading={submitting}
-          style={{ background: GRADIENT.vocab }}
+          style={{ background: 'var(--accent)', color: 'var(--accent-on)' }}
         >
           <span className="inline-flex items-center gap-2">
             <IconLogIn size={18} />
