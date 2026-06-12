@@ -176,6 +176,14 @@ export function UpgradeModal({ open, onClose, defaultPeriod = 'yearly', featureC
     onClose();
   }, [onClose]);
 
+  // Once the payment is confirmed, briefly show the success screen then close the
+  // modal automatically — no "I've paid" button, the unlock happens on its own.
+  useEffect(() => {
+    if (!paid) return;
+    const timer = setTimeout(handleClose, 2200);
+    return () => clearTimeout(timer);
+  }, [paid, handleClose]);
+
   const handleApplyPromo = async () => {
     if (!promoCode.trim()) return;
     setPromoError(null);
@@ -617,18 +625,10 @@ export function UpgradeModal({ open, onClose, defaultPeriod = 'yearly', featureC
               {t('confirmNote')}
             </div>
 
-            <div className="flex items-center justify-center gap-2 mb-3 text-xs" style={{ color: 'var(--theme-text-muted)' }}>
+            <div className="flex items-center justify-center gap-2 text-xs" style={{ color: 'var(--theme-text-muted)' }}>
               <span className="inline-block w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: STATUS.success }} />
               {t('autoConfirmWaiting')}
             </div>
-
-            <button
-              onClick={handleClose}
-              className="w-full py-3 rounded-xl text-sm font-bold transition-colors"
-              style={{ color: 'var(--theme-text-primary)', backgroundColor: 'var(--theme-bg-secondary)' }}
-            >
-              {t('transferred')}
-            </button>
           </>
         ) : null}
       </div>
