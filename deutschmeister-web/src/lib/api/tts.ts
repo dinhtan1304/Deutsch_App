@@ -1,9 +1,11 @@
 /**
  * TTS API client — fetches German speech audio from the backend.
  *
- * Returns a blob URL the caller can hand to <audio> or `new Audio()`.
- * The backend serves immutable, infinitely-cacheable MP3, so the browser's
- * HTTP cache covers repeat plays of the same word inside one session.
+ * Returns a Blob the caller can hand to `new Audio()` via a blob URL.
+ * Note: this is a POST, so the browser's HTTP cache does NOT cover repeat
+ * plays — `usePronunciation` keeps an in-memory blob-URL cache per tab, and
+ * the backend caches synthesized audio in Postgres to avoid re-hitting the
+ * Python TTS service across sessions/users.
  */
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://deutschmeister-api-production.up.railway.app/api';

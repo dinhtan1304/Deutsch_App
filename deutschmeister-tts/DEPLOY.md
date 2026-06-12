@@ -57,7 +57,6 @@ Trong `deutschmeister-api/.env`:
 ```env
 TTS_SERVICE_URL=http://localhost:8001
 TTS_SHARED_SECRET=local-dev-tts-secret-change-in-prod
-TTS_AUDIO_DIR=E:\Deutsch_App\deutschmeister-api\audio-cache
 TTS_TIMEOUT_MS=60000
 ```
 
@@ -136,17 +135,16 @@ Trong dashboard Railway của **deutschmeister-api**:
 ```env
 TTS_SERVICE_URL=http://<tts-service-name>.railway.internal:8001
 TTS_SHARED_SECRET=<same-secret-as-tts>
-TTS_AUDIO_DIR=/data/tts-cache
 TTS_TIMEOUT_MS=30000
 ```
 
 ⚠️ **Quan trọng:** Dùng `railway.internal` URL (free, không tốn egress) thay vì public URL.
 
-### Volume cho audio cache trên API
+### Audio cache
 
-API cũng cần persistent volume cho audio cache:
-- Mount path: `/data/tts-cache`
-- Size: 5 GB (đủ cho ~50,000 unique phrases)
+Audio synthesized được cache **trong Postgres** (cột `tts_cache.audio_data`), KHÔNG còn ghi
+ra disk → không cần persistent volume cho API, và cache survive mỗi lần redeploy. Cron dọn
+entry không dùng > 90 ngày tự bound kích thước bảng.
 
 ---
 
@@ -195,7 +193,7 @@ FROM tts_cache;
 | Metric                      | Healthy range          | Action nếu lệch                 |
 |-----------------------------|------------------------|--------------------------------|
 | `/synthesize` p95 latency   | 500ms – 5s             | Scale up CPU hoặc move to GPU  |
-| Cache hit rate              | > 70%                  | Tăng `TTS_AUDIO_DIR` capacity  |
+| Cache hit rate              | > 70%                  | Kiểm tra cron dọn cache 90 ngày |
 | RAM usage TTS container     | < 1.5 GB               | Restart container nếu memory leak |
 | `TtsCache` row count growth | Linear theo unique từ  | OK — phrases độc nhất tích lũy |
 
