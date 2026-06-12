@@ -65,6 +65,8 @@ export interface Payment {
   status: 'pending' | 'confirmed' | 'rejected';
   transferNote: string | null;
   adminNote: string | null;
+  /** Unique transfer code shown in the QR; SePay matches the bank transfer on it. */
+  payCode: string | null;
   createdAt: string;
   confirmedAt: string | null;
 }

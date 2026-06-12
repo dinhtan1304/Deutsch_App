@@ -102,6 +102,7 @@
     "lifetimeRemaining": "🔥 Còn <b>{remaining}/{max}</b> suất Lifetime",
     "promoLabel": "Mã giảm giá (tùy chọn)",
     "promoInvalid": "Mã không hợp lệ",
+    "upgradeError": "Không thể tạo yêu cầu nâng cấp. Vui lòng thử lại.",
     "promoRemove": "Bỏ",
     "promoPlaceholder": "VD: EARLY50",
     "promoApply": "Áp dụng",
@@ -123,7 +124,11 @@
     "accountName": "Chủ tài khoản",
     "amount": "Số tiền",
     "transferContent": "Nội dung chuyển khoản",
-    "confirmNote": "Sau khi chuyển khoản, admin sẽ xác nhận trong vòng 24 giờ. Premium sẽ được kích hoạt tự động sau khi xác nhận.",
-    "transferred": "Tôi đã chuyển khoản"
+    "confirmNote": "Vui lòng chuyển khoản đúng số tiền và nội dung như trên. Hệ thống tự động xác nhận ngay sau khi nhận được tiền (thường trong 1–2 phút).",
+    "transferred": "Tôi đã chuyển khoản",
+    "autoConfirmWaiting": "Đang chờ xác nhận tự động…",
+    "paymentSuccessTitle": "Thanh toán thành công 🎉",
+    "paymentSuccessBody": "Tài khoản của bạn đã được nâng cấp. Chúc bạn học vui!",
+    "paymentSuccessContinue": "Bắt đầu học"
   }
 }

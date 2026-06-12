@@ -102,6 +102,7 @@
     "lifetimeRemaining": "🔥 Noch <b>{remaining}/{max}</b> Lifetime-Plätze",
     "promoLabel": "Gutscheincode (optional)",
     "promoInvalid": "Ungültiger Code",
+    "upgradeError": "Upgrade-Anfrage konnte nicht erstellt werden. Bitte versuche es erneut.",
     "promoRemove": "Entfernen",
     "promoPlaceholder": "z. B. EARLY50",
     "promoApply": "Anwenden",
@@ -123,7 +124,11 @@
     "accountName": "Kontoinhaber",
     "amount": "Betrag",
     "transferContent": "Verwendungszweck",
-    "confirmNote": "Nach der Überweisung bestätigt ein Admin innerhalb von 24 Stunden. Premium wird nach der Bestätigung automatisch aktiviert.",
-    "transferred": "Ich habe überwiesen"
+    "confirmNote": "Bitte überweise genau den angezeigten Betrag und Verwendungszweck. Das System bestätigt automatisch, sobald die Zahlung eingeht (meist innerhalb von 1–2 Minuten).",
+    "transferred": "Ich habe überwiesen",
+    "autoConfirmWaiting": "Warte auf automatische Bestätigung…",
+    "paymentSuccessTitle": "Zahlung erfolgreich 🎉",
+    "paymentSuccessBody": "Dein Konto wurde aktualisiert. Viel Erfolg beim Lernen!",
+    "paymentSuccessContinue": "Lernen beginnen"
   }
 }

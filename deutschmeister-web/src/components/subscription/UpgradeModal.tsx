@@ -1,13 +1,16 @@
 'use client';
 /* eslint-disable no-restricted-syntax -- custom UI gradients */
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useTranslations } from 'next-intl';
+import { useQueryClient } from '@tanstack/react-query';
 import {
   useRequestUpgrade,
   useValidatePromo,
   useLifetimeRemaining,
   usePlans,
+  useMySubscription,
+  subscriptionKeys,
 } from '@/hooks/useSubscription';
 import { useAuthStore } from '@/stores/authStore';
 import { useModalA11y } from '@/hooks/useModalA11y';
@@ -117,15 +120,44 @@ function priceForPeriod(p: BillingPeriod, plans?: Plan[]): number {
 export function UpgradeModal({ open, onClose, defaultPeriod = 'yearly', featureContext }: Props) {
   const t = useTranslations('subscription.upgradeModal');
   const { isAuthenticated } = useAuthStore();
+  const fetchUser = useAuthStore((s) => s.fetchUser);
+  const qc = useQueryClient();
   const dialogRef = useModalA11y(open, onClose);
   const [period, setPeriod] = useState<BillingPeriod>(defaultPeriod);
   const [step, setStep] = useState<'select' | 'payment'>('select');
   const [upgradeData, setUpgradeData] = useState<UpgradeResponse | null>(null);
 
+  // While the QR is shown, poll /subscriptions/me; the SePay webhook flips our
+  // payment to `confirmed` server-side and we unlock the UI without a reload.
+  // `paid` is derived (not state) so we don't setState inside an effect.
+  const waitingForPayment = step === 'payment' && !!upgradeData;
+  const { data: meSub } = useMySubscription(
+    waitingForPayment,
+    waitingForPayment ? 4000 : false,
+  );
+  const paid =
+    waitingForPayment &&
+    !!upgradeData &&
+    (meSub?.payments?.some((p) => p.id === upgradeData.payment.id && p.status === 'confirmed') ?? false);
+
+  // Run the one-time post-confirmation side effects (cache refresh + analytics)
+  // exactly once per upgrade, without storing derived state.
+  const confirmedHandledRef = useRef(false);
+  useEffect(() => {
+    if (!paid || confirmedHandledRef.current) return;
+    confirmedHandledRef.current = true;
+    qc.invalidateQueries({ queryKey: subscriptionKeys.all });
+    void fetchUser(); // refresh authStore.user.subscription for gating that reads it
+    trackEvent('purchase_confirmed', { period });
+  }, [paid, qc, fetchUser, period]);
+
   // Promo code state
   const [promoCode, setPromoCode] = useState('');
   const [promoApplied, setPromoApplied] = useState<{ discount: number; label: string } | null>(null);
   const [promoError, setPromoError] = useState<string | null>(null);
+  // Error surfaced when creating the upgrade request fails (e.g. already Lifetime,
+  // lifetime sold out). Shown inline instead of crashing with a runtime overlay.
+  const [upgradeError, setUpgradeError] = useState<string | null>(null);
 
   const upgradeMut = useRequestUpgrade();
   const validatePromoMut = useValidatePromo();
@@ -136,9 +168,11 @@ export function UpgradeModal({ open, onClose, defaultPeriod = 'yearly', featureC
   const handleClose = useCallback(() => {
     setStep('select');
     setUpgradeData(null);
+    confirmedHandledRef.current = false;
     setPromoCode('');
     setPromoApplied(null);
     setPromoError(null);
+    setUpgradeError(null);
     onClose();
   }, [onClose]);
 
@@ -165,14 +199,23 @@ export function UpgradeModal({ open, onClose, defaultPeriod = 'yearly', featureC
 
   const handleUpgrade = async () => {
     if (!isAuthenticated) return;
+    setUpgradeError(null);
     trackEvent('begin_checkout', { period, feature_context: featureContext ?? 'direct' });
-    const res = await upgradeMut.mutateAsync({
-      period,
-      promoCode: promoApplied ? promoCode.trim() : undefined,
-    });
-    trackEvent('purchase', { period, value: Math.max(0, priceForPeriod(period, plans) - (promoApplied?.discount ?? 0)), currency: 'VND' });
-    setUpgradeData(res);
-    setStep('payment');
+    try {
+      const res = await upgradeMut.mutateAsync({
+        period,
+        promoCode: promoApplied ? promoCode.trim() : undefined,
+      });
+      trackEvent('purchase', { period, value: Math.max(0, priceForPeriod(period, plans) - (promoApplied?.discount ?? 0)), currency: 'VND' });
+      setUpgradeData(res);
+      setStep('payment');
+    } catch (e) {
+      setUpgradeError(
+        (e as { response?: { data?: { message?: string } } } | undefined)?.response?.data?.message ||
+        (e as Error | undefined)?.message ||
+        t('upgradeError'),
+      );
+    }
   };
 
   if (!open) return null;
@@ -234,7 +277,7 @@ export function UpgradeModal({ open, onClose, defaultPeriod = 'yearly', featureC
                   return (
                     <button
                       key={p}
-                      onClick={() => { setPeriod(p); setPromoApplied(null); setPromoError(null); }}
+                      onClick={() => { setPeriod(p); setPromoApplied(null); setPromoError(null); setUpgradeError(null); }}
                       className="relative py-2.5 px-2 rounded-xl text-xs font-semibold transition-all"
                       style={{
                         color: isActive ? '#fff' : 'var(--theme-text-primary)',
@@ -263,7 +306,7 @@ export function UpgradeModal({ open, onClose, defaultPeriod = 'yearly', featureC
                   return (
                     <button
                       key={p}
-                      onClick={() => { setPeriod(p); setPromoApplied(null); setPromoError(null); }}
+                      onClick={() => { setPeriod(p); setPromoApplied(null); setPromoError(null); setUpgradeError(null); }}
                       className="relative py-2.5 px-2 rounded-xl text-xs font-semibold transition-all"
                       style={{
                         color: isActive ? '#fff' : 'var(--theme-text-primary)',
@@ -304,7 +347,7 @@ export function UpgradeModal({ open, onClose, defaultPeriod = 'yearly', featureC
                   return (
                     <button
                       key={p}
-                      onClick={() => { if (!disabled) { setPeriod(p); setPromoApplied(null); setPromoError(null); } }}
+                      onClick={() => { if (!disabled) { setPeriod(p); setPromoApplied(null); setPromoError(null); setUpgradeError(null); } }}
                       disabled={disabled}
                       className="relative py-2.5 px-2 rounded-xl text-xs font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                       style={{
@@ -460,6 +503,15 @@ export function UpgradeModal({ open, onClose, defaultPeriod = 'yearly', featureC
               </div>
             </div>
 
+            {upgradeError && (
+              <div
+                className="rounded-lg px-3 py-2 mb-3 text-xs leading-relaxed"
+                style={{ backgroundColor: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', color: STATUS.danger }}
+              >
+                {upgradeError}
+              </div>
+            )}
+
             <button
               onClick={handleUpgrade}
               disabled={upgradeMut.isPending || plansLoading}
@@ -469,6 +521,30 @@ export function UpgradeModal({ open, onClose, defaultPeriod = 'yearly', featureC
               {upgradeMut.isPending ? t('creating') : plansLoading ? t('loading') : t('continuePayment')}
             </button>
           </>
+        ) : upgradeData && paid ? (
+          <div className="text-center py-4">
+            <div
+              className="mx-auto mb-4 flex items-center justify-center rounded-full"
+              style={{ width: 64, height: 64, backgroundColor: 'rgba(34,197,94,0.12)' }}
+            >
+              <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke={STATUS.success} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M20 6 9 17l-5-5" />
+              </svg>
+            </div>
+            <h2 id="upgrade-modal-title" className="text-lg font-bold mb-1" style={{ color: 'var(--theme-text-primary)' }}>
+              {t('paymentSuccessTitle')}
+            </h2>
+            <p className="text-body mb-6" style={{ color: 'var(--theme-text-muted)' }}>
+              {t('paymentSuccessBody')}
+            </p>
+            <button
+              onClick={handleClose}
+              className="w-full py-3 rounded-xl text-sm font-bold text-white transition-transform hover:scale-[1.01]"
+              style={{ background: 'linear-gradient(135deg, #6366F1, #8B5CF6)' }}
+            >
+              {t('paymentSuccessContinue')}
+            </button>
+          </div>
         ) : upgradeData ? (
           <>
             <h2 id="upgrade-modal-title" className="text-lg font-bold mb-1" style={{ color: 'var(--theme-text-primary)' }}>
@@ -539,6 +615,11 @@ export function UpgradeModal({ open, onClose, defaultPeriod = 'yearly', featureC
 
             <div className="rounded-lg p-3 mb-4 text-xs leading-relaxed" style={{ backgroundColor: 'rgba(59,130,246,0.08)', color: 'var(--theme-text-secondary)' }}>
               {t('confirmNote')}
+            </div>
+
+            <div className="flex items-center justify-center gap-2 mb-3 text-xs" style={{ color: 'var(--theme-text-muted)' }}>
+              <span className="inline-block w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: STATUS.success }} />
+              {t('autoConfirmWaiting')}
             </div>
 
             <button

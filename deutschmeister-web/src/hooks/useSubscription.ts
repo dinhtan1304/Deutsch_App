@@ -35,12 +35,13 @@ export function usePlans() {
   });
 }
 
-export function useMySubscription(enabled = true) {
+export function useMySubscription(enabled = true, refetchInterval?: number | false) {
   return useQuery<MySubscription>({
     queryKey: subscriptionKeys.me(),
     queryFn: () => subscriptionsApi.getMySubscription(),
     enabled,
     staleTime: 60 * 1000,
+    refetchInterval,
   });
 }
 
