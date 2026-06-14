@@ -16,11 +16,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 from .synthesizer import (
-    DEFAULT_MODEL,
     LENGTH_SCALE,
     NOISE_W_SCALE,
     SENTENCE_SILENCE_SEC,
     get_tts,
+    model_for_voice,
+    resolve_voice_key,
     synthesize_to_wav,
 )
 
@@ -63,16 +64,22 @@ def require_secret(x_tts_token: str | None = Header(default=None)) -> None:
 
 class SynthesizeRequest(BaseModel):
     text: str = Field(min_length=1, max_length=MAX_TEXT_LEN)
+    # Logical voice key ("male"/"female"); unknown/None falls back to the
+    # default voice. Enables two-voice dialogue playback.
+    voice: str | None = None
 
 
 def normalize_text(text: str) -> str:
     return " ".join(text.strip().split()).lower()
 
 
-def cache_path(text: str) -> Path:
+def cache_path(text: str, voice_key: str) -> Path:
+    # Include the resolved model in the key so the two voices never collide and
+    # so the default (male) keeps the same key as before this change.
+    model = model_for_voice(voice_key)
     key = hashlib.sha256(
         (
-            f"{normalize_text(text)}|{DEFAULT_MODEL}|mp3-128k-mono"
+            f"{normalize_text(text)}|{model}|mp3-128k-mono"
             f"|ls={LENGTH_SCALE}|nw={NOISE_W_SCALE}|ss={SENTENCE_SILENCE_SEC}"
         ).encode("utf-8")
     ).hexdigest()
@@ -114,8 +121,10 @@ def synthesize(req: SynthesizeRequest):
     if not text:
         raise HTTPException(status_code=400, detail="Empty text")
 
+    voice_key = resolve_voice_key(req.voice)
+
     TTS_CACHE_DIR.mkdir(parents=True, exist_ok=True)
-    cached = cache_path(text)
+    cached = cache_path(text, voice_key)
     if cached.exists():
         audio_bytes = cached.read_bytes()
         logger.info(
@@ -139,7 +148,7 @@ def synthesize(req: SynthesizeRequest):
             mp3_path = str(Path(tmp) / "out.mp3")
 
             try:
-                synthesize_to_wav(text, wav_path)
+                synthesize_to_wav(text, wav_path, voice_key)
             except Exception as e:
                 logger.exception("synthesis failed")
                 raise HTTPException(status_code=500, detail=f"Synthesis failed: {e}") from e

@@ -23,11 +23,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY requirements.txt ./
 RUN pip install --upgrade pip && pip install -r requirements.txt
 
-# Pre-download the Thorsten medium voice (.onnx + .onnx.json) so the first
-# request — and container startup — doesn't need network. /models is also the
-# volume mount target (TTS_MODEL_CACHE).
+# Pre-download the voices (.onnx + .onnx.json) so the first request — and
+# container startup — doesn't need network. /models is also the volume mount
+# target (TTS_MODEL_CACHE). Thorsten (male, medium) is the default voice;
+# kerstin (female) is used as the second voice so dialogues between two people
+# are read in two distinct voices. (synthesizer.py also downloads on demand if
+# a voice is missing, e.g. when overridden via TTS_VOICE_FEMALE.)
 RUN mkdir -p /models && \
-    python -m piper.download_voices de_DE-thorsten-medium --data-dir /models
+    python -m piper.download_voices de_DE-thorsten-medium --data-dir /models && \
+    python -m piper.download_voices de_DE-kerstin-low --data-dir /models
 
 # ── Runtime stage ─────────────────────────────────────────────────────────
 FROM python:3.11-slim AS runtime

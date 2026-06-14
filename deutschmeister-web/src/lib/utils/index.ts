@@ -63,12 +63,17 @@ let currentSequence: AudioSequenceHandle | null = null;
 
 const TTS_API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://deutschmeister-api-production.up.railway.app/api';
 
-function ttsCacheKey(text: string) {
-  return text.trim().toLowerCase().replace(/\s+/g, ' ');
+/** Logical TTS voice. `undefined` lets the backend pick its default (male). */
+export type TtsVoice = 'male' | 'female';
+
+function ttsCacheKey(text: string, voice?: TtsVoice) {
+  const normalized = text.trim().toLowerCase().replace(/\s+/g, ' ');
+  // Different voices produce different audio, so they must not share a blob URL.
+  return `${voice ?? 'default'}|${normalized}`;
 }
 
-async function fetchTtsBlobUrl(text: string): Promise<string> {
-  const key = ttsCacheKey(text);
+async function fetchTtsBlobUrl(text: string, voice?: TtsVoice): Promise<string> {
+  const key = ttsCacheKey(text, voice);
   const cached = ttsBlobUrlCache.get(key);
   if (cached) return cached;
 
@@ -80,7 +85,9 @@ async function fetchTtsBlobUrl(text: string): Promise<string> {
       const res = await fetch(`${TTS_API_URL}/tts/synthesize`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text }),
+        // Omit `voice` when undefined so the request body is identical to the
+        // historical single-voice call.
+        body: JSON.stringify(voice ? { text, voice } : { text }),
       });
       if (!res.ok) throw new Error(`TTS ${res.status}`);
       const blob = await res.blob();
@@ -93,6 +100,59 @@ async function fetchTtsBlobUrl(text: string): Promise<string> {
   })();
   ttsInflight.set(key, promise);
   return promise;
+}
+
+/**
+ * Parse a transcript into per-speaker segments. Dialogue lines are marked
+ * `[Name:] ...` (the format the AI generator produces); each distinct speaker
+ * is assigned a voice in order of first appearance, alternating male/female, so
+ * a two-person conversation is read in two distinct voices. The same name
+ * always maps to the same voice across the whole script.
+ *
+ * Text with no speaker markers (monologue, radio, announcement) returns a
+ * single segment with no voice — read in the backend's default voice, exactly
+ * as before. The `[Name:]` labels themselves are stripped, so they are never
+ * spoken aloud.
+ */
+export interface VoiceSegment {
+  text: string;
+  voice?: TtsVoice;
+}
+
+// Speaker label like "[Anna:]". Bounded name length avoids matching unrelated
+// bracketed text; the required brackets avoid false positives on clock times.
+const SPEAKER_LABEL_RE = /\[([^\]:\n]{1,40}):\]/g;
+
+export function parseDialogue(text: string): VoiceSegment[] {
+  const normalized = text.replace(/\r\n/g, '\n');
+  const matches = [...normalized.matchAll(SPEAKER_LABEL_RE)];
+  if (matches.length === 0) {
+    const trimmed = normalized.trim();
+    return trimmed ? [{ text: trimmed }] : [];
+  }
+
+  const palette: TtsVoice[] = ['male', 'female'];
+  const nameToVoice = new Map<string, TtsVoice>();
+  const segments: VoiceSegment[] = [];
+
+  // Any text before the first label (uncommon) is read in the default voice.
+  const preamble = normalized.slice(0, matches[0]!.index).trim();
+  if (preamble) segments.push({ text: preamble });
+
+  matches.forEach((m, i) => {
+    const name = m[1]!.trim().toLowerCase();
+    let voice = nameToVoice.get(name);
+    if (!voice) {
+      voice = palette[nameToVoice.size % palette.length]!;
+      nameToVoice.set(name, voice);
+    }
+    const start = m.index! + m[0].length;
+    const end = i + 1 < matches.length ? matches[i + 1]!.index! : normalized.length;
+    const line = normalized.slice(start, end).trim();
+    if (line) segments.push({ text: line, voice });
+  });
+
+  return segments.length ? segments : [{ text: normalized.trim() }];
 }
 
 /**
@@ -117,14 +177,14 @@ export async function synthesizeAudio(text: string): Promise<HTMLAudioElement> {
  * silently swallows errors. Call when the user is likely to play the audio
  * soon (e.g. on hover of the speaker button, when the next flashcard mounts).
  */
-export function prefetchAudio(text: string): void {
+export function prefetchAudio(text: string, voice?: TtsVoice): void {
   if (typeof window === 'undefined') return;
   const trimmed = text.trim();
   if (!trimmed) return;
   // Already cached or fetching — nothing to do
-  const key = ttsCacheKey(trimmed);
+  const key = ttsCacheKey(trimmed, voice);
   if (ttsBlobUrlCache.has(key) || ttsInflight.has(key)) return;
-  fetchTtsBlobUrl(trimmed).catch(() => undefined);
+  fetchTtsBlobUrl(trimmed, voice).catch(() => undefined);
 }
 
 /** A controllable handle over a sequence of synthesized audio chunks. */
@@ -211,7 +271,14 @@ export function synthesizeAudioSequence(
   text: string,
   opts: AudioSequenceOptions = {},
 ): AudioSequenceHandle {
-  const chunks = splitIntoChunks(text);
+  // Split into per-speaker segments first (so dialogues use alternating
+  // voices), then chunk each segment to stay under the TTS character limit.
+  const chunks: VoiceSegment[] = [];
+  for (const seg of parseDialogue(text)) {
+    for (const piece of splitIntoChunks(seg.text)) {
+      chunks.push({ text: piece, voice: seg.voice });
+    }
+  }
   let rate = opts.playbackRate ?? 1;
   let idx = 0;
   let current: HTMLAudioElement | null = null;
@@ -237,10 +304,10 @@ export function synthesizeAudioSequence(
     }
     idx = i;
     try {
-      const url = await fetchTtsBlobUrl(chunks[i]!);
+      const url = await fetchTtsBlobUrl(chunks[i]!.text, chunks[i]!.voice);
       if (stopped) return;
       // Warm the next chunk so playback is gapless.
-      if (i + 1 < chunks.length) prefetchAudio(chunks[i + 1]!);
+      if (i + 1 < chunks.length) prefetchAudio(chunks[i + 1]!.text, chunks[i + 1]!.voice);
       const audio = new Audio(url);
       audio.playbackRate = rate;
       current = audio;
