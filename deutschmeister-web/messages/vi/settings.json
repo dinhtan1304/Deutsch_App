@@ -89,8 +89,10 @@
     "currentPlanLabel": "Gói dịch vụ hiện tại",
     "planNames": {
       "free": "Gói Miễn phí",
+      "lite": "Gói Premium Lite",
       "premium": "Gói Premium",
-      "lifetime": "Gói Vĩnh viễn"
+      "lifetime": "Gói Vĩnh viễn",
+      "examBundle": "Gói Exam Bundle"
     },
     "expiresOn": "Hết hạn: {date}",
     "basicFeatures": "Tính năng cơ bản",

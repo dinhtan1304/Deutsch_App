@@ -89,8 +89,10 @@
     "currentPlanLabel": "Current plan",
     "planNames": {
       "free": "Free plan",
+      "lite": "Premium Lite plan",
       "premium": "Premium plan",
-      "lifetime": "Lifetime plan"
+      "lifetime": "Lifetime plan",
+      "examBundle": "Exam Bundle plan"
     },
     "expiresOn": "Expires: {date}",
     "basicFeatures": "Basic features",

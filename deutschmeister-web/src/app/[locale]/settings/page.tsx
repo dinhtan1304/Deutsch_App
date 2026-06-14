@@ -10,6 +10,7 @@ import { useUpdateSettings } from '@/hooks/useUser';
 import type { UpdateSettingsPayload } from '@/lib/api/users';
 import { IconSettings } from '@/components/ui/Icons';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
+import { isPaidPlan } from '@/lib/plan';
 
 // Inline Icons
 function IconPalette({ size = 16, style, className }: { size?: number; style?: React.CSSProperties; className?: string }) {
@@ -318,7 +319,7 @@ export default function SettingsPage() {
   }
 
   const plan = user?.subscription?.plan;
-  const isFreePlan = !plan || plan === 'free';
+  const isFreePlan = !isPaidPlan(plan, user?.subscription?.status);
 
   return (
     <div className="mx-auto max-w-360 px-4 py-6 sm:px-6">
@@ -504,7 +505,12 @@ export default function SettingsPage() {
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
                           <span className="text-[15px] font-bold" style={{ color: 'var(--theme-text-primary)' }}>
-                            {isFreePlan ? t('account.planNames.free') : plan === 'premium' ? t('account.planNames.premium') : t('account.planNames.lifetime')}
+                            {isFreePlan
+                              ? t('account.planNames.free')
+                              : t(plan === 'premium_lite' ? 'account.planNames.lite'
+                                : plan === 'exam_bundle' ? 'account.planNames.examBundle'
+                                : plan === 'premium' ? 'account.planNames.premium'
+                                : 'account.planNames.lifetime')}
                           </span>
                           {!isFreePlan && <span className="v2-beta-badge rounded-[4px] px-1.5 py-px text-[9.5px] font-bold uppercase tracking-wide">PRO</span>}
                         </div>

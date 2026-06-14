@@ -4,6 +4,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import { useQueryClient } from '@tanstack/react-query';
+import { useRouter } from '@/i18n/navigation';
 import {
   useRequestUpgrade,
   useValidatePromo,
@@ -122,6 +123,7 @@ export function UpgradeModal({ open, onClose, defaultPeriod = 'yearly', featureC
   const { isAuthenticated } = useAuthStore();
   const fetchUser = useAuthStore((s) => s.fetchUser);
   const qc = useQueryClient();
+  const router = useRouter();
   const dialogRef = useModalA11y(open, onClose);
   const [period, setPeriod] = useState<BillingPeriod>(defaultPeriod);
   const [step, setStep] = useState<'select' | 'payment'>('select');
@@ -176,13 +178,20 @@ export function UpgradeModal({ open, onClose, defaultPeriod = 'yearly', featureC
     onClose();
   }, [onClose]);
 
-  // Once the payment is confirmed, briefly show the success screen then close the
-  // modal automatically — no "I've paid" button, the unlock happens on its own.
+  // Close the modal and send the user to the dashboard so they land on a fresh
+  // page that reflects their newly-upgraded plan.
+  const handleContinue = useCallback(() => {
+    handleClose();
+    router.push('/dashboard');
+  }, [handleClose, router]);
+
+  // Once the payment is confirmed, briefly show the success screen then move on to
+  // the dashboard automatically — no "I've paid" button, the unlock happens on its own.
   useEffect(() => {
     if (!paid) return;
-    const timer = setTimeout(handleClose, 2200);
+    const timer = setTimeout(handleContinue, 2200);
     return () => clearTimeout(timer);
-  }, [paid, handleClose]);
+  }, [paid, handleContinue]);
 
   const handleApplyPromo = async () => {
     if (!promoCode.trim()) return;
@@ -546,7 +555,7 @@ export function UpgradeModal({ open, onClose, defaultPeriod = 'yearly', featureC
               {t('paymentSuccessBody')}
             </p>
             <button
-              onClick={handleClose}
+              onClick={handleContinue}
               className="w-full py-3 rounded-xl text-sm font-bold text-white transition-transform hover:scale-[1.01]"
               style={{ background: 'linear-gradient(135deg, #6366F1, #8B5CF6)' }}
             >

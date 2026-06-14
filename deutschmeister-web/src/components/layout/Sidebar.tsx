@@ -13,6 +13,7 @@ import { PremiumLockIcon } from '@/components/subscription/UpsellTrigger';
 import { BetaBadge } from '@/components/ui/BetaBadge';
 import { PRIMARY_NAV, PREMIUM_HREFS, AUTH_HREFS, NAV_FLAT, type NavItem } from '@/config/navigation';
 import { STATUS, ACCENT, GRADIENT } from '@/lib/tokens';
+import { isPaidPlan, PLAN_SHORT_LABEL } from '@/lib/plan';
 
 // Widths (px) — exported for MainLayout & Header
 export const SIDEBAR_WIDTH = 232;
@@ -357,13 +358,13 @@ function SidebarComponent({ isCollapsed, onToggle }: SidebarProps) {
       {/* ─── Premium CTA ─── */}
       {user && (
         <div className="px-3 pb-1 shrink-0">
-          {(user.subscription?.plan === 'premium' || user.subscription?.plan === 'lifetime') && user.subscription?.status === 'active' ? (
+          {isPaidPlan(user.subscription?.plan, user.subscription?.status) ? (
             <Link
               href="/profile/subscription"
               className="flex items-center justify-center gap-2 py-2 rounded-xl text-xs font-bold transition-colors"
               style={{ color: ACCENT.premium, backgroundColor: `${ACCENT.premium}14` }}
             >
-              {!isCollapsed && <span>{user.subscription.plan === 'lifetime' ? 'Lifetime' : 'Premium'}</span>}
+              {!isCollapsed && <span>{PLAN_SHORT_LABEL[user.subscription!.plan]}</span>}
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={ACCENT.premium} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
               </svg>
