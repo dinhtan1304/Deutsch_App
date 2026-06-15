@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { adminSubscriptionsApi, type AdminPayment, type AdminSubscription, type BillingPeriod, type CreateUserWithPlanResponse } from '@/lib/api/subscriptions';
+import { useIsMobile } from '@/hooks/useIsMobile';
+import { AdminCard, AdminCardList } from '../_components/MobileCardList';
 
 function IconLoader({ size = 14 }: { size?: number }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="animate-spin" style={{ display: 'block' }}><path d="M21 12a9 9 0 1 1-6.219-8.56" /></svg>;
@@ -50,8 +52,9 @@ const LABEL_STYLE = { fontSize: 11, color: 'var(--theme-text-muted)', display: '
 
 /** Plan + duration picker, shared by the grant / create-account / pre-grant modals. */
 function PeriodGrid({ value, onChange }: { value: BillingPeriod; onChange: (p: BillingPeriod) => void }) {
+  const isMobile = useIsMobile();
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
+    <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(3, 1fr)', gap: 6 }}>
       {GRANT_PERIODS.map(p => {
         const active = value === p;
         const isLite = p.startsWith('lite_');
@@ -69,6 +72,7 @@ function PeriodGrid({ value, onChange }: { value: BillingPeriod; onChange: (p: B
 }
 
 export default function AdminSubscriptionsPage() {
+  const isMobile = useIsMobile();
   const [tab, setTab] = useState<'payments' | 'subs' | 'grant'>('payments');
   const [paymentPage, setPaymentPage] = useState(1);
   const [subsPage, setSubsPage] = useState(1);
@@ -209,12 +213,12 @@ export default function AdminSubscriptionsPage() {
       </div>
 
       {/* Tabs */}
-      <div style={{ display: 'flex', gap: 4, marginBottom: 20, borderBottom: '1px solid var(--theme-border)' }}>
+      <div style={{ display: 'flex', gap: 4, marginBottom: 20, borderBottom: '1px solid var(--theme-border)', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
         {([['payments', 'Thanh toán'], ['subs', 'Đăng ký'], ['grant', 'Học viên']] as const).map(([key, label]) => (
           <button key={key} onClick={() => setTab(key)}
             style={{
               padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer',
-              border: 'none', background: 'none',
+              border: 'none', background: 'none', whiteSpace: 'nowrap', flexShrink: 0,
               color: tab === key ? '#818CF8' : 'var(--theme-text-muted)',
               borderBottom: tab === key ? '2px solid #6366F1' : '2px solid transparent',
               marginBottom: -1,
@@ -245,6 +249,41 @@ export default function AdminSubscriptionsPage() {
             <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0', color: '#6366F1' }}><IconLoader size={24} /></div>
           ) : !payments?.items.length ? (
             <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--theme-text-muted)', fontSize: 13 }}>Chưa có thanh toán nào.</div>
+          ) : isMobile ? (
+            <AdminCardList>
+              {payments.items.map((p: AdminPayment) => (
+                <AdminCard key={p.id}>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 10 }}>
+                    <div style={{ minWidth: 0 }}>
+                      <p style={{ fontWeight: 700, fontSize: 14, color: 'var(--theme-text-primary)' }}>{p.user.name || '—'}</p>
+                      <p style={{ fontSize: 12, color: 'var(--theme-text-muted)', overflow: 'hidden', textOverflow: 'ellipsis' }}>{p.user.email}</p>
+                    </div>
+                    <span style={{ flexShrink: 0, fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 6, backgroundColor: `${PAYMENT_STATUS_COLORS[p.status]}20`, color: PAYMENT_STATUS_COLORS[p.status] }}>
+                      {PAYMENT_STATUS_LABELS[p.status]}
+                    </span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', fontSize: 13 }}>
+                    <span style={{ color: PLAN_META[p.plan]?.color ?? '#818CF8', fontWeight: 600 }}>{PLAN_META[p.plan]?.label ?? p.plan}</span>
+                    <span style={{ color: 'var(--theme-text-muted)' }}>· {PERIOD_LABELS[p.period] ?? p.period}</span>
+                    <span style={{ flex: 1 }} />
+                    <span style={{ color: 'var(--theme-text-primary)', fontWeight: 700 }}>{p.amount.toLocaleString('vi-VN')}đ</span>
+                  </div>
+                  <div style={{ fontSize: 12, color: 'var(--theme-text-muted)' }}>{new Date(p.createdAt).toLocaleDateString('vi-VN')}</div>
+                  {p.status === 'pending' && (
+                    <div style={{ display: 'flex', gap: 8, borderTop: '1px solid var(--theme-border)', paddingTop: 10 }}>
+                      <button onClick={() => setActionTarget({ type: 'confirm', id: p.id })}
+                        style={{ flex: 1, padding: '9px 0', borderRadius: 8, border: 'none', backgroundColor: '#22C55E', color: '#fff', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
+                        Xác nhận
+                      </button>
+                      <button onClick={() => setActionTarget({ type: 'reject', id: p.id })}
+                        style={{ flex: 1, padding: '9px 0', borderRadius: 8, border: '1px solid #EF4444', backgroundColor: 'transparent', color: '#EF4444', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
+                        Từ chối
+                      </button>
+                    </div>
+                  )}
+                </AdminCard>
+              ))}
+            </AdminCardList>
           ) : (
             <div style={{ backgroundColor: 'var(--theme-bg-card)', borderRadius: 12, border: '1px solid var(--theme-border)', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13, whiteSpace: 'nowrap' }}>
@@ -330,6 +369,42 @@ export default function AdminSubscriptionsPage() {
             <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0', color: '#6366F1' }}><IconLoader size={24} /></div>
           ) : !subs?.items.length ? (
             <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--theme-text-muted)', fontSize: 13 }}>Chưa có đăng ký nào.</div>
+          ) : isMobile ? (
+            <AdminCardList>
+              {subs.items.map((s: AdminSubscription) => {
+                const meta = PLAN_META[s.plan] ?? PLAN_META.free!;
+                return (
+                  <AdminCard key={s.id}>
+                    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 10 }}>
+                      <div style={{ minWidth: 0 }}>
+                        <p style={{ fontWeight: 700, fontSize: 14, color: 'var(--theme-text-primary)' }}>{s.user.name || '—'}</p>
+                        <p style={{ fontSize: 12, color: 'var(--theme-text-muted)', overflow: 'hidden', textOverflow: 'ellipsis' }}>{s.user.email}</p>
+                      </div>
+                      <span style={{ flexShrink: 0, fontSize: 12, fontWeight: 700, padding: '2px 8px', borderRadius: 6, backgroundColor: `${meta.color}20`, color: meta.color }}>
+                        {meta.label}
+                      </span>
+                    </div>
+                    <div style={{ display: 'flex', gap: 8, fontSize: 12, color: 'var(--theme-text-muted)' }}>
+                      <span>Trạng thái: <span style={{ color: 'var(--theme-text-secondary)' }}>{s.status}</span></span>
+                      <span style={{ flex: 1 }} />
+                      <span>Hết hạn: <span style={{ color: 'var(--theme-text-secondary)' }}>{s.expiresAt ? new Date(s.expiresAt).toLocaleDateString('vi-VN') : '—'}</span></span>
+                    </div>
+                    <div style={{ display: 'flex', gap: 8, borderTop: '1px solid var(--theme-border)', paddingTop: 10 }}>
+                      <button onClick={() => setGrantTarget(s)}
+                        style={{ flex: 1, padding: '9px 0', borderRadius: 8, border: 'none', backgroundColor: '#6366F1', color: '#fff', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
+                        Cấp gói
+                      </button>
+                      {PAID_PLANS.has(s.plan) && (
+                        <button onClick={() => revokeMut.mutate(s.userId)} disabled={revokeMut.isPending}
+                          style={{ flex: 1, padding: '9px 0', borderRadius: 8, border: '1px solid #EF4444', backgroundColor: 'transparent', color: '#EF4444', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
+                          Thu hồi
+                        </button>
+                      )}
+                    </div>
+                  </AdminCard>
+                );
+              })}
+            </AdminCardList>
           ) : (
             <div style={{ backgroundColor: 'var(--theme-bg-card)', borderRadius: 12, border: '1px solid var(--theme-border)', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13, whiteSpace: 'nowrap' }}>
@@ -411,6 +486,28 @@ export default function AdminSubscriptionsPage() {
             <div style={{ display: 'flex', justifyContent: 'center', padding: '32px 0', color: '#6366F1' }}><IconLoader size={22} /></div>
           ) : !pendingGrants?.length ? (
             <div style={{ textAlign: 'center', padding: '28px 0', color: 'var(--theme-text-muted)', fontSize: 13 }}>Chưa có pre-grant nào.</div>
+          ) : isMobile ? (
+            <AdminCardList>
+              {pendingGrants.map(g => (
+                <AdminCard key={g.id}>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 10 }}>
+                    <p style={{ fontWeight: 700, fontSize: 14, color: 'var(--theme-text-primary)', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>{g.email}</p>
+                    <span style={{ flexShrink: 0, fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 6, backgroundColor: g.status === 'applied' ? 'rgba(34,197,94,.15)' : 'rgba(245,158,11,.15)', color: g.status === 'applied' ? '#22C55E' : '#F59E0B' }}>
+                      {g.status === 'applied' ? 'Đã áp dụng' : 'Đang chờ'}
+                    </span>
+                  </div>
+                  <div style={{ display: 'flex', gap: 8, fontSize: 12, color: 'var(--theme-text-muted)' }}>
+                    <span style={{ color: 'var(--theme-text-secondary)' }}>{PERIOD_LABELS[g.period] ?? g.period}</span>
+                    <span style={{ flex: 1 }} />
+                    <span>{new Date(g.createdAt).toLocaleDateString('vi-VN')}</span>
+                  </div>
+                  <button onClick={() => deletePendingMut.mutate(g.id)} disabled={deletePendingMut.isPending}
+                    style={{ padding: '9px 0', borderRadius: 8, border: '1px solid #EF4444', backgroundColor: 'transparent', color: '#EF4444', fontSize: 13, fontWeight: 700, cursor: 'pointer', borderTop: '1px solid var(--theme-border)' }}>
+                    Xoá
+                  </button>
+                </AdminCard>
+              ))}
+            </AdminCardList>
           ) : (
             <div style={{ backgroundColor: 'var(--theme-bg-card)', borderRadius: 12, border: '1px solid var(--theme-border)', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13, whiteSpace: 'nowrap' }}>
@@ -488,12 +585,12 @@ export default function AdminSubscriptionsPage() {
       {/* Grant premium modal */}
       {grantTarget && (
         <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}>
-          <div style={{ backgroundColor: 'var(--theme-bg-card)', borderRadius: 12, padding: 24, maxWidth: 380, width: '90%', border: '1px solid var(--theme-border)' }}>
+          <div style={{ backgroundColor: 'var(--theme-bg-card)', borderRadius: 12, padding: 24, maxWidth: 380, width: '90%', border: '1px solid var(--theme-border)', maxHeight: '90vh', overflowY: 'auto' }}>
             <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--theme-text-primary)', marginBottom: 4 }}>Cấp gói thủ công</h3>
             <p style={{ fontSize: 13, color: 'var(--theme-text-muted)', marginBottom: 16 }}>{grantTarget.user.email}</p>
             <div style={{ marginBottom: 14 }}>
               <label style={{ fontSize: 11, color: 'var(--theme-text-muted)', display: 'block', marginBottom: 6 }}>Gói &amp; thời hạn</label>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(3, 1fr)', gap: 6 }}>
                 {GRANT_PERIODS.map(p => {
                   const active = grantPeriod === p;
                   const isLite = p.startsWith('lite_');
@@ -529,7 +626,7 @@ export default function AdminSubscriptionsPage() {
       {/* Create participant account + grant modal */}
       {createOpen && (
         <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50, padding: 16 }}>
-          <div style={{ backgroundColor: 'var(--theme-bg-card)', borderRadius: 12, padding: 24, maxWidth: 420, width: '100%', border: '1px solid var(--theme-border)' }}>
+          <div style={{ backgroundColor: 'var(--theme-bg-card)', borderRadius: 12, padding: 24, maxWidth: 420, width: '100%', border: '1px solid var(--theme-border)', maxHeight: '90vh', overflowY: 'auto' }}>
             <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--theme-text-primary)', marginBottom: 4 }}>Tạo tài khoản &amp; cấp gói</h3>
             <p style={{ fontSize: 12, color: 'var(--theme-text-muted)', marginBottom: 16 }}>Tạo sẵn tài khoản cho học viên (kèm mật khẩu tạm) và cấp gói ngay.</p>
             <div style={{ marginBottom: 12 }}>
@@ -564,7 +661,7 @@ export default function AdminSubscriptionsPage() {
       {/* Pre-grant by email modal */}
       {preOpen && (
         <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50, padding: 16 }}>
-          <div style={{ backgroundColor: 'var(--theme-bg-card)', borderRadius: 12, padding: 24, maxWidth: 420, width: '100%', border: '1px solid var(--theme-border)' }}>
+          <div style={{ backgroundColor: 'var(--theme-bg-card)', borderRadius: 12, padding: 24, maxWidth: 420, width: '100%', border: '1px solid var(--theme-border)', maxHeight: '90vh', overflowY: 'auto' }}>
             <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--theme-text-primary)', marginBottom: 4 }}>Cấp gói theo email</h3>
             <p style={{ fontSize: 12, color: 'var(--theme-text-muted)', marginBottom: 16 }}>Email đã có tài khoản → cấp gói ngay. Chưa có tài khoản → gói tự áp dụng khi họ đăng ký bằng email này.</p>
             <div style={{ marginBottom: 12 }}>
@@ -595,7 +692,7 @@ export default function AdminSubscriptionsPage() {
       {/* Create result modal — shows the one-time temp password */}
       {createResult && (
         <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 60, padding: 16 }}>
-          <div style={{ backgroundColor: 'var(--theme-bg-card)', borderRadius: 12, padding: 24, maxWidth: 440, width: '100%', border: '1px solid var(--theme-border)' }}>
+          <div style={{ backgroundColor: 'var(--theme-bg-card)', borderRadius: 12, padding: 24, maxWidth: 440, width: '100%', border: '1px solid var(--theme-border)', maxHeight: '90vh', overflowY: 'auto' }}>
             <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--theme-text-primary)', marginBottom: 8 }}>
               {createResult.created ? '✅ Đã tạo tài khoản & cấp gói' : 'ℹ️ Email đã tồn tại — đã cấp gói'}
             </h3>

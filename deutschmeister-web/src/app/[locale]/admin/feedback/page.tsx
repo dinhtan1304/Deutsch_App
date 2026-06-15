@@ -4,6 +4,8 @@ import { useState, useRef, useCallback } from 'react';
 import { useAdminFeedback, useUpdateFeedbackStatus, useAdminFeedbackThread, useSendAdminFeedbackMessage } from '@/hooks/useAdmin';
 import { AdminFeedbackItem } from '@/lib/api/admin';
 import { compressImage } from '@/lib/compressImage';
+import { useIsMobile } from '@/hooks/useIsMobile';
+import { AdminCard, AdminCardList } from '../_components/MobileCardList';
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 
@@ -79,6 +81,7 @@ function ImageLightbox({ src, onClose }: { src: string; onClose: () => void }) {
 // ─── Page ───────────────────────────────────────────────────────────────────
 
 export default function AdminFeedbackPage() {
+  const isMobile = useIsMobile();
   const [statusFilter, setStatusFilter] = useState('');
   const [typeFilter, setTypeFilter] = useState('');
   const [page, setPage] = useState(1);
@@ -128,7 +131,38 @@ export default function AdminFeedbackPage() {
         </select>
       </div>
 
-      {/* Table */}
+      {/* Mobile card list */}
+      {isMobile ? (
+        isLoading ? (
+          <div style={{ padding: 40, textAlign: 'center', color: 'var(--theme-text-muted)' }}>Đang tải...</div>
+        ) : isError ? (
+          <div style={{ padding: 40, textAlign: 'center' }}>
+            <div style={{ color: '#F87171', fontSize: 13, marginBottom: 8 }}>Không tải được phản hồi.</div>
+            <div style={{ color: 'var(--theme-text-muted)', fontSize: 12, marginBottom: 12 }}>{(error as any)?.message ?? 'Lỗi không xác định.'}</div>
+            <button onClick={() => refetch()}
+              style={{ padding: '6px 14px', borderRadius: 6, border: '1px solid var(--theme-border)', backgroundColor: 'var(--theme-bg-body)', color: 'var(--theme-text-secondary)', fontSize: 12, cursor: 'pointer' }}>
+              Thử lại
+            </button>
+          </div>
+        ) : !data?.items.length ? (
+          <div style={{ padding: 40, textAlign: 'center', color: 'var(--theme-text-muted)' }}>Không có phản hồi nào</div>
+        ) : (
+          <AdminCardList>
+            {data.items.map((item) => (
+              <FeedbackCard
+                key={item.id}
+                item={item}
+                expanded={expandedId === item.id}
+                onToggle={() => setExpandedId(expandedId === item.id ? null : item.id)}
+                onStatusChange={handleStatusChange}
+                onImageClick={setLightboxSrc}
+                isPending={pendingRowId === item.id}
+              />
+            ))}
+          </AdminCardList>
+        )
+      ) : (
+      /* Table */
       <div style={{ borderRadius: 12, border: '1px solid var(--theme-border)', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13, whiteSpace: 'nowrap' }}>
           <thead>
@@ -170,6 +204,7 @@ export default function AdminFeedbackPage() {
           </tbody>
         </table>
       </div>
+      )}
 
       {/* Pagination */}
       {data && data.totalPages > 1 && (
@@ -267,83 +302,150 @@ function FeedbackRow({
       {expanded && (
         <tr>
           <td colSpan={5} style={{ padding: '0 14px 16px', borderBottom: '1px solid var(--theme-border)', backgroundColor: 'rgba(99,102,241,0.03)' }}>
-            <div style={{ padding: '16px', borderRadius: 10, background: 'var(--theme-bg-body)', border: '1px solid var(--theme-border)', marginTop: 8 }}>
-              {/* Full content */}
-              <p style={{ color: 'var(--theme-text-primary)', fontSize: 13, lineHeight: 1.7, margin: '0 0 12px', whiteSpace: 'pre-wrap' }}>
-                {item.content}
-              </p>
-
-              {/* Images */}
-              {hasImages && (
-                <div style={{ marginBottom: 14 }}>
-                  <p style={{ fontSize: 11, fontWeight: 600, color: 'var(--theme-text-muted)', marginBottom: 8 }}>
-                    Ảnh đính kèm ({item.imageUrls.length})
-                  </p>
-                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                    {item.imageUrls.map((src, i) => (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        key={i}
-                        src={src}
-                        alt={`Screenshot ${i + 1}`}
-                        onClick={(e) => { e.stopPropagation(); onImageClick(src); }}
-                        style={{
-                          width: 140, height: 100, objectFit: 'cover',
-                          borderRadius: 8, border: '1px solid var(--theme-border)',
-                          cursor: 'zoom-in', transition: 'border-color 0.15s',
-                        }}
-                        onMouseEnter={e => (e.currentTarget.style.borderColor = '#6366F1')}
-                        onMouseLeave={e => (e.currentTarget.style.borderColor = 'var(--theme-border)')}
-                      />
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Meta */}
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, fontSize: 12, color: 'var(--theme-text-muted)', marginBottom: 16 }}>
-                {item.user && (
-                  <span>Email: <span style={{ color: 'var(--theme-text-secondary)' }}>{item.user.email}</span></span>
-                )}
-                {item.pageUrl && (
-                  <span>Trang: <span style={{ color: '#818CF8' }}>{item.pageUrl}</span></span>
-                )}
-              </div>
-
-              {/* Status actions */}
-              <div style={{ display: 'flex', gap: 8 }}>
-                {(['new', 'reviewed', 'resolved'] as const).map(s => {
-                  const active = item.status === s;
-                  const sc = STATUS_COLORS[s]!;
-                  const disabled = active || isPending;
-                  return (
-                    <button
-                      key={s}
-                      disabled={disabled}
-                      onClick={(e) => { e.stopPropagation(); if (!disabled) onStatusChange(item.id, s); }}
-                      style={{
-                        padding: '5px 14px', borderRadius: 6, fontSize: 11, fontWeight: 600,
-                        cursor: disabled ? (active ? 'default' : 'wait') : 'pointer',
-                        border: `1px solid ${active ? sc.border : 'var(--theme-border)'}`,
-                        background: active ? sc.bg : 'transparent',
-                        color: active ? sc.color : 'var(--theme-text-muted)',
-                        opacity: isPending ? 0.4 : (active ? 1 : 0.7),
-                        transition: 'all 0.15s',
-                      }}
-                    >
-                      {STATUS_LABELS[s]}
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Conversation thread + reply composer */}
-              <AdminFeedbackThread feedbackId={item.id} onImageClick={onImageClick} />
+            <div style={{ marginTop: 8 }}>
+              <FeedbackDetail item={item} onImageClick={onImageClick} onStatusChange={onStatusChange} isPending={isPending} />
             </div>
           </td>
         </tr>
       )}
     </>
+  );
+}
+
+// ─── Expanded detail (shared by table row + mobile card) ─────────────────────
+
+function FeedbackDetail({
+  item, onImageClick, onStatusChange, isPending,
+}: {
+  item: AdminFeedbackItem;
+  onImageClick: (src: string) => void;
+  onStatusChange: (id: string, status: 'new' | 'reviewed' | 'resolved') => void;
+  isPending: boolean;
+}) {
+  const hasImages = item.imageUrls && item.imageUrls.length > 0;
+  return (
+    <div style={{ padding: '16px', borderRadius: 10, background: 'var(--theme-bg-body)', border: '1px solid var(--theme-border)' }}>
+      {/* Full content */}
+      <p style={{ color: 'var(--theme-text-primary)', fontSize: 13, lineHeight: 1.7, margin: '0 0 12px', whiteSpace: 'pre-wrap' }}>
+        {item.content}
+      </p>
+
+      {/* Images */}
+      {hasImages && (
+        <div style={{ marginBottom: 14 }}>
+          <p style={{ fontSize: 11, fontWeight: 600, color: 'var(--theme-text-muted)', marginBottom: 8 }}>
+            Ảnh đính kèm ({item.imageUrls.length})
+          </p>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            {item.imageUrls.map((src, i) => (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                key={i}
+                src={src}
+                alt={`Screenshot ${i + 1}`}
+                onClick={(e) => { e.stopPropagation(); onImageClick(src); }}
+                style={{
+                  width: 140, height: 100, objectFit: 'cover',
+                  borderRadius: 8, border: '1px solid var(--theme-border)',
+                  cursor: 'zoom-in', transition: 'border-color 0.15s',
+                }}
+                onMouseEnter={e => (e.currentTarget.style.borderColor = '#6366F1')}
+                onMouseLeave={e => (e.currentTarget.style.borderColor = 'var(--theme-border)')}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Meta */}
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, fontSize: 12, color: 'var(--theme-text-muted)', marginBottom: 16 }}>
+        {item.user && (
+          <span>Email: <span style={{ color: 'var(--theme-text-secondary)' }}>{item.user.email}</span></span>
+        )}
+        {item.pageUrl && (
+          <span style={{ wordBreak: 'break-all' }}>Trang: <span style={{ color: '#818CF8' }}>{item.pageUrl}</span></span>
+        )}
+      </div>
+
+      {/* Status actions */}
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        {(['new', 'reviewed', 'resolved'] as const).map(s => {
+          const active = item.status === s;
+          const sc = STATUS_COLORS[s]!;
+          const disabled = active || isPending;
+          return (
+            <button
+              key={s}
+              disabled={disabled}
+              onClick={(e) => { e.stopPropagation(); if (!disabled) onStatusChange(item.id, s); }}
+              style={{
+                padding: '5px 14px', borderRadius: 6, fontSize: 11, fontWeight: 600,
+                cursor: disabled ? (active ? 'default' : 'wait') : 'pointer',
+                border: `1px solid ${active ? sc.border : 'var(--theme-border)'}`,
+                background: active ? sc.bg : 'transparent',
+                color: active ? sc.color : 'var(--theme-text-muted)',
+                opacity: isPending ? 0.4 : (active ? 1 : 0.7),
+                transition: 'all 0.15s',
+              }}
+            >
+              {STATUS_LABELS[s]}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Conversation thread + reply composer */}
+      <AdminFeedbackThread feedbackId={item.id} onImageClick={onImageClick} />
+    </div>
+  );
+}
+
+// ─── Mobile card ─────────────────────────────────────────────────────────────
+
+function FeedbackCard({
+  item, expanded, onToggle, onStatusChange, onImageClick, isPending,
+}: {
+  item: AdminFeedbackItem;
+  expanded: boolean;
+  onToggle: () => void;
+  onStatusChange: (id: string, status: 'new' | 'reviewed' | 'resolved') => void;
+  onImageClick: (src: string) => void;
+  isPending: boolean;
+}) {
+  const typeStyle = TYPE_COLORS[item.type] ?? TYPE_COLORS.other!;
+  const statusStyle = STATUS_COLORS[item.status] ?? STATUS_COLORS.new!;
+  const date = new Date(item.createdAt);
+  const hasImages = item.imageUrls && item.imageUrls.length > 0;
+
+  return (
+    <AdminCard>
+      <div onClick={onToggle} style={{ display: 'flex', flexDirection: 'column', gap: 8, cursor: 'pointer' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+          <span style={{ padding: '3px 10px', borderRadius: 20, fontSize: 10, fontWeight: 700, background: typeStyle.bg, color: typeStyle.color, border: `1px solid ${typeStyle.border}` }}>
+            {TYPE_LABELS[item.type] ?? item.type}
+          </span>
+          <span style={{ padding: '3px 10px', borderRadius: 20, fontSize: 10, fontWeight: 700, background: statusStyle.bg, color: statusStyle.color, border: `1px solid ${statusStyle.border}` }}>
+            {STATUS_LABELS[item.status] ?? item.status}
+          </span>
+          {hasImages && (
+            <span style={{ fontSize: 9, fontWeight: 700, padding: '2px 6px', borderRadius: 4, backgroundColor: 'rgba(99,102,241,.15)', color: '#818CF8' }}>
+              {item.imageUrls.length} ảnh
+            </span>
+          )}
+          <span style={{ flex: 1 }} />
+          <span style={{ fontSize: 11, color: 'var(--theme-text-muted)' }}>
+            {date.toLocaleDateString('vi-VN')}
+          </span>
+        </div>
+        <p style={{ fontSize: 13, color: 'var(--theme-text-primary)', margin: 0, display: '-webkit-box', WebkitLineClamp: expanded ? 'unset' : 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+          {item.content}
+        </p>
+        <p style={{ fontSize: 12, color: 'var(--theme-text-muted)', margin: 0 }}>
+          {item.user ? (item.user.name || item.user.email) : <span style={{ fontStyle: 'italic' }}>Ẩn danh</span>}
+        </p>
+      </div>
+      {expanded && <FeedbackDetail item={item} onImageClick={onImageClick} onStatusChange={onStatusChange} isPending={isPending} />}
+    </AdminCard>
   );
 }
 
