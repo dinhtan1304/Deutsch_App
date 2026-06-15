@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import { useAdminTokenStats } from '@/hooks/useAdmin';
+import { useIsMobile } from '@/hooks/useIsMobile';
+import { AdminCard, AdminCardList } from '../_components/MobileCardList';
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
 function IconLoader({ size = 24, style }: { size?: number; style?: React.CSSProperties }) {
@@ -116,6 +118,7 @@ function DailyChart({ daily }: { daily: { day: string; tokens: number; calls: nu
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function AdminTokenUsagePage() {
+  const isMobile = useIsMobile();
   const { data, isLoading } = useAdminTokenStats();
   const [featureSort, setFeatureSort] = useState<'tokens' | 'calls'>('tokens');
 
@@ -137,7 +140,7 @@ export default function AdminTokenUsagePage() {
         <>
           {/* ── Grand totals ──────────────────────────────────── */}
           <SL>Tổng quan</SL>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 10 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, minmax(0, 1fr))' : 'repeat(4, minmax(0, 1fr))', gap: 10 }}>
             <StatCard
               label="Tổng tokens (all-time)"
               value={fmtNum(data.totals.allTime.totalTokens)}
@@ -215,18 +218,34 @@ export default function AdminTokenUsagePage() {
                   {sorted.map((f) => {
                     const meta = featureMeta(f.feature);
                     const val = featureSort === 'tokens' ? f.totalTokens : f.calls;
+                    const bar = (
+                      <div style={{ height: 7, borderRadius: 4, backgroundColor: 'var(--theme-bg-body)', overflow: 'hidden' }}>
+                        <div style={{
+                          height: '100%',
+                          width: `${val > 0 ? Math.max(Math.round((val / maxVal) * 100), 2) : 0}%`,
+                          background: meta.gradient,
+                          borderRadius: 4,
+                          transition: 'width 0.5s ease',
+                        }} />
+                      </div>
+                    );
+                    if (isMobile) {
+                      return (
+                        <div key={f.feature} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+                            <span style={{ fontSize: 12, color: 'var(--theme-text-secondary)', fontWeight: 500 }}>{meta.label}</span>
+                            <span style={{ fontSize: 12, color: 'var(--theme-text-primary)', fontWeight: 700 }}>
+                              {fmtNum(f.totalTokens)} <span style={{ fontSize: 11, color: 'var(--theme-text-muted)', fontWeight: 400 }}>· {f.calls.toLocaleString()} calls</span>
+                            </span>
+                          </div>
+                          {bar}
+                        </div>
+                      );
+                    }
                     return (
                       <div key={f.feature} style={{ display: 'grid', gridTemplateColumns: '120px 1fr 80px 80px', alignItems: 'center', gap: 10 }}>
                         <span style={{ fontSize: 12, color: 'var(--theme-text-secondary)', fontWeight: 500 }}>{meta.label}</span>
-                        <div style={{ height: 7, borderRadius: 4, backgroundColor: 'var(--theme-bg-body)', overflow: 'hidden' }}>
-                          <div style={{
-                            height: '100%',
-                            width: `${val > 0 ? Math.max(Math.round((val / maxVal) * 100), 2) : 0}%`,
-                            background: meta.gradient,
-                            borderRadius: 4,
-                            transition: 'width 0.5s ease',
-                          }} />
-                        </div>
+                        {bar}
                         <p style={{ fontSize: 12, fontWeight: 700, color: 'var(--theme-text-primary)', textAlign: 'right' }}>
                           {fmtNum(f.totalTokens)}
                         </p>
@@ -249,6 +268,27 @@ export default function AdminTokenUsagePage() {
 
           {/* ── Top users ─────────────────────────────────────── */}
           <SL>Top người dùng sử dụng nhiều nhất</SL>
+          {isMobile ? (
+            data.topUsers.length === 0 ? (
+              <div style={{ padding: '20px 16px', fontSize: 12, color: 'var(--theme-text-muted)', textAlign: 'center' }}>Chưa có dữ liệu</div>
+            ) : (
+              <AdminCardList>
+                {data.topUsers.map((u, i) => (
+                  <AdminCard key={u.userId} style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                    <span style={{ fontSize: 14, fontWeight: 800, color: 'var(--theme-text-muted)', width: 22, textAlign: 'center', flexShrink: 0 }}>{i + 1}</span>
+                    <div style={{ minWidth: 0, flex: 1 }}>
+                      <p style={{ fontSize: 13, color: 'var(--theme-text-primary)', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{u.name || '(no name)'}</p>
+                      <p style={{ fontSize: 11, color: 'var(--theme-text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{u.email || u.userId}</p>
+                    </div>
+                    <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                      <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--theme-text-primary)' }}>{fmtNum(u.totalTokens)}</p>
+                      <p style={{ fontSize: 11, color: 'var(--theme-text-muted)' }}>{u.calls.toLocaleString()} calls</p>
+                    </div>
+                  </AdminCard>
+                ))}
+              </AdminCardList>
+            )
+          ) : (
           <div style={{ backgroundColor: 'var(--theme-bg-card)', borderRadius: 12, border: '1px solid var(--theme-border)', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', whiteSpace: 'nowrap' }}>
               <thead>
@@ -286,6 +326,7 @@ export default function AdminTokenUsagePage() {
               </tbody>
             </table>
           </div>
+          )}
         </>
       )}
     </div>

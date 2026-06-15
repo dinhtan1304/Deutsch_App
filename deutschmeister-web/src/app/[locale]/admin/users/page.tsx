@@ -6,6 +6,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAdminUsers, useUpdateAdminUser, useDeleteAdminUser } from '@/hooks/useAdmin';
 import { AdminUserItem } from '@/lib/api/admin';
 import { adminSubscriptionsApi } from '@/lib/api/subscriptions';
+import { useIsMobile } from '@/hooks/useIsMobile';
+import { AdminCard, AdminCardList } from '../_components/MobileCardList';
 
 function IconSearch({ size = 16 }: { size?: number }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>;
@@ -92,6 +94,7 @@ const FILTER_OPTS = [
 /** Admin campaign: gift Premium Lite (1 month) to all free users. Runs in the
  *  background on the API; this card previews counts and polls progress. */
 function GiftLiteCampaignCard() {
+  const isMobile = useIsMobile();
   const queryClient = useQueryClient();
   const [confirm, setConfirm] = useState<{ limit?: number } | null>(null);
   const prevRunning = useRef(false);
@@ -149,13 +152,13 @@ function GiftLiteCampaignCard() {
             ) : 'Đang tải số liệu...'}
           </div>
         </div>
-        <div style={{ display: 'flex', gap: 8 }}>
+        <div style={{ display: 'flex', gap: 8, width: isMobile ? '100%' : undefined }}>
           <button onClick={() => setConfirm({ limit: 5 })} disabled={running}
-            style={{ padding: '0 14px', height: 34, borderRadius: 8, border: '1px solid #10B981', backgroundColor: 'transparent', color: '#10B981', fontSize: 12, fontWeight: 700, cursor: running ? 'not-allowed' : 'pointer', opacity: running ? 0.5 : 1 }}>
+            style={{ flex: isMobile ? 1 : undefined, justifyContent: 'center', padding: '0 14px', height: 34, borderRadius: 8, border: '1px solid #10B981', backgroundColor: 'transparent', color: '#10B981', fontSize: 12, fontWeight: 700, cursor: running ? 'not-allowed' : 'pointer', opacity: running ? 0.5 : 1, display: 'flex', alignItems: 'center' }}>
             Gửi thử (5 user)
           </button>
           <button onClick={() => setConfirm({})} disabled={running}
-            style={{ padding: '0 14px', height: 34, borderRadius: 8, border: 'none', backgroundColor: '#10B981', color: '#fff', fontSize: 12, fontWeight: 700, cursor: running ? 'not-allowed' : 'pointer', opacity: running ? 0.5 : 1, display: 'flex', alignItems: 'center', gap: 6 }}>
+            style={{ flex: isMobile ? 1 : undefined, padding: '0 14px', height: 34, borderRadius: 8, border: 'none', backgroundColor: '#10B981', color: '#fff', fontSize: 12, fontWeight: 700, cursor: running ? 'not-allowed' : 'pointer', opacity: running ? 0.5 : 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
             {running && <IconLoader size={14} />} Chạy toàn bộ
           </button>
         </div>
@@ -201,6 +204,7 @@ function GiftLiteCampaignCard() {
 }
 
 export default function AdminUsersPage() {
+  const isMobile = useIsMobile();
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('');
   const [page, setPage] = useState(1);
@@ -334,6 +338,68 @@ export default function AdminUsersPage() {
         ) : !data?.items?.length ? (
           <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--theme-text-muted)', fontSize: 13 }}>
             Không tìm thấy người dùng nào.
+          </div>
+        ) : isMobile ? (
+          <div style={{ padding: 10 }}>
+            <AdminCardList>
+              {data.items.map((u) => {
+                const paid = isPaidActive(u);
+                const planStyle = paid && u.subscription ? PLAN_STYLES[u.subscription.plan] : undefined;
+                return (
+                  <AdminCard key={u.id} style={planStyle ? { borderLeft: `3px solid ${planStyle.color}` } : undefined}>
+                    {/* Name + plan */}
+                    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 10 }}>
+                      <div style={{ minWidth: 0 }}>
+                        <Link href={`/admin/users/${u.id}`} style={{ color: 'var(--theme-text-primary)', fontWeight: 700, fontSize: 14, textDecoration: 'none' }}>
+                          {u.name || <span style={{ color: 'var(--theme-text-muted)', fontStyle: 'italic' }}>Chưa đặt tên</span>}
+                        </Link>
+                        <p style={{ fontSize: 12, color: 'var(--theme-text-muted)', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis' }}>{u.email}</p>
+                      </div>
+                      <div style={{ flexShrink: 0 }}><PlanBadge user={u} /></div>
+                    </div>
+                    {/* Controls */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                      <select
+                        value={u.role}
+                        onChange={e => requestRoleChange(u, e.target.value)}
+                        style={{
+                          backgroundColor: u.role === 'admin' ? 'rgba(99,102,241,.15)' : 'transparent',
+                          color: u.role === 'admin' ? '#818CF8' : 'var(--theme-text-muted)',
+                          border: '1px solid var(--theme-border)', borderRadius: 6, padding: '4px 8px',
+                          fontSize: 12, fontWeight: 700, cursor: 'pointer', outline: 'none',
+                        }}
+                      >
+                        <option value="user" style={{ backgroundColor: 'var(--theme-bg-card)' }}>user</option>
+                        <option value="admin" style={{ backgroundColor: 'var(--theme-bg-card)' }}>admin</option>
+                      </select>
+                      <button
+                        onClick={() => handleToggleActive(u.id, u.isActive)}
+                        style={{
+                          width: 36, height: 20, borderRadius: 10, border: 'none', cursor: 'pointer',
+                          backgroundColor: u.isActive ? '#22C55E' : 'var(--theme-border)',
+                          position: 'relative', transition: 'background-color 0.2s', flexShrink: 0,
+                        }}
+                      >
+                        <span style={{ position: 'absolute', top: 2, left: u.isActive ? 18 : 2, width: 16, height: 16, borderRadius: '50%', backgroundColor: '#fff', transition: 'left 0.2s' }} />
+                      </button>
+                      <span style={{ fontSize: 12, color: 'var(--theme-text-muted)' }}>{u.isActive ? 'Hoạt động' : 'Tắt'}</span>
+                      <span style={{ flex: 1 }} />
+                      <span style={{ fontSize: 12, color: 'var(--theme-text-muted)' }}>{new Date(u.createdAt).toLocaleDateString('vi-VN')}</span>
+                    </div>
+                    {/* Actions */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, borderTop: '1px solid var(--theme-border)', paddingTop: 10 }}>
+                      <Link href={`/admin/users/${u.id}`} style={{ flex: 1, textAlign: 'center', padding: '8px 0', borderRadius: 8, border: '1px solid var(--theme-border)', fontSize: 13, color: '#818CF8', fontWeight: 600, textDecoration: 'none' }}>
+                        Chi tiết
+                      </Link>
+                      <button onClick={() => setDeleteId(u.id)}
+                        style={{ padding: '8px 14px', borderRadius: 8, border: '1px solid rgba(239,68,68,.4)', background: 'transparent', color: '#EF4444', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 600 }}>
+                        <IconTrash size={14} /> Xóa
+                      </button>
+                    </div>
+                  </AdminCard>
+                );
+              })}
+            </AdminCardList>
           </div>
         ) : (
           <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>

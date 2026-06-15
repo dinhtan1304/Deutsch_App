@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { useAdminStats } from '@/hooks/useAdmin';
 import type { FeatureStat } from '@/lib/api/admin';
+import { useIsMobile } from '@/hooks/useIsMobile';
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
 function IconUsers({ size = 20 }: { size?: number }) {
@@ -134,8 +135,11 @@ function FeatureChart({ features, period }: { features: Record<string, FeatureSt
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function AdminDashboardPage() {
+  const isMobile = useIsMobile();
   const { data: stats, isLoading, isError, error, refetch } = useAdminStats();
   const [period, setPeriod] = useState<Period>('week');
+  const grid4 = isMobile ? 'repeat(2, minmax(0, 1fr))' : 'repeat(4, minmax(0, 1fr))';
+  const grid3 = isMobile ? 'repeat(2, minmax(0, 1fr))' : 'repeat(3, minmax(0, 1fr))';
 
   return (
     <div style={{ width: '100%', maxWidth: '100%' }}>
@@ -168,7 +172,7 @@ export default function AdminDashboardPage() {
         <>
           {/* ── Users ────────────────────────────────────────── */}
           <SL>Người dùng</SL>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 10 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: grid4, gap: 10 }}>
             <StatCard label="Tổng người dùng" value={stats.totalUsers.toLocaleString()}
               sub={`${stats.activeUsers} đang hoạt động`}
               icon={IconUsers} color="#6366F1" href="/admin/users" />
@@ -185,7 +189,7 @@ export default function AdminDashboardPage() {
 
           {/* ── Traffic ──────────────────────────────────────── */}
           <SL>Traffic — phiên sử dụng</SL>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 10 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: grid3, gap: 10 }}>
             <StatCard label="Hôm nay" value={stats.sessionsToday.toLocaleString()}
               sub="Tất cả loại"
               icon={IconActivity} color="#22C55E" />
@@ -199,7 +203,7 @@ export default function AdminDashboardPage() {
 
           {/* ── AI Usage ─────────────────────────────────────── */}
           <SL>Tính năng AI (Gemini)</SL>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 10 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: grid3, gap: 10 }}>
             <StatCard label="AI calls hôm nay" value={stats.aiSessionsToday.toLocaleString()}
               sub="Viết · Nói · Thi Viết · Thi Nói"
               icon={IconZap} color="#6366F1" accent />
@@ -238,7 +242,7 @@ export default function AdminDashboardPage() {
 
           {/* ── Content ──────────────────────────────────────── */}
           <SL>Nội dung</SL>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 10 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: grid3, gap: 10 }}>
             <StatCard label="Từ vựng" value={stats.totalWords.toLocaleString()} icon={IconBook} color="#3B82F6" href="/admin/words" />
             <StatCard label="Topics" value={stats.totalTopics.toLocaleString()} icon={IconBook} color="#EC4899" href="/admin/topics" />
             <StatCard label="Bài ngữ pháp" value={stats.totalGrammarLessons.toLocaleString()} icon={IconBook} color="#8B5CF6" href="/admin/grammar" />
