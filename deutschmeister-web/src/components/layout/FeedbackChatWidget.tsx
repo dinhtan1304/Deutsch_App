@@ -99,7 +99,7 @@ export function FeedbackChatWidget({ enabled }: FeedbackChatWidgetProps) {
         <button
           onClick={() => setOpen(true)}
           aria-label={t('launcherAria')}
-          className="fixed bottom-6 right-6 z-40 w-14 h-14 rounded-full flex items-center justify-center text-white shadow-2xl transition-transform hover:-translate-y-0.5"
+          className="fixed right-6 z-40 w-14 h-14 rounded-full flex items-center justify-center text-white shadow-2xl transition-transform hover:-translate-y-0.5 bottom-[calc(64px+env(safe-area-inset-bottom)+1rem)] md:bottom-6"
           style={{ background: GRADIENT.writing }}
         >
           <IconMessageCircle size={24} />
@@ -119,8 +119,8 @@ export function FeedbackChatWidget({ enabled }: FeedbackChatWidgetProps) {
         <div
           role="dialog"
           aria-label={t('title')}
-          className="fixed bottom-6 right-6 z-40 w-90 max-w-[calc(100vw-2rem)] rounded-2xl shadow-2xl border overflow-hidden flex flex-col"
-          style={{ backgroundColor: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)', height: 'min(560px, calc(100vh - 96px))' }}
+          className="fixed right-6 z-40 w-90 max-w-[calc(100vw-2rem)] rounded-2xl shadow-2xl border overflow-hidden flex flex-col bottom-[calc(64px+env(safe-area-inset-bottom)+1rem)] md:bottom-6"
+          style={{ backgroundColor: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)', height: 'min(560px, calc(100vh - 96px - 64px - env(safe-area-inset-bottom)))' }}
         >
           {selectedId ? (
             <ThreadView
