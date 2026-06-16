@@ -1,11 +1,13 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { useExamReadingSession, useSubmitExamReading } from '@/hooks/useExamReading';
 import { ExamReadingTeil, ExamTeilQuestion } from '@/lib/api/examReading';
+import { EXAM_READING_DISPLAY } from '@/lib/examConfig';
+import { useExamCountdown, formatTime } from '@/hooks/useExamCountdown';
 import { HighlightedText } from '@/components/word-highlight/HighlightedText';
 import { PageHeader, FixedActionBar, MobileSplitTabs } from '@/components/ui';
 import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
@@ -342,6 +344,19 @@ export default function ExamReadingPage() {
   const [currentTeil, setCurrentTeil] = useState(0);
   const [error, setError] = useState('');
   const [mobileView, setMobileView] = useState<'task' | 'editor'>('task');
+  const userAnswersRef = useRef(userAnswers);
+
+  useEffect(() => { userAnswersRef.current = userAnswers; }, [userAnswers]);
+
+  // Đếm ngược theo timeMin của chứng chỉ; bắt đầu khi học viên trả lời câu đầu tiên,
+  // hết giờ tự nộp bài.
+  const totalSeconds = (EXAM_READING_DISPLAY[session?.examType ?? '']?.[session?.cefrLevel ?? '']?.timeMin ?? 0) * 60;
+  const handleTimeUp = useCallback(() => {
+    submitMut.mutateAsync({ id, userAnswers: userAnswersRef.current })
+      .then(() => router.push(`/practice-test/reading/exam/${id}/result`))
+      .catch(() => {});
+  }, [id, submitMut, router]);
+  const { timeRemaining, start: startTimer } = useExamCountdown(totalSeconds, handleTimeUp);
 
   // Reset to passage view when switching Teile so user reads context first
   const goToTeil = useCallback((i: number) => {
@@ -350,11 +365,12 @@ export default function ExamReadingPage() {
   }, []);
 
   const handleAnswer = useCallback((teilNumber: number, qid: string, val: string) => {
+    startTimer();
     setUserAnswers(prev => ({
       ...prev,
       [`teil_${teilNumber}`]: { ...(prev[`teil_${teilNumber}`] || {}), [qid]: val },
     }));
-  }, []);
+  }, [startTimer]);
 
   useEffect(() => {
     if (session?.status === 'GRADED') {
@@ -414,8 +430,16 @@ export default function ExamReadingPage() {
         title={t('pageTitle')}
         accent="reading"
         right={
-          <span className="px-2.5 py-0.5 rounded-lg text-xs font-black text-white"
-            style={{ backgroundColor: ACCENT.reading }}>{session.cefrLevel}</span>
+          <div className="flex items-center gap-3">
+            {timeRemaining !== null && timeRemaining > 0 && (
+              <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-black text-xs tabular-nums shadow-sm"
+                style={{ backgroundColor: `${ACCENT.games}1A`, color: ACCENT.games, border: `1px solid ${ACCENT.games}33` }}>
+                ⏱ {formatTime(timeRemaining)}
+              </span>
+            )}
+            <span className="px-2.5 py-0.5 rounded-lg text-xs font-black text-white"
+              style={{ backgroundColor: ACCENT.reading }}>{session.cefrLevel}</span>
+          </div>
         }
       />
 

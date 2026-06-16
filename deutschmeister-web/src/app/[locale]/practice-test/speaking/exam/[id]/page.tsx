@@ -6,6 +6,8 @@ import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { useExamSpeakingSession, useSubmitExamSpeaking } from '@/hooks/useExamSpeaking';
 import { ExamSpeakingTeil } from '@/lib/api/examSpeaking';
+import { EXAM_SPEAKING_DISPLAY } from '@/lib/examConfig';
+import { useExamCountdown, formatTime } from '@/hooks/useExamCountdown';
 import { PageHeader, FixedActionBar } from '@/components/ui';
 import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 
@@ -124,6 +126,39 @@ export default function ExamSpeakingSessionPage() {
 
   useEffect(() => () => cleanup(), [cleanup]);
 
+  // Đồng hồ tổng theo timeMin của chứng chỉ; bắt đầu khi học viên vào Teil đầu tiên,
+  // hết giờ tự nộp bài (các bản ghi đã có). timeUpRef trỏ tới closure mới nhất.
+  const timeUpRef = useRef<() => void>(() => {});
+  const totalSeconds = (EXAM_SPEAKING_DISPLAY[session?.examType ?? '']?.[session?.cefrLevel ?? '']?.timeMin ?? 0) * 60;
+  const { timeRemaining, start: startTimer, stop: stopTimer } = useExamCountdown(totalSeconds, () => timeUpRef.current());
+
+  const handleSubmit = useCallback(async () => {
+    stopTimer();
+    if (!session) return;
+    const teile = session.teile as ExamSpeakingTeil[];
+    try {
+      const teileData: Record<string, { audioBase64: string; transcript: string; mimeType: string }> = {};
+      for (const teil of teile) {
+        const blob = blobMap[teil.number];
+        if (!blob) continue;
+        const audioBase64 = await blobToBase64(blob);
+        const mimeType = blob.type || 'audio/webm';
+        teileData[String(teil.number)] = {
+          audioBase64,
+          transcript: transcriptMap[teil.number] ?? '',
+          mimeType,
+        };
+      }
+      await submitMut.mutateAsync({ id, teileData });
+      router.push(`/practice-test/speaking/exam/${id}/result`);
+    } catch {
+      alert(t('submitError'));
+    }
+  }, [stopTimer, session, blobMap, transcriptMap, id, submitMut, router, t]);
+
+  // Hết giờ: dừng mic/ghi âm rồi nộp các bản ghi đã có.
+  useEffect(() => { timeUpRef.current = () => { cleanup(); handleSubmit(); }; }, [cleanup, handleSubmit]);
+
   if (isLoading) {
     return (
       <div className="py-6 flex items-center justify-center min-h-[60vh]">
@@ -157,6 +192,7 @@ export default function ExamSpeakingSessionPage() {
   // ─── Handlers ──────────────────────────────────────────────────────────────
 
   const startPrep = () => {
+    startTimer();
     if (currentTeil.prepTimeSeconds <= 0) {
       startRecording();
       return;
@@ -266,27 +302,6 @@ export default function ExamSpeakingSessionPage() {
     setCurrentTeilIdx(i => i + 1);
   };
 
-  const handleSubmit = async () => {
-    try {
-      const teileData: Record<string, { audioBase64: string; transcript: string; mimeType: string }> = {};
-      for (const teil of teile) {
-        const blob = blobMap[teil.number];
-        if (!blob) continue;
-        const audioBase64 = await blobToBase64(blob);
-        const mimeType = blob.type || 'audio/webm';
-        teileData[String(teil.number)] = {
-          audioBase64,
-          transcript: transcriptMap[teil.number] ?? '',
-          mimeType,
-        };
-      }
-      await submitMut.mutateAsync({ id, teileData });
-      router.push(`/practice-test/speaking/exam/${id}/result`);
-    } catch {
-      alert(t('submitError'));
-    }
-  };
-
   if (submitMut.isPending) {
     return (
       <div className="py-16 flex flex-col items-center gap-4 text-center">
@@ -306,8 +321,16 @@ export default function ExamSpeakingSessionPage() {
         title={t('pageTitle')}
         accent="speaking"
         right={
-          <span className="px-2.5 py-0.5 rounded-lg text-xs font-black text-white"
-            style={{ backgroundColor: ACCENT.xp }}>{session.cefrLevel}</span>
+          <div className="flex items-center gap-3">
+            {timeRemaining !== null && timeRemaining > 0 && (
+              <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-black text-xs tabular-nums shadow-sm"
+                style={{ backgroundColor: `${ACCENT.games}1A`, color: ACCENT.games, border: `1px solid ${ACCENT.games}33` }}>
+                ⏱ {formatTime(timeRemaining)}
+              </span>
+            )}
+            <span className="px-2.5 py-0.5 rounded-lg text-xs font-black text-white"
+              style={{ backgroundColor: ACCENT.xp }}>{session.cefrLevel}</span>
+          </div>
         }
       />
 

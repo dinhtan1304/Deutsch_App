@@ -7,6 +7,7 @@ import { useTranslations } from 'next-intl';
 import { useExamListeningSession, useSubmitExamListening } from '@/hooks/useExamListening';
 import { ExamListeningTeil, ExamListeningQuestion } from '@/lib/api/examListening';
 import { EXAM_LISTENING_DISPLAY } from '@/lib/examConfig';
+import { useExamCountdown, formatTime } from '@/hooks/useExamCountdown';
 import { PageHeader, FixedActionBar } from '@/components/ui';
 import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 import { synthesizeAudioSequence, type AudioSequenceHandle } from '@/lib/utils';
@@ -36,19 +37,14 @@ function IconSend({ size = 16 }: { size?: number }) {
 
 const PLAYING_GRADIENT = `linear-gradient(135deg, ${ACCENT.games}, ${STATUS.danger})`;
 
-function formatTime(secs: number) {
-  const m = Math.floor(secs / 60);
-  const s = secs % 60;
-  return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-}
-
 // ─── TTS Player ───────────────────────────────────────────────────────────────
-function TTSPlayer({ texts, speed, onSpeedChange, playCount, onPlay }: {
+function TTSPlayer({ texts, speed, onSpeedChange, playCount, onPlay, onPlayStart }: {
   texts: ExamListeningTeil['texts'];
   speed: number;
   onSpeedChange: (s: number) => void;
   playCount: number;
   onPlay: () => void;
+  onPlayStart: () => void;
 }) {
   const t = useTranslations('practice.examListening.answering');
   const [playing, setPlaying] = useState(false);
@@ -84,6 +80,7 @@ function TTSPlayer({ texts, speed, onSpeedChange, playCount, onPlay }: {
   // natural Piper voice instead of being rejected and dropping to the browser.
   const handlePlay = () => {
     if (playing) { stopAll(); return; }
+    onPlayStart();
     seqRef.current?.stop();
     const seq = synthesizeAudioSequence(fullScript, {
       playbackRate: speed,
@@ -322,39 +319,19 @@ export default function ExamListeningPage() {
   const [error, setError] = useState('');
   const [ttsSpeed, setTtsSpeed] = useState(1.0);
   const [playCounts, setPlayCounts] = useState<Record<number, number>>({});
-  const [timeRemaining, setTimeRemaining] = useState(0);
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const userAnswersRef = useRef(userAnswers);
 
   useEffect(() => { userAnswersRef.current = userAnswers; }, [userAnswers]);
 
-  const sessionId = session?.id;
-  const sessionStatus = session?.status;
-  const sessionExamType = session?.examType;
-  const sessionCefrLevel = session?.cefrLevel;
-
-  useEffect(() => {
-    if (!sessionId || sessionStatus === 'GRADED') return;
-    const cfg = EXAM_LISTENING_DISPLAY[sessionExamType ?? '']?.[sessionCefrLevel ?? ''];
-    if (!cfg) return;
-    const totalSecs = cfg.timeMin * 60;
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setTimeRemaining(totalSecs);
-    timerRef.current = setInterval(() => {
-      setTimeRemaining(prev => {
-        if (prev <= 1) { clearInterval(timerRef.current!); return 0; }
-        return prev - 1;
-      });
-    }, 1000);
-    return () => { if (timerRef.current) clearInterval(timerRef.current!); };
-  }, [sessionId, sessionStatus, sessionExamType, sessionCefrLevel]);
-
-  useEffect(() => {
-    if (timeRemaining !== 0 || !session || session.status === 'GRADED') return;
+  // Đếm ngược theo timeMin của chứng chỉ; chỉ bắt đầu khi học viên bấm Play lần đầu
+  // (mô phỏng phòng thi thật), hết giờ tự nộp bài.
+  const totalSeconds = (EXAM_LISTENING_DISPLAY[session?.examType ?? '']?.[session?.cefrLevel ?? '']?.timeMin ?? 0) * 60;
+  const handleTimeUp = useCallback(() => {
     submitMut.mutateAsync({ id, userAnswers: userAnswersRef.current })
       .then(() => router.push(`/practice-test/listening/exam/${id}/result`))
       .catch(() => {});
-  }, [timeRemaining, id, session, submitMut, router]);
+  }, [id, submitMut, router]);
+  const { timeRemaining, start: startTimer } = useExamCountdown(totalSeconds, handleTimeUp);
 
   const handleAnswer = useCallback((teilNumber: number, qid: string, val: string) => {
     setUserAnswers(prev => ({
@@ -422,7 +399,7 @@ export default function ExamListeningPage() {
         accent="listening"
         right={
           <div className="flex items-center gap-3">
-            {timeRemaining > 0 && (
+            {timeRemaining !== null && timeRemaining > 0 && (
               <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-black text-xs tabular-nums shadow-sm"
                 style={{ backgroundColor: `${ACCENT.games}1A`, color: ACCENT.games, border: `1px solid ${ACCENT.games}33` }}>
                 ⏱ {formatTime(timeRemaining)}
@@ -478,6 +455,7 @@ export default function ExamListeningPage() {
             onSpeedChange={setTtsSpeed}
             playCount={playCounts[teil.number] || 0}
             onPlay={() => setPlayCounts(prev => ({ ...prev, [teil.number]: (prev[teil.number] || 0) + 1 }))}
+            onPlayStart={startTimer}
           />
 
           <div className="rounded-3xl border p-6" style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>

@@ -6,6 +6,8 @@ import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { useExamWritingSession, useSaveExamWritingDraft, useSubmitExamWriting } from '@/hooks/useExamWriting';
 import { ExamWritingTeil } from '@/lib/api/examWriting';
+import { EXAM_WRITING_DISPLAY } from '@/lib/examConfig';
+import { useExamCountdown, formatTime } from '@/hooks/useExamCountdown';
 import { HighlightedText } from '@/components/word-highlight/HighlightedText';
 import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 import { useUmlautTrigger, UMLAUT_TRIGGER_HINT } from '@/hooks/useUmlautTrigger';
@@ -216,6 +218,16 @@ export default function ExamWritingPage() {
   const autoSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const userTextsRef = useRef<Record<string, string>>({});
 
+  // Đếm ngược theo timeMin của chứng chỉ; bắt đầu khi học viên gõ chữ đầu tiên,
+  // hết giờ tự nộp bài.
+  const totalSeconds = (EXAM_WRITING_DISPLAY[session?.examType ?? '']?.[session?.cefrLevel ?? '']?.timeMin ?? 0) * 60;
+  const handleTimeUp = useCallback(() => {
+    submitMut.mutateAsync({ id, userTexts: userTextsRef.current })
+      .then(() => router.push(`/practice-test/writing/exam/${id}/result`))
+      .catch(() => {});
+  }, [id, submitMut, router]);
+  const { timeRemaining, start: startTimer } = useExamCountdown(totalSeconds, handleTimeUp);
+
   useEffect(() => {
     if (session?.userTexts && Object.keys(userTexts).length === 0) {
       setUserTexts(session.userTexts);
@@ -249,6 +261,7 @@ export default function ExamWritingPage() {
   useEffect(() => { }, [activeTeil, showStickyPrompt]);
 
   const handleTextChange = useCallback((teilNum: number, value: string) => {
+    startTimer();
     const key = `teil_${teilNum}`;
     setUserTexts(prev => ({ ...prev, [key]: value }));
     setSaveState('idle');
@@ -261,7 +274,7 @@ export default function ExamWritingPage() {
         setTimeout(() => setSaveState('idle'), 2500);
       } catch { setSaveState('idle'); }
     }, 1800);
-  }, [id, saveDraft]);
+  }, [id, saveDraft, startTimer]);
 
   const handleSubmit = async () => {
     setConfirmSubmit(false);
@@ -333,17 +346,25 @@ export default function ExamWritingPage() {
             </div>
           </div>
 
-          <div className="hidden sm:flex flex-col items-end text-right">
-            {saveState === 'saving' && (
-              <span className="flex items-center gap-1.5 text-xs font-bold" style={{ color: 'var(--theme-text-muted)' }}>
-                <IconLoader size={12} /> {t('saving')}
+          <div className="flex items-center gap-3">
+            {timeRemaining !== null && timeRemaining > 0 && (
+              <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-black text-xs tabular-nums shadow-sm"
+                style={{ backgroundColor: `${ACCENT.games}1A`, color: ACCENT.games, border: `1px solid ${ACCENT.games}33` }}>
+                ⏱ {formatTime(timeRemaining)}
               </span>
             )}
-            {saveState === 'saved' && (
-              <span className="flex items-center gap-1.5 text-xs font-bold" style={{ color: STATUS.success }}>
-                <IconCheck size={12} /> {t('saved')}
-              </span>
-            )}
+            <div className="hidden sm:flex flex-col items-end text-right">
+              {saveState === 'saving' && (
+                <span className="flex items-center gap-1.5 text-xs font-bold" style={{ color: 'var(--theme-text-muted)' }}>
+                  <IconLoader size={12} /> {t('saving')}
+                </span>
+              )}
+              {saveState === 'saved' && (
+                <span className="flex items-center gap-1.5 text-xs font-bold" style={{ color: STATUS.success }}>
+                  <IconCheck size={12} /> {t('saved')}
+                </span>
+              )}
+            </div>
           </div>
         </div>
       </div>
