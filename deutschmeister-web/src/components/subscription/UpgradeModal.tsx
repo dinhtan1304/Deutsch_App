@@ -137,10 +137,13 @@ export function UpgradeModal({ open, onClose, defaultPeriod = 'yearly', featureC
     waitingForPayment,
     waitingForPayment ? 4000 : false,
   );
+  // The Payment row is only created server-side once the SePay webhook confirms
+  // the transfer, so we match on the payCode (shown in the QR) rather than an id
+  // we don't have yet.
   const paid =
     waitingForPayment &&
     !!upgradeData &&
-    (meSub?.payments?.some((p) => p.id === upgradeData.payment.id && p.status === 'confirmed') ?? false);
+    (meSub?.payments?.some((p) => p.payCode === upgradeData.bankInfo.content && p.status === 'confirmed') ?? false);
 
   // Run the one-time post-confirmation side effects (cache refresh + analytics)
   // exactly once per upgrade, without storing derived state.

@@ -80,10 +80,16 @@ export interface BankInfo {
 }
 
 export interface UpgradeResponse {
-  payment: Payment;
+  /** PaymentIntent id. No Payment/order exists yet — it's created when the SePay
+   *  webhook confirms the transfer. Poll `me.payments` by `bankInfo.content` (payCode). */
+  intentId: string;
   bankInfo: BankInfo;
   promo?: {
     code: string;
+    discount: number;
+    originalAmount: number;
+  };
+  referral?: {
     discount: number;
     originalAmount: number;
   };
