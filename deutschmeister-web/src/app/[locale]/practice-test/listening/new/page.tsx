@@ -4,9 +4,12 @@ import { useState } from 'react';
 import { Link, useRouter } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
 import { useGenerateListening } from '@/hooks/useListening';
+import { useGenerateExamListening } from '@/hooks/useExamListening';
+import { EXAM_LISTENING_DISPLAY } from '@/lib/examConfig';
 import { QuotaPaywall } from '@/components/subscription/QuotaPaywall';
 import { QuotaBanner } from '@/components/subscription/QuotaBanner';
 import { SetupSection, PromptToken } from '../../_components/createSetup';
+import { TeilPracticeSetup } from '../../_components/TeilPracticeSetup';
 
 type IconProps = { size?: number; style?: React.CSSProperties };
 function IconChevronLeft({ size = 16, style }: IconProps) {
@@ -36,9 +39,12 @@ const WAVE = Array.from({ length: 32 }, (_, i) => 24 + Math.abs(Math.sin(i * 0.9
 export default function NewListeningPage() {
   const t = useTranslations('practice.listening.setup');
   const tHub = useTranslations('practice.common.hub');
+  const tCommon = useTranslations('practice.examCommon.setup');
   const router = useRouter();
   const generateMut = useGenerateListening();
+  const examGenMut = useGenerateExamListening();
 
+  const [mode, setMode] = useState<'topic' | 'teil'>('topic');
   const [level, setLevel] = useState<typeof LEVEL_IDS[number]>('A2');
   const [scriptType, setScriptType] = useState<typeof SCRIPT_TYPE_IDS[number]>('dialogue');
   const loading = generateMut.isPending;
@@ -76,6 +82,28 @@ export default function NewListeningPage() {
           </div>
         </header>
 
+        {/* Mode toggle: topic-based vs single exam Teil */}
+        <div className="mb-6 inline-flex rounded-[11px] border p-1" style={{ borderColor: 'var(--theme-border)', background: 'var(--theme-bg-card)' }}>
+          {(['topic', 'teil'] as const).map((m) => {
+            const on = mode === m;
+            return (
+              <button key={m} onClick={() => setMode(m)} className="rounded-[8px] px-4 py-2 text-caption font-bold transition-colors"
+                style={on ? { background: 'var(--accent)', color: 'var(--accent-on)' } : { color: 'var(--theme-text-secondary)' }}>
+                {m === 'topic' ? tCommon('modeByTopic') : tCommon('modeByTeil')}
+              </button>
+            );
+          })}
+        </div>
+
+        {mode === 'teil' ? (
+          <TeilPracticeSetup
+            displayMap={EXAM_LISTENING_DISPLAY}
+            isPending={examGenMut.isPending}
+            onGenerate={(d) => examGenMut.mutateAsync(d)}
+            answerHref={(id) => `/practice-test/listening/exam/${id}`}
+          />
+        ) : (
+        <>
         {/* Live prompt sentence */}
         <div className="v2-hero-accent mb-6 rounded-2xl px-5 py-4 text-[15px] leading-loose"
           style={{ border: '1px solid color-mix(in srgb, var(--accent) 28%, transparent)', color: 'var(--theme-text-secondary)' }}>
@@ -179,6 +207,8 @@ export default function NewListeningPage() {
             {generateMut.isError && <p className="text-center text-caption" style={{ color: 'var(--danger)' }}>{t('generateError')}</p>}
           </div>
         </div>
+        </>
+        )}
       </div>
     </QuotaPaywall>
   );

@@ -89,7 +89,7 @@ function toQS(params?: Record<string, any>): string {
 }
 
 export const examWritingApi = {
-  generateSession: (data: { examType: string; cefrLevel: string }) =>
+  generateSession: (data: { examType: string; cefrLevel: string; teilNumber?: number }) =>
     apiPost<ExamWritingSession>('/exam-writing/generate', data),
 
   saveDraft: (id: string, userTexts: Record<string, string>) =>

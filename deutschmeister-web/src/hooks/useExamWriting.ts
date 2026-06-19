@@ -49,7 +49,7 @@ export function useExamWritingSession(id: string) {
 export function useGenerateExamWriting() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (data: { examType: string; cefrLevel: string }) =>
+    mutationFn: (data: { examType: string; cefrLevel: string; teilNumber?: number }) =>
       examWritingApi.generateSession(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: examWritingKeys.history() });

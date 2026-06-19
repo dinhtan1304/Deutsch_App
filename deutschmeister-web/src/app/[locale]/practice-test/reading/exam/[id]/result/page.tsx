@@ -16,7 +16,7 @@ import {
 } from '../../../icons';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
-type TaskTypeKey = 'richtig_falsch' | 'multiple_choice' | 'zuordnung' | 'ja_nein' | 'sprachbausteine';
+type TaskTypeKey = 'richtig_falsch' | 'richtig_falsch_x' | 'multiple_choice' | 'zuordnung' | 'ja_nein' | 'sentence_insertion' | 'sprachbausteine';
 
 function useGradeInfo() {
   const t = useTranslations('practice.examCommon.result');
@@ -32,7 +32,7 @@ function useGradeInfo() {
 function useTaskTypeLabel() {
   const t = useTranslations('practice.examReading.result.taskTypes');
   return (type: string) => {
-    const keys: TaskTypeKey[] = ['richtig_falsch', 'multiple_choice', 'zuordnung', 'ja_nein', 'sprachbausteine'];
+    const keys: TaskTypeKey[] = ['richtig_falsch', 'richtig_falsch_x', 'multiple_choice', 'zuordnung', 'ja_nein', 'sentence_insertion', 'sprachbausteine'];
     return (keys as string[]).includes(type) ? t(type as TaskTypeKey) : type;
   };
 }

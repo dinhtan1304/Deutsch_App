@@ -103,7 +103,7 @@ function toQS(params?: Record<string, any>): string {
 // ─── API ──────────────────────────────────────────────────────────────────────
 
 export const examListeningApi = {
-  generateSession: (data: { examType: string; cefrLevel: string }) =>
+  generateSession: (data: { examType: string; cefrLevel: string; teilNumber?: number }) =>
     apiPost<ExamListeningSession>('/exam-listening/generate', data),
 
   submitAnswers: (id: string, userAnswers: Record<string, Record<string, string>>) =>

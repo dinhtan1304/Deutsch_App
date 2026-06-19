@@ -63,12 +63,30 @@ function TeilLeftContent({ teil }: { teil: ExamReadingTeil }) {
   const t = useTranslations('practice.examReading.answering');
   switch (teil.taskType) {
     case 'richtig_falsch':
+    case 'richtig_falsch_x':
     case 'multiple_choice':
       return (
         <div className="space-y-3">
           {teil.texts.map(t => <TextCard key={t.id} text={t} />)}
         </div>
       );
+
+    case 'sentence_insertion': {
+      const sentences = teil.wordBank || [];
+      return sentences.length > 0 ? (
+        <div className="rounded-xl border p-4" style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-secondary)' }}>
+          <p className="text-caption font-bold mb-3 uppercase tracking-wide" style={{ color: 'var(--theme-text-muted)' }}>{t('satzliste')}</p>
+          <ol className="space-y-2">
+            {sentences.map((s, i) => (
+              <li key={i} className="flex gap-2.5 text-body" style={{ color: 'var(--theme-text-secondary)' }}>
+                <span className="font-black shrink-0" style={{ color: ACCENT.reading }}>{i + 1}.</span>
+                <span><HighlightedText text={s} /></span>
+              </li>
+            ))}
+          </ol>
+        </div>
+      ) : null;
+    }
 
     case 'zuordnung':
       return (
@@ -159,6 +177,47 @@ function TeilRightContent({ teil, answers, onAnswer, cefrLevel }: {
               </div>
             </div>
           ))}
+        </div>
+      );
+
+    case 'richtig_falsch_x':
+      return (
+        <div className="space-y-4">
+          {questions.map((q, i) => {
+            const opts = q.options && q.options.length > 0
+              ? q.options
+              : [{ id: 'ja', text: t('jaLabel') }, { id: 'nein', text: t('neinLabel') }, { id: 'x', text: t('stehtNichtLabel') }];
+            const colorFor = (id: string) => id === 'ja' ? ACCENT.reading : id === 'nein' ? STATUS.danger : 'var(--theme-text-muted)';
+            return (
+              <div key={q.id} className="rounded-2xl border p-5 transition-all duration-300 shadow-sm"
+                style={{ borderColor: answers[q.id] ? `${ACCENT.reading}4D` : 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
+                <div className="flex items-start gap-3 mb-4">
+                  <div className="w-7 h-7 rounded-[9px] flex items-center justify-center text-xs font-black text-white shrink-0"
+                    style={{ background: answers[q.id] ? GRADIENT.reading : 'var(--theme-bg-secondary)', color: answers[q.id] ? 'white' : 'var(--theme-text-muted)' }}>
+                    {i + 1}
+                  </div>
+                  <p className="text-[15px] font-bold leading-snug pt-0.5" style={{ color: 'var(--theme-text-primary)' }}>
+                    <HighlightedText text={q.questionText} />
+                  </p>
+                </div>
+                <div className="flex flex-col sm:flex-row gap-2.5">
+                  {opts.map(opt => {
+                    const sel = answers[q.id] === opt.id;
+                    const c = colorFor(opt.id);
+                    return (
+                      <button key={opt.id} onClick={() => onAnswer(q.id, opt.id)}
+                        className="flex-1 py-3 px-2 rounded-xl text-body font-bold border-2 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                        style={sel
+                          ? { borderColor: c, backgroundColor: `${ACCENT.reading}1A`, color: c }
+                          : { borderColor: 'var(--theme-border)', backgroundColor: 'transparent', color: 'var(--theme-text-secondary)' }}>
+                        {opt.text}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
         </div>
       );
 
@@ -293,6 +352,7 @@ function TeilRightContent({ teil, answers, onAnswer, cefrLevel }: {
       );
     }
 
+    case 'sentence_insertion':
     case 'sprachbausteine': {
       const text = teil.texts[0]?.content || '';
       const wordBank = teil.wordBank || [];

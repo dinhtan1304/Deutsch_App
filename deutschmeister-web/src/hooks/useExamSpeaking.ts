@@ -34,7 +34,7 @@ export function useExamSpeakingSession(id: string) {
 export function useGenerateExamSpeaking() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: { examType: string; cefrLevel: string }) =>
+    mutationFn: (data: { examType: string; cefrLevel: string; teilNumber?: number }) =>
       examSpeakingApi.generateSession(data),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['exam-speaking', 'history'] }),
   });

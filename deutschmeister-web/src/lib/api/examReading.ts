@@ -23,9 +23,11 @@ export interface ExamTeilQuestion {
 
 export type ExamReadingTaskType =
   | 'richtig_falsch'
+  | 'richtig_falsch_x'
   | 'multiple_choice'
   | 'zuordnung'
   | 'ja_nein'
+  | 'sentence_insertion'
   | 'sprachbausteine';
 
 export interface ExamReadingTeil {
@@ -112,7 +114,7 @@ function toQS(params?: Record<string, any>): string {
 // ─── API client ───────────────────────────────────────────────────────────────
 
 export const examReadingApi = {
-  generateSession: (data: { examType: string; cefrLevel: string }) =>
+  generateSession: (data: { examType: string; cefrLevel: string; teilNumber?: number }) =>
     apiPost<ExamReadingSession>('/exam-reading/generate', data),
 
   submitAnswers: (id: string, userAnswers: Record<string, Record<string, string>>) =>

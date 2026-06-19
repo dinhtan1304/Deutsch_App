@@ -4,9 +4,12 @@ import { useState } from 'react';
 import { Link, useRouter } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
 import { useReadingTopics, useGenerateReading } from '@/hooks/useReading';
+import { useGenerateExamReading } from '@/hooks/useExamReading';
+import { EXAM_READING_DISPLAY } from '@/lib/examConfig';
 import { QuotaPaywall } from '@/components/subscription/QuotaPaywall';
 import { QuotaBanner } from '@/components/subscription/QuotaBanner';
 import { SetupSection, PromptToken } from '../../_components/createSetup';
+import { TeilPracticeSetup } from '../../_components/TeilPracticeSetup';
 import { IconSparkles, IconChevronLeft, IconLoader, IconCheck } from '../icons';
 
 type LengthId = 'short' | 'medium' | 'long';
@@ -38,7 +41,11 @@ export default function NewReadingPage() {
   const t = useTranslations('practice.reading.setup');
   const tType = useTranslations('practice.reading.list');
   const tHub = useTranslations('practice.common.hub');
+  const tCommon = useTranslations('practice.examCommon.setup');
   const router = useRouter();
+
+  const [mode, setMode] = useState<'topic' | 'teil'>('topic');
+  const examGenMut = useGenerateExamReading();
 
   const [level, setLevel] = useState('A2');
   const [length, setLength] = useState<LengthId>('medium');
@@ -96,6 +103,28 @@ export default function NewReadingPage() {
           </div>
         </header>
 
+        {/* Mode toggle: topic-based vs single exam Teil */}
+        <div className="mb-6 inline-flex rounded-[11px] border p-1" style={{ borderColor: 'var(--theme-border)', background: 'var(--theme-bg-card)' }}>
+          {(['topic', 'teil'] as const).map((m) => {
+            const on = mode === m;
+            return (
+              <button key={m} onClick={() => setMode(m)} className="rounded-[8px] px-4 py-2 text-caption font-bold transition-colors"
+                style={on ? { background: 'var(--accent)', color: 'var(--accent-on)' } : { color: 'var(--theme-text-secondary)' }}>
+                {m === 'topic' ? tCommon('modeByTopic') : tCommon('modeByTeil')}
+              </button>
+            );
+          })}
+        </div>
+
+        {mode === 'teil' ? (
+          <TeilPracticeSetup
+            displayMap={EXAM_READING_DISPLAY}
+            isPending={examGenMut.isPending}
+            onGenerate={(d) => examGenMut.mutateAsync(d)}
+            answerHref={(id) => `/practice-test/reading/exam/${id}`}
+          />
+        ) : (
+        <>
         {/* Live prompt sentence */}
         <div className="v2-hero-accent mb-6 rounded-2xl px-5 py-4 text-[15px] leading-loose"
           style={{ border: '1px solid color-mix(in srgb, var(--accent) 28%, transparent)', color: 'var(--theme-text-secondary)' }}>
@@ -279,6 +308,8 @@ export default function NewReadingPage() {
             {generateMutation.isError && <p className="text-center text-caption" style={{ color: 'var(--danger)' }}>{t('generateError')}</p>}
           </div>
         </div>
+        </>
+        )}
       </div>
     </QuotaPaywall>
   );

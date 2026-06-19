@@ -8,26 +8,26 @@ export const EXAM_READING_DISPLAY: Record<string, Record<string, {
 }>> = {
   GOETHE: {
     A1: {
-      teile: 3, questions: 15, timeMin: 45, totalPoints: 15,
-      structure: ['Email → Richtig/Falsch (5 câu)', '5 yêu cầu → chọn Website A/B', '5 biển hiệu → Richtig/Falsch'],
+      teile: 3, questions: 15, timeMin: 25, totalPoints: 15,
+      structure: ['Email → Richtig/Falsch (5 câu)', '5 yêu cầu → chọn Anzeige A/B', '5 biển hiệu → Richtig/Falsch'],
     },
     A2: {
       teile: 4, questions: 20, timeMin: 30, totalPoints: 20,
-      structure: ['Bài văn → Multiple Choice a/b/c', 'Bảng thông tin → MCQ', 'Email → MCQ', '5 người → 6 website (Zuordnung, có thể chọn X)'],
+      structure: ['Bài báo → Multiple Choice a/b/c (5)', 'Bảng thông tin / chương trình sự kiện → MCQ (5)', 'Email → MCQ (5)', '5 người → 6 Anzeigen (Zuordnung, có thể chọn X)'],
     },
     B1: {
       teile: 5, questions: 30, timeMin: 65, totalPoints: 30,
-      structure: ['Email → Richtig/Falsch (6 câu)', '2 bài → MCQ a/b/c', '7 người → 10 Anzeigen (Zuordnung, có thể chọn X)', '7 ý kiến → Ja/Nein', '1 bài → MCQ a/b/c'],
+      structure: ['Blog → Richtig/Falsch (6 câu)', '2 bài báo → MCQ a/b/c (6)', '7 người → 10 Anzeigen (Zuordnung, có thể chọn X)', '7 ý kiến → Ja/Nein', 'Nội quy/Hướng dẫn → MCQ a/b/c (4)'],
     },
   },
   TELC: {
     A2: {
-      teile: 5, questions: 30, timeMin: 45, totalPoints: 40,
-      structure: ['Bài → Richtig/Falsch', 'Zuordnung (có thể chọn X)', 'MCQ a/b/c', 'Richtig/Falsch', 'Sprachbausteine (10 gaps MCQ)'],
+      teile: 5, questions: 35, timeMin: 50, totalPoints: 35,
+      structure: ['5 đoạn → tiêu đề (Zuordnung Überschriften)', 'Bài → Richtig/Falsch (5)', '5 người → 7 Anzeigen (Zuordnung, có thể chọn X)', 'Sprachbausteine MCQ (10 chỗ)', 'Sprachbausteine Wortliste (10 chỗ)'],
     },
     B1: {
-      teile: 6, questions: 45, timeMin: 60, totalPoints: 60,
-      structure: ['Bài dài → 10 Richtig/Falsch', 'Zuordnung (có thể chọn X)', '5→8 Anzeigen (Zuordnung, có thể chọn X)', 'MCQ a/b/c', 'Richtig/Falsch', 'Sprachbausteine (20 gaps)'],
+      teile: 5, questions: 40, timeMin: 90, totalPoints: 40,
+      structure: ['5 đoạn → 10 tiêu đề (Zuordnung Überschriften)', 'Bài → MCQ a/b/c (5)', '10 tình huống → 12 Anzeigen (Zuordnung)', 'Sprachbausteine MCQ a/b/c (10 chỗ)', 'Sprachbausteine Wortliste 15 từ (10 chỗ)'],
     },
   },
 };
@@ -140,10 +140,6 @@ EXAM_WRITING_DISPLAY.OESD = { ...EXAM_WRITING_DISPLAY.GOETHE! };
 // ─── ÖSD B2 + TestDaF (B2–C1) ────────────────────────────────────────────────
 // ÖSD B2 mirrors Goethe B2; TestDaF is one B2–C1 exam shown as two difficulty
 // tiers (results map to a TDN band — see lib/tdn.ts).
-EXAM_READING_DISPLAY.OESD!.B2 = {
-  teile: 4, questions: 24, timeMin: 90, totalPoints: 100,
-  structure: ['Bài báo dài → MCQ a/b/c (6 câu)', '6 người → 8 văn bản (Zuordnung)', 'Bài báo → Richtig/Falsch (6 câu)', 'Bài quan điểm → MCQ (6 câu)'],
-};
 EXAM_LISTENING_DISPLAY.OESD!.B2 = {
   teile: 3, questions: 25, timeMin: 40, totalPoints: 100,
   structure: ['Phỏng vấn → MCQ (8 câu)', 'Bản tin radio → Richtig/Falsch (10 câu)', 'Thảo luận → MCQ (7 câu, nghe 2×)'],
@@ -178,14 +174,19 @@ EXAM_WRITING_DISPLAY.TESTDAF = {
   C1: { teile: 1, timeMin: 60, totalPoints: 100, structure: ['Schriftlicher Ausdruck: mô tả Grafik/số liệu + lập luận (~300–400 từ)'] },
 };
 
-// ─── B2 / C1 for Goethe · TELC · ÖSD (shared display) ────────────────────────
-const B2_READING_DISP = { teile: 4, questions: 24, timeMin: 90, totalPoints: 100, structure: ['Bài báo dài → MCQ a/b/c (6 câu)', '6 người → 8 văn bản (Zuordnung)', 'Bài báo → Richtig/Falsch (6 câu)', 'Bài quan điểm → MCQ (6 câu)'] };
-const C1_READING_DISP = { teile: 4, questions: 32, timeMin: 90, totalPoints: 100, structure: ['Văn bản học thuật → MCQ (8 câu)', '8 người → 10 văn bản (Zuordnung)', 'Bài báo dài → Richtig/Falsch (8 câu)', 'Bài bình luận → MCQ (8 câu)'] };
-EXAM_READING_DISPLAY.GOETHE!.B2 = B2_READING_DISP;
-EXAM_READING_DISPLAY.GOETHE!.C1 = C1_READING_DISP;
-EXAM_READING_DISPLAY.TELC!.B2 = B2_READING_DISP;
-EXAM_READING_DISPLAY.TELC!.C1 = C1_READING_DISP;
-EXAM_READING_DISPLAY.OESD!.C1 = C1_READING_DISP;
+// ─── Reading B2 / C1 display — provider-specific (Goethe/ÖSD vs telc differ) ──
+// Goethe/ÖSD B2 Lesen (5 Teile, 65′) and C1 (4 Teile, 65′).
+const GOETHE_B2_READING_DISP = { teile: 5, questions: 30, timeMin: 65, totalPoints: 30, structure: ['4 bài → 9 phát biểu (Zuordnung, có thể chọn X)', 'Lückentext: chọn từ/cụm (6 chỗ)', 'Bài báo → MCQ a/b/c (6)', '8 bình luận → 6 phát biểu (Zuordnung)', 'Zuordnung ngắn (3)'] };
+const GOETHE_C1_READING_DISP = { teile: 4, questions: 30, timeMin: 65, totalPoints: 30, structure: ['Lückentext MC 4 lựa chọn (8 chỗ)', 'Bài báo → MCQ (7)', 'Textrekonstruktion: điền câu (8 chỗ)', '7 phát biểu → 3 tác giả (Zuordnung, có thể chọn X)'] };
+// telc B2 / C1 Lesen — Leseverstehen 3 Teile + Sprachbausteine.
+const TELC_B2_READING_DISP = { teile: 4, questions: 42, timeMin: 90, totalPoints: 42, structure: ['5 đoạn → 10 tiêu đề (Zuordnung)', 'Bài → MCQ a/b/c (5)', '10 tình huống → 12 Anzeigen (Zuordnung)', 'Sprachbausteine 22 câu (MCQ + Wortliste)'] };
+const TELC_C1_READING_DISP = { teile: 4, questions: 45, timeMin: 90, totalPoints: 45, structure: ['Textrekonstruktion: điền câu (6 chỗ)', '6 selektiv (Zuordnung, có thể chọn X)', 'Ja / Nein / Steht nicht im Text (11 câu)', 'Sprachbausteine 22 câu (MCQ 4 lựa chọn)'] };
+EXAM_READING_DISPLAY.GOETHE!.B2 = GOETHE_B2_READING_DISP;
+EXAM_READING_DISPLAY.GOETHE!.C1 = GOETHE_C1_READING_DISP;
+EXAM_READING_DISPLAY.OESD!.B2 = GOETHE_B2_READING_DISP;
+EXAM_READING_DISPLAY.OESD!.C1 = GOETHE_C1_READING_DISP;
+EXAM_READING_DISPLAY.TELC!.B2 = TELC_B2_READING_DISP;
+EXAM_READING_DISPLAY.TELC!.C1 = TELC_C1_READING_DISP;
 
 const B2_LISTENING_DISP = { teile: 3, questions: 25, timeMin: 40, totalPoints: 100, structure: ['Phỏng vấn → MCQ (8 câu)', 'Bản tin radio → Richtig/Falsch (10 câu)', 'Thảo luận → MCQ (7 câu, nghe 2×)'] };
 const C1_LISTENING_DISP = { teile: 3, questions: 30, timeMin: 40, totalPoints: 100, structure: ['Phỏng vấn học thuật → MCQ (10 câu)', 'Phóng sự → Richtig/Falsch (12 câu)', 'Thảo luận chuyên môn → MCQ (8 câu)'] };

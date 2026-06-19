@@ -1210,7 +1210,13 @@
       "createExam": "Tạo đề thi",
       "examTypeLabel": "Loại đề thi",
       "levelLabel": "Trình độ",
-      "previewLabel": "Xem trước"
+      "previewLabel": "Xem trước",
+      "teilSelectLabel": "Chọn phần",
+      "fullExam": "Toàn bộ đề",
+      "modeByTopic": "Theo chủ đề",
+      "modeByTeil": "Theo phần thi (Teil)",
+      "creating": "Đang tạo…",
+      "errorCreate": "Không thể tạo. Vui lòng thử lại."
     },
     "answering": {
       "loadingExam": "Đang tải bài thi...",
@@ -1294,6 +1300,8 @@
       "falschLabel": "Falsch ✗",
       "jaLabel": "Ja — Dafür ✓",
       "neinLabel": "Nein — Dagegen ✗",
+      "stehtNichtLabel": "Steht nicht im Text",
+      "satzliste": "Danh sách câu",
       "splitTabTask": "Texte / Bài đọc",
       "splitTabEditor": "Fragen / Câu hỏi"
     },
@@ -1305,9 +1313,11 @@
       "correctOfTotalDone": "{correct}/{total} đúng · {pct}%",
       "taskTypes": {
         "richtig_falsch": "Richtig / Falsch",
+        "richtig_falsch_x": "Ja / Nein / Steht nicht im Text",
         "multiple_choice": "Multiple Choice",
         "zuordnung": "Zuordnung",
         "ja_nein": "Ja / Nein",
+        "sentence_insertion": "Textrekonstruktion",
         "sprachbausteine": "Sprachbausteine"
       }
     }

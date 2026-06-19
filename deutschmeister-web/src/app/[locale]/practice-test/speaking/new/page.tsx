@@ -4,9 +4,12 @@ import { useState } from 'react';
 import { Link, useRouter } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
 import { useGenerateFreeSpeaking } from '@/hooks/useFreeSpeaking';
+import { useGenerateExamSpeaking } from '@/hooks/useExamSpeaking';
+import { EXAM_SPEAKING_DISPLAY } from '@/lib/examConfig';
 import { QuotaPaywall } from '@/components/subscription/QuotaPaywall';
 import { QuotaBanner } from '@/components/subscription/QuotaBanner';
 import { SetupSection, PromptToken } from '../../_components/createSetup';
+import { TeilPracticeSetup } from '../../_components/TeilPracticeSetup';
 
 type IconProps = { size?: number; style?: React.CSSProperties };
 function IconChevronLeft({ size = 16, style }: IconProps) {
@@ -35,9 +38,12 @@ const TOPIC_KEYS = [
 export default function FreeSpeakingNewPage() {
   const t = useTranslations('practice.speaking.setup');
   const tHub = useTranslations('practice.common.hub');
+  const tCommon = useTranslations('practice.examCommon.setup');
   const router = useRouter();
   const generateMut = useGenerateFreeSpeaking();
+  const examGenMut = useGenerateExamSpeaking();
 
+  const [mode, setMode] = useState<'topic' | 'teil'>('topic');
   const [cefrLevel, setCefrLevel] = useState('B1');
   const [topicType, setTopicType] = useState<typeof TOPIC_KEYS[number]>('sich_vorstellen');
   const loading = generateMut.isPending;
@@ -75,6 +81,28 @@ export default function FreeSpeakingNewPage() {
           </div>
         </header>
 
+        {/* Mode toggle: topic-based vs single exam Teil */}
+        <div className="mb-6 inline-flex rounded-[11px] border p-1" style={{ borderColor: 'var(--theme-border)', background: 'var(--theme-bg-card)' }}>
+          {(['topic', 'teil'] as const).map((m) => {
+            const on = mode === m;
+            return (
+              <button key={m} onClick={() => setMode(m)} className="rounded-[8px] px-4 py-2 text-caption font-bold transition-colors"
+                style={on ? { background: 'var(--accent)', color: 'var(--accent-on)' } : { color: 'var(--theme-text-secondary)' }}>
+                {m === 'topic' ? tCommon('modeByTopic') : tCommon('modeByTeil')}
+              </button>
+            );
+          })}
+        </div>
+
+        {mode === 'teil' ? (
+          <TeilPracticeSetup
+            displayMap={EXAM_SPEAKING_DISPLAY as Record<string, Record<string, { teile: number; structure: string[] }>>}
+            isPending={examGenMut.isPending}
+            onGenerate={(d) => examGenMut.mutateAsync(d)}
+            answerHref={(id) => `/practice-test/speaking/exam/${id}`}
+          />
+        ) : (
+        <>
         {/* Live prompt sentence */}
         <div className="v2-hero-accent mb-6 rounded-2xl px-5 py-4 text-[15px] leading-loose"
           style={{ border: '1px solid color-mix(in srgb, var(--accent) 28%, transparent)', color: 'var(--theme-text-secondary)' }}>
@@ -174,6 +202,8 @@ export default function FreeSpeakingNewPage() {
             {generateMut.isError && <p className="text-center text-caption" style={{ color: 'var(--danger)' }}>{t('generateError')}</p>}
           </div>
         </div>
+        </>
+        )}
       </div>
     </QuotaPaywall>
   );

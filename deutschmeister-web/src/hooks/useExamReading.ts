@@ -44,7 +44,7 @@ export function useExamReadingSession(id: string) {
 export function useGenerateExamReading() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (data: { examType: string; cefrLevel: string }) =>
+    mutationFn: (data: { examType: string; cefrLevel: string; teilNumber?: number }) =>
       examReadingApi.generateSession(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: examReadingKeys.history() });

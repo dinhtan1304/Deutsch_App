@@ -1210,7 +1210,13 @@
       "createExam": "Create exam",
       "examTypeLabel": "Exam type",
       "levelLabel": "Level",
-      "previewLabel": "Preview"
+      "previewLabel": "Preview",
+      "teilSelectLabel": "Select part",
+      "fullExam": "Full exam",
+      "modeByTopic": "By topic",
+      "modeByTeil": "By exam part (Teil)",
+      "creating": "Creating…",
+      "errorCreate": "Could not create. Please try again."
     },
     "answering": {
       "loadingExam": "Loading exam...",
@@ -1294,6 +1300,8 @@
       "falschLabel": "Falsch ✗",
       "jaLabel": "Ja — In favour ✓",
       "neinLabel": "Nein — Against ✗",
+      "stehtNichtLabel": "Not in the text",
+      "satzliste": "Sentence list",
       "splitTabTask": "Texte / Texts",
       "splitTabEditor": "Fragen / Questions"
     },
@@ -1305,9 +1313,11 @@
       "correctOfTotalDone": "{correct}/{total} correct · {pct}%",
       "taskTypes": {
         "richtig_falsch": "Richtig / Falsch",
+        "richtig_falsch_x": "Ja / Nein / Not in text",
         "multiple_choice": "Multiple Choice",
         "zuordnung": "Zuordnung",
         "ja_nein": "Ja / Nein",
+        "sentence_insertion": "Sentence insertion",
         "sprachbausteine": "Sprachbausteine"
       }
     }

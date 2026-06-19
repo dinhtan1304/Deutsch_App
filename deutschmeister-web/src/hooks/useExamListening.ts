@@ -37,7 +37,7 @@ export function useExamListeningSession(id: string) {
 export function useGenerateExamListening() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (data: { examType: string; cefrLevel: string }) =>
+    mutationFn: (data: { examType: string; cefrLevel: string; teilNumber?: number }) =>
       examListeningApi.generateSession(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: examListeningKeys.history() });

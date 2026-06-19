@@ -81,7 +81,7 @@ function toQS(params?: Record<string, any>): string {
 // ─── API ──────────────────────────────────────────────────────────────────────
 
 export const examSpeakingApi = {
-  generateSession: (data: { examType: string; cefrLevel: string }) =>
+  generateSession: (data: { examType: string; cefrLevel: string; teilNumber?: number }) =>
     apiPost<ExamSpeakingSession>('/exam-speaking/generate', data),
 
   submitAndGrade: (id: string, teileData: Record<string, { audioBase64: string; transcript: string; mimeType: string }>) =>
