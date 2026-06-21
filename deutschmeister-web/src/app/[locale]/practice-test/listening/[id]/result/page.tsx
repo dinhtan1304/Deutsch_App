@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { useListeningSession } from '@/hooks/useListening';
+import { useShareResult } from '@/hooks/useShareResult';
 import { ListeningQuestion } from '@/lib/api/listening';
 import { InsightsPanel } from '@/components/grading/InsightsPanel';
 import { coalesceInsights } from '@/lib/api/utils/insights-fallback';
@@ -172,6 +173,7 @@ export default function ListeningResultPage() {
   const router = useRouter();
   const t = useTranslations('practice.listening.result');
   const tCommon = useTranslations('practice.common');
+  const shareResult = useShareResult();
   const { data: session, isLoading } = useListeningSession(id);
   const [showTranscript, setShowTranscript] = useState(false);
   const [filter, setFilter] = useState<'all' | 'wrong' | 'correct'>('all');
@@ -335,7 +337,7 @@ export default function ListeningResultPage() {
           style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)', backgroundColor: 'var(--theme-bg-card)' }}
           onClick={() => {
             const score = total > 0 ? Math.round((correct / total) * 100) : 0;
-            navigator.share?.({ title: tCommon('shareTitle'), text: t('shareText', { score }) }).catch(() => {});
+            shareResult({ skill: 'listening', score, title: tCommon('shareTitle'), text: t('shareText', { score }) });
           }}>
           <IconShare size={16} /> {t('share')}
         </button>

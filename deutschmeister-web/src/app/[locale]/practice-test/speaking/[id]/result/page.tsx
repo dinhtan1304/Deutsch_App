@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useTranslations, useFormatter } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { useFreeSpeakingSession } from '@/hooks/useFreeSpeaking';
+import { useShareResult } from '@/hooks/useShareResult';
 import { PageHeader, FixedActionBar, ScoreRing } from '@/components/ui';
 import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 import { synthesizeAudio } from '@/lib/utils';
@@ -214,6 +215,7 @@ export default function FreeSpeakingResultPage() {
   const router = useRouter();
   const t = useTranslations('practice.speaking.result');
   const formatter = useFormatter();
+  const shareResult = useShareResult();
   const [polling, setPolling] = useState(true);
   const { data: session, isLoading } = useFreeSpeakingSession(id, {
     refetchInterval: polling ? 3000 : false,
@@ -475,7 +477,7 @@ export default function FreeSpeakingResultPage() {
         <button
           className="flex-1 flex items-center justify-center gap-3 py-4.5 rounded-2xl font-black text-sm border-2 transition-all hover:bg-black/5"
           style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)', backgroundColor: 'var(--theme-bg-card)' }}
-          onClick={() => { if (navigator.share) navigator.share({ title: t('shareTitle'), text: t('shareText', { score }), url: window.location.href }); }}>
+          onClick={() => { shareResult({ skill: 'speaking', score, title: t('shareTitle'), text: t('shareText', { score }) }); }}>
           <IconShare size={18} /> {t('share')}
         </button>
         <button

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useTranslations, useFormatter } from 'next-intl';
 import { useExamListeningSession } from '@/hooks/useExamListening';
+import { useShareResult } from '@/hooks/useShareResult';
 import { ExamListeningTeil, TeilGradingDetail, ExamListeningQuestion } from '@/lib/api/examListening';
 import { InsightsPanel } from '@/components/grading/InsightsPanel';
 import { coalesceInsights } from '@/lib/api/utils/insights-fallback';
@@ -236,6 +237,7 @@ export default function ExamListeningResultPage() {
   const router = useRouter();
   const t = useTranslations('practice.examListening.result');
   const tCommon = useTranslations('practice.examCommon.result');
+  const shareResult = useShareResult();
   const taskTypeLabel = useTaskTypeLabel();
   const fmt = useFormatter();
   const { data: session, isLoading } = useExamListeningSession(id);
@@ -419,7 +421,11 @@ export default function ExamListeningResultPage() {
           className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl font-bold text-sm border-2 transition-all hover:bg-black/5"
           style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)', backgroundColor: 'var(--theme-bg-card)' }}
           onClick={() => {
-            navigator.share?.({ title: tCommon('shareTitle'), text: t('shareText', { score: Math.round(score), examType: session.examType, cefrLevel: session.cefrLevel }) }).catch(() => {});
+            shareResult({
+              skill: 'listening', score, level: session.cefrLevel,
+              title: tCommon('shareTitle'),
+              text: t('shareText', { score: Math.round(score), examType: session.examType, cefrLevel: session.cefrLevel }),
+            });
           }}>
           <IconShare size={16} /> {tCommon('shareBtn')}
         </button>

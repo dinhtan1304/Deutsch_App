@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { useTranslations, useFormatter } from 'next-intl';
 import { useExamWritingSession } from '@/hooks/useExamWriting';
+import { useShareResult } from '@/hooks/useShareResult';
 import { ExamWritingTeil, TeilGrading } from '@/lib/api/examWriting';
 import { CriterionRadar } from '@/components/writing/CriterionRadar';
 import { InsightsPanel } from '@/components/grading/InsightsPanel';
@@ -242,6 +243,7 @@ export default function ExamWritingResultPage() {
   const t = useTranslations('practice.examWriting.result');
   const tCommon = useTranslations('practice.examCommon.result');
   const taskTypeLabel = useTaskTypeLabel();
+  const shareResult = useShareResult();
   const fmt = useFormatter();
   const { data: session, isLoading } = useExamWritingSession(id);
   const [expandedTeil, setExpandedTeil] = useState<number | null>(0);
@@ -399,7 +401,11 @@ export default function ExamWritingResultPage() {
           className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl font-bold text-sm border-2 transition-all hover:bg-black/5"
           style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)', backgroundColor: 'var(--theme-bg-card)' }}
           onClick={() => {
-            navigator.share?.({ title: tCommon('shareTitle'), text: t('shareText', { score: Math.round(score), examType: session.examType, cefrLevel: session.cefrLevel }) }).catch(() => {});
+            shareResult({
+              skill: 'writing', score, level: session.cefrLevel,
+              title: tCommon('shareTitle'),
+              text: t('shareText', { score: Math.round(score), examType: session.examType, cefrLevel: session.cefrLevel }),
+            });
           }}>
           <IconShare size={16} /> {tCommon('shareBtn')}
         </button>

@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useTranslations, useFormatter } from 'next-intl';
 import { useExamSpeakingSession } from '@/hooks/useExamSpeaking';
+import { useShareResult } from '@/hooks/useShareResult';
 import { ExamSpeakingTeil, TeilGrading } from '@/lib/api/examSpeaking';
 import { PageHeader, FixedActionBar } from '@/components/ui';
 import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
@@ -381,6 +382,7 @@ export default function ExamSpeakingResultPage() {
   const router = useRouter();
   const t = useTranslations('practice.examSpeaking.result');
   const tCommon = useTranslations('practice.examCommon.result');
+  const shareResult = useShareResult();
   const getGrade = useGrade();
   const fmt = useFormatter();
   const { data: session, isLoading } = useExamSpeakingSession(id);
@@ -528,7 +530,13 @@ export default function ExamSpeakingResultPage() {
         <button
           className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl font-bold text-sm border-2 transition-all hover:bg-black/5"
           style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)', backgroundColor: 'var(--theme-bg-card)' }}
-          onClick={() => { if (navigator.share) navigator.share({ title: t('shareTitle'), text: t('shareText', { score: Math.round(totalScore), examType: session.examType, cefrLevel: session.cefrLevel }), url: window.location.href }); }}>
+          onClick={() => {
+            shareResult({
+              skill: 'speaking', score: totalScore, level: session.cefrLevel,
+              title: t('shareTitle'),
+              text: t('shareText', { score: Math.round(totalScore), examType: session.examType, cefrLevel: session.cefrLevel }),
+            });
+          }}>
           <IconShare size={16} /> {tCommon('shareBtn')}
         </button>
         <button

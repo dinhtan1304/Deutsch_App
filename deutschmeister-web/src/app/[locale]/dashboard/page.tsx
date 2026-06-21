@@ -10,6 +10,7 @@ import { CelebrationModal } from '@/components/ui/CelebrationModal';
 import { DailyBonusToast } from '@/components/dashboard/DailyBonusToast';
 import { StreakWarningBanner } from '@/components/dashboard/StreakWarningBanner';
 import { UpsellTrigger } from '@/components/subscription/UpsellTrigger';
+import { ReferralInviteCard } from '@/components/referral/ReferralInviteCard';
 import { DashboardGreetingV2 } from '@/components/dashboard/DashboardGreetingV2';
 import { PrimarySessionV2 } from '@/components/dashboard/PrimarySessionV2';
 import { ProgressChartV2 } from '@/components/dashboard/ProgressChartV2';
@@ -194,6 +195,7 @@ export default function DashboardPage() {
               <QuickReviewWidget />
               <StudyPlanWidget />
               <WeeklyChallengesWidget />
+              <ReferralInviteCard />
             </>
           )}
         </div>

@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { useReadingSession } from '@/hooks/useReading';
+import { useShareResult } from '@/hooks/useShareResult';
 import { ReadingQuestion, GradingDetail } from '@/lib/api/reading';
 import { InsightsPanel } from '@/components/grading/InsightsPanel';
 import { coalesceInsights } from '@/lib/api/utils/insights-fallback';
@@ -116,6 +117,7 @@ export default function ReadingResultPage() {
   const router = useRouter();
   const t = useTranslations('practice.reading.result');
   const tCommon = useTranslations('practice.common');
+  const shareResult = useShareResult();
   const { data: session, isLoading, error } = useReadingSession(id);
   const [filter, setFilter] = useState<'all' | 'wrong' | 'correct'>('all');
   const [timeMs, setTimeMs] = useState<number | null>(null);
@@ -268,9 +270,7 @@ export default function ReadingResultPage() {
           className="flex items-center justify-center gap-2 py-3.5 rounded-2xl font-bold text-sm border-2 transition-all hover:bg-black/5"
           style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)', backgroundColor: 'var(--theme-bg-card)' }}
           onClick={() => {
-            if (navigator.share) {
-              navigator.share({ title: tCommon('shareTitle'), text: t('shareText'), url: window.location.href }).catch(() => {});
-            }
+            shareResult({ skill: 'reading', score: scorePct, title: tCommon('shareTitle'), text: t('shareText') });
           }}>
           <IconShare size={16} /> {tCommon('share')}
         </button>

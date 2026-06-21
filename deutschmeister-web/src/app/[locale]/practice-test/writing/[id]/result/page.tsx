@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { useWritingSession, useExplainError } from '@/hooks/useWriting';
+import { useShareResult } from '@/hooks/useShareResult';
 import { useAuthStore } from '@/stores/authStore';
 import type { WritingError, GrammarAnalysis } from '@/lib/api/writing';
 import { CriterionRadar } from '@/components/writing/CriterionRadar';
@@ -255,6 +256,7 @@ export default function WritingResultPage() {
   const id = params.id as string;
   const t = useTranslations('practice.writing.result');
   const tCommon = useTranslations('practice.common');
+  const shareResult = useShareResult();
   const { data: session, isLoading, isError } = useWritingSession(id);
   const [showOriginal, setShowOriginal] = useState(true);
   const [filterType, setFilterType] = useState<string>('');
@@ -455,7 +457,11 @@ export default function WritingResultPage() {
           className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl font-bold text-sm border-2 transition-all hover:bg-black/5"
           style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)', backgroundColor: 'var(--theme-bg-card)' }}
           onClick={() => {
-            navigator.share?.({ title: tCommon('shareTitle'), text: t('shareText', { score: Math.round(overallScore) }) }).catch(() => {});
+            shareResult({
+              skill: 'writing', score: overallScore,
+              title: tCommon('shareTitle'),
+              text: t('shareText', { score: Math.round(overallScore) }),
+            });
           }}>
           <IconShare size={16} /> {tCommon('share')}
         </button>
