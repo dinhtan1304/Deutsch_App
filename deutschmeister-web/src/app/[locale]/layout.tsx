@@ -6,6 +6,7 @@ import { NextIntlClientProvider, hasLocale } from 'next-intl';
 import { getMessages, getTranslations, setRequestLocale } from 'next-intl/server';
 import '../globals.css';
 import { MainLayout } from '@/components/layout';
+import { PWAInstallPrompt } from '@/components/pwa/PWAInstallPrompt';
 import { Providers } from './providers';
 import { GA_ID } from '@/lib/analytics';
 import { routing } from '@/i18n/routing';
@@ -59,6 +60,8 @@ export async function generateMetadata({
     authors: [{ name: 'Deutschmeister' }],
     creator: 'Deutschmeister',
     metadataBase: new URL('https://www.deutschmeister.vn'),
+    icons: { icon: '/logo-64.png', apple: '/icon-192.png' },
+    appleWebApp: { capable: true, title: 'DeutschMeister', statusBarStyle: 'black-translucent' },
     openGraph: {
       type: 'website',
       locale: OG_LOCALE[locale] ?? OG_LOCALE.vi,
@@ -128,6 +131,7 @@ export default async function LocaleLayout({
         <NextIntlClientProvider messages={messages} locale={locale}>
           <Providers>
             <MainLayout>{children}</MainLayout>
+            <PWAInstallPrompt />
           </Providers>
         </NextIntlClientProvider>
       </body>

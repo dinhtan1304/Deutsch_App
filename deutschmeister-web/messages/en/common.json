@@ -1,4 +1,11 @@
 {
+  "pwa": {
+    "installTitle": "Install DeutschMeister",
+    "installBody": "Add it to your home screen to learn faster — no browser needed.",
+    "installCta": "Install",
+    "dismiss": "Later",
+    "iosHint": "Tap the Share button, then choose “Add to Home Screen”."
+  },
   "actions": {
     "save": "Save",
     "cancel": "Cancel",

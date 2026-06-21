@@ -1,4 +1,11 @@
 {
+  "pwa": {
+    "installTitle": "Cài DeutschMeister",
+    "installBody": "Thêm vào màn hình chính để học nhanh hơn, không cần mở trình duyệt.",
+    "installCta": "Cài đặt",
+    "dismiss": "Để sau",
+    "iosHint": "Nhấn nút Chia sẻ rồi chọn “Thêm vào MH chính”."
+  },
   "actions": {
     "save": "Lưu",
     "cancel": "Hủy",

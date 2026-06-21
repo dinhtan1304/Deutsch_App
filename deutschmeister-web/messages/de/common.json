@@ -1,4 +1,11 @@
 {
+  "pwa": {
+    "installTitle": "DeutschMeister installieren",
+    "installBody": "Füge die App zum Startbildschirm hinzu — schneller lernen, ohne Browser.",
+    "installCta": "Installieren",
+    "dismiss": "Später",
+    "iosHint": "Tippe auf „Teilen“ und wähle „Zum Home-Bildschirm“."
+  },
   "actions": {
     "save": "Speichern",
     "cancel": "Abbrechen",
