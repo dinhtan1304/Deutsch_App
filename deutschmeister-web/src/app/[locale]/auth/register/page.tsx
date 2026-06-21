@@ -6,7 +6,7 @@ import { Link } from '@/i18n/navigation';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 import { useAuthStore } from '@/stores/authStore';
-import { trackEvent } from '@/lib/analytics';
+import { trackSignup, trackReferralApplied } from '@/lib/analytics';
 import {
   IconUser, IconMail, IconLock, IconLoader, IconEye, IconEyeOff,
   IconUserPlus, IconCheckCircle,
@@ -151,14 +151,16 @@ function RegisterForm() {
     try {
       const captchaToken = executeRecaptcha ? await executeRecaptcha('register') : undefined;
       const ref = referralCode.trim().toUpperCase();
+      const hasRef = ref.length >= 4;
       await register({
         name: name.trim(),
         email,
         password,
         captchaToken,
-        ...(ref.length >= 4 ? { referralCode: ref } : {}),
+        ...(hasRef ? { referralCode: ref } : {}),
       });
-      trackEvent('sign_up', { method: 'email' });
+      if (hasRef) trackReferralApplied(ref);
+      trackSignup('email', hasRef);
       router.push(`/auth/verify-email?email=${encodeURIComponent(email)}`);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);

@@ -5,6 +5,7 @@ import { Suspense, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useAuthStore } from '@/stores/authStore';
+import { trackSignup } from '@/lib/analytics';
 
 function AuthCallbackInner() {
   const router = useRouter();
@@ -28,6 +29,8 @@ function AuthCallbackInner() {
     loginWithOAuth(token)
       .then(() => {
         const { user } = useAuthStore.getState();
+        // New OAuth users land on onboarding — use that as the signup signal.
+        if (user?.onboardingCompleted === false) trackSignup('google');
         const dest = user?.role === 'admin' ? '/admin' : user?.onboardingCompleted === false ? '/onboarding' : '/dashboard';
         router.replace(dest);
       })

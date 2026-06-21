@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import { trackDemoStart, trackDemoComplete } from '@/lib/analytics';
 import { hexToRgb, DEMO_API_URL } from './utils';
 
 interface DemoWord {
@@ -40,6 +41,7 @@ export function LandingDemoQuiz() {
       setScore(0);
       setSelected(null);
       setPhase('playing');
+      trackDemoStart();
     } catch { /* ignore */ }
     setLoading(false);
   };
@@ -58,6 +60,8 @@ export function LandingDemoQuiz() {
         setSelected(null);
       } else {
         setPhase('finished');
+        // score state hasn't flushed the last increment yet — tally it explicitly.
+        trackDemoComplete(score + (isCorrect ? 1 : 0), words.length);
       }
     }, 900);
   };
