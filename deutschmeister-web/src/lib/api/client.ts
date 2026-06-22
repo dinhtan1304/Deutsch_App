@@ -14,6 +14,19 @@ import { clearSessionHint } from '@/lib/auth/sessionHint';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://deutschmeister-api-production.up.railway.app/api';
 
+/**
+ * Active UI locale (vi/en/de), sent on every request as `x-app-locale` so the
+ * backend can return AI feedback/explanations in the user's language. Reads the
+ * next-intl NEXT_LOCALE cookie, falling back to the URL prefix, then 'vi'.
+ */
+function getAppLocale(): string {
+  if (typeof document === 'undefined') return 'vi';
+  const cookieLocale = document.cookie.match(/(?:^|;\s*)NEXT_LOCALE=([^;]+)/)?.[1];
+  if (cookieLocale) return decodeURIComponent(cookieLocale);
+  const seg = window.location.pathname.split('/')[1];
+  return seg === 'en' || seg === 'de' ? seg : 'vi';
+}
+
 // Access token stored in memory only (more secure than localStorage)
 let accessToken: string | null = null;
 
@@ -154,6 +167,7 @@ export async function api<T>(
 
   const headers: HeadersInit = {
     'Content-Type': 'application/json',
+    'x-app-locale': getAppLocale(),
     ...options.headers,
   };
 
@@ -255,7 +269,7 @@ export async function apiUpload<T>(endpoint: string, formData: FormData): Promis
 
   const response = await fetch(url, {
     method: 'POST',
-    headers: { Authorization: `Bearer ${token}` },
+    headers: { Authorization: `Bearer ${token}`, 'x-app-locale': getAppLocale() },
     body: formData,
     credentials: 'include',
   });

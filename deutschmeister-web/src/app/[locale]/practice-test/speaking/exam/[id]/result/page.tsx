@@ -203,6 +203,15 @@ function TeilDetailCard({ teil, grading, transcript }: {
   const corrections = grading?.corrections || [];
   const strengths = grading?.strengths || [];
 
+  // Insights panel supersedes the legacy strengths/improvements grid + plain
+  // feedback when it carries a summary — hide those to avoid duplicate content.
+  const panelInsights = coalesceInsights({
+    insights: grading?.insights,
+    strengths: grading?.strengths,
+    feedbackVi: grading?.feedbackVi,
+  });
+  const hasInsightSummary = !!panelInsights?.overallSummaryVi;
+
   return (
     <div className="rounded-2xl border overflow-hidden"
       style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
@@ -322,7 +331,7 @@ function TeilDetailCard({ teil, grading, transcript }: {
                 )}
 
                 {/* Strengths & Improvements */}
-                {(strengths.length > 0 || corrections.length > 0) && (
+                {!hasInsightSummary && (strengths.length > 0 || corrections.length > 0) && (
                   <div className="grid grid-cols-2 gap-2">
                     <div className="rounded-xl p-3" style={{ background: 'rgba(34,197,94,.05)', border: `1px solid ${STATUS.success}33` }}>
                       <p className="text-caption font-bold mb-2 flex items-center gap-1" style={{ color: STATUS.success }}>{t('strengthsTitle')}</p>
@@ -350,7 +359,7 @@ function TeilDetailCard({ teil, grading, transcript }: {
                 )}
 
                 {/* Feedback */}
-                {grading.feedbackVi && (
+                {!hasInsightSummary && grading.feedbackVi && (
                   <div className="rounded-xl p-3" style={{ backgroundColor: `${ACCENT.xp}0F`, borderLeft: `3px solid ${ACCENT.xp}80` }}>
                     <p className="text-xs leading-relaxed" style={{ color: 'var(--theme-text-secondary)' }}>
                       {grading.feedbackVi}
@@ -358,13 +367,7 @@ function TeilDetailCard({ teil, grading, transcript }: {
                   </div>
                 )}
 
-                <InsightsPanel
-                  insights={coalesceInsights({
-                    insights: grading.insights,
-                    strengths: grading.strengths,
-                    feedbackVi: grading.feedbackVi,
-                  })}
-                />
+                <InsightsPanel insights={panelInsights} />
               </>
             ) : (
               <p className="text-body" style={{ color: 'var(--theme-text-muted)' }}>{t('noGrading')}</p>

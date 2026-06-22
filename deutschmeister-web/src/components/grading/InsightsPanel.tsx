@@ -4,6 +4,7 @@ import { useTranslations } from 'next-intl';
 import type { GradingInsights } from '@/lib/api/types/grading-insights';
 import { WeaknessCard } from './WeaknessCard';
 import { StrengthCard } from './StrengthCard';
+import { StudyTipCard } from './StudyTipCard';
 
 /**
  * Wrapper panel for AI grading insights. Layout:
@@ -33,7 +34,12 @@ export function InsightsPanel({
   const t = useTranslations('practice.grading');
   if (!insights) return null;
   const { weaknesses, strengths, overallSummaryVi } = insights;
-  const hasAny = weaknesses.length > 0 || strengths.length > 0 || overallSummaryVi.length > 0;
+  const studyTips = insights.studyTips ?? [];
+  const hasAny =
+    weaknesses.length > 0 ||
+    strengths.length > 0 ||
+    studyTips.length > 0 ||
+    overallSummaryVi.length > 0;
   if (!hasAny) return null;
 
   return (
@@ -72,6 +78,22 @@ export function InsightsPanel({
           <div className="space-y-2">
             {weaknesses.map((w, i) => (
               <WeaknessCard key={i} weakness={w} defaultOpen={i === 0} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {studyTips.length > 0 && (
+        <div className="mt-5">
+          <h4
+            className="mb-2 text-sm font-semibold uppercase tracking-wide"
+            style={{ color: 'var(--theme-text-secondary)' }}
+          >
+            {t('studyTips')}
+          </h4>
+          <div className="space-y-2">
+            {studyTips.map((tip, i) => (
+              <StudyTipCard key={i} tip={tip} />
             ))}
           </div>
         </div>

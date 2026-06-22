@@ -86,6 +86,17 @@ function TeilGradingCard({
   const pct = grading.maxPoints > 0 ? (grading.score / grading.maxPoints) * 100 : 0;
   const [showText, setShowText] = useState(false);
 
+  // The insights panel already shows the summary + strengths + weaknesses; when
+  // it does, hide the legacy feedback / strengths / improvements blocks to avoid
+  // showing the same content twice.
+  const panelInsights = coalesceInsights({
+    insights: grading.insights,
+    strengths: grading.strengths,
+    improvements: grading.improvements,
+    feedbackVi: grading.feedback,
+  });
+  const hasInsightSummary = !!panelInsights?.overallSummaryVi;
+
   return (
     <div className="rounded-2xl border overflow-hidden"
       style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
@@ -117,7 +128,7 @@ function TeilGradingCard({
               <CriterionRadar scores={grading.criterionScores} size={240} />
             </div>
           )}
-          {grading.feedback && (
+          {!hasInsightSummary && grading.feedback && (
             <div className="pt-3">
               <p className="text-caption font-bold uppercase tracking-wide mb-1.5" style={{ color: ACCENT.examWriting }}>{t('bewertung')}</p>
               <p className="text-body leading-relaxed" style={{ color: 'var(--theme-text-primary)' }}>
@@ -125,15 +136,8 @@ function TeilGradingCard({
               </p>
             </div>
           )}
-          <InsightsPanel
-            insights={coalesceInsights({
-              insights: grading.insights,
-              strengths: grading.strengths,
-              improvements: grading.improvements,
-              feedbackVi: grading.feedback,
-            })}
-          />
-          {grading.strengths?.length > 0 && (
+          <InsightsPanel insights={panelInsights} />
+          {!hasInsightSummary && grading.strengths?.length > 0 && (
             <div>
               <p className="text-caption font-bold uppercase tracking-wide mb-1.5" style={{ color: STATUS.success }}>{t('staerken')}</p>
               <ul className="space-y-1">
@@ -145,7 +149,7 @@ function TeilGradingCard({
               </ul>
             </div>
           )}
-          {grading.improvements?.length > 0 && (
+          {!hasInsightSummary && grading.improvements?.length > 0 && (
             <div>
               <p className="text-caption font-bold uppercase tracking-wide mb-1.5" style={{ color: STATUS.warning }}>{t('verbesserungen')}</p>
               <ul className="space-y-1">

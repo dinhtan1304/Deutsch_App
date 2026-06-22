@@ -24,6 +24,8 @@ export interface InsightWeakness {
   titleVi: string;
   titleDe: string;
   explanationVi: string;
+  /** Actionable fix: the rule to apply so the mistake stops recurring. */
+  howToFixVi?: string;
   examples: Array<{ quote: string; errorId?: string }>;
 }
 
@@ -33,8 +35,17 @@ export interface InsightStrength {
   evidence: string[];
 }
 
+/** "How to study next" tip: what to practise + a memorable rule + an example. */
+export interface StudyTip {
+  category: WeaknessCategory;
+  titleVi: string;
+  tipVi: string;
+  exampleDe?: string;
+}
+
 export interface GradingInsights {
   weaknesses: InsightWeakness[];
   strengths: InsightStrength[];
+  studyTips?: StudyTip[];
   overallSummaryVi: string;
 }

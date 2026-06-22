@@ -270,6 +270,15 @@ export default function FreeSpeakingResultPage() {
   const corrections = grading.corrections || [];
   const strengths = grading.strengths || [];
 
+  // When the insights panel shows a summary, the legacy strengths grid + plain
+  // feedback paragraph repeat it — hide them to avoid duplicate content.
+  const panelInsights = coalesceInsights({
+    insights: grading.insights,
+    strengths: grading.strengths,
+    feedbackVi: grading.feedbackVi,
+  });
+  const hasInsightSummary = !!panelInsights?.overallSummaryVi;
+
   return (
     <div className="max-w-360 mx-auto px-4 py-6 pb-28">
       <PageHeader
@@ -426,33 +435,35 @@ export default function FreeSpeakingResultPage() {
             </div>
           )}
 
-          {/* Feedback & Strengths */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-             <div className="rounded-3xl border p-6 bg-emerald-500/[0.02] border-emerald-500/10">
-                <h4 className="text-[10px] font-black uppercase tracking-widest mb-4 text-emerald-500">{t('strengths')}</h4>
-                <ul className="space-y-3">
-                  {(strengths.length > 0 ? strengths : [t('defaultStrength')]).map((s, i) => (
-                    <li key={i} className="flex items-start gap-3">
-                      <div className="mt-1 shrink-0 text-emerald-500"><IconCheck size={14} /></div>
-                      <span className="text-sm font-semibold opacity-80" style={{ color: 'var(--theme-text-primary)' }}>{s}</span>
-                    </li>
-                  ))}
-                </ul>
-             </div>
-             <div className="rounded-3xl border p-6 bg-rose-500/[0.02] border-rose-500/10">
-                <h4 className="text-[10px] font-black uppercase tracking-widest mb-4 text-rose-500">{t('needsImprovement')}</h4>
-                <ul className="space-y-3">
-                  {(corrections.length > 0 ? corrections.slice(0, 3) : [t('defaultImprovement')]).map((c, i) => (
-                    <li key={i} className="flex items-start gap-3">
-                      <div className="mt-1 shrink-0 text-rose-500"><IconWarn size={14} /></div>
-                      <span className="text-sm font-semibold opacity-80" style={{ color: 'var(--theme-text-primary)' }}>{c.split('.')[0]}.</span>
-                    </li>
-                  ))}
-                </ul>
-             </div>
-          </div>
+          {/* Feedback & Strengths — superseded by the insights panel when present */}
+          {!hasInsightSummary && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+               <div className="rounded-3xl border p-6 bg-emerald-500/[0.02] border-emerald-500/10">
+                  <h4 className="text-[10px] font-black uppercase tracking-widest mb-4 text-emerald-500">{t('strengths')}</h4>
+                  <ul className="space-y-3">
+                    {(strengths.length > 0 ? strengths : [t('defaultStrength')]).map((s, i) => (
+                      <li key={i} className="flex items-start gap-3">
+                        <div className="mt-1 shrink-0 text-emerald-500"><IconCheck size={14} /></div>
+                        <span className="text-sm font-semibold opacity-80" style={{ color: 'var(--theme-text-primary)' }}>{s}</span>
+                      </li>
+                    ))}
+                  </ul>
+               </div>
+               <div className="rounded-3xl border p-6 bg-rose-500/[0.02] border-rose-500/10">
+                  <h4 className="text-[10px] font-black uppercase tracking-widest mb-4 text-rose-500">{t('needsImprovement')}</h4>
+                  <ul className="space-y-3">
+                    {(corrections.length > 0 ? corrections.slice(0, 3) : [t('defaultImprovement')]).map((c, i) => (
+                      <li key={i} className="flex items-start gap-3">
+                        <div className="mt-1 shrink-0 text-rose-500"><IconWarn size={14} /></div>
+                        <span className="text-sm font-semibold opacity-80" style={{ color: 'var(--theme-text-primary)' }}>{c.split('.')[0]}.</span>
+                      </li>
+                    ))}
+                  </ul>
+               </div>
+            </div>
+          )}
 
-          {grading.feedbackVi && (
+          {!hasInsightSummary && grading.feedbackVi && (
             <div className="rounded-3xl border p-8 shadow-xl relative overflow-hidden"
               style={{ background: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}>
               <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500 opacity-[0.03] blur-3xl -mr-16 -mt-16" />
@@ -463,13 +474,7 @@ export default function FreeSpeakingResultPage() {
             </div>
           )}
 
-          <InsightsPanel
-            insights={coalesceInsights({
-              insights: grading.insights,
-              strengths: grading.strengths,
-              feedbackVi: grading.feedbackVi,
-            })}
-          />
+          <InsightsPanel insights={panelInsights} />
         </div>
       </div>
 

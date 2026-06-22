@@ -306,6 +306,17 @@ export default function WritingResultPage() {
   const filteredErrors = filterType ? errors.filter(e => e.errorType === filterType) : errors;
   const overallScore = session.overallScore || 0;
 
+  // The insights panel already shows a localized overall summary; when it does,
+  // the separate Vietnamese feedback box below is a duplicate, so we drop it and
+  // keep only the German feedback (which the panel does not repeat).
+  const panelInsights = coalesceInsights({
+    insights: session.insights,
+    strengths: session.strengths as string[] | null,
+    improvements: session.improvements as string[] | null,
+    feedbackVi: session.feedbackVi,
+  });
+  const hasInsightSummary = !!panelInsights?.overallSummaryVi;
+
   return (
     <div className="max-w-360 mx-auto px-4 py-6">
       <PageHeader
@@ -352,30 +363,26 @@ export default function WritingResultPage() {
           builds a degraded view from legacy strengths/improvements when
           insights is null so older rows still render. */}
       <div className="mb-5">
-        <InsightsPanel
-          insights={coalesceInsights({
-            insights: session.insights,
-            strengths: session.strengths as string[] | null,
-            improvements: session.improvements as string[] | null,
-            feedbackVi: session.feedbackVi,
-          })}
-        />
+        <InsightsPanel insights={panelInsights} />
       </div>
 
-      {/* General Feedback */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-5">
+      {/* General Feedback — Vietnamese box dropped when the panel already shows a
+          localized summary (avoids duplicate text); German feedback always kept. */}
+      <div className={`grid grid-cols-1 ${hasInsightSummary ? '' : 'md:grid-cols-2'} gap-3 mb-5`}>
         <div className="rounded-md border p-4" style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
           <h3 className="text-caption font-bold uppercase tracking-wider mb-2" style={{ color: 'var(--theme-text-muted)' }}>
             {t('feedbackDe')}
           </h3>
           <p className="text-body leading-relaxed" style={{ color: 'var(--theme-text-secondary)' }}>{session.feedbackDe}</p>
         </div>
-        <div className="rounded-md border p-4" style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
-          <h3 className="text-caption font-bold uppercase tracking-wider mb-2" style={{ color: 'var(--theme-text-muted)' }}>
-            {t('feedbackVi')}
-          </h3>
-          <p className="text-body leading-relaxed" style={{ color: 'var(--theme-text-secondary)' }}>{session.feedbackVi}</p>
-        </div>
+        {!hasInsightSummary && (
+          <div className="rounded-md border p-4" style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
+            <h3 className="text-caption font-bold uppercase tracking-wider mb-2" style={{ color: 'var(--theme-text-muted)' }}>
+              {t('feedbackVi')}
+            </h3>
+            <p className="text-body leading-relaxed" style={{ color: 'var(--theme-text-secondary)' }}>{session.feedbackVi}</p>
+          </div>
+        )}
       </div>
 
       {/* Text Comparison + Error Details */}

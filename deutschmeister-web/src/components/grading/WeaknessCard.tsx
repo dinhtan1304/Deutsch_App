@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import type { InsightWeakness, WeaknessSeverity } from '@/lib/api/types/grading-insights';
 
 /**
@@ -9,9 +10,13 @@ import type { InsightWeakness, WeaknessSeverity } from '@/lib/api/types/grading-
  * scannable summary, and the explanation + example quotes expand on click.
  */
 export function WeaknessCard({ weakness, defaultOpen = false }: { weakness: InsightWeakness; defaultOpen?: boolean }) {
+  const t = useTranslations('practice.grading');
   const [open, setOpen] = useState(defaultOpen);
   const accent = severityAccent(weakness.severity);
-  const hasDetails = weakness.explanationVi.length > 0 || weakness.examples.length > 0;
+  const hasDetails =
+    weakness.explanationVi.length > 0 ||
+    (weakness.howToFixVi?.length ?? 0) > 0 ||
+    weakness.examples.length > 0;
 
   return (
     <div
@@ -57,6 +62,18 @@ export function WeaknessCard({ weakness, defaultOpen = false }: { weakness: Insi
             <p className="text-sm leading-relaxed" style={{ color: 'var(--theme-text-secondary)' }}>
               {weakness.explanationVi}
             </p>
+          )}
+          {weakness.howToFixVi && (
+            <div
+              className="flex items-start gap-2 rounded-lg p-2.5"
+              style={{ backgroundColor: 'var(--theme-bg-subtle)' }}
+            >
+              <span aria-hidden className="text-sm">🔧</span>
+              <p className="text-sm leading-relaxed" style={{ color: 'var(--theme-text-primary)' }}>
+                <span className="font-semibold">{t('howToFix')}: </span>
+                {weakness.howToFixVi}
+              </p>
+            </div>
           )}
           {weakness.examples.length > 0 && (
             <div className="flex flex-wrap gap-2">
