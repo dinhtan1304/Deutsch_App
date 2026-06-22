@@ -9,6 +9,7 @@ import { ExamReadingTeil, ExamTeilQuestion } from '@/lib/api/examReading';
 import { EXAM_READING_DISPLAY } from '@/lib/examConfig';
 import { useExamCountdown, formatTime } from '@/hooks/useExamCountdown';
 import { HighlightedText } from '@/components/word-highlight/HighlightedText';
+import { StructuredPassage } from '../../../_components/StructuredPassage';
 import { PageHeader, FixedActionBar, MobileSplitTabs } from '@/components/ui';
 import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 import { speakGerman as speakText } from '@/lib/utils';
@@ -45,9 +46,7 @@ function TextCard({ text }: { text: ExamReadingTeil['texts'][0] }) {
         </div>
       )}
       {text.author && <p className="text-caption mb-1.5" style={{ color: 'var(--theme-text-muted)' }}>{t('byAuthor', { author: text.author })}</p>}
-      <p className="text-body leading-relaxed whitespace-pre-wrap" style={{ color: 'var(--theme-text-primary)' }}>
-        <HighlightedText text={text.content} />
-      </p>
+      <StructuredPassage content={text.content} highlight />
       <button onClick={() => speakText(text.content)}
         className="mt-2 p-1.5 rounded-lg transition-all hover:scale-110 flex items-center gap-1 text-caption"
         style={{ color: ACCENT.reading }}>

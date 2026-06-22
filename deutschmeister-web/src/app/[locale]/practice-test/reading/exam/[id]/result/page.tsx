@@ -7,6 +7,7 @@ import { useExamReadingSession } from '@/hooks/useExamReading';
 import { useShareResult } from '@/hooks/useShareResult';
 import { ExamReadingTeil, TeilGradingDetail, ExamTeilQuestion } from '@/lib/api/examReading';
 import { InsightsPanel } from '@/components/grading/InsightsPanel';
+import { StructuredPassage } from '../../../../_components/StructuredPassage';
 import { coalesceInsights } from '@/lib/api/utils/insights-fallback';
 import {
   PageHeader, ScoreRing, StatGrid, FixedActionBar, type StatItem,
@@ -88,10 +89,7 @@ function QuestionReview({ teil, details }: { teil: ExamReadingTeil; details: Tei
                       {text.title && <p className="min-w-0 text-xs font-bold" style={{ color: 'var(--theme-text-primary)' }}>{text.title}</p>}
                     </div>
                   )}
-                  <p className="text-xs leading-relaxed whitespace-pre-wrap"
-                    style={{ color: 'var(--theme-text-primary)' }}>
-                    {text.content}
-                  </p>
+                  <StructuredPassage content={text.content} size="sm" />
                 </div>
               ))}
             </div>
