@@ -83,7 +83,8 @@ function TeilGradingCard({
 }) {
   const t = useTranslations('practice.examWriting.result');
   const taskTypeLabel = useTaskTypeLabel();
-  const pct = grading.maxPoints > 0 ? (grading.score / grading.maxPoints) * 100 : 0;
+  const pct = Math.max(0, Math.min(100, grading.score ?? 0));
+  const earned = Math.round((pct / 100) * grading.maxPoints);
   const [showText, setShowText] = useState(false);
 
   // The insights panel already shows the summary + strengths + weaknesses; when
@@ -108,11 +109,11 @@ function TeilGradingCard({
             {taskTypeLabel(teil.taskType)}
           </p>
           <div className="flex items-center gap-2 mt-0.5">
-            <div className="flex-1 h-1.5 rounded-full max-w-24" style={{ backgroundColor: 'var(--theme-border)' }}>
+            <div className="flex-1 h-1.5 rounded-full max-w-24 overflow-hidden" style={{ backgroundColor: 'var(--theme-border)' }}>
               <div className="h-1.5 rounded-full" style={{ width: `${pct}%`, backgroundColor: getScoreColor(pct) }} />
             </div>
             <span className="text-xs font-semibold" style={{ color: getScoreColor(pct) }}>
-              {grading.score}/{grading.maxPoints} {t('punkteSuffix')} · {Math.round(pct)}%
+              {earned}/{grading.maxPoints} {t('punkteSuffix')} · {Math.round(pct)}%
             </span>
           </div>
         </div>
@@ -168,10 +169,11 @@ function TeilGradingCard({
                 {grading.corrections.map((corr, i) => (
                   <div key={i} className="rounded-xl border p-3 space-y-1.5"
                     style={{ borderColor: `${STATUS.danger}33`, backgroundColor: `${STATUS.danger}0A` }}>
-                    <div className="flex items-start gap-2 text-xs">
-                      <span className="line-through shrink-0 font-medium" style={{ color: STATUS.danger }}>{corr.original}</span>
-                      <span style={{ color: 'var(--theme-text-muted)' }}>→</span>
-                      <span className="font-semibold shrink-0" style={{ color: STATUS.success }}>{corr.corrected}</span>
+                    <div className="flex flex-col gap-1 text-xs min-w-0">
+                      <span className="line-through font-medium wrap-break-word" style={{ color: STATUS.danger }}>{corr.original}</span>
+                      <span className="font-semibold wrap-break-word" style={{ color: STATUS.success }}>
+                        <span style={{ color: 'var(--theme-text-muted)' }}>→ </span>{corr.corrected}
+                      </span>
                     </div>
                     {corr.explanationVi && (
                       <p className="text-caption leading-relaxed" style={{ color: 'var(--theme-text-secondary)' }}>
@@ -351,7 +353,8 @@ export default function ExamWritingResultPage() {
             {session.teile.map(teil => {
               const g = grading[`teil_${teil.number}`];
               if (!g) return null;
-              const pct = g.maxPoints > 0 ? (g.score / g.maxPoints) * 100 : 0;
+              const pct = Math.max(0, Math.min(100, g.score ?? 0));
+              const earned = Math.round((pct / 100) * g.maxPoints);
               return (
                 <div key={teil.number}>
                   <div className="flex items-center justify-between">
@@ -363,10 +366,10 @@ export default function ExamWritingResultPage() {
                       </span>
                     </div>
                     <span className="text-xs font-bold" style={{ color: getScoreColor(pct) }}>
-                      {g.score}/{g.maxPoints} · {Math.round(pct)}%
+                      {earned}/{g.maxPoints} · {Math.round(pct)}%
                     </span>
                   </div>
-                  <div className="flex-1 h-1.5 rounded-full mt-1.5" style={{ backgroundColor: 'var(--theme-border)' }}>
+                  <div className="flex-1 h-1.5 rounded-full mt-1.5 overflow-hidden" style={{ backgroundColor: 'var(--theme-border)' }}>
                     <div className="h-1.5 rounded-full transition-all" style={{ width: `${pct}%`, backgroundColor: getScoreColor(pct) }} />
                   </div>
                 </div>

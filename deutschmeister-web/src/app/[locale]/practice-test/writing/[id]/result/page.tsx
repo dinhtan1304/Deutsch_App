@@ -176,10 +176,11 @@ function ErrorCard({ error, sessionId }: { error: WritingError; sessionId: strin
             </span>
             <span className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>{severityLabel}</span>
           </div>
-          <div className="flex items-center gap-2 text-body flex-wrap">
-            <span className="line-through font-medium" style={{ color: STATUS.danger }}>{error.originalText}</span>
-            <span style={{ color: 'var(--theme-text-muted)' }}>→</span>
-            <span className="font-medium" style={{ color: STATUS.success }}>{error.correctedText}</span>
+          <div className="flex flex-col gap-1 text-body min-w-0">
+            <span className="line-through font-medium wrap-break-word" style={{ color: STATUS.danger }}>{error.originalText}</span>
+            <span className="font-medium wrap-break-word" style={{ color: STATUS.success }}>
+              <span style={{ color: 'var(--theme-text-muted)' }}>→ </span>{error.correctedText}
+            </span>
           </div>
           {expanded && (
             <div className="mt-3 space-y-2 border-t pt-3" style={{ borderColor: 'var(--theme-border)' }}>
