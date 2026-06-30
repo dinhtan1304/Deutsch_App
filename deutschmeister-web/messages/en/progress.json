@@ -292,5 +292,19 @@
       "xpSub": "experience points",
       "footer": "Learn German with me at"
     }
+  },
+  "smartReview": {
+    "title": "Smart Review",
+    "subtitle": "Your personalised path for today — your to-dos bundled into one short sequence.",
+    "back": "Back",
+    "totalTimeLabel": "Total time",
+    "minutesUnit": "min",
+    "loading": "Building your path...",
+    "errorTitle": "Couldn't load the path",
+    "retry": "Try again",
+    "refresh": "Refresh",
+    "start": "Start now",
+    "stepLabel": "Step",
+    "done": "Done for today"
   }
 }

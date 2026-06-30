@@ -29,8 +29,23 @@ function CardShell({ children }: { children: React.ReactNode }) {
   );
 }
 
+// Subtle entry-point to the full adaptive Smart Review hub.
+function SmartReviewLink({ label }: { label: string }) {
+  return (
+    <Link
+      href="/smart-review"
+      className="mt-3 flex items-center justify-center gap-1 text-caption font-semibold transition-opacity hover:opacity-80"
+      style={{ color: 'var(--accent)' }}
+    >
+      {label}
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden><polyline points="9 18 15 12 9 6" /></svg>
+    </Link>
+  );
+}
+
 export function QuickReviewWidget() {
   const t = useTranslations('dashboard.quickReview');
+  const tn = useTranslations('nav');
   const { data: stats } = useProgressStats();
   const { data: allDue = [], isLoading } = useDueCards(QUICK_LIMIT);
   const reviewMutation = useReviewCard();
@@ -81,6 +96,7 @@ export function QuickReviewWidget() {
             {t('continueLink', { count: remaining })}
           </Link>
         )}
+        <SmartReviewLink label={tn('smartReview')} />
       </CardShell>
     );
   }
@@ -169,6 +185,7 @@ export function QuickReviewWidget() {
         ))}
       </div>
       {error && <p className="mt-2 text-caption font-medium" style={{ color: STATUS.danger }}>{error}</p>}
+      <SmartReviewLink label={tn('smartReview')} />
     </CardShell>
   );
 }

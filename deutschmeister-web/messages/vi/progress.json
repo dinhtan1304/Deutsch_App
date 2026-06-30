@@ -292,5 +292,19 @@
       "xpSub": "điểm kinh nghiệm",
       "footer": "Học tiếng Đức cùng mình tại"
     }
+  },
+  "smartReview": {
+    "title": "Ôn tập thông minh",
+    "subtitle": "Lộ trình cá nhân hóa cho hôm nay — gom việc cần làm thành một chuỗi ngắn.",
+    "back": "Quay lại",
+    "totalTimeLabel": "Tổng thời gian",
+    "minutesUnit": "phút",
+    "loading": "Đang tạo lộ trình...",
+    "errorTitle": "Không tải được lộ trình",
+    "retry": "Thử lại",
+    "refresh": "Làm mới",
+    "start": "Làm ngay",
+    "stepLabel": "Bước",
+    "done": "Đã xong hôm nay"
   }
 }

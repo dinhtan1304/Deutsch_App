@@ -292,5 +292,19 @@
       "xpSub": "Erfahrungspunkte",
       "footer": "Lerne Deutsch mit mir auf"
     }
+  },
+  "smartReview": {
+    "title": "Intelligente Wiederholung",
+    "subtitle": "Dein persönlicher Plan für heute — deine Aufgaben in einer kurzen Abfolge.",
+    "back": "Zurück",
+    "totalTimeLabel": "Gesamtzeit",
+    "minutesUnit": "Min",
+    "loading": "Plan wird erstellt...",
+    "errorTitle": "Plan konnte nicht geladen werden",
+    "retry": "Erneut versuchen",
+    "refresh": "Aktualisieren",
+    "start": "Jetzt starten",
+    "stepLabel": "Schritt",
+    "done": "Für heute erledigt"
   }
 }

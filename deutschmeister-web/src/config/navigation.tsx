@@ -73,6 +73,7 @@ export const PRIMARY_NAV: NavItem[] = [
       { key: 'my-topics',     labelKey: 'myTopics',        href: '/my-topics',          icon: IconNotebook },
       { key: 'community-topics', labelKey: 'communityTopics', href: '/community/topics', icon: IconLayers },
       { key: 'ipa-chart',     labelKey: 'ipaChart',        href: '/learn/ipa',          icon: IconMic },
+      { key: 'smart-review',  labelKey: 'smartReview',     href: '/smart-review',       icon: IconTarget },
     ],
   },
   {
@@ -163,4 +164,5 @@ export const AUTH_HREFS: ReadonlySet<string> = new Set([
   '/practice-test/dictation',
   '/study-plan',
   '/referral',
+  '/smart-review',
 ]);

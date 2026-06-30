@@ -18,6 +18,7 @@ const BAR_COLORS = [STATUS.danger, ACCENT.xp, ACCENT.srs, ACCENT.vocab, ACCENT.c
 
 export function ErrorPatternsWidget() {
   const t = useTranslations('dashboard.errorPatterns');
+  const tn = useTranslations('nav');
   const { data, isLoading } = useErrorPatterns();
   const labelFor = (errorType: string) =>
     TRANSLATED_CATEGORIES.has(errorType)
@@ -37,6 +38,11 @@ export function ErrorPatternsWidget() {
           </div>
           <h3 className="text-title font-bold m-0" style={{ color: 'var(--theme-text-primary)' }}>{t('title')}</h3>
         </div>
+        {data && data.length > 0 && (
+          <Link href="/smart-review" className="text-caption font-semibold shrink-0" style={{ color: ACCENT.srs, textDecoration: 'none' }}>
+            {tn('smartReview')}
+          </Link>
+        )}
       </div>
 
       {isLoading ? (
