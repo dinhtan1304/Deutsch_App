@@ -90,6 +90,7 @@ export type UpdateSettingsPayload = {
   showVietnamese?: boolean;
   dailyReminder?: boolean;
   weeklyEmailEnabled?: boolean;
+  webPushEnabled?: boolean;
 };
 
 export interface ErrorPattern {

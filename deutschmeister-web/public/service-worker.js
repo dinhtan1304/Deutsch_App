@@ -2,7 +2,7 @@
 // Strategy: cache-first for immutable static assets, network-first for navigations
 // (with an offline cache fallback). Never touches API/auth/admin responses.
 // Served as /service-worker.js (public/sw.js is gitignored by a leftover PWA rule).
-const VERSION = 'v1';
+const VERSION = 'v2';
 const STATIC_CACHE = `dm-static-${VERSION}`;
 const PAGE_CACHE = `dm-pages-${VERSION}`;
 
@@ -76,4 +76,36 @@ self.addEventListener('fetch', (event) => {
       })(),
     );
   }
+});
+
+// ── Web Push ──────────────────────────────────────────────────────────────
+// Payload shape (from PushService): { title, body, icon?, url? }
+self.addEventListener('push', (event) => {
+  let data = {};
+  try {
+    data = event.data ? event.data.json() : {};
+  } catch {
+    data = { body: event.data && event.data.text ? event.data.text() : '' };
+  }
+  event.waitUntil(
+    self.registration.showNotification(data.title || 'DeutschMeister', {
+      body: data.body || '',
+      icon: data.icon || '/logo-192.png',
+      badge: '/logo-192.png',
+      data: { url: data.url || '/' },
+    }),
+  );
+});
+
+// Focus an existing tab on the target URL, else open a new one.
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const target = (event.notification.data && event.notification.data.url) || '/';
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+      const hit = clientList.find((c) => c.url.includes(target));
+      if (hit) return hit.focus();
+      return self.clients.openWindow(target);
+    }),
+  );
 });

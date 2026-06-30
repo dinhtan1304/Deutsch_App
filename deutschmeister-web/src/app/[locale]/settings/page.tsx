@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { useSettingsStore, BACKEND_SETTINGS_KEYS, defaultSettings } from '@/stores/settingsStore';
 import { useAuthStore } from '@/stores/authStore';
 import { useUpdateSettings } from '@/hooks/useUser';
+import { useWebPush } from '@/hooks/useWebPush';
 import type { UpdateSettingsPayload } from '@/lib/api/users';
 import { IconSettings } from '@/components/ui/Icons';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
@@ -132,18 +133,18 @@ function pickBackendSettings(source: typeof defaultSettings): UpdateSettingsPayl
   }, {} as UpdateSettingsPayload);
 }
 
-function SettingToggle({ label, desc, checked, onChange }: {
-  label: string; desc: string; checked: boolean; onChange: (v: boolean) => void;
+function SettingToggle({ label, desc, checked, onChange, disabled }: {
+  label: string; desc: string; checked: boolean; onChange: (v: boolean) => void; disabled?: boolean;
 }) {
   return (
     <div className="flex items-center justify-between gap-5 py-4 border-b last:border-b-0"
-      style={{ borderColor: 'var(--theme-border)' }}>
+      style={{ borderColor: 'var(--theme-border)', opacity: disabled ? 0.5 : 1 }}>
       <div className="min-w-0 flex-1">
         <div className="text-[14px] font-semibold" style={{ color: 'var(--theme-text-primary)' }}>{label}</div>
         <div className="mt-0.5 text-caption font-medium" style={{ color: 'var(--theme-text-muted)' }}>{desc}</div>
       </div>
-      <button onClick={() => onChange(!checked)}
-        className="relative h-6.5 w-11 shrink-0 rounded-full transition-colors duration-200"
+      <button onClick={() => !disabled && onChange(!checked)} disabled={disabled}
+        className="relative h-6.5 w-11 shrink-0 rounded-full transition-colors duration-200 disabled:cursor-not-allowed"
         style={{ background: checked ? 'var(--accent)' : 'var(--theme-bg-tertiary)', boxShadow: checked ? '0 2px 8px color-mix(in srgb, var(--accent) 45%, transparent)' : 'none' }}>
         <span className="absolute top-[3px] h-5 w-5 rounded-full bg-white shadow-md transition-[left] duration-200"
           style={{ left: checked ? 21 : 3 }} />
@@ -206,6 +207,7 @@ export default function SettingsPage() {
   const { settings, isLoaded, updateSetting, resetSettings, loadSettings } = useSettingsStore();
   const { user, isAuthenticated, logout } = useAuthStore();
   const { mutate: updateSettings } = useUpdateSettings();
+  const webPush = useWebPush();
 
   const [toast, setToast] = useState('');
   const [activeTab, setActiveTab] = useState<'display' | 'sound' | 'learning' | 'notification' | 'account'>('display');
@@ -280,6 +282,19 @@ export default function SettingsPage() {
   };
   const handleTheme = (theme: 'light' | 'dark' | 'system') => {
     handleChange('theme', theme);
+  };
+
+  // Web push needs the browser subscribe/permission flow before persisting the
+  // setting — not a plain handleChange.
+  const handlePushToggle = async (v: boolean) => {
+    if (v) {
+      const ok = await webPush.enable();
+      if (ok) handleChange('webPushEnabled', true);
+      else showToast(t('notification.webPush.failed'));
+    } else {
+      await webPush.disable();
+      handleChange('webPushEnabled', false);
+    }
   };
 
   const handleReset = () => {
@@ -468,6 +483,19 @@ export default function SettingsPage() {
             <Panel title={t('tabs.notification')} icon={IconBell}>
               <SettingToggle label={t('notification.dailyReminder.label')} desc={t('notification.dailyReminder.desc')} checked={settings.dailyReminder} onChange={v => handleChange('dailyReminder', v)} />
               <SettingToggle label={t('notification.weeklyEmail.label')} desc={t('notification.weeklyEmail.desc')} checked={settings.weeklyEmailEnabled} onChange={v => handleChange('weeklyEmailEnabled', v)} />
+              <SettingToggle
+                label={t('notification.webPush.label')}
+                desc={
+                  webPush.permission === 'denied'
+                    ? t('notification.webPush.denied')
+                    : !webPush.isSupported
+                      ? t('notification.webPush.unsupported')
+                      : t('notification.webPush.desc')
+                }
+                checked={settings.webPushEnabled}
+                onChange={handlePushToggle}
+                disabled={!webPush.isSupported || webPush.permission === 'denied' || webPush.busy}
+              />
             </Panel>
           )}
 

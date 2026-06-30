@@ -81,6 +81,13 @@
     "weeklyEmail": {
       "label": "Weekly report",
       "desc": "Weekly learning summary on Sunday evening"
+    },
+    "webPush": {
+      "label": "Push notifications",
+      "desc": "Get reminders right on your device, even when the app is closed",
+      "denied": "Notifications are blocked — re-enable them in your browser settings",
+      "unsupported": "This browser doesn't support push notifications",
+      "failed": "Couldn't enable push notifications. Try again!"
     }
   },
   "account": {

@@ -16,11 +16,12 @@ export interface AppSettings {
   timedChallengeSeconds: number;
   dailyReminder: boolean;
   weeklyEmailEnabled: boolean;
+  webPushEnabled: boolean;
 }
 
 // Fields that are persisted to the backend DB (subset of AppSettings)
 export const BACKEND_SETTINGS_KEYS: (keyof AppSettings)[] = [
-  'theme', 'soundEnabled', 'dailyGoal', 'preferredLevel', 'showVietnamese', 'dailyReminder', 'weeklyEmailEnabled',
+  'theme', 'soundEnabled', 'dailyGoal', 'preferredLevel', 'showVietnamese', 'dailyReminder', 'weeklyEmailEnabled', 'webPushEnabled',
 ];
 
 interface SettingsState {
@@ -47,6 +48,7 @@ export const defaultSettings: AppSettings = {
   timedChallengeSeconds: 60,
   dailyReminder: true,
   weeklyEmailEnabled: true,
+  webPushEnabled: false,
 };
 
 const STORAGE_KEY = 'deutschmeister-settings';

@@ -81,6 +81,13 @@
     "weeklyEmail": {
       "label": "Báo cáo hàng tuần",
       "desc": "Tổng kết tiến độ học tập vào tối Chủ Nhật hàng tuần"
+    },
+    "webPush": {
+      "label": "Thông báo đẩy",
+      "desc": "Nhận nhắc nhở ngay trên thiết bị, kể cả khi đã đóng app",
+      "denied": "Bạn đã chặn thông báo — hãy bật lại trong cài đặt trình duyệt",
+      "unsupported": "Trình duyệt này không hỗ trợ thông báo đẩy",
+      "failed": "Không bật được thông báo đẩy. Thử lại nhé!"
     }
   },
   "account": {
