@@ -71,6 +71,23 @@ function IconTarget({ size = 28 }: { size?: number }) {
     </svg>
   );
 }
+function IconBolt({ size = 22 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}>
+      <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+    </svg>
+  );
+}
+function IconRepeat({ size = 22 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}>
+      <polyline points="17 1 21 5 17 9" /><path d="M3 11V9a4 4 0 0 1 4-4h14" />
+      <polyline points="7 23 3 19 7 15" /><path d="M21 13v2a4 4 0 0 1-4 4H3" />
+    </svg>
+  );
+}
 
 export default function GrammarDashboardPage() {
   const t = useTranslations('vocabulary.grammar');
@@ -192,17 +209,29 @@ export default function GrammarDashboardPage() {
         </div>
       </header>
 
-      {/* ─── Grammar Trainer CTA ─── */}
-      <Link href="/grammar/trainer"
-        className="flex items-center gap-4 rounded-2xl px-5 py-4 mb-8 border transition-transform hover:-translate-y-0.5"
-        style={{ borderColor: 'var(--theme-border)', background: 'var(--theme-bg-card)', textDecoration: 'none' }}>
-        <span style={{ width: 46, height: 46, borderRadius: 12, background: GRADIENT.action, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, flexShrink: 0 }}>⚡</span>
-        <span style={{ flex: 1, minWidth: 0 }}>
-          <span style={{ display: 'block', fontSize: 15, fontWeight: 800, color: 'var(--theme-text-primary)' }}>Grammar Trainer</span>
-          <span style={{ display: 'block', fontSize: 13, color: 'var(--theme-text-secondary)' }}>Drill chia động từ, các thì &amp; các cách (Kasus) — chấm điểm tức thì</span>
-        </span>
-        <span style={{ color: ACCENT.srs, flexShrink: 0 }}><IconArrowRight size={18} /></span>
-      </Link>
+      {/* ─── Grammar practice entries: Trainer (drill) + SRS Review ─── */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8">
+        <Link href="/grammar/trainer"
+          className="flex items-center gap-4 rounded-2xl px-5 py-4 border transition-transform hover:-translate-y-0.5"
+          style={{ borderColor: 'var(--theme-border)', background: 'var(--theme-bg-card)', textDecoration: 'none' }}>
+          <span style={{ width: 46, height: 46, borderRadius: 12, background: GRADIENT.action, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', flexShrink: 0 }}><IconBolt size={22} /></span>
+          <span style={{ flex: 1, minWidth: 0 }}>
+            <span style={{ display: 'block', fontSize: 15, fontWeight: 800, color: 'var(--theme-text-primary)' }}>Luyện ngữ pháp</span>
+            <span style={{ display: 'block', fontSize: 13, color: 'var(--theme-text-secondary)' }}>Drill chia động từ &amp; các cách (Kasus) — chấm điểm tức thì</span>
+          </span>
+          <span style={{ color: ACCENT.srs, flexShrink: 0 }}><IconArrowRight size={18} /></span>
+        </Link>
+        <Link href="/grammar/review"
+          className="flex items-center gap-4 rounded-2xl px-5 py-4 border transition-transform hover:-translate-y-0.5"
+          style={{ borderColor: 'var(--theme-border)', background: 'var(--theme-bg-card)', textDecoration: 'none' }}>
+          <span style={{ width: 46, height: 46, borderRadius: 12, background: GRADIENT.vocab, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', flexShrink: 0 }}><IconRepeat size={22} /></span>
+          <span style={{ flex: 1, minWidth: 0 }}>
+            <span style={{ display: 'block', fontSize: 15, fontWeight: 800, color: 'var(--theme-text-primary)' }}>Ôn ngữ pháp (SRS)</span>
+            <span style={{ display: 'block', fontSize: 13, color: 'var(--theme-text-secondary)' }}>Ôn lặp lại theo lịch — tự lên cấp theo phong độ của bạn</span>
+          </span>
+          <span style={{ color: ACCENT.vocab, flexShrink: 0 }}><IconArrowRight size={18} /></span>
+        </Link>
+      </div>
 
       {/* ─── Stats (practice style) ─── */}
       {totalCount > 0 && (

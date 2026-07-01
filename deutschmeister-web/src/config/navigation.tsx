@@ -92,7 +92,6 @@ export const PRIMARY_NAV: NavItem[] = [
       { key: 'arena',       labelKey: 'arena',           href: '/arena',                   icon: IconFlame, beta: true },
       { key: 'dictation',   labelKey: 'dictation',       href: '/practice-test/dictation', icon: IconHeadphones },
       { key: 'study-plan',  labelKey: 'studyPlan',       href: '/study-plan',               icon: IconTarget },
-      { key: 'grammar-trainer', labelKey: 'grammarTrainer', href: '/grammar/trainer',        icon: IconBrain },
     ],
   },
   {
@@ -165,4 +164,5 @@ export const AUTH_HREFS: ReadonlySet<string> = new Set([
   '/study-plan',
   '/referral',
   '/smart-review',
+  '/grammar/review',
 ]);
