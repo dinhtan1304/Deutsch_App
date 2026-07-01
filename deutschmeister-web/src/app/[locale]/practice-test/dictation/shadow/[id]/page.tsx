@@ -14,7 +14,9 @@ import { RecordButton } from '@/components/shadowing/RecordButton';
 import { PhraseScoreBadge } from '@/components/shadowing/PhraseScoreBadge';
 import { AiReviewCounter } from '@/components/shadowing/AiReviewCounter';
 import { ACCENT, STATUS } from '@/lib/tokens';
-import type { ShadowingAttempt, ShadowingSegment } from '@/lib/api/shadowing';
+import type { GradeAttemptResponse, ShadowingAttempt, ShadowingSegment } from '@/lib/api/shadowing';
+
+type WordScore = GradeAttemptResponse['wordScores'][number];
 
 const SPEED_OPTIONS = [0.75, 1, 1.25] as const;
 const TIP_DISMISS_KEY = 'shadowing-tip-dismissed-v1';
@@ -136,13 +138,39 @@ function SegmentListRow({
   );
 }
 
+// ─── Per-word pronunciation chips (S1) ──────────────────────────────────────
+// Colours each word by its score; words flagged with an `issue` carry a dot
+// and surface the explanation on hover (title).
+function WordScoreChips({ words }: { words: WordScore[] }) {
+  if (!words.length) return null;
+  return (
+    <div className="flex flex-wrap justify-center gap-1.5">
+      {words.map((w, i) => {
+        const color = w.score >= 80 ? STATUS.success : w.score >= 60 ? STATUS.warning : STATUS.danger;
+        return (
+          <span
+            key={i}
+            title={w.issue ?? undefined}
+            className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-sm font-bold"
+            style={{ color, background: `${color}1A`, border: `1px solid ${color}33`, cursor: w.issue ? 'help' : 'default' }}
+          >
+            {w.word}
+            {w.issue && <span className="h-1.5 w-1.5 rounded-full" style={{ background: color }} />}
+          </span>
+        );
+      })}
+    </div>
+  );
+}
+
 // ─── Score / feedback panel shown after grading ─────────────────────────────
-function ScoreFeedback({ attempt }: { attempt: ShadowingAttempt }) {
+function ScoreFeedback({ attempt, wordScores }: { attempt: ShadowingAttempt; wordScores?: WordScore[] }) {
   const t = useTranslations('practice.dictation.shadow.session');
   const score = attempt.pronunciationScore ?? 0;
   return (
     <div className="w-full max-w-lg flex flex-col items-center gap-3 mt-4">
       <PhraseScoreBadge score={score} />
+      {wordScores && wordScores.length > 0 && <WordScoreChips words={wordScores} />}
       {attempt.userTranscript && (
         <div
           className="w-full px-4 py-2.5 rounded-xl text-sm italic text-center"
@@ -203,6 +231,9 @@ export default function ShadowingPlayPage() {
   const [autoPause, setAutoPause] = useState(true);
   const [pausedAtSegmentId, setPausedAtSegmentId] = useState<string | null>(null);
   const [tipDismissed, setTipDismissed] = useState(false);
+  // Per-word scores are only returned by the grade mutation (not persisted on
+  // the attempt), so keep the latest set per segment for this session view.
+  const [wordScoresBySeg, setWordScoresBySeg] = useState<Record<string, WordScore[]>>({});
 
   // Read tip banner state from localStorage (client-only)
   useEffect(() => {
@@ -273,12 +304,13 @@ export default function ShadowingPlayPage() {
     setRecordError('');
     setIsProcessing(true);
     try {
-      await gradeAttempt({
+      const res = await gradeAttempt({
         sessionId: id,
         segmentId: currentSegment.id,
         audioBase64,
         mimeType,
       });
+      setWordScoresBySeg(prev => ({ ...prev, [res.segmentId]: res.wordScores }));
     } catch (err) {
       setRecordError(err instanceof Error ? err.message : t('grading'));
     } finally {
@@ -458,13 +490,14 @@ export default function ShadowingPlayPage() {
               onError={setRecordError}
               size={88}
               accentColor={ACCENT.reading}
+              countdownMs={3000}
             />
 
             <div className="mt-5 text-center">
               {isProcessing ? (
                 <p className="text-base font-extrabold" style={{ color: ACCENT.reading }}>{t('grading')}</p>
               ) : currentAttempt ? (
-                <ScoreFeedback attempt={currentAttempt} />
+                <ScoreFeedback attempt={currentAttempt} wordScores={wordScoresBySeg[currentAttempt.segmentId]} />
               ) : (
                 <>
                   <p className="text-[15px] font-bold mb-1" style={{ color: 'var(--theme-text-primary)' }}>{t('ready')}</p>

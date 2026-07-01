@@ -8,11 +8,31 @@ import { YouTubeEmbed, YouTubeEmbedRef } from '@/components/dictation/YouTubeEmb
 import { DictationSegmentRow } from '@/components/dictation/DictationSegmentRow';
 import { DictationHeader } from '@/components/dictation/DictationHeader';
 import { VideoUnavailableFallback } from '@/components/dictation/VideoUnavailableFallback';
-import { STATUS } from '@/lib/tokens';
+import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 
 const AUTOSAVE_DEBOUNCE_MS = 3000;
 const SPEED_OPTIONS = [0.5, 0.75, 1, 1.25, 1.5] as const;
 const NAVBAR_HEIGHT = 64;
+
+type SaveState = 'idle' | 'saving' | 'saved';
+
+// Subtle autosave status (D4) — reassures the learner their answers are kept.
+function SaveIndicator({ state }: { state: SaveState }) {
+  const t = useTranslations('practice.dictation.session');
+  if (state === 'idle') return null;
+  const saved = state === 'saved';
+  return (
+    <span className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide"
+      style={{ color: saved ? STATUS.success : 'var(--theme-text-muted)' }}>
+      {saved ? (
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+      ) : (
+        <svg className="animate-spin" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 12a9 9 0 1 1-6.219-8.56" /></svg>
+      )}
+      {saved ? t('saveSaved') : t('saveSaving')}
+    </span>
+  );
+}
 
 export default function DictationPlayPage() {
   const { id } = useParams<{ id: string }>();
@@ -36,6 +56,7 @@ export default function DictationPlayPage() {
   const [speed, setSpeed] = useState(1);
   const [autoPause, setAutoPause] = useState(true);
   const [pausedAtSegmentId, setPausedAtSegmentId] = useState<string | null>(null);
+  const [saveState, setSaveState] = useState<SaveState>('idle');
 
   // Redirect if already graded
   useEffect(() => {
@@ -43,6 +64,13 @@ export default function DictationPlayPage() {
       router.replace(`/practice-test/dictation/${id}/result`);
     }
   }, [session?.status, id, router]);
+
+  // Auto-clear the "saved" badge shortly after it appears.
+  useEffect(() => {
+    if (saveState !== 'saved') return;
+    const timer = setTimeout(() => setSaveState('idle'), 1500);
+    return () => clearTimeout(timer);
+  }, [saveState]);
 
 
   // Smart scroll
@@ -69,8 +97,9 @@ export default function DictationPlayPage() {
   const scheduleAutosave = useCallback((answers: Record<string, string>) => {
     if (autosaveTimer.current) clearTimeout(autosaveTimer.current);
     pendingSave.current = true;
+    setSaveState('saving');
     autosaveTimer.current = setTimeout(() => {
-      autosave({ id, userAnswers: answers });
+      autosave({ id, userAnswers: answers }, { onSuccess: () => setSaveState('saved') });
       pendingSave.current = false;
     }, AUTOSAVE_DEBOUNCE_MS);
   }, [id, autosave]);
@@ -94,6 +123,19 @@ export default function DictationPlayPage() {
   function handleSpeedChange(rate: number) {
     setSpeed(rate);
     playerRef.current?.setSpeed(rate);
+  }
+
+  // Compact mobile bar: replay the segment currently in view (fallback: first).
+  function handleReplayActive() {
+    if (!session?.segments?.length) return;
+    const seg = session.segments.find(s => s.id === activeSegmentId) ?? session.segments[0];
+    if (!seg) return;
+    playerRef.current?.playSegment(seg.start / 1000, seg.end / 1000);
+  }
+
+  function cycleSpeed() {
+    const idx = SPEED_OPTIONS.indexOf(speed as (typeof SPEED_OPTIONS)[number]);
+    handleSpeedChange(SPEED_OPTIONS[(idx + 1) % SPEED_OPTIONS.length] ?? 1);
   }
 
   function handlePlayNext() {
@@ -157,13 +199,12 @@ export default function DictationPlayPage() {
       {videoError ? (
         <VideoUnavailableFallback sessionId={id} />
       ) : (
-        <div className="flex flex-col lg:flex-row gap-8 items-start">
-          
-          {/* Sticky Panel: Video + Controls */}
-          <div ref={stickyRef} className="w-full lg:w-100 lg:sticky z-30"
-            style={{ top: `${NAVBAR_HEIGHT + 16}px` }}>
-            
-            <div className="flex flex-col gap-4">
+        <div className="flex flex-col lg:flex-row gap-4 lg:gap-8 items-start">
+
+          {/* Sticky Panel: Video + Controls — pinned right below the navbar on all sizes */}
+          <div ref={stickyRef} className="w-full lg:w-100 sticky top-16 lg:top-20 z-20 lg:z-30">
+
+            <div className="flex flex-col gap-3 lg:gap-4">
               {/* Video wrapper */}
               <div className="relative rounded-2xl overflow-hidden border w-full aspect-video" style={{ borderColor: 'var(--theme-border)' }}>
                 <YouTubeEmbed
@@ -179,8 +220,46 @@ export default function DictationPlayPage() {
                 />
               </div>
 
-              {/* Controls Card */}
-              <div className="rounded-2xl border p-4"
+              {/* Compact control bar — mobile only, pinned right under the video */}
+              <div className="lg:hidden flex flex-wrap items-center gap-2 rounded-2xl border px-3 py-2.5"
+                style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
+                <button type="button" onClick={handleReplayActive} aria-label={t('listenSegment')}
+                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"
+                  style={{ background: `color-mix(in srgb, ${ACCENT.dictation} 14%, transparent)`, color: ACCENT.dictation }}>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M3 18v-6a9 9 0 0 1 18 0v6" />
+                    <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z" />
+                  </svg>
+                </button>
+                <button type="button" onClick={cycleSpeed} title={t('speedLabel')}
+                  className="mono flex h-8 shrink-0 items-center rounded-lg px-2.5 text-[11px] font-bold"
+                  style={{ background: 'var(--theme-bg-secondary)', color: 'var(--theme-text-secondary)', border: '1px solid var(--theme-border)' }}>
+                  {speed}x
+                </button>
+                <button type="button" onClick={() => setAutoPause(a => !a)} aria-label={t('autoPause')} aria-pressed={autoPause}
+                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"
+                  style={autoPause
+                    ? { background: 'color-mix(in srgb, var(--accent) 14%, transparent)', color: 'var(--accent)', border: '1px solid var(--accent)' }
+                    : { background: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)', border: '1px solid var(--theme-border)' }}>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1" /><rect x="14" y="5" width="4" height="14" rx="1" /></svg>
+                </button>
+                <button type="button" onClick={handlePlayNext} aria-label={t('nextSegment')}
+                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"
+                  style={{ background: 'var(--theme-bg-secondary)', color: 'var(--theme-text-secondary)', border: '1px solid var(--theme-border)' }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6" /></svg>
+                </button>
+                <span className="mono text-[11px] font-bold" style={{ color: 'var(--theme-text-secondary)' }}>{answeredCount}/{session.totalBlanks}</span>
+                <SaveIndicator state={saveState} />
+                <button type="button" onClick={handleSubmit} disabled={isSubmitting}
+                  className="ml-auto flex shrink-0 items-center gap-1.5 rounded-lg px-3.5 py-2 text-caption font-bold text-white transition-opacity disabled:opacity-60"
+                  style={{ background: GRADIENT.dictation }}>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+                  {t('checkAnswers')}
+                </button>
+              </div>
+
+              {/* Controls Card — desktop only; mobile uses the compact bar above */}
+              <div className="hidden lg:block rounded-2xl border p-4"
                 style={{
                   borderColor: 'var(--theme-border)',
                   backgroundColor: 'var(--theme-bg-card)',
@@ -221,6 +300,9 @@ export default function DictationPlayPage() {
                     </button>
                   </div>
 
+                  <div className="flex h-4 items-center justify-end">
+                    <SaveIndicator state={saveState} />
+                  </div>
                   <DictationHeader
                     difficulty={session.difficulty}
                     answeredCount={answeredCount}

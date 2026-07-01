@@ -152,9 +152,20 @@ function BlankInput({ part, value, onChange, pxWidth }: {
   return (
     <input
       type="text"
+      data-dictation-blank
       value={value}
       onChange={e => onChange(part.blankId, e.target.value)}
-      onKeyDown={onUmlautKey}
+      onKeyDown={e => {
+        onUmlautKey(e);
+        if (e.key === 'Enter') {
+          // Jump to the next blank (in DOM/reading order); blur on the last.
+          e.preventDefault();
+          const inputs = Array.from(document.querySelectorAll<HTMLInputElement>('input[data-dictation-blank]'));
+          const next = inputs[inputs.indexOf(e.currentTarget) + 1];
+          if (next) next.focus();
+          else e.currentTarget.blur();
+        }
+      }}
       title={t('umlautTip', { hint: UMLAUT_TRIGGER_HINT })}
       className="inline-block text-center rounded-lg shadow-sm font-bold outline-none transition-all duration-200 mx-1 py-1"
       style={{

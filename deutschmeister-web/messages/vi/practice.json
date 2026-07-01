@@ -845,6 +845,8 @@
       "difficultyBadge": "Độ khó: {difficulty}",
       "completedBadge": "Hoàn thành: {pct}%",
       "checkAnswers": "Kiểm tra đáp án",
+      "saveSaving": "Đang lưu…",
+      "saveSaved": "Đã lưu",
       "listenSegment": "Nghe câu này",
       "seekHere": "Nhảy tới vị trí này",
       "umlautTip": "Mẹo gõ umlaut: {hint}",
@@ -865,6 +867,7 @@
       },
       "mistakesTitle": "Lỗi cần ôn luyện",
       "skipped": "(bỏ qua)",
+      "nearMiss": "gần đúng",
       "reviewTitle": "Xem lại từng câu",
       "noDetail": "Không có dữ liệu chi tiết cho bài này.",
       "filterAll": "Tất cả ({count})",
@@ -987,6 +990,8 @@
         "recProcessError": "Có lỗi khi xử lý audio.",
         "recStop": "Dừng ghi âm",
         "recStart": "Bắt đầu ghi âm",
+        "recCancel": "Hủy",
+        "recGetReady": "Chuẩn bị…",
         "recGrading": "Đang chấm điểm…"
       },
       "result": {
@@ -997,6 +1002,7 @@
         "retry": "🔄 Luyện lại video này",
         "retryPending": "Đang tạo...",
         "backList": "Về trang shadowing",
+        "dictateVideo": "Chép chính tả video này",
         "filterLabel": "Lọc câu",
         "filterAll": "Tất cả ({count})",
         "filterWeak": "Cần cải thiện ({count})",

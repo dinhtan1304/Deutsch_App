@@ -845,6 +845,8 @@
       "difficultyBadge": "Difficulty: {difficulty}",
       "completedBadge": "Completed: {pct}%",
       "checkAnswers": "Check answers",
+      "saveSaving": "Saving…",
+      "saveSaved": "Saved",
       "listenSegment": "Listen to this line",
       "seekHere": "Jump to this position",
       "umlautTip": "Umlaut typing tip: {hint}",
@@ -865,6 +867,7 @@
       },
       "mistakesTitle": "Mistakes to review",
       "skipped": "(skipped)",
+      "nearMiss": "close",
       "reviewTitle": "Review each line",
       "noDetail": "No detailed data for this session.",
       "filterAll": "All ({count})",
@@ -987,6 +990,8 @@
         "recProcessError": "Something went wrong processing the audio.",
         "recStop": "Stop recording",
         "recStart": "Start recording",
+        "recCancel": "Cancel",
+        "recGetReady": "Get ready…",
         "recGrading": "Grading…"
       },
       "result": {
@@ -997,6 +1002,7 @@
         "retry": "🔄 Practice this video again",
         "retryPending": "Creating...",
         "backList": "Back to shadowing",
+        "dictateVideo": "Dictation with this video",
         "filterLabel": "Filter",
         "filterAll": "All ({count})",
         "filterWeak": "Needs work ({count})",
