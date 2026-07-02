@@ -8,6 +8,7 @@ import type { TrainerExercise, TrainerMode } from '@/lib/api/grammarTrainer';
 import { gradeAnswer, buildOptions, skillTagLabel } from '@/lib/grammarTrainer/engine';
 import { getDelayText } from '@/lib/srs';
 import { useGrammarSrsStats, useGrammarSrsSession, useReviewGrammarSrs } from '@/hooks/useGrammarSrs';
+import { ReportExerciseModal } from '@/components/grammar/trainer/ReportExerciseModal';
 
 type Phase = 'list' | 'drill' | 'done';
 type AnswerMode = 'type' | 'choose';
@@ -41,6 +42,7 @@ export default function GrammarReviewPage() {
   const [perTag, setPerTag] = useState<Record<string, { c: number; t: number }>>({});
   const startRef = useRef(0);
   const inputRef = useRef<HTMLInputElement>(null);
+  const [reportId, setReportId] = useState<string | null>(null);
   const [result, setResult] = useState<{ xp: number; acc: number; delayMinutes: number; levelChanged?: { from: string; to: string; direction: 'up' | 'down' } } | null>(null);
 
   // Start the drill once the session exercises arrive.
@@ -295,6 +297,14 @@ export default function GrammarReviewPage() {
             {current.explanationVi && (
               <div className="mt-1 text-body" style={{ color: 'var(--theme-text-secondary)', lineHeight: 1.5 }}>{current.explanationVi}</div>
             )}
+            <button
+              type="button"
+              onClick={() => setReportId(current.id)}
+              className="mt-2 text-caption underline underline-offset-2 transition-opacity hover:opacity-80"
+              style={{ color: 'var(--theme-text-muted)' }}
+            >
+              Báo lỗi câu này
+            </button>
           </div>
         )}
       </div>
@@ -304,6 +314,8 @@ export default function GrammarReviewPage() {
         style={{ color: 'var(--accent-on)' }}>
         {revealed ? (idx + 1 >= items.length ? 'Xem kết quả' : 'Câu tiếp →') : 'Kiểm tra'}
       </button>
+
+      {reportId && <ReportExerciseModal exerciseId={reportId} onClose={() => setReportId(null)} />}
     </div>
   );
 }
