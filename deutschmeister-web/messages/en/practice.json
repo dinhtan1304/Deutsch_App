@@ -807,6 +807,7 @@
         "urlMissing": "Please paste a YouTube URL.",
         "urlInvalid": "Invalid URL. Please use a YouTube link.",
         "urlGenericError": "Couldn't process this video. Try another URL.",
+        "urlNotGerman": "This video isn't in German. Please pick a German-language video.",
         "randomNotFound": "No matching video found. Try another level!",
         "processing": "Processing...",
         "searching": "Finding video...",
@@ -935,6 +936,7 @@
       "urlMissing": "Please paste a YouTube URL.",
       "urlInvalid": "Invalid URL. Please use a YouTube link.",
       "urlGenericError": "Couldn't process this video. Try another URL.",
+      "urlNotGerman": "This video isn't in German. Please pick a German-language video.",
       "processing": "Processing...",
       "start": "Start →",
       "chooseShadowVideoTitle": "Choose a shadowing video",
@@ -992,6 +994,7 @@
         "recStart": "Start recording",
         "recCancel": "Cancel",
         "recGetReady": "Get ready…",
+        "recStopHint": "Tap to stop",
         "recGrading": "Grading…"
       },
       "result": {

@@ -807,6 +807,7 @@
         "urlMissing": "Vui lòng nhập URL YouTube.",
         "urlInvalid": "URL không hợp lệ. Vui lòng dùng link YouTube.",
         "urlGenericError": "Không thể xử lý video này. Vui lòng thử URL khác.",
+        "urlNotGerman": "Video này không phải tiếng Đức. Hãy chọn video có nội dung tiếng Đức.",
         "randomNotFound": "Không tìm thấy video phù hợp. Thử cấp độ khác!",
         "processing": "Đang xử lý...",
         "searching": "Đang tìm video...",
@@ -935,6 +936,7 @@
       "urlMissing": "Vui lòng nhập URL YouTube.",
       "urlInvalid": "URL không hợp lệ. Vui lòng dùng link YouTube.",
       "urlGenericError": "Không thể xử lý video này. Vui lòng thử URL khác.",
+      "urlNotGerman": "Video này không phải tiếng Đức. Hãy chọn video có nội dung tiếng Đức.",
       "processing": "Đang xử lý...",
       "start": "Bắt đầu →",
       "chooseShadowVideoTitle": "Chọn video shadowing",
@@ -992,6 +994,7 @@
         "recStart": "Bắt đầu ghi âm",
         "recCancel": "Hủy",
         "recGetReady": "Chuẩn bị…",
+        "recStopHint": "Chạm để dừng",
         "recGrading": "Đang chấm điểm…"
       },
       "result": {

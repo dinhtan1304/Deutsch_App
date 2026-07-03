@@ -1,6 +1,6 @@
 'use client';
 
-import { apiGet, apiPost, apiDelete, api } from './client';
+import { apiGet, apiPost, apiPatch, apiDelete, api } from './client';
 import type { FeedbackThread, FeedbackMessageItem, PostMessagePayload } from './feedback';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -354,4 +354,62 @@ export const adminDictationRequestApi = {
 
   reject: (id: string, reason: string) =>
     apiPost<AdminDictationRequest>(`/admin/dictation-requests/${id}/reject`, { reason }),
+};
+
+// ─── Admin Video Library API ──────────────────────────────────────────────────
+
+export interface AdminVideoItem {
+  id: string;
+  youtubeId: string;
+  title: string;
+  channelName: string | null;
+  thumbnailUrl: string | null;
+  cefrLevel: string;
+  topic: string | null;
+  durationSec: number;
+  isActive: boolean;
+  transcriptSource: 'youtube' | 'ai';
+  createdAt: string;
+  updatedAt: string;
+  segmentsCount: number;
+  /** 0..1 — heuristic tỷ lệ tiếng Đức của transcript (german-detect.util.ts bên API) */
+  germanScore: number;
+  /** true khi segments trông hỏng (câu quá dài / quá ít câu) — nên renormalize */
+  pathological: boolean;
+  _count: { sessions: number; shadowingSessions: number; requests: number };
+}
+
+export interface AdminVideoListResponse {
+  items: AdminVideoItem[];
+  availableTopics: string[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export interface UpdateVideoPayload {
+  title?: string;
+  cefrLevel?: 'A1' | 'A2' | 'B1';
+  topic?: string;
+  isActive?: boolean;
+}
+
+export const adminVideoApi = {
+  getAll: (params?: {
+    search?: string; cefrLevel?: string; topic?: string;
+    isActive?: string; transcriptSource?: string; page?: number; limit?: number;
+  }) =>
+    apiGet<AdminVideoListResponse>(`/admin/dictation-videos${toQS(params)}`),
+
+  update: (id: string, data: UpdateVideoPayload) =>
+    apiPatch<AdminVideoItem>(`/admin/dictation-videos/${id}`, data),
+
+  delete: (id: string) =>
+    apiDelete<{ success: boolean }>(`/admin/dictation-videos/${id}`),
+
+  renormalize: (id: string) =>
+    apiPost<{ id: string; youtubeId: string; title: string; segments: number; durationSec: number }>(
+      `/admin/dictation-videos/${id}/renormalize`,
+    ),
 };

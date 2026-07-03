@@ -12,6 +12,7 @@ import {
   useStartShadowingFromUrl,
 } from '@/hooks/useShadowing';
 import { dictationApi } from '@/lib/api/dictation';
+import { ApiError } from '@/lib/api/client';
 import type { ShadowingHistoryItem } from '@/lib/api/shadowing';
 import { GridSkeleton } from '@/components/ui';
 import { ACCENT, STATUS } from '@/lib/tokens';
@@ -247,6 +248,10 @@ export default function ShadowingListPage() {
       });
       router.push(`/practice-test/dictation/shadow/${session.id}`);
     } catch (err) {
+      if (err instanceof ApiError && (err.data as { code?: string })?.code === 'VIDEO_NOT_GERMAN') {
+        setUrlError(t('urlNotGerman'));
+        return;
+      }
       const msg = err instanceof Error && err.message ? err.message : '';
       setUrlError(msg || t('urlGenericError'));
     }

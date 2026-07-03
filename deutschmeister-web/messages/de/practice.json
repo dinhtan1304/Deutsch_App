@@ -807,6 +807,7 @@
         "urlMissing": "Bitte eine YouTube-URL einfügen.",
         "urlInvalid": "Ungültige URL. Bitte einen YouTube-Link verwenden.",
         "urlGenericError": "Video konnte nicht verarbeitet werden. Andere URL versuchen.",
+        "urlNotGerman": "Dieses Video ist nicht auf Deutsch. Bitte wähle ein deutschsprachiges Video.",
         "randomNotFound": "Kein passendes Video gefunden. Versuche ein anderes Niveau!",
         "processing": "Wird verarbeitet...",
         "searching": "Video wird gesucht...",
@@ -935,6 +936,7 @@
       "urlMissing": "Bitte eine YouTube-URL einfügen.",
       "urlInvalid": "Ungültige URL. Bitte einen YouTube-Link verwenden.",
       "urlGenericError": "Video konnte nicht verarbeitet werden. Andere URL versuchen.",
+      "urlNotGerman": "Dieses Video ist nicht auf Deutsch. Bitte wähle ein deutschsprachiges Video.",
       "processing": "Wird verarbeitet...",
       "start": "Starten →",
       "chooseShadowVideoTitle": "Shadowing-Video wählen",
@@ -992,6 +994,7 @@
         "recStart": "Aufnahme starten",
         "recCancel": "Abbrechen",
         "recGetReady": "Bereit machen…",
+        "recStopHint": "Zum Stoppen tippen",
         "recGrading": "Wird bewertet…"
       },
       "result": {
