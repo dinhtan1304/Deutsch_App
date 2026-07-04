@@ -3,11 +3,13 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useDictationSession, useAutosaveDictation, useSubmitDictation } from '@/hooks/useDictation';
+import { useDictationSession, useAutosaveDictation, useSubmitDictation, useCheckDictation, useDictationHint } from '@/hooks/useDictation';
 import { YouTubeEmbed, YouTubeEmbedRef } from '@/components/dictation/YouTubeEmbed';
 import { DictationSegmentRow } from '@/components/dictation/DictationSegmentRow';
 import { DictationHeader } from '@/components/dictation/DictationHeader';
 import { VideoUnavailableFallback } from '@/components/dictation/VideoUnavailableFallback';
+import { UmlautToolbar } from '@/components/dictation/UmlautToolbar';
+import { BlankCheckStatus } from '@/lib/api/dictation';
 import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 
 const AUTOSAVE_DEBOUNCE_MS = 3000;
@@ -47,6 +49,8 @@ export default function DictationPlayPage() {
   const { data: session, isLoading } = useDictationSession(id);
   const { mutate: autosave } = useAutosaveDictation();
   const { mutate: submit, isPending: isSubmitting } = useSubmitDictation();
+  const { mutate: checkAnswers, isPending: isChecking } = useCheckDictation();
+  const { mutate: fetchHint } = useDictationHint();
 
   const [localAnswers, setLocalAnswers] = useState<Record<string, string> | null>(null);
   const userAnswers = localAnswers ?? (session?.userAnswers as Record<string, string> | undefined) ?? {};
@@ -57,6 +61,8 @@ export default function DictationPlayPage() {
   const [autoPause, setAutoPause] = useState(true);
   const [pausedAtSegmentId, setPausedAtSegmentId] = useState<string | null>(null);
   const [saveState, setSaveState] = useState<SaveState>('idle');
+  const [blankStatus, setBlankStatus] = useState<Record<string, BlankCheckStatus>>({});
+  const focusedBlankRef = useRef<HTMLInputElement | null>(null);
 
   // Redirect if already graded
   useEffect(() => {
@@ -112,11 +118,75 @@ export default function DictationPlayPage() {
   }
 
   function handleChange(blankId: string, value: string) {
+    // Editing a checked blank resets its check status
+    setBlankStatus(prev => {
+      if (!(blankId in prev)) return prev;
+      const next = { ...prev };
+      delete next[blankId];
+      return next;
+    });
     setLocalAnswers(prev => {
       const base = prev ?? (session?.userAnswers as Record<string, string> | undefined) ?? {};
       const next = { ...base, [blankId]: value };
       scheduleAutosave(next);
       return next;
+    });
+  }
+
+  function handleCheckSegment(segmentId: string) {
+    const seg = session?.segments.find(s => s.id === segmentId);
+    if (!seg) return;
+    const answers: Record<string, string> = {};
+    for (const part of seg.parts) {
+      if (part.type !== 'blank') continue;
+      const v = userAnswers[part.blankId];
+      if (v?.trim()) answers[part.blankId] = v;
+    }
+    if (!Object.keys(answers).length) return;
+    checkAnswers({ id, answers }, {
+      onSuccess: (data) => {
+        setBlankStatus(prev => {
+          const next = { ...prev };
+          for (const r of data.results) next[r.blankId] = r.status;
+          return next;
+        });
+      },
+    });
+  }
+
+  function handleHint(blankId: string) {
+    fetchHint({ id, blankId }, {
+      onSuccess: (data) => {
+        if (!(userAnswers[blankId] ?? '').trim()) {
+          handleChange(blankId, data.firstLetter);
+          // Put the caret after the revealed letter
+          requestAnimationFrame(() => {
+            const el = document.querySelector<HTMLInputElement>(`input[data-blank-id="${blankId}"]`);
+            if (el) { el.focus(); el.setSelectionRange(1, 1); }
+          });
+        }
+      },
+    });
+  }
+
+  // Check the segment containing the focused blank; fall back to active segment
+  function handleCheckFocusedOrActive() {
+    const focusedSegId = focusedBlankRef.current?.closest('[data-segment-id]')?.getAttribute('data-segment-id');
+    const segId = focusedSegId ?? activeSegmentId;
+    if (segId) handleCheckSegment(segId);
+  }
+
+  function handleUmlautInsert(ch: string) {
+    const el = focusedBlankRef.current;
+    const blankId = el?.dataset.blankId;
+    if (!el || !blankId || el.readOnly) return;
+    const start = el.selectionStart ?? el.value.length;
+    const end = el.selectionEnd ?? start;
+    const next = el.value.slice(0, start) + ch + el.value.slice(end);
+    handleChange(blankId, next);
+    requestAnimationFrame(() => {
+      el.focus();
+      el.setSelectionRange(start + 1, start + 1);
     });
   }
 
@@ -163,6 +233,23 @@ export default function DictationPlayPage() {
       onSuccess: () => router.push(`/practice-test/dictation/${id}/result`),
     });
   }
+
+  // Desktop hotkeys — listener bound once; handlers read via ref so the
+  // effect never needs re-binding.
+  const hotkeysRef = useRef({ replay: () => {}, check: () => {}, next: () => {} });
+  useEffect(() => {
+    hotkeysRef.current = { replay: handleReplayActive, check: handleCheckFocusedOrActive, next: handlePlayNext };
+  });
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (!(e.ctrlKey || e.metaKey)) return;
+      if (e.code === 'Space') { e.preventDefault(); hotkeysRef.current.replay(); }
+      else if (e.key === 'Enter') { e.preventDefault(); hotkeysRef.current.check(); }
+      else if (e.key === 'ArrowRight') { e.preventDefault(); hotkeysRef.current.next(); }
+    }
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
 
   if (isLoading) {
     return (
@@ -258,6 +345,13 @@ export default function DictationPlayPage() {
                 </button>
               </div>
 
+              {/* Umlaut quick-insert — mobile only (desktop has it in the controls card) */}
+              <div className="lg:hidden flex items-center gap-2 rounded-2xl border px-3 py-2"
+                style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
+                <span className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: 'var(--theme-text-muted)' }}>{t('umlautLabel')}</span>
+                <UmlautToolbar onInsert={handleUmlautInsert} />
+              </div>
+
               {/* Controls Card — desktop only; mobile uses the compact bar above */}
               <div className="hidden lg:block rounded-2xl border p-4"
                 style={{
@@ -281,6 +375,12 @@ export default function DictationPlayPage() {
                     </span>
                   </div>
 
+                  {/* Umlaut quick-insert row */}
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: 'var(--theme-text-muted)' }}>{t('umlautLabel')}</span>
+                    <UmlautToolbar onInsert={handleUmlautInsert} />
+                  </div>
+
                   {/* Auto-pause + Next segment row */}
                   <div className="flex items-center justify-between gap-3 flex-wrap">
                     <button type="button" onClick={() => setAutoPause(a => !a)} className="flex items-center gap-2">
@@ -299,6 +399,10 @@ export default function DictationPlayPage() {
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6" /></svg>
                     </button>
                   </div>
+
+                  <p className="text-[10.5px] leading-relaxed" style={{ color: 'var(--theme-text-muted)' }}>
+                    {t('hotkeysLegend')}
+                  </p>
 
                   <div className="flex h-4 items-center justify-end">
                     <SaveIndicator state={saveState} />
@@ -349,6 +453,11 @@ export default function DictationPlayPage() {
                   onChange={handleChange}
                   playerRef={playerRef}
                   isActive={seg.id === activeSegmentId}
+                  blankStatus={blankStatus}
+                  onCheck={handleCheckSegment}
+                  isChecking={isChecking}
+                  onHint={handleHint}
+                  onBlankFocus={el => { focusedBlankRef.current = el; }}
                 />
               ))}
             </div>
