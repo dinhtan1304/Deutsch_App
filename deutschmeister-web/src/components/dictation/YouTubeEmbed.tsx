@@ -36,6 +36,7 @@ interface YTPlayer {
   pauseVideo(): void;
   destroy(): void;
   getCurrentTime?(): number;
+  getPlayerState?(): number;
   setPlaybackRate(rate: number): void;
 }
 
@@ -93,6 +94,9 @@ export const YouTubeEmbed = forwardRef<YouTubeEmbedRef, Props>(function YouTubeE
   const onAutoPausedRef = useRef(onAutoPaused);
   onAutoPausedRef.current = onAutoPaused;
   const lastActiveSegIdRef = useRef<string | null>(null);
+  // The segment we most recently auto-paused at — prevents re-pausing the same
+  // boundary when the user resumes playback.
+  const lastPausedSegIdRef = useRef<string | null>(null);
 
   useImperativeHandle(ref, () => ({
     seekTo(seconds: number) {
@@ -104,6 +108,10 @@ export const YouTubeEmbed = forwardRef<YouTubeEmbedRef, Props>(function YouTubeE
     playSegment(startSec: number, endSec: number) {
       try {
         if (segmentTimerRef.current) clearInterval(segmentTimerRef.current);
+        // Reset boundary tracking so continuous auto-pause restarts cleanly
+        // after this explicit single-segment playback.
+        lastActiveSegIdRef.current = null;
+        lastPausedSegIdRef.current = null;
         playerRef.current?.seekTo(startSec, true);
         playerRef.current?.playVideo();
         segmentTimerRef.current = setInterval(() => {
@@ -133,59 +141,73 @@ export const YouTubeEmbed = forwardRef<YouTubeEmbedRef, Props>(function YouTubeE
 
       playerRef.current = new window.YT.Player(containerRef.current, {
         videoId: youtubeId,
-        playerVars: { rel: 0, modestbranding: 1 },
+        playerVars: { rel: 0, modestbranding: 1, enablejsapi: 1 },
         events: {
           onError: () => onError?.(),
           onStateChange: (e: YTPlayerStateEvent) => {
-            // YT.PlayerState.PLAYING = 1
-            if (e.data === 1) {
-              if (!timeUpdateTimerRef.current) {
-                timeUpdateTimerRef.current = setInterval(() => {
-                  try {
-                    const t = playerRef.current?.getCurrentTime?.();
-                    if (t === undefined) return;
-                    onTimeUpdateRef.current?.(t);
-
-                    // Auto-pause at segment boundary during continuous play.
-                    // Always update lastActiveSegId so single-segment playback
-                    // doesn't leave a stale value that triggers a false pause
-                    // when the user resumes continuous play.
-                    const segs = autoPauseSegmentsRef.current;
-                    if (segs?.length) {
-                      const ms = t * 1000;
-                      const active = segs.find(s => ms >= s.start && ms <= s.end);
-                      const newId = active?.id ?? null;
-                      const prevId = lastActiveSegIdRef.current;
-                      // Only pause when boundary is crossed during continuous
-                      // playback (no playSegment in flight).
-                      if (
-                        !segmentTimerRef.current &&
-                        prevId !== null &&
-                        newId !== prevId
-                      ) {
-                        try { playerRef.current?.pauseVideo(); } catch {}
-                        onAutoPausedRef.current?.(prevId);
-                      }
-                      lastActiveSegIdRef.current = newId;
-                    }
-                  } catch {}
-                }, 300);
+            // A user pause / video end must cancel any in-flight playSegment
+            // timer. Skip BUFFERING (3) so a transient buffer blip mid-segment
+            // doesn't cancel a valid playSegment.
+            if (e.data === 2 || e.data === 0) {
+              if (segmentTimerRef.current) {
+                clearInterval(segmentTimerRef.current);
+                segmentTimerRef.current = null;
               }
-            } else {
-              if (timeUpdateTimerRef.current) {
-                clearInterval(timeUpdateTimerRef.current);
-                timeUpdateTimerRef.current = null;
-              }
+              // Forget the last active segment so resuming from a pause does
+              // not immediately re-pause the boundary we just stopped at.
+              lastActiveSegIdRef.current = null;
             }
           },
         },
       });
+
+      // ONE persistent monitor, independent of onStateChange (which is
+      // unreliable for interval lifecycle — buffering tears it down and a
+      // missed PLAYING event never rebuilds it). It self-gates on the live
+      // player state, so it survives buffering and native-control playback.
+      if (!timeUpdateTimerRef.current) {
+        timeUpdateTimerRef.current = setInterval(() => {
+          try {
+            const player = playerRef.current;
+            if (!player) return;
+            // YT.PlayerState.PLAYING === 1
+            if (player.getPlayerState?.() !== 1) return;
+            const t = player.getCurrentTime?.();
+            if (t === undefined) return;
+            onTimeUpdateRef.current?.(t);
+
+            const segs = autoPauseSegmentsRef.current;
+            if (segs?.length) {
+              const ms = t * 1000;
+              const active = segs.find(s => ms >= s.start && ms <= s.end);
+              const newId = active?.id ?? null;
+              const prevId = lastActiveSegIdRef.current;
+              // Pause once when we cross OUT of a segment during continuous
+              // playback (the sentence just finished). Guarded by lastPausedSegId
+              // so resuming from that pause doesn't immediately re-pause the same
+              // boundary.
+              if (
+                prevId !== null &&
+                newId !== prevId &&
+                lastPausedSegIdRef.current !== prevId
+              ) {
+                try { player.pauseVideo(); } catch {}
+                lastPausedSegIdRef.current = prevId;
+                onAutoPausedRef.current?.(prevId);
+              }
+              lastActiveSegIdRef.current = newId;
+            }
+          } catch {}
+        }, 250);
+      }
     });
 
     return () => {
       destroyed = true;
-      if (segmentTimerRef.current) clearInterval(segmentTimerRef.current);
-      if (timeUpdateTimerRef.current) clearInterval(timeUpdateTimerRef.current);
+      if (segmentTimerRef.current) { clearInterval(segmentTimerRef.current); segmentTimerRef.current = null; }
+      if (timeUpdateTimerRef.current) { clearInterval(timeUpdateTimerRef.current); timeUpdateTimerRef.current = null; }
+      lastActiveSegIdRef.current = null;
+      lastPausedSegIdRef.current = null;
       try { playerRef.current?.destroy(); } catch {}
       playerRef.current = null;
     };

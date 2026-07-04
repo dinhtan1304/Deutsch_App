@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { ACCENT, STATUS } from '@/lib/tokens';
+import { blobToWavBase64 } from '@/lib/audio';
 
 type RecState = 'idle' | 'countdown' | 'recording' | 'processing';
 
@@ -108,11 +109,19 @@ export function RecordButton({
       }
       setState('processing');
       try {
-        const buf = await blob.arrayBuffer();
-        const base64 = btoa(
-          new Uint8Array(buf).reduce((s, b) => s + String.fromCharCode(b), ''),
-        );
-        await onRecorded(base64, mimeType);
+        // Gemini's audio input rejects webm — send WAV (16 kHz mono), which is
+        // universally supported. Fall back to the raw recording only if the
+        // browser can't decode the blob.
+        const wav = await blobToWavBase64(blob);
+        if (wav) {
+          await onRecorded(wav, 'audio/wav');
+        } else {
+          const buf = await blob.arrayBuffer();
+          const base64 = btoa(
+            new Uint8Array(buf).reduce((s, b) => s + String.fromCharCode(b), ''),
+          );
+          await onRecorded(base64, mimeType);
+        }
       } catch (err) {
         onError?.(err instanceof Error ? err.message : t('recProcessError'));
       } finally {
@@ -179,9 +188,6 @@ export function RecordButton({
   const isCountdown = state === 'countdown';
   const isRecording = state === 'recording';
   const isProcessing = state === 'processing';
-  const remainPct = isRecording
-    ? Math.max(0, 100 - (elapsedMs / maxDurationMs) * 100)
-    : 0;
 
   return (
     <div className="flex items-center gap-3">
@@ -239,18 +245,9 @@ export function RecordButton({
           >
             {(elapsedMs / 1000).toFixed(1)}s
           </div>
-          <div
-            className="h-1.5 w-20 rounded-full overflow-hidden"
-            style={{ backgroundColor: 'var(--theme-bg-secondary)' }}
-          >
-            <div
-              className="h-full transition-all"
-              style={{
-                width: `${remainPct}%`,
-                background: recordingColor,
-              }}
-            />
-          </div>
+          <span className="text-xs font-bold" style={{ color: 'var(--theme-text-muted)' }}>
+            {t('recStopHint')}
+          </span>
         </div>
       )}
 
