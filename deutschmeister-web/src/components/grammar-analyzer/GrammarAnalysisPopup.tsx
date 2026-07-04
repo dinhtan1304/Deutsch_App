@@ -32,7 +32,7 @@ function getRoleColor(role: string): string {
 
 export function GrammarAnalysisPopup() {
   const t = useTranslations('vocabulary.grammarAnalyzer');
-  const { showPopup, isAnalyzing, result, error, popupPosition, closePopup } =
+  const { showPopup, isAnalyzing, result, error, popupPosition, selectedSentence, closePopup } =
     useGrammarAnalyzerStore();
   const popupRef = useRef<HTMLDivElement>(null);
 
@@ -77,11 +77,41 @@ export function GrammarAnalysisPopup() {
         {/* Close */}
         <button onClick={closePopup} className="grammar-popup-close">✕</button>
 
-        {/* Loading */}
+        {/* Loading: hiện ngay câu đang phân tích + skeleton mô phỏng layout kết quả */}
         {isAnalyzing && (
-          <div className="gp-body" style={{ textAlign: 'center', padding: '32px 24px' }}>
-            <div className="gp-spinner" />
-            <p className="gp-muted" style={{ marginTop: '12px' }}>{t('analyzing')}</p>
+          <div className="gp-body">
+            <div className="gp-section">
+              <div className="gp-primary" style={{ fontSize: '15px', fontWeight: 700, fontStyle: 'italic' }}>
+                &quot;{selectedSentence}&quot;
+              </div>
+            </div>
+
+            {/* Tags skeleton */}
+            <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
+              <span className="gp-skel" style={{ width: '110px', height: '20px' }} />
+              <span className="gp-skel" style={{ width: '130px', height: '20px' }} />
+            </div>
+
+            {/* Component chips skeleton */}
+            <div className="gp-section">
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                <span className="gp-skel" style={{ width: '64px', height: '44px' }} />
+                <span className="gp-skel" style={{ width: '80px', height: '44px' }} />
+                <span className="gp-skel" style={{ width: '56px', height: '44px' }} />
+              </div>
+            </div>
+
+            {/* Explain box skeleton */}
+            <div className="gp-section">
+              <span className="gp-skel" style={{ width: '100%', height: '14px', marginBottom: '6px' }} />
+              <span className="gp-skel" style={{ width: '85%', height: '14px', marginBottom: '6px' }} />
+              <span className="gp-skel" style={{ width: '60%', height: '14px' }} />
+            </div>
+
+            <p className="gp-muted" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span className="gp-spinner" style={{ width: '14px', height: '14px', margin: 0, borderWidth: '2px' }} />
+              {t('analyzing')}
+            </p>
           </div>
         )}
 
@@ -276,6 +306,23 @@ export function GrammarAnalysisPopup() {
         }
         html:not(.dark) .gp-tip, html[data-theme="light"] .gp-tip {
           background: #FFFBEB; border-left-color: #D97706;
+        }
+
+        .gp-skel {
+          display: block;
+          border-radius: 8px;
+          background: linear-gradient(
+            90deg,
+            rgba(148, 163, 184, 0.12) 25%,
+            rgba(148, 163, 184, 0.24) 50%,
+            rgba(148, 163, 184, 0.12) 75%
+          );
+          background-size: 200% 100%;
+          animation: gpSkelShimmer 1.2s ease-in-out infinite;
+        }
+        @keyframes gpSkelShimmer {
+          from { background-position: 200% 0; }
+          to { background-position: -200% 0; }
         }
 
         .gp-spinner {
