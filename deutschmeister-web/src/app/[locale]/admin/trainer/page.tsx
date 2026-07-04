@@ -92,10 +92,19 @@ export default function AdminTrainerListPage() {
                 <td style={{ padding: '8px 12px', color: 'var(--theme-text-secondary)', fontFamily: 'ui-monospace, monospace' }}>{ex.answer}</td>
                 <td style={{ padding: '8px 12px', color: 'var(--theme-text-muted)' }}>{ex.mode}/{ex.skillTag}/{ex.level}</td>
                 <td style={{ padding: '8px 12px', color: 'var(--theme-text-muted)' }}>{ex.source}</td>
-                <td style={{ padding: '8px 12px' }}>
+                <td style={{ padding: '8px 12px', whiteSpace: 'nowrap' }}>
                   <span style={{ padding: '2px 8px', borderRadius: 6, fontSize: 11, fontWeight: 700, backgroundColor: ex.status === 'active' ? '#22C55E20' : '#F59E0B20', color: ex.status === 'active' ? '#22C55E' : '#F59E0B' }}>{ex.status}</span>
+                  {ex.reportCount > 0 && (
+                    <span title="Số lượt user báo lỗi" style={{ marginLeft: 6, padding: '2px 7px', borderRadius: 6, fontSize: 11, fontWeight: 700, backgroundColor: '#EF444420', color: '#EF4444' }}>⚠ {ex.reportCount}</span>
+                  )}
                 </td>
                 <td style={{ padding: '8px 12px', textAlign: 'right', whiteSpace: 'nowrap' }}>
+                  <Link
+                    href={`/admin/trainer/${ex.id}`}
+                    style={{ marginRight: 8, padding: '4px 8px', borderRadius: 6, border: '1px solid #6366F1', background: 'transparent', color: '#6366F1', fontSize: 11, textDecoration: 'none' }}
+                  >
+                    Sửa
+                  </Link>
                   <button
                     onClick={() => updateStatus.mutate({ id: ex.id, status: ex.status === 'active' ? 'flagged' : 'active' })}
                     style={{ marginRight: 8, padding: '4px 8px', borderRadius: 6, border: '1px solid var(--theme-border)', background: 'transparent', color: 'var(--theme-text-secondary)', fontSize: 11, cursor: 'pointer' }}

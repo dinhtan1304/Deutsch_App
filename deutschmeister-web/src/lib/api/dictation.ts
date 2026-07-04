@@ -108,6 +108,18 @@ export interface DictationStats {
   bestScore: number;
 }
 
+/** Instant-check status per blank — server never reveals the correct word. */
+export type BlankCheckStatus = 'correct' | 'near' | 'wrong';
+
+export interface CheckAnswersResponse {
+  results: Array<{ blankId: string; status: BlankCheckStatus }>;
+}
+
+export interface HintResponse {
+  blankId: string;
+  firstLetter: string;
+}
+
 // ─── Helper ───────────────────────────────────────────────────────────────────
 
 function toQS(params?: Record<string, any>): string {
@@ -147,6 +159,12 @@ export const dictationApi = {
 
   submitSession: (id: string, userAnswers: Record<string, string>) =>
     apiPost<DictationSession>(`/dictation/session/${id}/submit`, { userAnswers }),
+
+  checkAnswers: (id: string, answers: Record<string, string>) =>
+    apiPost<CheckAnswersResponse>(`/dictation/session/${id}/check`, { answers }),
+
+  getHint: (id: string, blankId: string) =>
+    apiPost<HintResponse>(`/dictation/session/${id}/hint`, { blankId }),
 
   getHistory: (params?: { page?: number; limit?: number; status?: string; cefrLevel?: string }) =>
     apiGet<DictationHistoryResponse>(`/dictation/history${toQS(params)}`),

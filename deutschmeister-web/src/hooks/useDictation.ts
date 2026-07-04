@@ -121,6 +121,20 @@ export function useSubmitDictation() {
   });
 }
 
+export function useCheckDictation() {
+  return useMutation({
+    mutationFn: ({ id, answers }: { id: string; answers: Record<string, string> }) =>
+      dictationApi.checkAnswers(id, answers),
+  });
+}
+
+export function useDictationHint() {
+  return useMutation({
+    mutationFn: ({ id, blankId }: { id: string; blankId: string }) =>
+      dictationApi.getHint(id, blankId),
+  });
+}
+
 export function useDeleteDictation() {
   const queryClient = useQueryClient();
   return useMutation({

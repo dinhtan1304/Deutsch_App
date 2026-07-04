@@ -16,6 +16,9 @@ import {
   TrainerMode,
   TrainerStats,
   AdminExercisesResponse,
+  AdminExerciseDetail,
+  ReportReason,
+  UpdateExercisePatch,
 } from '@/lib/api/grammarTrainer';
 
 export const trainerKeys = {
@@ -24,6 +27,7 @@ export const trainerKeys = {
   stats: () => [...trainerKeys.all, 'stats'] as const,
   history: (params?: Record<string, unknown>) => [...trainerKeys.all, 'history', params] as const,
   adminExercises: (params?: Record<string, unknown>) => [...trainerKeys.all, 'admin', params] as const,
+  adminExercise: (id: string) => [...trainerKeys.all, 'admin', 'detail', id] as const,
 };
 
 // ── Queries ──
@@ -71,7 +75,37 @@ export function useAdminTrainerExercises(params?: {
   });
 }
 
+/** Admin: chi tiết 1 bài tập kèm lịch sử báo lỗi (cho trang edit). */
+export function useAdminTrainerExercise(id: string, enabled = true) {
+  return useQuery<AdminExerciseDetail>({
+    queryKey: trainerKeys.adminExercise(id),
+    queryFn: () => grammarTrainerApi.getAdminExercise(id),
+    enabled: enabled && !!id,
+  });
+}
+
 // ── Mutations ──
+
+/** User báo lỗi 1 bài tập. */
+export function useReportExercise() {
+  return useMutation({
+    mutationFn: ({ id, reason, note }: { id: string; reason: ReportReason; note?: string }) =>
+      grammarTrainerApi.reportExercise(id, { reason, note }),
+  });
+}
+
+/** Admin sửa nội dung 1 bài tập. */
+export function useUpdateExercise() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, patch }: { id: string; patch: UpdateExercisePatch }) =>
+      grammarTrainerApi.updateExercise(id, patch),
+    onSuccess: (_res, { id }) => {
+      qc.invalidateQueries({ queryKey: trainerKeys.all });
+      qc.invalidateQueries({ queryKey: trainerKeys.adminExercise(id) });
+    },
+  });
+}
 
 export function useRecordTrainerSession() {
   const qc = useQueryClient();

@@ -6,6 +6,7 @@ import { Link } from '@/i18n/navigation';
 import { useRouter } from 'next/navigation';
 import * as DictationHooks from '@/hooks/useDictation';
 import { DictationHistoryItem, dictationApi } from '@/lib/api/dictation';
+import { ApiError } from '@/lib/api/client';
 import { GridSkeleton } from '@/components/ui';
 import { ACCENT, STATUS } from '@/lib/tokens';
 
@@ -218,6 +219,10 @@ export default function DictationListPage() {
       }
       router.push(`/practice-test/dictation/${result.id}`);
     } catch (err) {
+      if (err instanceof ApiError && (err.data as { code?: string })?.code === 'VIDEO_NOT_GERMAN') {
+        setUrlError(tQuick('urlNotGerman'));
+        return;
+      }
       const msg = err instanceof Error && err.message ? err.message : '';
       setUrlError(msg || tQuick('urlGenericError'));
     }

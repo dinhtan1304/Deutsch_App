@@ -9,6 +9,7 @@ import { IconFlame, IconCheckCircle, IconXCircle, IconFileText } from '@/compone
 import { TENSES, CASES, TRAINER_LEVELS, TrainerExercise, TrainerMode } from '@/lib/api/grammarTrainer';
 import { useTrainerExercises, useRecordTrainerSession } from '@/hooks/useGrammarTrainer';
 import { buildOptions, gradeAnswer, skillTagLabel } from '@/lib/grammarTrainer/engine';
+import { ReportExerciseModal } from './ReportExerciseModal';
 
 type AnswerMode = 'type' | 'choose';
 type Phase = 'setup' | 'drill' | 'done';
@@ -57,6 +58,7 @@ export default function DrillRunner({ mode }: { mode: TrainerMode }) {
   const startRef = useRef<number>(0);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  const [reportId, setReportId] = useState<string | null>(null);
   const recordMutation = useRecordTrainerSession();
   const recordedRef = useRef(false);
   const awaitingStartRef = useRef(false);
@@ -361,6 +363,14 @@ export default function DrillRunner({ mode }: { mode: TrainerMode }) {
             {current.explanationVi && (
               <div className="text-body mt-1" style={{ color: 'var(--theme-text-secondary)', lineHeight: 1.5 }}>{current.explanationVi}</div>
             )}
+            <button
+              type="button"
+              onClick={() => setReportId(current.id)}
+              className="mt-2 text-caption underline underline-offset-2 transition-opacity hover:opacity-80"
+              style={{ color: 'var(--theme-text-muted)' }}
+            >
+              Báo lỗi câu này
+            </button>
           </div>
         )}
       </Card>
@@ -373,6 +383,8 @@ export default function DrillRunner({ mode }: { mode: TrainerMode }) {
       >
         {revealed ? (idx + 1 >= items.length ? 'Xem kết quả' : 'Câu tiếp →') : 'Kiểm tra'}
       </button>
+
+      {reportId && <ReportExerciseModal exerciseId={reportId} onClose={() => setReportId(null)} />}
     </div>
   );
 }

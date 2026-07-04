@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { useParams, useRouter } from 'next/navigation';
 import { useShadowingSession, useStartShadowing } from '@/hooks/useShadowing';
+import { useStartDictation } from '@/hooks/useDictation';
 import { PageHeader, ScoreRing } from '@/components/ui';
 import { PhraseScoreBadge } from '@/components/shadowing/PhraseScoreBadge';
 import { ACCENT, STATUS } from '@/lib/tokens';
@@ -24,6 +25,7 @@ export default function ShadowingResultPage() {
   const t = useTranslations('practice.dictation.shadow.result');
   const { data: session, isLoading } = useShadowingSession(id);
   const startMut = useStartShadowing();
+  const startDictation = useStartDictation();
   const [filterWeak, setFilterWeak] = useState(false);
 
   const sortedAttempts = useMemo(() => {
@@ -77,6 +79,13 @@ export default function ShadowingResultPage() {
     } catch {
       // toast handled upstream — fall back silently
     }
+  };
+
+  // X1 — practise the same video as a dictation (fill-in-the-blanks).
+  const handleDictate = () => {
+    startDictation.mutate({ videoId: session.video.id }, {
+      onSuccess: (s) => router.push(`/practice-test/dictation/${s.id}`),
+    });
   };
 
   return (
@@ -135,6 +144,18 @@ export default function ShadowingResultPage() {
               style={{ background: ACCENT.reading }}
             >
               {startMut.isPending ? t('retryPending') : t('retry')}
+            </button>
+            <button
+              type="button"
+              onClick={handleDictate}
+              disabled={startDictation.isPending}
+              className="px-5 py-2.5 rounded-md text-body font-semibold border transition-colors hover:bg-(--theme-bg-secondary) disabled:opacity-60"
+              style={{
+                borderColor: 'var(--theme-border)',
+                color: 'var(--theme-text-primary)',
+              }}
+            >
+              ✍️ {t('dictateVideo')}
             </button>
             <Link
               href="/practice-test/dictation/shadow"

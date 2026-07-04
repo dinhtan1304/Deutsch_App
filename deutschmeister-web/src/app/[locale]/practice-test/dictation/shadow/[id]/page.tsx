@@ -14,7 +14,9 @@ import { RecordButton } from '@/components/shadowing/RecordButton';
 import { PhraseScoreBadge } from '@/components/shadowing/PhraseScoreBadge';
 import { AiReviewCounter } from '@/components/shadowing/AiReviewCounter';
 import { ACCENT, STATUS } from '@/lib/tokens';
-import type { ShadowingAttempt, ShadowingSegment } from '@/lib/api/shadowing';
+import type { GradeAttemptResponse, ShadowingAttempt, ShadowingSegment } from '@/lib/api/shadowing';
+
+type WordScore = GradeAttemptResponse['wordScores'][number];
 
 const SPEED_OPTIONS = [0.75, 1, 1.25] as const;
 const TIP_DISMISS_KEY = 'shadowing-tip-dismissed-v1';
@@ -136,13 +138,39 @@ function SegmentListRow({
   );
 }
 
+// ─── Per-word pronunciation chips (S1) ──────────────────────────────────────
+// Colours each word by its score; words flagged with an `issue` carry a dot
+// and surface the explanation on hover (title).
+function WordScoreChips({ words }: { words: WordScore[] }) {
+  if (!words.length) return null;
+  return (
+    <div className="flex flex-wrap justify-center gap-1.5">
+      {words.map((w, i) => {
+        const color = w.score >= 80 ? STATUS.success : w.score >= 60 ? STATUS.warning : STATUS.danger;
+        return (
+          <span
+            key={i}
+            title={w.issue ?? undefined}
+            className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-sm font-bold"
+            style={{ color, background: `${color}1A`, border: `1px solid ${color}33`, cursor: w.issue ? 'help' : 'default' }}
+          >
+            {w.word}
+            {w.issue && <span className="h-1.5 w-1.5 rounded-full" style={{ background: color }} />}
+          </span>
+        );
+      })}
+    </div>
+  );
+}
+
 // ─── Score / feedback panel shown after grading ─────────────────────────────
-function ScoreFeedback({ attempt }: { attempt: ShadowingAttempt }) {
+function ScoreFeedback({ attempt, wordScores }: { attempt: ShadowingAttempt; wordScores?: WordScore[] }) {
   const t = useTranslations('practice.dictation.shadow.session');
   const score = attempt.pronunciationScore ?? 0;
   return (
     <div className="w-full max-w-lg flex flex-col items-center gap-3 mt-4">
       <PhraseScoreBadge score={score} />
+      {wordScores && wordScores.length > 0 && <WordScoreChips words={wordScores} />}
       {attempt.userTranscript && (
         <div
           className="w-full px-4 py-2.5 rounded-xl text-sm italic text-center"
@@ -203,6 +231,9 @@ export default function ShadowingPlayPage() {
   const [autoPause, setAutoPause] = useState(true);
   const [pausedAtSegmentId, setPausedAtSegmentId] = useState<string | null>(null);
   const [tipDismissed, setTipDismissed] = useState(false);
+  // Per-word scores are only returned by the grade mutation (not persisted on
+  // the attempt), so keep the latest set per segment for this session view.
+  const [wordScoresBySeg, setWordScoresBySeg] = useState<Record<string, WordScore[]>>({});
 
   // Read tip banner state from localStorage (client-only)
   useEffect(() => {
@@ -245,6 +276,11 @@ export default function ShadowingPlayPage() {
     playerRef.current?.setSpeed(rate);
   }
 
+  function cycleSpeed() {
+    const idx = SPEED_OPTIONS.indexOf(speed as (typeof SPEED_OPTIONS)[number]);
+    handleSpeedChange(SPEED_OPTIONS[(idx + 1) % SPEED_OPTIONS.length] ?? 1);
+  }
+
   function handleSelectSegment(seg: ShadowingSegment) {
     setSelectedSegmentId(seg.id);
     setActiveSegmentId(seg.id);
@@ -273,12 +309,13 @@ export default function ShadowingPlayPage() {
     setRecordError('');
     setIsProcessing(true);
     try {
-      await gradeAttempt({
+      const res = await gradeAttempt({
         sessionId: id,
         segmentId: currentSegment.id,
         audioBase64,
         mimeType,
       });
+      setWordScoresBySeg(prev => ({ ...prev, [res.segmentId]: res.wordScores }));
     } catch (err) {
       setRecordError(err instanceof Error ? err.message : t('grading'));
     } finally {
@@ -367,10 +404,11 @@ export default function ShadowingPlayPage() {
         <VideoUnavailableFallback sessionId={id} />
       ) : (
         <>
-          {/* Top: video + controls | segment list ─────────────────── */}
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-[300px_1fr] mb-5">
-            {/* Video + controls column */}
-            <div className="flex flex-col gap-2.5">
+          {/* Video (sticky) + main practice column ─────────────────── */}
+          <div className="flex flex-col lg:flex-row gap-4 lg:gap-8 items-start mb-5">
+            {/* Left panel: video + controls — pinned right below the navbar */}
+            <div className="w-full lg:w-100 sticky top-16 lg:top-20 z-20 lg:z-30">
+              <div className="flex flex-col gap-2.5">
               <div className="rounded-md overflow-hidden border aspect-video bg-black/40" style={{ borderColor: 'var(--theme-border)' }}>
                 <YouTubeEmbed
                   ref={playerRef}
@@ -378,11 +416,38 @@ export default function ShadowingPlayPage() {
                   onError={() => setVideoError(true)}
                   onTimeUpdate={handleTimeUpdate}
                   autoPauseSegments={autoPause ? session.segments : undefined}
-                  onAutoPaused={(segId) => setPausedAtSegmentId(segId)}
+                  onAutoPaused={(segId) => {
+                    // The segment that just finished is the one to record next.
+                    setPausedAtSegmentId(segId);
+                    setSelectedSegmentId(segId);
+                    setActiveSegmentId(segId);
+                  }}
                 />
               </div>
-              {/* Controls card */}
-              <div className="rounded-[11px] border p-3" style={{ background: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}>
+              {/* Compact control bar — mobile only, pinned right under the video */}
+              <div className="lg:hidden flex flex-wrap items-center gap-2 rounded-[11px] border p-2" style={{ background: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}>
+                <button type="button" onClick={handleReplayCurrent} aria-label={t('replaySample')} disabled={!currentSegment}
+                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg disabled:opacity-40"
+                  style={{ background: `${ACCENT.reading}18`, color: ACCENT.reading }}>
+                  <IconHeadphones size={15} />
+                </button>
+                <button type="button" onClick={cycleSpeed}
+                  className="mono flex h-8 shrink-0 items-center rounded-lg px-2.5 text-[11px] font-bold"
+                  style={{ background: 'var(--theme-bg-secondary)', color: 'var(--theme-text-secondary)', border: '1px solid var(--theme-border)' }}>
+                  {speed}x
+                </button>
+                <button type="button" onClick={() => setAutoPause((a) => !a)} aria-label={t('autoPause')} aria-pressed={autoPause}
+                  className="flex h-8 shrink-0 items-center gap-1.5 rounded-lg px-2.5"
+                  style={autoPause
+                    ? { background: ACCENT.reading, color: 'white', border: `1px solid ${ACCENT.reading}` }
+                    : { background: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)', border: '1px solid var(--theme-border)' }}>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1" /><rect x="14" y="5" width="4" height="14" rx="1" /></svg>
+                  <span className="text-[10px] font-bold uppercase tracking-wider">{t('autoPause')}</span>
+                </button>
+              </div>
+
+              {/* Controls card — desktop only */}
+              <div className="hidden lg:block rounded-[11px] border p-3" style={{ background: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}>
                 <div className="mb-2.5 flex flex-wrap items-center gap-1.5">
                   <span className="text-[9.5px] font-bold uppercase tracking-wider" style={{ color: 'var(--theme-text-muted)' }}>{t('subtitleSourceLabel')}</span>
                   <span className="rounded-[5px] px-1.5 py-0.5 text-[9.5px] font-bold uppercase tracking-wider"
@@ -413,22 +478,10 @@ export default function ShadowingPlayPage() {
               </div>
             </div>
 
-            {/* Segment list */}
-            <div className="rounded-md border overflow-hidden flex flex-col" style={{ background: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)', maxHeight: 240 }}>
-              <div className="overflow-y-auto flex-1 divide-y" style={{ borderColor: 'var(--theme-border)' }}>
-                {segments.map((seg) => (
-                  <SegmentListRow
-                    key={seg.id}
-                    segment={seg}
-                    isActive={seg.id === activeSegmentId}
-                    isCurrent={seg.id === currentSegmentId}
-                    attempt={attemptByStmtId.get(seg.id)}
-                    onClick={() => handleSelectSegment(seg)}
-                  />
-                ))}
-              </div>
-            </div>
           </div>
+
+          {/* Main practice column */}
+          <div className="flex-1 min-w-0 w-full">
 
           {/* Active segment text — big bold centered ────────────── */}
           {currentSegment && (
@@ -452,19 +505,20 @@ export default function ShadowingPlayPage() {
             )}
 
             <RecordButton
-              maxDurationMs={Math.min(20000, currentSegment ? Math.round((currentSegment.end - currentSegment.start) * 1.5 + 1500) : 8000)}
+              maxDurationMs={40000}
               disabled={isProcessing || !currentSegment}
               onRecorded={handleRecord}
               onError={setRecordError}
               size={88}
               accentColor={ACCENT.reading}
+              countdownMs={3000}
             />
 
             <div className="mt-5 text-center">
               {isProcessing ? (
                 <p className="text-base font-extrabold" style={{ color: ACCENT.reading }}>{t('grading')}</p>
               ) : currentAttempt ? (
-                <ScoreFeedback attempt={currentAttempt} />
+                <ScoreFeedback attempt={currentAttempt} wordScores={wordScoresBySeg[currentAttempt.segmentId]} />
               ) : (
                 <>
                   <p className="text-[15px] font-bold mb-1" style={{ color: 'var(--theme-text-primary)' }}>{t('ready')}</p>
@@ -491,6 +545,25 @@ export default function ShadowingPlayPage() {
               <AiReviewCounter />
             </div>
           </div>
+
+          {/* Segment list */}
+          <div className="mt-5 rounded-md border overflow-hidden flex flex-col" style={{ background: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)', maxHeight: 240 }}>
+            <div className="overflow-y-auto flex-1 divide-y" style={{ borderColor: 'var(--theme-border)' }}>
+              {segments.map((seg) => (
+                <SegmentListRow
+                  key={seg.id}
+                  segment={seg}
+                  isActive={seg.id === activeSegmentId}
+                  isCurrent={seg.id === currentSegmentId}
+                  attempt={attemptByStmtId.get(seg.id)}
+                  onClick={() => handleSelectSegment(seg)}
+                />
+              ))}
+            </div>
+          </div>
+
+          </div>
+        </div>
         </>
       )}
 

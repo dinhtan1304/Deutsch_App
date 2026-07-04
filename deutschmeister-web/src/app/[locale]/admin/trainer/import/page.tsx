@@ -7,15 +7,70 @@ import { getApiErrorMessage } from '@/lib/api/client';
 import type { ImportTrainerResult } from '@/lib/api/grammarTrainer';
 
 const SAMPLE_CONJUGATION = `[
+  // skillTag: praesens | praeteritum | perfekt | futur1 | nebensatz | modalverben | reflexiv | trennbar | imperativ | konjunktiv2
   {
     "mode": "conjugation",
     "level": "A2",
-    "skillTag": "perfekt",            // praesens | praeteritum | perfekt | futur1
+    "skillTag": "perfekt",
     "prompt": "Chia động từ: Gestern hat er Fußball ___. (spielen — Perfekt)",
     "answer": "gespielt",             // chỉ 1 từ điền vào chỗ trống "___"
     "distractors": ["gespielen", "spielte", "spielt"],
     "explanationVi": "Dấu hiệu 'gestern' → quá khứ. Perfekt = haben/sein + Partizip II; spielen → gespielt.",
     "meta": { "infinitive": "spielen", "person": "erSieEs", "tense": "perfekt" }
+  },
+  {
+    "skillTag": "nebensatz",          // động từ dồn về CUỐI câu phụ
+    "mode": "conjugation", "level": "A2",
+    "prompt": "Chia động từ: Ich weiß, dass er jeden Tag Deutsch ___. (lernen — Nebensatz)",
+    "answer": "lernt",
+    "distractors": ["lernen", "lernte", "gelernt"],
+    "explanationVi": "Trong câu phụ (dass…), động từ đã chia đứng cuối câu; er → lernt.",
+    "meta": { "infinitive": "lernen", "person": "erSieEs", "tense": "nebensatz" }
+  },
+  {
+    "skillTag": "modalverben",        // chia ĐỘNG TỪ KHUYẾT THIẾU, Vollverb nguyên mẫu ở cuối
+    "mode": "conjugation", "level": "A2",
+    "prompt": "Chia động từ: Ich ___ heute länger arbeiten. (müssen — Modalverb)",
+    "answer": "muss",
+    "distractors": ["musst", "muß", "müssen"],
+    "explanationVi": "Modalverb chia theo chủ ngữ, động từ chính ở dạng nguyên mẫu cuối câu; ich → muss.",
+    "meta": { "infinitive": "müssen", "person": "ich", "tense": "modalverben" }
+  },
+  {
+    "skillTag": "reflexiv",           // chỗ trống là ĐẠI TỪ PHẢN THÂN
+    "mode": "conjugation", "level": "A2",
+    "prompt": "Chia động từ: Er interessiert ___ für Musik. (sich interessieren — Reflexiv)",
+    "answer": "sich",
+    "distractors": ["ihn", "mich", "dich"],
+    "explanationVi": "Đại từ phản thân theo chủ ngữ er → sich (Akkusativ).",
+    "meta": { "infinitive": "interessieren", "person": "erSieEs", "tense": "reflexiv" }
+  },
+  {
+    "skillTag": "trennbar",           // chỗ trống là TIỀN TỐ TÁCH ở cuối câu
+    "mode": "conjugation", "level": "A2",
+    "prompt": "Chia động từ: Ich stehe jeden Tag um 7 Uhr ___. (aufstehen — trennbar)",
+    "answer": "auf",
+    "distractors": ["an", "aus", "ab"],
+    "explanationVi": "Động từ tách: phần thân 'stehe' đã chia, tiền tố 'auf' tách về cuối câu.",
+    "meta": { "infinitive": "aufstehen", "person": "ich", "tense": "trennbar" }
+  },
+  {
+    "skillTag": "imperativ",          // dạng MỆNH LỆNH ở đầu câu
+    "mode": "conjugation", "level": "A2",
+    "prompt": "Chia động từ: ___ bitte die Tür! (öffnen — Imperativ, du)",
+    "answer": "Öffne",
+    "distractors": ["Öffnen", "Öffnest", "Öffnet"],
+    "explanationVi": "Mệnh lệnh ngôi 'du': bỏ đuôi -st → Öffne (die Tür).",
+    "meta": { "infinitive": "öffnen", "person": "du", "tense": "imperativ" }
+  },
+  {
+    "skillTag": "konjunktiv2",        // würde-Form hoặc hätte/wäre/könnte…
+    "mode": "conjugation", "level": "B1",
+    "prompt": "Chia động từ: An deiner Stelle ___ ich mehr lernen. (lernen — Konjunktiv II)",
+    "answer": "würde",
+    "distractors": ["werde", "wurde", "würdet"],
+    "explanationVi": "Konjunktiv II (giả định/lịch sự): würde + nguyên mẫu; ich → würde lernen.",
+    "meta": { "infinitive": "lernen", "person": "ich", "tense": "konjunktiv2" }
   }
 ]`;
 
@@ -35,23 +90,33 @@ const SAMPLE_CASES = `[
 interface ImportErrorBody { message?: string; errors?: string[]; }
 
 export default function AdminTrainerImportPage() {
+  const [mode, setMode] = useState<'file' | 'paste'>('paste');
   const [files, setFiles] = useState<File[]>([]);
+  const [jsonText, setJsonText] = useState('');
   const [result, setResult] = useState<ImportTrainerResult | null>(null);
   const [errors, setErrors] = useState<string[]>([]);
   const [topLevelError, setTopLevelError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const importMutation = useImportTrainerExercises();
 
-  function handleFilesSelected(list: FileList | null) {
-    if (!list) return;
-    setFiles(Array.from(list).filter((f) => f.name.toLowerCase().endsWith('.json')));
+  function resetOutput() {
     setResult(null); setErrors([]); setTopLevelError(null);
   }
 
-  function handleImport() {
-    if (files.length === 0) return;
-    setResult(null); setErrors([]); setTopLevelError(null);
-    importMutation.mutate(files, {
+  function switchMode(next: 'file' | 'paste') {
+    setMode(next);
+    resetOutput();
+  }
+
+  function handleFilesSelected(list: FileList | null) {
+    if (!list) return;
+    setFiles(Array.from(list).filter((f) => f.name.toLowerCase().endsWith('.json')));
+    resetOutput();
+  }
+
+  function runImport(payload: File[]) {
+    resetOutput();
+    importMutation.mutate(payload, {
       onSuccess: (res) => setResult(res),
       onError: (err: unknown) => {
         const body = (err as { data?: ImportErrorBody })?.data;
@@ -65,6 +130,27 @@ export default function AdminTrainerImportPage() {
     });
   }
 
+  function handleImport() {
+    if (mode === 'file') {
+      if (files.length === 0) return;
+      runImport(files);
+      return;
+    }
+    if (jsonText.trim() === '') return;
+    resetOutput();
+    try {
+      JSON.parse(jsonText);
+    } catch (e) {
+      setTopLevelError('JSON không hợp lệ: ' + (e as Error).message);
+      return;
+    }
+    const blob = new Blob([jsonText], { type: 'application/json' });
+    const pastedFile = new File([blob], 'pasted-exercises.json', { type: 'application/json' });
+    runImport([pastedFile]);
+  }
+
+  const canImport = mode === 'file' ? files.length > 0 : jsonText.trim() !== '';
+
   return (
     <div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
@@ -75,14 +161,40 @@ export default function AdminTrainerImportPage() {
         </div>
       </div>
 
-      <div style={{ backgroundColor: 'var(--theme-bg-card)', border: '1px dashed var(--theme-border)', borderRadius: 12, padding: 20, marginBottom: 16, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
-        <div style={{ fontSize: 13, color: 'var(--theme-text-secondary)' }}>
-          {files.length === 0 ? 'Chưa chọn file (.json, ≤5MB)' : `Đã chọn ${files.length} file`}
+      <div style={{ backgroundColor: 'var(--theme-bg-card)', border: '1px solid var(--theme-border)', borderRadius: 12, padding: 20, marginBottom: 16 }}>
+        <div style={{ display: 'inline-flex', gap: 4, padding: 4, borderRadius: 10, border: '1px solid var(--theme-border)', backgroundColor: 'var(--theme-bg-body)', marginBottom: 16 }}>
+          {(['paste', 'file'] as const).map((m) => (
+            <button
+              key={m}
+              onClick={() => switchMode(m)}
+              disabled={importMutation.isPending}
+              style={{ padding: '6px 14px', borderRadius: 8, border: 'none', fontSize: 13, fontWeight: 600, cursor: 'pointer', backgroundColor: mode === m ? '#6366F1' : 'transparent', color: mode === m ? '#fff' : 'var(--theme-text-secondary)' }}
+            >
+              {m === 'paste' ? 'Dán JSON' : 'Chọn file'}
+            </button>
+          ))}
         </div>
-        <div style={{ display: 'flex', gap: 8 }}>
-          <input ref={inputRef} type="file" multiple accept=".json,application/json" style={{ display: 'none' }} onChange={(e) => handleFilesSelected(e.target.files)} />
-          <button onClick={() => inputRef.current?.click()} disabled={importMutation.isPending} style={{ padding: '8px 14px', borderRadius: 8, border: '1px solid #6366F1', backgroundColor: 'transparent', color: '#6366F1', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>Chọn file</button>
-          <button onClick={handleImport} disabled={files.length === 0 || importMutation.isPending} style={{ padding: '8px 16px', borderRadius: 8, border: 'none', backgroundColor: files.length === 0 || importMutation.isPending ? 'var(--theme-border)' : '#6366F1', color: '#fff', fontSize: 13, fontWeight: 600, cursor: files.length === 0 ? 'not-allowed' : 'pointer' }}>
+
+        {mode === 'paste' ? (
+          <textarea
+            value={jsonText}
+            onChange={(e) => setJsonText(e.target.value)}
+            rows={12}
+            placeholder={'Dán mảng JSON bài tập vào đây, ví dụ: [ { "mode": "cases", ... } ]'}
+            style={{ width: '100%', padding: '10px 12px', backgroundColor: 'var(--theme-bg-body)', border: '1px solid var(--theme-border)', borderRadius: 8, color: 'var(--theme-text-primary)', fontSize: 12, fontFamily: 'ui-monospace, monospace', outline: 'none', resize: 'vertical', boxSizing: 'border-box', marginBottom: 12 }}
+          />
+        ) : (
+          <div style={{ border: '1px dashed var(--theme-border)', borderRadius: 8, padding: 16, marginBottom: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
+            <div style={{ fontSize: 13, color: 'var(--theme-text-secondary)' }}>
+              {files.length === 0 ? 'Chưa chọn file (.json, ≤5MB)' : `Đã chọn ${files.length} file`}
+            </div>
+            <input ref={inputRef} type="file" multiple accept=".json,application/json" style={{ display: 'none' }} onChange={(e) => handleFilesSelected(e.target.files)} />
+            <button onClick={() => inputRef.current?.click()} disabled={importMutation.isPending} style={{ padding: '8px 14px', borderRadius: 8, border: '1px solid #6366F1', backgroundColor: 'transparent', color: '#6366F1', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>Chọn file</button>
+          </div>
+        )}
+
+        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <button onClick={handleImport} disabled={!canImport || importMutation.isPending} style={{ padding: '8px 16px', borderRadius: 8, border: 'none', backgroundColor: !canImport || importMutation.isPending ? 'var(--theme-border)' : '#6366F1', color: '#fff', fontSize: 13, fontWeight: 600, cursor: !canImport ? 'not-allowed' : 'pointer' }}>
             {importMutation.isPending ? 'Đang import…' : 'Bắt đầu import'}
           </button>
         </div>

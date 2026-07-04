@@ -6,6 +6,7 @@ import {
   AdminStats, AdminUserListResponse, AdminUserDetail, CreateWordPayload,
   AdminFeedbackListResponse, AdminTokenStats,
   AdminDictationRequestListResponse, AdminDictationRequest, ApproveRequestPayload,
+  adminVideoApi, AdminVideoListResponse, UpdateVideoPayload,
 } from '@/lib/api/admin';
 import type { FeedbackThread, PostMessagePayload } from '@/lib/api/feedback';
 
@@ -205,6 +206,54 @@ export function useDeleteWord() {
     mutationFn: (id: string) => adminWordApi.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: adminWordKeys.all });
+    },
+  });
+}
+
+// ─── Video library (admin) ────────────────────────────────────────────────────
+
+export const adminVideoKeys = {
+  all: ['admin-videos'] as const,
+  list: (params?: Record<string, unknown>) => [...adminVideoKeys.all, 'list', params] as const,
+};
+
+export function useAdminVideos(params?: {
+  search?: string; cefrLevel?: string; topic?: string;
+  isActive?: string; transcriptSource?: string; page?: number; limit?: number;
+}) {
+  return useQuery<AdminVideoListResponse>({
+    queryKey: adminVideoKeys.list(params),
+    queryFn: () => adminVideoApi.getAll(params),
+  });
+}
+
+export function useUpdateAdminVideo() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: UpdateVideoPayload }) =>
+      adminVideoApi.update(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: adminVideoKeys.all });
+    },
+  });
+}
+
+export function useDeleteAdminVideo() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => adminVideoApi.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: adminVideoKeys.all });
+    },
+  });
+}
+
+export function useRenormalizeAdminVideo() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => adminVideoApi.renormalize(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: adminVideoKeys.all });
     },
   });
 }

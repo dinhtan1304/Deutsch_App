@@ -2,7 +2,19 @@ import { apiGet, apiPost, apiPatch, apiDelete, apiUpload } from './client';
 
 export type TrainerMode = 'conjugation' | 'cases';
 
-export const TENSES = ['praesens', 'praeteritum', 'perfekt', 'futur1'] as const;
+// Conjugation skill tags — gồm cả câu phụ, khuyết thiếu, phản thân, tách, mệnh lệnh, Konjunktiv II
+export const TENSES = [
+  'praesens',
+  'praeteritum',
+  'perfekt',
+  'futur1',
+  'nebensatz',
+  'modalverben',
+  'reflexiv',
+  'trennbar',
+  'imperativ',
+  'konjunktiv2',
+] as const;
 export const CASES = ['nominativ', 'akkusativ', 'dativ', 'genitiv'] as const;
 export const TRAINER_LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1'] as const;
 
@@ -93,7 +105,43 @@ export interface ImportTrainerResult {
 export interface AdminExercise extends TrainerExercise {
   source: string;
   status: string;
+  reportCount: number;
   createdAt: string;
+}
+
+// ── Báo lỗi bài tập ──
+export const REPORT_REASONS = ['wrong_answer', 'typo', 'bad_explanation', 'other'] as const;
+export type ReportReason = (typeof REPORT_REASONS)[number];
+export const REPORT_REASON_LABEL: Record<ReportReason, string> = {
+  wrong_answer: 'Đáp án sai',
+  typo: 'Lỗi chính tả / câu chữ',
+  bad_explanation: 'Giải thích sai / khó hiểu',
+  other: 'Khác',
+};
+
+export interface TrainerExerciseReport {
+  id: string;
+  exerciseId: string;
+  reporterId: string | null;
+  reason: string;
+  note: string | null;
+  createdAt: string;
+}
+
+export interface AdminExerciseDetail extends AdminExercise {
+  reports: TrainerExerciseReport[];
+}
+
+export interface UpdateExercisePatch {
+  level?: string;
+  skillTag?: string;
+  prompt?: string;
+  answer?: string;
+  alternatives?: string[];
+  distractors?: string[];
+  explanationVi?: string;
+  meta?: Record<string, unknown> | null;
+  status?: string;
 }
 
 export interface AdminExercisesResponse {
@@ -129,6 +177,9 @@ export const grammarTrainerApi = {
 
   getStats: () => apiGet<TrainerStats>('/grammar-trainer/stats'),
 
+  reportExercise: (id: string, body: { reason: ReportReason; note?: string }) =>
+    apiPost<{ reported: boolean; deduped: boolean }>(`/grammar-trainer/exercises/${id}/report`, body),
+
   getHistory: (params?: { mode?: TrainerMode; page?: number; limit?: number }) =>
     apiGet<TrainerHistoryResponse>(`/grammar-trainer/history${qs({ ...params })}`),
 
@@ -151,6 +202,12 @@ export const grammarTrainerApi = {
     limit?: number;
   }) =>
     apiGet<AdminExercisesResponse>(`/grammar-trainer/admin/exercises${qs({ ...params })}`),
+
+  getAdminExercise: (id: string) =>
+    apiGet<AdminExerciseDetail>(`/grammar-trainer/admin/exercises/${id}`),
+
+  updateExercise: (id: string, patch: UpdateExercisePatch) =>
+    apiPatch<AdminExercise>(`/grammar-trainer/admin/exercises/${id}/content`, patch),
 
   updateStatus: (id: string, status: string) =>
     apiPatch<AdminExercise>(`/grammar-trainer/admin/exercises/${id}`, { status }),

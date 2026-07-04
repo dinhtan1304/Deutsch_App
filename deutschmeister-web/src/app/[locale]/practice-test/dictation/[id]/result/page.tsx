@@ -10,6 +10,7 @@ import { DictationSessionGraded, Part } from '@/lib/api/dictation';
 import { YouTubeEmbed, YouTubeEmbedRef } from '@/components/dictation/YouTubeEmbed';
 import { ScoreRing, PageHeader } from '@/components/ui';
 import { ACCENT } from '@/lib/tokens';
+import { isNearMiss } from '@/lib/text';
 
 type GradingDetail = DictationSessionGraded['gradingDetails'][number];
 type GradingMap = Map<string, GradingDetail>;
@@ -53,7 +54,7 @@ function getSegmentStats(
   return { correct, total, hasWrong: total > 0 && correct < total };
 }
 
-function GradedPart({ part, gradingMap }: { part: Part; gradingMap: GradingMap }) {
+function GradedPart({ part, gradingMap, nearMissLabel }: { part: Part; gradingMap: GradingMap; nearMissLabel: string }) {
   if (part.type === 'text') {
     return <span style={{ color: 'var(--theme-text-primary)', opacity: 0.85 }}>{part.text}</span>;
   }
@@ -76,12 +77,25 @@ function GradedPart({ part, gradingMap }: { part: Part; gradingMap: GradingMap }
     );
   }
 
+  // Near miss = wrong but a likely typo (≤1 edit). Shown amber (not red) to
+  // reassure the learner they were close.
+  const near = isNearMiss(info.userAnswer ?? '', info.correctWord);
+
   return (
     <span className="inline-flex items-center gap-1 flex-wrap">
-      <span className="inline-block font-bold px-2 py-0.5 rounded-lg text-sm line-through"
-        style={{ color: 'var(--color-status-danger)', background: 'rgba(239,68,68,0.10)' }}>
+      <span
+        className={`inline-block font-bold px-2 py-0.5 rounded-lg text-sm${near ? '' : ' line-through'}`}
+        style={near
+          ? { color: 'var(--color-status-warning)', background: 'rgba(245,158,11,0.12)' }
+          : { color: 'var(--color-status-danger)', background: 'rgba(239,68,68,0.10)' }}>
         {info.userAnswer || '—'}
       </span>
+      {near && (
+        <span className="text-[9px] font-bold uppercase tracking-wide px-1 py-0.5 rounded"
+          style={{ color: 'var(--color-status-warning)', background: 'rgba(245,158,11,0.12)' }}>
+          {nearMissLabel}
+        </span>
+      )}
       <span className="text-[10px] opacity-40" style={{ color: 'var(--theme-text-muted)' }}>→</span>
       <span className="inline-block font-bold px-2 py-0.5 rounded-lg text-sm"
         style={{ color: 'var(--color-status-success)', background: 'rgba(34,197,94,0.12)' }}>
@@ -263,13 +277,17 @@ function MistakesSummary({
       {open && (
         <div className="px-4 pb-4 border-t" style={{ borderColor: 'var(--theme-border)' }}>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 pt-3">
-            {items.map(({ blankId, userAnswer, correctWord }) => (
+            {items.map(({ blankId, userAnswer, correctWord }) => {
+              const near = isNearMiss(userAnswer ?? '', correctWord);
+              return (
               <div key={blankId}
                 className="rounded-xl px-3 py-2.5 flex items-center gap-1.5 min-w-0"
-                style={{ background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.18)' }}>
+                style={near
+                  ? { background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.20)' }
+                  : { background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.18)' }}>
                 {userAnswer ? (
-                  <span className="font-bold text-sm line-through shrink min-w-0 truncate"
-                    style={{ color: 'var(--color-status-danger)' }} title={userAnswer}>
+                  <span className={`font-bold text-sm shrink min-w-0 truncate${near ? '' : ' line-through'}`}
+                    style={{ color: near ? 'var(--color-status-warning)' : 'var(--color-status-danger)' }} title={userAnswer}>
                     {userAnswer}
                   </span>
                 ) : (
@@ -283,7 +301,8 @@ function MistakesSummary({
                   {correctWord}
                 </span>
               </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}
@@ -382,7 +401,7 @@ function SegmentList({ segments, gradingMap, onPlay, filter, onFilterChange, wro
                 <div className="flex-1 min-w-0">
                   <div className="flex flex-wrap items-center gap-x-0.5 gap-y-2 text-[15px] leading-loose">
                     {seg.parts.map((part, i) => (
-                      <GradedPart key={i} part={part} gradingMap={gradingMap} />
+                      <GradedPart key={i} part={part} gradingMap={gradingMap} nearMissLabel={t('nearMiss')} />
                     ))}
                   </div>
                 </div>

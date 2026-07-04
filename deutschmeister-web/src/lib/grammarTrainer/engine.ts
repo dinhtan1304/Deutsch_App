@@ -55,6 +55,12 @@ export const TENSE_LABEL: Record<string, string> = {
   praeteritum: 'Präteritum',
   perfekt: 'Perfekt',
   futur1: 'Futur I',
+  nebensatz: 'Nebensatz',
+  modalverben: 'Modalverben',
+  reflexiv: 'Reflexiv',
+  trennbar: 'Trennbare Verben',
+  imperativ: 'Imperativ',
+  konjunktiv2: 'Konjunktiv II',
 };
 
 export const CASE_LABEL: Record<string, string> = {

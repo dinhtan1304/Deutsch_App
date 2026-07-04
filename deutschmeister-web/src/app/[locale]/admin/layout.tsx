@@ -59,6 +59,7 @@ const NAV_ITEMS = [
   { href: '/admin/feedback', label: 'Phản hồi', icon: IconMessageSquare, exact: false },
   { href: '/admin/dictation-requests', label: 'Dictation Queue', icon: IconVideo, exact: false },
   { href: '/admin/exam-rag', label: 'Đề mẫu RAG', icon: IconDatabase, exact: false },
+  { href: '/admin/videos', label: 'Thư viện Video', icon: IconVideo, exact: false },
 ];
 
 // Quick-access tabs for the mobile bottom bar — the four focus areas.
