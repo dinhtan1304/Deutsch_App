@@ -54,7 +54,21 @@
       "Bash(cd \"e:/Deutsch_App/deutschmeister-web\")",
       "Bash(node -e 'JSON.parse\\(require\\('\\\\''fs'\\\\''\\).readFileSync\\('\\\\''messages/__TRACKED_VAR__/progress.json'\\\\'','\\\\''utf8'\\\\''\\)\\)')",
       "Bash(echo '__TRACKED_VAR__ BAD')",
-      "Bash(rg -ln 'roleplay' messages/vi/*.json)"
+      "Bash(rg -ln 'roleplay' messages/vi/*.json)",
+      "Bash(Get-ChildItem -Path \"e:\\\\Deutsch_App\" -Directory)",
+      "Bash(Select-Object Name)",
+      "Bash(npx tsx *)",
+      "WebFetch(domain:resend.com)",
+      "Bash(echo \"EXIT: $?\")",
+      "Bash(Get-ChildItem -Recurse src/app/[locale]/grammar -ErrorAction SilentlyContinue)",
+      "Bash(Select-Object FullName)",
+      "Bash(Get-ChildItem -Recurse src/app/[locale]/practice-test -ErrorAction SilentlyContinue)",
+      "Bash(git fetch *)",
+      "Bash(git rev-list *)",
+      "Bash(git -C deutschmeister-api status --short)",
+      "mcp__claude_ai_Vercel__list_deployments",
+      "Bash(awk '/^model User \\\\{/,/^\\\\}/' prisma/schema.prisma)",
+      "Bash(git -C deutschmeister-api branch --show-current)"
     ]
   }
 }
