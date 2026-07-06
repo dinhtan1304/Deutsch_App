@@ -9,6 +9,7 @@ import { IconBookOpen, IconChevronLeft, IconEye, IconEyeOff, IconLoader, IconPen
 import { PageHeader, FixedActionBar, MobileSplitTabs } from '@/components/ui';
 import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 import { useUmlautTrigger, UMLAUT_TRIGGER_HINT } from '@/hooks/useUmlautTrigger';
+import { RedemittelPanel } from '../../_components/TeilStrategyPanel';
 
 function IconCheck({ size = 14, style }: { size?: number; style?: React.CSSProperties }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', ...style }}><polyline points="20 6 9 17 4 12" /></svg>;
@@ -193,6 +194,9 @@ export default function WritingEditorPage() {
                 {session.prompt}
               </p>
             </div>
+
+            {/* Redemittel lookup — curated for B1 exam writing */}
+            {session.cefrLevel === 'B1' && <RedemittelPanel skill="writing" />}
 
             {/* Toggle hints */}
             <button onClick={() => setShowHints(!showHints)}

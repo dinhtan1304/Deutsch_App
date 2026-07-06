@@ -8,6 +8,8 @@ import { useExamWritingSession, useSaveExamWritingDraft, useSubmitExamWriting } 
 import { ExamWritingTeil } from '@/lib/api/examWriting';
 import { EXAM_WRITING_DISPLAY } from '@/lib/examConfig';
 import { useExamCountdown, formatTime } from '@/hooks/useExamCountdown';
+import { useMockExamContext } from '@/hooks/useMockExamContext';
+import { TeilStrategyPanel } from '../../../_components/TeilStrategyPanel';
 import { HighlightedText } from '@/components/word-highlight/HighlightedText';
 import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 import { useUmlautTrigger, UMLAUT_TRIGGER_HINT } from '@/hooks/useUmlautTrigger';
@@ -200,6 +202,8 @@ export default function ExamWritingPage() {
   const { data: session, isLoading } = useExamWritingSession(id);
   const saveDraft = useSaveExamWritingDraft();
   const submitMut = useSubmitExamWriting();
+  const { isMock, cockpitHref } = useMockExamContext();
+  const doneHref = isMock && cockpitHref ? cockpitHref : `/practice-test/writing/exam/${id}/result`;
 
   const [activeTeil, setActiveTeil] = useState(0);
   const [userTexts, setUserTexts] = useState<Record<string, string>>({});
@@ -223,9 +227,9 @@ export default function ExamWritingPage() {
   const totalSeconds = (EXAM_WRITING_DISPLAY[session?.examType ?? '']?.[session?.cefrLevel ?? '']?.timeMin ?? 0) * 60;
   const handleTimeUp = useCallback(() => {
     submitMut.mutateAsync({ id, userTexts: userTextsRef.current })
-      .then(() => router.push(`/practice-test/writing/exam/${id}/result`))
+      .then(() => router.push(doneHref))
       .catch(() => {});
-  }, [id, submitMut, router]);
+  }, [id, submitMut, router, doneHref]);
   const { timeRemaining, start: startTimer } = useExamCountdown(totalSeconds, handleTimeUp);
 
   useEffect(() => {
@@ -237,9 +241,9 @@ export default function ExamWritingPage() {
 
   useEffect(() => {
     if (session?.status === 'GRADED') {
-      router.replace(`/practice-test/writing/exam/${id}/result`);
+      router.replace(doneHref);
     }
-  }, [session?.status, id, router]);
+  }, [session?.status, id, router, doneHref]);
 
   useEffect(() => {
     return () => { if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current); };
@@ -281,7 +285,7 @@ export default function ExamWritingPage() {
     setErrorMsg('');
     try {
       await submitMut.mutateAsync({ id, userTexts });
-      router.push(`/practice-test/writing/exam/${id}/result`);
+      router.push(doneHref);
     } catch {
       setErrorMsg(tCommon('submitError'));
     }
@@ -390,6 +394,13 @@ export default function ExamWritingPage() {
           })}
         </div>
       </div>
+
+      {/* Per-Teil strategy hints — never during a mock sitting */}
+      {!isMock && (
+        <div className="max-w-2xl mx-auto">
+          <TeilStrategyPanel examType={session.examType} cefrLevel={session.cefrLevel} skill="writing" teilNumber={currentTeil.number} />
+        </div>
+      )}
 
       {/* ── Content ── */}
       <div className="pb-24">

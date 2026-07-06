@@ -1,10 +1,39 @@
 'use client';
 
 import { useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useRouter } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
 import { EXAM_PROVIDERS, VISIBLE_LEVELS, providerLevels, coerceLevel } from '@/config/examProviders';
 import { SetupSection } from './createSetup';
+import { TeilStrategyPanel } from './TeilStrategyPanel';
+import type { StrategySkill } from '../_data/teil-strategies';
+
+export interface TeilPreset {
+  examType?: string;
+  cefrLevel?: string;
+  teilNumber?: number;
+}
+
+/**
+ * Reads a single-Teil practice preset from the URL — the deep-link target the
+ * Exam Readiness recommendations use:
+ *   /practice-test/<skill>/new?mode=teil&examType=GOETHE&level=B1&teil=3
+ * `presetMode` is 'teil' when the link asked for Teil mode, else null.
+ */
+export function useTeilPresetFromQuery(): { presetMode: 'teil' | null; initial: TeilPreset } {
+  const searchParams = useSearchParams();
+  const presetMode = searchParams.get('mode') === 'teil' ? ('teil' as const) : null;
+  const teilRaw = Number(searchParams.get('teil'));
+  return {
+    presetMode,
+    initial: {
+      examType: searchParams.get('examType') ?? undefined,
+      cefrLevel: searchParams.get('level') ?? undefined,
+      teilNumber: Number.isInteger(teilRaw) && teilRaw >= 1 ? teilRaw : undefined,
+    },
+  };
+}
 
 type IconProps = { size?: number; style?: React.CSSProperties };
 function IconLoader({ size = 16, style }: IconProps) {
@@ -28,17 +57,30 @@ export function TeilPracticeSetup({
   isPending,
   onGenerate,
   answerHref,
+  initial,
+  skill,
 }: {
   displayMap: DisplayMap;
   isPending: boolean;
   onGenerate: (data: { examType: string; cefrLevel: string; teilNumber: number }) => Promise<{ id: string }>;
   answerHref: (id: string) => string;
+  initial?: TeilPreset;
+  /** When set, the preview column also shows the strategy of the chosen Teil. */
+  skill?: StrategySkill;
 }) {
   const router = useRouter();
   const tSetup = useTranslations('practice.examCommon.setup');
-  const [examType, setExamType] = useState<string>('GOETHE');
-  const [cefrLevel, setCefrLevel] = useState<string>('B1');
-  const [teilNumber, setTeilNumber] = useState<number>(1);
+  const initialExamType = initial?.examType && displayMap[initial.examType] ? initial.examType : 'GOETHE';
+  const initialLevel = initial?.cefrLevel && displayMap[initialExamType]?.[initial.cefrLevel]
+    ? initial.cefrLevel
+    : coerceLevel(initialExamType, 'B1');
+  const [examType, setExamType] = useState<string>(initialExamType);
+  const [cefrLevel, setCefrLevel] = useState<string>(initialLevel);
+  const [teilNumber, setTeilNumber] = useState<number>(() => {
+    const max = displayMap[initialExamType]?.[initialLevel]?.structure.length ?? 1;
+    const wanted = initial?.teilNumber ?? 1;
+    return wanted >= 1 && wanted <= max ? wanted : 1;
+  });
   const [errorMsg, setErrorMsg] = useState('');
 
   const examInfo = displayMap[examType]?.[cefrLevel];
@@ -154,6 +196,11 @@ export function TeilPracticeSetup({
             <div className="p-4 text-center text-caption" style={{ color: 'var(--theme-text-muted)' }}>{tSetup('naBadge')}</div>
           )}
         </div>
+
+        {/* Strategy preview for the selected Teil (only where content exists) */}
+        {skill && ready && (
+          <TeilStrategyPanel examType={examType} cefrLevel={cefrLevel} skill={skill} teilNumber={teilNumber} defaultOpen />
+        )}
 
         <button onClick={handleGenerate} disabled={!ready || isPending}
           className={`flex h-13 items-center justify-center gap-2.5 rounded-[13px] text-[15px] font-bold transition-transform ${ready && !isPending ? 'hover:-translate-y-0.5 active:scale-95' : 'cursor-not-allowed'}`}

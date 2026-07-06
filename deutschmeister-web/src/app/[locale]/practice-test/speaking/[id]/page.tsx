@@ -7,6 +7,7 @@ import { Link } from '@/i18n/navigation';
 import { useFreeSpeakingSession, useSubmitFreeSpeaking } from '@/hooks/useFreeSpeaking';
 import { PageHeader, FixedActionBar } from '@/components/ui';
 import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import { RedemittelPanel } from '../../_components/TeilStrategyPanel';
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
 function IconMic({ size = 20, style }: { size?: number; style?: React.CSSProperties }) {
@@ -305,6 +306,9 @@ export default function FreeSpeakingSessionPage() {
               </ul>
             </div>
           )}
+
+          {/* Redemittel lookup — curated for B1 exam speaking */}
+          {session.cefrLevel === 'B1' && <RedemittelPanel skill="speaking" />}
         </div>
 
         {/* Right Side: Recorder */}

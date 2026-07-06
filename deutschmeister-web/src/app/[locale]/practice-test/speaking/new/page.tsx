@@ -9,7 +9,7 @@ import { EXAM_SPEAKING_DISPLAY } from '@/lib/examConfig';
 import { QuotaPaywall } from '@/components/subscription/QuotaPaywall';
 import { QuotaBanner } from '@/components/subscription/QuotaBanner';
 import { SetupSection, PromptToken } from '../../_components/createSetup';
-import { TeilPracticeSetup } from '../../_components/TeilPracticeSetup';
+import { TeilPracticeSetup, useTeilPresetFromQuery } from '../../_components/TeilPracticeSetup';
 
 type IconProps = { size?: number; style?: React.CSSProperties };
 function IconChevronLeft({ size = 16, style }: IconProps) {
@@ -43,7 +43,8 @@ export default function FreeSpeakingNewPage() {
   const generateMut = useGenerateFreeSpeaking();
   const examGenMut = useGenerateExamSpeaking();
 
-  const [mode, setMode] = useState<'topic' | 'teil'>('topic');
+  const teilPreset = useTeilPresetFromQuery();
+  const [mode, setMode] = useState<'topic' | 'teil'>(teilPreset.presetMode ?? 'topic');
   const [cefrLevel, setCefrLevel] = useState('B1');
   const [topicType, setTopicType] = useState<typeof TOPIC_KEYS[number]>('sich_vorstellen');
   const loading = generateMut.isPending;
@@ -100,6 +101,8 @@ export default function FreeSpeakingNewPage() {
             isPending={examGenMut.isPending}
             onGenerate={(d) => examGenMut.mutateAsync(d)}
             answerHref={(id) => `/practice-test/speaking/exam/${id}`}
+            initial={teilPreset.initial}
+            skill="speaking"
           />
         ) : (
         <>

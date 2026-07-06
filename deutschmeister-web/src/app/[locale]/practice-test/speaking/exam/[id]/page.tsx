@@ -8,6 +8,8 @@ import { useExamSpeakingSession, useSubmitExamSpeaking } from '@/hooks/useExamSp
 import { ExamSpeakingTeil } from '@/lib/api/examSpeaking';
 import { EXAM_SPEAKING_DISPLAY } from '@/lib/examConfig';
 import { useExamCountdown, formatTime } from '@/hooks/useExamCountdown';
+import { useMockExamContext } from '@/hooks/useMockExamContext';
+import { TeilStrategyPanel } from '../../../_components/TeilStrategyPanel';
 import { PageHeader, FixedActionBar } from '@/components/ui';
 import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 
@@ -91,6 +93,8 @@ export default function ExamSpeakingSessionPage() {
   const tCommon = useTranslations('practice.examCommon.answering');
   const { data: session, isLoading } = useExamSpeakingSession(id);
   const submitMut = useSubmitExamSpeaking();
+  const { isMock, cockpitHref } = useMockExamContext();
+  const doneHref = isMock && cockpitHref ? cockpitHref : `/practice-test/speaking/exam/${id}/result`;
 
   const [currentTeilIdx, setCurrentTeilIdx] = useState(0);
   const [teilState, setTeilState] = useState<TeilState>('idle');
@@ -150,11 +154,11 @@ export default function ExamSpeakingSessionPage() {
         };
       }
       await submitMut.mutateAsync({ id, teileData });
-      router.push(`/practice-test/speaking/exam/${id}/result`);
+      router.push(doneHref);
     } catch {
       alert(t('submitError'));
     }
-  }, [stopTimer, session, blobMap, transcriptMap, id, submitMut, router, t]);
+  }, [stopTimer, session, blobMap, transcriptMap, id, submitMut, router, t, doneHref]);
 
   // Hết giờ: dừng mic/ghi âm rồi nộp các bản ghi đã có.
   useEffect(() => { timeUpRef.current = () => { cleanup(); handleSubmit(); }; }, [cleanup, handleSubmit]);
@@ -180,7 +184,7 @@ export default function ExamSpeakingSessionPage() {
   }
 
   if (session.status === 'GRADED' || session.status === 'GRADING') {
-    router.replace(`/practice-test/speaking/exam/${id}/result`);
+    router.replace(doneHref);
     return null;
   }
 
@@ -317,7 +321,7 @@ export default function ExamSpeakingSessionPage() {
   return (
     <div className="max-w-360 mx-auto px-4 py-6 pb-28">
       <PageHeader
-        backHref="/practice-test/speaking/exam"
+        backHref={isMock && cockpitHref ? cockpitHref : '/practice-test/speaking/exam'}
         title={t('pageTitle')}
         accent="speaking"
         right={
@@ -366,6 +370,11 @@ export default function ExamSpeakingSessionPage() {
           );
         })}
       </div>
+
+      {/* Per-Teil strategy hints — never during a mock sitting */}
+      {!isMock && (
+        <TeilStrategyPanel examType={session.examType} cefrLevel={session.cefrLevel} skill="speaking" teilNumber={currentTeil.number} />
+      )}
 
       {/* Split Layout */}
       <div className="flex flex-col lg:flex-row gap-8">

@@ -93,6 +93,16 @@
         "title": "Nói",
         "titleDe": "Prüfungssprechen",
         "description": "Luyện đủ phần Sprechen theo format Goethe/TELC."
+      },
+      "mock": {
+        "title": "Thi thử toàn phần",
+        "titleDe": "Prüfungssimulation",
+        "description": "Trọn buổi thi 4 kỹ năng liên tục, chấm đậu/rớt theo luật thi thật."
+      },
+      "readiness": {
+        "title": "Mức độ sẵn sàng",
+        "titleDe": "Prüfungsreife",
+        "description": "Điểm sẵn sàng, Teil yếu nhất và gợi ý luyện tiếp trước ngày thi."
       }
     },
     "cta": {
@@ -1564,5 +1574,118 @@
         "wortschatz": "Wortschatz"
       }
     }
+  },
+  "mockExam": {
+    "list": {
+      "title": "Thi thử toàn phần",
+      "subtitle": "Mô phỏng trọn buổi thi thật: 4 kỹ năng liên tục theo giờ chuẩn, chấm đậu/rớt theo luật chính thức.",
+      "new": "Buổi thi mới",
+      "emptyTitle": "Chưa có buổi thi thử nào",
+      "emptySubtitle": "Tạo buổi thi thử đầu tiên để biết bạn đã sẵn sàng cho kỳ thi thật chưa.",
+      "statusInProgress": "Đang thi",
+      "statusCompleted": "Hoàn thành",
+      "statusAbandoned": "Đã hủy",
+      "passed": "BESTANDEN",
+      "failed": "NICHT BESTANDEN",
+      "modulesLine": "{count} phần thi",
+      "withSpeaking": "có Sprechen",
+      "withoutSpeaking": "không Sprechen"
+    },
+    "new": {
+      "pageTitle": "Buổi thi thử mới",
+      "pageSubtitle": "Chọn chứng chỉ và cấp độ — hệ thống dựng trọn buổi thi như ngày thi thật.",
+      "speakingLabel": "Phần thi Nói (Sprechen)",
+      "speakingOn": "Có — thi đủ 4 kỹ năng",
+      "speakingOff": "Bỏ qua — chỉ thi Lesen, Hören, Schreiben",
+      "speakingHint": "Ở kỳ thi thật, Sprechen thi theo cặp/nhóm. Bạn có thể bỏ qua và luyện riêng phần nói.",
+      "totalTime": "Tổng thời gian",
+      "modulesLabel": "Các phần thi",
+      "ruleGoethe": "Luật đậu: đạt tối thiểu 60% cho TỪNG kỹ năng (Goethe/ÖSD).",
+      "ruleTelc": "Luật đậu: đạt tối thiểu 60% tổng điểm (TELC/TestDaF — đơn giản hóa).",
+      "start": "Bắt đầu buổi thi",
+      "loadingLong": "Đang dựng phần thi đầu tiên…",
+      "loadingHint": "AI đang tạo đề Lesen — thường mất 30–60 giây.",
+      "errorCreate": "Không tạo được buổi thi. Vui lòng thử lại."
+    },
+    "cockpit": {
+      "eyebrow": "Prüfungssimulation",
+      "title": "Buổi thi thử {examType} {cefrLevel}",
+      "subtitle": "Làm lần lượt từng phần như buổi thi thật. Nộp xong một phần mới mở phần kế tiếp — kết quả chỉ hiện ở phiếu điểm cuối buổi.",
+      "module": { "reading": "Lesen", "listening": "Hören", "writing": "Schreiben", "speaking": "Sprechen" },
+      "moduleVi": { "reading": "Đọc hiểu", "listening": "Nghe hiểu", "writing": "Viết", "speaking": "Nói" },
+      "statusPending": "Chưa mở",
+      "statusActive": "Đang làm",
+      "statusGrading": "Đang chấm…",
+      "statusDone": "Đã nộp",
+      "enter": "Vào thi",
+      "advance": "Mở phần kế tiếp",
+      "advanceLoading": "Đang tạo đề…",
+      "advanceHint": "AI tạo đề phần kế tiếp — thường mất 30–60 giây.",
+      "finish": "Chốt kết quả",
+      "finishWait": "Chờ AI chấm xong các phần Viết/Nói để chốt kết quả.",
+      "viewResult": "Xem phiếu điểm",
+      "abandon": "Hủy buổi thi",
+      "confirmAbandon": "Hủy buổi thi thử này? Các phần đã nộp vẫn được giữ trong lịch sử từng kỹ năng.",
+      "minutes": "{count} phút",
+      "progress": "{done}/{total} phần",
+      "errorAdvance": "Không tạo được phần thi kế tiếp. Vui lòng thử lại."
+    },
+    "result": {
+      "title": "Phiếu điểm — {examType} {cefrLevel}",
+      "subtitle": "Kết quả buổi thi thử ngày {date}",
+      "bestanden": "BESTANDEN",
+      "nichtBestanden": "NICHT BESTANDEN",
+      "overallLabel": "Điểm trung bình",
+      "gradeLabel": "Xếp loại",
+      "ruleNotePerModule": "Luật Goethe/ÖSD: mỗi kỹ năng phải đạt tối thiểu 60/100.",
+      "ruleNoteTotal": "Luật TELC/TestDaF (đơn giản hóa): tổng điểm trung bình phải đạt tối thiểu 60%.",
+      "thresholdLine": "Ngưỡng đậu 60%",
+      "colModule": "Phần thi",
+      "colScore": "Điểm",
+      "colResult": "Kết quả",
+      "pass": "Đạt",
+      "fail": "Chưa đạt",
+      "viewDetail": "Xem chi tiết",
+      "tryAgain": "Thi thử lại",
+      "backToList": "Về danh sách",
+      "notFinished": "Buổi thi chưa được chốt kết quả.",
+      "goCockpit": "Về buổi thi"
+    }
+  },
+  "readiness": {
+    "title": "Mức độ sẵn sàng thi",
+    "subtitle": "Tổng hợp kết quả đề chuẩn thành một bức tranh: đã vượt ngưỡng 60% chưa, kỹ năng nào yếu, nên luyện gì tiếp.",
+    "gaugeLabel": "Sẵn sàng",
+    "gaugeHint": "Tính theo kỹ năng yếu nhất — đúng luật Goethe: một kỹ năng dưới 60% là trượt cả kỳ thi.",
+    "daysLeft": "Còn {count} ngày đến kỳ thi",
+    "noPlan": "Chưa đặt ngày thi",
+    "noPlanCta": "Tạo lộ trình học",
+    "skillsTitle": "Từng kỹ năng",
+    "skillsHint": "Điểm trung bình {window} bài gần nhất so với vạch 60%.",
+    "attempts": "{count} bài",
+    "bestLabel": "Tốt nhất",
+    "noData": "Chưa có dữ liệu",
+    "practiceNow": "Làm đề ngay",
+    "teilTitle": "Độ chính xác theo Teil",
+    "teilHint": "Trung bình các bài gần nhất — đỏ là dưới ngưỡng đậu.",
+    "recTitle": "Nên luyện tiếp",
+    "recCta": "Luyện Teil này",
+    "empty": "Chưa có bài {examType} {cefrLevel} nào được chấm. Làm đề chuẩn đầu tiên để bắt đầu đo mức sẵn sàng.",
+    "startFirst": "Làm đề chuẩn",
+    "mockCta": "Thi thử toàn phần",
+    "skillNames": {
+      "reading": "Đọc · Lesen",
+      "listening": "Nghe · Hören",
+      "writing": "Viết · Schreiben",
+      "speaking": "Nói · Sprechen"
+    }
+  },
+  "teilStrategy": {
+    "title": "Chiến lược làm bài — Teil {teil}",
+    "goal": "Mục tiêu",
+    "steps": "Cách làm",
+    "traps": "Bẫy thường gặp",
+    "redemittel": "Redemittel — mẫu câu",
+    "redemittelPanelTitle": "Redemittel B1 — tra cứu mẫu câu"
   }
 }

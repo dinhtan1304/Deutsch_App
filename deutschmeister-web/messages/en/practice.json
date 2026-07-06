@@ -93,6 +93,16 @@
         "title": "Speaking",
         "titleDe": "Prüfungssprechen",
         "description": "Practice the full Sprechen section in Goethe/TELC format."
+      },
+      "mock": {
+        "title": "Full mock exam",
+        "titleDe": "Prüfungssimulation",
+        "description": "A complete sitting of all skills back to back, graded with real pass rules."
+      },
+      "readiness": {
+        "title": "Exam readiness",
+        "titleDe": "Prüfungsreife",
+        "description": "Readiness score, weakest Teile and what to practise before exam day."
       }
     },
     "cta": {
@@ -1564,5 +1574,118 @@
         "wortschatz": "Wortschatz"
       }
     }
+  },
+  "mockExam": {
+    "list": {
+      "title": "Full mock exam",
+      "subtitle": "Simulate a real exam day: all skills back to back with official timing and official pass rules.",
+      "new": "New sitting",
+      "emptyTitle": "No mock exams yet",
+      "emptySubtitle": "Run your first full mock exam to find out whether you are ready for the real certificate.",
+      "statusInProgress": "In progress",
+      "statusCompleted": "Completed",
+      "statusAbandoned": "Abandoned",
+      "passed": "BESTANDEN",
+      "failed": "NICHT BESTANDEN",
+      "modulesLine": "{count} modules",
+      "withSpeaking": "with Sprechen",
+      "withoutSpeaking": "without Sprechen"
+    },
+    "new": {
+      "pageTitle": "New mock exam",
+      "pageSubtitle": "Pick a certificate and level — we build the whole sitting exactly like the real exam day.",
+      "speakingLabel": "Speaking module (Sprechen)",
+      "speakingOn": "Include — all 4 skills",
+      "speakingOff": "Skip — Lesen, Hören, Schreiben only",
+      "speakingHint": "In the real exam, Sprechen is taken in pairs/groups. You can skip it here and practise speaking separately.",
+      "totalTime": "Total time",
+      "modulesLabel": "Modules",
+      "ruleGoethe": "Pass rule: at least 60% in EVERY module (Goethe/ÖSD).",
+      "ruleTelc": "Pass rule: at least 60% overall (TELC/TestDaF — simplified).",
+      "start": "Start the sitting",
+      "loadingLong": "Building the first module…",
+      "loadingHint": "The AI is generating the Lesen paper — usually 30–60 seconds.",
+      "errorCreate": "Could not create the sitting. Please try again."
+    },
+    "cockpit": {
+      "eyebrow": "Prüfungssimulation",
+      "title": "Mock exam {examType} {cefrLevel}",
+      "subtitle": "Work through the modules in order, like on exam day. The next module unlocks after you submit — results only appear on the final score report.",
+      "module": { "reading": "Lesen", "listening": "Hören", "writing": "Schreiben", "speaking": "Sprechen" },
+      "moduleVi": { "reading": "Reading", "listening": "Listening", "writing": "Writing", "speaking": "Speaking" },
+      "statusPending": "Locked",
+      "statusActive": "In progress",
+      "statusGrading": "Grading…",
+      "statusDone": "Submitted",
+      "enter": "Enter module",
+      "advance": "Unlock next module",
+      "advanceLoading": "Generating paper…",
+      "advanceHint": "The AI is generating the next module — usually 30–60 seconds.",
+      "finish": "Finalise result",
+      "finishWait": "Waiting for the AI to finish grading Writing/Speaking before the result can be finalised.",
+      "viewResult": "View score report",
+      "abandon": "Abandon sitting",
+      "confirmAbandon": "Abandon this mock exam? Submitted modules stay in each skill's history.",
+      "minutes": "{count} min",
+      "progress": "{done}/{total} modules",
+      "errorAdvance": "Could not generate the next module. Please try again."
+    },
+    "result": {
+      "title": "Score report — {examType} {cefrLevel}",
+      "subtitle": "Mock exam result from {date}",
+      "bestanden": "BESTANDEN",
+      "nichtBestanden": "NICHT BESTANDEN",
+      "overallLabel": "Average score",
+      "gradeLabel": "Grade",
+      "ruleNotePerModule": "Goethe/ÖSD rule: every module needs at least 60/100.",
+      "ruleNoteTotal": "TELC/TestDaF rule (simplified): the overall average must reach 60%.",
+      "thresholdLine": "Pass mark 60%",
+      "colModule": "Module",
+      "colScore": "Score",
+      "colResult": "Result",
+      "pass": "Passed",
+      "fail": "Failed",
+      "viewDetail": "View details",
+      "tryAgain": "Retake mock exam",
+      "backToList": "Back to list",
+      "notFinished": "This sitting has not been finalised yet.",
+      "goCockpit": "Back to sitting"
+    }
+  },
+  "readiness": {
+    "title": "Exam readiness",
+    "subtitle": "Your mock exam results in one picture: are you over the 60% line, which skill is weakest, what to practise next.",
+    "gaugeLabel": "Ready",
+    "gaugeHint": "Gated by your weakest skill — the Goethe rule: one module under 60% fails the whole exam.",
+    "daysLeft": "{count} days until the exam",
+    "noPlan": "No exam date set",
+    "noPlanCta": "Create study plan",
+    "skillsTitle": "Per skill",
+    "skillsHint": "Average of your last {window} papers against the 60% line.",
+    "attempts": "{count} papers",
+    "bestLabel": "Best",
+    "noData": "No data yet",
+    "practiceNow": "Take a paper",
+    "teilTitle": "Accuracy per Teil",
+    "teilHint": "Averaged over recent papers — red means below the pass mark.",
+    "recTitle": "Practise next",
+    "recCta": "Practise this Teil",
+    "empty": "No graded {examType} {cefrLevel} papers yet. Take your first mock paper to start measuring readiness.",
+    "startFirst": "Take a mock paper",
+    "mockCta": "Full mock exam",
+    "skillNames": {
+      "reading": "Reading · Lesen",
+      "listening": "Listening · Hören",
+      "writing": "Writing · Schreiben",
+      "speaking": "Speaking · Sprechen"
+    }
+  },
+  "teilStrategy": {
+    "title": "Strategy — Teil {teil}",
+    "goal": "Goal",
+    "steps": "How to work it",
+    "traps": "Common traps",
+    "redemittel": "Redemittel — useful phrases",
+    "redemittelPanelTitle": "Redemittel B1 — phrase lookup"
   }
 }

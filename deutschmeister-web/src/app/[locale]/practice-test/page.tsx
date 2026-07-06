@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Link } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
 import {
-  IconPenLine, IconHeadphones, IconBookOpen, IconMic, IconZap, IconArrowRight, IconSparkles,
+  IconPenLine, IconHeadphones, IconBookOpen, IconMic, IconZap, IconArrowRight, IconSparkles, IconTrophy, IconTarget,
 } from '@/components/ui/Icons';
 import { ACCENT } from '@/lib/tokens';
 import { SurfaceCard } from '@/components/ui';
@@ -43,6 +43,9 @@ const MODES: Mode[] = [
   { key: 'roleplay',      group: 'ai', ns: 'ai', href: '/practice-test/roleplay',      icon: IconZap,        color: ACCENT.examWriting },
   { key: 'pronunciation', group: 'ai', ns: 'ai', href: '/practice-test/pronunciation', icon: IconMic,        color: ACCENT.listening },
   { key: 'dictation',     group: 'ai', ns: 'ai', href: '/practice-test/dictation',     icon: IconHeadphones, color: ACCENT.dictation },
+
+  { key: 'mock', group: 'exam', ns: 'exam', href: '/practice-test/mock-exam', icon: IconTrophy, color: ACCENT.premium },
+  { key: 'readiness', group: 'exam', ns: 'exam', href: '/practice-test/readiness', icon: IconTarget, color: ACCENT.xp },
 ];
 
 const GROUPS: { id: Group; color: string; subKey: 'skills.subtitle' | 'exam.subtitleUnlocked' | 'ai.subtitle'; premium?: boolean }[] = [

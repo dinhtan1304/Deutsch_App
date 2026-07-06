@@ -8,6 +8,8 @@ import { useExamListeningSession, useSubmitExamListening } from '@/hooks/useExam
 import { ExamListeningTeil, ExamListeningQuestion } from '@/lib/api/examListening';
 import { EXAM_LISTENING_DISPLAY } from '@/lib/examConfig';
 import { useExamCountdown, formatTime } from '@/hooks/useExamCountdown';
+import { useMockExamContext } from '@/hooks/useMockExamContext';
+import { TeilStrategyPanel } from '../../../_components/TeilStrategyPanel';
 import { PageHeader, FixedActionBar } from '@/components/ui';
 import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 import { synthesizeAudioSequence, type AudioSequenceHandle } from '@/lib/utils';
@@ -313,6 +315,8 @@ export default function ExamListeningPage() {
   const tCommon = useTranslations('practice.examCommon.answering');
   const { data: session, isLoading } = useExamListeningSession(id);
   const submitMut = useSubmitExamListening();
+  const { isMock, cockpitHref } = useMockExamContext();
+  const doneHref = isMock && cockpitHref ? cockpitHref : `/practice-test/listening/exam/${id}/result`;
 
   const [userAnswers, setUserAnswers] = useState<Record<string, Record<string, string>>>({});
   const [currentTeil, setCurrentTeil] = useState(0);
@@ -328,9 +332,9 @@ export default function ExamListeningPage() {
   const totalSeconds = (EXAM_LISTENING_DISPLAY[session?.examType ?? '']?.[session?.cefrLevel ?? '']?.timeMin ?? 0) * 60;
   const handleTimeUp = useCallback(() => {
     submitMut.mutateAsync({ id, userAnswers: userAnswersRef.current })
-      .then(() => router.push(`/practice-test/listening/exam/${id}/result`))
+      .then(() => router.push(doneHref))
       .catch(() => {});
-  }, [id, submitMut, router]);
+  }, [id, submitMut, router, doneHref]);
   const { timeRemaining, start: startTimer } = useExamCountdown(totalSeconds, handleTimeUp);
 
   const handleAnswer = useCallback((teilNumber: number, qid: string, val: string) => {
@@ -342,9 +346,9 @@ export default function ExamListeningPage() {
 
   useEffect(() => {
     if (session?.status === 'GRADED') {
-      router.replace(`/practice-test/listening/exam/${id}/result`);
+      router.replace(doneHref);
     }
-  }, [session?.status, id, router]);
+  }, [session?.status, id, router, doneHref]);
 
   if (isLoading) {
     return (
@@ -383,7 +387,7 @@ export default function ExamListeningPage() {
     setError('');
     try {
       await submitMut.mutateAsync({ id, userAnswers });
-      router.push(`/practice-test/listening/exam/${id}/result`);
+      router.push(doneHref);
     } catch {
       setError(tCommon('submitError'));
     }
@@ -394,7 +398,7 @@ export default function ExamListeningPage() {
   return (
     <div className="max-w-360 mx-auto px-4 py-6 pb-28">
       <PageHeader
-        backHref="/practice-test/listening/exam"
+        backHref={isMock && cockpitHref ? cockpitHref : '/practice-test/listening/exam'}
         title={t('pageTitle')}
         accent="listening"
         right={
@@ -446,6 +450,11 @@ export default function ExamListeningPage() {
           );
         })}
       </div>
+
+      {/* Per-Teil strategy hints — never during a mock sitting */}
+      {!isMock && (
+        <TeilStrategyPanel examType={session.examType} cefrLevel={session.cefrLevel} skill="listening" teilNumber={teil.number} />
+      )}
 
       <div className="flex flex-col lg:flex-row gap-8">
         <div className="lg:w-1/2 shrink-0 lg:sticky lg:top-20 lg:self-start lg:max-h-[calc(100vh-10rem)] lg:overflow-y-auto lg:pr-1 space-y-6">

@@ -9,7 +9,7 @@ import { EXAM_LISTENING_DISPLAY } from '@/lib/examConfig';
 import { QuotaPaywall } from '@/components/subscription/QuotaPaywall';
 import { QuotaBanner } from '@/components/subscription/QuotaBanner';
 import { SetupSection, PromptToken } from '../../_components/createSetup';
-import { TeilPracticeSetup } from '../../_components/TeilPracticeSetup';
+import { TeilPracticeSetup, useTeilPresetFromQuery } from '../../_components/TeilPracticeSetup';
 
 type IconProps = { size?: number; style?: React.CSSProperties };
 function IconChevronLeft({ size = 16, style }: IconProps) {
@@ -44,7 +44,8 @@ export default function NewListeningPage() {
   const generateMut = useGenerateListening();
   const examGenMut = useGenerateExamListening();
 
-  const [mode, setMode] = useState<'topic' | 'teil'>('topic');
+  const teilPreset = useTeilPresetFromQuery();
+  const [mode, setMode] = useState<'topic' | 'teil'>(teilPreset.presetMode ?? 'topic');
   const [level, setLevel] = useState<typeof LEVEL_IDS[number]>('A2');
   const [scriptType, setScriptType] = useState<typeof SCRIPT_TYPE_IDS[number]>('dialogue');
   const loading = generateMut.isPending;
@@ -101,6 +102,8 @@ export default function NewListeningPage() {
             isPending={examGenMut.isPending}
             onGenerate={(d) => examGenMut.mutateAsync(d)}
             answerHref={(id) => `/practice-test/listening/exam/${id}`}
+            initial={teilPreset.initial}
+            skill="listening"
           />
         ) : (
         <>

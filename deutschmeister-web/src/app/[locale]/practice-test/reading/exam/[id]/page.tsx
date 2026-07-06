@@ -8,8 +8,10 @@ import { useExamReadingSession, useSubmitExamReading } from '@/hooks/useExamRead
 import { ExamReadingTeil, ExamTeilQuestion } from '@/lib/api/examReading';
 import { EXAM_READING_DISPLAY } from '@/lib/examConfig';
 import { useExamCountdown, formatTime } from '@/hooks/useExamCountdown';
+import { useMockExamContext } from '@/hooks/useMockExamContext';
 import { HighlightedText } from '@/components/word-highlight/HighlightedText';
 import { StructuredPassage } from '../../../_components/StructuredPassage';
+import { TeilStrategyPanel } from '../../../_components/TeilStrategyPanel';
 import { PageHeader, FixedActionBar, MobileSplitTabs } from '@/components/ui';
 import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 import { speakGerman as speakText } from '@/lib/utils';
@@ -403,6 +405,8 @@ export default function ExamReadingPage() {
   const tCommon = useTranslations('practice.examCommon.answering');
   const { data: session, isLoading } = useExamReadingSession(id);
   const submitMut = useSubmitExamReading();
+  const { isMock, cockpitHref } = useMockExamContext();
+  const doneHref = isMock && cockpitHref ? cockpitHref : `/practice-test/reading/exam/${id}/result`;
 
   const [userAnswers, setUserAnswers] = useState<Record<string, Record<string, string>>>({});
   const [currentTeil, setCurrentTeil] = useState(0);
@@ -417,9 +421,9 @@ export default function ExamReadingPage() {
   const totalSeconds = (EXAM_READING_DISPLAY[session?.examType ?? '']?.[session?.cefrLevel ?? '']?.timeMin ?? 0) * 60;
   const handleTimeUp = useCallback(() => {
     submitMut.mutateAsync({ id, userAnswers: userAnswersRef.current })
-      .then(() => router.push(`/practice-test/reading/exam/${id}/result`))
+      .then(() => router.push(doneHref))
       .catch(() => {});
-  }, [id, submitMut, router]);
+  }, [id, submitMut, router, doneHref]);
   const { timeRemaining, start: startTimer } = useExamCountdown(totalSeconds, handleTimeUp);
 
   // Reset to passage view when switching Teile so user reads context first
@@ -438,9 +442,9 @@ export default function ExamReadingPage() {
 
   useEffect(() => {
     if (session?.status === 'GRADED') {
-      router.replace(`/practice-test/reading/exam/${id}/result`);
+      router.replace(doneHref);
     }
-  }, [session?.status, id, router]);
+  }, [session?.status, id, router, doneHref]);
 
   if (isLoading) {
     return (
@@ -479,7 +483,7 @@ export default function ExamReadingPage() {
     setError('');
     try {
       await submitMut.mutateAsync({ id, userAnswers });
-      router.push(`/practice-test/reading/exam/${id}/result`);
+      router.push(doneHref);
     } catch {
       setError(tCommon('submitError'));
     }
@@ -490,7 +494,7 @@ export default function ExamReadingPage() {
   return (
     <div className="max-w-360 mx-auto px-4 py-6 pb-28">
       <PageHeader
-        backHref="/practice-test/reading/exam"
+        backHref={isMock && cockpitHref ? cockpitHref : '/practice-test/reading/exam'}
         title={t('pageTitle')}
         accent="reading"
         right={
@@ -543,6 +547,11 @@ export default function ExamReadingPage() {
           );
         })}
       </div>
+
+      {/* Per-Teil strategy hints — never during a mock sitting */}
+      {!isMock && (
+        <TeilStrategyPanel examType={session.examType} cefrLevel={session.cefrLevel} skill="reading" teilNumber={teil.number} />
+      )}
 
       {/* Mobile-only tab switcher between passage and questions */}
       <MobileSplitTabs

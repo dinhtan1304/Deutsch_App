@@ -9,7 +9,7 @@ import { EXAM_READING_DISPLAY } from '@/lib/examConfig';
 import { QuotaPaywall } from '@/components/subscription/QuotaPaywall';
 import { QuotaBanner } from '@/components/subscription/QuotaBanner';
 import { SetupSection, PromptToken } from '../../_components/createSetup';
-import { TeilPracticeSetup } from '../../_components/TeilPracticeSetup';
+import { TeilPracticeSetup, useTeilPresetFromQuery } from '../../_components/TeilPracticeSetup';
 import { IconSparkles, IconChevronLeft, IconLoader, IconCheck } from '../icons';
 
 type LengthId = 'short' | 'medium' | 'long';
@@ -44,7 +44,8 @@ export default function NewReadingPage() {
   const tCommon = useTranslations('practice.examCommon.setup');
   const router = useRouter();
 
-  const [mode, setMode] = useState<'topic' | 'teil'>('topic');
+  const teilPreset = useTeilPresetFromQuery();
+  const [mode, setMode] = useState<'topic' | 'teil'>(teilPreset.presetMode ?? 'topic');
   const examGenMut = useGenerateExamReading();
 
   const [level, setLevel] = useState('A2');
@@ -122,6 +123,8 @@ export default function NewReadingPage() {
             isPending={examGenMut.isPending}
             onGenerate={(d) => examGenMut.mutateAsync(d)}
             answerHref={(id) => `/practice-test/reading/exam/${id}`}
+            initial={teilPreset.initial}
+            skill="reading"
           />
         ) : (
         <>

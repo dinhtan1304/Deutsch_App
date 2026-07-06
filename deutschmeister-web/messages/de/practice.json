@@ -93,6 +93,16 @@
         "title": "Sprechen",
         "titleDe": "Prüfungssprechen",
         "description": "Vollständiger Sprechen-Teil im Goethe/TELC-Format."
+      },
+      "mock": {
+        "title": "Prüfungssimulation",
+        "titleDe": "Prüfungssimulation",
+        "description": "Eine komplette Prüfung mit allen Modulen nacheinander, bewertet nach echten Bestehensregeln."
+      },
+      "readiness": {
+        "title": "Prüfungsreife",
+        "titleDe": "Prüfungsreife",
+        "description": "Readiness-Score, schwächste Teile und was vor dem Prüfungstag zu üben ist."
       }
     },
     "cta": {
@@ -1564,5 +1574,118 @@
         "wortschatz": "Wortschatz"
       }
     }
+  },
+  "mockExam": {
+    "list": {
+      "title": "Komplette Prüfungssimulation",
+      "subtitle": "Simuliere einen echten Prüfungstag: alle Module nacheinander mit offizieller Zeit und offiziellen Bestehensregeln.",
+      "new": "Neue Simulation",
+      "emptyTitle": "Noch keine Prüfungssimulation",
+      "emptySubtitle": "Starte deine erste komplette Simulation, um zu sehen, ob du bereit für das Zertifikat bist.",
+      "statusInProgress": "Läuft",
+      "statusCompleted": "Abgeschlossen",
+      "statusAbandoned": "Abgebrochen",
+      "passed": "BESTANDEN",
+      "failed": "NICHT BESTANDEN",
+      "modulesLine": "{count} Module",
+      "withSpeaking": "mit Sprechen",
+      "withoutSpeaking": "ohne Sprechen"
+    },
+    "new": {
+      "pageTitle": "Neue Prüfungssimulation",
+      "pageSubtitle": "Wähle Zertifikat und Niveau — wir bauen die komplette Prüfung wie am echten Prüfungstag.",
+      "speakingLabel": "Modul Sprechen",
+      "speakingOn": "Mit Sprechen — alle 4 Module",
+      "speakingOff": "Ohne Sprechen — nur Lesen, Hören, Schreiben",
+      "speakingHint": "In der echten Prüfung findet Sprechen als Paar-/Gruppenprüfung statt. Du kannst es hier auslassen und separat üben.",
+      "totalTime": "Gesamtzeit",
+      "modulesLabel": "Module",
+      "ruleGoethe": "Bestehensregel: mindestens 60% in JEDEM Modul (Goethe/ÖSD).",
+      "ruleTelc": "Bestehensregel: mindestens 60% insgesamt (TELC/TestDaF — vereinfacht).",
+      "start": "Prüfung starten",
+      "loadingLong": "Erstes Modul wird erstellt…",
+      "loadingHint": "Die KI erstellt das Lesen-Modul — meist 30–60 Sekunden.",
+      "errorCreate": "Simulation konnte nicht erstellt werden. Bitte erneut versuchen."
+    },
+    "cockpit": {
+      "eyebrow": "Prüfungssimulation",
+      "title": "Prüfungssimulation {examType} {cefrLevel}",
+      "subtitle": "Bearbeite die Module der Reihe nach wie am Prüfungstag. Das nächste Modul öffnet sich erst nach der Abgabe — Ergebnisse gibt es erst im Zeugnis am Ende.",
+      "module": { "reading": "Lesen", "listening": "Hören", "writing": "Schreiben", "speaking": "Sprechen" },
+      "moduleVi": { "reading": "Lesen", "listening": "Hören", "writing": "Schreiben", "speaking": "Sprechen" },
+      "statusPending": "Gesperrt",
+      "statusActive": "In Bearbeitung",
+      "statusGrading": "Wird bewertet…",
+      "statusDone": "Abgegeben",
+      "enter": "Modul starten",
+      "advance": "Nächstes Modul öffnen",
+      "advanceLoading": "Modul wird erstellt…",
+      "advanceHint": "Die KI erstellt das nächste Modul — meist 30–60 Sekunden.",
+      "finish": "Ergebnis feststellen",
+      "finishWait": "Warte, bis die KI Schreiben/Sprechen fertig bewertet hat.",
+      "viewResult": "Zeugnis ansehen",
+      "abandon": "Simulation abbrechen",
+      "confirmAbandon": "Diese Simulation abbrechen? Abgegebene Module bleiben in der Historie der einzelnen Fertigkeiten.",
+      "minutes": "{count} Min.",
+      "progress": "{done}/{total} Module",
+      "errorAdvance": "Nächstes Modul konnte nicht erstellt werden. Bitte erneut versuchen."
+    },
+    "result": {
+      "title": "Zeugnis — {examType} {cefrLevel}",
+      "subtitle": "Ergebnis der Simulation vom {date}",
+      "bestanden": "BESTANDEN",
+      "nichtBestanden": "NICHT BESTANDEN",
+      "overallLabel": "Durchschnitt",
+      "gradeLabel": "Note",
+      "ruleNotePerModule": "Goethe/ÖSD-Regel: jedes Modul braucht mindestens 60/100.",
+      "ruleNoteTotal": "TELC/TestDaF-Regel (vereinfacht): der Gesamtdurchschnitt muss 60% erreichen.",
+      "thresholdLine": "Bestehensgrenze 60%",
+      "colModule": "Modul",
+      "colScore": "Punkte",
+      "colResult": "Ergebnis",
+      "pass": "Bestanden",
+      "fail": "Nicht bestanden",
+      "viewDetail": "Details ansehen",
+      "tryAgain": "Erneut simulieren",
+      "backToList": "Zur Übersicht",
+      "notFinished": "Diese Simulation wurde noch nicht abgeschlossen.",
+      "goCockpit": "Zur Simulation"
+    }
+  },
+  "readiness": {
+    "title": "Prüfungsreife",
+    "subtitle": "Deine Modellprüfungen auf einen Blick: über der 60%-Linie oder nicht, wo die Schwächen liegen, was als Nächstes zu üben ist.",
+    "gaugeLabel": "Bereit",
+    "gaugeHint": "Bestimmt durch das schwächste Modul — Goethe-Regel: ein Modul unter 60% bedeutet nicht bestanden.",
+    "daysLeft": "Noch {count} Tage bis zur Prüfung",
+    "noPlan": "Kein Prüfungstermin gesetzt",
+    "noPlanCta": "Lernplan erstellen",
+    "skillsTitle": "Pro Fertigkeit",
+    "skillsHint": "Durchschnitt der letzten {window} Prüfungen gegenüber der 60%-Linie.",
+    "attempts": "{count} Prüfungen",
+    "bestLabel": "Beste",
+    "noData": "Noch keine Daten",
+    "practiceNow": "Prüfung ablegen",
+    "teilTitle": "Genauigkeit pro Teil",
+    "teilHint": "Durchschnitt der letzten Prüfungen — rot liegt unter der Bestehensgrenze.",
+    "recTitle": "Als Nächstes üben",
+    "recCta": "Diesen Teil üben",
+    "empty": "Noch keine bewerteten {examType}-{cefrLevel}-Prüfungen. Lege die erste Modellprüfung ab, um die Prüfungsreife zu messen.",
+    "startFirst": "Modellprüfung ablegen",
+    "mockCta": "Komplette Simulation",
+    "skillNames": {
+      "reading": "Lesen",
+      "listening": "Hören",
+      "writing": "Schreiben",
+      "speaking": "Sprechen"
+    }
+  },
+  "teilStrategy": {
+    "title": "Strategie — Teil {teil}",
+    "goal": "Ziel",
+    "steps": "Vorgehen",
+    "traps": "Typische Fallen",
+    "redemittel": "Redemittel",
+    "redemittelPanelTitle": "Redemittel B1 — Nachschlagen"
   }
 }
