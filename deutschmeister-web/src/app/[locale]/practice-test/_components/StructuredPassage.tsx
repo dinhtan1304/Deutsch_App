@@ -2,6 +2,8 @@
 
 import { HighlightedText } from '@/components/word-highlight/HighlightedText';
 import { ACCENT, GRADIENT } from '@/lib/tokens';
+import { DialoguePassage, parseDialogue } from './DialoguePassage';
+import { LetterPassage } from './LetterPassage';
 
 interface StructuredPassageProps {
   content: string;
@@ -9,6 +11,12 @@ interface StructuredPassageProps {
   highlight?: boolean;
   /** 'md' = answering view, 'sm' = compact result view. */
   size?: 'sm' | 'md';
+  /** Textsorte ('dialog' | 'brief' | 'email' | 'kurznachricht' | ...) — bật render đặc thù. */
+  textType?: string;
+  /** Betreff/tiêu đề thư (exam email) — hiện trong header của email card. */
+  title?: string;
+  /** Người gửi (exam email) — hiện dòng "Von:" trong header của email card. */
+  author?: string;
 }
 
 interface DirSection {
@@ -75,12 +83,27 @@ const SIZE = {
 } as const;
 
 /**
- * Render một passage phần đọc. Nếu nội dung là Wegweiser/danh bạ → chia thành
- * các section card (mỗi tầng một card, mục giãn cách). Ngược lại → đoạn văn
- * thường (giữ nguyên hành vi cũ).
+ * Render một passage phần đọc, chọn dạng theo textType:
+ * - dialog → chat bubbles (nếu parse được các lượt "Name: câu nói")
+ * - brief/email → email card (Von/Betreff + chào + thân + chữ ký)
+ * - kurznachricht → bubble SMS
+ * - Wegweiser/danh bạ (` --- `/` - `) → section cards (logic cũ)
+ * - còn lại / parse fail → đoạn văn thường (hành vi cũ, backward-compat)
  */
-export function StructuredPassage({ content, highlight = false, size = 'md' }: StructuredPassageProps) {
+export function StructuredPassage({ content, highlight = false, size = 'md', textType, title, author }: StructuredPassageProps) {
   const sz = SIZE[size];
+
+  if (textType === 'dialog') {
+    const turns = parseDialogue(content);
+    if (turns) return <DialoguePassage turns={turns} highlight={highlight} size={size} />;
+  }
+  if (textType === 'brief' || textType === 'email') {
+    return <LetterPassage content={content} variant="letter" title={title} author={author} highlight={highlight} size={size} />;
+  }
+  if (textType === 'kurznachricht') {
+    return <LetterPassage content={content} variant="sms" highlight={highlight} size={size} />;
+  }
+
   const parsed = parseDirectory(content);
 
   if (!parsed) {

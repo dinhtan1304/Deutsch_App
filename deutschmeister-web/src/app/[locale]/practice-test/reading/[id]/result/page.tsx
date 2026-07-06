@@ -8,6 +8,7 @@ import { useReadingSession } from '@/hooks/useReading';
 import { useShareResult } from '@/hooks/useShareResult';
 import { ReadingQuestion, GradingDetail } from '@/lib/api/reading';
 import { InsightsPanel } from '@/components/grading/InsightsPanel';
+import { StructuredPassage } from '../../../_components/StructuredPassage';
 import { coalesceInsights } from '@/lib/api/utils/insights-fallback';
 import { IconCheck, IconX, IconLoader, IconShare, IconSparkles } from '../../icons';
 import {
@@ -120,6 +121,7 @@ export default function ReadingResultPage() {
   const shareResult = useShareResult();
   const { data: session, isLoading, error } = useReadingSession(id);
   const [filter, setFilter] = useState<'all' | 'wrong' | 'correct'>('all');
+  const [showPassage, setShowPassage] = useState(false);
   const [timeMs, setTimeMs] = useState<number | null>(null);
 
   useEffect(() => {
@@ -221,6 +223,30 @@ export default function ReadingResultPage() {
       <div className="mb-5">
         <InsightsPanel insights={coalesceInsights({ insights: session.insights })} />
       </div>
+
+      {session.passage && (
+        <div className="rounded-xl border overflow-hidden mb-5" style={{ borderColor: 'var(--theme-border)' }}>
+          <button
+            className="w-full flex items-center justify-between p-3 hover:opacity-80 transition-opacity"
+            style={{ backgroundColor: 'var(--theme-bg-secondary)' }}
+            onClick={() => setShowPassage(v => !v)}
+          >
+            <span className="text-body font-semibold" style={{ color: 'var(--theme-text-primary)' }}>
+              {showPassage ? t('hidePassage') : t('showPassage')}
+            </span>
+            <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
+              className="shrink-0 transition-transform" style={{ color: 'var(--theme-text-muted)', transform: showPassage ? 'rotate(180deg)' : 'none' }}>
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </button>
+          {showPassage && (
+            <div className="p-3 border-t" style={{ borderColor: 'var(--theme-border)' }}>
+              <p className="text-xs font-bold mb-1.5" style={{ color: 'var(--theme-text-primary)' }}>{session.title}</p>
+              <StructuredPassage content={session.passage} size="sm" textType={session.textType} />
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="space-y-3">
         <div className="flex items-center justify-between mb-1">

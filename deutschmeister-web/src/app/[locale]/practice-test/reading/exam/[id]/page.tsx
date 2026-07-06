@@ -21,32 +21,37 @@ import {
 // ─── TextCard ─────────────────────────────────────────────────────────────────
 function TextCard({ text }: { text: ExamReadingTeil['texts'][0] }) {
   const t = useTranslations('practice.examReading.answering');
+  // Email: title (Betreff) + author (người gửi) hiện trong header của email card,
+  // không lặp lại bên ngoài — chỉ giữ label badge của Teil.
+  const isEmail = text.type === 'email';
+  const outerTitle = isEmail ? undefined : text.title;
   const shortLabel = text.label && text.label.length <= 3;
   const longLabel = text.label && text.label.length > 3;
   return (
     <div className="rounded-xl border p-4 mb-4" style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-secondary)' }}>
-      {(text.label || text.title) && (
+      {(text.label || outerTitle) && (
         <div className="mb-2">
           {shortLabel && (
             <div className="flex items-center gap-2 mb-1">
               <span className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-extrabold text-white shrink-0"
                 style={{ background: GRADIENT.reading }}>{text.label}</span>
-              {text.title && <p className="text-body font-bold" style={{ color: 'var(--theme-text-primary)' }}>{text.title}</p>}
+              {outerTitle && <p className="text-body font-bold" style={{ color: 'var(--theme-text-primary)' }}>{outerTitle}</p>}
             </div>
           )}
           {longLabel && (
             <div className="mb-1.5">
               <span className="inline-block text-caption font-bold px-2.5 py-1 rounded-lg text-white" style={{ background: GRADIENT.reading }}>{text.label}</span>
-              {text.title && <p className="text-body font-bold mt-1" style={{ color: 'var(--theme-text-primary)' }}>{text.title}</p>}
+              {outerTitle && <p className="text-body font-bold mt-1" style={{ color: 'var(--theme-text-primary)' }}>{outerTitle}</p>}
             </div>
           )}
-          {!text.label && text.title && (
-            <p className="text-body font-bold mb-1" style={{ color: 'var(--theme-text-primary)' }}>{text.title}</p>
+          {!text.label && outerTitle && (
+            <p className="text-body font-bold mb-1" style={{ color: 'var(--theme-text-primary)' }}>{outerTitle}</p>
           )}
         </div>
       )}
-      {text.author && <p className="text-caption mb-1.5" style={{ color: 'var(--theme-text-muted)' }}>{t('byAuthor', { author: text.author })}</p>}
-      <StructuredPassage content={text.content} highlight />
+      {!isEmail && text.author && <p className="text-caption mb-1.5" style={{ color: 'var(--theme-text-muted)' }}>{t('byAuthor', { author: text.author })}</p>}
+      <StructuredPassage content={text.content} highlight textType={text.type}
+        title={isEmail ? text.title : undefined} author={isEmail ? text.author : undefined} />
       <button onClick={() => speakText(text.content)}
         className="mt-2 p-1.5 rounded-lg transition-all hover:scale-110 flex items-center gap-1 text-caption"
         style={{ color: ACCENT.reading }}>

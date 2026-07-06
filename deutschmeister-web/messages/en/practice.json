@@ -326,7 +326,9 @@
       "questionLabel": "Q{index}:",
       "correctAnswer": "Correct answer: {answer}",
       "explanation": "Explanation:",
-      "shareText": "I just finished a reading practice!"
+      "shareText": "I just finished a reading practice!",
+      "showPassage": "Show passage",
+      "hidePassage": "Hide passage"
     }
   },
   "writing": {

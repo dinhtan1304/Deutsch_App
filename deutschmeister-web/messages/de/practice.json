@@ -326,7 +326,9 @@
       "questionLabel": "Frage {index}:",
       "correctAnswer": "Richtige Antwort: {answer}",
       "explanation": "Erklärung:",
-      "shareText": "Ich habe gerade eine Leseübung abgeschlossen!"
+      "shareText": "Ich habe gerade eine Leseübung abgeschlossen!",
+      "showPassage": "Text anzeigen",
+      "hidePassage": "Text ausblenden"
     }
   },
   "writing": {

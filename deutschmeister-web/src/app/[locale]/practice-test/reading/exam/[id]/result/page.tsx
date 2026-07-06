@@ -78,20 +78,26 @@ function QuestionReview({ teil, details }: { teil: ExamReadingTeil; details: Tei
           </button>
           {showPassage && (
             <div className="p-3 space-y-3 border-t" style={{ borderColor: 'var(--theme-border)' }}>
-              {teil.texts.map(text => (
-                <div key={text.id}>
-                  {(text.label || text.title) && (
-                    <div className="flex items-center gap-2 mb-1 flex-wrap">
-                      {text.label && (
-                        <span className="shrink-0 inline-flex min-w-6 items-center justify-center rounded-md px-1.5 py-0.5 text-caption font-extrabold text-white"
-                          style={{ background: GRADIENT.reading }}>{text.label}</span>
-                      )}
-                      {text.title && <p className="min-w-0 text-xs font-bold" style={{ color: 'var(--theme-text-primary)' }}>{text.title}</p>}
-                    </div>
-                  )}
-                  <StructuredPassage content={text.content} size="sm" />
-                </div>
-              ))}
+              {teil.texts.map(text => {
+                // Email: title/author hiện trong header của email card, chỉ giữ label badge.
+                const isEmail = text.type === 'email';
+                const outerTitle = isEmail ? undefined : text.title;
+                return (
+                  <div key={text.id}>
+                    {(text.label || outerTitle) && (
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
+                        {text.label && (
+                          <span className="shrink-0 inline-flex min-w-6 items-center justify-center rounded-md px-1.5 py-0.5 text-caption font-extrabold text-white"
+                            style={{ background: GRADIENT.reading }}>{text.label}</span>
+                        )}
+                        {outerTitle && <p className="min-w-0 text-xs font-bold" style={{ color: 'var(--theme-text-primary)' }}>{outerTitle}</p>}
+                      </div>
+                    )}
+                    <StructuredPassage content={text.content} size="sm" textType={text.type}
+                      title={isEmail ? text.title : undefined} author={isEmail ? text.author : undefined} />
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>

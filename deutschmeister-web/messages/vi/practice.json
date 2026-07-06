@@ -326,7 +326,9 @@
       "questionLabel": "Câu {index}:",
       "correctAnswer": "Đáp án đúng: {answer}",
       "explanation": "Giải thích:",
-      "shareText": "Tôi vừa hoàn thành bài luyện đọc!"
+      "shareText": "Tôi vừa hoàn thành bài luyện đọc!",
+      "showPassage": "Xem lại văn bản",
+      "hidePassage": "Ẩn văn bản"
     }
   },
   "writing": {

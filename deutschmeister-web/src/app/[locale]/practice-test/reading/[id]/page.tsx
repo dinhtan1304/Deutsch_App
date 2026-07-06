@@ -7,6 +7,7 @@ import { Link } from '@/i18n/navigation';
 import { useReadingSession, useSubmitReading } from '@/hooks/useReading';
 import { ReadingQuestion, VocabHighlight } from '@/lib/api/reading';
 import { HighlightedText } from '@/components/word-highlight/HighlightedText';
+import { StructuredPassage } from '../../_components/StructuredPassage';
 import { PageHeader, FixedActionBar, MobileSplitTabs } from '@/components/ui';
 import { ACCENT, GRADIENT } from '@/lib/tokens';
 import { synthesizeAudioSequence, type AudioSequenceHandle } from '@/lib/utils';
@@ -331,10 +332,7 @@ export default function ReadingSessionPage() {
         <div className={`${mobileView === 'task' ? 'block' : 'hidden'} lg:block lg:w-1/2 shrink-0 lg:sticky lg:top-20 lg:self-start lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto lg:pr-1 space-y-4`}>
           <AudioPlayer passage={session.passage} />
           <div className="rounded-2xl border p-5" style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
-            <div className="text-[15px] leading-relaxed whitespace-pre-wrap"
-              style={{ color: 'var(--theme-text-primary)' }}>
-              <HighlightedText text={session.passage} />
-            </div>
+            <StructuredPassage content={session.passage} highlight textType={session.textType} />
           </div>
           {vocabHighlights.length > 0 && (
             <VocabPanel vocabHighlights={vocabHighlights} />
