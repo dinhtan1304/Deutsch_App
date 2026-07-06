@@ -6,6 +6,7 @@ import { ACCENT, STATUS } from '@/lib/tokens';
 import { IconChevronLeft, IconFlame, IconCheckCircle, IconXCircle } from '@/components/ui/Icons';
 import type { TrainerExercise, TrainerMode } from '@/lib/api/grammarTrainer';
 import { gradeAnswer, buildOptions, skillTagLabel } from '@/lib/grammarTrainer/engine';
+import { WhyExplainer } from '@/components/grammar/WhyExplainer';
 import { getDelayText } from '@/lib/srs';
 import { useGrammarSrsStats, useGrammarSrsSession, useReviewGrammarSrs } from '@/hooks/useGrammarSrs';
 import { ReportExerciseModal } from '@/components/grammar/trainer/ReportExerciseModal';
@@ -297,6 +298,7 @@ export default function GrammarReviewPage() {
             {current.explanationVi && (
               <div className="mt-1 text-body" style={{ color: 'var(--theme-text-secondary)', lineHeight: 1.5 }}>{current.explanationVi}</div>
             )}
+            {!lastCorrect && <WhyExplainer concept={current.skillTag} />}
             <button
               type="button"
               onClick={() => setReportId(current.id)}

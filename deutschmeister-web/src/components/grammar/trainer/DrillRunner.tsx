@@ -9,6 +9,7 @@ import { IconFlame, IconCheckCircle, IconXCircle, IconFileText } from '@/compone
 import { TENSES, CASES, TRAINER_LEVELS, TrainerExercise, TrainerMode } from '@/lib/api/grammarTrainer';
 import { useTrainerExercises, useRecordTrainerSession } from '@/hooks/useGrammarTrainer';
 import { buildOptions, gradeAnswer, skillTagLabel } from '@/lib/grammarTrainer/engine';
+import { WhyExplainer } from '@/components/grammar/WhyExplainer';
 import { ReportExerciseModal } from './ReportExerciseModal';
 
 type AnswerMode = 'type' | 'choose';
@@ -363,6 +364,7 @@ export default function DrillRunner({ mode }: { mode: TrainerMode }) {
             {current.explanationVi && (
               <div className="text-body mt-1" style={{ color: 'var(--theme-text-secondary)', lineHeight: 1.5 }}>{current.explanationVi}</div>
             )}
+            {!lastCorrect && <WhyExplainer concept={current.skillTag} />}
             <button
               type="button"
               onClick={() => setReportId(current.id)}
