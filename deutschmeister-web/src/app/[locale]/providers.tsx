@@ -17,12 +17,11 @@ import { AchievementToastProvider } from '@/components/ui/AchievementToast';
 import { notifKeys } from '@/hooks/useNotifications';
 import { subscriptionKeys } from '@/hooks/useSubscription';
 
-function handleGlobalError(error: unknown) {
-  if (error instanceof ApiError && error.status === 401) {
-    clearTokens();
-    clearSessionHint();
-  }
-}
+// Real session expiry is handled centrally in client.ts (onAuthExpired fires
+// only after a genuine 401 from /auth/refresh or the post-refresh retry). A
+// 401 surfacing here can be a transient refresh failure (offline, timeout,
+// 429) — clearing tokens/hint here used to kick users to login mid-exercise.
+function handleGlobalError() {}
 
 function pickBackendSettings(settings: Record<string, unknown>): Partial<AppSettings> {
   return BACKEND_SETTINGS_KEYS.reduce((acc, key) => {
@@ -59,8 +58,11 @@ function AppInitializer({ children }: { children: React.ReactNode }) {
 
       useAuthStore.getState().setLoading(true);
       try {
-        const tokenValid = await initAuth();
-        if (!tokenValid) {
+        const tokenState = await initAuth();
+        if (tokenState !== 'authenticated') {
+          // 'unauthenticated': real expiry — client.ts already cleared the
+          // session hint. 'transient': API unreachable — the hint stays, so
+          // RequireAuth shows a retry panel instead of redirecting to login.
           useAuthStore.setState({
             bootstrap: null,
             user: null,
@@ -77,6 +79,8 @@ function AppInitializer({ children }: { children: React.ReactNode }) {
         queryClient.setQueryData(notifKeys.unread(), bootstrap.unreadCount);
         syncFromBackend(pickBackendSettings(bootstrap.settings));
       } catch (error) {
+        // Only a real 401 ends the session; other bootstrap errors (network,
+        // 5xx) keep the hint so the user gets a retry panel, not a logout.
         if (error instanceof ApiError && error.status === 401) {
           clearTokens();
           clearSessionHint();

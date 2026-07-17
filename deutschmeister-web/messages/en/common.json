@@ -60,7 +60,9 @@
     "taskLabelDefault": "Aufgabe / Task",
     "editorLabelDefault": "Antwort / Answer",
     "upgradePremium": "Upgrade to Premium",
-    "levelEstimate": "Estimate based on XP — take a placement test for an exact level"
+    "levelEstimate": "Estimate based on XP — take a placement test for an exact level",
+    "connectionProblem": "Can't reach the server. Your session is still active — check your connection and try again.",
+    "retry": "Retry"
   },
   "breadcrumb": {
     "dashboard": "Home",

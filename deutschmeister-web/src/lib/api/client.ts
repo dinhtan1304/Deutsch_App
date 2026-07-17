@@ -30,9 +30,20 @@ function getAppLocale(): string {
 // Access token stored in memory only (more secure than localStorage)
 let accessToken: string | null = null;
 
-// Flag to prevent multiple simultaneous refresh attempts
-let isRefreshing = false;
-let refreshPromise: Promise<string | null> | null = null;
+/**
+ * Refresh outcome. Only a real 401 from /auth/refresh means the session is
+ * gone ('expired'). Timeouts, offline, 429 and 5xx are 'transient' — the
+ * httpOnly refresh cookie is likely still valid, so callers must NOT treat
+ * them as a logout (users were getting kicked out mid-exercise on network
+ * blips because every failure looked the same).
+ */
+type RefreshResult =
+  | { status: 'ok'; token: string }
+  | { status: 'expired' }
+  | { status: 'transient' };
+
+// Single-flight: concurrent callers share one in-flight refresh
+let refreshPromise: Promise<RefreshResult> | null = null;
 
 // Callback to notify auth store when tokens expire
 // This bridges client.ts ↔ zustand authStore to prevent state desync
@@ -106,14 +117,13 @@ export function getApiErrorMessage(err: unknown, fallback = 'Đã xảy ra lỗi
  * Refresh access token using httpOnly cookie
  * The refresh token is automatically sent via cookie by the browser
  */
-async function refreshAccessToken(): Promise<string | null> {
+async function refreshAccessToken(): Promise<RefreshResult> {
   // Prevent multiple simultaneous refresh attempts
-  if (isRefreshing && refreshPromise) {
+  if (refreshPromise) {
     return refreshPromise;
   }
 
-  isRefreshing = true;
-  refreshPromise = (async () => {
+  refreshPromise = (async (): Promise<RefreshResult> => {
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 6000); // 6s timeout
@@ -136,24 +146,32 @@ async function refreshAccessToken(): Promise<string | null> {
           clearTokens();
           clearSessionHint();
           onAuthExpiredCallback?.();
+          return { status: 'expired' };
         }
-        return null;
+        return { status: 'transient' }; // 429 / 5xx — session may still be fine
       }
 
       const data = await response.json();
       console.log('[Auth] Refresh success, got new access token');
       setAccessToken(data.accessToken);
-      return data.accessToken;
+      return { status: 'ok', token: data.accessToken };
     } catch (err) {
-      console.warn('[Auth] Refresh error:', err);
-      return null;
+      console.warn('[Auth] Refresh error (transient):', err);
+      return { status: 'transient' }; // abort / offline / DNS
     } finally {
-      isRefreshing = false;
       refreshPromise = null;
     }
   })();
 
   return refreshPromise;
+}
+
+/** One automatic retry on transient failure — shared by api(), apiUpload(), initAuth(). */
+async function refreshAccessTokenWithRetry(): Promise<RefreshResult> {
+  const first = await refreshAccessToken();
+  if (first.status !== 'transient') return first;
+  await new Promise((resolve) => setTimeout(resolve, 1500));
+  return refreshAccessToken();
 }
 
 /**
@@ -185,9 +203,9 @@ export async function api<T>(
 
   // If unauthorized, try to refresh token (even if token was null — e.g. after page refresh)
   if (response.status === 401) {
-    const newToken = await refreshAccessToken();
-    if (newToken) {
-      (headers as Record<string, string>)['Authorization'] = `Bearer ${newToken}`;
+    const result = await refreshAccessTokenWithRetry();
+    if (result.status === 'ok') {
+      (headers as Record<string, string>)['Authorization'] = `Bearer ${result.token}`;
       response = await fetch(url, {
         ...options,
         headers,
@@ -201,8 +219,9 @@ export async function api<T>(
         onAuthExpiredCallback?.();
       }
     }
-    // If refresh failed (newToken is null), onAuthExpiredCallback already
-    // called inside refreshAccessToken() — no hard redirect needed
+    // 'expired': refreshAccessToken already cleared state + fired the callback.
+    // 'transient': fall through and throw the 401 ApiError WITHOUT touching
+    // auth state — the session likely survives and the caller can retry.
   }
 
   if (!response.ok) {
@@ -260,11 +279,15 @@ export async function apiUpload<T>(endpoint: string, formData: FormData): Promis
   // Pre-ensure valid token so we don't upload twice on 401
   let token = getAccessToken();
   if (!token) {
-    token = await refreshAccessToken();
-  }
-  if (!token) {
-    onAuthExpiredCallback?.();
-    throw new ApiError(401, 'Vui lòng đăng nhập lại', undefined, 'AUTH_REQUIRED');
+    const result = await refreshAccessTokenWithRetry();
+    if (result.status === 'transient') {
+      // Connection problem, not an expired session — don't log the user out
+      throw new ApiError(0, 'Không thể kết nối máy chủ. Vui lòng thử lại.');
+    }
+    if (result.status === 'expired') {
+      throw new ApiError(401, 'Vui lòng đăng nhập lại', undefined, 'AUTH_REQUIRED');
+    }
+    token = result.token;
   }
 
   const response = await fetch(url, {
@@ -295,15 +318,17 @@ export async function apiUpload<T>(endpoint: string, formData: FormData): Promis
 }
 
 /**
- * Initialize authentication on app startup
- * Attempts to refresh token if we have a stored access token
+ * Initialize authentication on app startup.
+ * 'transient' means the API was unreachable (offline, timeout, 5xx) — the
+ * refresh cookie may still be valid, so callers must not treat it as logout.
  */
-export async function initAuth(): Promise<boolean> {
+export type InitAuthResult = 'authenticated' | 'unauthenticated' | 'transient';
+
+export async function initAuth(): Promise<InitAuthResult> {
   const token = getAccessToken();
-  if (!token) {
-    // Try to refresh using cookie (in case page was refreshed)
-    const newToken = await refreshAccessToken();
-    return !!newToken;
-  }
-  return true;
+  if (token) return 'authenticated';
+  // Try to refresh using cookie (in case page was refreshed)
+  const result = await refreshAccessTokenWithRetry();
+  if (result.status === 'ok') return 'authenticated';
+  return result.status === 'expired' ? 'unauthenticated' : 'transient';
 }

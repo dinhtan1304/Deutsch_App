@@ -60,7 +60,9 @@
     "taskLabelDefault": "Aufgabe / Aufgabe",
     "editorLabelDefault": "Antwort / Antwort",
     "upgradePremium": "Auf Premium upgraden",
-    "levelEstimate": "Schätzung basierend auf XP — mach einen Einstufungstest für ein genaues Level"
+    "levelEstimate": "Schätzung basierend auf XP — mach einen Einstufungstest für ein genaues Level",
+    "connectionProblem": "Server nicht erreichbar. Deine Sitzung ist noch aktiv — prüfe deine Verbindung und versuche es erneut.",
+    "retry": "Erneut versuchen"
   },
   "breadcrumb": {
     "dashboard": "Startseite",
