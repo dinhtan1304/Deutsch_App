@@ -5,6 +5,7 @@ import { useTranslations, useLocale } from 'next-intl';
 import { ACCENT, STATUS } from '@/lib/tokens';
 import Link from 'next/link';
 import { useMySubscription } from '@/hooks/useSubscription';
+import { isPaidPlan } from '@/lib/plan';
 import { useAuthStore } from '@/stores/authStore';
 import { UpgradeModal } from '@/components/subscription/UpgradeModal';
 import { PageHeader } from '@/components/ui';
@@ -21,6 +22,9 @@ function IconCircleCheck({ size = 16, style, className }: { size?: number; style
 }
 function IconCrown({ size = 24, style, className }: { size?: number; style?: React.CSSProperties; className?: string }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className={className} style={{ display: 'block', ...style }}><path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14" /></svg>;
+}
+function IconLock({ size = 14, style, className }: { size?: number; style?: React.CSSProperties; className?: string }) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className={className} style={{ display: 'block', ...style }}><rect width="18" height="11" x="3" y="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>;
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -50,11 +54,23 @@ const STATUS_COLORS: Record<'pending' | 'confirmed' | 'rejected', string> = {
 
 const BENEFIT_KEYS = ['b1', 'b2', 'b3', 'b4', 'b5', 'b6'] as const;
 
+// Payment.period → display label (covers Lite/quarterly/exam_bundle, not just Premium).
+const PERIOD_LABEL: Record<string, string> = {
+  monthly: 'Premium Monthly',
+  quarterly: 'Premium Quarterly',
+  yearly: 'Premium Yearly',
+  lifetime: 'Lifetime',
+  lite_monthly: 'Premium Lite Monthly',
+  lite_quarterly: 'Premium Lite Quarterly',
+  exam_bundle: 'Exam Bundle',
+};
+
 // ─── Main Component ──────────────────────────────────────────────────────────
 export default function SubscriptionPage() {
   const t = useTranslations('subscription.page');
   const tb = useTranslations('subscription.benefits');
   const ts = useTranslations('subscription.status');
+  const tu = useTranslations('subscription.upsell');
   const locale = useLocale();
   const { isAuthenticated } = useAuthStore();
   const { data, isLoading } = useMySubscription();
@@ -90,9 +106,21 @@ export default function SubscriptionPage() {
     );
   }
 
-  const isLifetime = data.plan === 'lifetime' && data.status === 'active';
-  const isPremium = (data.plan === 'premium' || data.plan === 'lifetime') && data.status === 'active';
+  const isPaid = isPaidPlan(data.plan, data.status);
+  const isLifetime = isPaid && data.plan === 'lifetime';
+  const isLite = isPaid && data.plan === 'premium_lite';
   const isExpired = data.status === 'expired';
+
+  const planTitle = !isPaid ? 'Free Member'
+    : data.plan === 'lifetime' ? 'Lifetime Access'
+    : data.plan === 'premium_lite' ? 'Premium Lite'
+    : data.plan === 'exam_bundle' ? 'Exam Bundle'
+    : 'Premium Plan';
+  const planSub = !isPaid ? t('planSubFree')
+    : data.plan === 'lifetime' ? t('planSubLifetime')
+    : data.plan === 'premium_lite' ? t('planSubLite')
+    : data.plan === 'exam_bundle' ? t('planSubExamBundle')
+    : t('planSubPremium');
 
   return (
     <div className="max-w-360 mx-auto pb-16">
@@ -111,22 +139,22 @@ export default function SubscriptionPage() {
           {/* Hero Active Plan Card */}
           <div className="rounded-2xl border p-6"
             style={{
-              borderColor: isPremium ? 'color-mix(in srgb, var(--accent) 30%, transparent)' : 'var(--theme-border)',
+              borderColor: isPaid ? 'color-mix(in srgb, var(--accent) 30%, transparent)' : 'var(--theme-border)',
               backgroundColor: 'var(--theme-bg-card)',
             }}>
 
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
               <div className="flex items-center gap-4">
                 <div className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0"
-                  style={isPremium
+                  style={isPaid
                     ? { background: 'var(--accent)', color: 'var(--accent-on)' }
                     : { background: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)', border: '1px solid var(--theme-border)' }}>
-                  {isPremium ? <IconCrown size={28} /> : <IconShieldCheck size={28} />}
+                  {isPaid ? <IconCrown size={28} /> : <IconShieldCheck size={28} />}
                 </div>
                 <div>
                   <div className="flex items-center gap-2 mb-1 flex-wrap">
                     <h2 className="text-h2 font-bold leading-none" style={{ color: 'var(--theme-text-primary)' }}>
-                      {isLifetime ? 'Lifetime Access' : isPremium ? 'Premium Plan' : 'Free Member'}
+                      {planTitle}
                     </h2>
                     {isLifetime && (
                       <span className="inline-flex items-center px-2 py-0.5 rounded-md text-caption font-semibold uppercase tracking-wide"
@@ -136,12 +164,12 @@ export default function SubscriptionPage() {
                     )}
                   </div>
                   <p className="text-caption font-medium uppercase tracking-wide" style={{ color: 'var(--theme-text-muted)' }}>
-                    {isLifetime ? t('planSubLifetime') : isPremium ? t('planSubPremium') : t('planSubFree')}
+                    {planSub}
                   </p>
                 </div>
               </div>
 
-              {isPremium ? (
+              {isPaid ? (
                 <div className="flex flex-col items-start md:items-end gap-1.5">
                   <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-caption font-semibold uppercase tracking-wide"
                     style={{ background: `color-mix(in srgb, ${STATUS.success} 14%, transparent)`, color: STATUS.success, border: `1px solid color-mix(in srgb, ${STATUS.success} 30%, transparent)` }}>
@@ -165,10 +193,10 @@ export default function SubscriptionPage() {
               <div className="p-4 rounded-xl" style={{ background: 'var(--theme-bg-secondary)', border: '1px solid var(--theme-border)' }}>
                 <p className="text-caption font-semibold uppercase tracking-wide mb-2" style={{ color: 'var(--theme-text-muted)' }}>{t('accountStatus')}</p>
                 <div className="flex items-center gap-2">
-                  <span className="text-lead font-semibold" style={{ color: isPremium ? STATUS.success : 'var(--theme-text-primary)' }}>
-                    {isPremium ? t('verified') : t('freeVersion')}
+                  <span className="text-lead font-semibold" style={{ color: isPaid ? STATUS.success : 'var(--theme-text-primary)' }}>
+                    {isPaid ? t('verified') : t('freeVersion')}
                   </span>
-                  {isPremium && <IconCircleCheck size={16} style={{ color: STATUS.success }} />}
+                  {isPaid && <IconCircleCheck size={16} style={{ color: STATUS.success }} />}
                 </div>
               </div>
 
@@ -183,14 +211,21 @@ export default function SubscriptionPage() {
             </div>
 
             <div className="flex flex-col sm:flex-row gap-3">
-              {!isPremium && (
+              {!isPaid && (
                 <button onClick={() => setUpgradeOpen(true)}
                   className="flex-1 py-3 rounded-xl text-body font-semibold transition-transform hover:-translate-y-0.5 active:scale-95"
                   style={{ background: 'var(--accent)', color: 'var(--accent-on)' }}>
                   {isExpired ? t('renewNow') : t('upgradeToPremium')}
                 </button>
               )}
-              {isPremium && !isLifetime && data.expiresAt && daysUntil(data.expiresAt) <= 30 && (
+              {isLite && (
+                <button onClick={() => setUpgradeOpen(true)}
+                  className="flex-1 py-3 rounded-xl text-body font-semibold transition-colors"
+                  style={{ color: 'var(--accent)', background: 'color-mix(in srgb, var(--accent) 10%, transparent)', border: '1px solid color-mix(in srgb, var(--accent) 30%, transparent)' }}>
+                  {t('upgradeToFull')}
+                </button>
+              )}
+              {isPaid && !isLifetime && !isLite && data.expiresAt && daysUntil(data.expiresAt) <= 30 && (
                 <button onClick={() => setUpgradeOpen(true)}
                   className="flex-1 py-3 rounded-xl text-body font-semibold transition-colors"
                   style={{ color: 'var(--accent)', background: 'color-mix(in srgb, var(--accent) 10%, transparent)', border: '1px solid color-mix(in srgb, var(--accent) 30%, transparent)' }}>
@@ -210,7 +245,7 @@ export default function SubscriptionPage() {
             <div className="flex items-center justify-between mb-5">
               <div>
                 <h3 className="text-lead font-semibold" style={{ color: 'var(--theme-text-primary)' }}>{t('benefitsTitle')}</h3>
-                <p className="text-caption mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>{t('benefitsSubtitle')}</p>
+                <p className="text-caption mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>{isPaid ? t('benefitsSubtitle') : t('benefitsSubtitleLocked')}</p>
               </div>
               <span className="w-9 h-9 rounded-md flex items-center justify-center shrink-0"
                 style={{ background: `color-mix(in srgb, ${STATUS.success} 14%, transparent)`, color: STATUS.success }}>
@@ -218,16 +253,28 @@ export default function SubscriptionPage() {
               </span>
             </div>
             <div className="grid sm:grid-cols-2 gap-3">
-              {BENEFIT_KEYS.map((k) => (
-                <div key={k} className="flex items-center gap-3 p-3.5 rounded-xl"
-                  style={{ background: 'var(--theme-bg-secondary)', border: '1px solid var(--theme-border)' }}>
-                  <span className="w-6 h-6 rounded-md flex items-center justify-center shrink-0"
-                    style={{ background: `color-mix(in srgb, ${STATUS.success} 16%, transparent)`, color: STATUS.success }}>
-                    <IconCircleCheck size={14} />
-                  </span>
-                  <span className="text-body font-medium leading-tight" style={{ color: 'var(--theme-text-primary)' }}>{tb(k)}</span>
-                </div>
-              ))}
+              {BENEFIT_KEYS.map((k) => {
+                // Lite has no exam mode — exam-bank benefit (b3) stays locked.
+                const locked = isLite && k === 'b3';
+                return (
+                  <div key={k} className="flex items-center gap-3 p-3.5 rounded-xl"
+                    style={{ background: 'var(--theme-bg-secondary)', border: '1px solid var(--theme-border)', opacity: locked ? 0.75 : 1 }}>
+                    <span className="w-6 h-6 rounded-md flex items-center justify-center shrink-0"
+                      style={locked
+                        ? { background: 'var(--theme-bg-card)', color: 'var(--theme-text-muted)', border: '1px solid var(--theme-border)' }
+                        : { background: `color-mix(in srgb, ${STATUS.success} 16%, transparent)`, color: STATUS.success }}>
+                      {locked ? <IconLock size={13} /> : <IconCircleCheck size={14} />}
+                    </span>
+                    <span className="text-body font-medium leading-tight min-w-0" style={{ color: locked ? 'var(--theme-text-muted)' : 'var(--theme-text-primary)' }}>{tb(k)}</span>
+                    {locked && (
+                      <span className="ml-auto shrink-0 text-caption font-semibold uppercase tracking-wide px-2 py-0.5 rounded-md"
+                        style={{ background: 'color-mix(in srgb, var(--accent) 12%, transparent)', color: 'var(--accent)' }}>
+                        {tu('premiumOnly')}
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
@@ -263,7 +310,7 @@ export default function SubscriptionPage() {
                         </span>
                         <div className="min-w-0">
                           <p className="text-body font-semibold truncate" style={{ color: 'var(--theme-text-primary)' }}>
-                            Premium {p.period === 'yearly' ? 'Yearly' : p.period === 'lifetime' ? 'Lifetime' : 'Monthly'}
+                            {PERIOD_LABEL[p.period] ?? p.period}
                           </p>
                           <p className="text-caption mt-0.5" style={{ color: 'var(--theme-text-muted)' }}>{formatDate(p.createdAt, locale)}</p>
                         </div>
