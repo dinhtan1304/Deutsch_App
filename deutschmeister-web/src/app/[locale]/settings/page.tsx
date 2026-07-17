@@ -564,7 +564,7 @@ export default function SettingsPage() {
                   </button>
 
                   <p className="text-center text-caption" style={{ color: 'var(--theme-text-muted)' }}>
-                    {t('account.supportText')} <a href="mailto:support@deutschmeister.de" className="hover:underline" style={{ color: 'var(--accent)' }}>support@deutschmeister.de</a>
+                    {t('account.supportText')} <a href="mailto:dinhtan.yuki@gmail.com" className="hover:underline" style={{ color: 'var(--accent)' }}>dinhtan.yuki@gmail.com</a>
                   </p>
                 </div>
               ) : (

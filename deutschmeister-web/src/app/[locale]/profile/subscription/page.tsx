@@ -335,7 +335,7 @@ export default function SubscriptionPage() {
               <h4 className="text-caption font-semibold uppercase tracking-wide" style={{ color: ACCENT.xp }}>{t('support')}</h4>
             </div>
             <p className="text-caption leading-relaxed" style={{ color: 'var(--theme-text-secondary)' }}>
-              {t.rich('supportBody', { mail: () => <strong>support@deutschmeister.de</strong> })}
+              {t.rich('supportBody', { mail: () => <strong>dinhtan.yuki@gmail.com</strong> })}
             </p>
           </div>
         </div>
