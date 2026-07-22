@@ -15,6 +15,16 @@ import { FormLayout } from '@/components/ui/FormLayout';
 import { FormField } from '@/components/ui/FormField';
 import { ACCENT } from '@/lib/tokens';
 
+// Only ever redirect to a same-origin relative path. `returnTo` comes straight
+// from the query string, so an unvalidated value here is an open redirect
+// (e.g. ?returnTo=https://evil.example or the protocol-relative //evil.example).
+function isSafeReturnTo(path: string | null): path is string {
+  if (!path) return false;
+  if (!path.startsWith('/') || path.startsWith('//')) return false;
+  if (path.includes('://') || path.startsWith('/\\')) return false;
+  return true;
+}
+
 function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -38,7 +48,7 @@ function LoginContent() {
 
   useEffect(() => {
     if (_hasHydrated && isAuthenticated) {
-      const dest = returnTo || (user?.role === 'admin' ? '/admin' : user?.onboardingCompleted === false ? '/onboarding' : '/dashboard');
+      const dest = (isSafeReturnTo(returnTo) ? returnTo : null) || (user?.role === 'admin' ? '/admin' : user?.onboardingCompleted === false ? '/onboarding' : '/dashboard');
       router.replace(dest);
     }
   }, [_hasHydrated, isAuthenticated, user, router, returnTo]);
@@ -51,7 +61,7 @@ function LoginContent() {
       await login({ email: email.trim(), password, captchaToken });
       trackEvent('login', { method: 'email' });
       const { user: loggedInUser } = useAuthStore.getState();
-      const dest = returnTo || (loggedInUser?.role === 'admin' ? '/admin' : loggedInUser?.onboardingCompleted === false ? '/onboarding' : '/dashboard');
+      const dest = (isSafeReturnTo(returnTo) ? returnTo : null) || (loggedInUser?.role === 'admin' ? '/admin' : loggedInUser?.onboardingCompleted === false ? '/onboarding' : '/dashboard');
       router.push(dest);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
