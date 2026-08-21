@@ -230,6 +230,10 @@ export interface ReminderHealth {
   livePushSubscriptions: number;
   reachable: number;
   blockedByEmailGate: number;
+  /** Lifecycle mail sent this calendar month, against its ceiling. */
+  emailsSentThisMonth: number;
+  emailBudget: number;
+  emailBudgetRemaining: number;
 }
 
 export interface DormancyBuckets {

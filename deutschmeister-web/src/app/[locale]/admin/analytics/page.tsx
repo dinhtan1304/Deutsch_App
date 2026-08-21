@@ -248,6 +248,34 @@ function FunnelBar({ label, value, of, note }: { label: string; value: number; o
   );
 }
 
+// ─── Email budget ─────────────────────────────────────────────────────────────
+/**
+ * Runs red before the meter is full, not after: the point is to notice that a
+ * month is heading for exhaustion while there is still time to act, since the
+ * consequence used to be silent — verification mail stopped going out and
+ * nothing on any screen said so.
+ */
+function EmailBudgetBar({ sent, budget }: { sent: number; budget: number }) {
+  const used = budget > 0 ? Math.min(100, Math.round((sent / budget) * 100)) : 0;
+  const color = used >= 90 ? STATUS.danger : used >= 70 ? STATUS.warning : STATUS.success;
+
+  return (
+    <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 6, gap: 8 }}>
+        <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--theme-text-primary)' }}>
+          {sent.toLocaleString('vi-VN')} / {budget.toLocaleString('vi-VN')} email vòng đời
+        </span>
+        <span style={{ fontSize: 12, fontWeight: 600, color, whiteSpace: 'nowrap' }}>
+          {used}% · còn {Math.max(0, budget - sent).toLocaleString('vi-VN')}
+        </span>
+      </div>
+      <div style={{ height: 10, borderRadius: RADIUS.sm, backgroundColor: 'var(--theme-border)', overflow: 'hidden' }}>
+        <div style={{ width: `${used}%`, height: '100%', backgroundColor: color }} />
+      </div>
+    </div>
+  );
+}
+
 // ─── Feature usage ────────────────────────────────────────────────────────────
 function FeatureTable({ features, isMobile }: { features: FeatureUsage[]; isMobile: boolean }) {
   if (features.length === 0) {
@@ -438,6 +466,20 @@ export default function AdminAnalyticsPage() {
               color={ACCENT.srs}
             />
           </div>
+
+          {/* ── Email budget ────────────────────────────────────── */}
+          <SL>Hạn mức email tháng này</SL>
+          <Panel>
+            <EmailBudgetBar
+              sent={data.reminders.emailsSentThisMonth}
+              budget={data.reminders.emailBudget}
+            />
+            <p style={{ fontSize: 10, color: 'var(--theme-text-muted)', marginTop: 12, lineHeight: 1.6 }}>
+              Chỉ đếm email vòng đời (nhắc học, streak, tổng kết tuần, lên cấp). Email giao dịch —
+              xác thực tài khoản, đặt lại mật khẩu, hoá đơn, cảnh báo hết hạn — <strong>không bao giờ bị chặn</strong> và
+              không tính vào hạn mức này. Trần đặt dưới hạn mức của nhà cung cấp để luôn chừa chỗ cho nhóm đó.
+            </p>
+          </Panel>
 
           {/* ── Dormancy ────────────────────────────────────────── */}
           <SL>Phân khúc để win-back</SL>
