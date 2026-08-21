@@ -47,6 +47,10 @@ function IconDumbbell({ size = 18 }: { size?: number }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}><path d="m6.5 6.5 11 11" /><path d="m21 21-1-1" /><path d="m3 3 1 1" /><path d="m18 22 4-4" /><path d="m2 6 4-4" /><path d="m3 10 7-7" /><path d="m14 21 7-7" /></svg>;
 }
 
+function IconTrend({ size = 18 }: { size?: number }) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}><polyline points="22 7 13.5 15.5 8.5 10.5 2 17" /><polyline points="16 7 22 7 22 13" /></svg>;
+}
+
 const NAV_ITEMS = [
   { href: '/admin', label: 'Dashboard', icon: IconGrid, exact: true },
   { href: '/admin/users', label: 'Người dùng', icon: IconUsers, exact: false },
@@ -60,6 +64,7 @@ const NAV_ITEMS = [
   { href: '/admin/dictation-requests', label: 'Dictation Queue', icon: IconVideo, exact: false },
   { href: '/admin/exam-rag', label: 'Đề mẫu RAG', icon: IconDatabase, exact: false },
   { href: '/admin/videos', label: 'Thư viện Video', icon: IconVideo, exact: false },
+  { href: '/admin/analytics', label: 'Giữ chân', icon: IconTrend, exact: false },
 ];
 
 // Quick-access tabs for the mobile bottom bar — the four focus areas.

@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   adminApi, adminWordApi, adminFeedbackApi, adminDictationRequestApi,
   AdminStats, AdminUserListResponse, AdminUserDetail, CreateWordPayload,
-  AdminFeedbackListResponse, AdminTokenStats,
+  AdminFeedbackListResponse, AdminTokenStats, AdminAnalytics,
   AdminDictationRequestListResponse, AdminDictationRequest, ApproveRequestPayload,
   adminVideoApi, AdminVideoListResponse, UpdateVideoPayload,
 } from '@/lib/api/admin';
@@ -16,6 +16,7 @@ export const adminKeys = {
   all: ['admin'] as const,
   stats: () => [...adminKeys.all, 'stats'] as const,
   tokenStats: () => [...adminKeys.all, 'token-stats'] as const,
+  analytics: (days: number, weeks: number) => [...adminKeys.all, 'analytics', days, weeks] as const,
   users: (params?: Record<string, unknown>) => [...adminKeys.all, 'users', params] as const,
   user: (id: string) => [...adminKeys.all, 'users', id] as const,
 };
@@ -35,6 +36,19 @@ export function useAdminTokenStats() {
     queryKey: adminKeys.tokenStats(),
     queryFn: () => adminApi.getTokenStats(),
     staleTime: 30_000,
+  });
+}
+
+/**
+ * Retention, activation and true feature usage. The server caches this for 5
+ * minutes because the query unions 22 tables, so a short client staleTime
+ * would only re-fetch the same payload.
+ */
+export function useAdminAnalytics(days = 30, weeks = 12) {
+  return useQuery<AdminAnalytics>({
+    queryKey: adminKeys.analytics(days, weeks),
+    queryFn: () => adminApi.getAnalytics({ days, weeks }),
+    staleTime: 5 * 60_000,
   });
 }
 
