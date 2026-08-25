@@ -6,6 +6,12 @@
     "dismiss": "Later",
     "iosHint": "Tap the Share button, then choose “Add to Home Screen”."
   },
+  "push": {
+    "title": "Want a daily nudge?",
+    "body": "Turn on notifications so you do not forget to review. You can switch them off any time in Settings.",
+    "cta": "Turn on",
+    "dismiss": "Not now"
+  },
   "actions": {
     "save": "Save",
     "cancel": "Cancel",

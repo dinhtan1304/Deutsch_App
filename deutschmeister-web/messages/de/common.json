@@ -6,6 +6,12 @@
     "dismiss": "Später",
     "iosHint": "Tippe auf „Teilen“ und wähle „Zum Home-Bildschirm“."
   },
+  "push": {
+    "title": "Tägliche Erinnerung?",
+    "body": "Aktiviere Benachrichtigungen, damit du das Wiederholen nicht vergisst. Jederzeit in den Einstellungen abschaltbar.",
+    "cta": "Aktivieren",
+    "dismiss": "Später"
+  },
   "actions": {
     "save": "Speichern",
     "cancel": "Abbrechen",

@@ -1,6 +1,8 @@
 'use client';
 
+import { useEffect } from 'react';
 import { useTranslations } from 'next-intl';
+import { signalSessionComplete } from '@/lib/pushPrompt';
 import { IconTrophy, IconRefresh, IconChevronLeft, IconPlus } from '@/components/ui/Icons';
 
 type ProgressStats = { total: number; mastered: number; learning: number; due: number; new: number };
@@ -22,6 +24,10 @@ interface SRSCompleteScreenProps {
 
 export function SRSCompleteScreen({ sessionStats, stats, onContinue, onAddWords, onBack }: SRSCompleteScreenProps) {
   const t = useTranslations('progress.review');
+
+  // Reaching this screen means a review session finished — the moment the
+  // reader is most receptive to being asked about daily reminders.
+  useEffect(() => { signalSessionComplete(); }, []);
   const accuracy = sessionStats.correct + sessionStats.wrong > 0
     ? Math.round((sessionStats.correct / (sessionStats.correct + sessionStats.wrong)) * 100) : 0;
 

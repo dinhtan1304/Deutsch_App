@@ -6,6 +6,12 @@
     "dismiss": "Để sau",
     "iosHint": "Nhấn nút Chia sẻ rồi chọn “Thêm vào MH chính”."
   },
+  "push": {
+    "title": "Nhắc bạn học mỗi ngày nhé?",
+    "body": "Bật thông báo để không quên ôn từ. Bạn tắt lại bất cứ lúc nào trong Cài đặt.",
+    "cta": "Bật thông báo",
+    "dismiss": "Để sau"
+  },
   "actions": {
     "save": "Lưu",
     "cancel": "Hủy",

@@ -63,6 +63,14 @@ export const trackPaywallView = (context: string) =>
 export const trackReminderClick = (channel: 'email' | 'push') =>
   trackEvent('reminder_click', { channel });
 
+/**
+ * Our own web-push opt-in banner: 'accepted' or 'dismissed'. Distinct from the
+ * browser's permission dialog — we only spend that one if the user says yes
+ * here first, so the two rates are worth watching separately.
+ */
+export const trackPushPrompt = (stage: 'accepted' | 'dismissed') =>
+  trackEvent('push_prompt', { stage });
+
 /** PWA install: 'prompt' shown, 'accepted', or 'dismissed'. */
 export const trackPwaInstall = (stage: 'prompt' | 'accepted' | 'dismissed') =>
   trackEvent('pwa_install', { stage });
