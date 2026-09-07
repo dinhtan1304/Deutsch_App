@@ -51,6 +51,12 @@
       "twitterDescription": "Prüfungsaufbau, 12-Wochen-Plan, Schreiben- & Sprechen-Vorlagen.",
       "jsonLdName": "Deutsch B1 Prüfungsvorbereitung (Goethe & TELC)",
       "jsonLdDescription": "Leitfaden und Übungsprüfungen für Goethe-Zertifikat B1 und TELC Deutsch B1: Prüfungsaufbau, 12-Wochen-Plan, KI-Bewertung für Schreiben/Sprechen, wichtigste Grammatik & Wortschatz."
+    },
+    "topics": {
+      "title": "Deutscher Wortschatz nach Themen",
+      "description": "Über 190 Wortschatzthemen von A1 bis B1 — Familie, Wohnen, Arbeit, Gesundheit und mehr, mit Artikeln, Beispielen, Audio und Karteikarten.",
+      "ogTitle": "Deutscher Wortschatz nach Themen — Deutschmeister",
+      "ogDescription": "Über 190 Themen von A1 bis B1 mit Artikeln, Beispielen und Wiederholung nach Zeitabständen."
     }
   }
 }

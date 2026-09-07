@@ -8,9 +8,13 @@ export async function generateMetadata({
   params: Promise<{ locale: AppLocale }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: 'metadata.pages.grammar' });
+  const t = await getTranslations({ locale, namespace: 'metadata.pages.grammar' });
+
+  const tSite = await getTranslations({ locale, namespace: 'metadata' });
   return {
-    title: t('title'),
+    // Keep the brand template alive for the [slug] segment below: a plain
+    // string here would overwrite the inherited { default, template }.
+    title: { default: t('title'), template: `%s | ${tSite('siteName')}` },
     description: t('description'),
     openGraph: {
       title: t('ogTitle'),

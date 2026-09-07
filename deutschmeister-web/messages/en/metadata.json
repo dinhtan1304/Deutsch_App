@@ -51,6 +51,12 @@
       "twitterDescription": "Exam structure, 12-week roadmap, Schreiben & Sprechen templates.",
       "jsonLdName": "German B1 exam prep (Goethe & TELC)",
       "jsonLdDescription": "Guide and mock exams for both Goethe-Zertifikat B1 and TELC Deutsch B1: exam structure, a 12-week roadmap, AI grading for Schreiben/Sprechen, key grammar & vocabulary."
+    },
+    "topics": {
+      "title": "German vocabulary by topic",
+      "description": "Over 190 German vocabulary topics from A1 to B1 — family, home, work, health and more, with articles, examples, audio and spaced-repetition flashcards.",
+      "ogTitle": "German vocabulary by topic — Deutschmeister",
+      "ogDescription": "Over 190 A1–B1 vocabulary topics with articles, examples and spaced-repetition review."
     }
   }
 }
