@@ -68,7 +68,8 @@
     "upgradePremium": "Auf Premium upgraden",
     "levelEstimate": "Schätzung basierend auf XP — mach einen Einstufungstest für ein genaues Level",
     "connectionProblem": "Server nicht erreichbar. Deine Sitzung ist noch aktiv — prüfe deine Verbindung und versuche es erneut.",
-    "retry": "Erneut versuchen"
+    "retry": "Erneut versuchen",
+    "showAllNav": "Alle Bereiche zeigen"
   },
   "breadcrumb": {
     "dashboard": "Startseite",

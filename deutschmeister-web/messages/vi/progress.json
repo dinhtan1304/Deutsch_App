@@ -166,7 +166,8 @@
     "addRandom": "+ Thêm 20 từ ngẫu nhiên",
     "addFromDictHint": "Hoặc thêm từ từ trang Từ vựng bằng nút ⭐",
     "sm2What": "SM-2 là gì?",
-    "sm2Desc": "SM-2 (SuperMemo 2) là thuật toán lặp lại ngắt quãng giúp bạn nhớ từ lâu hơn. Từ bạn nhớ tốt sẽ xuất hiện ít hơn, từ khó sẽ xuất hiện thường xuyên hơn."
+    "sm2Desc": "SM-2 (SuperMemo 2) là thuật toán lặp lại ngắt quãng giúp bạn nhớ từ lâu hơn. Từ bạn nhớ tốt sẽ xuất hiện ít hơn, từ khó sẽ xuất hiện thường xuyên hơn.",
+    "tomorrowTeaser": "Ngày mai sẽ có {count} từ đến hạn ôn. Hẹn gặp lại nhé!"
   },
   "profile": {
     "authGateTitle": "Đăng nhập để xem hồ sơ",

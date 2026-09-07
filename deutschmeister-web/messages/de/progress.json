@@ -166,7 +166,8 @@
     "addRandom": "+ 20 zufällige Wörter hinzufügen",
     "addFromDictHint": "Oder füge Wörter auf der Wörterbuch-Seite mit dem ⭐-Button hinzu",
     "sm2What": "Was ist SM-2?",
-    "sm2Desc": "SM-2 (SuperMemo 2) ist ein Spaced-Repetition-Algorithmus, der dir hilft, Wörter länger zu behalten. Gut gekonnte Wörter erscheinen seltener, schwere häufiger."
+    "sm2Desc": "SM-2 (SuperMemo 2) ist ein Spaced-Repetition-Algorithmus, der dir hilft, Wörter länger zu behalten. Gut gekonnte Wörter erscheinen seltener, schwere häufiger.",
+    "tomorrowTeaser": "Morgen sind {count} Wörter fällig. Bis dann!"
   },
   "profile": {
     "authGateTitle": "Anmelden, um Profil anzusehen",

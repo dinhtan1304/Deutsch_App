@@ -68,7 +68,8 @@
     "upgradePremium": "Nâng cấp Premium",
     "levelEstimate": "Mức ước tính dựa trên XP — thi placement test để xác định chính xác",
     "connectionProblem": "Không thể kết nối máy chủ. Phiên đăng nhập của bạn vẫn còn — hãy kiểm tra mạng và thử lại.",
-    "retry": "Thử lại"
+    "retry": "Thử lại",
+    "showAllNav": "Xem tất cả mục"
   },
   "breadcrumb": {
     "dashboard": "Trang chủ",

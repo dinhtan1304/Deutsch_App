@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { signalSessionComplete } from '@/lib/pushPrompt';
+import { TomorrowTeaser } from '@/components/dashboard/TomorrowTeaser';
 import { IconTrophy, IconRefresh, IconChevronLeft, IconPlus } from '@/components/ui/Icons';
 
 type ProgressStats = { total: number; mastered: number; learning: number; due: number; new: number };
@@ -57,6 +58,8 @@ export function SRSCompleteScreen({ sessionStats, stats, onContinue, onAddWords,
             </div>
           ))}
         </div>
+
+        <TomorrowTeaser />
 
         <div className="space-y-3">
           {(stats?.due ?? 0) > 0 && (

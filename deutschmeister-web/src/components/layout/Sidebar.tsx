@@ -4,14 +4,18 @@ import { memo, useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import { Link, usePathname } from '@/i18n/navigation';
-import { IconChevronRight, IconChevronLeft } from '@/components/ui/Icons';
+import { IconChevronRight, IconChevronLeft, IconChevronDown } from '@/components/ui/Icons';
 import { useXp } from '@/hooks/useXp';
 import { useAuthUser, useIsAuthenticated, useAuthBootstrap } from '@/stores/authStore';
 import { useSRSStats } from '@/hooks/usePersonalWords';
 import { useProgressStats } from '@/hooks/useProgress';
 import { PremiumLockIcon } from '@/components/subscription/UpsellTrigger';
 import { BetaBadge } from '@/components/ui/BetaBadge';
-import { PRIMARY_NAV, PREMIUM_HREFS, AUTH_HREFS, NAV_FLAT, type NavItem } from '@/config/navigation';
+import {
+  PRIMARY_NAV, PREMIUM_HREFS, AUTH_HREFS, NAV_FLAT,
+  filterNavForAccountAge, hiddenNavCount, isNewAccount,
+  type NavItem,
+} from '@/config/navigation';
 import { STATUS, ACCENT, GRADIENT } from '@/lib/tokens';
 import { isPaidPlan, PLAN_SHORT_LABEL } from '@/lib/plan';
 
@@ -38,6 +42,13 @@ function SidebarComponent({ isCollapsed, onToggle }: SidebarProps) {
   const srsDue = srsStats?.due ?? 0;
   const builtInDue = progressStats?.due ?? 0;
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
+  // A first-week account sees the essentials only; everything else is one
+  // click away rather than gone. Opting to see all of it sticks for the
+  // session, and the trim lapses on its own after a week.
+  const [showAllNav, setShowAllNav] = useState(false);
+  const trimmed = isNewAccount(user?.createdAt) && !showAllNav;
+  const visibleNav = trimmed ? filterNavForAccountAge(PRIMARY_NAV, user?.createdAt) : PRIMARY_NAV;
+  const hiddenCount = trimmed ? hiddenNavCount(PRIMARY_NAV) : 0;
   const [tooltip, setTooltip] = useState<{ key: string; top: number } | null>(null);
 
   // Auto-expand parent of active child on route change
@@ -351,7 +362,21 @@ function SidebarComponent({ isCollapsed, onToggle }: SidebarProps) {
       {/* ─── Navigation ─── */}
       <nav className="sidebar-nav flex-1 py-2 px-3" style={{ overflowY: 'auto', overflowX: 'hidden' }}>
         <ul className="space-y-0.5">
-          {PRIMARY_NAV.map(item => renderNavItem(item))}
+          {visibleNav.map(item => renderNavItem(item))}
+          {trimmed && (
+            <li>
+              <button
+                type="button"
+                onClick={() => setShowAllNav(true)}
+                className="w-full flex items-center gap-3 rounded-lg px-3 py-2 text-body"
+                style={{ color: 'var(--theme-text-muted)', background: 'transparent', border: 'none', cursor: 'pointer' }}
+                title={tUi('showAllNav')}
+              >
+                <span className="shrink-0" aria-hidden><IconChevronDown size={20} /></span>
+                {!isCollapsed && <span>{tUi('showAllNav')} ({hiddenCount})</span>}
+              </button>
+            </li>
+          )}
         </ul>
       </nav>
 

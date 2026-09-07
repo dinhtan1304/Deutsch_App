@@ -11,6 +11,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { UpsellTrigger } from '@/components/subscription/UpsellTrigger';
 import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 import { signalSessionComplete } from '@/lib/pushPrompt';
+import { TomorrowTeaser } from '@/components/dashboard/TomorrowTeaser';
 import type { Word } from '@/types';
 import type { Level } from '@/types/personalWord';
 import {
@@ -185,7 +186,9 @@ export function GameResultCard({ accuracy, correct, total, stats, onRestart, onE
           </div>
         )}
 
-        {(onRestart || onExit) && (
+        <TomorrowTeaser />
+
+        {(onRestart || onExit) && (
           <div className="flex gap-3">
             {onExit && (
               <button onClick={onExit} className="h-11 flex-1 rounded-[11px] border text-sm font-semibold transition-colors hover:opacity-80"

@@ -29,6 +29,8 @@ export const progressApi = {
     learning: number;
     due: number;
     new: number;
+    /** Cards falling due during tomorrow, Vietnam time. Drives the post-session teaser. */
+    dueTomorrow: number;
   }> => {
     return apiGet('/progress/stats');
   },

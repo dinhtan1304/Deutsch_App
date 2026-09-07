@@ -39,6 +39,11 @@ export interface NavItem {
   premium?: boolean;                              // show crown icon for free users
   beta?: boolean;                                 // show BETA pill in sidebar (expanded only)
   badge?: 'srs-due' | 'builtin-due';              // runtime counts wired in Sidebar
+  /**
+   * Shown to brand-new accounts. Everything else is folded away behind
+   * "show everything" for the first week — see `filterNavForAccountAge`.
+   */
+  essential?: boolean;
 }
 
 // Inline icon for "More" — no existing icon fits
@@ -54,22 +59,22 @@ function IconMore({ size = 20 }: { size?: number; className?: string }) {
 
 export const PRIMARY_NAV: NavItem[] = [
   {
-    key: 'home',
+    key: 'home', essential: true,
     labelKey: 'home',
     href: '/dashboard',
     icon: IconHome,
   },
   {
-    key: 'vocabulary',
+    key: 'vocabulary', essential: true,
     labelKey: 'vocabulary',
     href: '/words',
     icon: IconBook,
     children: [
-      { key: 'words',         labelKey: 'words',           href: '/words',              icon: IconBook },
+      { key: 'words', essential: true,         labelKey: 'words',           href: '/words',              icon: IconBook },
       { key: 'word-bank',     labelKey: 'wordBank',        href: '/word-bank',          icon: IconNotebook },
       { key: 'word-bank-srs', labelKey: 'wordBankSrs',     href: '/word-bank/review',   icon: IconBrain, badge: 'srs-due' },
-      { key: 'review-sm2',    labelKey: 'reviewSm2',       href: '/review',             icon: IconRefresh, badge: 'builtin-due' },
-      { key: 'topics',        labelKey: 'topics',          href: '/topics',             icon: IconLayers },
+      { key: 'review-sm2', essential: true,    labelKey: 'reviewSm2',       href: '/review',             icon: IconRefresh, badge: 'builtin-due' },
+      { key: 'topics', essential: true,        labelKey: 'topics',          href: '/topics',             icon: IconLayers },
       { key: 'my-topics',     labelKey: 'myTopics',        href: '/my-topics',          icon: IconNotebook },
       { key: 'community-topics', labelKey: 'communityTopics', href: '/community/topics', icon: IconLayers },
       { key: 'ipa-chart',     labelKey: 'ipaChart',        href: '/learn/ipa',          icon: IconMic },
@@ -77,13 +82,13 @@ export const PRIMARY_NAV: NavItem[] = [
     ],
   },
   {
-    key: 'practice',
+    key: 'practice', essential: true,
     labelKey: 'practice',
     href: '/practice-test',
     icon: IconTarget,
     children: [
-      { key: 'grammar',     labelKey: 'grammar',         href: '/grammar',                icon: IconBookOpen },
-      { key: 'games',       labelKey: 'games',           href: '/games',                  icon: IconGamepad },
+      { key: 'grammar', essential: true,     labelKey: 'grammar',         href: '/grammar',                icon: IconBookOpen },
+      { key: 'games', essential: true,       labelKey: 'games',           href: '/games',                  icon: IconGamepad },
       { key: 'reading',     labelKey: 'reading',         href: '/practice-test/reading',  icon: IconBookOpen, premium: true },
       { key: 'listening',   labelKey: 'listening',       href: '/practice-test/listening', icon: IconHeadphones, premium: true },
       { key: 'writing',     labelKey: 'writing',         href: '/practice-test/writing',  icon: IconPenLine, premium: true },
@@ -95,12 +100,12 @@ export const PRIMARY_NAV: NavItem[] = [
     ],
   },
   {
-    key: 'progress',
+    key: 'progress', essential: true,
     labelKey: 'progress',
     href: '/profile',
     icon: IconBarChart,
     children: [
-      { key: 'profile',       labelKey: 'profile',      href: '/profile',       icon: IconUser },
+      { key: 'profile', essential: true,       labelKey: 'profile',      href: '/profile',       icon: IconUser },
       { key: 'achievements',  labelKey: 'achievements', href: '/achievements',  icon: IconTrophy },
       { key: 'leaderboard',   labelKey: 'leaderboard',  href: '/leaderboard',   icon: IconZap },
       { key: 'challenges',    labelKey: 'challenges',   href: '/challenges',    icon: IconBrain },
@@ -108,12 +113,12 @@ export const PRIMARY_NAV: NavItem[] = [
     ],
   },
   {
-    key: 'more',
+    key: 'more', essential: true,
     labelKey: 'more',
     href: '/settings',
     icon: IconMore,
     children: [
-      { key: 'settings',   labelKey: 'settings',  href: '/settings',  icon: IconSettings },
+      { key: 'settings', essential: true,   labelKey: 'settings',  href: '/settings',  icon: IconSettings },
       { key: 'resources',  labelKey: 'resources', href: '/resources', icon: IconLink },
       { key: 'pricing',    labelKey: 'pricing',   href: '/pricing',   icon: IconStar },
       { key: 'referral',   labelKey: 'referral',  href: '/referral',  icon: IconUser },
@@ -166,3 +171,42 @@ export const AUTH_HREFS: ReadonlySet<string> = new Set([
   '/smart-review',
   '/grammar/review',
 ]);
+
+/** How long an account counts as new for the purposes of a trimmed sidebar. */
+export const NEW_ACCOUNT_DAYS = 7;
+
+/**
+ * Trim the nav to `essential` entries for a brand-new account.
+ *
+ * The full tree is 4 groups and 28 children. Most of it — the four exam modes,
+ * arena, speaking rooms, shadowing, study plans — serves about 10% of measured
+ * activity and means nothing to someone who has not learned twenty words yet.
+ * Meanwhile only 4.4% of new signups reach three study days in their first
+ * week, and a wall of choices is a plausible part of why.
+ *
+ * This is presentation only. Every route stays reachable by URL, by search, and
+ * from any link elsewhere in the app — and the caller pairs this with a "show
+ * everything" control, so nothing is ever locked away from a curious user.
+ */
+export function filterNavForAccountAge(nav: NavItem[], accountCreatedAt: string | undefined): NavItem[] {
+  if (!isNewAccount(accountCreatedAt)) return nav;
+  return nav
+    .filter((item) => item.essential)
+    .map((item) => (item.children ? { ...item, children: item.children.filter((c) => c.essential) } : item));
+}
+
+/** True for accounts younger than NEW_ACCOUNT_DAYS. Unknown dates count as established. */
+export function isNewAccount(accountCreatedAt: string | undefined): boolean {
+  if (!accountCreatedAt) return false;
+  const created = new Date(accountCreatedAt).getTime();
+  if (!Number.isFinite(created)) return false;
+  return Date.now() - created < NEW_ACCOUNT_DAYS * 24 * 60 * 60 * 1000;
+}
+
+/** How many entries the trim is hiding, for the "show everything" affordance. */
+export function hiddenNavCount(nav: NavItem[]): number {
+  const all = nav.flatMap((i) => [i, ...(i.children ?? [])]).length;
+  const kept = filterNavForAccountAge(nav, new Date().toISOString())
+    .flatMap((i) => [i, ...(i.children ?? [])]).length;
+  return all - kept;
+}

@@ -68,7 +68,8 @@
     "upgradePremium": "Upgrade to Premium",
     "levelEstimate": "Estimate based on XP — take a placement test for an exact level",
     "connectionProblem": "Can't reach the server. Your session is still active — check your connection and try again.",
-    "retry": "Retry"
+    "retry": "Retry",
+    "showAllNav": "Show all sections"
   },
   "breadcrumb": {
     "dashboard": "Home",
