@@ -27,10 +27,15 @@ export const progressApi = {
     total: number;
     mastered: number;
     learning: number;
-    due: number;
     new: number;
+    /** Genuine reviews only. Never-studied cards are counted under `new`, not here. */
+    due: number;
     /** Cards falling due during tomorrow, Vietnam time. Drives the post-session teaser. */
     dueTomorrow: number;
+    /** New cards this session will introduce, after rationing. */
+    newInSession: number;
+    /** Reviews plus rationed new cards — what the learner is actually offered. */
+    sessionSize: number;
   }> => {
     return apiGet('/progress/stats');
   },

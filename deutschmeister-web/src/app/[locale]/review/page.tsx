@@ -50,7 +50,8 @@ export default function SRSReviewPage() {
     if (dueLoading) return 'loading';
     if (!stats) return 'loading';
     if (stats.total === 0) return 'empty';
-    if (stats.due === 0) return 'complete';
+    // Nothing to do only when neither reviews nor rationed new cards remain.
+    if ((stats.sessionSize ?? stats.due) === 0) return 'complete';
     return 'setup';
   }, [manualPhase, dueLoading, stats]);
   const [quizMode, setQuizMode] = useState<QuizMode>('mixed');

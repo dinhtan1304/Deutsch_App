@@ -3,7 +3,15 @@
 import { useTranslations } from 'next-intl';
 import { IconBrain, IconBookOpen, IconTarget, IconFlame, IconChevronLeft, IconPlus } from '@/components/ui/Icons';
 
-type ProgressStats = { total: number; mastered: number; learning: number; due: number; new: number };
+type ProgressStats = {
+  total: number; mastered: number; learning: number;
+  /** Genuine reviews only — never-studied cards are counted under `new`. */
+  due: number;
+  new: number;
+  /** Reviews plus the rationed new cards: what a session actually contains. */
+  sessionSize?: number;
+  newInSession?: number;
+};
 
 type QuizMode = 'gender' | 'de-vi' | 'vi-de' | 'mixed';
 
@@ -87,7 +95,7 @@ export function SRSSetupScreen({ stats, quizMode, onSetMode, onStart, onBack, on
           })}
         </div>
 
-        {(stats?.due ?? 0) > 0 ? (
+        {(stats?.sessionSize ?? stats?.due ?? 0) > 0 ? (
           <>
             <p className="text-body font-semibold mb-3" style={{ color: 'var(--theme-text-secondary)' }}>{t('chooseMode')}</p>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mb-6 max-w-md mx-auto">
@@ -110,7 +118,7 @@ export function SRSSetupScreen({ stats, quizMode, onSetMode, onStart, onBack, on
               })}
             </div>
             <p className="text-sm mb-6" style={{ color: 'var(--theme-text-secondary)' }}>
-              {t.rich('dueCountMessage', { count: stats?.due ?? 0, b: (chunks) => <span className="font-bold" style={{ color: 'var(--accent)' }}>{chunks}</span> })}
+              {t.rich('dueCountMessage', { count: stats?.sessionSize ?? stats?.due ?? 0, b: (chunks) => <span className="font-bold" style={{ color: 'var(--accent)' }}>{chunks}</span> })}
             </p>
             <button onClick={onStart}
               className="flex items-center gap-2.5 mx-auto px-8 h-12 rounded-[14px] font-bold text-[15px] transition-transform hover:-translate-y-0.5 active:scale-95"
