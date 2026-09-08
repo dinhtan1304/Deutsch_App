@@ -246,9 +246,15 @@ declare global {
   }
 }
 
-AudioParam.prototype.exponentialDecayTo = function(value: number, endTime: number) {
-  // Ensure value is never 0 (exponentialRampToValueAtTime doesn't allow 0)
-  const safeValue = Math.max(0.0001, value);
-  this.exponentialRampToValueAtTime(safeValue, endTime);
-  return this;
-};
+// Guarded because this runs at module scope, and `'use client'` does not keep a
+// module off the server — client components are still evaluated there to
+// produce HTML. Unguarded, importing this file crashed the server render of
+// every page that plays a sound.
+if (typeof AudioParam !== 'undefined') {
+  AudioParam.prototype.exponentialDecayTo = function(value: number, endTime: number) {
+    // Ensure value is never 0 (exponentialRampToValueAtTime doesn't allow 0)
+    const safeValue = Math.max(0.0001, value);
+    this.exponentialRampToValueAtTime(safeValue, endTime);
+    return this;
+  };
+}

@@ -10,7 +10,6 @@ import { BottomTabBar } from './BottomTabBar';
 import { GuestBanner } from './GuestBanner';
 import { VerifyEmailBanner } from './VerifyEmailBanner';
 import { Breadcrumb } from '@/components/ui';
-import { GRADIENT } from '@/lib/tokens';
 import { useIsAuthenticated } from '@/stores/authStore';
 
 const CommandPalette = dynamic(() => import('./CommandPalette').then((mod) => mod.CommandPalette), { ssr: false });
@@ -66,7 +65,6 @@ export function MainLayout({ children }: MainLayoutProps) {
   // full app shell. (vi is the default locale and has no prefix.)
   const localelessPath = pathname.replace(/^\/(en|de)(?=\/|$)/, '') || '/';
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [mounted, setMounted] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
 
   const isBareRoute = BARE_ROUTES.some(
@@ -74,11 +72,14 @@ export function MainLayout({ children }: MainLayoutProps) {
   );
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setMounted(true);
     if (!isBareRoute) {
       const saved = localStorage.getItem(SIDEBAR_COLLAPSED_KEY);
       if (saved !== null) {
+        // Deliberate: the server cannot read localStorage, so the preference has
+        // to be applied after mount. Reading it in a lazy initialiser instead
+        // would make the server and client disagree on the first render — the
+        // hydration mismatch the removed mount gate was papering over.
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setSidebarCollapsed(saved === 'true');
       }
     }
@@ -104,20 +105,21 @@ export function MainLayout({ children }: MainLayoutProps) {
     );
   }
 
-  // ─── Loading state ───
-  if (!mounted) {
-    return (
-      <div className="min-h-screen" style={{ backgroundColor: 'var(--theme-bg-body)' }}>
-        <div className="animate-pulse flex items-center justify-center h-screen">
-          <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl font-black text-white"
-            style={{ background: GRADIENT.writing }}>
-            D
-          </div>
-        </div>
-      </div>
-    );
-  }
-
+  // No mount gate here, deliberately.
+  //
+  // This used to return a pulsing splash until `mounted` flipped in an effect —
+  // and effects never run on the server, so every non-bare route served that
+  // splash as its entire HTML. Not a topic-page problem or a word-page problem:
+  // the whole app shipped a loading spinner to crawlers, which is why adding
+  // canonicals, metadata and server-side data fetching produced no visible
+  // content in the markup.
+  //
+  // The gate existed only so the sidebar's collapsed state could be read from
+  // localStorage without a hydration mismatch. That is handled correctly by
+  // starting from the same default on both sides and letting the effect above
+  // correct it — a collapsed sidebar expands for one frame on load, which is a
+  // small price for the site being readable at all. Moving the preference to a
+  // cookie would remove even that.
   const sidebarMl = `${sidebarCollapsed ? SIDEBAR_COLLAPSED_WIDTH : SIDEBAR_WIDTH}px`;
   const accentClass = accentClassFor(pathname);
 

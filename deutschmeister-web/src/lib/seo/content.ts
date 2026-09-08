@@ -73,6 +73,24 @@ export function fetchTopicDetail<T>(slug: string): Promise<T | null> {
   return getJson<T>(`/topics/${encodeURIComponent(slug)}?includeWords=true`);
 }
 
+/** One vocabulary entry by the slug its public page is addressed under. */
+export function fetchWordBySlug<T>(level: string, slug: string): Promise<T | null> {
+  return getJson<T>(
+    `/words/by-slug/${encodeURIComponent(level.toLowerCase())}/${encodeURIComponent(slug)}`,
+  );
+}
+
+/**
+ * Every addressable word page. ~41k entries, so this is only ever called from
+ * the sitemap, which regenerates daily — the API caches it for an hour on its
+ * side too.
+ */
+export function fetchWordSlugs(): Promise<{ slug: string; level: string }[]> {
+  return getJson<{ slug: string; level: string }[]>('/words/slug-index').then((data) =>
+    Array.isArray(data) ? data : [],
+  );
+}
+
 interface Paginated<T> {
   data: T[];
   total: number;
