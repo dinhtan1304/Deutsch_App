@@ -56,6 +56,23 @@ export function fetchGrammarLesson(slug: string): Promise<SeoGrammarLesson | nul
   return getJson<SeoGrammarLesson>(`/grammar/lessons/${encodeURIComponent(slug)}`);
 }
 
+/**
+ * The same two endpoints, typed for rendering rather than for metadata.
+ *
+ * `generateMetadata` only needs a title and a description, so `SeoTopic` and
+ * `SeoGrammarLesson` describe just that much. The page components hand the whole
+ * payload to the client view as `initialData`, so they take it untyped-by-us and
+ * let the view's own types apply — one request either way, since Next dedupes
+ * identical fetches within a render.
+ */
+export function fetchGrammarLessonDetail<T>(slug: string): Promise<T | null> {
+  return getJson<T>(`/grammar/lessons/${encodeURIComponent(slug)}`);
+}
+
+export function fetchTopicDetail<T>(slug: string): Promise<T | null> {
+  return getJson<T>(`/topics/${encodeURIComponent(slug)}?includeWords=true`);
+}
+
 interface Paginated<T> {
   data: T[];
   total: number;

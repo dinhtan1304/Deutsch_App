@@ -11,7 +11,7 @@ import {
   addWordsToTopic,
   removeWordsFromTopic,
 } from '@/lib/api/topics';
-import type { TopicsQueryParams, Topic } from '@/types/topic';
+import type { TopicsQueryParams, Topic, TopicWithWords } from '@/types/topic';
 
 // ============================================
 // Query Keys
@@ -53,12 +53,18 @@ export function useTopics(params?: TopicsQueryParams) {
 /**
  * Hook lấy chi tiết topic
  */
-export function useTopic(idOrSlug: string, includeWords = true) {
+/**
+ * `initialData` lets the server component hand the topic down as props, so the
+ * word list ships inside the HTML instead of arriving after hydration. Without
+ * it a crawler sees an empty shell where 40-odd German words should be.
+ */
+export function useTopic(idOrSlug: string, includeWords = true, initialData?: TopicWithWords) {
   return useQuery({
     queryKey: topicsKeys.detail(idOrSlug),
     queryFn: () => getTopic(idOrSlug, includeWords),
     enabled: !!idOrSlug,
     staleTime: 5 * 60 * 1000,
+    initialData,
   });
 }
 
