@@ -17,28 +17,8 @@ on:
       - '.github/workflows/ci.yml'
 
 jobs:
-  api:
-    name: API build, unit and local database tests
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: deutschmeister-api
-    env:
-      DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/unused
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: true
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '24'
-          cache: npm
-          cache-dependency-path: deutschmeister-api/package-lock.json
-      - run: npm ci
-      - run: npm test -- --runInBand
-      - run: node --test test/tts-prewarm.test.cjs
-      - run: npm run test:integration
-
+  # API tests run in the private API repository's own CI workflow.
+  # This repository's GITHUB_TOKEN cannot read that private submodule.
   tts:
     name: TTS cache tests
     runs-on: ubuntu-latest
