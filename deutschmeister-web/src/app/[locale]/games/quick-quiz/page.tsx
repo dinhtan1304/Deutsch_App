@@ -88,6 +88,7 @@ export default function QuickQuizPage() {
     if (showFeedback || !currentWord) return;
     setSelectedAnswer(gender); setShowFeedback(true);
     const isCorrect = gender === currentWord.gender;
+    session.recordAnswer(currentWord.id, gender);
 
     if (isCorrect) {
       playCorrect(); // BUG FIX 2: sound was missing
@@ -105,7 +106,7 @@ export default function QuickQuizPage() {
       if (currentIndex < TOTAL_QUESTIONS - 1) { setCurrentIndex(i => i + 1); setSelectedAnswer(null); setShowFeedback(false); }
       else { playGameOver(); setPhase('result'); } // BUG FIX 2: missing game over sound
     }, 1500);
-  }, [showFeedback, currentWord, currentIndex, playCorrect, playWrong, playGameOver, TOTAL_QUESTIONS]);
+  }, [showFeedback, currentWord, currentIndex, playCorrect, playWrong, playGameOver, TOTAL_QUESTIONS, session]);
 
   // Save session to backend when game finishes
   useEffect(() => {

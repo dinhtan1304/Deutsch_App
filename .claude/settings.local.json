@@ -68,7 +68,21 @@
       "Bash(git -C deutschmeister-api status --short)",
       "mcp__claude_ai_Vercel__list_deployments",
       "Bash(awk '/^model User \\\\{/,/^\\\\}/' prisma/schema.prisma)",
-      "Bash(git -C deutschmeister-api branch --show-current)"
+      "Bash(git -C deutschmeister-api branch --show-current)",
+      "Bash(awk '/^model GeminiTokenUsage/,/^}/' prisma/schema.prisma)",
+      "Bash(command -v jq)",
+      "Bash(jq --version)",
+      "Bash(curl -s -o /dev/null -w \"health: %{http_code}\\\\n\" --max-time 3 http://localhost:8000/api/health)",
+      "Bash(curl -sI --max-time 5 http://localhost:8000/api/grammar/lessons)",
+      "Bash(curl -sI --max-time 5 http://localhost:8000/api/topics)",
+      "Bash(curl -s --max-time 5 http://localhost:8000/api/auth/verify-email)",
+      "Bash(cp \"C:/Users/ADMIN/AppData/Local/Temp/claude/e--Deutsch-App/7380cc7f-224c-42ed-8082-e97f707998ac/scratchpad/batch1-smoke.sh\" /dev/null)",
+      "Bash(bash -n \"C:/Users/ADMIN/AppData/Local/Temp/claude/e--Deutsch-App/7380cc7f-224c-42ed-8082-e97f707998ac/scratchpad/batch1-smoke.sh\")",
+      "Bash(git checkout *)",
+      "Bash(git -C deutschmeister-api checkout -q -b tandv_update_audit-batch2)",
+      "Bash(echo \"submodule: $\\(git -C deutschmeister-api branch --show-current\\)\")",
+      "Bash(awk '/^model Settings/,/^}/' prisma/schema.prisma)",
+      "Bash(grep -n \"}, \\\\`.*\\\\`\\);\\\\|}, '.*'\\);\\\\|      \\\\`.*to \\\\${email}\\\\`,\\\\|^    \\);\" src/modules/email/email.service.ts)"
     ]
   }
 }

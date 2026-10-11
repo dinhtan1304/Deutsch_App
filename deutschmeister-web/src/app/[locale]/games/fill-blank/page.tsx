@@ -109,6 +109,7 @@ export default function FillBlankPage() {
     const correctAnswer = currentWord.article.toLowerCase();
     const userAnswer = userInput.trim().toLowerCase();
     const correct = userAnswer === correctAnswer;
+    session.recordAnswer(currentWord.id, userAnswer);
     setAnswered(true); setIsCorrect(correct);
     setAnswers(prev => [...prev, { word: currentWord, userInput: userInput.trim(), correctAnswer: currentWord.article, isCorrect: correct }]);
 
@@ -122,7 +123,7 @@ export default function FillBlankPage() {
       if (newCombo === 3 || newCombo === 5 || newCombo === 10) setTimeout(() => playCombo(), 200);
       if ((score + 10 * multiplier) % 100 === 0) setTimeout(() => playCombo(), 300);
     } else { playWrong(); wrongRef.current++; setCombo(0); }
-  }, [answered, currentWord, userInput, combo, bestCombo, score, playCorrect, playWrong, playCombo]);
+  }, [answered, currentWord, userInput, combo, bestCombo, score, playCorrect, playWrong, playCombo, session]);
 
   const nextQuestion = useCallback(() => {
     if (index + 1 >= questionsCount) { playGameOver(); setPhase('result'); }
@@ -142,6 +143,7 @@ export default function FillBlankPage() {
     if (answered || !currentWord) return;
     const correctAnswer = currentWord.article.toLowerCase();
     const correct = article.toLowerCase() === correctAnswer;
+    session.recordAnswer(currentWord.id, article);
     setUserInput(article);
     setAnswered(true); setIsCorrect(correct);
     setAnswers(prev => [...prev, { word: currentWord, userInput: article, correctAnswer: currentWord.article, isCorrect: correct }]);

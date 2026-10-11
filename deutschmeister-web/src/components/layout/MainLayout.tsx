@@ -1,7 +1,7 @@
 'use client';
 
 import { ReactNode, useCallback, useState, useEffect } from 'react';
-import { usePathname } from 'next/navigation';
+import { usePathname } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
 import dynamic from 'next/dynamic';
 import { Sidebar, SIDEBAR_WIDTH, SIDEBAR_COLLAPSED_WIDTH } from './Sidebar';
@@ -51,7 +51,7 @@ const ACCENT_ROUTES: { prefix: string; cls: string }[] = [
 
 // Strip an optional leading locale segment (/en, /de) so prefixes match across locales.
 function accentClassFor(pathname: string): string {
-  const p = pathname.replace(/^\/(en|de)(?=\/|$)/, '') || '/';
+  const p = pathname.replace(/^\/(vi|en|de)(?=\/|$)/, '') || '/';
   const hit = ACCENT_ROUTES.find((r) => p === r.prefix || p.startsWith(r.prefix + '/') || p.startsWith(r.prefix));
   return hit?.cls ?? '';
 }
@@ -60,10 +60,8 @@ export function MainLayout({ children }: MainLayoutProps) {
   const t = useTranslations('common.ui');
   const isAuthenticated = useIsAuthenticated();
   const pathname = usePathname();
-  // usePathname() (next/navigation) keeps the locale prefix (/en, /de), so strip
-  // it before matching bare routes — otherwise /en/auth/login wrongly renders the
-  // full app shell. (vi is the default locale and has no prefix.)
-  const localelessPath = pathname.replace(/^\/(en|de)(?=\/|$)/, '') || '/';
+  // Normalize static prerender paths and browser paths identically.
+  const localelessPath = pathname.replace(/^\/(vi|en|de)(?=\/|$)/, '') || '/';
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
 

@@ -1,14 +1,15 @@
 'use client';
 
-import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query';
+import { QueryClientProvider, useQueryClient } from '@tanstack/react-query';
 import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3';
-import { useState, useEffect } from 'react';
+import { useMemo, useEffect } from 'react';
+import { useLocale } from 'next-intl';
 import { usePathname } from '@/i18n/navigation';
 import { ErrorBoundary, ToastProvider } from '@/components/ui';
 import { ApiError, clearTokens, initAuth } from '@/lib/api/client';
 import { authApi } from '@/lib/api/auth';
 import { clearSessionHint, hasSessionHint, setSessionHint } from '@/lib/auth/sessionHint';
-import { useAuthStore } from '@/stores/authStore';
+import { getAuthEpoch, useAuthStore } from '@/stores/authStore';
 import { useSettingsStore, applyTheme, BACKEND_SETTINGS_KEYS, AppSettings } from '@/stores/settingsStore';
 import { DictionaryProvider } from '@/providers/DictionaryProvider';
 import { WordHighlightProvider } from '@/providers/WordHighlightProvider';
@@ -16,13 +17,14 @@ import { GrammarAnalyzerProvider } from '@/providers/GrammarAnalyzerProvider';
 import { AchievementToastProvider } from '@/components/ui/AchievementToast';
 import { notifKeys } from '@/hooks/useNotifications';
 import { subscriptionKeys } from '@/hooks/useSubscription';
+import { createAppQueryClient } from '@/lib/queryClient';
+import { UpdateAnnouncement } from '@/components/updates/UpdateAnnouncement';
+import { OfflineSync } from '@/components/learning/OfflineSync';
 
 // Real session expiry is handled centrally in client.ts (onAuthExpired fires
 // only after a genuine 401 from /auth/refresh or the post-refresh retry). A
 // 401 surfacing here can be a transient refresh failure (offline, timeout,
 // 429) — clearing tokens/hint here used to kick users to login mid-exercise.
-function handleGlobalError() {}
-
 function pickBackendSettings(settings: Record<string, unknown>): Partial<AppSettings> {
   return BACKEND_SETTINGS_KEYS.reduce((acc, key) => {
     const val = settings[key as string];
@@ -33,6 +35,7 @@ function pickBackendSettings(settings: Record<string, unknown>): Partial<AppSett
 
 function AppInitializer({ children }: { children: React.ReactNode }) {
   const queryClient = useQueryClient();
+  const bootstrap = useAuthStore((s) => s.bootstrap);
   const { loadSettings, syncFromBackend, settings, isLoaded } = useSettingsStore();
 
   useEffect(() => {
@@ -44,7 +47,16 @@ function AppInitializer({ children }: { children: React.ReactNode }) {
   }, [isLoaded, settings.theme]);
 
   useEffect(() => {
+    if (!bootstrap) return;
+    queryClient.setQueryData(subscriptionKeys.me(), bootstrap.subscription);
+    queryClient.setQueryData(['xp'], bootstrap.xp);
+    queryClient.setQueryData(notifKeys.unread(), bootstrap.unreadCount);
+    syncFromBackend(pickBackendSettings(bootstrap.settings));
+  }, [bootstrap, queryClient, syncFromBackend]);
+
+  useEffect(() => {
     const run = async () => {
+      const epoch = getAuthEpoch();
       if (!hasSessionHint()) {
         useAuthStore.setState({
           bootstrap: null,
@@ -59,6 +71,7 @@ function AppInitializer({ children }: { children: React.ReactNode }) {
       useAuthStore.getState().setLoading(true);
       try {
         const tokenState = await initAuth();
+        if (epoch !== getAuthEpoch()) return;
         if (tokenState !== 'authenticated') {
           // 'unauthenticated': real expiry — client.ts already cleared the
           // session hint. 'transient': API unreachable — the hint stays, so
@@ -72,6 +85,7 @@ function AppInitializer({ children }: { children: React.ReactNode }) {
         }
 
         const bootstrap = await authApi.bootstrap();
+        if (epoch !== getAuthEpoch()) return;
         setSessionHint();
         useAuthStore.getState().setBootstrap(bootstrap);
         queryClient.setQueryData(subscriptionKeys.me(), bootstrap.subscription);
@@ -79,6 +93,7 @@ function AppInitializer({ children }: { children: React.ReactNode }) {
         queryClient.setQueryData(notifKeys.unread(), bootstrap.unreadCount);
         syncFromBackend(pickBackendSettings(bootstrap.settings));
       } catch (error) {
+        if (epoch !== getAuthEpoch()) return;
         // Only a real 401 ends the session; other bootstrap errors (network,
         // 5xx) keep the hint so the user gets a retry panel, not a logout.
         if (error instanceof ApiError && error.status === 401) {
@@ -91,6 +106,7 @@ function AppInitializer({ children }: { children: React.ReactNode }) {
           isAuthenticated: false,
         });
       } finally {
+        if (epoch !== getAuthEpoch()) return;
         const state = useAuthStore.getState();
         state.setLoading(false);
         state.setHasHydrated(true);
@@ -123,24 +139,15 @@ function AuthRecaptchaGate({ children }: { children: React.ReactNode }) {
 }
 
 export function Providers({ children }: { children: React.ReactNode }) {
-  const [queryClient] = useState(
-    () =>
-      new QueryClient({
-        defaultOptions: {
-          queries: {
-            staleTime: 60 * 1000,
-            retry: (failureCount, error) => {
-              if (error instanceof ApiError && error.status === 401) return false;
-              return failureCount < 1;
-            },
-            refetchOnWindowFocus: false,
-          },
-          mutations: {
-            onError: handleGlobalError,
-          },
-        },
-      })
-  );
+  const userId = useAuthStore((s) => s.user?.id ?? null);
+  const locale = useLocale();
+  // A different identity or language gets a different cache synchronously,
+  // before children render. Late requests can only populate the discarded client.
+  const queryClient = useMemo(() => createAppQueryClient(), [userId, locale]);
+  useEffect(() => () => {
+    void queryClient.cancelQueries();
+    queryClient.clear();
+  }, [queryClient]);
 
   return (
     <ErrorBoundary>
@@ -153,6 +160,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
                   <ToastProvider>
                     {children}
                     <AchievementToastProvider />
+                    <UpdateAnnouncement />
+                    <OfflineSync />
                   </ToastProvider>
                 </GrammarAnalyzerProvider>
               </DictionaryProvider>

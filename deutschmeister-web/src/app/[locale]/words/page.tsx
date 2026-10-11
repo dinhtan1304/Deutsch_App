@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
+import { Suspense, useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import { Link } from '@/i18n/navigation';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useAuthStore } from '@/stores/authStore';
 import { WordCard } from '@/components/words/WordCard';
@@ -122,10 +122,15 @@ function Stat({ label, value, color, total, pulse }: { label: string; value: num
 }
 
 export default function WordsPage() {
+  return <Suspense fallback={<GridSkeleton />}><WordsContent /></Suspense>;
+}
+
+function WordsContent() {
+  const searchParams = useSearchParams();
   const t = useTranslations('vocabulary.words');
   const categoryLabel = useCategoryLabel();
-  const [searchInput, setSearchInput] = useState('');
-  const [search, setSearch] = useState('');
+  const [searchInput, setSearchInput] = useState(searchParams.get('search')?.slice(0, 100) ?? '');
+  const [search, setSearch] = useState(searchParams.get('search')?.slice(0, 100) ?? '');
   const [view, setView] = useState<'grid' | 'list'>('grid');
   const searchDebounceRef = useRef<NodeJS.Timeout | null>(null);
   useEffect(() => () => { if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current); }, []);

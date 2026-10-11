@@ -79,6 +79,9 @@ export const PRIMARY_NAV: NavItem[] = [
       { key: 'community-topics', labelKey: 'communityTopics', href: '/community/topics', icon: IconLayers },
       { key: 'ipa-chart',     labelKey: 'ipaChart',        href: '/learn/ipa',          icon: IconMic },
       { key: 'smart-review',  labelKey: 'smartReview',     href: '/smart-review',       icon: IconTarget },
+      { key: 'learning-session', essential: true, labelKey: 'learningSession', href: '/learning-session', icon: IconClock },
+      { key: 'error-notebook', labelKey: 'errorNotebook', href: '/error-notebook', icon: IconNotebook },
+      { key: 'offline-review', labelKey: 'offlineReview', href: '/offline-review', icon: IconRefresh },
     ],
   },
   {
@@ -97,6 +100,7 @@ export const PRIMARY_NAV: NavItem[] = [
       { key: 'arena',       labelKey: 'arena',           href: '/arena',                   icon: IconFlame, beta: true },
       { key: 'dictation',   labelKey: 'dictation',       href: '/practice-test/dictation', icon: IconHeadphones },
       { key: 'study-plan',  labelKey: 'studyPlan',       href: '/study-plan',               icon: IconTarget },
+      { key: 'practice-packs', labelKey: 'practicePacks', href: '/practice-packs', icon: IconLayers },
     ],
   },
   {
@@ -122,6 +126,7 @@ export const PRIMARY_NAV: NavItem[] = [
       { key: 'resources',  labelKey: 'resources', href: '/resources', icon: IconLink },
       { key: 'pricing',    labelKey: 'pricing',   href: '/pricing',   icon: IconStar },
       { key: 'referral',   labelKey: 'referral',  href: '/referral',  icon: IconUser },
+      { key: 'updates', labelKey: 'updates', href: '/updates', icon: IconStar },
     ],
   },
 ];
@@ -148,6 +153,9 @@ export const NAV_FLAT: NavItem[] = PRIMARY_NAV.flatMap(item =>
  * redirect guests to /auth/login?returnTo=<href> instead of the real page.
  */
 export const AUTH_HREFS: ReadonlySet<string> = new Set([
+  '/learning-session',
+  '/error-notebook',
+  '/practice-packs',
   '/dashboard',
   '/word-bank',
   '/word-bank/review',

@@ -1,4 +1,172 @@
 {
+  "offline": {
+    "title": "Wörter offline wiederholen",
+    "intro": "Lade online bis zu 100 fällige Karten. Wiederholungen bleiben auf diesem Gerät, bis sie mit deinem Konto synchronisiert werden.",
+    "pendingBeforeDownload": "Synchronisiere oder kläre ausstehende Wiederholungen vor einem neuen Download.",
+    "status": "{cards} Karten übrig · {pending} Wiederholungen ausstehend",
+    "download": "Fällige Karten herunterladen",
+    "downloading": "Wird heruntergeladen…",
+    "sync": "Jetzt synchronisieren",
+    "login": "Zum Herunterladen und Synchronisieren anmelden",
+    "storageError": "Dein Browser erlaubt keine Offline-Speicherung.",
+    "conflicts": "{count} Wiederholungen stehen im Konflikt mit Änderungen auf einem anderen Gerät. Sie wurden noch nicht übernommen.",
+    "discard": "Konflikte verwerfen und Karten neu laden",
+    "reveal": "Bedeutung anzeigen",
+    "saveError": "Die Wiederholung konnte nicht gespeichert werden. Bitte erneut versuchen.",
+    "finished": "Alle heruntergeladenen Karten sind wiederholt. Synchronisiere online und lade einen neuen Stapel.",
+    "empty": "Noch keine Offline-Karten. Melde dich online an und lade Karten herunter.",
+    "privacy": "Karten bleiben in diesem Browser und werden beim Abmelden gelöscht. XP werden nach erfolgreicher Synchronisierung verbucht.",
+    "back": "Zur Lerneinheit",
+    "ratings": {
+      "again": "Nochmal",
+      "hard": "Schwer",
+      "good": "Gut",
+      "easy": "Einfach"
+    }
+  },
+  "release": {
+    "badge": "Update {version}",
+    "title": "Mit einem klaren Plan täglich lernen",
+    "intro": "Neue Werkzeuge helfen dir, weiterzulernen, eigene Fehler zu üben und dich auf echte Situationen vorzubereiten.",
+    "close": "Mitteilung schließen",
+    "once": "Einmal pro Version in diesem Browser. Im Kontomenü oder auf der Update-Seite kannst du sie erneut öffnen.",
+    "continue": "Weiterlernen",
+    "start": "Lerneinheit starten",
+    "details": "Details ansehen",
+    "reopen": "Updates erneut ansehen",
+    "highlights": {
+      "dailySession": {
+        "title": "Kurze tägliche Lerneinheiten",
+        "body": "Eine Checkliste für etwa 15 Minuten aus Smart Review. Dein Fortschritt wird im Konto gespeichert."
+      },
+      "errorNotebook": {
+        "title": "Dein persönliches Fehlerheft",
+        "body": "Übe Fehler aus Schreibübungen und Spielen und wiederhole sie mit zeitlichem Abstand."
+      },
+      "offline": {
+        "title": "Wörter offline üben",
+        "body": "Lade Karten in diesen Browser, übe offline und synchronisiere später."
+      },
+      "practicePacks": {
+        "title": "Für das Leben in Deutschland",
+        "body": "Drei Lernwege: Ausbildungsgespräch, Wohnungssuche und Kommunikation am Arbeitsplatz."
+      },
+      "reliability": {
+        "title": "Zuverlässigerer Lernfortschritt",
+        "body": "Verbesserte Anmeldung, XP-Aktualisierung und Zahlungsabwicklung."
+      },
+      "newGames": {
+        "title": "6 neue Lernabenteuer",
+        "body": "6 Spiele für A1–B2: Satzbau, Wortverbindungen, Grammatikdetektiv, Plural, Wortfamilien und Dialogreise. Mit Erklärungen und Fehlerwiederholung."
+      },
+      "adaptiveGames": {
+        "title": "Alltagsthemen und passende Schwierigkeit",
+        "body": "Der Fragenpool wächst von 144 auf 864 Fragen mit fünf neuen Themen: Einkaufen, Gesundheit, Wohnen, Ausbildung und Arbeit. Angemeldete Lernende können Fragen anhand ihrer bisherigen Ergebnisse und Fehler auswählen lassen."
+      }
+    },
+    "games": "Neue Spiele entdecken"
+  },
+  "learning": {
+    "loading": "Lerneinheit wird geladen…",
+    "loadError": "Die Daten konnten nicht geladen werden. Bitte erneut versuchen.",
+    "retry": "Erneut versuchen",
+    "badge": "Etwa {minutes} Minuten",
+    "title": "Deine heutige Lerneinheit",
+    "intro": "Öffne jede Aktivität, kehre hierher zurück und markiere sie als erledigt. Der Fortschritt wird im Konto gespeichert.",
+    "finished": "Du hast die heutige Checkliste erledigt!",
+    "progress": "{done}/{total} Aktivitäten erledigt",
+    "progressLabel": "Fortschritt der Lerneinheit",
+    "saved": "Du kannst die Seite verlassen und später weitermachen.",
+    "minutes": "{count} Minuten",
+    "target": "Ziel: etwa {count} Karten in dieser Zeit.",
+    "again": "Erneut üben",
+    "start": "Schritt starten",
+    "open": "Aktivität öffnen",
+    "done": "Erledigt",
+    "markComplete": "Als erledigt markieren",
+    "saveError": "Der Fortschritt wurde nicht gespeichert. Bitte erneut versuchen.",
+    "checklistNote": "Du markierst diese persönliche Checkliste selbst. XP gibt es in den Aktivitäten; das Abhaken bringt keine zusätzlichen XP.",
+    "notebookLink": "Fehlerheft öffnen",
+    "packsLink": "Alltagsübungen",
+    "fullPlan": "Vollständigen Smart-Review-Plan ansehen",
+    "back": "Zur Lerneinheit",
+    "kinds": {
+      "srs": "Fällige Karten wiederholen",
+      "remediation": "Schwachstellen üben",
+      "skill": "Eine Fertigkeit üben",
+      "explore": "Neue Wörter entdecken"
+    },
+    "packSteps": {
+      "vocabulary": "Wortschatz zur Situation",
+      "speaking": "Gespräch im Rollenspiel",
+      "writing": "Text zur Situation"
+    },
+    "packsTitle": "Alltagsübungen",
+    "packsIntro": "Verbinde Wortschatz, Sprechen und Schreiben für eine Situation. Dein Fortschritt wird gespeichert; KI-Werkzeuge nutzen die bisherigen Tarifgrenzen.",
+    "packDuration": "3 Aktivitäten · etwa 15 Minuten",
+    "startPack": "Starten / fortsetzen",
+    "packs": {
+      "ausbildung": {
+        "title": "Ausbildungsgespräch",
+        "intro": "Stelle dich vor, erkläre deine Motivation und schreibe eine Bewerbung.",
+        "vocabulary": "Lerne Wörter über Ausbildung, Erfahrung und Motivation.",
+        "speaking": "Wähle ein Bewerbungsgespräch. Stelle dich vor und erkläre deine Berufswahl.",
+        "writing": "Schreibe eine Bewerbung für eine Ausbildung, beschreibe deine Erfahrung und bitte um ein Gespräch."
+      },
+      "housing": {
+        "title": "Wohnungssuche",
+        "intro": "Frage nach einer Wohnung, vereinbare eine Besichtigung und schreibe dem Vermieter.",
+        "vocabulary": "Lerne Wohnung, Miete, Kaution und Nebenkosten.",
+        "speaking": "Wähle eine Wohnungssituation. Frage nach Miete, Kaution und Besichtigung.",
+        "writing": "Schreibe eine Anfrage für eine Wohnung und schlage einen Besichtigungstermin vor."
+      },
+      "work": {
+        "title": "Kommunikation bei der Arbeit",
+        "intro": "Besprich Arbeitszeiten, bitte um Hilfe und schreibe einem Kollegen.",
+        "vocabulary": "Lerne Arbeit, Termin, Aufgabe und Besprechung.",
+        "speaking": "Wähle eine Arbeitssituation. Bitte um Hilfe und bestätige eine Frist.",
+        "writing": "Schreibe einem Kollegen, um einen Termin und Aufgaben abzustimmen."
+      }
+    }
+  },
+  "notebook": {
+    "title": "Dein Fehlerheft",
+    "intro": "Wiederhole Fehler aus deinen Texten. Gemerkte Korrekturen werden später wiederholt; verpasste nach 10 Minuten.",
+    "prompt": "Korrigiere den folgenden Ausschnitt",
+    "answer": "Deine Korrektur",
+    "saving": "Wird gespeichert…",
+    "check": "Prüfen und speichern",
+    "reviewError": "Die Wiederholung konnte nicht gespeichert werden. Lade das Fehlerheft neu und versuche es erneut.",
+    "correct": "Entspricht der vorgeschlagenen Korrektur!",
+    "tryAgain": "Lies die Korrektur für das nächste Mal.",
+    "next": "Weiter",
+    "source": "Originaltext ansehen",
+    "gamesSource": "Spiele üben",
+    "stats": "{total} gespeicherte Fehler · {due} fällig",
+    "showDue": "Nur fällige Fehler",
+    "showAll": "Alle anzeigen",
+    "practice": "Korrektur üben",
+    "scheduled": "Für später geplant",
+    "nothingDue": "Alle fälligen Fehler sind wiederholt.",
+    "empty": "Noch keine Schreibfehler. Das Fehlerheft wird nach der Bewertung automatisch aktualisiert.",
+    "write": "Schreiben üben",
+    "exactMatch": "Die Antwort wird mit der vorgeschlagenen Korrektur einschließlich Großschreibung und Satzzeichen verglichen. Andere korrekte Formulierungen werden möglicherweise nicht erkannt.",
+    "back": "Zur Lerneinheit"
+  },
+  "revisions": {
+    "title": "Überarbeiten und vergleichen",
+    "intro": "Überarbeite deinen Text, erhalte neues Feedback und vergleiche frühere Versuche.",
+    "answer": "Dein überarbeiteter Text",
+    "submit": "Überarbeitung bewerten",
+    "saving": "Wird bewertet…",
+    "error": "Die Überarbeitung konnte nicht bewertet werden. Dein Text ist noch hier.",
+    "history": "Frühere Versuche",
+    "score": "{score}/100",
+    "empty": "Noch keine früheren Versionen.",
+    "notebook": "Fehler im Fehlerheft üben",
+    "changed": "Punktänderung: {delta}",
+    "rewardNote": "Überarbeitungen bringen keine zusätzlichen Abschluss-XP."
+  },
   "pwa": {
     "installTitle": "DeutschMeister installieren",
     "installBody": "Füge die App zum Startbildschirm hinzu — schneller lernen, ohne Browser.",
@@ -94,7 +262,13 @@
     "word-bank": "Wortbank",
     "pricing": "Tarife",
     "tips": "Tipps",
-    "resources": "Ressourcen"
+    "resources": "Ressourcen",
+    "sentence-builder": "Satzbau",
+    "collocations": "Wortverbindungen",
+    "grammar-detective": "Grammatikdetektiv",
+    "plural": "Plural-Challenge",
+    "word-family": "Wortfamilien",
+    "dialogue": "Dialogreise"
   },
   "reportModal": {
     "title": "Spieler melden",

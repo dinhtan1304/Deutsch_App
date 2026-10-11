@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { useState, useMemo } from 'react';
 import { useTranslations, useFormatter, useNow } from 'next-intl';
 import { ACCENT, type AccentKey } from '@/lib/tokens';
@@ -10,6 +10,10 @@ import { useSettingsStore } from '@/stores/settingsStore';
 import { useAuthStore } from '@/stores/authStore';
 import { useProgressStats } from '@/hooks/useProgress';
 import { useGameHistory } from '@/hooks/useGames';
+import { Card } from '@/components/ui';
+import { GameArtwork } from '@/components/games/learning/GameArtwork';
+import { LEARNING_GAME_TYPES } from '@/lib/api/learningGames';
+import { LEARNING_GAME_ACCENTS } from '@/config/learningGames';
 import {
   IconTarget, IconClock, IconPenTool, IconLayers,
   IconBookOpen, IconLink, IconHeadphones, IconSpellCheck,
@@ -44,6 +48,12 @@ const games: GameDef[] = [
   { id: 'spelling',        enName: 'Spelling Bee',      icon: IconSpellCheck,  accent: 'listening', href: '/games/spelling',       cat: 'audio',   diff: 3, minutes: 5,  color: 'var(--die)',     sessionType: 'spelling' },
   { id: 'typing',          enName: 'Typing speed',      icon: IconKeyboard,    accent: 'games',     href: '/games/typing',         cat: 'audio',   diff: 1, minutes: 1,  color: 'var(--streak)' },
   { id: 'timed-challenge', enName: 'Timed Challenge',   icon: IconClock,       accent: 'speaking',  href: '/games/time-challenge', cat: 'speed',   diff: 3, minutes: 2,  color: 'var(--danger)',  sessionType: 'timed-challenge' },
+  { id: 'sentence-builder', enName: 'Satzbau', icon: IconLayers, accent: 'srs', href: '/games/sentence-builder', cat: 'grammar', diff: 2, minutes: 4, color: 'var(--violet)', sessionType: 'sentence-builder' },
+  { id: 'collocations', enName: 'Wortverbindungen', icon: IconLink, accent: 'cyan', href: '/games/collocations', cat: 'vocab', diff: 2, minutes: 3, color: 'var(--cyan)', sessionType: 'collocations' },
+  { id: 'grammar-detective', enName: 'Grammatikdetektiv', icon: IconSpellCheck, accent: 'writing', href: '/games/grammar-detective', cat: 'grammar', diff: 3, minutes: 5, color: 'var(--violet)', sessionType: 'grammar-detective' },
+  { id: 'plural', enName: 'Plural', icon: IconBookOpen, accent: 'vocab', href: '/games/plural', cat: 'vocab', diff: 2, minutes: 3, color: 'var(--violet)', sessionType: 'plural' },
+  { id: 'word-family', enName: 'Wortfamilien', icon: IconLightbulb, accent: 'reading', href: '/games/word-family', cat: 'vocab', diff: 2, minutes: 3, color: 'var(--success)', sessionType: 'word-family' },
+  { id: 'dialogue', enName: 'Dialogreise', icon: IconHeadphones, accent: 'speaking', href: '/games/dialogue', cat: 'grammar', diff: 2, minutes: 5, color: 'var(--die)', sessionType: 'dialogue' },
 ];
 
 const GAME_CATEGORIES: { id: GameCat; color: string }[] = [
@@ -260,7 +270,7 @@ export default function GamesPage() {
   const avgScore = playedStats.length ? Math.round(playedStats.reduce((a, s) => a + s.best, 0) / playedStats.length) : 0;
 
   // Recommendations.
-  const recIds = due > 0 ? ['srs-review', 'gender-quiz', 'flashcards'] : ['flashcards', 'gender-quiz', 'timed-challenge'];
+  const recIds = due > 0 ? ['srs-review', 'sentence-builder', 'collocations'] : ['sentence-builder', 'collocations', 'grammar-detective'];
   const recs = recIds.map((id) => games.find((g) => g.id === id)).filter(Boolean) as GameDef[];
   const [primary, ...secondary] = recs;
 
@@ -294,6 +304,20 @@ export default function GamesPage() {
           {secondary.map((g) => <SecondaryPick key={g.id} game={g} onPlay={playClick} />)}
         </section>
       )}
+
+      <section className="mb-6" aria-label={t('learning.newTitle')}>
+        <h2 className="mb-2 text-h2 font-semibold">{t('learning.newTitle')}</h2>
+        <p className="mb-4 text-body" style={{ color: 'var(--theme-text-muted)' }}>{t('learning.newBody')}</p>
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">
+          {LEARNING_GAME_TYPES.map((id) => <Link key={id} href={`/games/${id}`} onClick={playClick}>
+            <Card variant="bordered" className="h-full p-4 transition-colors hover:opacity-90">
+              <div style={{ color: ACCENT[LEARNING_GAME_ACCENTS[id]] }}><GameArtwork gameType={id} className="h-24 w-full max-w-48" /></div>
+              <h3 className="mt-2 text-body font-semibold">{t(`definitions.${id}.nameVi`)}</h3>
+              <p className="mt-1 text-caption" style={{ color: 'var(--theme-text-muted)' }}>A1–B2 · {tHub('minutesShort', { min: games.find((game) => game.id === id)!.minutes })}</p>
+            </Card>
+          </Link>)}
+        </div>
+      </section>
 
       {/* Category tabs — segmented pill */}
       <div className="mb-4 inline-flex flex-wrap gap-1.5 rounded-[11px] p-1" style={{ background: 'var(--theme-bg-card)', border: '1px solid var(--theme-border)' }}>

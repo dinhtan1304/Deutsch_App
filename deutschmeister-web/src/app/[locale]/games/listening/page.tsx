@@ -157,6 +157,7 @@ export default function ListeningQuizPage() {
     if (!q) return;
 
     const isCorrect = option.id === q.correct.id;
+    session.recordAnswer(q.correct.id, option.id, replayCountRef.current);
     const article = option.gender && GenderInfo[option.gender] ? GenderInfo[option.gender].article : '';
     const label = `${article} ${option.word}`.trim();
     setSelectedAnswer(label);

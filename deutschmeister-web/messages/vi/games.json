@@ -1,6 +1,6 @@
 {
   "landing": {
-    "title": "Trò chơi luyện từ",
+    "title": "Trò chơi từ vựng & ngữ pháp",
     "subtitle": "Luyện mạo từ, ghi nhớ nghĩa, nghe từ và chính tả bằng các phiên ngắn dễ bắt đầu.",
     "srsCta": "Ôn SRS",
     "levelBanner": {
@@ -42,7 +42,7 @@
   "hub": {
     "eyebrow": "Spiele · Trò chơi",
     "gamesUnit": "trò",
-    "subtitleNote": "70% từ đã học + 30% từ mới",
+    "subtitleNote": "Từ vựng · ngữ pháp · hội thoại",
     "statPlayed": "Đã chơi",
     "statWeek": "Tuần này",
     "statAvg": "Avg điểm",
@@ -79,15 +79,66 @@
     "all": "Tất cả trình độ"
   },
   "definitions": {
-    "gender-quiz":      { "nameVi": "Mạo từ der/die/das", "description": "Chọn mạo từ đúng cho từng danh từ." },
-    "timed-challenge":  { "nameVi": "Thử thách tốc độ",    "description": "Trả lời nhanh trong thời gian giới hạn." },
-    "fill-blank":       { "nameVi": "Điền vào chỗ trống",  "description": "Điền mạo từ hoặc từ phù hợp trong câu." },
-    "flashcards":       { "nameVi": "Thẻ ghi nhớ",         "description": "Ôn nghĩa, mạo từ và ví dụ bằng thẻ." },
-    "srs-review":       { "nameVi": "Ôn SRS",              "description": "Ôn tập thông minh với thuật toán SM-2." },
-    "word-match":       { "nameVi": "Ghép từ",             "description": "Ghép từ tiếng Đức với nghĩa tương ứng." },
-    "listening":        { "nameVi": "Nghe từ",             "description": "Nghe audio và chọn từ đúng." },
-    "spelling":         { "nameVi": "Chính tả",            "description": "Gõ đúng chính tả từ tiếng Đức." },
-    "typing":           { "nameVi": "Tốc độ gõ",           "description": "60 giây luyện WPM và độ chính xác." }
+    "gender-quiz": {
+      "nameVi": "Mạo từ der/die/das",
+      "description": "Chọn mạo từ đúng cho từng danh từ."
+    },
+    "timed-challenge": {
+      "nameVi": "Thử thách tốc độ",
+      "description": "Trả lời nhanh trong thời gian giới hạn."
+    },
+    "fill-blank": {
+      "nameVi": "Điền vào chỗ trống",
+      "description": "Điền mạo từ hoặc từ phù hợp trong câu."
+    },
+    "flashcards": {
+      "nameVi": "Thẻ ghi nhớ",
+      "description": "Ôn nghĩa, mạo từ và ví dụ bằng thẻ."
+    },
+    "srs-review": {
+      "nameVi": "Ôn SRS",
+      "description": "Ôn tập thông minh với thuật toán SM-2."
+    },
+    "word-match": {
+      "nameVi": "Ghép từ",
+      "description": "Ghép từ tiếng Đức với nghĩa tương ứng."
+    },
+    "listening": {
+      "nameVi": "Nghe từ",
+      "description": "Nghe audio và chọn từ đúng."
+    },
+    "spelling": {
+      "nameVi": "Chính tả",
+      "description": "Gõ đúng chính tả từ tiếng Đức."
+    },
+    "typing": {
+      "nameVi": "Tốc độ gõ",
+      "description": "60 giây luyện WPM và độ chính xác."
+    },
+    "sentence-builder": {
+      "nameVi": "Xếp câu",
+      "description": "Ghép các thẻ từ thành câu đúng, từ câu đơn đến mệnh đề phụ."
+    },
+    "collocations": {
+      "nameVi": "Ghép cụm từ",
+      "description": "Chọn từ đi cùng tự nhiên và luyện giới từ trong ngữ cảnh."
+    },
+    "grammar-detective": {
+      "nameVi": "Thám tử ngữ pháp",
+      "description": "Tìm chỗ đáng ngờ và viết lại câu cho đúng ngữ pháp."
+    },
+    "plural": {
+      "nameVi": "Thử thách số nhiều",
+      "description": "Nhớ số nhiều và Umlaut bằng cách tự viết danh từ."
+    },
+    "word-family": {
+      "nameVi": "Gia đình từ",
+      "description": "Khám phá từ cùng gốc và chọn dạng phù hợp trong câu."
+    },
+    "dialogue": {
+      "nameVi": "Hội thoại vượt màn",
+      "description": "Vượt qua các cuộc hội thoại ở quán cà phê, nhà ga và công việc."
+    }
   },
   "common": {
     "loading": "Đang tải…",
@@ -359,5 +410,120 @@
     "upsellDesc": "Mở khóa đề chuẩn + AI chấm không giới hạn",
     "upsellCta": "Xem Premium",
     "defaultSubtitle": "Trò chơi"
+  },
+  "learning": {
+    "eyebrow": "Chơi để hiểu, luyện để nhớ",
+    "back": "Tất cả trò chơi",
+    "level": "Chọn cấp độ",
+    "mode": "Nhịp chơi",
+    "relaxed": "Luyện thong thả",
+    "timed": "Thử thách",
+    "timedDescription": "45 giây mỗi câu. Hết giờ sẽ hiện đáp án để học tiếp.",
+    "relaxedDescription": "Không giới hạn thời gian. Điểm dựa trên câu đúng và chuỗi đúng.",
+    "roundDescription": "6 câu mỗi lượt · 5 chủ đề thực tế mới · Giải thích sau từng câu",
+    "start": "Bắt đầu chơi",
+    "resume": "Tiếp tục lượt trước",
+    "guest": "Chơi thử không lưu lịch sử hoặc XP.",
+    "login": "Đăng nhập để lưu",
+    "question": "Câu {current}/{total}",
+    "score": "{score} điểm",
+    "timeLeft": "Thời gian còn lại",
+    "progress": "Tiến độ lượt chơi",
+    "noun": "Danh từ",
+    "verb": "Động từ",
+    "adjective": "Tính từ",
+    "yourSentence": "Câu của bạn",
+    "wordTiles": "Các thẻ từ",
+    "tilePlaceholder": "Chọn các thẻ từ bên dưới…",
+    "addTile": "Thêm {word}",
+    "removeTile": "Bỏ {word}",
+    "clear": "Xếp lại",
+    "options": "Các đáp án",
+    "pluralAnswer": "Số nhiều với die",
+    "correctedSentence": "Viết lại câu đúng",
+    "germanLetters": "Chữ tiếng Đức",
+    "caseSensitive": "Phân biệt viết hoa/thường và ä, ö, ü. Có thể bỏ dấu chấm cuối câu.",
+    "check": "Kiểm tra",
+    "skip": "Bỏ qua",
+    "correct": "Chính xác!",
+    "learnFromMistake": "Ghi nhớ cho lần sau",
+    "otherAnswers": "Các cách đúng khác",
+    "next": "Câu tiếp theo",
+    "results": "Xem kết quả",
+    "retry": "Gửi lại đáp án",
+    "reloadSaved": "Tải lại lượt đã lưu",
+    "connectionError": "Chưa kết nối được máy chủ. Kiểm tra mạng và thử lại.",
+    "answerError": "Chưa xác nhận được đáp án. Gửi lại để lấy kết quả; đáp án giữ nguyên để tránh tính hai lần.",
+    "finishError": "Các câu đã được lưu, nhưng chưa xác nhận kết thúc. Bấm Xem kết quả để thử lại.",
+    "resumeError": "Không tải được lượt đã lưu. Kiểm tra mạng hoặc bắt đầu lượt mới.",
+    "noSavedRound": "Chưa có lượt chơi đang dở trên tab này.",
+    "points": "Điểm",
+    "bestStreak": "Chuỗi đúng dài nhất",
+    "savedResult": "Đã lưu kết quả vào lịch sử. Câu sai được đưa vào sổ lỗi.",
+    "guestResult": "Đây là lượt chơi thử. Đăng nhập để lưu tiến độ ở lượt tiếp theo.",
+    "practiceResult": "Đã luyện lại câu sai. Lượt ôn này không cộng thêm XP.",
+    "reviewTitle": "Bạn đã luyện được gì?",
+    "practiceMistakes": "Luyện lại các câu sai",
+    "mistakePractice": "Ôn câu sai",
+    "notebook": "Mở sổ lỗi",
+    "allAnswers": "Xem lại từng câu",
+    "yourAnswer": "Bạn đã trả lời",
+    "skipped": "Đã bỏ qua",
+    "newTitle": "6 hành trình học mới",
+    "newBody": "Từ ghép câu đến hội thoại: chọn một game và bắt đầu với cấp độ của bạn.",
+    "instructions": {
+      "sentence-builder": "Chạm các thẻ để xếp câu. Chạm thẻ đã chọn để đưa về. Có thể có nhiều thứ tự đúng.",
+      "collocations": "Chọn từ phù hợp với cả câu, rồi kiểm tra đáp án.",
+      "grammar-detective": "Chạm từ bạn nghi ngờ, sau đó viết lại toàn bộ câu đúng.",
+      "plural": "Viết số nhiều kèm mạo từ die. Chú ý viết hoa danh từ và Umlaut.",
+      "word-family": "Dựa vào từ gốc và ngữ cảnh để chọn danh từ, động từ hoặc tính từ phù hợp.",
+      "dialogue": "Đọc lời người đối thoại và mục tiêu, rồi chọn câu đáp phù hợp."
+    },
+    "skills": {
+      "verb2": "Vị trí động từ",
+      "question": "Câu hỏi",
+      "bracket": "Khung động từ",
+      "subordinate": "Mệnh đề phụ",
+      "perfect": "Các thì quá khứ",
+      "agreement": "Chia theo chủ ngữ",
+      "accusative": "Akkusativ",
+      "dative": "Dativ",
+      "location": "Vị trí và hướng",
+      "conditional": "Konjunktiv II",
+      "passive": "Câu bị động",
+      "genitive": "Genitiv",
+      "collocation": "Cụm từ cố định",
+      "preposition": "Giới từ đi kèm",
+      "plural": "Dạng số nhiều",
+      "foreignPlural": "Số nhiều từ mượn",
+      "family": "Từ cùng gốc",
+      "suffix": "Cấu tạo từ",
+      "polite": "Lời đề nghị lịch sự",
+      "dialogue": "Giao tiếp theo tình huống",
+      "pastSequence": "Thứ tự hành động quá khứ"
+    },
+    "topic": "Chọn chủ đề",
+    "topics": {
+      "all": "Tất cả chủ đề",
+      "everyday": "Hằng ngày",
+      "shopping": "Đi chợ",
+      "health": "Khám bệnh",
+      "housing": "Thuê nhà",
+      "training": "Ausbildung",
+      "work": "Công việc"
+    },
+    "adaptiveOn": "Tự điều chỉnh: bật",
+    "adaptiveOff": "Giữ cấp độ đã chọn",
+    "adaptiveDescription": "Ưu tiên câu chưa gặp và quy tắc hay sai. Sau ít nhất 12 câu khác nhau ở cấp độ đã chọn, hệ thống có thể tăng hoặc giảm một bậc ở lượt tiếp theo. Bạn có thể tắt bất cứ lúc nào.",
+    "adaptiveGuest": "Chơi thử giữ cấp độ bạn chọn. Đăng nhập để chọn câu dựa trên kết quả và lỗi gần đây.",
+    "selectionTitle": "Vì sao bạn nhận bộ câu này?",
+    "selectionReasons": {
+      "manual": "Lượt này giữ cấp độ {level} bạn đã chọn.",
+      "starting": "Bắt đầu ở {level}. Kết quả của bạn sẽ giúp chọn câu phù hợp hơn cho lượt sau.",
+      "steady": "Luyện ở {level}, ưu tiên nội dung chưa gặp và quy tắc cần củng cố.",
+      "stepUp": "Bạn làm tốt các câu ở {requestedLevel}. Lượt này thử sức ở {level}.",
+      "stepDown": "Các câu ở {requestedLevel} còn khó. Lượt này củng cố kiến thức ở {level}."
+    },
+    "focusSkills": "Tập trung luyện: {skills}"
   }
 }

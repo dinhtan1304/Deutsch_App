@@ -147,6 +147,7 @@ export default function WordMatchPage() {
     if (!selectedLeft) return;
 
     const leftId = selectedLeft;
+    session.recordAnswer(leftId, rightId);
     const currentAttempts = (attempts[leftId] ?? 0) + 1;
     setAttempts(prev => ({ ...prev, [leftId]: currentAttempts }));
 
@@ -202,7 +203,7 @@ export default function WordMatchPage() {
         setSelectedLeft(null);
       }, 700);
     }
-  }, [selectedLeft, matchedIds, wrongFlash, attempts, leftItems, results, playCorrect, playWrong, playCombo, endGame]);
+  }, [selectedLeft, matchedIds, wrongFlash, attempts, leftItems, results, playCorrect, playWrong, playCombo, endGame, session]);
 
   // ─── Setup Screen ───
   if (phase === 'setup') {

@@ -1,6 +1,6 @@
 {
   "landing": {
-    "title": "Wortschatzspiele",
+    "title": "Wortschatz- und Grammatikspiele",
     "subtitle": "Übe Artikel, Bedeutungen, Hören und Rechtschreibung in kurzen Einheiten.",
     "srsCta": "SRS-Wiederholung",
     "levelBanner": {
@@ -42,7 +42,7 @@
   "hub": {
     "eyebrow": "Spiele · Trò chơi",
     "gamesUnit": "Spiele",
-    "subtitleNote": "70% gelernt + 30% neue Wörter",
+    "subtitleNote": "Wortschatz · Grammatik · Dialoge",
     "statPlayed": "Gespielt",
     "statWeek": "Diese Woche",
     "statAvg": "Ø Punkte",
@@ -79,15 +79,66 @@
     "all": "Alle Niveaus"
   },
   "definitions": {
-    "gender-quiz":      { "nameVi": "der/die/das-Artikel",   "description": "Wähle den richtigen Artikel für jedes Nomen." },
-    "timed-challenge":  { "nameVi": "Zeitherausforderung",   "description": "Antworte schnell innerhalb des Zeitlimits." },
-    "fill-blank":       { "nameVi": "Lückentext",            "description": "Setze den fehlenden Artikel oder das Wort ein." },
-    "flashcards":       { "nameVi": "Karteikarten",          "description": "Wiederhole Bedeutung, Artikel und Beispiel mit Karten." },
-    "srs-review":       { "nameVi": "SRS-Wiederholung",      "description": "Intelligente Wiederholung mit dem SM-2-Algorithmus." },
-    "word-match":       { "nameVi": "Wort-Match",            "description": "Ordne deutsche Wörter ihrer Bedeutung zu." },
-    "listening":        { "nameVi": "Hören",                  "description": "Höre einen Audioclip und wähle das richtige Wort." },
-    "spelling":         { "nameVi": "Rechtschreibung",       "description": "Tippe das deutsche Wort korrekt." },
-    "typing":           { "nameVi": "Tipp-Geschwindigkeit",  "description": "60 Sekunden Übung für WPM und Genauigkeit." }
+    "gender-quiz": {
+      "nameVi": "der/die/das-Artikel",
+      "description": "Wähle den richtigen Artikel für jedes Nomen."
+    },
+    "timed-challenge": {
+      "nameVi": "Zeitherausforderung",
+      "description": "Antworte schnell innerhalb des Zeitlimits."
+    },
+    "fill-blank": {
+      "nameVi": "Lückentext",
+      "description": "Setze den fehlenden Artikel oder das Wort ein."
+    },
+    "flashcards": {
+      "nameVi": "Karteikarten",
+      "description": "Wiederhole Bedeutung, Artikel und Beispiel mit Karten."
+    },
+    "srs-review": {
+      "nameVi": "SRS-Wiederholung",
+      "description": "Intelligente Wiederholung mit dem SM-2-Algorithmus."
+    },
+    "word-match": {
+      "nameVi": "Wort-Match",
+      "description": "Ordne deutsche Wörter ihrer Bedeutung zu."
+    },
+    "listening": {
+      "nameVi": "Hören",
+      "description": "Höre einen Audioclip und wähle das richtige Wort."
+    },
+    "spelling": {
+      "nameVi": "Rechtschreibung",
+      "description": "Tippe das deutsche Wort korrekt."
+    },
+    "typing": {
+      "nameVi": "Tipp-Geschwindigkeit",
+      "description": "60 Sekunden Übung für WPM und Genauigkeit."
+    },
+    "sentence-builder": {
+      "nameVi": "Satzbau",
+      "description": "Baue Sätze aus Wortkarten, vom Aussagesatz bis zum Nebensatz."
+    },
+    "collocations": {
+      "nameVi": "Wortverbindungen",
+      "description": "Wähle natürliche Wortverbindungen und übe Präpositionen im Kontext."
+    },
+    "grammar-detective": {
+      "nameVi": "Grammatikdetektiv",
+      "description": "Finde eine verdächtige Stelle und schreibe den Satz richtig."
+    },
+    "plural": {
+      "nameVi": "Plural-Challenge",
+      "description": "Übe Pluralformen und Umlaute, indem du die Antwort selbst schreibst."
+    },
+    "word-family": {
+      "nameVi": "Wortfamilien",
+      "description": "Entdecke verwandte Wörter und wähle die passende Form im Satz."
+    },
+    "dialogue": {
+      "nameVi": "Dialogreise",
+      "description": "Meistere Gespräche im Café, am Bahnhof und im Beruf."
+    }
   },
   "common": {
     "loading": "Wird geladen…",
@@ -359,5 +410,120 @@
     "upsellDesc": "Standardprüfungen + unbegrenzte KI-Bewertung freischalten",
     "upsellCta": "Premium ansehen",
     "defaultSubtitle": "Spiel"
+  },
+  "learning": {
+    "eyebrow": "Spielend verstehen, übend behalten",
+    "back": "Alle Spiele",
+    "level": "Niveau wählen",
+    "mode": "Dein Tempo",
+    "relaxed": "In Ruhe üben",
+    "timed": "Challenge",
+    "timedDescription": "45 Sekunden pro Frage. Danach lernst du mit der richtigen Antwort weiter.",
+    "relaxedDescription": "Ohne Zeitlimit. Punkte hängen von richtigen Antworten und Serien ab.",
+    "roundDescription": "6 Fragen pro Runde · 5 neue Alltagsthemen · Erklärungen nach jeder Antwort",
+    "start": "Spiel starten",
+    "resume": "Letzte Runde fortsetzen",
+    "guest": "Gastübungen speichern weder Verlauf noch XP.",
+    "login": "Zum Speichern anmelden",
+    "question": "Frage {current}/{total}",
+    "score": "{score} Punkte",
+    "timeLeft": "Verbleibende Zeit",
+    "progress": "Rundenfortschritt",
+    "noun": "Nomen",
+    "verb": "Verb",
+    "adjective": "Adjektiv",
+    "yourSentence": "Dein Satz",
+    "wordTiles": "Wortkarten",
+    "tilePlaceholder": "Wähle unten die Wortkarten aus…",
+    "addTile": "{word} hinzufügen",
+    "removeTile": "{word} entfernen",
+    "clear": "Neu anordnen",
+    "options": "Antwortmöglichkeiten",
+    "pluralAnswer": "Plural mit die",
+    "correctedSentence": "Den richtigen Satz schreiben",
+    "germanLetters": "Deutsche Buchstaben",
+    "caseSensitive": "Großschreibung und ä, ö, ü sind wichtig. Das Satzzeichen am Ende ist optional.",
+    "check": "Antwort prüfen",
+    "skip": "Überspringen",
+    "correct": "Richtig!",
+    "learnFromMistake": "Für das nächste Mal merken",
+    "otherAnswers": "Weitere richtige Antworten",
+    "next": "Nächste Frage",
+    "results": "Ergebnis anzeigen",
+    "retry": "Antwort erneut senden",
+    "reloadSaved": "Gespeicherte Runde laden",
+    "connectionError": "Keine Verbindung zum Server. Prüfe deine Verbindung und versuche es erneut.",
+    "answerError": "Deine Antwort konnte nicht bestätigt werden. Sende dieselbe Antwort erneut, damit sie nicht doppelt zählt.",
+    "finishError": "Deine Antworten sind gespeichert, der Abschluss ist noch unbestätigt. Wähle Ergebnis anzeigen, um es erneut zu versuchen.",
+    "resumeError": "Die gespeicherte Runde konnte nicht geladen werden. Prüfe die Verbindung oder starte eine neue Runde.",
+    "noSavedRound": "In diesem Tab gibt es noch keine unvollständige Runde.",
+    "points": "Punkte",
+    "bestStreak": "Beste Serie",
+    "savedResult": "Ergebnis im Verlauf gespeichert. Falsche Antworten stehen im Fehlerheft.",
+    "guestResult": "Das war eine Gastübung. Melde dich an, um die nächste Runde zu speichern.",
+    "practiceResult": "Fehler erneut geübt. Diese Wiederholung vergibt keine zusätzlichen XP.",
+    "reviewTitle": "Was hast du geübt?",
+    "practiceMistakes": "Falsche Antworten wiederholen",
+    "mistakePractice": "Fehlerwiederholung",
+    "notebook": "Fehlerheft öffnen",
+    "allAnswers": "Alle Antworten ansehen",
+    "yourAnswer": "Deine Antwort",
+    "skipped": "Übersprungen",
+    "newTitle": "6 neue Lernabenteuer",
+    "newBody": "Vom Satzbau bis zum Dialog: Wähle ein Spiel und dein Niveau.",
+    "instructions": {
+      "sentence-builder": "Tippe auf Wortkarten, um einen Satz zu bauen. Tippe zum Zurücklegen auf eine ausgewählte Karte. Mehrere Reihenfolgen können richtig sein.",
+      "collocations": "Wähle das Wort, das zum ganzen Satz passt, und prüfe deine Antwort.",
+      "grammar-detective": "Tippe auf eine verdächtige Stelle und schreibe dann den ganzen Satz richtig.",
+      "plural": "Schreibe den Plural mit die. Achte auf Großschreibung und Umlaute.",
+      "word-family": "Wähle mit Hilfe des Wortstamms und des Kontexts ein passendes Nomen, Verb oder Adjektiv.",
+      "dialogue": "Lies die Äußerung und dein Ziel, dann wähle eine passende Antwort."
+    },
+    "skills": {
+      "verb2": "Verbstellung",
+      "question": "Fragesätze",
+      "bracket": "Satzklammer",
+      "subordinate": "Nebensätze",
+      "perfect": "Vergangenheitsformen",
+      "agreement": "Subjekt und Verb",
+      "accusative": "Akkusativ",
+      "dative": "Dativ",
+      "location": "Ort und Richtung",
+      "conditional": "Konjunktiv II",
+      "passive": "Passiv",
+      "genitive": "Genitiv",
+      "collocation": "Feste Verbindungen",
+      "preposition": "Verbpräpositionen",
+      "plural": "Pluralformen",
+      "foreignPlural": "Fremdwortplurale",
+      "family": "Verwandte Wortformen",
+      "suffix": "Wortbildung",
+      "polite": "Höfliche Bitten",
+      "dialogue": "Situative Kommunikation",
+      "pastSequence": "Zeitfolge in der Vergangenheit"
+    },
+    "topic": "Thema auswählen",
+    "topics": {
+      "all": "Alle Themen",
+      "everyday": "Alltag",
+      "shopping": "Einkaufen",
+      "health": "Gesundheit",
+      "housing": "Wohnen",
+      "training": "Ausbildung",
+      "work": "Arbeit"
+    },
+    "adaptiveOn": "Adaptive Schwierigkeit: an",
+    "adaptiveOff": "Gewähltes Niveau beibehalten",
+    "adaptiveDescription": "Neue Fragen und schwierige Regeln werden bevorzugt. Nach mindestens 12 unterschiedlichen Fragen auf deinem gewählten Niveau kann die nächste Runde eine Stufe höher oder niedriger liegen. Du kannst dies jederzeit ausschalten.",
+    "adaptiveGuest": "Als Gast übst du auf deinem gewählten Niveau. Melde dich an, um Fragen anhand deiner bisherigen Ergebnisse und Fehler auszuwählen.",
+    "selectionTitle": "Warum diese Fragen?",
+    "selectionReasons": {
+      "manual": "Diese Runde bleibt auf deinem gewählten Niveau: {level}.",
+      "starting": "Start auf {level}. Deine Ergebnisse helfen bei der Auswahl passender Fragen für die nächste Runde.",
+      "steady": "Üben auf {level}, mit neuen Inhalten und Regeln zur Vertiefung.",
+      "stepUp": "Du warst auf {requestedLevel} erfolgreich. Diese Runde probiert {level} aus.",
+      "stepDown": "Fragen auf {requestedLevel} sind noch schwierig. Diese Runde festigt deine Kenntnisse auf {level}."
+    },
+    "focusSkills": "Übungsschwerpunkt: {skills}"
   }
 }

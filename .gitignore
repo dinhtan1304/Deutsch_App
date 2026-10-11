@@ -1,4 +1,6 @@
 /FEATURES_LIST.md
+.audit-*
+test-results/
 # ============================================================
 # DEUTSCHMEISTER - Full Stack Project
 # NestJS (Backend) + Next.js (Frontend) + Prisma

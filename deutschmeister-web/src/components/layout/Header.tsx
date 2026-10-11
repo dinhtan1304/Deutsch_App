@@ -15,6 +15,7 @@ import { useDashboardStats } from '@/hooks/useDashboard';
 import { SIDEBAR_WIDTH, SIDEBAR_COLLAPSED_WIDTH } from './Sidebar';
 import { useUnreadCount, notifKeys } from '@/hooks/useNotifications';
 import { STATUS, ACCENT, GRADIENT } from '@/lib/tokens';
+import { openReleaseNotes } from '@/config/release';
 
 const FeedbackModal = dynamic(() => import('./FeedbackModal').then((mod) => mod.FeedbackModal), { ssr: false });
 const NotificationDrawer = dynamic(() => import('./NotificationDrawer').then((mod) => mod.NotificationDrawer), { ssr: false });
@@ -27,6 +28,7 @@ interface HeaderProps {
 function HeaderComponent({ sidebarCollapsed, onOpenPalette }: HeaderProps) {
   const router = useRouter();
   const t = useTranslations('header');
+  const releaseT = useTranslations('common.release');
   const formatter = useFormatter();
   const user = useAuthUser();
   const isAuthenticated = useIsAuthenticated();
@@ -284,6 +286,7 @@ function HeaderComponent({ sidebarCollapsed, onOpenPalette }: HeaderProps) {
                         { href: '/settings', icon: IconSettings, label: t('userMenu.settings'), color: ACCENT.vocab },
                         { href: 'https://discord.gg/NfztBxtxh', icon: IconDiscord, label: t('userMenu.discord'), color: ACCENT.srs },
                         { action: 'feedback', icon: IconMessageCircle, label: t('userMenu.feedback'), color: ACCENT.emerald },
+                        { action: 'updates', icon: IconStar, label: releaseT('reopen'), color: ACCENT.brand },
                       ].map((item, idx) => {
                         const ItemIcon = item.icon;
                         const isAction = 'action' in item;
@@ -302,7 +305,7 @@ function HeaderComponent({ sidebarCollapsed, onOpenPalette }: HeaderProps) {
 
                         if (isAction) {
                           return (
-                            <button key={idx} onClick={() => { setShowUserMenu(false); setShowFeedback(true); }} className="w-full text-left">
+                            <button key={idx} onClick={() => { setShowUserMenu(false); if (item.action === 'updates') openReleaseNotes(); else setShowFeedback(true); }} className="w-full text-left">
                               {content}
                             </button>
                           );
@@ -346,16 +349,14 @@ function HeaderComponent({ sidebarCollapsed, onOpenPalette }: HeaderProps) {
             <div className="flex items-center gap-2">
               <Link
                 href="/auth/login"
-                className="px-4 py-2 rounded-xl text-body font-medium transition-colors
-                hover:bg-(--theme-bg-secondary)"
+                className="px-4 py-2 rounded-xl text-body font-medium transition-colors hover:bg-(--theme-bg-secondary)"
                 style={{ color: 'var(--theme-text-secondary)' }}
               >
                 {t('guest.login')}
               </Link>
               <Link
                 href="/auth/register"
-                className="px-4 py-2 rounded-xl text-body font-semibold text-white transition-all
-                hover:shadow-md hover:-translate-y-0.5"
+                className="px-4 py-2 rounded-xl text-body font-semibold text-white transition-all hover:shadow-md hover:-translate-y-0.5"
                 style={{ background: GRADIENT.brand }}
               >
                 {t('guest.register')}

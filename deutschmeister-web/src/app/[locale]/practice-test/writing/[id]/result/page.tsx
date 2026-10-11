@@ -9,6 +9,7 @@ import { useShareResult } from '@/hooks/useShareResult';
 import { useAuthStore } from '@/stores/authStore';
 import type { WritingError, GrammarAnalysis } from '@/lib/api/writing';
 import { CriterionRadar } from '@/components/writing/CriterionRadar';
+import { WritingRevisions } from '@/components/writing/WritingRevisions';
 import { InsightsPanel } from '@/components/grading/InsightsPanel';
 import { coalesceInsights } from '@/lib/api/utils/insights-fallback';
 import { getErrorTip } from '@/data/error-tips';
@@ -333,6 +334,7 @@ export default function WritingResultPage() {
       />
 
       {/* Hero Result Card */}
+      <WritingRevisions session={session} />
       <div className="rounded-3xl border mb-6 overflow-hidden shadow-xl"
         style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)', backdropFilter: 'blur(10px)' }}>
         <div className="px-6 pt-5 pb-4 border-b text-center" style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-secondary)' }}>

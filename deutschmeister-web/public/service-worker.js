@@ -2,18 +2,24 @@
 // Strategy: cache-first for immutable static assets, network-first for navigations
 // (with an offline cache fallback). Never touches API/auth/admin responses.
 // Served as /service-worker.js (public/sw.js is gitignored by a leftover PWA rule).
-const VERSION = 'v2';
+const VERSION = 'v3-learning-2026-10';
 const STATIC_CACHE = `dm-static-${VERSION}`;
 const PAGE_CACHE = `dm-pages-${VERSION}`;
 
-self.addEventListener('install', () => self.skipWaiting());
+self.addEventListener('install', (event) => {
+  event.waitUntil((async () => {
+    const cache = await caches.open(PAGE_CACHE);
+    await cache.add('/offline.html');
+    self.skipWaiting();
+  })());
+});
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     (async () => {
       const keys = await caches.keys();
       await Promise.all(
-        keys.filter((k) => k !== STATIC_CACHE && k !== PAGE_CACHE).map((k) => caches.delete(k)),
+        keys.filter((k) => k.startsWith('dm-') && k !== STATIC_CACHE && k !== PAGE_CACHE).map((k) => caches.delete(k)),
       );
       await self.clients.claim();
     })(),
@@ -30,11 +36,20 @@ function isStaticAsset(url) {
 
 // Paths that must always hit the network and never be cached.
 function isBypassed(url) {
+  const path = url.pathname.replace(/^\/(vi|en|de)(?=\/|$)/, '') || '/';
   return (
-    url.pathname.startsWith('/api/') ||
-    url.pathname.startsWith('/auth/') ||
-    url.pathname.startsWith('/admin')
+    /^\/(api|auth|admin|uploads)(\/|$)/.test(path) ||
+    url.searchParams.has('_rsc') ||
+    url.searchParams.has('token')
   );
+}
+
+async function boundedPut(name, request, response, limit) {
+  if (!response.ok || response.type === 'opaque') return;
+  const cache = await caches.open(name);
+  await cache.put(request, response);
+  const keys = await cache.keys();
+  await Promise.all(keys.slice(0, Math.max(0, keys.length - limit)).map((key) => cache.delete(key)));
 }
 
 self.addEventListener('fetch', (event) => {
@@ -43,7 +58,7 @@ self.addEventListener('fetch', (event) => {
 
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
-  if (isBypassed(url)) return;
+  if (isBypassed(url) || request.headers.get('RSC') === '1') return;
 
   // Navigations: network-first, fall back to cached page, then offline shell.
   if (request.mode === 'navigate') {
@@ -51,12 +66,16 @@ self.addEventListener('fetch', (event) => {
       (async () => {
         try {
           const fresh = await fetch(request);
-          const cache = await caches.open(PAGE_CACHE);
-          cache.put(request, fresh.clone());
+          const path = url.pathname.replace(/^\/(vi|en|de)(?=\/|$)/, '') || '/';
+          // Only public shells can be stored. Never cache account pages or
+          // personal server-rendered navigation responses across logins.
+          if (['/', '/updates', '/offline-review'].includes(path) && !url.search) {
+            await boundedPut(PAGE_CACHE, request, fresh.clone(), 12);
+          }
           return fresh;
         } catch {
           const cached = await caches.match(request);
-          return cached || caches.match('/');
+          return cached || await caches.match('/offline.html') || new Response('Offline', { status: 503 });
         }
       })(),
     );
@@ -70,8 +89,7 @@ self.addEventListener('fetch', (event) => {
         const cached = await caches.match(request);
         if (cached) return cached;
         const fresh = await fetch(request);
-        const cache = await caches.open(STATIC_CACHE);
-        cache.put(request, fresh.clone());
+        await boundedPut(STATIC_CACHE, request, fresh.clone(), 300);
         return fresh;
       })(),
     );

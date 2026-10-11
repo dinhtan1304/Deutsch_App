@@ -2,7 +2,8 @@
 /* eslint-disable no-restricted-syntax */
 
 import { Suspense, useEffect, useRef } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
+import { useRouter } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
 import { useAuthStore } from '@/stores/authStore';
 import { trackSignup } from '@/lib/analytics';
@@ -21,12 +22,15 @@ function AuthCallbackInner() {
     const token = searchParams.get('token');
     const error = searchParams.get('error');
 
-    if (error || !token) {
+    if (error) {
       router.replace(`/auth/login?error=${encodeURIComponent(error || 'oauth_failed')}`);
       return;
     }
 
-    loginWithOAuth(token)
+    // Accept old callbacks during a rolling deployment, removing the token
+    // from browser history before bootstrapping or sending analytics.
+    if (token) window.history.replaceState(null, '', window.location.pathname);
+    loginWithOAuth(token ?? undefined)
       .then(() => {
         const { user } = useAuthStore.getState();
         // New OAuth users land on onboarding — use that as the signup signal.
@@ -40,16 +44,8 @@ function AuthCallbackInner() {
   }, [loginWithOAuth, router, searchParams]);
 
   return (
-    <div style={{ minHeight: '100vh', background: '#0a0f1e', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ textAlign: 'center' }}>
-        <div style={{
-          width: '48px', height: '48px', border: '3px solid rgba(99,102,241,0.3)',
-          borderTop: '3px solid #6366F1', borderRadius: '50%',
-          animation: 'spin 0.8s linear infinite', margin: '0 auto 16px',
-        }} />
-        <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
-        <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '14px' }}>{t('loggingIn')}</p>
-      </div>
+    <div className="flex min-h-screen items-center justify-center" style={{ background: 'var(--theme-bg-primary)' }}>
+      <p role="status" className="text-body" style={{ color: 'var(--theme-text-muted)' }}>{t('loggingIn')}</p>
     </div>
   );
 }

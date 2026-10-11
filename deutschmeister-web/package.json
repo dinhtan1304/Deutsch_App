@@ -9,6 +9,7 @@
     "build:analyze": "ANALYZE=true next build",
     "start": "next start",
     "lint": "eslint",
+    "test:e2e": "playwright test",
     "lint:strict": "eslint --max-warnings 0",
     "lhci": "lhci autorun"
   },
@@ -54,6 +55,7 @@
   },
   "devDependencies": {
     "@lhci/cli": "^0.14.0",
+    "@playwright/test": "1.64.0",
     "@tailwindcss/postcss": "^4",
     "@tanstack/react-query-devtools": "^5.91.2",
     "@types/node": "^20",
