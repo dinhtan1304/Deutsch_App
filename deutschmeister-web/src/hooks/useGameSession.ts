@@ -19,20 +19,42 @@ import { dashboardKeys } from '@/hooks/useDashboard';
  */
 export function useGameSession(gameType: GameType, difficulty: Difficulty = 'beginner') {
   const sessionIdRef = useRef<string | null>(null);
+  const answersRef = useRef<{ wordId: string; selectedAnswer: string; replays?: number }[]>([]);
+  const startingRef = useRef<Promise<void> | null>(null);
+  const endingRef = useRef(false);
+  const generationRef = useRef(0);
   const queryClient = useQueryClient();
 
-  const start = useCallback(async (totalQuestions: number) => {
+  const start = useCallback((totalQuestions: number) => {
+    const generation = ++generationRef.current;
+    sessionIdRef.current = null;
+    answersRef.current = [];
+    endingRef.current = false;
+    const pending = (async () => {
     try {
       const session = await gamesApi.start({ gameType, difficulty, totalQuestions });
+      if (generation !== generationRef.current) return;
       sessionIdRef.current = session.id;
     } catch (e) {
       if (process.env.NODE_ENV === 'development') console.warn('[GameSession] Failed to start:', e);
-      sessionIdRef.current = null;
+      if (generation === generationRef.current) sessionIdRef.current = null;
     }
+    })();
+    startingRef.current = pending;
+    return pending;
   }, [gameType, difficulty]);
 
+  const recordAnswer = useCallback((wordId: string, selectedAnswer: string, replays?: number) => {
+    if (endingRef.current) return;
+    answersRef.current.push({ wordId, selectedAnswer, ...(replays !== undefined ? { replays } : {}) });
+  }, []);
+
   const end = useCallback(async (score: number, bestStreak: number, correctAnswers: number, wrongAnswers: number) => {
-    if (!sessionIdRef.current) return;
+    if (endingRef.current) return;
+    endingRef.current = true;
+    const generation = generationRef.current;
+    await startingRef.current;
+    if (generation !== generationRef.current || !sessionIdRef.current) return;
     try {
       await gamesApi.end({
         sessionId: sessionIdRef.current,
@@ -40,6 +62,7 @@ export function useGameSession(gameType: GameType, difficulty: Difficulty = 'beg
         bestStreak,
         correctAnswers,
         wrongAnswers,
+        answers: [...answersRef.current],
       });
       // Refresh dashboard data so Recent Activity updates
       queryClient.invalidateQueries({ queryKey: dashboardKeys.all });
@@ -47,12 +70,12 @@ export function useGameSession(gameType: GameType, difficulty: Difficulty = 'beg
     } catch (e) {
       if (process.env.NODE_ENV === 'development') console.warn('[GameSession] Failed to end:', e);
     } finally {
-      sessionIdRef.current = null;
+      if (generation === generationRef.current) sessionIdRef.current = null;
     }
   }, [queryClient]);
 
   // Stable object reference — prevents useEffect([phase, session]) from
   // re-running on every render during the result phase, which would call
   // session.end() multiple times before sessionIdRef.current is nullified.
-  return useMemo(() => ({ start, end }), [start, end]);
+  return useMemo(() => ({ start, end, recordAnswer }), [start, end, recordAnswer]);
 }

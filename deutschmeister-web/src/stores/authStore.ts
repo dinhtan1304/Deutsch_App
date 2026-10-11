@@ -2,8 +2,12 @@
 
 import { create } from 'zustand';
 import { authApi, LoginDto, RegisterDto, MessageResponse, User, AuthBootstrap } from '@/lib/api/auth';
-import { clearTokens, getAccessToken, onAuthExpired, setAccessToken } from '@/lib/api/client';
+import { ApiError, clearTokens, getAccessToken, initAuth, onAuthExpired, setAccessToken } from '@/lib/api/client';
 import { clearSessionHint, setSessionHint } from '@/lib/auth/sessionHint';
+import { clearOfflineData } from '@/lib/offline/repository';
+
+let authEpoch = 0;
+export const getAuthEpoch = () => authEpoch;
 
 interface AuthState {
   user: User | null;
@@ -16,7 +20,7 @@ interface AuthState {
   register: (data: RegisterDto) => Promise<MessageResponse>;
   logout: () => Promise<void>;
   fetchUser: () => Promise<void>;
-  loginWithOAuth: (token: string) => Promise<void>;
+  loginWithOAuth: (token?: string) => Promise<void>;
   setUser: (user: User | null) => void;
   setBootstrap: (bootstrap: AuthBootstrap | null) => void;
   setLoading: (isLoading: boolean) => void;
@@ -34,13 +38,16 @@ export const useAuthStore = create<AuthState>()((set) => ({
   setLoading: (isLoading) => set({ isLoading }),
 
   login: async (data) => {
+    const epoch = ++authEpoch;
     set({ isLoading: true });
     try {
       await authApi.login(data);
       const bootstrap = await authApi.bootstrap();
+      if (epoch !== authEpoch) return;
       setSessionHint();
       set({ bootstrap, user: bootstrap.user, isAuthenticated: true, isLoading: false, _hasHydrated: true });
     } catch (error) {
+      if (epoch !== authEpoch) throw error;
       set({ isLoading: false, _hasHydrated: true });
       throw error;
     }
@@ -59,26 +66,33 @@ export const useAuthStore = create<AuthState>()((set) => ({
   },
 
   logout: async () => {
-    set({ isLoading: true });
+    const epoch = ++authEpoch;
+    set({ bootstrap: null, user: null, isAuthenticated: false, isLoading: true });
+    await clearOfflineData().catch(() => undefined);
     try {
       await authApi.logout();
     } catch {
       // Ignore: clear local state even if server logout fails (offline, expired token)
     } finally {
+      if (epoch !== authEpoch) return;
       clearTokens();
       clearSessionHint();
       set({ bootstrap: null, user: null, isAuthenticated: false, isLoading: false, _hasHydrated: true });
     }
   },
 
-  loginWithOAuth: async (token: string) => {
-    setAccessToken(token);
+  loginWithOAuth: async (token?: string) => {
+    const epoch = ++authEpoch;
+    if (token) setAccessToken(token);
     set({ isLoading: true });
     try {
+      if (!token && await initAuth() !== 'authenticated') throw new Error('OAuth session unavailable');
       const bootstrap = await authApi.bootstrap();
+      if (epoch !== authEpoch) return;
       setSessionHint();
       set({ bootstrap, user: bootstrap.user, isAuthenticated: true, isLoading: false, _hasHydrated: true });
     } catch {
+      if (epoch !== authEpoch) throw new Error('OAuth session changed');
       clearTokens();
       clearSessionHint();
       set({ bootstrap: null, user: null, isAuthenticated: false, isLoading: false, _hasHydrated: true });
@@ -87,6 +101,7 @@ export const useAuthStore = create<AuthState>()((set) => ({
   },
 
   fetchUser: async () => {
+    const epoch = authEpoch;
     const token = getAccessToken();
     if (!token) {
       set({ bootstrap: null, user: null, isAuthenticated: false, isLoading: false, _hasHydrated: true });
@@ -95,12 +110,17 @@ export const useAuthStore = create<AuthState>()((set) => ({
     set({ isLoading: true });
     try {
       const bootstrap = await authApi.bootstrap();
+      if (epoch !== authEpoch) return;
       setSessionHint();
       set({ bootstrap, user: bootstrap.user, isAuthenticated: true, isLoading: false, _hasHydrated: true });
-    } catch {
-      clearTokens();
-      clearSessionHint();
-      set({ bootstrap: null, user: null, isAuthenticated: false, isLoading: false, _hasHydrated: true });
+    } catch (error) {
+      if (epoch !== authEpoch) return;
+      if (error instanceof ApiError && error.status === 401) {
+        clearTokens();
+        clearSessionHint();
+        set({ bootstrap: null, user: null, isAuthenticated: false });
+      }
+      set({ isLoading: false, _hasHydrated: true });
     }
   },
 
@@ -117,7 +137,7 @@ export const useAuthBootstrap = () => useAuthStore((s) => s.bootstrap);
 export const useAuthLogout = () => useAuthStore((s) => s.logout);
 
 if (typeof window !== 'undefined') {
-  localStorage.removeItem('auth-storage');
+  try { localStorage.removeItem('auth-storage'); } catch { /* Storage may be unavailable. */ }
 }
 
 // ─── Sync API client token expiry → zustand auth state ───
@@ -127,6 +147,8 @@ if (typeof window !== 'undefined') {
 // has isAuthenticated:true in localStorage → Header shows avatar,
 // pages show login form = desync bug.
 onAuthExpired(() => {
+  authEpoch++;
+  void clearOfflineData().catch(() => undefined);
   clearSessionHint();
   useAuthStore.setState({
     bootstrap: null,

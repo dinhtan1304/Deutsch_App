@@ -23,6 +23,7 @@ export const gamesApi = {
     bestStreak: number;
     correctAnswers: number;
     wrongAnswers: number;
+    answers?: { wordId: string; selectedAnswer: string; replays?: number }[];
   }): Promise<GameSession> => {
     return apiPost<GameSession>('/games/end', data);
   },

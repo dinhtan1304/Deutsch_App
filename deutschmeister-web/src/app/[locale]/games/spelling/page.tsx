@@ -127,6 +127,7 @@ export default function SpellingBeePage() {
     if (!trimmed) return;
 
     const isCorrect = trimmed.toLowerCase() === currentWord.word.toLowerCase();
+    session.recordAnswer(currentWord.id, trimmed);
     setAnswers(prev => [...prev, { word: currentWord, selectedAnswer: trimmed, isCorrect }]);
 
     if (isCorrect) {
@@ -154,7 +155,7 @@ export default function SpellingBeePage() {
       setCombo(0);
       advanceToNext(1600);
     }
-  }, [currentWord, feedback, input, playCorrect, playWrong, playCombo, advanceToNext]);
+  }, [currentWord, feedback, input, playCorrect, playWrong, playCombo, advanceToNext, session]);
 
   // Enter key to submit
   useEffect(() => {

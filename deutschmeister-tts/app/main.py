@@ -43,6 +43,7 @@ TTS_CACHE_DIR = Path(os.environ.get("TTS_CACHE_DIR", "/tmp/deutschmeister-tts-ca
 MAX_QUEUE = max(1, int(os.environ.get("TTS_MAX_QUEUE", "2")))
 QUEUE_TIMEOUT_SEC = float(os.environ.get("TTS_QUEUE_TIMEOUT_SEC", "0.1"))
 _queue_slots = threading.BoundedSemaphore(MAX_QUEUE)
+_cache_write_lock = threading.Lock()
 
 app = FastAPI(title="DeutschMeister TTS", version="0.1.0")
 
@@ -70,20 +71,33 @@ class SynthesizeRequest(BaseModel):
 
 
 def normalize_text(text: str) -> str:
-    return " ".join(text.strip().split()).lower()
+    # German casing can change pronunciation (e.g. "Weg" / "weg") and meaning.
+    return " ".join(text.strip().split())
 
 
 def cache_path(text: str, voice_key: str) -> Path:
-    # Include the resolved model in the key so the two voices never collide and
-    # so the default (male) keeps the same key as before this change.
+    # Include the resolved model so voices never collide and model changes
+    # invalidate previously generated audio.
     model = model_for_voice(voice_key)
     key = hashlib.sha256(
         (
-            f"{normalize_text(text)}|{model}|mp3-128k-mono"
+            f"case-sensitive-v2|{normalize_text(text)}|{model}|mp3-128k-mono"
             f"|ls={LENGTH_SCALE}|nw={NOISE_W_SCALE}|ss={SENTENCE_SILENCE_SEC}"
         ).encode("utf-8")
     ).hexdigest()
     return TTS_CACHE_DIR / f"{key}.mp3"
+
+
+def write_cache(cached: Path, audio_bytes: bytes) -> None:
+    # Independent temporary files and atomic replacement protect parallel writers.
+    with tempfile.NamedTemporaryFile(dir=cached.parent, suffix=".tmp", delete=False) as cache_file:
+        tmp_cache = Path(cache_file.name)
+        cache_file.write(audio_bytes)
+    try:
+        with _cache_write_lock:
+            tmp_cache.replace(cached)
+    finally:
+        tmp_cache.unlink(missing_ok=True)
 
 
 @app.on_event("startup")
@@ -169,9 +183,9 @@ def synthesize(req: SynthesizeRequest):
 
             audio_bytes = Path(mp3_path).read_bytes()
 
-        tmp_cache = cached.with_suffix(".tmp")
-        tmp_cache.write_bytes(audio_bytes)
-        tmp_cache.replace(cached)
+        # A unique temporary file per request avoids concurrent writers sharing
+        # one .tmp name. Atomic replacement keeps readers from seeing partial MP3s.
+        write_cache(cached, audio_bytes)
         logger.info(
             "synthesize cache_miss chars=%s bytes=%s ms=%.1f",
             len(text),

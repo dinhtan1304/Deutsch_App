@@ -166,7 +166,8 @@
     "addRandom": "+ Add 20 random words",
     "addFromDictHint": "Or add words from the Dictionary page with the ⭐ button",
     "sm2What": "What is SM-2?",
-    "sm2Desc": "SM-2 (SuperMemo 2) is a spaced-repetition algorithm that helps you remember words longer. Words you know well appear less often; hard words appear more frequently."
+    "sm2Desc": "SM-2 (SuperMemo 2) is a spaced-repetition algorithm that helps you remember words longer. Words you know well appear less often; hard words appear more frequently.",
+    "tomorrowTeaser": "{count} words come due tomorrow. See you then!"
   },
   "profile": {
     "authGateTitle": "Sign in to view profile",

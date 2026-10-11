@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Link, useRouter } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
 import { useWritingTopics, useGeneratePrompt } from '@/hooks/useWriting';
@@ -24,6 +25,8 @@ export default function NewWritingPage() {
   const tHub = useTranslations('practice.common.hub');
   const tCommon = useTranslations('practice.examCommon.setup');
   const router = useRouter();
+  const pack = useSearchParams().get('pack');
+  const packTopics: Record<string, string> = { ausbildung: 'Eine Bewerbung für eine Ausbildung schreiben: Erfahrung, Motivation und Bitte um ein Vorstellungsgespräch', housing: 'Eine Wohnung mieten: Anfrage an den Vermieter und Besichtigungstermin', work: 'Eine E-Mail an einen Kollegen: Besprechungstermin und Aufgaben abstimmen' };
 
   const teilPreset = useTeilPresetFromQuery();
   const [mode, setMode] = useState<'topic' | 'teil'>(teilPreset.presetMode ?? 'topic');
@@ -31,7 +34,7 @@ export default function NewWritingPage() {
 
   const [level, setLevel] = useState('A2');
   const [selectedTopic, setSelectedTopic] = useState('');
-  const [customTopic, setCustomTopic] = useState('');
+  const [customTopic, setCustomTopic] = useState(() => packTopics[pack ?? ''] ?? '');
   const [writingType, setWritingType] = useState('');
   const [wordCountIdx, setWordCountIdx] = useState(0);
 

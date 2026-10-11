@@ -10,6 +10,8 @@ import { useCreatePersonalWord } from '@/hooks/usePersonalWords';
 import { useAuthStore } from '@/stores/authStore';
 import { UpsellTrigger } from '@/components/subscription/UpsellTrigger';
 import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import { signalSessionComplete } from '@/lib/pushPrompt';
+import { TomorrowTeaser } from '@/components/dashboard/TomorrowTeaser';
 import type { Word } from '@/types';
 import type { Level } from '@/types/personalWord';
 import {
@@ -159,6 +161,13 @@ export function GameResultCard({ accuracy, correct, total, stats, onRestart, onE
     : accuracy >= 50 ? { label: t('gradeGood'), emoji: '👍', color: ACCENT.srs }
     : { label: t('gradeKeepGoing'), emoji: '💪', color: ACCENT.games };
 
+  // One signal covering all ten games, since every one of them ends here. Only
+  // on a decent score: asking for notification permission right after someone
+  // did badly is the worst possible moment, and the browser gives us one ask.
+  useEffect(() => {
+    if (accuracy >= 50) signalSessionComplete();
+  }, [accuracy]);
+
   const card = (
       <div className="rounded-[22px] border p-8 text-center"
         // eslint-disable-next-line no-restricted-syntax
@@ -177,7 +186,9 @@ export function GameResultCard({ accuracy, correct, total, stats, onRestart, onE
           </div>
         )}
 
-        {(onRestart || onExit) && (
+        <TomorrowTeaser />
+
+        {(onRestart || onExit) && (
           <div className="flex gap-3">
             {onExit && (
               <button onClick={onExit} className="h-11 flex-1 rounded-[11px] border text-sm font-semibold transition-colors hover:opacity-80"

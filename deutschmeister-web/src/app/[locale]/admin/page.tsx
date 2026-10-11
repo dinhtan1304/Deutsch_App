@@ -188,18 +188,24 @@ export default function AdminDashboardPage() {
           </div>
 
           {/* ── Traffic ──────────────────────────────────────── */}
-          <SL>Traffic — phiên sử dụng</SL>
+          {/* These count eight skill-practice tables only, not the daily loop —
+              the sub-labels used to say "Tất cả loại", which is what made a live
+              app look dead. Real activity lives on /admin/analytics. */}
+          <SL>Bài luyện kỹ năng (Viết · Đọc · Nghe · Nói · Thi)</SL>
           <div style={{ display: 'grid', gridTemplateColumns: grid3, gap: 10 }}>
             <StatCard label="Hôm nay" value={stats.sessionsToday.toLocaleString()}
-              sub="Tất cả loại"
+              sub="Không tính flashcard/game"
               icon={IconActivity} color="#22C55E" />
             <StatCard label="7 ngày gần nhất" value={stats.sessionsThisWeek.toLocaleString()}
-              sub="Tất cả loại"
+              sub="Không tính flashcard/game"
               icon={IconActivity} color="#3B82F6" />
             <StatCard label="Tổng tất cả thời gian" value={stats.sessionsAllTime.toLocaleString()}
-              sub="Tất cả loại"
+              sub="Không tính flashcard/game"
               icon={IconActivity} color="#8B5CF6" />
           </div>
+          <Link href="/admin/analytics" style={{ display: 'inline-block', marginTop: 8, fontSize: 11, fontWeight: 600, color: '#818CF8', textDecoration: 'none' }}>
+            → Xem hoạt động thật, giữ chân và phễu kích hoạt
+          </Link>
 
           {/* ── AI Usage ─────────────────────────────────────── */}
           <SL>Tính năng AI (Gemini)</SL>

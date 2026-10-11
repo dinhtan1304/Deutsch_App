@@ -182,6 +182,83 @@ function toQS(params?: Record<string, any>): string {
   return '?' + new URLSearchParams(entries.map(([k, v]) => [k, String(v)])).toString();
 }
 
+// ─── Analytics ────────────────────────────────────────────────────────────────
+
+export interface DailyActivity {
+  /** yyyy-mm-dd, Vietnam time. */
+  date: string;
+  activeUsers: number;
+  actions: number;
+}
+
+export interface CohortRow {
+  weekStart: string;
+  size: number;
+  /** Days since the cohort week began. Columns past this are not knowable yet. */
+  ageDays: number;
+  activated: number;
+  d1: number;
+  d3: number;
+  d7: number;
+  d14: number;
+  d30: number;
+  habitFormed: number;
+}
+
+export interface ActivationFunnel {
+  registered: number;
+  emailVerified: number;
+  onboardingCompleted: number;
+  activated: number;
+  returnedNextDay: number;
+  habitFormed: number;
+}
+
+export interface FeatureUsage {
+  key: string;
+  today: number;
+  week: number;
+  total: number;
+  users30d: number;
+}
+
+export interface ReminderHealth {
+  totalUsers: number;
+  emailVerified: number;
+  dailyReminderOn: number;
+  webPushOn: number;
+  livePushSubscriptions: number;
+  reachable: number;
+  blockedByEmailGate: number;
+  /** Lifecycle mail sent this calendar month, against its ceiling. */
+  emailsSentThisMonth: number;
+  emailBudget: number;
+  emailBudgetRemaining: number;
+}
+
+export interface DormancyBuckets {
+  neverActive: number;
+  active7d: number;
+  dormant7to30d: number;
+  dormant30dPlus: number;
+}
+
+export interface AdminAnalytics {
+  generatedAt: string;
+  windowDays: number;
+  activity: {
+    daily: DailyActivity[];
+    dau: number;
+    wau: number;
+    mau: number;
+  };
+  cohorts: CohortRow[];
+  funnel: ActivationFunnel;
+  features: FeatureUsage[];
+  reminders: ReminderHealth;
+  dormancy: DormancyBuckets;
+}
+
 // ─── Admin User API ───────────────────────────────────────────────────────────
 
 export const adminApi = {
@@ -202,6 +279,9 @@ export const adminApi = {
 
   getTokenStats: () =>
     apiGet<AdminTokenStats>('/admin/token-stats'),
+
+  getAnalytics: (params?: { days?: number; weeks?: number; refresh?: boolean }) =>
+    apiGet<AdminAnalytics>(`/admin/analytics${toQS(params)}`),
 };
 
 // ─── Admin Word API ───────────────────────────────────────────────────────────

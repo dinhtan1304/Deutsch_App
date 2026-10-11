@@ -96,6 +96,7 @@ export default function GenderQuizPage() {
     if (answered || !currentWord) return;
     setSelectedAnswer(gender); setAnswered(true);
     const isCorrect = gender === currentWord.gender;
+    session.recordAnswer(currentWord.id, gender);
     setAnswers(prev => [...prev, { word: currentWord, selectedAnswer: gender, isCorrect }]);
 
     if (isCorrect) {
@@ -114,7 +115,7 @@ export default function GenderQuizPage() {
       if (index + 1 >= questionsCount) { playGameOver(); setPhase('result'); }
       else { setIndex(i => i + 1); setAnswered(false); setSelectedAnswer(null); }
     }, 1200);
-  }, [answered, currentWord, combo, bestCombo, index, questionsCount, score, playCorrect, playWrong, playCombo, playGameOver]);
+  }, [answered, currentWord, combo, bestCombo, index, questionsCount, score, playCorrect, playWrong, playCombo, playGameOver, session]);
 
   useEffect(() => {
     const handle = (e: KeyboardEvent) => {

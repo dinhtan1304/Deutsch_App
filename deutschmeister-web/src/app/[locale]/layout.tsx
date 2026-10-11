@@ -7,6 +7,7 @@ import { getMessages, getTranslations, setRequestLocale } from 'next-intl/server
 import '../globals.css';
 import { MainLayout } from '@/components/layout';
 import { PWAInstallPrompt } from '@/components/pwa/PWAInstallPrompt';
+import { PushOptInPrompt } from '@/components/pwa/PushOptInPrompt';
 import { Providers } from './providers';
 import { GA_ID } from '@/lib/analytics';
 import { routing } from '@/i18n/routing';
@@ -132,6 +133,7 @@ export default async function LocaleLayout({
           <Providers>
             <MainLayout>{children}</MainLayout>
             <PWAInstallPrompt />
+            <PushOptInPrompt />
           </Providers>
         </NextIntlClientProvider>
       </body>

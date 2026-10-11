@@ -155,6 +155,7 @@ export default function TimedChallengePage() {
   const answer = useCallback((gender: Gender) => {
     if (phase !== 'playing' || !currentWord) return;
     const isCorrect = gender === currentWord.gender;
+    session.recordAnswer(currentWord.id, gender);
 
     if (isCorrect) {
       playCorrect();
@@ -171,7 +172,7 @@ export default function TimedChallengePage() {
     // Always increment — no wrap-around. The buffer grows via prefetch so we
     // never reach the end of `words` under normal play conditions.
     setIndex(i => i + 1);
-  }, [phase, currentWord, combo, bestCombo, playCorrect, playWrong, playCombo]);
+  }, [phase, currentWord, combo, bestCombo, playCorrect, playWrong, playCombo, session]);
 
   useEffect(() => {
     const handle = (e: KeyboardEvent) => {

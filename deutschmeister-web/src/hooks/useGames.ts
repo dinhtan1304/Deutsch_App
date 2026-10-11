@@ -3,6 +3,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { gamesApi } from '@/lib/api/games';
 import { StartGameDto } from '@/types';
+import { useAuthStore } from '@/stores/authStore';
 
 export function useStartGame() {
   return useMutation({
@@ -37,9 +38,11 @@ export function useEndGame() {
 }
 
 export function useGameHistory(limit = 20) {
+  const authenticated = useAuthStore((s) => s.isAuthenticated);
   return useQuery({
     queryKey: ['games', 'history', limit],
     queryFn: () => gamesApi.getHistory(limit),
+    enabled: authenticated,
     retry: false,
     staleTime: 60_000,
   });

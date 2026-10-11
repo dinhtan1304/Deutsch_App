@@ -1,7 +1,6 @@
 'use client';
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { Link, usePathname } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
 
 interface BreadcrumbProps {
@@ -15,7 +14,7 @@ const LOCALE_SEGMENTS = new Set(['vi', 'en', 'de']);
 export function Breadcrumb({ labelMap, className }: BreadcrumbProps) {
   const t = useTranslations('common.breadcrumb');
   const pathname = usePathname() || '';
-  const segments = pathname.split('/').filter(Boolean);
+  const segments = pathname.split('/').filter((segment) => segment && !LOCALE_SEGMENTS.has(segment));
   if (segments.length < 2) return null;
 
   const prettify = (segment: string): string | null => {

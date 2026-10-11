@@ -98,6 +98,7 @@ export default function FlashcardsPage() {
 
   const handleResponse = useCallback((knew: boolean) => {
     if (!currentWord) return;
+    session.recordAnswer(currentWord.id, knew ? currentWord.word : '');
     setResults(prev => [...prev, { word: currentWord, knew }]);
 
     if (knew) {
@@ -115,7 +116,7 @@ export default function FlashcardsPage() {
         setPhase('result');
       } else { setIndex(i => i + 1); setIsFlipped(false); }
     }, 300);
-  }, [currentWord, index, words?.length, streak, bestStreak, playCorrect, playWrong, playCombo, playGameOver, playStreak]);
+  }, [currentWord, index, words?.length, streak, bestStreak, playCorrect, playWrong, playCombo, playGameOver, playStreak, session]);
 
   const goToPrev = useCallback(() => {
     if (index > 0) { setIndex(i => i - 1); setIsFlipped(false); }

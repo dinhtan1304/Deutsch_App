@@ -2,6 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { grammarApi } from '@/lib/api/grammar';
+import type { GrammarLessonDetail } from '@/types/grammar';
 
 // ============================================
 // Query Keys
@@ -28,12 +29,18 @@ export function useGrammarLessons(level?: string) {
 }
 
 /** Lấy chi tiết 1 lesson theo slug */
-export function useGrammarLesson(slug: string) {
+/**
+ * `initialData` lets the server component hand the lesson down as props, so the
+ * theory ships inside the HTML instead of arriving after hydration. Without it
+ * a crawler sees a skeleton where the lesson should be.
+ */
+export function useGrammarLesson(slug: string, initialData?: GrammarLessonDetail) {
   return useQuery({
     queryKey: grammarKeys.lesson(slug),
     queryFn: () => grammarApi.getLessonBySlug(slug),
     enabled: !!slug,
     staleTime: 5 * 60 * 1000,
+    initialData,
   });
 }
 

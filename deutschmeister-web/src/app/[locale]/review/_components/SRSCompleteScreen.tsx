@@ -1,9 +1,20 @@
 'use client';
 
+import { useEffect } from 'react';
 import { useTranslations } from 'next-intl';
+import { signalSessionComplete } from '@/lib/pushPrompt';
+import { TomorrowTeaser } from '@/components/dashboard/TomorrowTeaser';
 import { IconTrophy, IconRefresh, IconChevronLeft, IconPlus } from '@/components/ui/Icons';
 
-type ProgressStats = { total: number; mastered: number; learning: number; due: number; new: number };
+type ProgressStats = {
+  total: number; mastered: number; learning: number;
+  /** Genuine reviews only — never-studied cards are counted under `new`. */
+  due: number;
+  new: number;
+  /** Reviews plus the rationed new cards: what a session actually contains. */
+  sessionSize?: number;
+  newInSession?: number;
+};
 
 interface SessionStats {
   correct: number;
@@ -22,6 +33,10 @@ interface SRSCompleteScreenProps {
 
 export function SRSCompleteScreen({ sessionStats, stats, onContinue, onAddWords, onBack }: SRSCompleteScreenProps) {
   const t = useTranslations('progress.review');
+
+  // Reaching this screen means a review session finished — the moment the
+  // reader is most receptive to being asked about daily reminders.
+  useEffect(() => { signalSessionComplete(); }, []);
   const accuracy = sessionStats.correct + sessionStats.wrong > 0
     ? Math.round((sessionStats.correct / (sessionStats.correct + sessionStats.wrong)) * 100) : 0;
 
@@ -52,12 +67,14 @@ export function SRSCompleteScreen({ sessionStats, stats, onContinue, onAddWords,
           ))}
         </div>
 
+        <TomorrowTeaser />
+
         <div className="space-y-3">
-          {(stats?.due ?? 0) > 0 && (
+          {(stats?.sessionSize ?? stats?.due ?? 0) > 0 && (
             <button onClick={onContinue}
               className="flex items-center gap-2 mx-auto px-6 h-11 rounded-md font-bold text-sm transition-transform hover:-translate-y-0.5 active:scale-95"
               style={{ background: 'var(--accent)', color: 'var(--accent-on)', boxShadow: '0 8px 24px color-mix(in srgb, var(--accent) 40%, transparent)' }}>
-              <IconRefresh size={16} /> {t('continueReview', { count: stats?.due ?? 0 })}
+              <IconRefresh size={16} /> {t('continueReview', { count: stats?.sessionSize ?? stats?.due ?? 0 })}
             </button>
           )}
           <button onClick={onAddWords}

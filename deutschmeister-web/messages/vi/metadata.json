@@ -51,6 +51,12 @@
       "twitterDescription": "Cấu trúc đề, lộ trình 12 tuần, mẫu Schreiben & Sprechen.",
       "jsonLdName": "Luyện thi B1 tiếng Đức (Goethe & TELC)",
       "jsonLdDescription": "Cẩm nang và đề thi thử B1 cho cả Goethe-Zertifikat B1 và TELC Deutsch B1: cấu trúc đề, lộ trình 12 tuần, AI chấm Schreiben/Sprechen, ngữ pháp & từ vựng trọng tâm."
+    },
+    "topics": {
+      "title": "Từ vựng tiếng Đức theo chủ đề",
+      "description": "Hơn 190 chủ đề từ vựng tiếng Đức A1–B1: gia đình, nhà cửa, công việc, sức khỏe… Kèm giống từ, ví dụ, phát âm và flashcard ôn tập.",
+      "ogTitle": "Từ vựng tiếng Đức theo chủ đề — Deutschmeister",
+      "ogDescription": "Hơn 190 chủ đề từ vựng A1–B1, kèm giống từ, ví dụ và flashcard ôn tập theo phương pháp lặp lại ngắt quãng."
     }
   }
 }

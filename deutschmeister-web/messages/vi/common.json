@@ -1,10 +1,184 @@
 {
+  "offline": {
+    "title": "Ôn từ ngoại tuyến",
+    "intro": "Khi có mạng, tải tối đa 100 thẻ đến hạn về trình duyệt này. Lượt ôn được lưu trên thiết bị rồi đồng bộ vào tài khoản.",
+    "pendingBeforeDownload": "Hãy đồng bộ hoặc xử lý các lượt ôn đang chờ trước khi tải bộ thẻ mới.",
+    "status": "{cards} thẻ còn lại · {pending} lượt chờ đồng bộ",
+    "download": "Tải bộ thẻ đến hạn",
+    "downloading": "Đang tải…",
+    "sync": "Đồng bộ ngay",
+    "login": "Đăng nhập để tải thẻ và đồng bộ",
+    "storageError": "Trình duyệt không cho phép lưu ngoại tuyến.",
+    "conflicts": "{count} lượt ôn xung đột với dữ liệu đã thay đổi trên máy khác. Các lượt này chưa được áp dụng.",
+    "discard": "Bỏ lượt xung đột để tải lại thẻ",
+    "reveal": "Xem nghĩa",
+    "saveError": "Chưa lưu được lượt ôn trên thiết bị. Hãy thử lại.",
+    "finished": "Đã ôn hết bộ thẻ đã tải. Khi có mạng, đồng bộ rồi tải bộ mới.",
+    "empty": "Chưa có bộ thẻ ngoại tuyến. Đăng nhập và tải thẻ khi có mạng.",
+    "privacy": "Thẻ chỉ lưu trên trình duyệt này và được xóa khi đăng xuất. XP được ghi nhận sau khi đồng bộ thành công.",
+    "back": "Về phiên học",
+    "ratings": {
+      "again": "Học lại",
+      "hard": "Khó",
+      "good": "Nhớ được",
+      "easy": "Dễ"
+    }
+  },
+  "release": {
+    "badge": "Bản cập nhật {version}",
+    "title": "Học có định hướng, tiến bộ mỗi ngày",
+    "intro": "Các công cụ mới giúp bạn nối tiếp phiên học, luyện lại lỗi đã mắc và thực hành tình huống thật.",
+    "close": "Đóng thông báo",
+    "once": "Thông báo hiện một lần mỗi phiên bản trên trình duyệt này. Bạn có thể xem lại trong menu tài khoản hoặc trang cập nhật.",
+    "continue": "Tiếp tục học",
+    "start": "Bắt đầu phiên học",
+    "details": "Xem chi tiết",
+    "reopen": "Xem lại cập nhật",
+    "highlights": {
+      "dailySession": {
+        "title": "Phiên học ngắn mỗi ngày",
+        "body": "Checklist khoảng 15 phút từ Smart Review, lưu tiến độ theo tài khoản để tiếp tục sau."
+      },
+      "errorNotebook": {
+        "title": "Sổ lỗi cá nhân",
+        "body": "Luyện sửa câu sai từ bài viết và game, rồi ôn lại theo lịch giãn cách."
+      },
+      "offline": {
+        "title": "Ôn từ khi mất mạng",
+        "body": "Tải bộ thẻ về trình duyệt, ôn ngoại tuyến và đồng bộ khi kết nối trở lại."
+      },
+      "practicePacks": {
+        "title": "Thực hành cuộc sống tại Đức",
+        "body": "Ba lộ trình: phỏng vấn Ausbildung, tìm nhà và giao tiếp công việc."
+      },
+      "reliability": {
+        "title": "Tiến độ học ổn định hơn",
+        "body": "Cải thiện quản lý phiên đăng nhập, điểm XP và xử lý thanh toán."
+      },
+      "newGames": {
+        "title": "6 hành trình học mới",
+        "body": "6 game A1–B2: Xếp câu, Ghép cụm từ, Thám tử ngữ pháp, Số nhiều, Gia đình từ và Hội thoại. Có giải thích đáp án và ôn lại câu sai."
+      },
+      "adaptiveGames": {
+        "title": "Chủ đề thực tế và độ khó phù hợp",
+        "body": "Kho game tăng từ 144 lên 864 câu với 5 chủ đề mới: đi chợ, khám bệnh, thuê nhà, Ausbildung và công việc. Người đã đăng nhập có thể bật chọn câu theo kết quả và lỗi gần đây."
+      }
+    },
+    "games": "Khám phá game mới"
+  },
+  "learning": {
+    "loading": "Đang tải phiên học…",
+    "loadError": "Không tải được dữ liệu. Vui lòng thử lại.",
+    "retry": "Thử lại",
+    "badge": "Phiên học khoảng {minutes} phút",
+    "title": "Phiên học hôm nay",
+    "intro": "Bắt đầu từng hoạt động, quay lại đây và đánh dấu khi hoàn tất. Tiến độ được lưu theo tài khoản.",
+    "finished": "Bạn đã hoàn tất checklist hôm nay!",
+    "progress": "Đã hoàn tất {done}/{total} hoạt động",
+    "progressLabel": "Tiến độ phiên học",
+    "saved": "Bạn có thể rời trang và quay lại để tiếp tục.",
+    "minutes": "{count} phút",
+    "target": "Mục tiêu: khoảng {count} thẻ trong thời gian này.",
+    "again": "Ôn lại",
+    "start": "Bắt đầu bước này",
+    "open": "Mở hoạt động",
+    "done": "Đã hoàn tất",
+    "markComplete": "Đánh dấu hoàn tất",
+    "saveError": "Chưa lưu được tiến độ. Hãy thử lại.",
+    "checklistNote": "Checklist do bạn tự đánh dấu. XP được tính trong từng hoạt động; đánh dấu không cộng thêm XP.",
+    "notebookLink": "Mở sổ lỗi",
+    "packsLink": "Lộ trình thực tế",
+    "fullPlan": "Xem toàn bộ Smart Review",
+    "back": "Về phiên học",
+    "kinds": {
+      "srs": "Ôn thẻ đến hạn",
+      "remediation": "Luyện điểm còn yếu",
+      "skill": "Thực hành kỹ năng",
+      "explore": "Khám phá từ mới"
+    },
+    "packSteps": {
+      "vocabulary": "Từ vựng theo tình huống",
+      "speaking": "Đóng vai hội thoại",
+      "writing": "Viết theo tình huống"
+    },
+    "packsTitle": "Lộ trình thực tế",
+    "packsIntro": "Kết hợp từ vựng, nói và viết cho một tình huống cụ thể. Tiến độ được lưu để bạn tiếp tục; các công cụ AI áp dụng hạn mức hiện tại.",
+    "packDuration": "3 hoạt động · khoảng 15 phút",
+    "startPack": "Bắt đầu / tiếp tục",
+    "packs": {
+      "ausbildung": {
+        "title": "Phỏng vấn Ausbildung",
+        "intro": "Chuẩn bị giới thiệu bản thân, nói về động lực và viết thư ứng tuyển.",
+        "vocabulary": "Tìm và học từ về Ausbildung, kinh nghiệm và động lực.",
+        "speaking": "Chọn tình huống phỏng vấn. Luyện giới thiệu bản thân và giải thích vì sao bạn chọn nghề này.",
+        "writing": "Viết email ứng tuyển Ausbildung, nêu kinh nghiệm và xin lịch phỏng vấn."
+      },
+      "housing": {
+        "title": "Tìm nhà tại Đức",
+        "intro": "Hỏi thông tin căn hộ, hẹn xem nhà và viết email cho chủ nhà.",
+        "vocabulary": "Học từ về Wohnung, Miete, Kaution và Nebenkosten.",
+        "speaking": "Chọn tình huống thuê nhà. Hỏi giá thuê, tiền cọc và lịch xem nhà.",
+        "writing": "Viết email hỏi thuê căn hộ và đề nghị một lịch xem nhà."
+      },
+      "work": {
+        "title": "Giao tiếp công việc",
+        "intro": "Trao đổi lịch làm việc, nhờ hỗ trợ và viết email cho đồng nghiệp.",
+        "vocabulary": "Học từ về Arbeit, Termin, Aufgabe và Besprechung.",
+        "speaking": "Chọn tình huống công việc. Luyện nhờ đồng nghiệp hỗ trợ và xác nhận hạn chót.",
+        "writing": "Viết email cho đồng nghiệp để thống nhất lịch họp và công việc."
+      }
+    }
+  },
+  "notebook": {
+    "title": "Sổ lỗi cá nhân",
+    "intro": "Ôn lại câu sai từ bài viết của bạn. Câu sửa đúng được hẹn ôn xa hơn; câu chưa đúng sẽ quay lại sau 10 phút.",
+    "prompt": "Hãy sửa đoạn sau",
+    "answer": "Cách sửa của bạn",
+    "saving": "Đang lưu…",
+    "check": "Kiểm tra và lưu",
+    "reviewError": "Chưa lưu được lượt ôn. Hãy tải lại sổ lỗi rồi thử lại.",
+    "correct": "Đúng với cách sửa được gợi ý!",
+    "tryAgain": "Xem cách sửa để ôn lại lần tới.",
+    "next": "Tiếp tục",
+    "source": "Xem bài viết gốc",
+    "gamesSource": "Luyện game",
+    "stats": "{total} lỗi đã lưu · {due} lỗi đến hạn",
+    "showDue": "Chỉ xem lỗi đến hạn",
+    "showAll": "Xem tất cả",
+    "practice": "Luyện sửa",
+    "scheduled": "Đã hẹn ôn lại",
+    "nothingDue": "Bạn đã ôn hết lỗi đến hạn.",
+    "empty": "Chưa có lỗi từ bài viết. Sổ lỗi sẽ tự cập nhật sau khi bài được chấm.",
+    "write": "Luyện viết",
+    "exactMatch": "Bài luyện so sánh với cách sửa được gợi ý, giữ chữ hoa và dấu câu. Những cách viết đúng khác có thể chưa được nhận diện.",
+    "back": "Về phiên học"
+  },
+  "revisions": {
+    "title": "Viết lại và so sánh",
+    "intro": "Chỉnh sửa bài hiện tại, nhận góp ý mới và so sánh với các lần trước.",
+    "answer": "Bản viết mới",
+    "submit": "Chấm bản viết lại",
+    "saving": "Đang chấm…",
+    "error": "Chưa chấm được bài. Bản viết của bạn vẫn ở đây.",
+    "history": "Các lần viết trước",
+    "score": "{score}/100",
+    "empty": "Chưa có bản viết trước.",
+    "notebook": "Luyện lại lỗi trong sổ lỗi",
+    "changed": "Điểm thay đổi: {delta}",
+    "rewardNote": "Viết lại không cộng thêm XP hoàn thành bài."
+  },
   "pwa": {
     "installTitle": "Cài DeutschMeister",
     "installBody": "Thêm vào màn hình chính để học nhanh hơn, không cần mở trình duyệt.",
     "installCta": "Cài đặt",
     "dismiss": "Để sau",
     "iosHint": "Nhấn nút Chia sẻ rồi chọn “Thêm vào MH chính”."
+  },
+  "push": {
+    "title": "Nhắc bạn học mỗi ngày nhé?",
+    "body": "Bật thông báo để không quên ôn từ. Bạn tắt lại bất cứ lúc nào trong Cài đặt.",
+    "cta": "Bật thông báo",
+    "dismiss": "Để sau"
   },
   "actions": {
     "save": "Lưu",
@@ -62,7 +236,8 @@
     "upgradePremium": "Nâng cấp Premium",
     "levelEstimate": "Mức ước tính dựa trên XP — thi placement test để xác định chính xác",
     "connectionProblem": "Không thể kết nối máy chủ. Phiên đăng nhập của bạn vẫn còn — hãy kiểm tra mạng và thử lại.",
-    "retry": "Thử lại"
+    "retry": "Thử lại",
+    "showAllNav": "Xem tất cả mục"
   },
   "breadcrumb": {
     "dashboard": "Trang chủ",
@@ -87,7 +262,13 @@
     "word-bank": "Kho từ",
     "pricing": "Gói dịch vụ",
     "tips": "Mẹo",
-    "resources": "Tài liệu"
+    "resources": "Tài liệu",
+    "sentence-builder": "Xếp câu",
+    "collocations": "Ghép cụm từ",
+    "grammar-detective": "Thám tử ngữ pháp",
+    "plural": "Thử thách số nhiều",
+    "word-family": "Gia đình từ",
+    "dialogue": "Hội thoại vượt màn"
   },
   "reportModal": {
     "title": "Báo cáo người chơi",

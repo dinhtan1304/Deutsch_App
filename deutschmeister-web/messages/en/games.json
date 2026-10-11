@@ -1,6 +1,6 @@
 {
   "landing": {
-    "title": "Vocabulary games",
+    "title": "Vocabulary & grammar games",
     "subtitle": "Practice articles, meanings, listening and spelling in short sessions.",
     "srsCta": "SRS review",
     "levelBanner": {
@@ -42,7 +42,7 @@
   "hub": {
     "eyebrow": "Games · Spiele",
     "gamesUnit": "games",
-    "subtitleNote": "70% learned + 30% new words",
+    "subtitleNote": "Vocabulary · grammar · conversations",
     "statPlayed": "Played",
     "statWeek": "This week",
     "statAvg": "Avg score",
@@ -79,15 +79,66 @@
     "all": "All levels"
   },
   "definitions": {
-    "gender-quiz":      { "nameVi": "der/die/das articles", "description": "Pick the right article for each noun." },
-    "timed-challenge":  { "nameVi": "Time challenge",       "description": "Answer fast within the time limit." },
-    "fill-blank":       { "nameVi": "Fill in the blank",    "description": "Fill the missing article or word." },
-    "flashcards":       { "nameVi": "Flashcards",           "description": "Review meaning, article and example on cards." },
-    "srs-review":       { "nameVi": "SRS review",           "description": "Smart review with the SM-2 algorithm." },
-    "word-match":       { "nameVi": "Word match",           "description": "Match German words with their meaning." },
-    "listening":        { "nameVi": "Listening",            "description": "Hear an audio clip and pick the right word." },
-    "spelling":         { "nameVi": "Spelling",             "description": "Type the German word correctly." },
-    "typing":           { "nameVi": "Typing speed",         "description": "60 seconds of WPM and accuracy practice." }
+    "gender-quiz": {
+      "nameVi": "der/die/das articles",
+      "description": "Pick the right article for each noun."
+    },
+    "timed-challenge": {
+      "nameVi": "Time challenge",
+      "description": "Answer fast within the time limit."
+    },
+    "fill-blank": {
+      "nameVi": "Fill in the blank",
+      "description": "Fill the missing article or word."
+    },
+    "flashcards": {
+      "nameVi": "Flashcards",
+      "description": "Review meaning, article and example on cards."
+    },
+    "srs-review": {
+      "nameVi": "SRS review",
+      "description": "Smart review with the SM-2 algorithm."
+    },
+    "word-match": {
+      "nameVi": "Word match",
+      "description": "Match German words with their meaning."
+    },
+    "listening": {
+      "nameVi": "Listening",
+      "description": "Hear an audio clip and pick the right word."
+    },
+    "spelling": {
+      "nameVi": "Spelling",
+      "description": "Type the German word correctly."
+    },
+    "typing": {
+      "nameVi": "Typing speed",
+      "description": "60 seconds of WPM and accuracy practice."
+    },
+    "sentence-builder": {
+      "nameVi": "Sentence Builder",
+      "description": "Build sentences with word tiles, from statements to subordinate clauses."
+    },
+    "collocations": {
+      "nameVi": "Word Connections",
+      "description": "Choose natural word combinations and practise prepositions in context."
+    },
+    "grammar-detective": {
+      "nameVi": "Grammar Detective",
+      "description": "Spot a suspicious word and rewrite the sentence correctly."
+    },
+    "plural": {
+      "nameVi": "Plural Challenge",
+      "description": "Recall noun plurals and umlauts by typing the answer yourself."
+    },
+    "word-family": {
+      "nameVi": "Word Families",
+      "description": "Explore related words and choose the form that fits a sentence."
+    },
+    "dialogue": {
+      "nameVi": "Dialogue Quest",
+      "description": "Navigate conversations at a café, the station and at work."
+    }
   },
   "common": {
     "loading": "Loading…",
@@ -359,5 +410,120 @@
     "upsellDesc": "Unlock standard exams + unlimited AI grading",
     "upsellCta": "View Premium",
     "defaultSubtitle": "Game"
+  },
+  "learning": {
+    "eyebrow": "Play to understand, practise to remember",
+    "back": "All games",
+    "level": "Choose a level",
+    "mode": "Your pace",
+    "relaxed": "Relaxed practice",
+    "timed": "Challenge",
+    "timedDescription": "45 seconds per question. When time runs out, learn from the answer.",
+    "relaxedDescription": "No time limit. Points depend on accuracy and consecutive correct answers.",
+    "roundDescription": "6 questions per round · 5 new real-life topics · Explanations after each answer",
+    "start": "Start playing",
+    "resume": "Resume previous round",
+    "guest": "Guest practice does not save history or XP.",
+    "login": "Log in to save",
+    "question": "Question {current}/{total}",
+    "score": "{score} points",
+    "timeLeft": "Time remaining",
+    "progress": "Round progress",
+    "noun": "Noun",
+    "verb": "Verb",
+    "adjective": "Adjective",
+    "yourSentence": "Your sentence",
+    "wordTiles": "Word tiles",
+    "tilePlaceholder": "Choose word tiles below…",
+    "addTile": "Add {word}",
+    "removeTile": "Remove {word}",
+    "clear": "Start over",
+    "options": "Answer choices",
+    "pluralAnswer": "Plural with die",
+    "correctedSentence": "Rewrite the correct sentence",
+    "germanLetters": "German letters",
+    "caseSensitive": "Capitalization and ä, ö, ü matter. Final punctuation is optional.",
+    "check": "Check answer",
+    "skip": "Skip",
+    "correct": "Correct!",
+    "learnFromMistake": "Remember for next time",
+    "otherAnswers": "Other accepted answers",
+    "next": "Next question",
+    "results": "Show results",
+    "retry": "Resend answer",
+    "reloadSaved": "Reload saved round",
+    "connectionError": "Could not connect. Check your connection and try again.",
+    "answerError": "Your answer could not be confirmed. Resend the same answer to get the result without counting it twice.",
+    "finishError": "Your answers are saved, but completion is unconfirmed. Select Show results to retry.",
+    "resumeError": "Could not load the saved round. Check your connection or start a new round.",
+    "noSavedRound": "There is no unfinished round in this tab yet.",
+    "points": "Points",
+    "bestStreak": "Best streak",
+    "savedResult": "Results saved to your history. Incorrect answers are in your error notebook.",
+    "guestResult": "This was guest practice. Log in to save progress in your next round.",
+    "practiceResult": "Mistakes practised again. This review does not award additional XP.",
+    "reviewTitle": "What did you practise?",
+    "practiceMistakes": "Practise missed questions",
+    "mistakePractice": "Mistake review",
+    "notebook": "Open error notebook",
+    "allAnswers": "Review every answer",
+    "yourAnswer": "Your answer",
+    "skipped": "Skipped",
+    "newTitle": "6 new learning adventures",
+    "newBody": "From sentence building to conversations: choose a game and your level.",
+    "instructions": {
+      "sentence-builder": "Tap tiles to build a sentence. Tap a selected tile to return it. More than one order may be correct.",
+      "collocations": "Choose the word that fits the whole sentence, then check your answer.",
+      "grammar-detective": "Tap a suspicious word, then rewrite the complete sentence correctly.",
+      "plural": "Type the plural with die. Remember noun capitalization and umlauts.",
+      "word-family": "Use the root word and context to choose the right noun, verb or adjective.",
+      "dialogue": "Read the speaker’s turn and your goal, then choose a fitting response."
+    },
+    "skills": {
+      "verb2": "Verb position",
+      "question": "Questions",
+      "bracket": "Verb brackets",
+      "subordinate": "Subordinate clauses",
+      "perfect": "Past tenses",
+      "agreement": "Subject–verb agreement",
+      "accusative": "Accusative",
+      "dative": "Dative",
+      "location": "Location and direction",
+      "conditional": "Konjunktiv II",
+      "passive": "Passive voice",
+      "genitive": "Genitive",
+      "collocation": "Fixed expressions",
+      "preposition": "Verb prepositions",
+      "plural": "Plural forms",
+      "foreignPlural": "Loanword plurals",
+      "family": "Related word forms",
+      "suffix": "Word formation",
+      "polite": "Polite requests",
+      "dialogue": "Situational communication",
+      "pastSequence": "Sequence of past actions"
+    },
+    "topic": "Choose a topic",
+    "topics": {
+      "all": "All topics",
+      "everyday": "Everyday",
+      "shopping": "Shopping",
+      "health": "Health",
+      "housing": "Housing",
+      "training": "Apprenticeship",
+      "work": "Work"
+    },
+    "adaptiveOn": "Adaptive difficulty: on",
+    "adaptiveOff": "Keep selected level",
+    "adaptiveDescription": "Prioritise unseen questions and rules you find difficult. After at least 12 different questions at your selected level, the next round may move up or down one level. You can turn this off at any time.",
+    "adaptiveGuest": "Guest practice keeps your selected level. Log in to select questions using your recent results and mistakes.",
+    "selectionTitle": "Why these questions?",
+    "selectionReasons": {
+      "manual": "This round keeps your selected level: {level}.",
+      "starting": "Starting at {level}. Your results will help select suitable questions for the next round.",
+      "steady": "Practising at {level}, prioritising unseen content and rules to strengthen.",
+      "stepUp": "You did well at {requestedLevel}. This round tries {level}.",
+      "stepDown": "Questions at {requestedLevel} are still challenging. This round strengthens your skills at {level}."
+    },
+    "focusSkills": "Practice focus: {skills}"
   }
 }

@@ -1,10 +1,184 @@
 {
+  "offline": {
+    "title": "Offline vocabulary review",
+    "intro": "Download up to 100 due cards while connected. Reviews stay on this device until synced to your account.",
+    "pendingBeforeDownload": "Sync or resolve pending reviews before downloading a new deck.",
+    "status": "{cards} cards remaining · {pending} reviews pending",
+    "download": "Download due cards",
+    "downloading": "Downloading…",
+    "sync": "Sync now",
+    "login": "Log in to download and sync",
+    "storageError": "Your browser does not allow offline storage.",
+    "conflicts": "{count} reviews conflict with changes made on another device. These reviews have not been applied.",
+    "discard": "Discard conflicting reviews to reload cards",
+    "reveal": "Show meaning",
+    "saveError": "Could not save this review on your device. Please try again.",
+    "finished": "You've reviewed this downloaded deck. Sync and download a fresh deck when connected.",
+    "empty": "No offline deck yet. Log in and download cards while connected.",
+    "privacy": "Cards are stored in this browser and removed on logout. XP is recorded after successful sync.",
+    "back": "Back to study session",
+    "ratings": {
+      "again": "Again",
+      "hard": "Hard",
+      "good": "Good",
+      "easy": "Easy"
+    }
+  },
+  "release": {
+    "badge": "Update {version}",
+    "title": "A clearer path to daily progress",
+    "intro": "New tools help you continue your study session, practise your own mistakes and prepare for real situations.",
+    "close": "Close announcement",
+    "once": "Shown once per version in this browser. Reopen it from your account menu or the updates page.",
+    "continue": "Continue learning",
+    "start": "Start a study session",
+    "details": "See details",
+    "reopen": "View updates again",
+    "highlights": {
+      "dailySession": {
+        "title": "Short daily study sessions",
+        "body": "A checklist of about 15 minutes from Smart Review, with progress saved to your account."
+      },
+      "errorNotebook": {
+        "title": "Your personal error notebook",
+        "body": "Practise corrections from writing and games, then revisit them with spaced repetition."
+      },
+      "offline": {
+        "title": "Vocabulary practice offline",
+        "body": "Download cards to this browser, review offline and sync when connected again."
+      },
+      "practicePacks": {
+        "title": "Prepare for life in Germany",
+        "body": "Three paths: Ausbildung interviews, finding housing and workplace communication."
+      },
+      "reliability": {
+        "title": "More reliable learning progress",
+        "body": "Improved login sessions, XP updates and payment processing."
+      },
+      "newGames": {
+        "title": "6 new learning adventures",
+        "body": "6 A1–B2 games: Sentence Builder, Word Connections, Grammar Detective, Plurals, Word Families and Dialogue Quest. Get explanations and review mistakes."
+      },
+      "adaptiveGames": {
+        "title": "Real-life topics and suitable difficulty",
+        "body": "The game bank grows from 144 to 864 questions with five new topics: shopping, health, housing, apprenticeships and work. Signed-in learners can use recent results and mistakes to choose suitable questions."
+      }
+    },
+    "games": "Explore new games"
+  },
+  "learning": {
+    "loading": "Loading your study session…",
+    "loadError": "Could not load the data. Please try again.",
+    "retry": "Try again",
+    "badge": "About {minutes} minutes",
+    "title": "Today's study session",
+    "intro": "Open each activity, return here and mark it complete. Progress is saved to your account.",
+    "finished": "You've finished today's checklist!",
+    "progress": "{done}/{total} activities completed",
+    "progressLabel": "Study session progress",
+    "saved": "Leave and return whenever you need to continue.",
+    "minutes": "{count} minutes",
+    "target": "Aim for about {count} cards within this time.",
+    "again": "Practise again",
+    "start": "Start this step",
+    "open": "Open activity",
+    "done": "Completed",
+    "markComplete": "Mark complete",
+    "saveError": "Progress could not be saved. Please try again.",
+    "checklistNote": "You mark this personal checklist yourself. Each activity awards its own XP; checking a step gives no additional XP.",
+    "notebookLink": "Open error notebook",
+    "packsLink": "Real-life practice packs",
+    "fullPlan": "See the full Smart Review plan",
+    "back": "Back to study session",
+    "kinds": {
+      "srs": "Review due cards",
+      "remediation": "Work on weak points",
+      "skill": "Practise a skill",
+      "explore": "Discover new words"
+    },
+    "packSteps": {
+      "vocabulary": "Situational vocabulary",
+      "speaking": "Roleplay conversation",
+      "writing": "Situational writing"
+    },
+    "packsTitle": "Real-life practice packs",
+    "packsIntro": "Combine vocabulary, speaking and writing around one situation. Progress is saved; AI tools use your current plan limits.",
+    "packDuration": "3 activities · about 15 minutes",
+    "startPack": "Start / continue",
+    "packs": {
+      "ausbildung": {
+        "title": "Ausbildung interview",
+        "intro": "Introduce yourself, discuss your motivation and write an application.",
+        "vocabulary": "Find and learn words about Ausbildung, experience and motivation.",
+        "speaking": "Choose an interview scenario. Introduce yourself and explain your career choice.",
+        "writing": "Write an Ausbildung application email, describe your experience and request an interview."
+      },
+      "housing": {
+        "title": "Finding housing",
+        "intro": "Ask about an apartment, arrange a viewing and email a landlord.",
+        "vocabulary": "Learn Wohnung, Miete, Kaution and Nebenkosten.",
+        "speaking": "Choose a housing scenario. Ask about rent, deposit and viewing dates.",
+        "writing": "Write an email asking about an apartment and suggesting a viewing date."
+      },
+      "work": {
+        "title": "Workplace communication",
+        "intro": "Discuss work schedules, ask for help and email a colleague.",
+        "vocabulary": "Learn Arbeit, Termin, Aufgabe and Besprechung.",
+        "speaking": "Choose a workplace scenario. Ask a colleague for help and confirm a deadline.",
+        "writing": "Write a colleague an email to agree on a meeting and tasks."
+      }
+    }
+  },
+  "notebook": {
+    "title": "Your error notebook",
+    "intro": "Revisit mistakes from your writing. Suggested corrections you remember move further apart; missed ones return in 10 minutes.",
+    "prompt": "Correct the following excerpt",
+    "answer": "Your correction",
+    "saving": "Saving…",
+    "check": "Check and save",
+    "reviewError": "Could not save this review. Refresh the notebook and try again.",
+    "correct": "Matches the suggested correction!",
+    "tryAgain": "Read the correction to prepare for next time.",
+    "next": "Continue",
+    "source": "View original writing",
+    "gamesSource": "Practise games",
+    "stats": "{total} saved errors · {due} due",
+    "showDue": "Show due errors only",
+    "showAll": "Show all",
+    "practice": "Practise correction",
+    "scheduled": "Scheduled for later",
+    "nothingDue": "You've reviewed all due errors.",
+    "empty": "No writing errors yet. The notebook updates automatically after grading.",
+    "write": "Practise writing",
+    "exactMatch": "This exercise compares your answer with the suggested correction, including capitals and punctuation. Other valid phrasing may not be recognised.",
+    "back": "Back to study session"
+  },
+  "revisions": {
+    "title": "Rewrite and compare",
+    "intro": "Revise your current text, get fresh feedback and compare earlier attempts.",
+    "answer": "Your revised text",
+    "submit": "Grade revision",
+    "saving": "Grading…",
+    "error": "Could not grade this revision. Your text is still here.",
+    "history": "Earlier attempts",
+    "score": "{score}/100",
+    "empty": "No earlier versions yet.",
+    "notebook": "Practise errors in your notebook",
+    "changed": "Score change: {delta}",
+    "rewardNote": "Revisions do not award additional completion XP."
+  },
   "pwa": {
     "installTitle": "Install DeutschMeister",
     "installBody": "Add it to your home screen to learn faster — no browser needed.",
     "installCta": "Install",
     "dismiss": "Later",
     "iosHint": "Tap the Share button, then choose “Add to Home Screen”."
+  },
+  "push": {
+    "title": "Want a daily nudge?",
+    "body": "Turn on notifications so you do not forget to review. You can switch them off any time in Settings.",
+    "cta": "Turn on",
+    "dismiss": "Not now"
   },
   "actions": {
     "save": "Save",
@@ -62,7 +236,8 @@
     "upgradePremium": "Upgrade to Premium",
     "levelEstimate": "Estimate based on XP — take a placement test for an exact level",
     "connectionProblem": "Can't reach the server. Your session is still active — check your connection and try again.",
-    "retry": "Retry"
+    "retry": "Retry",
+    "showAllNav": "Show all sections"
   },
   "breadcrumb": {
     "dashboard": "Home",
@@ -87,7 +262,13 @@
     "word-bank": "Word Bank",
     "pricing": "Plans",
     "tips": "Tips",
-    "resources": "Resources"
+    "resources": "Resources",
+    "sentence-builder": "Sentence Builder",
+    "collocations": "Word Connections",
+    "grammar-detective": "Grammar Detective",
+    "plural": "Plural Challenge",
+    "word-family": "Word Families",
+    "dialogue": "Dialogue Quest"
   },
   "reportModal": {
     "title": "Report player",
