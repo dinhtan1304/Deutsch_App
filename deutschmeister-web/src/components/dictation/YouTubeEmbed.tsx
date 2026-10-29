@@ -4,7 +4,8 @@ import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
 
 export interface YouTubeEmbedRef {
   seekTo: (seconds: number) => void;
-  playSegment: (startSec: number, endSec: number) => void;
+  /** `onEnd` fires once playback reaches `endSec` (not on a user pause). */
+  playSegment: (startSec: number, endSec: number, onEnd?: () => void) => void;
   setSpeed: (rate: number) => void;
   play: () => void;
   pause: () => void;
@@ -116,7 +117,7 @@ export const YouTubeEmbed = forwardRef<YouTubeEmbedRef, Props>(function YouTubeE
         playerRef.current?.playVideo();
       } catch {}
     },
-    playSegment(startSec: number, endSec: number) {
+    playSegment(startSec: number, endSec: number, onEnd?: () => void) {
       try {
         if (segmentTimerRef.current) clearInterval(segmentTimerRef.current);
         // Reset boundary tracking so continuous auto-pause restarts cleanly
@@ -132,6 +133,7 @@ export const YouTubeEmbed = forwardRef<YouTubeEmbedRef, Props>(function YouTubeE
               playerRef.current?.pauseVideo();
               if (segmentTimerRef.current) clearInterval(segmentTimerRef.current);
               segmentTimerRef.current = null;
+              onEnd?.();
             }
           } catch {}
         }, 250);
@@ -209,7 +211,8 @@ export const YouTubeEmbed = forwardRef<YouTubeEmbedRef, Props>(function YouTubeE
             onTimeUpdateRef.current?.(t);
 
             const segs = autoPauseSegmentsRef.current;
-            if (segs?.length) {
+            // A playSegment() in flight owns the end-of-segment pause.
+            if (segs?.length && !segmentTimerRef.current) {
               const ms = t * 1000;
               const active = segs.find(s => ms >= s.start && ms <= s.end);
               const newId = active?.id ?? null;

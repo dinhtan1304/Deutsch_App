@@ -19,7 +19,9 @@ export const dictationKeys = {
   library: (params?: Record<string, unknown>) => [...dictationKeys.all, 'library', params] as const,
   random: (params?: Record<string, unknown>) => [...dictationKeys.all, 'random', params] as const,
   session: (id: string) => [...dictationKeys.all, 'session', id] as const,
-  history: (params?: Record<string, unknown>) => [...dictationKeys.all, 'history', params] as const,
+  // Prefix for invalidation: history(undefined) would not match keys that carry params.
+  historyAll: () => [...dictationKeys.all, 'history'] as const,
+  history: (params?: Record<string, unknown>) => [...dictationKeys.historyAll(), params] as const,
   stats: () => [...dictationKeys.all, 'stats'] as const,
   myRequests: () => [...dictationKeys.all, 'my-requests'] as const,
 };
@@ -75,7 +77,7 @@ export function useStartDictation() {
   return useMutation({
     mutationFn: (data: { videoId: string }) => dictationApi.startSession(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: dictationKeys.history() });
+      queryClient.invalidateQueries({ queryKey: dictationKeys.historyAll() });
     },
   });
 }
@@ -86,7 +88,7 @@ export function useStartDictationFromUrl() {
     mutationFn: (data: { youtubeUrl: string; cefrLevel?: string }) =>
       dictationApi.startFromUrl(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: dictationKeys.history() });
+      queryClient.invalidateQueries({ queryKey: dictationKeys.historyAll() });
       queryClient.invalidateQueries({ queryKey: dictationKeys.myRequests() });
     },
   });
@@ -116,7 +118,7 @@ export function useSubmitDictation() {
       // Set cache directly with the GRADED result so the result page
       // never sees a stale DRAFT and incorrectly redirects back to play
       queryClient.setQueryData(dictationKeys.session(id), data);
-      queryClient.invalidateQueries({ queryKey: dictationKeys.history() });
+      queryClient.invalidateQueries({ queryKey: dictationKeys.historyAll() });
       queryClient.invalidateQueries({ queryKey: dictationKeys.stats() });
     },
   });
@@ -141,7 +143,7 @@ export function useDeleteDictation() {
   return useMutation({
     mutationFn: (id: string) => dictationApi.deleteSession(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: dictationKeys.history() });
+      queryClient.invalidateQueries({ queryKey: dictationKeys.historyAll() });
       queryClient.invalidateQueries({ queryKey: dictationKeys.stats() });
     },
   });

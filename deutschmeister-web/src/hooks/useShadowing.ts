@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   shadowingApi,
   ShadowingSession,
+  ShadowingAttempt,
   ShadowingHistoryResponse,
   ShadowingStats,
   GradeAttemptResponse,
@@ -14,7 +15,9 @@ import {
 export const shadowingKeys = {
   all: ['shadowing'] as const,
   session: (id: string) => [...shadowingKeys.all, 'session', id] as const,
-  history: (params?: Record<string, unknown>) => [...shadowingKeys.all, 'history', params] as const,
+  // Prefix for invalidation: history(undefined) would not match keys that carry params.
+  historyAll: () => [...shadowingKeys.all, 'history'] as const,
+  history: (params?: Record<string, unknown>) => [...shadowingKeys.historyAll(), params] as const,
   stats: () => [...shadowingKeys.all, 'stats'] as const,
 };
 
@@ -53,7 +56,7 @@ export function useStartShadowing() {
     mutationFn: (data: { videoId: string; difficulty?: string }) =>
       shadowingApi.startSession(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: shadowingKeys.history() });
+      queryClient.invalidateQueries({ queryKey: shadowingKeys.historyAll() });
     },
   });
 }
@@ -64,7 +67,7 @@ export function useStartShadowingFromUrl() {
     mutationFn: (data: { youtubeUrl: string; cefrLevel?: string }) =>
       shadowingApi.startFromUrl(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: shadowingKeys.history() });
+      queryClient.invalidateQueries({ queryKey: shadowingKeys.historyAll() });
     },
   });
 }
@@ -78,8 +81,31 @@ export function useGradeShadowingAttempt() {
   >({
     mutationFn: ({ sessionId, segmentId, audioBase64, mimeType }) =>
       shadowingApi.gradeAttempt(sessionId, { segmentId, audioBase64, mimeType }),
-    onSuccess: (_data, { sessionId }) => {
-      queryClient.invalidateQueries({ queryKey: shadowingKeys.session(sessionId) });
+    onSuccess: (data, { sessionId }) => {
+      // Patch the attempt into the cached session instead of refetching it —
+      // the session payload carries every segment and attempt of the video.
+      queryClient.setQueryData<ShadowingSession>(shadowingKeys.session(sessionId), (prev) => {
+        if (!prev) return prev;
+        const existing = prev.attempts.find((a) => a.segmentId === data.segmentId);
+        const attempt: ShadowingAttempt = {
+          id: data.attemptId,
+          segmentId: data.segmentId,
+          segmentText: existing?.segmentText ?? prev.segments.find((s) => s.id === data.segmentId)?.text ?? '',
+          userTranscript: data.userTranscript,
+          pronunciationScore: data.pronunciationScore,
+          fluencyScore: existing?.fluencyScore ?? null,
+          feedback: data.feedback,
+          attemptCount: data.attemptCount,
+          createdAt: existing?.createdAt ?? new Date().toISOString(),
+        };
+        return {
+          ...prev,
+          completedSegments: existing ? prev.completedSegments : prev.completedSegments + 1,
+          attempts: existing
+            ? prev.attempts.map((a) => (a.segmentId === data.segmentId ? attempt : a))
+            : [...prev.attempts, attempt],
+        };
+      });
       // AI review counter must reflect the just-burned attempt.
       queryClient.invalidateQueries({ queryKey: ['subscription', 'quota', 'shadowing'] });
     },
@@ -93,7 +119,7 @@ export function useSubmitShadowing() {
     onSuccess: (data, id) => {
       // Set cache directly so result page sees SUBMITTED status without race
       queryClient.setQueryData(shadowingKeys.session(id), data);
-      queryClient.invalidateQueries({ queryKey: shadowingKeys.history() });
+      queryClient.invalidateQueries({ queryKey: shadowingKeys.historyAll() });
       queryClient.invalidateQueries({ queryKey: shadowingKeys.stats() });
     },
   });
@@ -104,7 +130,7 @@ export function useDeleteShadowing() {
   return useMutation({
     mutationFn: (id: string) => shadowingApi.deleteSession(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: shadowingKeys.history() });
+      queryClient.invalidateQueries({ queryKey: shadowingKeys.historyAll() });
       queryClient.invalidateQueries({ queryKey: shadowingKeys.stats() });
     },
   });

@@ -862,6 +862,7 @@
       "checkAnswers": "Check answers",
       "saveSaving": "Saving…",
       "saveSaved": "Saved",
+      "saveFailed": "Not saved",
       "listenSegment": "Listen to this line",
       "seekHere": "Jump to this position",
       "umlautTip": "Umlaut typing tip: {hint}",
@@ -888,6 +889,7 @@
       "mistakesTitle": "Mistakes to review",
       "skipped": "(skipped)",
       "nearMiss": "close",
+      "lookupHint": "Click a correct word to look it up and save it to your word bank.",
       "reviewTitle": "Review each line",
       "noDetail": "No detailed data for this session.",
       "filterAll": "All ({count})",
@@ -998,7 +1000,13 @@
         "warnNoAttempts": "Practice at least one line before finishing.",
         "warnSubmitError": "Couldn't finish the session.",
         "attemptCount": "Attempt {count}",
-        "feedbackTipPrefix": "💡"
+        "feedbackTipPrefix": "💡",
+        "playMine": "Play my take",
+        "compare": "Compare with original",
+        "autoRecord": "Record after listening",
+        "autoRecordShort": "Auto rec",
+        "autoRecordHint": "Recording starts (after a countdown) as soon as the sample ends — practise hands-free.",
+        "hotkeysLegend": "Shortcuts: R record/stop · L play sample · M play my take · N next"
       },
       "components": {
         "aiLoading": "Loading AI review quota...",

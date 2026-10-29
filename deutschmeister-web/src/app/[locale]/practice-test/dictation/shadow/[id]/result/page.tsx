@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { useParams, useRouter } from 'next/navigation';
@@ -27,6 +27,12 @@ export default function ShadowingResultPage() {
   const startMut = useStartShadowing();
   const startDictation = useStartDictation();
   const [filterWeak, setFilterWeak] = useState(false);
+
+  // Not submitted yet → back to the practice page (navigate outside render).
+  const notSubmitted = !!session && session.status !== 'SUBMITTED';
+  useEffect(() => {
+    if (notSubmitted) router.replace(`/practice-test/dictation/shadow/${id}`);
+  }, [notSubmitted, id, router]);
 
   const sortedAttempts = useMemo(() => {
     if (!session) return [];
@@ -56,10 +62,7 @@ export default function ShadowingResultPage() {
     );
   }
 
-  if (session.status !== 'SUBMITTED') {
-    router.replace(`/practice-test/dictation/shadow/${id}`);
-    return null;
-  }
+  if (notSubmitted) return null;
 
   const overall = session.overallScore ?? 0;
   const scoreKey = getScoreKey(overall);

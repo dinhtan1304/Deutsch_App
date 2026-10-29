@@ -862,6 +862,7 @@
       "checkAnswers": "Antworten prüfen",
       "saveSaving": "Wird gespeichert…",
       "saveSaved": "Gespeichert",
+      "saveFailed": "Nicht gespeichert",
       "listenSegment": "Diesen Satz anhören",
       "seekHere": "Zu dieser Stelle springen",
       "umlautTip": "Umlaut-Tipp: {hint}",
@@ -888,6 +889,7 @@
       "mistakesTitle": "Fehler zum Wiederholen",
       "skipped": "(übersprungen)",
       "nearMiss": "fast",
+      "lookupHint": "Klicke auf ein richtiges Wort, um es nachzuschlagen und im Wortschatz zu speichern.",
       "reviewTitle": "Jede Zeile prüfen",
       "noDetail": "Keine Detaildaten für diese Sitzung.",
       "filterAll": "Alle ({count})",
@@ -998,7 +1000,13 @@
         "warnNoAttempts": "Übe mindestens eine Zeile, bevor du fertigmachst.",
         "warnSubmitError": "Sitzung konnte nicht beendet werden.",
         "attemptCount": "Versuch {count}",
-        "feedbackTipPrefix": "💡"
+        "feedbackTipPrefix": "💡",
+        "playMine": "Meine Aufnahme",
+        "compare": "Mit Original vergleichen",
+        "autoRecord": "Nach dem Hören aufnehmen",
+        "autoRecordShort": "Auto-Aufn.",
+        "autoRecordHint": "Die Aufnahme startet (nach einem Countdown), sobald das Beispiel endet – üben ohne Klicken.",
+        "hotkeysLegend": "Tastenkürzel: R Aufnahme/Stopp · L Beispiel · M meine Aufnahme · N weiter"
       },
       "components": {
         "aiLoading": "Lade KI-Review-Kontingent...",

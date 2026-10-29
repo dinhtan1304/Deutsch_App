@@ -1,16 +1,25 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { ACCENT, STATUS } from '@/lib/tokens';
 import { blobToWavBase64 } from '@/lib/audio';
 
 type RecState = 'idle' | 'countdown' | 'recording' | 'processing';
 
+/** Imperative handle so the page can drive recording from hotkeys / auto-record. */
+export interface RecordButtonRef {
+  /** Same as a click: start (idle), cancel (countdown) or stop (recording). */
+  toggle: () => void;
+  /** Start only if idle and enabled (auto-record); no-op otherwise. */
+  start: () => void;
+}
+
 interface Props {
   maxDurationMs: number;
   disabled?: boolean;
-  onRecorded: (audioBase64: string, mimeType: string) => Promise<void> | void;
+  /** `blob` is the raw take, for local playback. */
+  onRecorded: (audioBase64: string, mimeType: string, blob: Blob) => Promise<void> | void;
   onError?: (message: string) => void;
   size?: number; // pixel size of the round button (default 64)
   accentColor?: string;
@@ -19,7 +28,7 @@ interface Props {
   countdownMs?: number;
 }
 
-export function RecordButton({
+export const RecordButton = forwardRef<RecordButtonRef, Props>(function RecordButton({
   maxDurationMs,
   disabled,
   onRecorded,
@@ -28,7 +37,7 @@ export function RecordButton({
   accentColor = ACCENT.dictation,
   recordingColor = STATUS.danger,
   countdownMs = 0,
-}: Props) {
+}, ref) {
   const t = useTranslations('practice.dictation.shadow.components');
   const [state, setState] = useState<RecState>('idle');
   const [elapsedMs, setElapsedMs] = useState(0);
@@ -114,13 +123,13 @@ export function RecordButton({
         // browser can't decode the blob.
         const wav = await blobToWavBase64(blob);
         if (wav) {
-          await onRecorded(wav, 'audio/wav');
+          await onRecorded(wav, 'audio/wav', blob);
         } else {
           const buf = await blob.arrayBuffer();
           const base64 = btoa(
             new Uint8Array(buf).reduce((s, b) => s + String.fromCharCode(b), ''),
           );
-          await onRecorded(base64, mimeType);
+          await onRecorded(base64, mimeType, blob);
         }
       } catch (err) {
         onError?.(err instanceof Error ? err.message : t('recProcessError'));
@@ -184,6 +193,8 @@ export function RecordButton({
     else if (state === 'countdown') cancelCountdown();
     else if (state === 'recording') stopRecording();
   };
+
+  useImperativeHandle(ref, () => ({ toggle: handleClick, start: () => { void start(); } }));
 
   const isCountdown = state === 'countdown';
   const isRecording = state === 'recording';
@@ -261,4 +272,4 @@ export function RecordButton({
       )}
     </div>
   );
-}
+});

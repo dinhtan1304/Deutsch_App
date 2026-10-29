@@ -16,12 +16,19 @@ const AUTOSAVE_DEBOUNCE_MS = 3000;
 const SPEED_OPTIONS = [0.5, 0.75, 1, 1.25, 1.5] as const;
 const NAVBAR_HEIGHT = 64;
 
-type SaveState = 'idle' | 'saving' | 'saved';
+type SaveState = 'idle' | 'saving' | 'saved' | 'error';
 
 // Subtle autosave status (D4) — reassures the learner their answers are kept.
 function SaveIndicator({ state }: { state: SaveState }) {
   const t = useTranslations('practice.dictation.session');
   if (state === 'idle') return null;
+  if (state === 'error') {
+    return (
+      <span className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide" style={{ color: STATUS.warning }}>
+        {t('saveFailed')}
+      </span>
+    );
+  }
   const saved = state === 'saved';
   return (
     <span className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide"
@@ -42,7 +49,8 @@ export default function DictationPlayPage() {
   const t = useTranslations('practice.dictation.session');
   const playerRef = useRef<YouTubeEmbedRef | null>(null);
   const autosaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const pendingSave = useRef(false);
+  // Answers typed since the last save; flushed on debounce, tab hide and unmount.
+  const pendingAnswers = useRef<Record<string, string> | null>(null);
   const stickyRef = useRef<HTMLDivElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
 
@@ -100,15 +108,37 @@ export default function DictationPlayPage() {
   }, [activeSegmentId]);
 
   // Debounced autosave
+  const flushAutosave = useCallback(() => {
+    if (autosaveTimer.current) clearTimeout(autosaveTimer.current);
+    autosaveTimer.current = null;
+    const answers = pendingAnswers.current;
+    if (!answers) return;
+    pendingAnswers.current = null;
+    autosave({ id, userAnswers: answers }, {
+      onSuccess: () => setSaveState('saved'),
+      onError: () => setSaveState('error'),
+    });
+  }, [id, autosave]);
+
   const scheduleAutosave = useCallback((answers: Record<string, string>) => {
     if (autosaveTimer.current) clearTimeout(autosaveTimer.current);
-    pendingSave.current = true;
+    pendingAnswers.current = answers;
     setSaveState('saving');
-    autosaveTimer.current = setTimeout(() => {
-      autosave({ id, userAnswers: answers }, { onSuccess: () => setSaveState('saved') });
-      pendingSave.current = false;
-    }, AUTOSAVE_DEBOUNCE_MS);
-  }, [id, autosave]);
+    autosaveTimer.current = setTimeout(flushAutosave, AUTOSAVE_DEBOUNCE_MS);
+  }, [flushAutosave]);
+
+  // Don't drop the last few seconds of typing when the learner leaves the
+  // page, switches tabs or backgrounds the app before the debounce fires.
+  useEffect(() => {
+    const onVisibility = () => { if (document.visibilityState === 'hidden') flushAutosave(); };
+    document.addEventListener('visibilitychange', onVisibility);
+    window.addEventListener('pagehide', flushAutosave);
+    return () => {
+      document.removeEventListener('visibilitychange', onVisibility);
+      window.removeEventListener('pagehide', flushAutosave);
+      flushAutosave();
+    };
+  }, [flushAutosave]);
 
   function handleTimeUpdate(currentSec: number) {
     if (!session?.segments) return;
@@ -228,7 +258,9 @@ export default function DictationPlayPage() {
       setShowSubmitWarning(true);
       return;
     }
+    // Submit carries the answers itself; a later draft save would hit a graded session.
     if (autosaveTimer.current) clearTimeout(autosaveTimer.current);
+    pendingAnswers.current = null;
     submit({ id, userAnswers }, {
       onSuccess: () => router.push(`/practice-test/dictation/${id}/result`),
     });

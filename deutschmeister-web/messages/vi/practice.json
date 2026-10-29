@@ -862,6 +862,7 @@
       "checkAnswers": "Kiểm tra đáp án",
       "saveSaving": "Đang lưu…",
       "saveSaved": "Đã lưu",
+      "saveFailed": "Chưa lưu được",
       "listenSegment": "Nghe câu này",
       "seekHere": "Nhảy tới vị trí này",
       "umlautTip": "Mẹo gõ umlaut: {hint}",
@@ -888,6 +889,7 @@
       "mistakesTitle": "Lỗi cần ôn luyện",
       "skipped": "(bỏ qua)",
       "nearMiss": "gần đúng",
+      "lookupHint": "Bấm vào từ đúng để tra nghĩa và lưu vào sổ từ.",
       "reviewTitle": "Xem lại từng câu",
       "noDetail": "Không có dữ liệu chi tiết cho bài này.",
       "filterAll": "Tất cả ({count})",
@@ -998,7 +1000,13 @@
         "warnNoAttempts": "Hãy luyện ít nhất 1 câu trước khi hoàn thành.",
         "warnSubmitError": "Không thể hoàn tất phiên.",
         "attemptCount": "Lần thử {count}",
-        "feedbackTipPrefix": "💡"
+        "feedbackTipPrefix": "💡",
+        "playMine": "Nghe giọng bạn",
+        "compare": "So sánh với câu mẫu",
+        "autoRecord": "Tự ghi âm sau khi nghe",
+        "autoRecordShort": "Tự ghi",
+        "autoRecordHint": "Nghe xong câu mẫu là tự đếm ngược và ghi âm — luyện liên tục không cần bấm.",
+        "hotkeysLegend": "Phím tắt: R ghi âm/dừng · L nghe câu mẫu · M nghe giọng bạn · N câu tiếp"
       },
       "components": {
         "aiLoading": "Đang tải lượt AI review...",

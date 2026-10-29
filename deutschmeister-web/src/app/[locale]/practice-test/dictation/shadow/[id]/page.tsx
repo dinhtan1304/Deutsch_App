@@ -10,9 +10,10 @@ import {
 } from '@/hooks/useShadowing';
 import { YouTubeEmbed, YouTubeEmbedRef } from '@/components/dictation/YouTubeEmbed';
 import { VideoUnavailableFallback } from '@/components/dictation/VideoUnavailableFallback';
-import { RecordButton } from '@/components/shadowing/RecordButton';
+import { RecordButton, type RecordButtonRef } from '@/components/shadowing/RecordButton';
 import { PhraseScoreBadge } from '@/components/shadowing/PhraseScoreBadge';
 import { AiReviewCounter } from '@/components/shadowing/AiReviewCounter';
+import { SubtitleText } from '@/components/dictation/SubtitleText';
 import { ACCENT, STATUS } from '@/lib/tokens';
 import type { GradeAttemptResponse, ShadowingAttempt, ShadowingSegment } from '@/lib/api/shadowing';
 
@@ -33,6 +34,24 @@ function IconHeadphones({ size = 16 }: { size?: number }) {
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
       <path d="M3 18v-6a9 9 0 0 1 18 0v6" />
       <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z" />
+    </svg>
+  );
+}
+
+function IconMic({ size = 14 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
+      <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+      <line x1="12" y1="19" x2="12" y2="22" />
+    </svg>
+  );
+}
+
+function IconPlay({ size = 14 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+      <polygon points="6 4 20 12 6 20 6 4" />
     </svg>
   );
 }
@@ -234,6 +253,24 @@ export default function ShadowingPlayPage() {
   // Per-word scores are only returned by the grade mutation (not persisted on
   // the attempt), so keep the latest set per segment for this session view.
   const [wordScoresBySeg, setWordScoresBySeg] = useState<Record<string, WordScore[]>>({});
+  // Latest local take per segment (object URL) so the learner can hear
+  // themselves and compare against the original.
+  const recordRef = useRef<RecordButtonRef | null>(null);
+  const takeAudioRef = useRef<HTMLAudioElement | null>(null);
+  const takeUrlSet = useRef(new Set<string>());
+  const [takeUrls, setTakeUrls] = useState<Record<string, string>>({});
+  // Listen → speak loop: start recording as soon as the sample finishes.
+  const [autoRecord, setAutoRecord] = useState(false);
+  const autoRecordRef = useRef(autoRecord);
+  useEffect(() => { autoRecordRef.current = autoRecord; }, [autoRecord]);
+
+  useEffect(() => {
+    const urls = takeUrlSet.current;
+    return () => {
+      takeAudioRef.current?.pause();
+      urls.forEach((u) => URL.revokeObjectURL(u));
+    };
+  }, []);
 
   // Read tip banner state from localStorage (client-only)
   useEffect(() => {
@@ -281,18 +318,57 @@ export default function ShadowingPlayPage() {
     handleSpeedChange(SPEED_OPTIONS[(idx + 1) % SPEED_OPTIONS.length] ?? 1);
   }
 
+  function maybeAutoRecord() {
+    // start() is a no-op unless the button is idle and enabled.
+    if (autoRecordRef.current) recordRef.current?.start();
+  }
+
+  // Play the original phrase; by default the auto-record loop follows it.
+  function playSample(seg: ShadowingSegment, onEnd: () => void = maybeAutoRecord) {
+    takeAudioRef.current?.pause();
+    playerRef.current?.playSegment(seg.start / 1000, seg.end / 1000, onEnd);
+  }
+
   function handleSelectSegment(seg: ShadowingSegment) {
     setSelectedSegmentId(seg.id);
     setActiveSegmentId(seg.id);
     setPausedAtSegmentId(null);
     setRecordError('');
-    playerRef.current?.playSegment(seg.start / 1000, seg.end / 1000);
+    playSample(seg);
   }
 
   function handleReplayCurrent() {
     if (!currentSegment) return;
     setRecordError('');
-    playerRef.current?.playSegment(currentSegment.start / 1000, currentSegment.end / 1000);
+    playSample(currentSegment);
+  }
+
+  function storeTake(segmentId: string, blob: Blob) {
+    const url = URL.createObjectURL(blob);
+    takeUrlSet.current.add(url);
+    const old = takeUrls[segmentId];
+    if (old) {
+      URL.revokeObjectURL(old);
+      takeUrlSet.current.delete(old);
+    }
+    setTakeUrls((prev) => ({ ...prev, [segmentId]: url }));
+  }
+
+  function playTake(url: string | undefined) {
+    if (!url) return;
+    playerRef.current?.pause();
+    takeAudioRef.current?.pause();
+    const audio = new Audio(url);
+    takeAudioRef.current = audio;
+    audio.play().catch(() => {});
+  }
+
+  // Original phrase first, then the learner's take right after it.
+  function handleCompare() {
+    if (!currentSegment) return;
+    const url = takeUrls[currentSegment.id];
+    if (!url) return;
+    playSample(currentSegment, () => playTake(url));
   }
 
   function handlePlayNext() {
@@ -304,8 +380,9 @@ export default function ShadowingPlayPage() {
     handleSelectSegment(next);
   }
 
-  async function handleRecord(audioBase64: string, mimeType: string) {
+  async function handleRecord(audioBase64: string, mimeType: string, blob: Blob) {
     if (!currentSegment) return;
+    storeTake(currentSegment.id, blob);
     setRecordError('');
     setIsProcessing(true);
     try {
@@ -336,6 +413,36 @@ export default function ShadowingPlayPage() {
     });
   }
 
+  // Single-key hotkeys (the page has no text inputs) — listener bound once;
+  // handlers read via ref so the effect never needs re-binding.
+  const hotkeysRef = useRef({ record: () => {}, sample: () => {}, mine: () => {}, next: () => {} });
+  useEffect(() => {
+    hotkeysRef.current = {
+      record: () => recordRef.current?.toggle(),
+      sample: handleReplayCurrent,
+      mine: () => playTake(currentTakeUrl),
+      next: handlePlayNext,
+    };
+  });
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.ctrlKey || e.metaKey || e.altKey || e.repeat) return;
+      const el = e.target as HTMLElement | null;
+      if (el && (el.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName))) return;
+      const key = e.key.toLowerCase();
+      const action = key === 'r' ? 'record'
+        : key === 'l' ? 'sample'
+        : key === 'm' ? 'mine'
+        : key === 'n' || e.key === 'ArrowRight' ? 'next'
+        : null;
+      if (!action) return;
+      e.preventDefault();
+      hotkeysRef.current[action]();
+    }
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
+
   // Derived state
   const attemptByStmtId = useMemo(
     () => new Map((session?.attempts ?? []).map((a) => [a.segmentId, a])),
@@ -350,6 +457,7 @@ export default function ShadowingPlayPage() {
   const currentAttempt = currentSegment
     ? attemptByStmtId.get(currentSegment.id)
     : undefined;
+  const currentTakeUrl = currentSegment ? takeUrls[currentSegment.id] : undefined;
 
   const completedPct = session && session.totalSegments > 0
     ? (session.completedSegments / session.totalSegments) * 100
@@ -421,6 +529,7 @@ export default function ShadowingPlayPage() {
                     setPausedAtSegmentId(segId);
                     setSelectedSegmentId(segId);
                     setActiveSegmentId(segId);
+                    maybeAutoRecord();
                   }}
                 />
               </div>
@@ -443,6 +552,14 @@ export default function ShadowingPlayPage() {
                     : { background: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)', border: '1px solid var(--theme-border)' }}>
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1" /><rect x="14" y="5" width="4" height="14" rx="1" /></svg>
                   <span className="text-[10px] font-bold uppercase tracking-wider">{t('autoPause')}</span>
+                </button>
+                <button type="button" onClick={() => setAutoRecord((a) => !a)} aria-pressed={autoRecord}
+                  className="flex h-8 shrink-0 items-center gap-1.5 rounded-lg px-2.5"
+                  style={autoRecord
+                    ? { background: ACCENT.reading, color: 'white', border: `1px solid ${ACCENT.reading}` }
+                    : { background: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)', border: '1px solid var(--theme-border)' }}>
+                  <IconMic size={12} />
+                  <span className="text-[10px] font-bold uppercase tracking-wider">{t('autoRecordShort')}</span>
                 </button>
               </div>
 
@@ -475,6 +592,16 @@ export default function ShadowingPlayPage() {
                   </span>
                   <span className="text-[10.5px] font-semibold uppercase tracking-wider" style={{ color: 'var(--theme-text-secondary)' }}>{t('autoPause')}</span>
                 </button>
+                <button type="button" onClick={() => setAutoRecord((a) => !a)} aria-pressed={autoRecord} className="mt-2 flex items-center gap-2" title={t('autoRecordHint')}>
+                  <span className="flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded-[5px]"
+                    style={autoRecord ? { background: ACCENT.reading, color: 'white' } : { background: 'var(--theme-bg-secondary)', border: '1px solid var(--theme-border)' }}>
+                    {autoRecord && <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>}
+                  </span>
+                  <span className="text-[10.5px] font-semibold uppercase tracking-wider" style={{ color: 'var(--theme-text-secondary)' }}>{t('autoRecord')}</span>
+                </button>
+                <p className="mt-3 text-[10.5px] leading-relaxed" style={{ color: 'var(--theme-text-muted)' }}>
+                  {t('hotkeysLegend')}
+                </p>
               </div>
             </div>
 
@@ -487,7 +614,7 @@ export default function ShadowingPlayPage() {
           {currentSegment && (
             <div key={currentSegment.id} className="text-center my-6 px-2">
               <p className="text-2xl md:text-[32px] font-extrabold leading-snug" style={{ letterSpacing: '-.01em', color: 'var(--theme-text-primary)' }}>
-                {currentSegment.text}
+                <SubtitleText text={currentSegment.text} />
               </p>
             </div>
           )}
@@ -528,6 +655,23 @@ export default function ShadowingPlayPage() {
               )}
               {recordError && <p className="mt-3 text-xs font-bold" style={{ color: STATUS.danger }}>{recordError}</p>}
             </div>
+
+            {currentTakeUrl && (
+              <div className="mt-4 flex items-center gap-2 flex-wrap justify-center">
+                <button type="button" onClick={() => playTake(currentTakeUrl)}
+                  className="flex items-center gap-1.5 px-3.5 py-2 rounded-[10px] border text-caption font-bold transition-colors"
+                  style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)' }}>
+                  <IconPlay size={12} />
+                  {t('playMine')}
+                </button>
+                <button type="button" onClick={handleCompare}
+                  className="flex items-center gap-1.5 px-3.5 py-2 rounded-[10px] border text-caption font-bold transition-colors"
+                  style={{ borderColor: `${ACCENT.reading}55`, color: ACCENT.reading }}>
+                  <IconHeadphones size={13} />
+                  {t('compare')}
+                </button>
+              </div>
+            )}
 
             {currentAttempt && !isProcessing && (
               <div className="mt-6 flex items-center gap-3 flex-wrap justify-center">
