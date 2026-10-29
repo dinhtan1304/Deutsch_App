@@ -33,7 +33,7 @@ function Chip({ label, on, onClick, mono }: { label: string; on: boolean; onClic
   );
 }
 
-function VideoCard({ video, onStart, isStarting, ctaLabel }: { video: DictationVideo; onStart: () => void; isStarting: boolean; ctaLabel: string }) {
+function VideoCard({ video, onStart, isStarting, ctaLabel, onWatch }: { video: DictationVideo; onStart: () => void; isStarting: boolean; ctaLabel: string; onWatch?: () => void }) {
   const t = useTranslations('practice.dictation.library');
   const [imgError, setImgError] = useState(false);
   const levelColor = CEFR_COLORS[video.cefrLevel] || ACCENT.vocab;
@@ -79,6 +79,16 @@ function VideoCard({ video, onStart, isStarting, ctaLabel }: { video: DictationV
           {video.cefrLevel}
         </span>
 
+        {/* Bilingual watch shortcut — available from every mode */}
+        {onWatch && (
+          <button type="button"
+            onClick={e => { e.stopPropagation(); onWatch(); }}
+            className="absolute top-2.5 right-2.5 text-[10.5px] font-bold px-2 py-0.5 rounded-md text-white transition-opacity hover:opacity-90"
+            style={{ background: 'rgba(0,0,0,.7)' }}>
+            🎬 {t('watchBadge')}
+          </button>
+        )}
+
         {/* Topic + duration */}
         <div className="absolute bottom-2.5 left-2.5 right-2.5 flex items-center justify-between gap-2 pointer-events-none">
            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md text-white truncate" style={{ background: 'rgba(0,0,0,.6)' }}>
@@ -120,6 +130,7 @@ export default function DictationLibraryPage() {
   const searchParams = useSearchParams();
   const t = useTranslations('practice.dictation.library');
   const isShadowingMode = searchParams.get('mode') === 'shadowing';
+  const isWatchMode = searchParams.get('mode') === 'watch';
   const [cefrLevel, setCefrLevel] = useState('');
   const [topic, setTopic] = useState('');
   const [page, setPage] = useState(1);
@@ -129,7 +140,11 @@ export default function DictationLibraryPage() {
   const { mutate: startSession } = useStartDictation();
   const { mutate: startShadowing } = useStartShadowing();
 
+  const openWatch = (videoId: string) => router.push(`/practice-test/dictation/watch/${videoId}`);
+
   const handleStart = (videoId: string) => {
+    // Watch mode has no session to create — go straight to the player.
+    if (isWatchMode) { openWatch(videoId); return; }
     setStartingId(videoId);
     if (isShadowingMode) {
       startShadowing({ videoId }, {
@@ -148,8 +163,8 @@ export default function DictationLibraryPage() {
     <div className="mx-auto max-w-360 py-6 space-y-6">
       <PageHeader
         backHref={isShadowingMode ? '/practice-test/dictation/shadow' : '/practice-test/dictation'}
-        title={isShadowingMode ? t('titleShadowing') : t('titleDictation')}
-        subtitle={isShadowingMode ? t('subtitleShadowing') : t('subtitleDictation')}
+        title={isWatchMode ? t('titleWatch') : isShadowingMode ? t('titleShadowing') : t('titleDictation')}
+        subtitle={isWatchMode ? t('subtitleWatch') : isShadowingMode ? t('subtitleShadowing') : t('subtitleDictation')}
         accent="listening"
       />
 
@@ -192,7 +207,8 @@ export default function DictationLibraryPage() {
                 video={video}
                 onStart={() => handleStart(video.id)}
                 isStarting={startingId === video.id}
-                ctaLabel={isShadowingMode ? t('ctaShadowing') : t('ctaDictation')}
+                ctaLabel={isWatchMode ? t('ctaWatch') : isShadowingMode ? t('ctaShadowing') : t('ctaDictation')}
+                onWatch={isWatchMode ? undefined : () => openWatch(video.id)}
               />
             ))}
           </div>

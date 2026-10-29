@@ -261,6 +261,12 @@ export default function DictationListPage() {
           <Link href="/practice-test/dictation/shadow" className="inline-flex h-11 items-center gap-1.5 rounded-[10px] px-4 text-caption font-bold" style={{ background: 'var(--theme-bg-card)', color: 'var(--theme-text-secondary)', border: '1px solid var(--theme-border)' }}>
             {t('shadowingLink')}
           </Link>
+          <Link href="/practice-test/dictation/library?mode=watch" className="inline-flex h-11 items-center gap-1.5 rounded-[10px] px-4 text-caption font-bold" style={{ background: 'var(--theme-bg-card)', color: 'var(--theme-text-secondary)', border: '1px solid var(--theme-border)' }}>
+            {t('watchLink')}
+          </Link>
+          <Link href="/practice-test/dictation/saved" className="inline-flex h-11 items-center gap-1.5 rounded-[10px] px-4 text-caption font-bold" style={{ background: 'var(--theme-bg-card)', color: 'var(--theme-text-secondary)', border: '1px solid var(--theme-border)' }}>
+            {t('savedLink')}
+          </Link>
           {stats && stats.total > 0 && (
             <>
               <MiniStat label={t('stats.total')} value={stats.total} color="var(--accent)" />

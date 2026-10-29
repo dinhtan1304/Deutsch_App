@@ -839,7 +839,9 @@
         "reason": "Reason: {reason}",
         "start": "Start →",
         "newRequest": "Request new video"
-      }
+      },
+      "watchLink": "🎬 Bilingual watch",
+      "savedLink": "Saved sentences"
     },
     "session": {
       "loading": "Loading session...",
@@ -909,7 +911,11 @@
       "ctaDictation": "Practice →",
       "ctaShadowing": "🎤 Shadow →",
       "empty": "No matching videos",
-      "page": "Page {page} / {total}"
+      "page": "Page {page} / {total}",
+      "titleWatch": "Bilingual videos",
+      "subtitleWatch": "Watch German videos with German – Vietnamese subtitles, tap words to look them up and save useful sentences",
+      "ctaWatch": "Watch →",
+      "watchBadge": "Bilingual watch"
     },
     "shadow": {
       "title": "Shadowing Practice",
@@ -1052,6 +1058,63 @@
           }
         }
       }
+    },
+    "watch": {
+      "back": "Library",
+      "notFound": "Video not found",
+      "videoUnavailable": "The original YouTube video can’t be played (removed, private or embedding disabled).",
+      "chooseOther": "Choose another video",
+      "transcriptTitle": "German – Vietnamese subtitles",
+      "emptyTranscript": "This video has no subtitles yet.",
+      "asrTitle": "Machine-generated subtitles",
+      "asrText": "The original video has no German subtitles, so these were transcribed by AI and may contain mistakes.",
+      "viNotice": "The Vietnamese line is a machine translation, for reference only.",
+      "dismiss": "Close",
+      "shortcutsHint": "Shortcuts: A previous · S play/pause · D next · R save sentence · − + font size · click a word to look it up",
+      "shortcutsHintTouch": "Use the buttons below the subtitles to move between sentences, play/pause and save. Tap a word to look it up.",
+      "prev": "Previous sentence (A)",
+      "next": "Next sentence (D)",
+      "playPause": "Play / pause (S)",
+      "save": "Save sentence (R)",
+      "saveShort": "Save",
+      "savedShort": "Saved",
+      "saveError": "Couldn’t save the sentence, please try again",
+      "fontDown": "Smaller text (−)",
+      "fontUp": "Larger text (+)",
+      "speed": "Playback speed",
+      "showVi": "Show Vietnamese",
+      "hideVi": "Hide Vietnamese",
+      "showAll": "Show full transcript",
+      "hideAll": "Collapse transcript",
+      "waiting": "Play the video to see subtitles",
+      "savedCount": "{count} saved",
+      "quizCta": "Take the quiz",
+      "quizHint": "Quick check on what the video teaches",
+      "quizTitle": "Quiz",
+      "quizLoading": "Building a quiz from the video…",
+      "quizError": "Couldn’t create the quiz yet. Please try again in a few minutes.",
+      "quizRetry": "Retry",
+      "quizProgress": "Question {current} / {total}",
+      "quizCorrect": "Correct!",
+      "quizWrong": "Not quite — the answer is \"{answer}\"",
+      "quizReplay": "Replay this part",
+      "quizNext": "Next",
+      "quizFinish": "See results",
+      "quizScore": "You got {correct} / {total} right",
+      "quizRestart": "Try again",
+      "quizClose": "Close",
+      "quizAiNote": "Questions are written by AI from the video subtitles."
+    },
+    "saved": {
+      "title": "Saved sentences",
+      "subtitle": "Bilingual sentences you saved while watching — tap to jump back to that moment",
+      "back": "Dictation",
+      "empty": "No saved sentences yet. While watching a bilingual video, press R or the \"Save\" button.",
+      "emptyCta": "Watch bilingual videos",
+      "delete": "Delete sentence",
+      "listen": "Listen",
+      "openVideo": "Watch this part",
+      "page": "Page {page} / {total}"
     }
   },
   "pronunciation": {

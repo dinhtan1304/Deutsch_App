@@ -839,7 +839,9 @@
         "reason": "Grund: {reason}",
         "start": "Starten →",
         "newRequest": "Neues Video anfragen"
-      }
+      },
+      "watchLink": "🎬 Zweisprachig ansehen",
+      "savedLink": "Gespeicherte Sätze"
     },
     "session": {
       "loading": "Sitzung wird geladen...",
@@ -909,7 +911,11 @@
       "ctaDictation": "Üben →",
       "ctaShadowing": "🎤 Shadow →",
       "empty": "Keine passenden Videos",
-      "page": "Seite {page} / {total}"
+      "page": "Seite {page} / {total}",
+      "titleWatch": "Zweisprachige Videos",
+      "subtitleWatch": "Deutsche Videos mit Untertiteln Deutsch – Vietnamesisch ansehen, Wörter nachschlagen und Sätze speichern",
+      "ctaWatch": "Ansehen →",
+      "watchBadge": "Zweisprachig"
     },
     "shadow": {
       "title": "Shadowing-Übung",
@@ -1052,6 +1058,63 @@
           }
         }
       }
+    },
+    "watch": {
+      "back": "Bibliothek",
+      "notFound": "Video nicht gefunden",
+      "videoUnavailable": "Das YouTube-Video kann nicht abgespielt werden (gelöscht, privat oder Einbetten deaktiviert).",
+      "chooseOther": "Anderes Video wählen",
+      "transcriptTitle": "Untertitel Deutsch – Vietnamesisch",
+      "emptyTranscript": "Dieses Video hat noch keine Untertitel.",
+      "asrTitle": "Automatisch erstellte Untertitel",
+      "asrText": "Das Originalvideo hat keine deutschen Untertitel. Diese hier wurden von einer KI transkribiert und können Fehler enthalten.",
+      "viNotice": "Die vietnamesische Zeile ist eine maschinelle Übersetzung.",
+      "dismiss": "Schließen",
+      "shortcutsHint": "Tasten: A vorheriger · S Play/Pause · D nächster · R Satz speichern · − + Schriftgröße · Wort anklicken zum Nachschlagen",
+      "shortcutsHintTouch": "Mit den Tasten unter den Untertiteln Sätze wechseln, abspielen/pausieren und speichern. Wort antippen zum Nachschlagen.",
+      "prev": "Vorheriger Satz (A)",
+      "next": "Nächster Satz (D)",
+      "playPause": "Abspielen / Pause (S)",
+      "save": "Satz speichern (R)",
+      "saveShort": "Speichern",
+      "savedShort": "Gespeichert",
+      "saveError": "Satz konnte nicht gespeichert werden, bitte erneut versuchen",
+      "fontDown": "Kleinere Schrift (−)",
+      "fontUp": "Größere Schrift (+)",
+      "speed": "Wiedergabegeschwindigkeit",
+      "showVi": "Vietnamesisch anzeigen",
+      "hideVi": "Vietnamesisch ausblenden",
+      "showAll": "Ganzes Transkript",
+      "hideAll": "Transkript einklappen",
+      "waiting": "Video abspielen, um Untertitel zu sehen",
+      "savedCount": "{count} gespeichert",
+      "quizCta": "Zum Test",
+      "quizHint": "Kurzer Test zum Inhalt des Videos",
+      "quizTitle": "Test",
+      "quizLoading": "Test wird aus dem Video erstellt…",
+      "quizError": "Der Test konnte noch nicht erstellt werden. Bitte in ein paar Minuten erneut versuchen.",
+      "quizRetry": "Erneut versuchen",
+      "quizProgress": "Frage {current} / {total}",
+      "quizCorrect": "Richtig!",
+      "quizWrong": "Leider falsch — richtig ist „{answer}\"",
+      "quizReplay": "Stelle noch einmal hören",
+      "quizNext": "Weiter",
+      "quizFinish": "Ergebnis ansehen",
+      "quizScore": "{correct} von {total} richtig",
+      "quizRestart": "Nochmal",
+      "quizClose": "Schließen",
+      "quizAiNote": "Die Fragen wurden von einer KI aus den Untertiteln erstellt."
+    },
+    "saved": {
+      "title": "Gespeicherte Sätze",
+      "subtitle": "Zweisprachige Sätze, die du beim Ansehen gespeichert hast — antippen, um zur Stelle zu springen",
+      "back": "Diktat",
+      "empty": "Noch keine Sätze gespeichert. Drücke beim Ansehen R oder „Speichern\".",
+      "emptyCta": "Zweisprachige Videos ansehen",
+      "delete": "Satz löschen",
+      "listen": "Anhören",
+      "openVideo": "Stelle ansehen",
+      "page": "Seite {page} / {total}"
     }
   },
   "pronunciation": {

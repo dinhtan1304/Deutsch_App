@@ -839,7 +839,9 @@
         "reason": "Lý do: {reason}",
         "start": "Bắt đầu →",
         "newRequest": "Yêu cầu video mới"
-      }
+      },
+      "watchLink": "🎬 Xem song ngữ",
+      "savedLink": "Câu đã lưu"
     },
     "session": {
       "loading": "Đang tải bài...",
@@ -909,7 +911,11 @@
       "ctaDictation": "Luyện tập →",
       "ctaShadowing": "🎤 Shadowing →",
       "empty": "Không tìm thấy video phù hợp",
-      "page": "Trang {page} / {total}"
+      "page": "Trang {page} / {total}",
+      "titleWatch": "Xem video song ngữ",
+      "subtitleWatch": "Xem video tiếng Đức với phụ đề Đức – Việt, bấm vào từ để tra nghĩa và lưu câu hay",
+      "ctaWatch": "Xem →",
+      "watchBadge": "Xem song ngữ"
     },
     "shadow": {
       "title": "Luyện Shadowing",
@@ -1052,6 +1058,63 @@
           }
         }
       }
+    },
+    "watch": {
+      "back": "Thư viện",
+      "notFound": "Không tìm thấy video",
+      "videoUnavailable": "Video gốc trên YouTube không phát được (đã bị xoá, chuyển riêng tư hoặc tắt nhúng).",
+      "chooseOther": "Chọn video khác",
+      "transcriptTitle": "Phụ đề Đức – Việt",
+      "emptyTranscript": "Video này chưa có phụ đề.",
+      "asrTitle": "Phụ đề do máy tạo",
+      "asrText": "Video gốc không có phụ đề tiếng Đức, bản ở đây được AI nghe và chép lại — có thể còn sai sót.",
+      "viNotice": "Bản dịch tiếng Việt là dịch máy, chỉ để tham khảo.",
+      "dismiss": "Đóng",
+      "shortcutsHint": "Phím tắt: A câu trước · S dừng/phát · D câu sau · R lưu câu · − + cỡ chữ · bấm vào một từ để tra nghĩa",
+      "shortcutsHintTouch": "Dùng các nút dưới phụ đề để chuyển câu, dừng/phát và lưu câu. Chạm vào một từ để tra nghĩa.",
+      "prev": "Câu trước (A)",
+      "next": "Câu sau (D)",
+      "playPause": "Dừng / phát (S)",
+      "save": "Lưu câu (R)",
+      "saveShort": "Lưu câu",
+      "savedShort": "Đã lưu",
+      "saveError": "Không lưu được câu, thử lại nhé",
+      "fontDown": "Giảm cỡ chữ (−)",
+      "fontUp": "Tăng cỡ chữ (+)",
+      "speed": "Tốc độ phát",
+      "showVi": "Hiện tiếng Việt",
+      "hideVi": "Ẩn tiếng Việt",
+      "showAll": "Xem toàn bộ phụ đề",
+      "hideAll": "Thu gọn phụ đề",
+      "waiting": "Phát video để xem phụ đề",
+      "savedCount": "{count} câu đã lưu",
+      "quizCta": "Làm bài kiểm tra",
+      "quizHint": "Kiểm tra nhanh kiến thức trong video",
+      "quizTitle": "Bài kiểm tra",
+      "quizLoading": "Đang soạn bài kiểm tra từ nội dung video…",
+      "quizError": "Chưa tạo được bài kiểm tra. Thử lại sau ít phút nhé.",
+      "quizRetry": "Thử lại",
+      "quizProgress": "Câu {current} / {total}",
+      "quizCorrect": "Chính xác!",
+      "quizWrong": "Chưa đúng — đáp án là \"{answer}\"",
+      "quizReplay": "Nghe lại đoạn này",
+      "quizNext": "Câu tiếp",
+      "quizFinish": "Xem kết quả",
+      "quizScore": "Bạn đúng {correct} / {total} câu",
+      "quizRestart": "Làm lại",
+      "quizClose": "Đóng",
+      "quizAiNote": "Câu hỏi do AI soạn từ phụ đề video."
+    },
+    "saved": {
+      "title": "Câu đã lưu",
+      "subtitle": "Những câu song ngữ bạn lưu khi xem video — bấm để xem lại đúng đoạn đó",
+      "back": "Chép chính tả",
+      "empty": "Bạn chưa lưu câu nào. Khi xem video song ngữ, bấm R hoặc nút \"Lưu câu\".",
+      "emptyCta": "Xem video song ngữ",
+      "delete": "Xoá câu",
+      "listen": "Nghe câu",
+      "openVideo": "Xem đoạn này",
+      "page": "Trang {page} / {total}"
     }
   },
   "pronunciation": {

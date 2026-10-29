@@ -3,6 +3,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   dictationApi,
+  videoWatchApi,
   DictationSession,
   DictationHistoryResponse,
   DictationLibraryResponse,
@@ -142,6 +143,64 @@ export function useDeleteDictation() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: dictationKeys.history() });
       queryClient.invalidateQueries({ queryKey: dictationKeys.stats() });
+    },
+  });
+}
+
+// ─── Bilingual watch mode ─────────────────────────────────────────────────────
+
+export const videoWatchKeys = {
+  all: ['video-watch'] as const,
+  video: (id: string) => [...videoWatchKeys.all, 'video', id] as const,
+  quiz: (id: string) => [...videoWatchKeys.all, 'quiz', id] as const,
+  savedAll: () => [...videoWatchKeys.all, 'saved'] as const,
+  saved: (params?: Record<string, unknown>) => [...videoWatchKeys.savedAll(), params] as const,
+};
+
+export function useWatchVideo(id: string) {
+  return useQuery({
+    queryKey: videoWatchKeys.video(id),
+    queryFn: () => videoWatchApi.getVideo(id),
+    enabled: !!id,
+    staleTime: 10 * 60 * 1000,
+  });
+}
+
+/** Lazy: only fetch once the user opens the quiz — first call costs a Gemini request. */
+export function useVideoQuiz(id: string, enabled: boolean) {
+  return useQuery({
+    queryKey: videoWatchKeys.quiz(id),
+    queryFn: () => videoWatchApi.getQuiz(id),
+    enabled: !!id && enabled,
+    staleTime: Infinity,
+    retry: false,
+  });
+}
+
+export function useSavedSentences(params?: { page?: number; limit?: number; videoId?: string }) {
+  return useQuery({
+    queryKey: videoWatchKeys.saved(params),
+    queryFn: () => videoWatchApi.listSaved(params),
+  });
+}
+
+export function useSaveSentence() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { videoId: string; segmentId: string; textVi?: string }) =>
+      videoWatchApi.saveSentence(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: videoWatchKeys.savedAll() });
+    },
+  });
+}
+
+export function useDeleteSavedSentence() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => videoWatchApi.deleteSaved(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: videoWatchKeys.savedAll() });
     },
   });
 }

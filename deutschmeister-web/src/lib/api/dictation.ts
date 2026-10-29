@@ -1,4 +1,4 @@
-import { apiGet, apiPost, api } from './client';
+import { apiGet, apiPost, apiDelete, api } from './client';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -174,4 +174,67 @@ export const dictationApi = {
 
   deleteSession: (id: string) =>
     api(`/dictation/session/${id}`, { method: 'DELETE' }),
+};
+
+// ─── Bilingual watch mode ─────────────────────────────────────────────────────
+
+export interface TranscriptSegment {
+  id: string;
+  /** ms */
+  start: number;
+  /** ms */
+  end: number;
+  text: string;
+}
+
+export interface DictationVideoDetail extends DictationVideo {
+  segments: TranscriptSegment[];
+}
+
+export interface VideoQuizItem {
+  id: string;
+  /** German sentence with one "___" gap */
+  sentence: string;
+  options: string[];
+  answer: string;
+  translationVi: string;
+  explanationVi: string;
+  segmentId: string | null;
+}
+
+export interface SavedSentence {
+  id: string;
+  videoId: string;
+  segmentId: string;
+  textDe: string;
+  textVi: string | null;
+  startMs: number;
+  endMs: number;
+  createdAt: string;
+  video: { title: string; youtubeId: string; thumbnailUrl: string | null };
+}
+
+export interface SavedSentencesResponse {
+  items: SavedSentence[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export const videoWatchApi = {
+  getVideo: (id: string) =>
+    apiGet<DictationVideoDetail>(`/dictation/videos/${id}`),
+
+  getQuiz: (id: string) =>
+    apiGet<{ items: VideoQuizItem[] }>(`/dictation/videos/${id}/quiz`),
+
+  listSaved: (params?: { page?: number; limit?: number; videoId?: string }) =>
+    apiGet<SavedSentencesResponse>(`/dictation/saved-sentences${toQS(params)}`),
+
+  saveSentence: (data: { videoId: string; segmentId: string; textVi?: string }) =>
+    apiPost<SavedSentence>('/dictation/saved-sentences', data),
+
+  deleteSaved: (id: string) =>
+    apiDelete<{ success: boolean }>(`/dictation/saved-sentences/${id}`),
 };
