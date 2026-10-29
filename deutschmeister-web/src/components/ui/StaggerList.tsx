@@ -1,7 +1,7 @@
 'use client';
 
 import { Children, isValidElement } from 'react';
-import { motion, useReducedMotion } from 'motion/react';
+import { m, useReducedMotion } from 'motion/react';
 import { fadeUp, staggerContainer } from '@/lib/motion-presets';
 import { MOTION } from '@/lib/tokens';
 
@@ -28,7 +28,7 @@ export function StaggerList({
   style,
 }: StaggerListProps) {
   const reduce = useReducedMotion();
-  const Container = motion[as];
+  const Container = m[as];
   const items = Children.toArray(children).filter(isValidElement);
 
   if (reduce) {
@@ -49,9 +49,9 @@ export function StaggerList({
       style={style}
     >
       {items.map((child, i) => (
-        <motion.div key={(child as { key?: string }).key ?? i} variants={fadeUp}>
+        <m.div key={(child as { key?: string }).key ?? i} variants={fadeUp}>
           {child}
-        </motion.div>
+        </m.div>
       ))}
     </Container>
   );

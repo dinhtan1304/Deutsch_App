@@ -45,6 +45,7 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   reactCompiler: true,
   images: {
+    formats: ['image/avif', 'image/webp'],
     remotePatterns: [
       { protocol: 'https', hostname: 'img.youtube.com' },
       { protocol: 'https', hostname: 'i.ytimg.com' },
@@ -69,6 +70,11 @@ const nextConfig: NextConfig = {
       {
         source: '/(.*)',
         headers: securityHeaders,
+      },
+      // Logo/icon PNGs aren't content-hashed, so a day + SWR instead of immutable
+      {
+        source: '/:file(logo.*|icon-.*)\\.png',
+        headers: [{ key: 'Cache-Control', value: 'public, max-age=86400, stale-while-revalidate=604800' }],
       },
     ];
   },

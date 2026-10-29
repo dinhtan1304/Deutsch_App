@@ -2,6 +2,7 @@
 
 import { QueryClientProvider, useQueryClient } from '@tanstack/react-query';
 import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3';
+import { LazyMotion } from 'motion/react';
 import { useMemo, useEffect } from 'react';
 import { useLocale } from 'next-intl';
 import { usePathname } from '@/i18n/navigation';
@@ -138,6 +139,8 @@ function AuthRecaptchaGate({ children }: { children: React.ReactNode }) {
   );
 }
 
+const loadMotionFeatures = () => import('@/lib/motion-features').then((mod) => mod.default);
+
 export function Providers({ children }: { children: React.ReactNode }) {
   const userId = useAuthStore((s) => s.user?.id ?? null);
   const locale = useLocale();
@@ -150,25 +153,27 @@ export function Providers({ children }: { children: React.ReactNode }) {
   }, [queryClient]);
 
   return (
-    <ErrorBoundary>
-      <QueryClientProvider client={queryClient}>
-        <AuthRecaptchaGate>
-          <AppInitializer>
-            <WordHighlightProvider>
-              <DictionaryProvider>
-                <GrammarAnalyzerProvider>
-                  <ToastProvider>
-                    {children}
-                    <AchievementToastProvider />
-                    <UpdateAnnouncement />
-                    <OfflineSync />
-                  </ToastProvider>
-                </GrammarAnalyzerProvider>
-              </DictionaryProvider>
-            </WordHighlightProvider>
-          </AppInitializer>
-        </AuthRecaptchaGate>
-      </QueryClientProvider>
-    </ErrorBoundary>
+    <LazyMotion features={loadMotionFeatures}>
+      <ErrorBoundary>
+        <QueryClientProvider client={queryClient}>
+          <AuthRecaptchaGate>
+            <AppInitializer>
+              <WordHighlightProvider>
+                <DictionaryProvider>
+                  <GrammarAnalyzerProvider>
+                    <ToastProvider>
+                      {children}
+                      <AchievementToastProvider />
+                      <UpdateAnnouncement />
+                      <OfflineSync />
+                    </ToastProvider>
+                  </GrammarAnalyzerProvider>
+                </DictionaryProvider>
+              </WordHighlightProvider>
+            </AppInitializer>
+          </AuthRecaptchaGate>
+        </QueryClientProvider>
+      </ErrorBoundary>
+    </LazyMotion>
   );
 }

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
+import { AnimatePresence, m, useReducedMotion } from 'motion/react';
 import { backdropFade, scaleIn } from '@/lib/motion-presets';
 import { THEME_VAR, RADIUS, SHADOW } from '@/lib/tokens';
 
@@ -53,7 +53,7 @@ export function AnimatedModal({
   return createPortal(
     <AnimatePresence>
       {open && (
-        <motion.div
+        <m.div
           ref={containerRef}
           role="dialog"
           aria-modal="true"
@@ -74,7 +74,7 @@ export function AnimatedModal({
             zIndex: 1000,
           }}
         >
-          <motion.div
+          <m.div
             variants={reduce ? undefined : scaleIn}
             initial={reduce ? false : 'hidden'}
             animate={reduce ? undefined : 'show'}
@@ -92,8 +92,8 @@ export function AnimatedModal({
             }}
           >
             {children}
-          </motion.div>
-        </motion.div>
+          </m.div>
+        </m.div>
       )}
     </AnimatePresence>,
     document.body,

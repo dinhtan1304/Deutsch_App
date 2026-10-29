@@ -1,6 +1,6 @@
 'use client';
 
-import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
+import { AnimatePresence, m, useReducedMotion } from 'motion/react';
 import { MOTION } from '@/lib/tokens';
 
 interface LoadingCrossfadeProps {
@@ -29,14 +29,14 @@ export function LoadingCrossfade({
   return (
     <div className={className}>
       <AnimatePresence mode="wait" initial={false}>
-        <motion.div
+        <m.div
           key={isLoading ? 'skeleton' : 'content'}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1, transition: { duration: MOTION.duration.fast } }}
           exit={{ opacity: 0, transition: { duration: MOTION.duration.instant } }}
         >
           {isLoading ? skeleton : children}
-        </motion.div>
+        </m.div>
       </AnimatePresence>
     </div>
   );
