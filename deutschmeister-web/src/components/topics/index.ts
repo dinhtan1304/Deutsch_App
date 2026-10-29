@@ -3,3 +3,4 @@ export { TopicWordCard } from './TopicWordCard';
 export { TopicFlashcard } from './TopicFlashcard';
 export { TopicQuiz } from './TopicQuiz';
 export { TopicMatching } from './TopicMatching';
+export { TopicDrill } from './TopicDrill';

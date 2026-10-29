@@ -796,7 +796,16 @@
     "attemptsLabel": "Thử: {count}",
     "german": "Tiếng Đức",
     "vietnamese": "Tiếng Việt",
-    "matchHint": "Chọn 1 từ bên trái → chọn nghĩa bên phải để nối"
+    "matchHint": "Chọn 1 từ bên trái → chọn nghĩa bên phải để nối",
+    "qListen": "Nghe và chọn nghĩa đúng",
+    "qType": "Gõ từ tiếng Đức",
+    "qDictate": "Nghe và gõ lại từ",
+    "listenSlow": "Nghe chậm",
+    "almost": "Gần đúng — kiểm tra chính tả",
+    "missingArticle": "Thiếu mạo từ (der/die/das)",
+    "typePlaceholder": "Gõ từ tiếng Đức…",
+    "typePlaceholderNoun": "Gõ kèm mạo từ, vd: der Tisch",
+    "check": "Kiểm tra · Enter"
   },
   "genderTip": {
     "endingTip": "Đuôi <b>{pattern}</b> → {article} ({reliability}%)",

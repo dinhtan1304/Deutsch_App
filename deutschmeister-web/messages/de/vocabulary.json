@@ -796,7 +796,16 @@
     "attemptsLabel": "Versuche: {count}",
     "german": "Deutsch",
     "vietnamese": "Vietnamesisch",
-    "matchHint": "Wähle links ein Wort → wähle rechts die Bedeutung zum Zuordnen"
+    "matchHint": "Wähle links ein Wort → wähle rechts die Bedeutung zum Zuordnen",
+    "qListen": "Hör zu und wähle die Bedeutung",
+    "qType": "Schreib das deutsche Wort",
+    "qDictate": "Hör zu und schreib das Wort",
+    "listenSlow": "Langsam",
+    "almost": "Fast — prüf die Schreibweise",
+    "missingArticle": "Artikel fehlt (der/die/das)",
+    "typePlaceholder": "Deutsches Wort eingeben…",
+    "typePlaceholderNoun": "Mit Artikel, z. B. der Tisch",
+    "check": "Prüfen · Enter"
   },
   "genderTip": {
     "endingTip": "Endung <b>{pattern}</b> → {article} ({reliability}%)",

@@ -796,7 +796,16 @@
     "attemptsLabel": "Tries: {count}",
     "german": "German",
     "vietnamese": "Vietnamese",
-    "matchHint": "Pick a word on the left → pick its meaning on the right to match"
+    "matchHint": "Pick a word on the left → pick its meaning on the right to match",
+    "qListen": "Listen and pick the meaning",
+    "qType": "Type the German word",
+    "qDictate": "Listen and type the word",
+    "listenSlow": "Slow",
+    "almost": "Almost — check the spelling",
+    "missingArticle": "Missing article (der/die/das)",
+    "typePlaceholder": "Type the German word…",
+    "typePlaceholderNoun": "Include the article, e.g. der Tisch",
+    "check": "Check · Enter"
   },
   "genderTip": {
     "endingTip": "Ending <b>{pattern}</b> → {article} ({reliability}%)",
