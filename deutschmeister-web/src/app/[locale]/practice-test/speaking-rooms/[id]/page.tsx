@@ -3,8 +3,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useParams, useRouter } from 'next/navigation';
-import { PageHeader } from '@/components/ui';
 import { ACCENT } from '@/lib/tokens';
+import { FIT_VIEWPORT_HEIGHT, fitToViewport } from '@/lib/fitToViewport';
 import { useAuthStore } from '@/stores/authStore';
 import {
   useSpeakingRoom,
@@ -16,8 +16,11 @@ import { useWebRTCCall } from '@/hooks/useWebRTCCall';
 import { ChatPanel } from '@/components/speaking-rooms/ChatPanel';
 import { ChatInput } from '@/components/roleplay/ChatInput';
 import { SuggestionsPanel } from '@/components/speaking-rooms/SuggestionsPanel';
-import { VoiceCallPanel } from '@/components/speaking-rooms/VoiceCallPanel';
+import { CallStage } from '@/components/speaking-rooms/CallStage';
+import { topicColor } from '@/components/speaking-rooms/RoomCard';
 import { ReportUserModal } from '@/components/common/ReportUserModal';
+
+type SideTab = 'chat' | 'suggestions';
 
 export default function SpeakingRoomDetailPage() {
   const t = useTranslations('speakingRooms');
@@ -30,6 +33,7 @@ export default function SpeakingRoomDetailPage() {
   const leaveMut = useLeaveSpeakingRoom();
   const initialMessages = useMemo(() => room?.messages ?? [], [room?.id]);
   const [reportOpen, setReportOpen] = useState(false);
+  const [sideTab, setSideTab] = useState<SideTab>('chat');
 
   const { socket, messages, sendText, setTyping, typingUserIds, connected } =
     useSpeakingRoomSocket(room ? room.id : null, initialMessages);
@@ -95,95 +99,110 @@ export default function SpeakingRoomDetailPage() {
     );
   }
 
-  return (
-    <div className="max-w-360 mx-auto px-4 py-6 flex flex-col" style={{ minHeight: 'calc(100vh - 120px)' }}>
-      <PageHeader
-        backHref="/practice-test/speaking-rooms"
-        title={room.title}
-        subtitle={t('detail.subtitle', { topic: room.topic, level: room.cefrLevel, status: connected ? t('detail.connected') : t('detail.connecting') })}
-        accent="speaking"
-        right={
-          <div className="flex items-center gap-2">
-            {room.visibility === 'PRIVATE' && (
-              <button
-                type="button"
-                onClick={handleCopyInvite}
-                className="px-3 py-2 rounded-lg text-sm font-bold border"
-                style={{ borderColor: ACCENT.speaking, color: ACCENT.speaking }}
-              >
-                {inviteCopied ? t('detail.copied') : t('detail.copyInvite')}
-              </button>
-            )}
-            {remotePeer && (
-              <button
-                type="button"
-                onClick={() => setReportOpen(true)}
-                className="px-3 py-2 rounded-lg text-sm font-bold border"
-                title={t('detail.reportTitle', { name: remotePeer.name })}
-                style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)' }}
-              >
-                {t('detail.report')}
-              </button>
-            )}
-            <button
-              type="button"
-              onClick={handleLeave}
-              disabled={leaveMut.isPending}
-              className="px-3 py-2 rounded-lg text-sm font-bold text-white disabled:opacity-60"
-              style={{ backgroundColor: 'var(--danger)' }}
-            >
-              {leaveMut.isPending ? t('detail.leaving') : t('detail.leave')}
-            </button>
-          </div>
-        }
-      />
+  const tColor = topicColor(room.topic);
+  const chip = 'inline-flex shrink-0 items-center gap-1.5 rounded-md px-2 py-0.5 text-[11px] font-semibold';
+  const btn = 'inline-flex h-8 shrink-0 items-center gap-1.5 rounded-lg px-3 text-caption font-bold';
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 flex-1">
-        <div className="lg:col-span-2 flex flex-col gap-3">
-          <VoiceCallPanel call={call} remotePeer={remotePeer} />
-          <ChatPanel
-            messages={messages}
-            currentUserId={currentUserId}
-            participantById={participantById}
-            typingUserIds={typingUserIds}
-          />
-          <ChatInput
-            onSend={(text) => {
-              sendText(text);
-              setTyping(false);
-            }}
-            onTypingChange={setTyping}
-            placeholder={t('detail.chatPlaceholder')}
-            disabled={!connected}
-          />
+  return (
+    <div ref={fitToViewport} className={`mx-auto flex max-w-360 flex-col gap-3 min-h-115 ${FIT_VIEWPORT_HEIGHT}`}>
+      {/* Top bar */}
+      <div className="flex shrink-0 flex-wrap items-center gap-2">
+        <button type="button" onClick={() => router.push('/practice-test/speaking-rooms')} aria-label={t('detail.back')}
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border"
+          style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)' }}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
+        </button>
+        <div className="min-w-0 flex-1">
+          <h1 className="truncate text-lead font-bold" style={{ color: 'var(--theme-text-primary)' }} title={room.title}>{room.title}</h1>
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className={`${chip} mono`} style={{ background: 'var(--theme-bg-secondary)', color: 'var(--theme-text-secondary)', border: '1px solid var(--theme-border)' }}>{room.cefrLevel}</span>
+            <span className={chip} style={{ background: `color-mix(in srgb, ${tColor} 16%, transparent)`, color: tColor }}>
+              <span className="h-1.5 w-1.5 rounded-full" style={{ background: tColor }} />{room.topic}
+            </span>
+            <span className={chip} style={{ color: connected ? 'var(--success)' : 'var(--warn)' }}>
+              <span className={`h-1.5 w-1.5 rounded-full ${connected ? '' : 'v2-pulse'}`} style={{ background: 'currentColor' }} />
+              {connected ? t('detail.connected') : t('detail.connecting')}
+            </span>
+          </div>
         </div>
-        <div className="space-y-3">
-          <SuggestionsPanel
-            suggestions={suggestions.data}
-            loading={suggestions.isFetching}
-            onFetch={() => suggestions.refetch()}
-            onPick={(text) => {
-              sendText(text);
-            }}
-          />
-          {remoteParticipant && (
-            <div className="rounded-2xl p-4" style={{ background: 'var(--theme-bg-card)', border: '1px solid var(--theme-border)' }}>
-              <p className="mb-3 text-[10.5px] font-semibold uppercase tracking-widest" style={{ color: 'var(--theme-text-muted)' }}>{t('detail.partnerLabel')}</p>
-              <div className="flex items-center gap-3">
-                <div className="relative shrink-0">
-                  <div className="v2-avatar-grad flex h-11 w-11 items-center justify-center rounded-xl text-body font-bold text-white">
-                    {(remoteParticipant.user.name ?? '?').charAt(0).toUpperCase()}
-                  </div>
-                  <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full" style={{ background: 'var(--success)', border: '2px solid var(--theme-bg-card)' }} />
-                </div>
-                <div className="min-w-0">
-                  <div className="truncate text-body font-bold" style={{ color: 'var(--theme-text-primary)' }}>{remoteParticipant.user.name ?? t('detail.opponent')}</div>
-                  <div className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>{t('detail.partnerLevel', { level: room.cefrLevel })}</div>
-                </div>
+        <div className="flex shrink-0 items-center gap-2">
+          {room.visibility === 'PRIVATE' && (
+            <button type="button" onClick={handleCopyInvite} className={`${btn} border`} style={{ borderColor: ACCENT.speaking, color: ACCENT.speaking }}>
+              {inviteCopied ? t('detail.copied') : t('detail.copyInvite')}
+            </button>
+          )}
+          {remotePeer && (
+            <button type="button" onClick={() => setReportOpen(true)} title={t('detail.reportTitle', { name: remotePeer.name })}
+              className={`${btn} border`} style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)' }}>
+              {t('detail.report')}
+            </button>
+          )}
+          <button type="button" onClick={handleLeave} disabled={leaveMut.isPending}
+            className={`${btn} text-white disabled:opacity-60`} style={{ background: 'var(--danger)' }}>
+            {leaveMut.isPending ? t('detail.leaving') : t('detail.leave')}
+          </button>
+        </div>
+      </div>
+
+      {/* Body: call stage + chat/suggestions side panel */}
+      <div className="flex min-h-0 flex-1 flex-col gap-3 lg:grid lg:grid-cols-[minmax(0,1fr)_380px]">
+        {/* Compact on phones (tiles shrink) so the chat keeps most of the height */}
+        <div className="shrink-0 lg:h-full">
+          <CallStage call={call}
+            me={{ name: user?.name ?? t('components.you'), caption: `${t('components.you')} · ${room.cefrLevel}` }}
+            partner={remotePeer && { ...remotePeer, caption: t('detail.partnerLevel', { level: room.cefrLevel }) }} />
+        </div>
+
+        <section className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border lg:h-full"
+          style={{ background: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}>
+          <div role="tablist" className="flex shrink-0 gap-1 border-b p-1.5" style={{ borderColor: 'var(--theme-border)' }}>
+            {(['chat', 'suggestions'] as const).map((tab) => (
+              <button key={tab} type="button" role="tab" aria-selected={sideTab === tab} onClick={() => setSideTab(tab)}
+                className="flex-1 rounded-lg py-1.5 text-caption font-bold transition-colors"
+                style={sideTab === tab
+                  ? { background: `color-mix(in srgb, ${ACCENT.speaking} 14%, transparent)`, color: ACCENT.speaking }
+                  : { color: 'var(--theme-text-muted)' }}>
+                {tab === 'chat' ? t('detail.tabChat') : t('detail.tabSuggestions')}
+              </button>
+            ))}
+          </div>
+
+          {sideTab === 'chat' ? (
+            <>
+              <ChatPanel
+                messages={messages}
+                currentUserId={currentUserId}
+                participantById={participantById}
+                typingUserIds={typingUserIds}
+              />
+              {/* pr-16 keeps the send button clear of the global feedback FAB */}
+              <div className="shrink-0 border-t py-2 pl-2 pr-16" style={{ borderColor: 'var(--theme-border)' }}>
+                <ChatInput
+                  onSend={(text) => {
+                    sendText(text);
+                    setTyping(false);
+                  }}
+                  onTypingChange={setTyping}
+                  placeholder={t('detail.chatPlaceholder')}
+                  disabled={!connected}
+                />
               </div>
+            </>
+          ) : (
+            <div className="flex min-h-0 flex-1 flex-col px-3 pb-3">
+              <SuggestionsPanel
+                embedded
+                suggestions={suggestions.data}
+                loading={suggestions.isFetching}
+                onFetch={() => suggestions.refetch()}
+                onPick={(text) => {
+                  sendText(text);
+                  setSideTab('chat');
+                }}
+              />
             </div>
           )}
-        </div>
+        </section>
       </div>
 
       {reportOpen && remotePeer && (

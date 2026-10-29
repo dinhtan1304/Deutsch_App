@@ -277,6 +277,168 @@ html.dark {
   z-index: -1;
 }
 
+/* ── Arena game skin ───────────────────────────────────────────────────────
+   The arena is a game stage: always dark/neon whatever the app theme, so
+   its palette lives here once (--ag-*) and components read the vars. */
+.arena-stage {
+  --ag-bg1: #0b1026;
+  --ag-bg2: #1b0f3a;
+  --ag-grid: rgba(148, 163, 255, .09);
+  --ag-me: #22d3ee;
+  --ag-opp: #f472b6;
+  --ag-gold: #fbbf24;
+  --ag-win: #4ade80;
+  --ag-lose: #f87171;
+  --ag-text: #eef2ff;
+  --ag-muted: rgba(226, 232, 255, .62);
+  --ag-line: rgba(167, 139, 250, .24);
+  --ag-panel: rgba(15, 18, 48, .66);
+  /* No position here: unlayered CSS would override Tailwind's fixed/relative
+     utilities. Add `relative` or `fixed` on the element. */
+  isolation: isolate;
+  overflow: hidden;
+  color: var(--ag-text);
+  background:
+    radial-gradient(120% 80% at 50% -10%, rgba(124, 58, 237, .45), transparent 60%),
+    radial-gradient(80% 60% at 100% 100%, rgba(236, 72, 153, .16), transparent 60%),
+    linear-gradient(160deg, var(--ag-bg1), var(--ag-bg2));
+  border: 1px solid var(--ag-line);
+}
+.arena-stage::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    linear-gradient(var(--ag-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--ag-grid) 1px, transparent 1px);
+  background-size: 36px 36px;
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 45%, transparent);
+          mask-image: linear-gradient(to bottom, transparent, #000 45%, transparent);
+}
+.arena-panel {
+  background: var(--ag-panel);
+  border: 1px solid var(--ag-line);
+  backdrop-filter: blur(6px);
+}
+.arena-muted { color: var(--ag-muted); }
+
+/* Chunky 3D "PLAY" button with a light sweep */
+.arena-play-btn {
+  position: relative;
+  overflow: hidden;
+  color: #2a1300;
+  background: linear-gradient(180deg, #fcd34d, #f97316);
+  box-shadow: 0 6px 0 #b45309, 0 14px 30px rgba(249, 115, 22, .4);
+  transition: transform .12s ease, box-shadow .12s ease, filter .12s ease;
+}
+.arena-play-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 0 #b45309, 0 18px 36px rgba(249, 115, 22, .5); }
+.arena-play-btn:active:not(:disabled) { transform: translateY(4px); box-shadow: 0 2px 0 #b45309, 0 6px 14px rgba(249, 115, 22, .35); }
+.arena-play-btn:disabled { filter: grayscale(.6); opacity: .6; cursor: not-allowed; }
+.arena-play-btn::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  width: 40%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .55), transparent);
+  animation: arenaShine 2.8s ease-in-out infinite;
+}
+@keyframes arenaShine {
+  0%   { transform: translateX(-150%) skewX(-20deg); }
+  60%, 100% { transform: translateX(350%) skewX(-20deg); }
+}
+
+/* Mode cards on the stage */
+.arena-mode {
+  background: var(--ag-panel);
+  border: 1.5px solid var(--ag-line);
+  transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+.arena-mode:hover:not(:disabled) { transform: translateY(-3px); }
+.arena-mode[aria-pressed="true"] {
+  border-color: var(--ag-gold);
+  box-shadow: 0 0 0 3px rgba(251, 191, 36, .18), 0 12px 28px rgba(251, 191, 36, .18);
+}
+
+/* Matchmaking radar */
+.arena-radar { position: relative; border-radius: 9999px; border: 1px solid rgba(34, 211, 238, .35); }
+.arena-radar::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: conic-gradient(from 0deg, rgba(34, 211, 238, .55), transparent 25%);
+  animation: arenaRingRotate 1.8s linear infinite;
+}
+.arena-radar::after {
+  content: "";
+  position: absolute;
+  inset: 18%;
+  border-radius: inherit;
+  border: 1px solid rgba(34, 211, 238, .25);
+  box-shadow: 0 0 0 30px rgba(34, 211, 238, .04);
+}
+.arena-ping { animation: arenaPing 1.8s ease-out infinite; }
+@keyframes arenaPing {
+  0%   { transform: scale(.6); opacity: .8; }
+  100% { transform: scale(1.7); opacity: 0; }
+}
+
+/* Letter tiles of the masked word */
+.arena-tile {
+  color: rgba(221, 214, 254, .9);
+  background: linear-gradient(180deg, rgba(167, 139, 250, .26), rgba(99, 102, 241, .14));
+  border: 1px solid rgba(167, 139, 250, .42);
+  box-shadow: inset 0 -3px 0 rgba(0, 0, 0, .28);
+}
+.arena-tile--on {
+  color: #fff;
+  background: linear-gradient(180deg, #a78bfa, #7c3aed);
+  border-color: #c4b5fd;
+  box-shadow: inset 0 -3px 0 rgba(0, 0, 0, .28), 0 0 16px rgba(167, 139, 250, .55);
+}
+
+.arena-input {
+  color: var(--ag-text);
+  background: rgba(8, 10, 30, .72);
+  border: 2px solid var(--ag-line);
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+.arena-input::placeholder { color: var(--ag-muted); }
+.arena-input:focus { outline: none; border-color: var(--ag-me); box-shadow: 0 0 0 4px rgba(34, 211, 238, .18); }
+.arena-input:disabled { opacity: .55; }
+
+@keyframes arenaVsIn {
+  from { transform: scale(2.6) rotate(-10deg); opacity: 0; }
+  to   { transform: scale(1) rotate(0); opacity: 1; }
+}
+@keyframes arenaSlideL {
+  from { transform: translateX(-70px); opacity: 0; }
+  to   { transform: translateX(0); opacity: 1; }
+}
+@keyframes arenaSlideR {
+  from { transform: translateX(70px); opacity: 0; }
+  to   { transform: translateX(0); opacity: 1; }
+}
+@keyframes arenaFloatUp {
+  0%   { transform: translate(-50%, 0); opacity: 0; }
+  15%  { opacity: 1; }
+  100% { transform: translate(-50%, -56px); opacity: 0; }
+}
+@keyframes arenaBannerIn {
+  from { transform: scale(.55); opacity: 0; letter-spacing: .5em; }
+  to   { transform: scale(1); opacity: 1; letter-spacing: .08em; }
+}
+@keyframes arenaBubble {
+  from { transform: translateY(6px) scale(.9); opacity: 0; }
+  to   { transform: translateY(0) scale(1); opacity: 1; }
+}
+@keyframes arenaDots {
+  0%, 80%, 100% { opacity: .25; }
+  40%           { opacity: 1; }
+}
+
 /* Accessibility: respect user's motion preference */
 @media (prefers-reduced-motion: reduce) {
   *,

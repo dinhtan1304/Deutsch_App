@@ -48,7 +48,11 @@
     "viewAll": "View all",
     "recentEmpty": "No matches yet. Hit “Find match” to start!",
     "topEmpty": "No one on the leaderboard yet — you could be the first!",
-    "topStatLine": "{wins}W · {losses}L · streak {streak}"
+    "topStatLine": "{wins}W · {losses}L · streak {streak}",
+    "toNextTier": "{points} points to {tier}",
+    "maxTier": "You are in the top tier!",
+    "playCta": "Find match",
+    "nearYou": "Opponents near your rank"
   },
   "leaderboard": {
     "title": "Arena leaderboard",
@@ -184,7 +188,12 @@
     "redirecting": "Going to the results page...",
     "connConnecting": "Connecting to the Arena...",
     "connReconnecting": "Reconnecting. The match will be restored if still valid.",
-    "connLost": "Lost connection to the Arena."
+    "connLost": "Lost connection to the Arena.",
+    "vs": "VS",
+    "surrender": "Surrender",
+    "victory": "Victory",
+    "defeat": "Defeat",
+    "drawBanner": "Draw"
   },
   "components": {
     "openRooms": "Open rooms",
@@ -214,6 +223,16 @@
     "pronounce": "Pronounce",
     "translation": "Translation",
     "hintWordType": "Word type",
-    "hintPronunciation": "Pronunciation"
+    "hintPronunciation": "Pronunciation",
+    "statusCorrect": "✓ Correct",
+    "statusWrong": "✗ Wrong",
+    "statusTypingAria": "{name} is typing"
+  },
+  "tiers": {
+    "bronze": "Bronze",
+    "silver": "Silver",
+    "gold": "Gold",
+    "platinum": "Platinum",
+    "diamond": "Diamond"
   }
 }

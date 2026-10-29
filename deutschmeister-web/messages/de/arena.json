@@ -48,7 +48,11 @@
     "viewAll": "Alle ansehen",
     "recentEmpty": "Noch keine Matches. Tippe auf „Match finden“, um loszulegen!",
     "topEmpty": "Noch niemand in der Rangliste — du könntest der Erste sein!",
-    "topStatLine": "{wins}S · {losses}N · Serie {streak}"
+    "topStatLine": "{wins}S · {losses}N · Serie {streak}",
+    "toNextTier": "Noch {points} Punkte bis {tier}",
+    "maxTier": "Du bist in der höchsten Liga!",
+    "playCta": "Match suchen",
+    "nearYou": "Gegner in deiner Nähe"
   },
   "leaderboard": {
     "title": "Arena-Rangliste",
@@ -184,7 +188,12 @@
     "redirecting": "Weiter zur Ergebnisseite...",
     "connConnecting": "Verbinde mit der Arena...",
     "connReconnecting": "Verbinde erneut. Das Match wird wiederhergestellt, falls noch gültig.",
-    "connLost": "Verbindung zur Arena verloren."
+    "connLost": "Verbindung zur Arena verloren.",
+    "vs": "VS",
+    "surrender": "Aufgeben",
+    "victory": "Sieg",
+    "defeat": "Niederlage",
+    "drawBanner": "Unentschieden"
   },
   "components": {
     "openRooms": "Offene Räume",
@@ -214,6 +223,16 @@
     "pronounce": "Aussprechen",
     "translation": "Übersetzung",
     "hintWordType": "Wortart",
-    "hintPronunciation": "Aussprache"
+    "hintPronunciation": "Aussprache",
+    "statusCorrect": "✓ Richtig",
+    "statusWrong": "✗ Falsch",
+    "statusTypingAria": "{name} tippt"
+  },
+  "tiers": {
+    "bronze": "Bronze",
+    "silver": "Silber",
+    "gold": "Gold",
+    "platinum": "Platin",
+    "diamond": "Diamant"
   }
 }

@@ -97,7 +97,7 @@ function GradedPart({ part, gradingMap, nearMissLabel }: { part: Part; gradingMa
         </span>
       )}
       <span className="text-[10px] opacity-40" style={{ color: 'var(--theme-text-muted)' }}>→</span>
-      <span className="inline-block font-bold px-2 py-0.5 rounded-lg text-sm"
+      <span className="wh-word cursor-pointer inline-block font-bold px-2 py-0.5 rounded-lg text-sm"
         style={{ color: 'var(--color-status-success)', background: 'rgba(34,197,94,0.12)' }}>
         {info.correctWord}
       </span>
@@ -276,6 +276,7 @@ function MistakesSummary({
       </button>
       {open && (
         <div className="px-4 pb-4 border-t" style={{ borderColor: 'var(--theme-border)' }}>
+          <p className="pt-3 text-caption" style={{ color: 'var(--theme-text-muted)' }}>{t('lookupHint')}</p>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 pt-3">
             {items.map(({ blankId, userAnswer, correctWord }) => {
               const near = isNearMiss(userAnswer ?? '', correctWord);
@@ -296,7 +297,7 @@ function MistakesSummary({
                   </span>
                 )}
                 <span className="text-[10px] shrink-0 opacity-50" style={{ color: 'var(--theme-text-muted)' }}>→</span>
-                <span className="font-bold text-sm px-1.5 py-0.5 rounded-lg shrink-0 truncate max-w-[50%]"
+                <span className="wh-word cursor-pointer font-bold text-sm px-1.5 py-0.5 rounded-lg shrink-0 truncate max-w-[50%]"
                   style={{ color: 'var(--color-status-success)', background: 'rgba(34,197,94,0.12)' }} title={correctWord}>
                   {correctWord}
                 </span>

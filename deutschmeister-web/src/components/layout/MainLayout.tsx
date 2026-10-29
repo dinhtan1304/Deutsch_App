@@ -146,7 +146,9 @@ export function MainLayout({ children }: MainLayoutProps) {
       >
         <GuestBanner />
         <VerifyEmailBanner />
-        <div className="min-h-[calc(100vh-4rem)] px-4 md:px-6 lg:px-8 xl:px-10 py-4">
+        {/* Phones also subtract the BottomTabBar spacer (64px + safe area),
+            otherwise every short page scrolls by that much */}
+        <div className="min-h-[calc(100dvh-4rem-64px-env(safe-area-inset-bottom))] md:min-h-[calc(100dvh-4rem)] px-4 md:px-6 lg:px-8 xl:px-10 py-4">
           <Breadcrumb className="mb-3" />
           {children}
         </div>

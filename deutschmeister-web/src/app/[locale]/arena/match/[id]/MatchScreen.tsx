@@ -7,14 +7,15 @@ import { useArenaSocket } from '@/hooks/useArenaSocket';
 import { useArenaStore, type ArenaConnectionStatus } from '@/stores/arenaStore';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
 import { useSettingsStore } from '@/stores/settingsStore';
-import { ArenaScoreboard } from '@/components/arena/ArenaScoreboard';
+import { ArenaScoreboard, type OpponentStatus } from '@/components/arena/ArenaScoreboard';
 import { MaskedWordCard } from '@/components/arena/MaskedWordCard';
-import { RoundTimer } from '@/components/arena/RoundTimer';
+import { RoundTimerRing } from '@/components/arena/RoundTimerRing';
 import { RoundEndOverlay } from '@/components/arena/RoundEndOverlay';
 import { ConfettiBurst } from '@/components/arena/ConfettiBurst';
-import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
-import { Button, Card } from '@/components/ui';
-import { IconTrophy, IconMedal, IconUsers, IconXCircle, IconLogOut } from '@/components/ui/Icons';
+import { FIT_VIEWPORT_HEIGHT, fitToViewport } from '@/lib/fitToViewport';
+import { GRADIENT } from '@/lib/tokens';
+import { IconLogOut, IconXCircle } from '@/components/ui/Icons';
+import type { ArenaPlayerLite } from '@/types/arena-events.types';
 import { ARENA_COUNTDOWN_MS } from '@/types/arena-events.types';
 
 interface MatchScreenProps {
@@ -24,6 +25,8 @@ interface MatchScreenProps {
 // Hold on the match-end overlay long enough for SFX/animation to play
 // before navigating to the result page.
 const MATCH_END_REDIRECT_MS = 2_000;
+
+const STAGE_CLASS = `arena-stage relative mx-auto flex w-full max-w-5xl flex-col gap-3 rounded-3xl p-3 sm:p-5 min-h-115 ${FIT_VIEWPORT_HEIGHT}`;
 
 export default function MatchScreen({ matchId }: MatchScreenProps) {
   const t = useTranslations('arena');
@@ -45,6 +48,7 @@ export default function MatchScreen({ matchId }: MatchScreenProps) {
   const opponentConnected = useArenaStore((s) => s.opponentConnected);
   const graceRemainingMs = useArenaStore((s) => s.graceRemainingMs);
   const roundReveal = useArenaStore((s) => s.roundReveal);
+  const roundWinners = useArenaStore((s) => s.roundWinners);
   const matchResult = useArenaStore((s) => s.matchResult);
   const announcement = useArenaStore((s) => s.announcement);
   const serverClockSkewMs = useArenaStore((s) => s.serverClockSkewMs);
@@ -141,14 +145,14 @@ export default function MatchScreen({ matchId }: MatchScreenProps) {
       if (hapticOn) navigator.vibrate(50);
       setFlash('ok');
       setShowCorrectConfetti(true);
-      timers.push(setTimeout(() => setFlash(null), 500));
+      timers.push(setTimeout(() => setFlash(null), 900));
       timers.push(setTimeout(() => setShowCorrectConfetti(false), 1500));
     } else {
       playWrong();
       setFlash('bad');
       timers.push(setTimeout(() => setShake(true), 0));
       timers.push(setTimeout(() => setShake(false), 400));
-      timers.push(setTimeout(() => setFlash(null), 500));
+      timers.push(setTimeout(() => setFlash(null), 900));
       if (hapticOn) navigator.vibrate([100, 50, 100]);
     }
     return () => {
@@ -185,300 +189,155 @@ export default function MatchScreen({ matchId }: MatchScreenProps) {
 
   if (!match) {
     return (
-      <div className="max-w-3xl mx-auto px-4 sm:px-6">
-        <Card className="text-center py-12">
-          <div className="text-lead mb-2" style={{ color: 'var(--theme-text-primary)' }}>
-            {lastError ? t('match.loadFailed') : t('match.connecting')}
-          </div>
-          <div className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>
-            {lastError?.message ?? t('match.loadHint')}
-          </div>
-          <div className="mt-4 flex justify-center gap-3">
-            <Button variant="outline" onClick={() => router.push('/arena')}>
-              {t('match.toLobby')}
-            </Button>
-            <Button variant="outline" onClick={() => router.push('/arena/history')}>
-              {t('match.toHistory')}
-            </Button>
-          </div>
-        </Card>
+      <div ref={fitToViewport} className={`${STAGE_CLASS} items-center justify-center text-center`}>
+        <div className="text-h3 font-bold">{lastError ? t('match.loadFailed') : t('match.connecting')}</div>
+        <div className="arena-muted text-body">{lastError?.message ?? t('match.loadHint')}</div>
+        <div className="mt-2 flex gap-3">
+          <button type="button" onClick={() => router.push('/arena')} className="arena-panel rounded-xl px-5 py-2 text-body font-bold">{t('match.toLobby')}</button>
+          <button type="button" onClick={() => router.push('/arena/history')} className="arena-panel rounded-xl px-5 py-2 text-body font-bold">{t('match.toHistory')}</button>
+        </div>
       </div>
     );
   }
 
   if (phase === 'countdown' || !currentClue) {
     return (
-      <div className="max-w-3xl mx-auto px-4 sm:px-6">
+      <div ref={fitToViewport} className={`${STAGE_CLASS} items-center justify-center`}>
         <ConnectionBanner status={connectionStatus} />
-        <Card className="text-center py-10">
-          <div className="text-caption mb-4" style={{ color: 'var(--theme-text-muted)' }}>
-            {t('match.starting')}
+        <div className="arena-muted text-caption font-bold uppercase tracking-[0.3em]">{t('match.starting')}</div>
+        <div className="grid w-full max-w-2xl grid-cols-[1fr_auto_1fr] items-center gap-4">
+          <VsPlayer player={match.me} label={t('match.labelYou')} side="me" />
+          <div className="text-[56px] font-black italic sm:text-[72px]"
+            style={{ color: 'var(--ag-gold)', textShadow: '0 0 30px rgba(251,191,36,.7)', animation: 'arenaVsIn .55s cubic-bezier(0.34,1.56,0.64,1)' }}>
+            {t('match.vs')}
           </div>
-          <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4">
-            <PlayerIntro name={match.me.displayName} level={match.me.level} label={t('match.labelYou')} />
-            <div className="text-2xl font-bold" style={{ color: 'var(--theme-text-muted)' }}>VS</div>
-            <PlayerIntro
-              name={match.opponent.displayName}
-              level={match.opponent.level}
-              label={match.opponent.isBot ? t('match.labelBot') : t('match.labelOpponent')}
-            />
-          </div>
-          <div
-            key={countdownLeft}
-            className="mt-8 text-5xl font-bold tabular-nums"
-            style={{
-              color: countdownLeft === 0 ? STATUS.success : ACCENT.vocab,
-              display: 'inline-block',
-              animation: 'arenaCountdownPulse 0.55s cubic-bezier(0.34,1.56,0.64,1)',
-            }}
-          >
-            {countdownLeft > 0 ? countdownLeft : t('match.go')}
-          </div>
-        </Card>
+          <VsPlayer player={match.opponent} label={match.opponent.isBot ? t('match.labelBot') : t('match.labelOpponent')} side="opp" />
+        </div>
+        <div key={countdownLeft} className="mono text-[64px] font-black tabular-nums"
+          style={{
+            color: countdownLeft === 0 ? 'var(--ag-win)' : 'var(--ag-text)',
+            textShadow: '0 0 30px rgba(167,139,250,.7)',
+            animation: 'arenaCountdownPulse 0.55s cubic-bezier(0.34,1.56,0.64,1)',
+          }}>
+          {countdownLeft > 0 ? countdownLeft : t('match.go')}
+        </div>
       </div>
     );
   }
 
   const roundNumber = currentClue.roundNumber;
   const answerDisabled = phase !== 'playing' || answeredCorrectThisRound;
+  const opponentStatus: OpponentStatus = phase !== 'playing'
+    ? null
+    : opponentLastResult ? (opponentLastResult.isCorrect ? 'correct' : 'wrong')
+    : opponentTyping ? 'typing'
+    : null;
 
   return (
-    <div className="max-w-3xl mx-auto px-4 sm:px-6">
-      <div className="sr-only" aria-live="polite" aria-atomic="true">
-        {announcement}
+    <div ref={fitToViewport} className={STAGE_CLASS}>
+      <div className="sr-only" aria-live="polite" aria-atomic="true">{announcement}</div>
+
+      {/* Top strip: surrender + connection */}
+      <div className="flex shrink-0 items-center justify-between gap-2">
+        <button type="button" onClick={() => setConfirmForfeit(true)}
+          disabled={forfeitting || phase === 'match-result'}
+          className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-caption font-bold transition-colors hover:bg-white/10 disabled:opacity-50"
+          style={{ color: 'var(--ag-lose)', border: '1px solid rgba(248,113,113,.4)' }}>
+          🏳 {t('match.surrender')}
+        </button>
+        <ConnectionBanner status={connectionStatus} compact />
       </div>
 
-      <ConnectionBanner status={connectionStatus} />
+      <div className="shrink-0">
+        <ArenaScoreboard
+          me={match.me}
+          opponent={match.opponent}
+          myScore={scores.me}
+          opponentScore={scores.opponent}
+          roundNumber={roundNumber}
+          totalRounds={match.totalRounds}
+          roundWinners={roundWinners}
+          opponentConnected={opponentConnected}
+          graceRemainingMs={graceRemainingMs}
+          opponentStatus={opponentStatus}
+        />
+      </div>
+
       {(lastError || lastRejection) && (
-        <div
-          className="mb-3 px-4 py-3 rounded-xl text-body"
-          style={{
-            background: 'rgba(239,68,68,.10)',
-            color: STATUS.danger,
-            border: '1px solid rgba(239,68,68,.35)',
-          }}
-        >
+        <div className="shrink-0 rounded-xl px-4 py-2 text-center text-caption font-semibold"
+          style={{ background: 'rgba(248,113,113,.12)', color: 'var(--ag-lose)', border: '1px solid rgba(248,113,113,.35)' }}>
           {(lastRejection ?? lastError)?.message}
         </div>
       )}
 
-      <div className="flex justify-end mb-2">
-        <button
-          type="button"
-          onClick={() => setConfirmForfeit(true)}
-          disabled={forfeitting || phase === 'match-result'}
-          className="px-3 py-1.5 rounded-lg text-caption font-semibold border transition-colors disabled:opacity-50"
-          style={{
-            borderColor: 'rgba(239,68,68,.4)',
-            color: STATUS.danger,
-            background: 'transparent',
-          }}
-        >
-          {t('match.leaveBtn')}
-        </button>
-      </div>
-
-      <ArenaScoreboard
-        me={match.me}
-        opponent={match.opponent}
-        myScore={scores.me}
-        opponentScore={scores.opponent}
-        roundNumber={roundNumber}
-        totalRounds={match.totalRounds}
-        opponentConnected={opponentConnected}
-        graceRemainingMs={graceRemainingMs}
-      />
-
-      {confirmForfeit && (
-        <div
-          className="fixed inset-0 flex items-center justify-center px-4"
-          style={{
-            background: 'rgba(0,0,0,.6)',
-            backdropFilter: 'blur(8px)',
-            zIndex: 9000,
-          }}
-          onClick={(e) => {
-            if (e.target === e.currentTarget && !forfeitting) setConfirmForfeit(false);
-          }}
-        >
-          <div
-            role="dialog"
-            aria-modal="true"
-            className="rounded-2xl max-w-sm w-full p-5"
-            style={{
-              background: 'var(--theme-bg-card)',
-              boxShadow: 'var(--shadow-lifted)',
-              border: '1px solid var(--theme-border)',
-            }}
-          >
-            <div
-              className="flex justify-center mb-2"
-              style={{ color: STATUS.danger }}
-              aria-hidden="true"
-            >
-              <IconXCircle size={36} />
-            </div>
-            <h3
-              className="text-lead font-bold text-center mb-2"
-              style={{ color: 'var(--theme-text-primary)' }}
-            >
-              {t('match.leaveTitle')}
-            </h3>
-            <p
-              className="text-body text-center mb-4"
-              style={{ color: 'var(--theme-text-secondary)' }}
-            >
-              {t.rich('match.leaveBody', { b: (chunks) => <strong style={{ color: STATUS.danger }}>{chunks}</strong> })}
-              {match.opponent.isBot ? '' : t('match.leaveBodyRanked')}
-            </p>
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                fullWidth
-                onClick={() => setConfirmForfeit(false)}
-                disabled={forfeitting}
-              >
-                {t('match.keepPlaying')}
-              </Button>
-              <Button
-                variant="primary"
-                fullWidth
-                isLoading={forfeitting}
-                onClick={() => {
-                  setForfeitting(true);
-                  forfeitMatch(matchId);
-                  // The match:end event will trigger the redirect to /result —
-                  // close the dialog so user sees the final state animation.
-                  setConfirmForfeit(false);
-                }}
-                style={{ background: STATUS.danger }}
-              >
-                <span className="inline-flex items-center gap-1.5">
-                  <IconLogOut size={16} />
-                  <span>{t('match.leave')}</span>
-                </span>
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <div className="mb-3">
-        <RoundTimer
+      {/* Arena floor: timer + clue */}
+      <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-3 overflow-y-auto py-1">
+        <RoundTimerRing
           roundStartedAt={currentClue.roundStartedAt}
           durationMs={currentClue.durationMs}
           serverClockSkewMs={serverClockSkewMs}
         />
+        <div className="w-full max-w-xl" style={{ animation: shake ? 'arenaShake 0.4s ease-in-out' : 'none' }}>
+          <MaskedWordCard key={currentClue.roundNumber} clue={currentClue} serverClockSkewMs={serverClockSkewMs} />
+        </div>
       </div>
 
-      <div
-        className="arena-shake-container"
-        style={{ animation: shake ? 'arenaShake 0.4s ease-in-out' : 'none' }}
-      >
-        <MaskedWordCard
-          key={currentClue.roundNumber}
-          clue={currentClue}
-          serverClockSkewMs={serverClockSkewMs}
-        />
-      </div>
-
-      <form onSubmit={handleSubmit}>
+      {/* Answer */}
+      {/* pr-14 on phones keeps the send button clear of the global feedback FAB */}
+      <form onSubmit={handleSubmit} className="relative mx-auto w-full max-w-xl shrink-0 pr-14 sm:pr-0">
+        {flash && (
+          <span key={`${flash}-${myLastAnswer?.attempts}`} aria-hidden
+            className="pointer-events-none absolute left-1/2 top-0 z-10 rounded-full px-3 py-1 text-body font-black"
+            style={{
+              background: flash === 'ok' ? 'var(--ag-win)' : 'var(--ag-lose)',
+              color: 'var(--ag-bg1)',
+              animation: 'arenaFloatUp .9s ease-out forwards',
+            }}>
+            {flash === 'ok' ? '+1 ✓' : '✗'}
+          </span>
+        )}
         <div className="flex items-center gap-2">
           <input
             ref={inputRef}
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder={currentClue.mode === 'vi_to_de' ? t('match.inputDe') : t('match.inputVi')}
+            placeholder={answeredCorrectThisRound ? t('match.answerCorrect') : currentClue.mode === 'vi_to_de' ? t('match.inputDe') : t('match.inputVi')}
             disabled={answerDisabled}
             autoComplete="off"
             autoCorrect="off"
             spellCheck={false}
             maxLength={100}
-            className="flex-1 px-4 py-3 rounded-xl text-lead"
+            className="arena-input h-14 min-w-0 flex-1 rounded-2xl px-4 text-lead font-semibold"
             style={{
-              background: 'var(--theme-bg-card)',
-              color: 'var(--theme-text-primary)',
-              border: `1px solid ${
-                myLastAnswer?.isCorrect === false
-                  ? STATUS.danger
-                  : myLastAnswer?.isCorrect === true
-                    ? STATUS.success
-                    : 'var(--theme-border)'
-              }`,
-              outline: 'none',
-              animation:
-                flash === 'ok'
-                  ? 'arenaFlashOk 0.5s ease-out'
-                  : flash === 'bad'
-                    ? 'arenaFlashBad 0.5s ease-out'
-                    : 'none',
+              borderColor: myLastAnswer?.isCorrect === false ? 'var(--ag-lose)' : myLastAnswer?.isCorrect === true ? 'var(--ag-win)' : undefined,
+              animation: flash === 'ok' ? 'arenaFlashOk 0.5s ease-out' : flash === 'bad' ? 'arenaFlashBad 0.5s ease-out' : 'none',
             }}
           />
-          <Button
-            type="submit"
-            variant="primary"
-            disabled={answerDisabled || !input.trim()}
-            style={{ background: GRADIENT.vocab }}
-          >
+          <button type="submit" disabled={answerDisabled || !input.trim()}
+            className="arena-play-btn flex h-14 shrink-0 items-center justify-center rounded-2xl px-5 text-body font-black uppercase">
             {t('match.send')}
-          </Button>
+          </button>
         </div>
         <div className="mt-2 flex flex-wrap items-center gap-2">
           {currentClue.mode === 'vi_to_de' && ['ä', 'ö', 'ü', 'ß'].map((ch) => (
-            <button
-              key={ch}
-              type="button"
-              onClick={() => insertGermanChar(ch)}
-              disabled={answerDisabled}
-              className="w-9 h-8 rounded-lg font-semibold"
-              style={{
-                background: 'var(--theme-bg-card)',
-                color: 'var(--theme-text-primary)',
-                border: '1px solid var(--theme-border)',
-                opacity: answerDisabled ? 0.5 : 1,
-              }}
-            >
+            <button key={ch} type="button" onClick={() => insertGermanChar(ch)} disabled={answerDisabled}
+              onPointerDown={(e) => e.preventDefault()}
+              className="arena-panel h-8 w-9 rounded-lg text-body font-bold disabled:opacity-50">
               {ch}
             </button>
           ))}
-          <span className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>
-            {currentClue.mode === 'vi_to_de' ? t('match.hintDe') : t('match.hintVi')}
+          <span className="arena-muted min-w-0 flex-1 text-caption">
+            {myLastAnswer && phase === 'playing'
+              ? <span style={{ color: myLastAnswer.isCorrect ? 'var(--ag-win)' : 'var(--ag-lose)' }}>
+                  {myLastAnswer.isCorrect ? t('match.answerCorrect') : t('match.answerWrong', { attempts: myLastAnswer.attempts })}
+                </span>
+              : currentClue.mode === 'vi_to_de' ? t('match.hintDe') : t('match.hintVi')}
           </span>
         </div>
       </form>
 
-      <div className="mt-3 min-h-6 space-y-1">
-        {myLastAnswer && phase === 'playing' && (
-          <div
-            className="text-caption"
-            style={{ color: myLastAnswer.isCorrect ? STATUS.success : STATUS.danger }}
-          >
-            {myLastAnswer.isCorrect
-              ? t('match.answerCorrect')
-              : t('match.answerWrong', { attempts: myLastAnswer.attempts })}
-          </div>
-        )}
-        {opponentLastResult && phase === 'playing' && (
-          <div
-            className="text-caption"
-            style={{ color: opponentLastResult.isCorrect ? STATUS.success : STATUS.danger }}
-          >
-            {opponentLastResult.isCorrect
-              ? t('match.oppCorrect', { seconds: Math.round((opponentLastResult.responseTimeMs ?? 0) / 1000) })
-              : t('match.oppWrong', { attempts: opponentLastResult.attempts })}
-          </div>
-        )}
-        {opponentTyping && phase === 'playing' && (
-          <div className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>
-            {t('match.oppTyping', { name: match.opponent.displayName })}
-          </div>
-        )}
-      </div>
-
-      {showCorrectConfetti && (
-        <ConfettiBurst count={20} durationMs={1500} />
-      )}
+      {showCorrectConfetti && <ConfettiBurst count={20} durationMs={1500} />}
 
       {phase === 'round-reveal' && roundReveal && (
         <RoundEndOverlay reveal={roundReveal} myUserId={myUserId} />
@@ -492,6 +351,58 @@ export default function MatchScreen({ matchId }: MatchScreenProps) {
           scores={scores}
         />
       )}
+
+      {confirmForfeit && (
+        <div className="fixed inset-0 z-[9000] flex items-center justify-center px-4"
+          style={{ background: 'rgba(5,6,20,.72)', backdropFilter: 'blur(8px)' }}
+          onClick={(e) => { if (e.target === e.currentTarget && !forfeitting) setConfirmForfeit(false); }}>
+          <div role="dialog" aria-modal="true" className="arena-stage relative w-full max-w-sm rounded-3xl p-6 text-center">
+            <div className="mb-2 flex justify-center" style={{ color: 'var(--ag-lose)' }} aria-hidden="true"><IconXCircle size={40} /></div>
+            <h3 className="mb-2 text-lead font-black">{t('match.leaveTitle')}</h3>
+            <p className="arena-muted mb-5 text-body">
+              {t.rich('match.leaveBody', { b: (chunks) => <strong style={{ color: 'var(--ag-lose)' }}>{chunks}</strong> })}
+              {match.opponent.isBot ? '' : t('match.leaveBodyRanked')}
+            </p>
+            <div className="flex gap-2">
+              <button type="button" onClick={() => setConfirmForfeit(false)} disabled={forfeitting}
+                className="arena-play-btn flex-1 rounded-xl py-2.5 text-body font-black">
+                {t('match.keepPlaying')}
+              </button>
+              <button type="button" disabled={forfeitting}
+                onClick={() => {
+                  setForfeitting(true);
+                  forfeitMatch(matchId);
+                  // The match:end event will trigger the redirect to /result —
+                  // close the dialog so user sees the final state animation.
+                  setConfirmForfeit(false);
+                }}
+                className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl border py-2.5 text-body font-bold disabled:opacity-50"
+                style={{ borderColor: 'var(--ag-lose)', color: 'var(--ag-lose)' }}>
+                <IconLogOut size={16} />{t('match.leave')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function VsPlayer({ player, label, side }: { player: ArenaPlayerLite; label: string; side: 'me' | 'opp' }) {
+  const ring = side === 'me' ? 'var(--ag-me)' : 'var(--ag-opp)';
+  return (
+    <div className="flex min-w-0 flex-col items-center gap-2 text-center"
+      style={{ animation: `${side === 'me' ? 'arenaSlideL' : 'arenaSlideR'} .5s cubic-bezier(0.34,1.56,0.64,1)` }}>
+      <div className="flex h-20 w-20 items-center justify-center rounded-full text-h1 font-black text-white sm:h-24 sm:w-24"
+        style={{
+          background: player.isBot ? GRADIENT.examWriting : side === 'me' ? GRADIENT.dictation : GRADIENT.listening,
+          boxShadow: `0 0 0 4px ${ring}, 0 0 36px color-mix(in srgb, ${ring} 60%, transparent)`,
+        }}>
+        {(player.displayName || '?').charAt(0).toUpperCase()}
+      </div>
+      <div className="arena-muted text-[11px] font-bold uppercase tracking-widest">{label}</div>
+      <div className="w-full truncate text-lead font-black">{player.displayName}</div>
+      <div className="mono text-caption font-bold" style={{ color: ring }}>{player.level}</div>
     </div>
   );
 }
@@ -529,105 +440,42 @@ function MatchEndOverlay({
   }, [ratingTarget]);
 
   const ratingSign = ratingTarget > 0 ? '+' : ratingTarget < 0 ? '' : '±';
+  const tone = matchResult.isDraw ? 'var(--ag-text)' : iWon ? 'var(--ag-gold)' : 'var(--ag-lose)';
 
   return (
-    <div
-      className="fixed inset-0 flex items-center justify-center px-4"
-      style={{
-        background: 'rgba(0,0,0,.75)',
-        backdropFilter: 'blur(10px)',
-        zIndex: 9000,
-      }}
-    >
+    <div className="arena-stage fixed inset-0 z-[9000] flex flex-col items-center justify-center gap-4 px-4 text-center">
       {iWon && <ConfettiBurst count={40} durationMs={2200} />}
-      <div
-        className="rounded-2xl p-8 max-w-md w-full text-center"
-        style={{
-          background: 'var(--theme-bg-card)',
-          boxShadow: 'var(--shadow-lifted)',
-          animation: 'bounceIn 0.4s cubic-bezier(0.34,1.56,0.64,1)',
-        }}
-      >
-        <div
-          aria-hidden="true"
-          className="flex items-center justify-center mb-2"
-          style={{
-            color: matchResult.isDraw
-              ? 'var(--theme-text-secondary)'
-              : iWon
-                ? ACCENT.xp
-                : 'var(--theme-text-muted)',
-          }}
-        >
-          {matchResult.isDraw ? (
-            <IconUsers size={56} />
-          ) : iWon ? (
-            <IconTrophy size={56} />
-          ) : (
-            <IconMedal size={56} />
-          )}
-        </div>
-        <div
-          className="text-xl font-bold mb-2"
-          style={{
-            color: matchResult.isDraw
-              ? 'var(--theme-text-primary)'
-              : iWon
-                ? STATUS.success
-                : STATUS.danger,
-          }}
-        >
-          {matchResult.isDraw
-            ? t('match.endDraw')
-            : iWon
-              ? t('match.endWon')
-              : t('match.endLost')}
-        </div>
-        <div
-          className="text-3xl font-bold mt-1 tabular-nums"
-          style={{ color: 'var(--theme-text-primary)' }}
-        >
-          {scores.me} - {scores.opponent}
-        </div>
-        <div className="flex items-center justify-center gap-3 mt-4">
-          {ratingTarget !== 0 && (
-            <div
-              className="px-3 py-1.5 rounded-full text-caption font-bold tabular-nums"
-              style={{
-                background: ratingTarget > 0
-                  ? 'rgba(34,197,94,.14)'
-                  : 'rgba(239,68,68,.14)',
-                color: ratingTarget > 0 ? STATUS.success : STATUS.danger,
-                border: `1px solid ${ratingTarget > 0 ? 'rgba(34,197,94,.4)' : 'rgba(239,68,68,.4)'}`,
-              }}
-            >
-              {t('match.ratingBadge', { sign: ratingSign, value: Math.abs(ratingShown) })}
-            </div>
-          )}
-          {xpTarget > 0 && (
-            <div
-              className="px-3 py-1.5 rounded-full text-caption font-bold tabular-nums"
-              style={{
-                background: 'rgba(245,158,11,.14)',
-                color: ACCENT.xp,
-                border: '1px solid rgba(245,158,11,.4)',
-              }}
-            >
-              {t('match.xpBadge', { xp: xpTarget })}
-            </div>
-          )}
-        </div>
-        <div className="text-caption mt-4" style={{ color: 'var(--theme-text-muted)' }}>
-          {t('match.redirecting')}
-        </div>
+      <div className="text-[64px] leading-none" aria-hidden>{matchResult.isDraw ? '🤝' : iWon ? '🏆' : '💀'}</div>
+      <div className="text-[44px] font-black uppercase sm:text-[60px]"
+        style={{ color: tone, textShadow: `0 0 36px ${tone}`, animation: 'arenaBannerIn .6s cubic-bezier(0.34,1.56,0.64,1)' }}>
+        {matchResult.isDraw ? t('match.drawBanner') : iWon ? t('match.victory') : t('match.defeat')}
       </div>
+      <div className="mono text-[40px] font-black">
+        <span style={{ color: 'var(--ag-me)' }}>{scores.me}</span>
+        <span className="arena-muted mx-3">:</span>
+        <span style={{ color: 'var(--ag-opp)' }}>{scores.opponent}</span>
+      </div>
+      <div className="flex items-center justify-center gap-3">
+        {ratingTarget !== 0 && (
+          <span className="mono rounded-full px-4 py-1.5 text-body font-black"
+            style={{ color: ratingTarget > 0 ? 'var(--ag-win)' : 'var(--ag-lose)', border: `1.5px solid ${ratingTarget > 0 ? 'var(--ag-win)' : 'var(--ag-lose)'}` }}>
+            {t('match.ratingBadge', { sign: ratingSign, value: Math.abs(ratingShown) })}
+          </span>
+        )}
+        {xpTarget > 0 && (
+          <span className="mono rounded-full px-4 py-1.5 text-body font-black" style={{ color: 'var(--ag-gold)', border: '1.5px solid var(--ag-gold)' }}>
+            {t('match.xpBadge', { xp: xpTarget })}
+          </span>
+        )}
+      </div>
+      <div className="arena-muted text-caption">{t('match.redirecting')}</div>
     </div>
   );
 }
 
-function ConnectionBanner({ status }: { status: ArenaConnectionStatus }) {
+function ConnectionBanner({ status, compact }: { status: ArenaConnectionStatus; compact?: boolean }) {
   const t = useTranslations('arena');
-  if (status === 'connected' || status === 'idle') return null;
+  if (status === 'connected' || status === 'idle') return compact ? <span /> : null;
   const text =
     status === 'connecting'
       ? t('match.connConnecting')
@@ -635,25 +483,9 @@ function ConnectionBanner({ status }: { status: ArenaConnectionStatus }) {
         ? t('match.connReconnecting')
         : t('match.connLost');
   return (
-    <div
-      className="mb-3 px-4 py-3 rounded-xl text-body"
-      style={{
-        background: 'rgba(245,158,11,.12)',
-        color: ACCENT.xp,
-        border: '1px solid rgba(245,158,11,.4)',
-      }}
-    >
+    <div className={`rounded-lg text-caption font-semibold ${compact ? 'px-2.5 py-1' : 'mb-2 px-4 py-2'}`}
+      style={{ background: 'rgba(251,191,36,.12)', color: 'var(--ag-gold)', border: '1px solid rgba(251,191,36,.4)' }}>
       {text}
-    </div>
-  );
-}
-
-function PlayerIntro({ name, level, label }: { name: string; level: string; label: string }) {
-  return (
-    <div className="min-w-0">
-      <div className="text-caption mb-1" style={{ color: 'var(--theme-text-muted)' }}>{label}</div>
-      <div className="font-bold truncate" style={{ color: 'var(--theme-text-primary)' }}>{name}</div>
-      <div className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>{level}</div>
     </div>
   );
 }

@@ -36,5 +36,5 @@ export default function ArenaLayout({ children }: { children: React.ReactNode })
     );
   }
 
-  return <div className="py-6">{children}</div>;
+  return <>{children}</>;
 }

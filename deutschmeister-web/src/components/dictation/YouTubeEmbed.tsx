@@ -4,8 +4,13 @@ import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
 
 export interface YouTubeEmbedRef {
   seekTo: (seconds: number) => void;
-  playSegment: (startSec: number, endSec: number) => void;
+  /** `onEnd` fires once playback reaches `endSec` (not on a user pause). */
+  playSegment: (startSec: number, endSec: number, onEnd?: () => void) => void;
   setSpeed: (rate: number) => void;
+  play: () => void;
+  pause: () => void;
+  togglePlay: () => void;
+  getCurrentTime: () => number;
 }
 
 export interface AutoPauseSegment {
@@ -28,6 +33,10 @@ interface Props {
    */
   autoPauseSegments?: ReadonlyArray<AutoPauseSegment>;
   onAutoPaused?: (endedSegmentId: string) => void;
+  /** Fires on PLAYING (true) and PAUSED/ENDED (false); buffering is ignored. */
+  onPlayingChange?: (playing: boolean) => void;
+  /** Initial position in seconds; read once when the player is created. */
+  startSec?: number;
 }
 
 interface YTPlayer {
@@ -80,9 +89,12 @@ function loadYTScript(): Promise<void> {
 }
 
 export const YouTubeEmbed = forwardRef<YouTubeEmbedRef, Props>(function YouTubeEmbed(
-  { youtubeId, onError, onTimeUpdate, autoPauseSegments, onAutoPaused },
+  { youtubeId, onError, onTimeUpdate, autoPauseSegments, onAutoPaused, onPlayingChange, startSec },
   ref,
 ) {
+  const onPlayingChangeRef = useRef(onPlayingChange);
+  onPlayingChangeRef.current = onPlayingChange;
+  const startSecRef = useRef(startSec);
   const containerRef = useRef<HTMLDivElement>(null);
   const playerRef = useRef<YTPlayer | null>(null);
   const segmentTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -105,7 +117,7 @@ export const YouTubeEmbed = forwardRef<YouTubeEmbedRef, Props>(function YouTubeE
         playerRef.current?.playVideo();
       } catch {}
     },
-    playSegment(startSec: number, endSec: number) {
+    playSegment(startSec: number, endSec: number, onEnd?: () => void) {
       try {
         if (segmentTimerRef.current) clearInterval(segmentTimerRef.current);
         // Reset boundary tracking so continuous auto-pause restarts cleanly
@@ -121,6 +133,7 @@ export const YouTubeEmbed = forwardRef<YouTubeEmbedRef, Props>(function YouTubeE
               playerRef.current?.pauseVideo();
               if (segmentTimerRef.current) clearInterval(segmentTimerRef.current);
               segmentTimerRef.current = null;
+              onEnd?.();
             }
           } catch {}
         }, 250);
@@ -130,6 +143,22 @@ export const YouTubeEmbed = forwardRef<YouTubeEmbedRef, Props>(function YouTubeE
       try {
         playerRef.current?.setPlaybackRate(rate);
       } catch {}
+    },
+    play() {
+      try { playerRef.current?.playVideo(); } catch {}
+    },
+    pause() {
+      try { playerRef.current?.pauseVideo(); } catch {}
+    },
+    togglePlay() {
+      try {
+        // YT.PlayerState.PLAYING === 1
+        if (playerRef.current?.getPlayerState?.() === 1) playerRef.current.pauseVideo();
+        else playerRef.current?.playVideo();
+      } catch {}
+    },
+    getCurrentTime() {
+      try { return playerRef.current?.getCurrentTime?.() ?? 0; } catch { return 0; }
     },
   }));
 
@@ -141,10 +170,15 @@ export const YouTubeEmbed = forwardRef<YouTubeEmbedRef, Props>(function YouTubeE
 
       playerRef.current = new window.YT.Player(containerRef.current, {
         videoId: youtubeId,
-        playerVars: { rel: 0, modestbranding: 1, enablejsapi: 1 },
+        playerVars: {
+          rel: 0, modestbranding: 1, enablejsapi: 1,
+          ...(startSecRef.current ? { start: Math.floor(startSecRef.current) } : {}),
+        },
         events: {
           onError: () => onError?.(),
           onStateChange: (e: YTPlayerStateEvent) => {
+            if (e.data === 1) onPlayingChangeRef.current?.(true);
+            else if (e.data === 2 || e.data === 0) onPlayingChangeRef.current?.(false);
             // A user pause / video end must cancel any in-flight playSegment
             // timer. Skip BUFFERING (3) so a transient buffer blip mid-segment
             // doesn't cancel a valid playSegment.
@@ -177,7 +211,8 @@ export const YouTubeEmbed = forwardRef<YouTubeEmbedRef, Props>(function YouTubeE
             onTimeUpdateRef.current?.(t);
 
             const segs = autoPauseSegmentsRef.current;
-            if (segs?.length) {
+            // A playSegment() in flight owns the end-of-segment pause.
+            if (segs?.length && !segmentTimerRef.current) {
               const ms = t * 1000;
               const active = segs.find(s => ms >= s.start && ms <= s.end);
               const newId = active?.id ?? null;

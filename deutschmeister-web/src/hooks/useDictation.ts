@@ -3,6 +3,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   dictationApi,
+  videoWatchApi,
   DictationSession,
   DictationHistoryResponse,
   DictationLibraryResponse,
@@ -18,7 +19,9 @@ export const dictationKeys = {
   library: (params?: Record<string, unknown>) => [...dictationKeys.all, 'library', params] as const,
   random: (params?: Record<string, unknown>) => [...dictationKeys.all, 'random', params] as const,
   session: (id: string) => [...dictationKeys.all, 'session', id] as const,
-  history: (params?: Record<string, unknown>) => [...dictationKeys.all, 'history', params] as const,
+  // Prefix for invalidation: history(undefined) would not match keys that carry params.
+  historyAll: () => [...dictationKeys.all, 'history'] as const,
+  history: (params?: Record<string, unknown>) => [...dictationKeys.historyAll(), params] as const,
   stats: () => [...dictationKeys.all, 'stats'] as const,
   myRequests: () => [...dictationKeys.all, 'my-requests'] as const,
 };
@@ -74,7 +77,7 @@ export function useStartDictation() {
   return useMutation({
     mutationFn: (data: { videoId: string }) => dictationApi.startSession(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: dictationKeys.history() });
+      queryClient.invalidateQueries({ queryKey: dictationKeys.historyAll() });
     },
   });
 }
@@ -85,7 +88,7 @@ export function useStartDictationFromUrl() {
     mutationFn: (data: { youtubeUrl: string; cefrLevel?: string }) =>
       dictationApi.startFromUrl(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: dictationKeys.history() });
+      queryClient.invalidateQueries({ queryKey: dictationKeys.historyAll() });
       queryClient.invalidateQueries({ queryKey: dictationKeys.myRequests() });
     },
   });
@@ -115,7 +118,7 @@ export function useSubmitDictation() {
       // Set cache directly with the GRADED result so the result page
       // never sees a stale DRAFT and incorrectly redirects back to play
       queryClient.setQueryData(dictationKeys.session(id), data);
-      queryClient.invalidateQueries({ queryKey: dictationKeys.history() });
+      queryClient.invalidateQueries({ queryKey: dictationKeys.historyAll() });
       queryClient.invalidateQueries({ queryKey: dictationKeys.stats() });
     },
   });
@@ -140,8 +143,66 @@ export function useDeleteDictation() {
   return useMutation({
     mutationFn: (id: string) => dictationApi.deleteSession(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: dictationKeys.history() });
+      queryClient.invalidateQueries({ queryKey: dictationKeys.historyAll() });
       queryClient.invalidateQueries({ queryKey: dictationKeys.stats() });
+    },
+  });
+}
+
+// ─── Bilingual watch mode ─────────────────────────────────────────────────────
+
+export const videoWatchKeys = {
+  all: ['video-watch'] as const,
+  video: (id: string) => [...videoWatchKeys.all, 'video', id] as const,
+  quiz: (id: string) => [...videoWatchKeys.all, 'quiz', id] as const,
+  savedAll: () => [...videoWatchKeys.all, 'saved'] as const,
+  saved: (params?: Record<string, unknown>) => [...videoWatchKeys.savedAll(), params] as const,
+};
+
+export function useWatchVideo(id: string) {
+  return useQuery({
+    queryKey: videoWatchKeys.video(id),
+    queryFn: () => videoWatchApi.getVideo(id),
+    enabled: !!id,
+    staleTime: 10 * 60 * 1000,
+  });
+}
+
+/** Lazy: only fetch once the user opens the quiz — first call costs a Gemini request. */
+export function useVideoQuiz(id: string, enabled: boolean) {
+  return useQuery({
+    queryKey: videoWatchKeys.quiz(id),
+    queryFn: () => videoWatchApi.getQuiz(id),
+    enabled: !!id && enabled,
+    staleTime: Infinity,
+    retry: false,
+  });
+}
+
+export function useSavedSentences(params?: { page?: number; limit?: number; videoId?: string }) {
+  return useQuery({
+    queryKey: videoWatchKeys.saved(params),
+    queryFn: () => videoWatchApi.listSaved(params),
+  });
+}
+
+export function useSaveSentence() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { videoId: string; segmentId: string; textVi?: string }) =>
+      videoWatchApi.saveSentence(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: videoWatchKeys.savedAll() });
+    },
+  });
+}
+
+export function useDeleteSavedSentence() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => videoWatchApi.deleteSaved(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: videoWatchKeys.savedAll() });
     },
   });
 }

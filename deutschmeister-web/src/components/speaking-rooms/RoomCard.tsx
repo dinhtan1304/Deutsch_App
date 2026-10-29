@@ -31,7 +31,8 @@ export function RoomCard({ room, onJoin, onReopen, loading, variant = 'public' }
   const t = useTranslations('speakingRooms.components');
   const now = useNow();
 
-  const activeCount = room.participants.filter((p) => !p.leftAt).length;
+  const active = room.participants.filter((p) => !p.leftAt);
+  const activeCount = active.length;
   const isFull = activeCount >= room.maxSeats;
   const isClosed = room.status === 'CLOSED';
   const tColor = topicColor(room.topic);
@@ -89,10 +90,18 @@ export function RoomCard({ room, onJoin, onReopen, loading, variant = 'public' }
       {/* footer: participant dots + duration + join */}
       <footer className="flex items-center justify-between gap-2 border-t border-dashed pt-3" style={{ borderColor: 'var(--theme-border)' }}>
         <div className="flex items-center gap-2.5 text-[11.5px]" style={{ color: 'var(--theme-text-muted)' }}>
-          <span className="inline-flex items-center gap-1.5">
-            <span className="flex gap-0.5">
-              {Array.from({ length: Math.min(room.maxSeats, 8) }).map((_, i) => (
-                <span key={i} className="h-1.5 w-1.5 rounded-full" style={{ background: i < activeCount ? (room.status === 'ACTIVE' ? 'var(--success)' : 'var(--warn)') : 'var(--theme-bg-tertiary)' }} />
+          <span className="inline-flex items-center gap-2">
+            {/* Who's in the room: stacked initials, open seats as dashed rings */}
+            <span className="flex -space-x-1.5">
+              {active.slice(0, 3).map((p) => (
+                <span key={p.userId} title={p.user.name ?? undefined}
+                  className="flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-bold text-white"
+                  style={{ background: tColor, boxShadow: '0 0 0 2px var(--theme-bg-card)' }}>
+                  {(p.user.name ?? '?').charAt(0).toUpperCase()}
+                </span>
+              ))}
+              {Array.from({ length: Math.max(0, Math.min(room.maxSeats, 3) - Math.min(activeCount, 3)) }).map((_, i) => (
+                <span key={`open-${i}`} className="h-6 w-6 rounded-full border border-dashed" style={{ borderColor: 'var(--theme-border)', background: 'var(--theme-bg-card)' }} />
               ))}
             </span>
             <span className="mono">{activeCount}/{room.maxSeats}</span>
