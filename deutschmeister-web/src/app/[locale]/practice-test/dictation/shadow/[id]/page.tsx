@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import {
@@ -14,6 +14,9 @@ import { VideoUnavailableFallback } from '@/components/dictation/VideoUnavailabl
 import { RecordButton, type RecordButtonRef } from '@/components/shadowing/RecordButton';
 import { PhraseScoreBadge } from '@/components/shadowing/PhraseScoreBadge';
 import { AiReviewCounter } from '@/components/shadowing/AiReviewCounter';
+import {
+  IconChevron, IconHeadphones, OptionToggle, PracticeGuide, SentenceNav, SpeedPicker, StepAction, StepLabel, useGuideDismissed,
+} from '@/components/dictation/PracticeKit';
 import { ACCENT, STATUS } from '@/lib/tokens';
 import type { GradeAttemptResponse, ShadowingAttempt, ShadowingSegment } from '@/lib/api/shadowing';
 
@@ -57,15 +60,6 @@ function alignWordScores(tokens: string[], words: WordScore[]): Array<WordScore 
 }
 
 // ─── Icons ─────────────────────────────────────────────────────────────────
-function IconHeadphones({ size = 16 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-      <path d="M3 18v-6a9 9 0 0 1 18 0v6" />
-      <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z" />
-    </svg>
-  );
-}
-
 function IconCompare({ size = 16 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
@@ -82,22 +76,7 @@ function IconPlay({ size = 14 }: { size?: number }) {
   );
 }
 
-function IconChevron({ dir, size = 16 }: { dir: 'left' | 'right'; size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round">
-      <polyline points={dir === 'left' ? '15 18 9 12 15 6' : '9 18 15 12 9 6'} />
-    </svg>
-  );
-}
 
-function IconClose({ size = 14 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
-      <line x1="18" y1="6" x2="6" y2="18" />
-      <line x1="6" y1="6" x2="18" y2="18" />
-    </svg>
-  );
-}
 
 function IconEye({ off, size = 14 }: { off?: boolean; size?: number }) {
   return (
@@ -109,40 +88,7 @@ function IconEye({ off, size = 14 }: { off?: boolean; size?: number }) {
   );
 }
 
-function Kbd({ children }: { children: ReactNode }) {
-  return (
-    <kbd className="hidden lg:inline-flex h-4.5 min-w-4.5 items-center justify-center rounded-sm border px-1 font-mono text-[10px] font-bold"
-      style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-muted)', background: 'var(--theme-bg-secondary)' }}>
-      {children}
-    </kbd>
-  );
-}
 
-// ─── How-it-works guide (replaces the old tip banner) ──────────────────────
-function PracticeGuide({ onDismiss }: { onDismiss: () => void }) {
-  const t = useTranslations('practice.dictation.shadow.session');
-  const steps = [t('guideListen'), t('guideSpeak'), t('guideCompare')];
-  return (
-    <div className="relative mb-5 rounded-2xl border p-4 pr-11"
-      style={{ background: `${ACC}0D`, borderColor: `${ACC}33` }}>
-      <p className="mb-3 text-caption font-bold uppercase tracking-wider" style={{ color: ACC }}>{t('guideTitle')}</p>
-      <ol className="grid gap-3 sm:grid-cols-3">
-        {steps.map((text, i) => (
-          <li key={i} className="flex items-start gap-2.5">
-            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-caption font-bold text-white" style={{ background: ACC }}>{i + 1}</span>
-            <span className="text-caption leading-relaxed" style={{ color: 'var(--theme-text-secondary)' }}>{text}</span>
-          </li>
-        ))}
-      </ol>
-      <p className="mt-3 text-[11px] italic" style={{ color: 'var(--theme-text-muted)' }}>{t('headphoneTip')}</p>
-      <button type="button" onClick={onDismiss} aria-label={t('dismiss')}
-        className="absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-lg transition-colors hover:bg-black/5 dark:hover:bg-white/5"
-        style={{ color: 'var(--theme-text-muted)' }}>
-        <IconClose />
-      </button>
-    </div>
-  );
-}
 
 // ─── Sentence with per-word score underline ────────────────────────────────
 // Every word is a `.wh-word` (click → dictionary popup). After grading, each
@@ -174,41 +120,7 @@ function ScoredSentence({ text, wordScores }: { text: string; wordScores?: WordS
   );
 }
 
-// ─── One step of the listen → speak → compare loop ─────────────────────────
-function StepAction({ index, label, hotkey, highlight, disabled, onClick, icon }: {
-  index: number;
-  label: string;
-  hotkey: string;
-  highlight: boolean;
-  disabled?: boolean;
-  onClick: () => void;
-  icon: ReactNode;
-}) {
-  return (
-    <div className="flex flex-col items-center gap-2">
-      {/* Same height as the record button so the three labels line up */}
-      <div className="flex h-19 items-center">
-        <button type="button" onClick={onClick} disabled={disabled} aria-label={label}
-          className="flex h-14 w-14 items-center justify-center rounded-full border-2 transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-35"
-          style={highlight
-            ? { borderColor: ACC, color: ACC, background: `${ACC}14`, boxShadow: `0 0 0 4px ${ACC}22` }
-            : { borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)', background: 'var(--theme-bg-card)' }}>
-          {icon}
-        </button>
-      </div>
-      <StepLabel index={index} label={label} hotkey={hotkey} highlight={highlight} />
-    </div>
-  );
-}
 
-function StepLabel({ index, label, hotkey, highlight }: { index: number; label: string; hotkey: string; highlight: boolean }) {
-  return (
-    <span className="flex items-center gap-1.5 text-caption font-bold"
-      style={{ color: highlight ? ACC : 'var(--theme-text-secondary)' }}>
-      {index}. {label} <Kbd>{hotkey}</Kbd>
-    </span>
-  );
-}
 
 // ─── Feedback after grading ────────────────────────────────────────────────
 function AttemptFeedback({ attempt, wordScores }: { attempt: ShadowingAttempt; wordScores?: WordScore[] }) {
@@ -261,19 +173,6 @@ function AttemptFeedback({ attempt, wordScores }: { attempt: ShadowingAttempt; w
 }
 
 // ─── Settings (speed + toggles) ────────────────────────────────────────────
-function Toggle({ on, onClick, label, title, icon }: { on: boolean; onClick: () => void; label: string; title?: string; icon?: ReactNode }) {
-  return (
-    <button type="button" onClick={onClick} aria-pressed={on} title={title}
-      className="inline-flex h-8 items-center gap-1.5 rounded-lg border px-2.5 text-caption font-semibold transition-colors"
-      style={on
-        ? { background: `${ACC}18`, color: ACC, borderColor: `${ACC}66` }
-        : { background: 'var(--theme-bg-secondary)', color: 'var(--theme-text-secondary)', borderColor: 'var(--theme-border)' }}>
-      {icon}
-      {label}
-    </button>
-  );
-}
-
 function PracticeSettings({ speed, onSpeed, autoPause, onAutoPause, autoRecord, onAutoRecord, hideText, onHideText, showTranslation, onShowTranslation, transcriptSource }: {
   speed: number; onSpeed: (s: number) => void;
   autoPause: boolean; onAutoPause: () => void;
@@ -295,26 +194,15 @@ function PracticeSettings({ speed, onSpeed, autoPause, onAutoPause, autoRecord, 
         </span>
       </div>
 
-      <div className="mb-3 flex items-center gap-2">
-        <span className="text-caption font-semibold" style={{ color: 'var(--theme-text-secondary)' }}>{t('speedLabel')}</span>
-        <div className="flex gap-1 rounded-lg p-0.5" style={{ background: 'var(--theme-bg-secondary)' }}>
-          {SPEED_OPTIONS.map((s) => (
-            <button key={s} type="button" onClick={() => onSpeed(s)} aria-pressed={speed === s}
-              className="mono rounded-md px-2 py-1 text-[11px] font-bold transition-colors"
-              style={speed === s
-                ? { background: ACC, color: 'white' }
-                : { color: 'var(--theme-text-secondary)' }}>
-              {s}x
-            </button>
-          ))}
-        </div>
+      <div className="mb-3">
+        <SpeedPicker label={t('speedLabel')} options={SPEED_OPTIONS} value={speed} onChange={onSpeed} accent={ACC} />
       </div>
 
       <div className="flex flex-wrap gap-2">
-        <Toggle on={autoPause} onClick={onAutoPause} label={t('autoPause')} />
-        <Toggle on={autoRecord} onClick={onAutoRecord} label={t('autoRecord')} title={t('autoRecordHint')} />
-        <Toggle on={hideText} onClick={onHideText} label={t('hideText')} title={t('hideTextHint')} icon={<IconEye off size={13} />} />
-        <Toggle on={showTranslation} onClick={onShowTranslation} label={t('showTranslation')} />
+        <OptionToggle accent={ACC} on={autoPause} onClick={onAutoPause} label={t('autoPause')} />
+        <OptionToggle accent={ACC} on={autoRecord} onClick={onAutoRecord} label={t('autoRecord')} title={t('autoRecordHint')} />
+        <OptionToggle accent={ACC} on={hideText} onClick={onHideText} label={t('hideText')} title={t('hideTextHint')} icon={<IconEye off size={13} />} />
+        <OptionToggle accent={ACC} on={showTranslation} onClick={onShowTranslation} label={t('showTranslation')} />
       </div>
 
       <p className="mt-3 hidden text-[11px] leading-relaxed lg:block" style={{ color: 'var(--theme-text-muted)' }}>
@@ -371,7 +259,7 @@ export default function ShadowingPlayPage() {
   const [speed, setSpeed] = useState(1);
   const [submitWarning, setSubmitWarning] = useState('');
   const [autoPause, setAutoPause] = useState(true);
-  const [guideDismissed, setGuideDismissed] = useState(true);
+  const [guideDismissed, dismissGuide] = useGuideDismissed(GUIDE_DISMISS_KEY);
   // Blind shadowing: hide the sentence until the learner asks (or is graded).
   const [hideText, setHideText] = useState(false);
   const [revealedSegId, setRevealedSegId] = useState<string | null>(null);
@@ -400,20 +288,6 @@ export default function ShadowingPlayPage() {
     };
   }, []);
 
-  // Guide visibility lives in localStorage (client-only)
-  useEffect(() => {
-    try {
-      setGuideDismissed(window.localStorage.getItem(GUIDE_DISMISS_KEY) === '1');
-    } catch {
-      setGuideDismissed(false);
-    }
-  }, []);
-
-  const dismissGuide = () => {
-    setGuideDismissed(true);
-    try { window.localStorage.setItem(GUIDE_DISMISS_KEY, '1'); } catch {}
-  };
-
   // Redirect when submitted
   useEffect(() => {
     if (session?.status === 'SUBMITTED') {
@@ -421,12 +295,14 @@ export default function ShadowingPlayPage() {
     }
   }, [session?.status, id, router]);
 
-  // Keep the current row visible in the sentence list
+  // Keep the current row visible in the sentence list — scroll the list
+  // container only (scrollIntoView would also scroll the page).
+  const listRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const target = selectedSegmentId ?? activeSegmentId;
-    if (!target) return;
-    const el = document.querySelector(`[data-shadow-segment-id="${target}"]`) as HTMLElement | null;
-    el?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    const list = listRef.current;
+    const row = target ? list?.querySelector<HTMLElement>(`[data-shadow-segment-id="${target}"]`) : null;
+    if (list && row) list.scrollTo({ top: row.offsetTop - list.clientHeight / 2 + row.offsetHeight / 2, behavior: 'smooth' });
   }, [selectedSegmentId, activeSegmentId]);
 
   function handleTimeUpdate(currentSec: number) {
@@ -633,7 +509,16 @@ export default function ShadowingPlayPage() {
         <p className="mt-1 truncate text-body" style={{ color: 'var(--theme-text-secondary)' }}>{session.video.title}</p>
       </div>
 
-      {!guideDismissed && <PracticeGuide onDismiss={dismissGuide} />}
+      {!guideDismissed && (
+        <PracticeGuide
+          title={t('guideTitle')}
+          steps={[t('guideListen'), t('guideSpeak'), t('guideCompare')]}
+          footnote={t('headphoneTip')}
+          dismissLabel={t('dismiss')}
+          onDismiss={dismissGuide}
+          accent={ACC}
+        />
+      )}
 
       {videoError ? (
         <VideoUnavailableFallback sessionId={id} />
@@ -667,24 +552,14 @@ export default function ShadowingPlayPage() {
           {/* Right: practice card + sentence list */}
           <div className="flex-1 min-w-0 w-full space-y-4">
             <section className="rounded-2xl border" style={{ background: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}>
-              {/* Sentence navigation */}
-              <div className="flex items-center gap-2 border-b px-4 py-3" style={{ borderColor: 'var(--theme-border)' }}>
-                <button type="button" onClick={() => goToIndex(currentIndex - 1)} disabled={currentIndex === 0}
-                  aria-label={t('prevSegment')}
-                  className="flex h-8 w-8 items-center justify-center rounded-lg border transition-colors disabled:opacity-35"
-                  style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)' }}>
-                  <IconChevron dir="left" />
-                </button>
-                <span className="mono text-caption font-bold" style={{ color: 'var(--theme-text-secondary)' }}>
-                  {t('sentenceOf', { current: currentIndex + 1, total: segments.length })}
-                </span>
-                <button type="button" onClick={() => goToIndex(currentIndex + 1)} disabled={currentIndex >= segments.length - 1}
-                  aria-label={t('nextSegment')}
-                  className="flex h-8 w-8 items-center justify-center rounded-lg border transition-colors disabled:opacity-35"
-                  style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)' }}>
-                  <IconChevron dir="right" />
-                </button>
-              </div>
+              <SentenceNav
+                label={t('sentenceOf', { current: currentIndex + 1, total: segments.length })}
+                index={currentIndex}
+                total={segments.length}
+                onGo={goToIndex}
+                prevLabel={t('prevSegment')}
+                nextLabel={t('nextSegment')}
+              />
 
               <div className="px-4 py-6 sm:px-8">
                 {/* The sentence */}
@@ -720,7 +595,7 @@ export default function ShadowingPlayPage() {
 
                 {/* Listen → speak → compare */}
                 <div className="mx-auto mt-8 grid max-w-md grid-cols-3 items-start gap-2">
-                  <StepAction index={1} label={t('stepListen')} hotkey="L"
+                  <StepAction accent={ACC} index={1} label={t('stepListen')} hotkey="L"
                     highlight={nextStep === 'listen'} disabled={!currentSegment}
                     onClick={handleReplayCurrent} icon={<IconHeadphones size={22} />} />
                   <div className="flex flex-col items-center gap-2">
@@ -737,9 +612,9 @@ export default function ShadowingPlayPage() {
                         layout="column"
                       />
                     </div>
-                    <StepLabel index={2} label={t('stepSpeak')} hotkey="R" highlight={nextStep === 'speak'} />
+                    <StepLabel accent={ACC} index={2} label={t('stepSpeak')} hotkey="R" highlight={nextStep === 'speak'} />
                   </div>
-                  <StepAction index={3} label={t('stepCompare')} hotkey="M"
+                  <StepAction accent={ACC} index={3} label={t('stepCompare')} hotkey="M"
                     highlight={nextStep === 'compare'} disabled={!currentTakeUrl}
                     onClick={handleCompare} icon={<IconCompare size={22} />} />
                 </div>
@@ -795,7 +670,7 @@ export default function ShadowingPlayPage() {
                   {session.completedSegments}/{session.totalSegments}
                 </span>
               </div>
-              <div className="max-h-90 divide-y overflow-y-auto" style={{ borderColor: 'var(--theme-border)' }}>
+              <div ref={listRef} className="relative max-h-90 divide-y overflow-y-auto" style={{ borderColor: 'var(--theme-border)' }}>
                 {segments.map((seg, i) => (
                   <SentenceRow key={seg.id} index={i} segment={seg}
                     isCurrent={seg.id === currentSegment?.id}

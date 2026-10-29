@@ -1,22 +1,29 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useDictationSession, useAutosaveDictation, useSubmitDictation, useCheckDictation, useDictationHint } from '@/hooks/useDictation';
+import { UMLAUT_TRIGGER_HINT } from '@/hooks/useUmlautTrigger';
 import { YouTubeEmbed, YouTubeEmbedRef } from '@/components/dictation/YouTubeEmbed';
-import { DictationSegmentRow } from '@/components/dictation/DictationSegmentRow';
-import { DictationHeader } from '@/components/dictation/DictationHeader';
+import { DictationSentence } from '@/components/dictation/DictationSentence';
 import { VideoUnavailableFallback } from '@/components/dictation/VideoUnavailableFallback';
 import { UmlautToolbar } from '@/components/dictation/UmlautToolbar';
-import { BlankCheckStatus } from '@/lib/api/dictation';
-import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import {
+  IconChevron, IconHeadphones, OptionToggle, PracticeGuide, SentenceNav, SpeedPicker, StepAction, useGuideDismissed,
+} from '@/components/dictation/PracticeKit';
+import { BlankCheckStatus, SegmentWithParts } from '@/lib/api/dictation';
+import { ACCENT, STATUS } from '@/lib/tokens';
 
+const ACC = ACCENT.dictation;
 const AUTOSAVE_DEBOUNCE_MS = 3000;
 const SPEED_OPTIONS = [0.5, 0.75, 1, 1.25, 1.5] as const;
-const NAVBAR_HEIGHT = 64;
+const GUIDE_DISMISS_KEY = 'dictation-guide-dismissed-v1';
+const EMPTY_BLANK = '＿＿＿';
 
 type SaveState = 'idle' | 'saving' | 'saved' | 'error';
+type Step = 'listen' | 'type' | 'check' | 'next';
+type RowStatus = 'none' | 'empty' | 'partial' | 'filled' | 'correct';
 
 // Subtle autosave status (D4) — reassures the learner their answers are kept.
 function SaveIndicator({ state }: { state: SaveState }) {
@@ -31,7 +38,7 @@ function SaveIndicator({ state }: { state: SaveState }) {
   }
   const saved = state === 'saved';
   return (
-    <span className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide"
+    <span className="inline-flex items-center gap-1 whitespace-nowrap text-[10px] font-semibold uppercase tracking-wide"
       style={{ color: saved ? STATUS.success : 'var(--theme-text-muted)' }}>
       {saved ? (
         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
@@ -43,6 +50,59 @@ function SaveIndicator({ state }: { state: SaveState }) {
   );
 }
 
+function IconPencil({ size = 20 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 20h9" /><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+    </svg>
+  );
+}
+
+function IconCheck({ size = 20 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.6} strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="20 6 9 17 4 12" />
+    </svg>
+  );
+}
+
+const blankIdsOf = (seg: SegmentWithParts) =>
+  seg.parts.flatMap(p => (p.type === 'blank' ? [p.blankId] : []));
+
+// ─── Whole-transcript row ──────────────────────────────────────────────────
+// Memoized on primitive props: typing only re-renders the row whose preview
+// actually changed, not the whole list.
+const SentenceListRow = memo(function SentenceListRow({ index, preview, status, filled, total, isCurrent, isPlaying, onSelect }: {
+  index: number;
+  preview: string;
+  status: RowStatus;
+  filled: number;
+  total: number;
+  isCurrent: boolean;
+  isPlaying: boolean;
+  onSelect: (index: number) => void;
+}) {
+  const badgeColor = status === 'correct' ? STATUS.success : status === 'filled' ? ACC : 'var(--theme-text-muted)';
+  return (
+    <button type="button" onClick={() => onSelect(index)} data-dict-row={index}
+      className="flex w-full items-start gap-3 border-l-4 px-3 py-2.5 text-left transition-colors hover:bg-(--theme-bg-secondary)"
+      style={{ borderLeftColor: isCurrent ? ACC : 'transparent', background: isCurrent ? `${ACC}12` : undefined }}>
+      <span className="mono mt-0.5 w-6 shrink-0 text-right text-caption font-bold" style={{ color: isCurrent || isPlaying ? ACC : 'var(--theme-text-muted)' }}>
+        {index + 1}
+      </span>
+      <span className="line-clamp-2 min-w-0 flex-1 text-body"
+        style={{ color: isCurrent ? 'var(--theme-text-primary)' : 'var(--theme-text-secondary)', fontWeight: isCurrent ? 600 : 400 }}>
+        {preview}
+      </span>
+      {status !== 'none' && (
+        <span className="mono mt-0.5 shrink-0 text-caption font-bold" style={{ color: badgeColor }}>
+          {status === 'correct' ? '✓' : `${filled}/${total}`}
+        </span>
+      )}
+    </button>
+  );
+});
+
 export default function DictationPlayPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
@@ -51,8 +111,11 @@ export default function DictationPlayPage() {
   const autosaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   // Answers typed since the last save; flushed on debounce, tab hide and unmount.
   const pendingAnswers = useRef<Record<string, string> | null>(null);
-  const stickyRef = useRef<HTMLDivElement>(null);
-  const sentinelRef = useRef<HTMLDivElement>(null);
+  const focusedBlankRef = useRef<HTMLInputElement | null>(null);
+  const cardRef = useRef<HTMLElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
+  // Set by navigation so the effect below can focus the new sentence's first blank.
+  const focusOnNav = useRef(false);
 
   const { data: session, isLoading } = useDictationSession(id);
   const { mutate: autosave } = useAutosaveDictation();
@@ -61,16 +124,21 @@ export default function DictationPlayPage() {
   const { mutate: fetchHint } = useDictationHint();
 
   const [localAnswers, setLocalAnswers] = useState<Record<string, string> | null>(null);
-  const userAnswers = localAnswers ?? (session?.userAnswers as Record<string, string> | undefined) ?? {};
+  const userAnswers = useMemo(
+    () => localAnswers ?? (session?.userAnswers as Record<string, string> | undefined) ?? {},
+    [localAnswers, session?.userAnswers],
+  );
   const [videoError, setVideoError] = useState(false);
   const [showSubmitWarning, setShowSubmitWarning] = useState(false);
-  const [activeSegmentId, setActiveSegmentId] = useState<string | null>(null);
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const [playingSegmentId, setPlayingSegmentId] = useState<string | null>(null);
   const [speed, setSpeed] = useState(1);
   const [autoPause, setAutoPause] = useState(true);
-  const [pausedAtSegmentId, setPausedAtSegmentId] = useState<string | null>(null);
+  const [autoPlayOnNav, setAutoPlayOnNav] = useState(true);
   const [saveState, setSaveState] = useState<SaveState>('idle');
   const [blankStatus, setBlankStatus] = useState<Record<string, BlankCheckStatus>>({});
-  const focusedBlankRef = useRef<HTMLInputElement | null>(null);
+  const [listened, setListened] = useState<Record<string, true>>({});
+  const [guideDismissed, dismissGuide] = useGuideDismissed(GUIDE_DISMISS_KEY);
 
   // Redirect if already graded
   useEffect(() => {
@@ -85,27 +153,6 @@ export default function DictationPlayPage() {
     const timer = setTimeout(() => setSaveState('idle'), 1500);
     return () => clearTimeout(timer);
   }, [saveState]);
-
-
-  // Smart scroll
-  useEffect(() => {
-    if (!activeSegmentId) return;
-    const timer = setTimeout(() => {
-      const el = document.querySelector(`[data-segment-id="${activeSegmentId}"]`) as HTMLElement | null;
-      if (!el) return;
-
-      const stickyHeight = stickyRef.current?.offsetHeight ?? 200;
-      const topBarrier = NAVBAR_HEIGHT + stickyHeight + 12;
-      const bottomBarrier = window.innerHeight - 40;
-      const rect = el.getBoundingClientRect();
-
-      if (rect.top < topBarrier || rect.bottom > bottomBarrier) {
-        const targetY = el.getBoundingClientRect().top + window.scrollY - topBarrier;
-        window.scrollTo({ top: targetY, behavior: 'smooth' });
-      }
-    }, 50);
-    return () => clearTimeout(timer);
-  }, [activeSegmentId]);
 
   // Debounced autosave
   const flushAutosave = useCallback(() => {
@@ -140,13 +187,117 @@ export default function DictationPlayPage() {
     };
   }, [flushAutosave]);
 
-  function handleTimeUpdate(currentSec: number) {
-    if (!session?.segments) return;
-    const currentMs = currentSec * 1000;
-    const active = session.segments.find(s => currentMs >= s.start && currentMs <= s.end);
-    setActiveSegmentId(active?.id ?? null);
+  // ─── Derived per-sentence data ───────────────────────────────────────────
+  const segments = useMemo(() => session?.segments ?? [], [session?.segments]);
+  const segBlankIds = useMemo(() => segments.map(blankIdsOf), [segments]);
+
+  // Resume at the first sentence that still has an empty blank.
+  const resumeIndex = useMemo(() => {
+    const saved = (session?.userAnswers as Record<string, string> | undefined) ?? {};
+    const i = segBlankIds.findIndex(ids => ids.some(b => !saved[b]?.trim()));
+    return i < 0 ? 0 : i;
+  }, [segBlankIds, session?.userAnswers]);
+
+  const currentIndex = Math.min(selectedIndex ?? resumeIndex, Math.max(0, segments.length - 1));
+  const current = segments[currentIndex] ?? null;
+  const currentBlanks = segBlankIds[currentIndex] ?? [];
+  const filledCount = currentBlanks.filter(b => userAnswers[b]?.trim()).length;
+  const correctCount = currentBlanks.filter(b => blankStatus[b] === 'correct').length;
+  const nearCount = currentBlanks.filter(b => blankStatus[b] === 'near').length;
+  const checkedAny = currentBlanks.some(b => blankStatus[b]);
+  const allCorrect = currentBlanks.length > 0 && correctCount === currentBlanks.length;
+
+  const nextStep: Step = !current || currentBlanks.length === 0 || allCorrect
+    ? 'next'
+    : !listened[current.id] && filledCount === 0 ? 'listen'
+    : filledCount < currentBlanks.length ? 'type'
+    : 'check';
+
+  const rows = useMemo(() => segments.map((seg, i) => {
+    const ids = segBlankIds[i]!;
+    const filled = ids.filter(b => userAnswers[b]?.trim()).length;
+    const correct = ids.length > 0 && ids.every(b => blankStatus[b] === 'correct');
+    const preview = seg.parts
+      .map(p => (p.type === 'text' ? p.text : userAnswers[p.blankId]?.trim() || EMPTY_BLANK))
+      .join(' ')
+      .replace(/\s+([.,!?;:])/g, '$1');
+    const status: RowStatus = ids.length === 0 ? 'none'
+      : correct ? 'correct'
+      : filled === 0 ? 'empty'
+      : filled < ids.length ? 'partial'
+      : 'filled';
+    return { id: seg.id, preview, status, filled, total: ids.length };
+  }), [segments, segBlankIds, userAnswers, blankStatus]);
+
+  // ─── Navigation + playback ───────────────────────────────────────────────
+  function markListened(segId: string) {
+    setListened(prev => (prev[segId] ? prev : { ...prev, [segId]: true }));
   }
 
+  function playSeg(seg: SegmentWithParts) {
+    markListened(seg.id);
+    playerRef.current?.playSegment(seg.start / 1000, seg.end / 1000);
+  }
+
+  function goTo(index: number) {
+    const seg = segments[index];
+    if (!seg) return;
+    setSelectedIndex(index);
+    setShowSubmitWarning(false);
+    focusOnNav.current = true;
+    if (autoPlayOnNav) playSeg(seg);
+  }
+
+  // Stable handle for the memoized list rows.
+  const goToRef = useRef(goTo);
+  useEffect(() => { goToRef.current = goTo; });
+  const selectRow = useCallback((index: number) => goToRef.current(index), []);
+
+  function focusFirstOpenBlank() {
+    const inputs = Array.from(cardRef.current?.querySelectorAll<HTMLInputElement>('input[data-dictation-blank]') ?? []);
+    const target = inputs.find(el => !el.readOnly && !el.value.trim()) ?? inputs.find(el => !el.readOnly);
+    target?.focus();
+  }
+
+  // After navigating: focus the first open blank and keep the list row in view
+  // (scrolling the list container only, never the page).
+  useEffect(() => {
+    if (focusOnNav.current) {
+      focusOnNav.current = false;
+      focusFirstOpenBlank();
+    }
+    const list = listRef.current;
+    const row = list?.querySelector<HTMLElement>(`[data-dict-row="${currentIndex}"]`);
+    if (list && row) list.scrollTop = row.offsetTop - list.clientHeight / 2 + row.offsetHeight / 2;
+  }, [currentIndex]);
+
+  function handleTimeUpdate(currentSec: number) {
+    const ms = currentSec * 1000;
+    const active = segments.find(s => ms >= s.start && ms <= s.end);
+    if (active) setPlayingSegmentId(active.id);
+  }
+
+  function handleAutoPaused(segId: string) {
+    // The sentence that just finished is the one to type.
+    const index = segments.findIndex(s => s.id === segId);
+    if (index < 0) return;
+    markListened(segId);
+    if (index !== currentIndex) {
+      setSelectedIndex(index);
+      focusOnNav.current = true;
+    }
+  }
+
+  function handleReplay() {
+    if (current) playSeg(current);
+  }
+
+  function handleSpeedChange(rate: number) {
+    setSpeed(rate);
+    playerRef.current?.setSpeed(rate);
+  }
+
+  // ─── Answers ─────────────────────────────────────────────────────────────
   function handleChange(blankId: string, value: string) {
     // Editing a checked blank resets its check status
     setBlankStatus(prev => {
@@ -163,16 +314,17 @@ export default function DictationPlayPage() {
     });
   }
 
-  function handleCheckSegment(segmentId: string) {
-    const seg = session?.segments.find(s => s.id === segmentId);
-    if (!seg) return;
+  function handleCheck() {
+    if (!current) return;
     const answers: Record<string, string> = {};
-    for (const part of seg.parts) {
-      if (part.type !== 'blank') continue;
-      const v = userAnswers[part.blankId];
-      if (v?.trim()) answers[part.blankId] = v;
+    for (const b of currentBlanks) {
+      const v = userAnswers[b];
+      if (v?.trim()) answers[b] = v;
     }
-    if (!Object.keys(answers).length) return;
+    if (!Object.keys(answers).length) {
+      focusFirstOpenBlank();
+      return;
+    }
     checkAnswers({ id, answers }, {
       onSuccess: (data) => {
         setBlankStatus(prev => {
@@ -180,8 +332,16 @@ export default function DictationPlayPage() {
           for (const r of data.results) next[r.blankId] = r.status;
           return next;
         });
+        // Put the caret on the first blank that still needs work.
+        requestAnimationFrame(focusFirstOpenBlank);
       },
     });
+  }
+
+  // Enter in the last blank / Ctrl+Enter: check, or move on once all correct.
+  function handleCheckOrNext() {
+    if (allCorrect || currentBlanks.length === 0) goTo(currentIndex + 1);
+    else handleCheck();
   }
 
   function handleHint(blankId: string) {
@@ -199,17 +359,10 @@ export default function DictationPlayPage() {
     });
   }
 
-  // Check the segment containing the focused blank; fall back to active segment
-  function handleCheckFocusedOrActive() {
-    const focusedSegId = focusedBlankRef.current?.closest('[data-segment-id]')?.getAttribute('data-segment-id');
-    const segId = focusedSegId ?? activeSegmentId;
-    if (segId) handleCheckSegment(segId);
-  }
-
   function handleUmlautInsert(ch: string) {
     const el = focusedBlankRef.current;
     const blankId = el?.dataset.blankId;
-    if (!el || !blankId || el.readOnly) return;
+    if (!el || !blankId || el.readOnly || !el.isConnected) return;
     const start = el.selectionStart ?? el.value.length;
     const end = el.selectionEnd ?? start;
     const next = el.value.slice(0, start) + ch + el.value.slice(end);
@@ -218,36 +371,6 @@ export default function DictationPlayPage() {
       el.focus();
       el.setSelectionRange(start + 1, start + 1);
     });
-  }
-
-  function handleSpeedChange(rate: number) {
-    setSpeed(rate);
-    playerRef.current?.setSpeed(rate);
-  }
-
-  // Compact mobile bar: replay the segment currently in view (fallback: first).
-  function handleReplayActive() {
-    if (!session?.segments?.length) return;
-    const seg = session.segments.find(s => s.id === activeSegmentId) ?? session.segments[0];
-    if (!seg) return;
-    playerRef.current?.playSegment(seg.start / 1000, seg.end / 1000);
-  }
-
-  function cycleSpeed() {
-    const idx = SPEED_OPTIONS.indexOf(speed as (typeof SPEED_OPTIONS)[number]);
-    handleSpeedChange(SPEED_OPTIONS[(idx + 1) % SPEED_OPTIONS.length] ?? 1);
-  }
-
-  function handlePlayNext() {
-    if (!session?.segments) return;
-    // Prefer the segment AFTER the one we paused at; fall back to the
-    // current active, or the very first segment.
-    const anchorId = pausedAtSegmentId ?? activeSegmentId;
-    const idx = anchorId ? session.segments.findIndex(s => s.id === anchorId) : -1;
-    const next = idx >= 0 ? session.segments[idx + 1] : session.segments[0];
-    if (!next) return;
-    setPausedAtSegmentId(null);
-    playerRef.current?.playSegment(next.start / 1000, next.end / 1000);
   }
 
   function handleSubmit() {
@@ -266,18 +389,28 @@ export default function DictationPlayPage() {
     });
   }
 
-  // Desktop hotkeys — listener bound once; handlers read via ref so the
-  // effect never needs re-binding.
-  const hotkeysRef = useRef({ replay: () => {}, check: () => {}, next: () => {} });
+  // Hotkeys (Ctrl/⌘ so they work while typing) — listener bound once;
+  // handlers read via ref so the effect never needs re-binding.
+  const hotkeysRef = useRef({ replay: () => {}, check: () => {}, next: () => {}, prev: () => {} });
   useEffect(() => {
-    hotkeysRef.current = { replay: handleReplayActive, check: handleCheckFocusedOrActive, next: handlePlayNext };
+    hotkeysRef.current = {
+      replay: handleReplay,
+      check: handleCheckOrNext,
+      next: () => goTo(currentIndex + 1),
+      prev: () => goTo(currentIndex - 1),
+    };
   });
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (!(e.ctrlKey || e.metaKey)) return;
-      if (e.code === 'Space') { e.preventDefault(); hotkeysRef.current.replay(); }
-      else if (e.key === 'Enter') { e.preventDefault(); hotkeysRef.current.check(); }
-      else if (e.key === 'ArrowRight') { e.preventDefault(); hotkeysRef.current.next(); }
+      const action = e.code === 'Space' ? 'replay'
+        : e.key === 'Enter' ? 'check'
+        : e.key === 'ArrowRight' ? 'next'
+        : e.key === 'ArrowLeft' ? 'prev'
+        : null;
+      if (!action) return;
+      e.preventDefault();
+      hotkeysRef.current[action]();
     }
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
@@ -286,7 +419,7 @@ export default function DictationPlayPage() {
   if (isLoading) {
     return (
       <div className="flex justify-center items-center min-h-100">
-        <div className="w-10 h-10 border-4 rounded-full animate-spin" style={{ borderColor: 'var(--theme-border)', borderTopColor: 'var(--accent)' }} />
+        <div className="w-10 h-10 border-4 rounded-full animate-spin" style={{ borderColor: 'var(--theme-border)', borderTopColor: ACC }} />
       </div>
     );
   }
@@ -301,13 +434,37 @@ export default function DictationPlayPage() {
 
   const answeredCount = Object.values(userAnswers).filter(v => v?.trim()).length;
   const unansweredCount = session.totalBlanks - answeredCount;
+  const answeredPct = session.totalBlanks > 0 ? (answeredCount / session.totalBlanks) * 100 : 0;
+
+  const settings = (
+    <div className="rounded-2xl border p-4" style={{ background: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}>
+      <div className="mb-3 flex items-center justify-between gap-2">
+        <span className="text-caption font-bold uppercase tracking-wider" style={{ color: 'var(--theme-text-muted)' }}>{t('settingsTitle')}</span>
+        <span className="mono rounded-sm px-1.5 py-0.5 text-[10px] font-bold" style={{ background: `${ACC}18`, color: ACC }}>
+          {session.difficulty}
+        </span>
+      </div>
+      <div className="mb-3">
+        <SpeedPicker label={t('speedLabel')} options={SPEED_OPTIONS} value={speed} onChange={handleSpeedChange} accent={ACC} />
+      </div>
+      <div className="flex flex-wrap gap-2">
+        <OptionToggle on={autoPause} onClick={() => setAutoPause(a => !a)} label={t('autoPause')} accent={ACC} />
+        <OptionToggle on={autoPlayOnNav} onClick={() => setAutoPlayOnNav(a => !a)} label={t('autoPlayOnNav')} accent={ACC} />
+      </div>
+      <p className="mt-3 hidden text-[11px] leading-relaxed lg:block" style={{ color: 'var(--theme-text-muted)' }}>
+        {t('hotkeysLegend')}
+      </p>
+    </div>
+  );
 
   return (
-    <div className="max-w-360 mx-auto px-4 pb-24">
-      {/* Header Container — sentinel for collapse */}
-      <div ref={sentinelRef} className="pt-4 mb-5">
-        <button onClick={() => router.push('/practice-test/dictation')} className="mb-3 inline-flex items-center gap-1 text-caption font-medium transition-opacity hover:opacity-70" style={{ color: 'var(--accent)' }}>
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
+    <div className="max-w-360 mx-auto px-4 sm:px-6 pb-28">
+      {/* Back link + title */}
+      <div className="pt-4 mb-4">
+        <button type="button" onClick={() => router.push('/practice-test/dictation')}
+          className="mb-3 inline-flex items-center gap-1 text-caption font-semibold transition-opacity hover:opacity-70"
+          style={{ color: ACC }}>
+          <IconChevron dir="left" size={15} />
           {t('back')}
         </button>
         <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.14em]" style={{ color: 'var(--theme-text-muted)' }}>{t('eyebrow')}</p>
@@ -315,16 +472,25 @@ export default function DictationPlayPage() {
         <p className="mt-1.5 text-body" style={{ color: 'var(--theme-text-secondary)' }}>{t('subtitle')}</p>
       </div>
 
+      {!guideDismissed && (
+        <PracticeGuide
+          title={t('guideTitle')}
+          steps={[t('guideListen'), t('guideType'), t('guideCheck')]}
+          footnote={t('umlautTip', { hint: UMLAUT_TRIGGER_HINT })}
+          dismissLabel={t('dismiss')}
+          onDismiss={dismissGuide}
+          accent={ACC}
+        />
+      )}
+
       {videoError ? (
         <VideoUnavailableFallback sessionId={id} />
       ) : (
         <div className="flex flex-col lg:flex-row gap-4 lg:gap-8 items-start">
-
-          {/* Sticky Panel: Video + Controls — pinned right below the navbar on all sizes */}
-          <div ref={stickyRef} className="w-full lg:w-100 sticky top-16 lg:top-20 z-20 lg:z-30">
-
-            <div className="flex flex-col gap-3 lg:gap-4">
-              {/* Video wrapper */}
+          {/* Left: video + settings, pinned on desktop. On phones the video
+              scrolls away (the keyboard covers it anyway) — audio keeps playing. */}
+          <div className="w-full lg:w-100 lg:sticky lg:top-20 lg:z-30">
+            <div className="flex flex-col gap-3">
               <div className="relative rounded-2xl overflow-hidden border w-full aspect-video" style={{ borderColor: 'var(--theme-border)' }}>
                 <YouTubeEmbed
                   ref={playerRef}
@@ -332,167 +498,165 @@ export default function DictationPlayPage() {
                   onError={() => setVideoError(true)}
                   onTimeUpdate={handleTimeUpdate}
                   autoPauseSegments={autoPause ? session.segments : undefined}
-                  onAutoPaused={(segId) => {
-                    setPausedAtSegmentId(segId);
-                    setActiveSegmentId(segId);
-                  }}
+                  onAutoPaused={handleAutoPaused}
                 />
               </div>
-
-              {/* Compact control bar — mobile only, pinned right under the video */}
-              <div className="lg:hidden flex flex-wrap items-center gap-2 rounded-2xl border px-3 py-2.5"
-                style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
-                <button type="button" onClick={handleReplayActive} aria-label={t('listenSegment')}
-                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"
-                  style={{ background: `color-mix(in srgb, ${ACCENT.dictation} 14%, transparent)`, color: ACCENT.dictation }}>
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M3 18v-6a9 9 0 0 1 18 0v6" />
-                    <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z" />
-                  </svg>
-                </button>
-                <button type="button" onClick={cycleSpeed} title={t('speedLabel')}
-                  className="mono flex h-8 shrink-0 items-center rounded-lg px-2.5 text-[11px] font-bold"
-                  style={{ background: 'var(--theme-bg-secondary)', color: 'var(--theme-text-secondary)', border: '1px solid var(--theme-border)' }}>
-                  {speed}x
-                </button>
-                <button type="button" onClick={() => setAutoPause(a => !a)} aria-label={t('autoPause')} aria-pressed={autoPause}
-                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"
-                  style={autoPause
-                    ? { background: 'color-mix(in srgb, var(--accent) 14%, transparent)', color: 'var(--accent)', border: '1px solid var(--accent)' }
-                    : { background: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)', border: '1px solid var(--theme-border)' }}>
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1" /><rect x="14" y="5" width="4" height="14" rx="1" /></svg>
-                </button>
-                <button type="button" onClick={handlePlayNext} aria-label={t('nextSegment')}
-                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"
-                  style={{ background: 'var(--theme-bg-secondary)', color: 'var(--theme-text-secondary)', border: '1px solid var(--theme-border)' }}>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6" /></svg>
-                </button>
-                <span className="mono text-[11px] font-bold" style={{ color: 'var(--theme-text-secondary)' }}>{answeredCount}/{session.totalBlanks}</span>
-                <SaveIndicator state={saveState} />
-                <button type="button" onClick={handleSubmit} disabled={isSubmitting}
-                  className="ml-auto flex shrink-0 items-center gap-1.5 rounded-lg px-3.5 py-2 text-caption font-bold text-white transition-opacity disabled:opacity-60"
-                  style={{ background: GRADIENT.dictation }}>
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
-                  {t('checkAnswers')}
-                </button>
-              </div>
-
-              {/* Umlaut quick-insert — mobile only (desktop has it in the controls card) */}
-              <div className="lg:hidden flex items-center gap-2 rounded-2xl border px-3 py-2"
-                style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-card)' }}>
-                <span className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: 'var(--theme-text-muted)' }}>{t('umlautLabel')}</span>
-                <UmlautToolbar onInsert={handleUmlautInsert} />
-              </div>
-
-              {/* Controls Card — desktop only; mobile uses the compact bar above */}
-              <div className="hidden lg:block rounded-2xl border p-4"
-                style={{
-                  borderColor: 'var(--theme-border)',
-                  backgroundColor: 'var(--theme-bg-card)',
-                }}>
-                <div className="flex flex-col gap-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex flex-wrap items-center gap-1.5">
-                      <span className="mr-1 text-[10px] font-semibold uppercase tracking-widest" style={{ color: 'var(--theme-text-muted)' }}>{t('speedLabel')}</span>
-                      {SPEED_OPTIONS.map(s => (
-                        <button key={s} type="button" onClick={() => handleSpeedChange(s)}
-                          className="mono rounded-[7px] px-2 py-1 text-[11px] font-bold transition-colors"
-                          style={speed === s
-                            ? { background: 'color-mix(in srgb, var(--accent) 14%, transparent)', color: 'var(--accent)', border: '1px solid var(--accent)' }
-                            : { background: 'var(--theme-bg-secondary)', color: 'var(--theme-text-secondary)', border: '1px solid var(--theme-border)' }}>{s}x</button>
-                      ))}
-                    </div>
-                    <span className="mono rounded-[5px] px-2 py-0.5 text-[10.5px] font-bold" style={{ background: 'color-mix(in srgb, var(--violet) 16%, transparent)', color: 'var(--violet)' }}>
-                      {session.difficulty}
-                    </span>
-                  </div>
-
-                  {/* Umlaut quick-insert row */}
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: 'var(--theme-text-muted)' }}>{t('umlautLabel')}</span>
-                    <UmlautToolbar onInsert={handleUmlautInsert} />
-                  </div>
-
-                  {/* Auto-pause + Next segment row */}
-                  <div className="flex items-center justify-between gap-3 flex-wrap">
-                    <button type="button" onClick={() => setAutoPause(a => !a)} className="flex items-center gap-2">
-                      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-sm" style={autoPause ? { background: 'var(--accent)', color: 'var(--accent-on)' } : { background: 'var(--theme-bg-secondary)', border: '1px solid var(--theme-border)' }}>
-                        {autoPause && <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>}
-                      </span>
-                      <span className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: 'var(--theme-text-secondary)' }}>{t('autoPause')}</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handlePlayNext}
-                      className="inline-flex items-center gap-1.5 rounded-[9px] px-3.5 py-2 text-[11px] font-bold uppercase tracking-widest transition-colors"
-                      style={{ background: 'color-mix(in srgb, var(--accent) 14%, transparent)', color: 'var(--accent)', border: '1px solid color-mix(in srgb, var(--accent) 45%, transparent)' }}
-                    >
-                      {t('nextSegment')}
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6" /></svg>
-                    </button>
-                  </div>
-
-                  <p className="text-[10.5px] leading-relaxed" style={{ color: 'var(--theme-text-muted)' }}>
-                    {t('hotkeysLegend')}
-                  </p>
-
-                  <div className="flex h-4 items-center justify-end">
-                    <SaveIndicator state={saveState} />
-                  </div>
-                  <DictationHeader
-                    difficulty={session.difficulty}
-                    answeredCount={answeredCount}
-                    totalBlanks={session.totalBlanks}
-                    onSubmit={handleSubmit}
-                    isSubmitting={isSubmitting}
-                  />
-                </div>
-              </div>
+              <div className="hidden lg:block">{settings}</div>
             </div>
           </div>
 
-          {/* Main Content: Segments List */}
-          <div className="flex-1 min-w-0 w-full">
-            {showSubmitWarning && (
-              <div className="mb-6 p-4 rounded-2xl border flex items-start gap-3"
-                style={{ borderColor: `color-mix(in srgb, ${STATUS.warning} 30%, transparent)`, backgroundColor: `color-mix(in srgb, ${STATUS.warning} 6%, transparent)` }}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={STATUS.warning} strokeWidth="2.5" className="shrink-0 mt-0.5">
-                  <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
-                  <line x1="12" y1="9" x2="12" y2="13" />
-                  <line x1="12" y1="17" x2="12.01" y2="17" />
-                </svg>
-                <div className="flex-1">
-                  <p className="text-body font-bold" style={{ color: STATUS.warning }}>{t('warnUnansweredTitle', { count: unansweredCount })}</p>
-                  <p className="text-caption mt-0.5" style={{ color: 'var(--theme-text-secondary)' }}>{t('warnUnansweredSubtitle')}</p>
+          {/* Right: practice card + whole transcript */}
+          <div className="flex-1 min-w-0 w-full space-y-4">
+            <section ref={cardRef} className="rounded-2xl border" style={{ background: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}>
+              <SentenceNav
+                label={t('sentenceOf', { current: currentIndex + 1, total: segments.length })}
+                index={currentIndex}
+                total={segments.length}
+                onGo={goTo}
+                prevLabel={t('prevSegment')}
+                nextLabel={t('nextSegment')}
+              >
+                {currentBlanks.length > 0 && (
+                  <span className="mono text-caption font-bold" style={{ color: allCorrect ? STATUS.success : 'var(--theme-text-muted)' }}>
+                    {t('blanksFilled', { filled: filledCount, total: currentBlanks.length })}
+                  </span>
+                )}
+              </SentenceNav>
+
+              <div className="px-4 py-6 sm:px-8">
+                {current && (
+                  <DictationSentence
+                    parts={current.parts}
+                    userAnswers={userAnswers}
+                    onChange={handleChange}
+                    blankStatus={blankStatus}
+                    onHint={handleHint}
+                    onBlankFocus={el => { focusedBlankRef.current = el; }}
+                    onLastEnter={handleCheckOrNext}
+                  />
+                )}
+
+                {currentBlanks.length > 0 && (
+                  <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+                    <span className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: 'var(--theme-text-muted)' }}>{t('umlautLabel')}</span>
+                    <UmlautToolbar onInsert={handleUmlautInsert} />
+                  </div>
+                )}
+
+                {/* Listen → type → check */}
+                <div className="mx-auto mt-6 grid max-w-md grid-cols-3 items-start gap-2">
+                  <StepAction index={1} label={t('stepListen')} hotkey="Ctrl+␣" accent={ACC}
+                    highlight={nextStep === 'listen'} disabled={!current}
+                    onClick={handleReplay} icon={<IconHeadphones size={22} />} />
+                  <StepAction index={2} label={t('stepType')} accent={ACC}
+                    highlight={nextStep === 'type'} disabled={currentBlanks.length === 0}
+                    onClick={focusFirstOpenBlank} icon={<IconPencil size={20} />} />
+                  <StepAction index={3} label={t('stepCheck')} hotkey="Ctrl+↵" accent={ACC}
+                    highlight={nextStep === 'check'} disabled={filledCount === 0 || isChecking || allCorrect}
+                    onClick={handleCheck} icon={<IconCheck size={20} />} />
                 </div>
-                <div className="flex gap-2 shrink-0">
-                  <button type="button" onClick={() => setShowSubmitWarning(false)}
-                    className="text-caption px-3 py-1.5 rounded-md border font-semibold transition-colors hover:bg-(--theme-bg-secondary)"
-                    style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)' }}>{t('continueWriting')}</button>
-                  <button type="button" onClick={handleSubmit} disabled={isSubmitting}
-                    className="text-caption px-4 py-1.5 rounded-md font-semibold transition-transform hover:-translate-y-0.5 active:scale-95"
-                    style={{ background: 'var(--accent)', color: 'var(--accent-on)' }}>{t('submitNow')}</button>
+
+                {/* Feedback */}
+                <div className="mx-auto mt-6 max-w-xl text-center">
+                  {currentBlanks.length === 0 ? (
+                    <p className="text-caption" style={{ color: 'var(--theme-text-secondary)' }}>{t('noBlanks')}</p>
+                  ) : allCorrect ? (
+                    <p className="rounded-xl px-4 py-3 text-body font-bold" style={{ background: `${STATUS.success}14`, color: STATUS.success }}>
+                      {t('allCorrect')}
+                    </p>
+                  ) : checkedAny ? (
+                    <div className="rounded-xl px-4 py-3" style={{ background: 'var(--theme-bg-secondary)' }}>
+                      <p className="text-body font-bold" style={{ color: 'var(--theme-text-primary)' }}>
+                        {t('checkSummary', { correct: correctCount, total: currentBlanks.length })}
+                      </p>
+                      <p className="mt-1 text-caption" style={{ color: 'var(--theme-text-secondary)' }}>
+                        {nearCount > 0 ? t('nearCount', { count: nearCount }) : t('fixAndRecheck')}
+                      </p>
+                    </div>
+                  ) : (
+                    <p className="text-caption" style={{ color: 'var(--theme-text-secondary)' }}>
+                      {t(nextStep === 'listen' ? 'hintListen' : nextStep === 'type' ? 'hintType' : 'hintCheck')}
+                    </p>
+                  )}
+
+                  {currentIndex < segments.length - 1 && (
+                    <button type="button" onClick={() => goTo(currentIndex + 1)}
+                      className="mt-4 inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-caption font-bold transition-transform hover:-translate-y-0.5 active:scale-95"
+                      style={nextStep === 'next'
+                        ? { background: ACC, color: 'white' }
+                        : { border: '1px solid var(--theme-border)', color: 'var(--theme-text-secondary)' }}>
+                      {t('nextSegment')}
+                      <IconChevron dir="right" size={14} />
+                    </button>
+                  )}
                 </div>
               </div>
-            )}
+            </section>
 
-            <div className="space-y-4">
-              {session.segments.map(seg => (
-                <DictationSegmentRow
-                  key={seg.id}
-                  segment={seg}
-                  userAnswers={userAnswers}
-                  onChange={handleChange}
-                  playerRef={playerRef}
-                  isActive={seg.id === activeSegmentId}
-                  blankStatus={blankStatus}
-                  onCheck={handleCheckSegment}
-                  isChecking={isChecking}
-                  onHint={handleHint}
-                  onBlankFocus={el => { focusedBlankRef.current = el; }}
-                />
-              ))}
+            <div className="lg:hidden">{settings}</div>
+
+            {/* Whole transcript */}
+            <section className="overflow-hidden rounded-2xl border" style={{ background: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}>
+              <div className="flex items-center justify-between border-b px-4 py-3" style={{ borderColor: 'var(--theme-border)' }}>
+                <span className="text-caption font-bold uppercase tracking-wider" style={{ color: 'var(--theme-text-muted)' }}>{t('sentenceList')}</span>
+                <span className="mono text-caption font-bold" style={{ color: 'var(--theme-text-secondary)' }}>
+                  {answeredCount}/{session.totalBlanks}
+                </span>
+              </div>
+              <div ref={listRef} className="relative max-h-90 divide-y overflow-y-auto" style={{ borderColor: 'var(--theme-border)' }}>
+                {rows.map((row, i) => (
+                  <SentenceListRow key={row.id} index={i} preview={row.preview} status={row.status}
+                    filled={row.filled} total={row.total}
+                    isCurrent={i === currentIndex}
+                    isPlaying={row.id === playingSegmentId}
+                    onSelect={selectRow} />
+                ))}
+              </div>
+            </section>
+          </div>
+        </div>
+      )}
+
+      {/* Sticky bottom progress + submit — on phones it sits above the
+          BottomTabBar (64px + safe area, md:hidden) instead of behind it */}
+      {!videoError && (
+        <div className="sticky bottom-[calc(76px+env(safe-area-inset-bottom))] md:bottom-4 z-10 mt-6">
+          {showSubmitWarning && (
+            <div className="mb-2 mr-16 md:mr-0 flex flex-wrap items-start gap-3 rounded-2xl border p-4"
+              style={{ borderColor: `color-mix(in srgb, ${STATUS.warning} 30%, transparent)`, background: 'var(--theme-bg-card)' }}>
+              <div className="min-w-0 flex-1">
+                <p className="text-body font-bold" style={{ color: STATUS.warning }}>{t('warnUnansweredTitle', { count: unansweredCount })}</p>
+                <p className="text-caption mt-0.5" style={{ color: 'var(--theme-text-secondary)' }}>{t('warnUnansweredSubtitle')}</p>
+              </div>
+              <div className="flex shrink-0 gap-2">
+                <button type="button" onClick={() => setShowSubmitWarning(false)}
+                  className="rounded-md border px-3 py-1.5 text-caption font-semibold transition-colors hover:bg-(--theme-bg-secondary)"
+                  style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)' }}>{t('continueWriting')}</button>
+                <button type="button" onClick={handleSubmit} disabled={isSubmitting}
+                  className="rounded-md px-4 py-1.5 text-caption font-semibold text-white disabled:opacity-60"
+                  style={{ background: STATUS.warning }}>{t('submitNow')}</button>
+              </div>
             </div>
+          )}
+          {/* mr-16 on phones leaves room for the global feedback FAB */}
+          <div className="mr-16 md:mr-0 flex items-center gap-4 rounded-2xl border px-4 py-3 backdrop-blur"
+            style={{ background: 'color-mix(in srgb, var(--theme-bg-card) 92%, transparent)', borderColor: 'var(--theme-border)', boxShadow: '0 -4px 20px rgba(0,0,0,.18)' }}>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-1.5">
+                <span className="hidden text-[11px] font-semibold uppercase tracking-wider sm:inline" style={{ color: 'var(--theme-text-muted)' }}>{t('progressLabel')}</span>
+                <span className="mono text-caption font-bold" style={{ color: 'var(--theme-text-primary)' }}>{answeredCount}/{session.totalBlanks}</span>
+                <SaveIndicator state={saveState} />
+              </div>
+              <div className="h-1.5 rounded-full overflow-hidden max-w-90" style={{ background: 'var(--theme-bg-secondary)' }}>
+                <div className="h-full transition-all duration-500" style={{ width: `${answeredPct}%`, background: ACC }} />
+              </div>
+            </div>
+            <button type="button" onClick={handleSubmit} disabled={isSubmitting}
+              className="flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-bold text-white transition-transform hover:-translate-y-0.5 active:scale-95 disabled:opacity-50"
+              style={{ background: ACC }}>
+              {isSubmitting && <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
+              {t('submit')}
+            </button>
           </div>
         </div>
       )}
