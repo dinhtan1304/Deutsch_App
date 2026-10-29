@@ -15,8 +15,9 @@ import { RecordButton, type RecordButtonRef } from '@/components/shadowing/Recor
 import { PhraseScoreBadge } from '@/components/shadowing/PhraseScoreBadge';
 import { AiReviewCounter } from '@/components/shadowing/AiReviewCounter';
 import {
-  IconChevron, IconHeadphones, OptionToggle, PracticeGuide, SentenceNav, SpeedPicker, StepAction, StepLabel, useGuideDismissed,
+  IconChevron, IconHeadphones, OptionToggle, SentenceNav, SpeedPicker, StepAction, StepLabel,
 } from '@/components/dictation/PracticeKit';
+import { PracticeShell } from '@/components/dictation/PracticeShell';
 import { ACCENT, STATUS } from '@/lib/tokens';
 import type { GradeAttemptResponse, ShadowingAttempt, ShadowingSegment } from '@/lib/api/shadowing';
 
@@ -183,7 +184,7 @@ function PracticeSettings({ speed, onSpeed, autoPause, onAutoPause, autoRecord, 
 }) {
   const t = useTranslations('practice.dictation.shadow.session');
   return (
-    <div className="rounded-2xl border p-4" style={{ background: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}>
+    <div className="p-4">
       <div className="mb-3 flex items-center justify-between gap-2">
         <span className="text-caption font-bold uppercase tracking-wider" style={{ color: 'var(--theme-text-muted)' }}>{t('settingsTitle')}</span>
         <span className="rounded-sm px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider"
@@ -259,7 +260,6 @@ export default function ShadowingPlayPage() {
   const [speed, setSpeed] = useState(1);
   const [submitWarning, setSubmitWarning] = useState('');
   const [autoPause, setAutoPause] = useState(true);
-  const [guideDismissed, dismissGuide] = useGuideDismissed(GUIDE_DISMISS_KEY);
   // Blind shadowing: hide the sentence until the learner asks (or is graded).
   const [hideText, setHideText] = useState(false);
   const [revealedSegId, setRevealedSegId] = useState<string | null>(null);
@@ -494,227 +494,165 @@ export default function ShadowingPlayPage() {
   );
 
   return (
-    <div className="max-w-360 mx-auto px-4 sm:px-6 pb-28">
-      {/* Back link + title */}
-      <div className="pt-4 mb-4">
-        <button type="button" onClick={() => router.push('/practice-test/dictation/shadow')}
-          className="mb-3 inline-flex items-center gap-1 text-caption font-semibold transition-opacity hover:opacity-70"
-          style={{ color: ACC }}>
-          <IconChevron dir="left" size={15} />
-          {t('back')}
-        </button>
-        <h1 className="text-h2 font-extrabold leading-tight" style={{ letterSpacing: '-.02em', color: 'var(--theme-text-primary)' }}>
-          {t('title')}
-        </h1>
-        <p className="mt-1 truncate text-body" style={{ color: 'var(--theme-text-secondary)' }}>{session.video.title}</p>
-      </div>
-
-      {!guideDismissed && (
-        <PracticeGuide
-          title={t('guideTitle')}
-          steps={[t('guideListen'), t('guideSpeak'), t('guideCompare')]}
-          footnote={t('headphoneTip')}
-          dismissLabel={t('dismiss')}
-          onDismiss={dismissGuide}
-          accent={ACC}
+    <PracticeShell
+      accent={ACC}
+      backLabel={t('back')}
+      onBack={() => router.push('/practice-test/dictation/shadow')}
+      title={session.video.title}
+      progressPct={completedPct}
+      progressText={`${session.completedSegments}/${session.totalSegments}`}
+      progressDone={allDone}
+      submitLabel={isSubmitting ? t('submitting') : t('submit')}
+      onSubmit={handleSubmit}
+      submitDisabled={session.completedSegments === 0}
+      submitBusy={isSubmitting}
+      notice={submitWarning
+        ? <p className="-mt-1 shrink-0 text-right text-caption font-bold" style={{ color: STATUS.warning }}>{submitWarning}</p>
+        : undefined}
+      guide={{
+        title: t('guideTitle'),
+        steps: [t('guideListen'), t('guideSpeak'), t('guideCompare')],
+        footnote: t('headphoneTip'),
+        dismissLabel: t('dismiss'),
+        openLabel: t('guideTitle'),
+        storageKey: GUIDE_DISMISS_KEY,
+      }}
+      settingsLabel={t('settingsTitle')}
+      listLabel={t('sentenceList')}
+      listCount={`${session.completedSegments}/${session.totalSegments}`}
+      fallback={videoError ? <VideoUnavailableFallback sessionId={id} /> : undefined}
+      video={
+        <YouTubeEmbed
+          ref={playerRef}
+          youtubeId={session.video.youtubeId}
+          onError={() => setVideoError(true)}
+          onTimeUpdate={handleTimeUpdate}
+          autoPauseSegments={autoPause ? session.segments : undefined}
+          onAutoPaused={(segId) => {
+            // The segment that just finished is the one to record next.
+            setSelectedSegmentId(segId);
+            setActiveSegmentId(segId);
+            setListened((prev) => (prev[segId] ? prev : { ...prev, [segId]: true }));
+            maybeAutoRecord();
+          }}
         />
-      )}
-
-      {videoError ? (
-        <VideoUnavailableFallback sessionId={id} />
-      ) : (
-        <div className="flex flex-col lg:flex-row gap-4 lg:gap-8 items-start">
-          {/* Left: video + settings, pinned on desktop. On phones the video
-              scrolls away so it never covers the sentence and feedback —
-              playback (the audio source) keeps working off-screen. */}
-          <div className="w-full lg:w-100 lg:sticky lg:top-20 lg:z-30">
-            <div className="flex flex-col gap-3">
-              <div className="rounded-2xl overflow-hidden border aspect-video bg-black/40" style={{ borderColor: 'var(--theme-border)' }}>
-                <YouTubeEmbed
-                  ref={playerRef}
-                  youtubeId={session.video.youtubeId}
-                  onError={() => setVideoError(true)}
-                  onTimeUpdate={handleTimeUpdate}
-                  autoPauseSegments={autoPause ? session.segments : undefined}
-                  onAutoPaused={(segId) => {
-                    // The segment that just finished is the one to record next.
-                    setSelectedSegmentId(segId);
-                    setActiveSegmentId(segId);
-                    setListened((prev) => (prev[segId] ? prev : { ...prev, [segId]: true }));
-                    maybeAutoRecord();
+      }
+      settings={settings}
+      listRef={listRef}
+      list={segments.map((seg, i) => (
+        <SentenceRow key={seg.id} index={i} segment={seg}
+          isCurrent={seg.id === currentSegment?.id}
+          attempt={attemptBySegId.get(seg.id)}
+          onClick={() => handleSelectSegment(seg)} />
+      ))}
+      cardHeader={
+        <SentenceNav
+          label={t('sentenceOf', { current: currentIndex + 1, total: segments.length })}
+          index={currentIndex}
+          total={segments.length}
+          onGo={goToIndex}
+          prevLabel={t('prevSegment')}
+          nextLabel={t('nextSegment')}
+        />
+      }
+      cardFooter={
+        // Actions live in the footer so they stay visible on short screens.
+        <div className="flex items-center gap-2">
+          {currentTakeUrl && !isProcessing && (
+            <button type="button" onClick={() => playTake(currentTakeUrl)}
+              className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border px-3 py-1.5 text-caption font-bold transition-colors hover:bg-(--theme-bg-secondary)"
+              style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)' }}>
+              <IconPlay size={11} />
+              {t('playMine')}
+            </button>
+          )}
+          <div className="hidden min-w-0 flex-1 justify-center sm:flex"><AiReviewCounter /></div>
+          {currentIndex < segments.length - 1 && (
+            <button type="button" onClick={() => goToIndex(currentIndex + 1)}
+              className="ml-auto inline-flex shrink-0 items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-caption font-bold transition-transform active:scale-95"
+              style={currentAttempt
+                ? { background: ACC, color: 'white' }
+                : { border: '1px solid var(--theme-border)', color: 'var(--theme-text-secondary)' }}>
+              {t('nextSegment')}
+              <IconChevron dir="right" size={14} />
+            </button>
+          )}
+        </div>
+      }
+      cardBody={
+        <>
+          {/* The sentence */}
+          {currentSegment && (
+            <div className="text-center">
+              <div className="relative">
+                <p className="text-2xl md:text-[30px] font-extrabold leading-relaxed transition-[filter]"
+                  style={{
+                    letterSpacing: '-.01em',
+                    color: 'var(--theme-text-primary)',
+                    filter: textHidden ? 'blur(9px)' : undefined,
+                    userSelect: textHidden ? 'none' : undefined,
                   }}
+                  aria-hidden={textHidden}>
+                  <ScoredSentence text={currentSegment.text} wordScores={currentWordScores} />
+                </p>
+                {textHidden && (
+                  <button type="button" onClick={() => setRevealedSegId(currentSegment.id)}
+                    className="absolute inset-0 m-auto flex h-9 w-fit items-center gap-1.5 rounded-full border px-4 text-caption font-bold shadow-sm"
+                    style={{ background: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)', color: 'var(--theme-text-primary)' }}>
+                    <IconEye size={14} />
+                    {t('revealText')}
+                  </button>
+                )}
+              </div>
+              {showTranslation && !textHidden && translations[currentSegment.id] && (
+                <p className="mt-1 text-body italic" style={{ color: 'var(--theme-text-muted)' }}>
+                  {translations[currentSegment.id]}
+                </p>
+              )}
+            </div>
+          )}
+
+          {/* Listen → speak → compare */}
+          <div className="mx-auto mt-5 grid w-full max-w-md grid-cols-3 items-start gap-2">
+            <StepAction accent={ACC} index={1} label={t('stepListen')} hotkey="L"
+              highlight={nextStep === 'listen'} disabled={!currentSegment}
+              onClick={handleReplayCurrent} icon={<IconHeadphones size={22} />} />
+            <div className="flex flex-col items-center gap-2">
+              <div className="flex min-h-19 items-center">
+                <RecordButton
+                  ref={recordRef}
+                  maxDurationMs={40000}
+                  disabled={isProcessing || !currentSegment}
+                  onRecorded={handleRecord}
+                  onError={setRecordError}
+                  size={76}
+                  accentColor={ACC}
+                  countdownMs={3000}
+                  layout="column"
                 />
               </div>
-              <div className="hidden lg:block">{settings}</div>
+              <StepLabel accent={ACC} index={2} label={t('stepSpeak')} hotkey="R" highlight={nextStep === 'speak'} />
             </div>
+            <StepAction accent={ACC} index={3} label={t('stepCompare')} hotkey="M"
+              highlight={nextStep === 'compare'} disabled={!currentTakeUrl}
+              onClick={handleCompare} icon={<IconCompare size={22} />} />
           </div>
 
-          {/* Right: practice card + sentence list */}
-          <div className="flex-1 min-w-0 w-full space-y-4">
-            <section className="rounded-2xl border" style={{ background: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}>
-              <SentenceNav
-                label={t('sentenceOf', { current: currentIndex + 1, total: segments.length })}
-                index={currentIndex}
-                total={segments.length}
-                onGo={goToIndex}
-                prevLabel={t('prevSegment')}
-                nextLabel={t('nextSegment')}
-              />
-
-              <div className="px-4 py-6 sm:px-8">
-                {/* The sentence */}
-                {currentSegment && (
-                  <div className="text-center">
-                    <div className="relative">
-                      <p className="text-2xl md:text-[30px] font-extrabold leading-relaxed transition-[filter]"
-                        style={{
-                          letterSpacing: '-.01em',
-                          color: 'var(--theme-text-primary)',
-                          filter: textHidden ? 'blur(9px)' : undefined,
-                          userSelect: textHidden ? 'none' : undefined,
-                        }}
-                        aria-hidden={textHidden}>
-                        <ScoredSentence text={currentSegment.text} wordScores={currentWordScores} />
-                      </p>
-                      {textHidden && (
-                        <button type="button" onClick={() => setRevealedSegId(currentSegment.id)}
-                          className="absolute inset-0 m-auto flex h-9 w-fit items-center gap-1.5 rounded-full border px-4 text-caption font-bold shadow-sm"
-                          style={{ background: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)', color: 'var(--theme-text-primary)' }}>
-                          <IconEye size={14} />
-                          {t('revealText')}
-                        </button>
-                      )}
-                    </div>
-                    {showTranslation && !textHidden && translations[currentSegment.id] && (
-                      <p className="mt-2 text-body italic" style={{ color: 'var(--theme-text-muted)' }}>
-                        {translations[currentSegment.id]}
-                      </p>
-                    )}
-                  </div>
-                )}
-
-                {/* Listen → speak → compare */}
-                <div className="mx-auto mt-8 grid max-w-md grid-cols-3 items-start gap-2">
-                  <StepAction accent={ACC} index={1} label={t('stepListen')} hotkey="L"
-                    highlight={nextStep === 'listen'} disabled={!currentSegment}
-                    onClick={handleReplayCurrent} icon={<IconHeadphones size={22} />} />
-                  <div className="flex flex-col items-center gap-2">
-                    <div className="flex min-h-19 items-center">
-                      <RecordButton
-                        ref={recordRef}
-                        maxDurationMs={40000}
-                        disabled={isProcessing || !currentSegment}
-                        onRecorded={handleRecord}
-                        onError={setRecordError}
-                        size={76}
-                        accentColor={ACC}
-                        countdownMs={3000}
-                        layout="column"
-                      />
-                    </div>
-                    <StepLabel accent={ACC} index={2} label={t('stepSpeak')} hotkey="R" highlight={nextStep === 'speak'} />
-                  </div>
-                  <StepAction accent={ACC} index={3} label={t('stepCompare')} hotkey="M"
-                    highlight={nextStep === 'compare'} disabled={!currentTakeUrl}
-                    onClick={handleCompare} icon={<IconCompare size={22} />} />
-                </div>
-
-                {/* Status / feedback */}
-                <div className="mx-auto mt-6 max-w-xl">
-                  {isProcessing ? (
-                    <p className="text-center text-body font-bold" style={{ color: ACC }}>{t('grading')}</p>
-                  ) : currentAttempt ? (
-                    <AttemptFeedback attempt={currentAttempt} wordScores={currentWordScores} />
-                  ) : (
-                    <p className="text-center text-caption" style={{ color: 'var(--theme-text-secondary)' }}>
-                      {t(nextStep === 'listen' ? 'hintListen' : 'hintSpeak')}
-                    </p>
-                  )}
-                  {recordError && <p className="mt-3 text-center text-caption font-bold" style={{ color: STATUS.danger }}>{recordError}</p>}
-
-                  {(currentTakeUrl || currentAttempt) && !isProcessing && (
-                    <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
-                      {currentTakeUrl && (
-                        <button type="button" onClick={() => playTake(currentTakeUrl)}
-                          className="inline-flex items-center gap-1.5 rounded-lg border px-3.5 py-2 text-caption font-bold transition-colors hover:bg-(--theme-bg-secondary)"
-                          style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)' }}>
-                          <IconPlay size={11} />
-                          {t('playMine')}
-                        </button>
-                      )}
-                      {currentIndex < segments.length - 1 && (
-                        <button type="button" onClick={() => goToIndex(currentIndex + 1)}
-                          className="inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-caption font-bold text-white transition-transform hover:-translate-y-0.5 active:scale-95"
-                          style={{ background: ACC }}>
-                          {t('nextSegment')}
-                          <IconChevron dir="right" size={14} />
-                        </button>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="flex justify-center border-t px-4 py-3" style={{ borderColor: 'var(--theme-border)' }}>
-                <AiReviewCounter />
-              </div>
-            </section>
-
-            <div className="lg:hidden">{settings}</div>
-
-            {/* Sentence list */}
-            <section className="overflow-hidden rounded-2xl border" style={{ background: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}>
-              <div className="flex items-center justify-between border-b px-4 py-3" style={{ borderColor: 'var(--theme-border)' }}>
-                <span className="text-caption font-bold uppercase tracking-wider" style={{ color: 'var(--theme-text-muted)' }}>{t('sentenceList')}</span>
-                <span className="mono text-caption font-bold" style={{ color: 'var(--theme-text-secondary)' }}>
-                  {session.completedSegments}/{session.totalSegments}
-                </span>
-              </div>
-              <div ref={listRef} className="relative max-h-90 divide-y overflow-y-auto" style={{ borderColor: 'var(--theme-border)' }}>
-                {segments.map((seg, i) => (
-                  <SentenceRow key={seg.id} index={i} segment={seg}
-                    isCurrent={seg.id === currentSegment?.id}
-                    attempt={attemptBySegId.get(seg.id)}
-                    onClick={() => handleSelectSegment(seg)} />
-                ))}
-              </div>
-            </section>
+          {/* Status / feedback */}
+          <div className="mx-auto mt-4 w-full max-w-xl">
+            {isProcessing ? (
+              <p className="text-center text-body font-bold" style={{ color: ACC }}>{t('grading')}</p>
+            ) : currentAttempt ? (
+              <AttemptFeedback attempt={currentAttempt} wordScores={currentWordScores} />
+            ) : (
+              <p className="text-center text-caption" style={{ color: 'var(--theme-text-secondary)' }}>
+                {t(nextStep === 'listen' ? 'hintListen' : 'hintSpeak')}
+              </p>
+            )}
+            {recordError && <p className="mt-3 text-center text-caption font-bold" style={{ color: STATUS.danger }}>{recordError}</p>}
           </div>
-        </div>
-      )}
-
-      {/* Sticky bottom progress + submit — on phones it sits above the
-          BottomTabBar (64px + safe area, md:hidden) instead of behind it */}
-      {!videoError && (
-        <div className="sticky bottom-[calc(76px+env(safe-area-inset-bottom))] md:bottom-4 z-10 mt-6">
-          {/* mr-16 on phones leaves room for the global feedback FAB */}
-          <div className="mr-16 md:mr-0 flex items-center gap-4 rounded-2xl border px-4 py-3 backdrop-blur"
-            style={{ background: 'color-mix(in srgb, var(--theme-bg-card) 92%, transparent)', borderColor: 'var(--theme-border)', boxShadow: '0 -4px 20px rgba(0,0,0,.18)' }}>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-1.5">
-                <span className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: 'var(--theme-text-muted)' }}>{t('progress')}</span>
-                <span className="mono text-caption font-bold" style={{ color: allDone ? STATUS.success : 'var(--theme-text-primary)' }}>
-                  {session.completedSegments}/{session.totalSegments}
-                </span>
-              </div>
-              <div className="h-1.5 rounded-full overflow-hidden max-w-90" style={{ background: 'var(--theme-bg-secondary)' }}>
-                <div className="h-full transition-all duration-500" style={{ width: `${completedPct}%`, background: allDone ? STATUS.success : ACC }} />
-              </div>
-            </div>
-            <button type="button" onClick={handleSubmit} disabled={isSubmitting || session.completedSegments === 0}
-              className="flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold text-white transition-transform hover:-translate-y-0.5 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-              style={{ background: ACC }}>
-              {isSubmitting ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  {t('submitting')}
-                </>
-              ) : t('submit')}
-            </button>
-          </div>
-          {submitWarning && <p className="mt-2 text-xs font-bold text-right" style={{ color: STATUS.warning }}>{submitWarning}</p>}
-        </div>
-      )}
-    </div>
+        </>
+      }
+    />
   );
 }

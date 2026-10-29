@@ -10,8 +10,9 @@ import { DictationSentence } from '@/components/dictation/DictationSentence';
 import { VideoUnavailableFallback } from '@/components/dictation/VideoUnavailableFallback';
 import { UmlautToolbar } from '@/components/dictation/UmlautToolbar';
 import {
-  IconChevron, IconHeadphones, OptionToggle, PracticeGuide, SentenceNav, SpeedPicker, StepAction, useGuideDismissed,
+  IconChevron, IconHeadphones, OptionToggle, SentenceNav, SpeedPicker, StepAction,
 } from '@/components/dictation/PracticeKit';
+import { PracticeShell } from '@/components/dictation/PracticeShell';
 import { BlankCheckStatus, SegmentWithParts } from '@/lib/api/dictation';
 import { ACCENT, STATUS } from '@/lib/tokens';
 
@@ -112,7 +113,7 @@ export default function DictationPlayPage() {
   // Answers typed since the last save; flushed on debounce, tab hide and unmount.
   const pendingAnswers = useRef<Record<string, string> | null>(null);
   const focusedBlankRef = useRef<HTMLInputElement | null>(null);
-  const cardRef = useRef<HTMLElement>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
   // Set by navigation so the effect below can focus the new sentence's first blank.
   const focusOnNav = useRef(false);
@@ -138,7 +139,6 @@ export default function DictationPlayPage() {
   const [saveState, setSaveState] = useState<SaveState>('idle');
   const [blankStatus, setBlankStatus] = useState<Record<string, BlankCheckStatus>>({});
   const [listened, setListened] = useState<Record<string, true>>({});
-  const [guideDismissed, dismissGuide] = useGuideDismissed(GUIDE_DISMISS_KEY);
 
   // Redirect if already graded
   useEffect(() => {
@@ -437,7 +437,7 @@ export default function DictationPlayPage() {
   const answeredPct = session.totalBlanks > 0 ? (answeredCount / session.totalBlanks) * 100 : 0;
 
   const settings = (
-    <div className="rounded-2xl border p-4" style={{ background: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}>
+    <div className="p-4">
       <div className="mb-3 flex items-center justify-between gap-2">
         <span className="text-caption font-bold uppercase tracking-wider" style={{ color: 'var(--theme-text-muted)' }}>{t('settingsTitle')}</span>
         <span className="mono rounded-sm px-1.5 py-0.5 text-[10px] font-bold" style={{ background: `${ACC}18`, color: ACC }}>
@@ -458,208 +458,153 @@ export default function DictationPlayPage() {
   );
 
   return (
-    <div className="max-w-360 mx-auto px-4 sm:px-6 pb-28">
-      {/* Back link + title */}
-      <div className="pt-4 mb-4">
-        <button type="button" onClick={() => router.push('/practice-test/dictation')}
-          className="mb-3 inline-flex items-center gap-1 text-caption font-semibold transition-opacity hover:opacity-70"
-          style={{ color: ACC }}>
-          <IconChevron dir="left" size={15} />
-          {t('back')}
-        </button>
-        <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.14em]" style={{ color: 'var(--theme-text-muted)' }}>{t('eyebrow')}</p>
-        <h1 className="text-h2 font-extrabold leading-tight" style={{ letterSpacing: '-.02em', color: 'var(--theme-text-primary)' }}>{session.video.title}</h1>
-        <p className="mt-1.5 text-body" style={{ color: 'var(--theme-text-secondary)' }}>{t('subtitle')}</p>
-      </div>
-
-      {!guideDismissed && (
-        <PracticeGuide
-          title={t('guideTitle')}
-          steps={[t('guideListen'), t('guideType'), t('guideCheck')]}
-          footnote={t('umlautTip', { hint: UMLAUT_TRIGGER_HINT })}
-          dismissLabel={t('dismiss')}
-          onDismiss={dismissGuide}
-          accent={ACC}
-        />
-      )}
-
-      {videoError ? (
-        <VideoUnavailableFallback sessionId={id} />
-      ) : (
-        <div className="flex flex-col lg:flex-row gap-4 lg:gap-8 items-start">
-          {/* Left: video + settings, pinned on desktop. On phones the video
-              scrolls away (the keyboard covers it anyway) — audio keeps playing. */}
-          <div className="w-full lg:w-100 lg:sticky lg:top-20 lg:z-30">
-            <div className="flex flex-col gap-3">
-              <div className="relative rounded-2xl overflow-hidden border w-full aspect-video" style={{ borderColor: 'var(--theme-border)' }}>
-                <YouTubeEmbed
-                  ref={playerRef}
-                  youtubeId={session.video.youtubeId}
-                  onError={() => setVideoError(true)}
-                  onTimeUpdate={handleTimeUpdate}
-                  autoPauseSegments={autoPause ? session.segments : undefined}
-                  onAutoPaused={handleAutoPaused}
-                />
-              </div>
-              <div className="hidden lg:block">{settings}</div>
-            </div>
+    <PracticeShell
+      accent={ACC}
+      backLabel={t('back')}
+      onBack={() => router.push('/practice-test/dictation')}
+      title={session.video.title}
+      progressPct={answeredPct}
+      progressText={`${answeredCount}/${session.totalBlanks}`}
+      status={<SaveIndicator state={saveState} />}
+      submitLabel={t('submit')}
+      onSubmit={handleSubmit}
+      submitBusy={isSubmitting}
+      notice={showSubmitWarning ? (
+        <div className="flex shrink-0 flex-wrap items-center gap-3 rounded-2xl border px-4 py-2.5"
+          style={{ borderColor: `color-mix(in srgb, ${STATUS.warning} 30%, transparent)`, background: 'var(--theme-bg-card)' }}>
+          <div className="min-w-0 flex-1">
+            <p className="text-body font-bold" style={{ color: STATUS.warning }}>{t('warnUnansweredTitle', { count: unansweredCount })}</p>
+            <p className="text-caption" style={{ color: 'var(--theme-text-secondary)' }}>{t('warnUnansweredSubtitle')}</p>
           </div>
-
-          {/* Right: practice card + whole transcript */}
-          <div className="flex-1 min-w-0 w-full space-y-4">
-            <section ref={cardRef} className="rounded-2xl border" style={{ background: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}>
-              <SentenceNav
-                label={t('sentenceOf', { current: currentIndex + 1, total: segments.length })}
-                index={currentIndex}
-                total={segments.length}
-                onGo={goTo}
-                prevLabel={t('prevSegment')}
-                nextLabel={t('nextSegment')}
-              >
-                {currentBlanks.length > 0 && (
-                  <span className="mono text-caption font-bold" style={{ color: allCorrect ? STATUS.success : 'var(--theme-text-muted)' }}>
-                    {t('blanksFilled', { filled: filledCount, total: currentBlanks.length })}
-                  </span>
-                )}
-              </SentenceNav>
-
-              <div className="px-4 py-6 sm:px-8">
-                {current && (
-                  <DictationSentence
-                    parts={current.parts}
-                    userAnswers={userAnswers}
-                    onChange={handleChange}
-                    blankStatus={blankStatus}
-                    onHint={handleHint}
-                    onBlankFocus={el => { focusedBlankRef.current = el; }}
-                    onLastEnter={handleCheckOrNext}
-                  />
-                )}
-
-                {currentBlanks.length > 0 && (
-                  <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
-                    <span className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: 'var(--theme-text-muted)' }}>{t('umlautLabel')}</span>
-                    <UmlautToolbar onInsert={handleUmlautInsert} />
-                  </div>
-                )}
-
-                {/* Listen → type → check */}
-                <div className="mx-auto mt-6 grid max-w-md grid-cols-3 items-start gap-2">
-                  <StepAction index={1} label={t('stepListen')} hotkey="Ctrl+␣" accent={ACC}
-                    highlight={nextStep === 'listen'} disabled={!current}
-                    onClick={handleReplay} icon={<IconHeadphones size={22} />} />
-                  <StepAction index={2} label={t('stepType')} accent={ACC}
-                    highlight={nextStep === 'type'} disabled={currentBlanks.length === 0}
-                    onClick={focusFirstOpenBlank} icon={<IconPencil size={20} />} />
-                  <StepAction index={3} label={t('stepCheck')} hotkey="Ctrl+↵" accent={ACC}
-                    highlight={nextStep === 'check'} disabled={filledCount === 0 || isChecking || allCorrect}
-                    onClick={handleCheck} icon={<IconCheck size={20} />} />
-                </div>
-
-                {/* Feedback */}
-                <div className="mx-auto mt-6 max-w-xl text-center">
-                  {currentBlanks.length === 0 ? (
-                    <p className="text-caption" style={{ color: 'var(--theme-text-secondary)' }}>{t('noBlanks')}</p>
-                  ) : allCorrect ? (
-                    <p className="rounded-xl px-4 py-3 text-body font-bold" style={{ background: `${STATUS.success}14`, color: STATUS.success }}>
-                      {t('allCorrect')}
-                    </p>
-                  ) : checkedAny ? (
-                    <div className="rounded-xl px-4 py-3" style={{ background: 'var(--theme-bg-secondary)' }}>
-                      <p className="text-body font-bold" style={{ color: 'var(--theme-text-primary)' }}>
-                        {t('checkSummary', { correct: correctCount, total: currentBlanks.length })}
-                      </p>
-                      <p className="mt-1 text-caption" style={{ color: 'var(--theme-text-secondary)' }}>
-                        {nearCount > 0 ? t('nearCount', { count: nearCount }) : t('fixAndRecheck')}
-                      </p>
-                    </div>
-                  ) : (
-                    <p className="text-caption" style={{ color: 'var(--theme-text-secondary)' }}>
-                      {t(nextStep === 'listen' ? 'hintListen' : nextStep === 'type' ? 'hintType' : 'hintCheck')}
-                    </p>
-                  )}
-
-                  {currentIndex < segments.length - 1 && (
-                    <button type="button" onClick={() => goTo(currentIndex + 1)}
-                      className="mt-4 inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-caption font-bold transition-transform hover:-translate-y-0.5 active:scale-95"
-                      style={nextStep === 'next'
-                        ? { background: ACC, color: 'white' }
-                        : { border: '1px solid var(--theme-border)', color: 'var(--theme-text-secondary)' }}>
-                      {t('nextSegment')}
-                      <IconChevron dir="right" size={14} />
-                    </button>
-                  )}
-                </div>
-              </div>
-            </section>
-
-            <div className="lg:hidden">{settings}</div>
-
-            {/* Whole transcript */}
-            <section className="overflow-hidden rounded-2xl border" style={{ background: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}>
-              <div className="flex items-center justify-between border-b px-4 py-3" style={{ borderColor: 'var(--theme-border)' }}>
-                <span className="text-caption font-bold uppercase tracking-wider" style={{ color: 'var(--theme-text-muted)' }}>{t('sentenceList')}</span>
-                <span className="mono text-caption font-bold" style={{ color: 'var(--theme-text-secondary)' }}>
-                  {answeredCount}/{session.totalBlanks}
-                </span>
-              </div>
-              <div ref={listRef} className="relative max-h-90 divide-y overflow-y-auto" style={{ borderColor: 'var(--theme-border)' }}>
-                {rows.map((row, i) => (
-                  <SentenceListRow key={row.id} index={i} preview={row.preview} status={row.status}
-                    filled={row.filled} total={row.total}
-                    isCurrent={i === currentIndex}
-                    isPlaying={row.id === playingSegmentId}
-                    onSelect={selectRow} />
-                ))}
-              </div>
-            </section>
+          <div className="flex shrink-0 gap-2">
+            <button type="button" onClick={() => setShowSubmitWarning(false)}
+              className="rounded-md border px-3 py-1.5 text-caption font-semibold transition-colors hover:bg-(--theme-bg-secondary)"
+              style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)' }}>{t('continueWriting')}</button>
+            <button type="button" onClick={handleSubmit} disabled={isSubmitting}
+              className="rounded-md px-4 py-1.5 text-caption font-semibold text-white disabled:opacity-60"
+              style={{ background: STATUS.warning }}>{t('submitNow')}</button>
           </div>
         </div>
-      )}
+      ) : undefined}
+      guide={{
+        title: t('guideTitle'),
+        steps: [t('guideListen'), t('guideType'), t('guideCheck')],
+        footnote: t('umlautTip', { hint: UMLAUT_TRIGGER_HINT }),
+        dismissLabel: t('dismiss'),
+        openLabel: t('guideTitle'),
+        storageKey: GUIDE_DISMISS_KEY,
+      }}
+      settingsLabel={t('settingsTitle')}
+      listLabel={t('sentenceList')}
+      listCount={`${answeredCount}/${session.totalBlanks}`}
+      fallback={videoError ? <VideoUnavailableFallback sessionId={id} /> : undefined}
+      video={
+        <YouTubeEmbed
+          ref={playerRef}
+          youtubeId={session.video.youtubeId}
+          onError={() => setVideoError(true)}
+          onTimeUpdate={handleTimeUpdate}
+          autoPauseSegments={autoPause ? session.segments : undefined}
+          onAutoPaused={handleAutoPaused}
+        />
+      }
+      settings={settings}
+      listRef={listRef}
+      list={rows.map((row, i) => (
+        <SentenceListRow key={row.id} index={i} preview={row.preview} status={row.status}
+          filled={row.filled} total={row.total}
+          isCurrent={i === currentIndex}
+          isPlaying={row.id === playingSegmentId}
+          onSelect={selectRow} />
+      ))}
+      cardHeader={
+        <SentenceNav
+          label={t('sentenceOf', { current: currentIndex + 1, total: segments.length })}
+          index={currentIndex}
+          total={segments.length}
+          onGo={goTo}
+          prevLabel={t('prevSegment')}
+          nextLabel={t('nextSegment')}
+        >
+          {currentBlanks.length > 0 && (
+            <span className="mono text-caption font-bold" style={{ color: allCorrect ? STATUS.success : 'var(--theme-text-muted)' }}>
+              {t('blanksFilled', { filled: filledCount, total: currentBlanks.length })}
+            </span>
+          )}
+        </SentenceNav>
+      }
+      cardFooter={currentIndex < segments.length - 1 ? (
+        // Kept in the footer so it stays visible on short screens.
+        <div className="flex justify-end">
+          <button type="button" onClick={() => goTo(currentIndex + 1)}
+            className="inline-flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-caption font-bold transition-transform active:scale-95"
+            style={nextStep === 'next'
+              ? { background: ACC, color: 'white' }
+              : { border: '1px solid var(--theme-border)', color: 'var(--theme-text-secondary)' }}>
+            {t('nextSegment')}
+            <IconChevron dir="right" size={14} />
+          </button>
+        </div>
+      ) : undefined}
+      cardBody={
+        <div ref={cardRef}>
+          {current && (
+            <DictationSentence
+              parts={current.parts}
+              userAnswers={userAnswers}
+              onChange={handleChange}
+              blankStatus={blankStatus}
+              onHint={handleHint}
+              onBlankFocus={el => { focusedBlankRef.current = el; }}
+              onLastEnter={handleCheckOrNext}
+            />
+          )}
 
-      {/* Sticky bottom progress + submit — on phones it sits above the
-          BottomTabBar (64px + safe area, md:hidden) instead of behind it */}
-      {!videoError && (
-        <div className="sticky bottom-[calc(76px+env(safe-area-inset-bottom))] md:bottom-4 z-10 mt-6">
-          {showSubmitWarning && (
-            <div className="mb-2 mr-16 md:mr-0 flex flex-wrap items-start gap-3 rounded-2xl border p-4"
-              style={{ borderColor: `color-mix(in srgb, ${STATUS.warning} 30%, transparent)`, background: 'var(--theme-bg-card)' }}>
-              <div className="min-w-0 flex-1">
-                <p className="text-body font-bold" style={{ color: STATUS.warning }}>{t('warnUnansweredTitle', { count: unansweredCount })}</p>
-                <p className="text-caption mt-0.5" style={{ color: 'var(--theme-text-secondary)' }}>{t('warnUnansweredSubtitle')}</p>
-              </div>
-              <div className="flex shrink-0 gap-2">
-                <button type="button" onClick={() => setShowSubmitWarning(false)}
-                  className="rounded-md border px-3 py-1.5 text-caption font-semibold transition-colors hover:bg-(--theme-bg-secondary)"
-                  style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)' }}>{t('continueWriting')}</button>
-                <button type="button" onClick={handleSubmit} disabled={isSubmitting}
-                  className="rounded-md px-4 py-1.5 text-caption font-semibold text-white disabled:opacity-60"
-                  style={{ background: STATUS.warning }}>{t('submitNow')}</button>
-              </div>
+          {currentBlanks.length > 0 && (
+            <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
+              <span className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: 'var(--theme-text-muted)' }}>{t('umlautLabel')}</span>
+              <UmlautToolbar onInsert={handleUmlautInsert} />
             </div>
           )}
-          {/* mr-16 on phones leaves room for the global feedback FAB */}
-          <div className="mr-16 md:mr-0 flex items-center gap-4 rounded-2xl border px-4 py-3 backdrop-blur"
-            style={{ background: 'color-mix(in srgb, var(--theme-bg-card) 92%, transparent)', borderColor: 'var(--theme-border)', boxShadow: '0 -4px 20px rgba(0,0,0,.18)' }}>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-1.5">
-                <span className="hidden text-[11px] font-semibold uppercase tracking-wider sm:inline" style={{ color: 'var(--theme-text-muted)' }}>{t('progressLabel')}</span>
-                <span className="mono text-caption font-bold" style={{ color: 'var(--theme-text-primary)' }}>{answeredCount}/{session.totalBlanks}</span>
-                <SaveIndicator state={saveState} />
+
+          {/* Listen → type → check */}
+          <div className="mx-auto mt-4 grid max-w-md grid-cols-3 items-start gap-2">
+            <StepAction index={1} label={t('stepListen')} hotkey="Ctrl+␣" accent={ACC}
+              highlight={nextStep === 'listen'} disabled={!current}
+              onClick={handleReplay} icon={<IconHeadphones size={22} />} />
+            <StepAction index={2} label={t('stepType')} accent={ACC}
+              highlight={nextStep === 'type'} disabled={currentBlanks.length === 0}
+              onClick={focusFirstOpenBlank} icon={<IconPencil size={20} />} />
+            <StepAction index={3} label={t('stepCheck')} hotkey="Ctrl+↵" accent={ACC}
+              highlight={nextStep === 'check'} disabled={filledCount === 0 || isChecking || allCorrect}
+              onClick={handleCheck} icon={<IconCheck size={20} />} />
+          </div>
+
+          {/* Feedback */}
+          <div className="mx-auto mt-4 max-w-xl text-center">
+            {currentBlanks.length === 0 ? (
+              <p className="text-caption" style={{ color: 'var(--theme-text-secondary)' }}>{t('noBlanks')}</p>
+            ) : allCorrect ? (
+              <p className="rounded-xl px-4 py-2.5 text-body font-bold" style={{ background: `${STATUS.success}14`, color: STATUS.success }}>
+                {t('allCorrect')}
+              </p>
+            ) : checkedAny ? (
+              <div className="rounded-xl px-4 py-2.5" style={{ background: 'var(--theme-bg-secondary)' }}>
+                <p className="text-body font-bold" style={{ color: 'var(--theme-text-primary)' }}>
+                  {t('checkSummary', { correct: correctCount, total: currentBlanks.length })}
+                </p>
+                <p className="mt-0.5 text-caption" style={{ color: 'var(--theme-text-secondary)' }}>
+                  {nearCount > 0 ? t('nearCount', { count: nearCount }) : t('fixAndRecheck')}
+                </p>
               </div>
-              <div className="h-1.5 rounded-full overflow-hidden max-w-90" style={{ background: 'var(--theme-bg-secondary)' }}>
-                <div className="h-full transition-all duration-500" style={{ width: `${answeredPct}%`, background: ACC }} />
-              </div>
-            </div>
-            <button type="button" onClick={handleSubmit} disabled={isSubmitting}
-              className="flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-bold text-white transition-transform hover:-translate-y-0.5 active:scale-95 disabled:opacity-50"
-              style={{ background: ACC }}>
-              {isSubmitting && <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
-              {t('submit')}
-            </button>
+            ) : (
+              <p className="text-caption" style={{ color: 'var(--theme-text-secondary)' }}>
+                {t(nextStep === 'listen' ? 'hintListen' : nextStep === 'type' ? 'hintType' : 'hintCheck')}
+              </p>
+            )}
           </div>
         </div>
-      )}
-    </div>
+      }
+    />
   );
 }

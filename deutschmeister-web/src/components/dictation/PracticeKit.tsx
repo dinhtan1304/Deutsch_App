@@ -89,16 +89,17 @@ export function StepAction({ index, label, hotkey, highlight, disabled, onClick,
   );
 }
 
-export function PracticeGuide({ title, steps, footnote, dismissLabel, onDismiss, accent }: {
+export function PracticeGuide({ title, steps, footnote, dismissLabel, onDismiss, accent, className = 'mb-5' }: {
   title: string;
   steps: string[];
   footnote?: string;
   dismissLabel: string;
   onDismiss: () => void;
   accent: string;
+  className?: string;
 }) {
   return (
-    <div className="relative mb-5 rounded-2xl border p-4 pr-11"
+    <div className={`relative rounded-2xl border p-4 pr-11 ${className}`}
       style={{ background: `${accent}0D`, borderColor: `${accent}33` }}>
       <p className="mb-3 text-caption font-bold uppercase tracking-wider" style={{ color: accent }}>{title}</p>
       <ol className="grid gap-3 sm:grid-cols-3">
