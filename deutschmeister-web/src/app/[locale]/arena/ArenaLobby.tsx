@@ -14,10 +14,11 @@ import {
 } from '@/types/arena-events.types';
 import { arenaApi, type ArenaPlayerStats, type ArenaMatchSummary, type ArenaLeaderboardRow } from '@/lib/api/arena';
 import { useAuthStore } from '@/stores/authStore';
-import { GRADIENT, ACCENT, STATUS } from '@/lib/tokens';
-import { Card, Loading, BetaBadge } from '@/components/ui';
+import { GRADIENT } from '@/lib/tokens';
+import { Loading, BetaBadge } from '@/components/ui';
 import { FeedbackModal } from '@/components/layout/FeedbackModal';
 import { RoomList } from '@/components/arena/RoomList';
+import { TierBadge, tierFor } from '@/components/arena/ArenaTier';
 import { IconBug, IconFlame } from '@/components/ui/Icons';
 
 const MODES: {
@@ -25,13 +26,11 @@ const MODES: {
   labelKey: 'viToDe' | 'deToVi' | 'mixed';
   subKey: 'modeViToDeSub' | 'modeDeToViSub' | 'modeMixedSub';
   badge: string;
-  gradient: string;
   icon: string;
-  color: string;
 }[] = [
-  { key: 'vi_to_de', labelKey: 'viToDe', subKey: 'modeViToDeSub', badge: 'VI→DE', gradient: GRADIENT.history, icon: '🇻🇳', color: 'var(--der)' },
-  { key: 'de_to_vi', labelKey: 'deToVi', subKey: 'modeDeToViSub', badge: 'DE→VI', gradient: GRADIENT.examWriting, icon: '🇩🇪', color: 'var(--success)' },
-  { key: 'mixed', labelKey: 'mixed', subKey: 'modeMixedSub', badge: 'MIX', gradient: GRADIENT.vocab, icon: '🎲', color: 'var(--violet)' },
+  { key: 'vi_to_de', labelKey: 'viToDe', subKey: 'modeViToDeSub', badge: 'VI→DE', icon: '🇻🇳' },
+  { key: 'de_to_vi', labelKey: 'deToVi', subKey: 'modeDeToViSub', badge: 'DE→VI', icon: '🇩🇪' },
+  { key: 'mixed', labelKey: 'mixed', subKey: 'modeMixedSub', badge: 'MIX', icon: '🎲' },
 ];
 
 function formatWinRate(stats: ArenaPlayerStats | null): string {
@@ -39,36 +38,32 @@ function formatWinRate(stats: ArenaPlayerStats | null): string {
   return `${Math.round((stats.wins / stats.totalMatches) * 100)}%`;
 }
 
-// Rating ring — fills toward the next 100-point milestone.
-function RatingRing({ rating, size = 124 }: { rating: number; size?: number }) {
-  const t = useTranslations('arena');
-  const milestone = Math.ceil((rating + 1) / 100) * 100;
-  const base = milestone - 100;
-  const pct = Math.max(0, Math.min(100, ((rating - base) / 100) * 100));
-  const r = (size - 12) / 2;
-  const c = 2 * Math.PI * r;
-  const off = c - (pct / 100) * c;
+function formatClock(ms: number): string {
+  const s = Math.floor(ms / 1000);
+  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+}
+
+function initialOf(name: string | null | undefined) {
+  return (name ?? '?').charAt(0).toUpperCase();
+}
+
+// One stat cell of the player HUD.
+function HudStat({ label, value, color }: { label: string; value: string | number; color: string }) {
   return (
-    <div className="relative shrink-0" style={{ width: size, height: size }}>
-      <svg width={size} height={size} style={{ transform: 'rotate(-90deg)' }}>
-        <circle cx={size / 2} cy={size / 2} r={r} stroke="var(--theme-border)" strokeWidth="6" fill="none" />
-        <circle cx={size / 2} cy={size / 2} r={r} stroke="var(--accent)" strokeWidth="6" fill="none"
-          strokeDasharray={c} strokeDashoffset={off} strokeLinecap="round"
-          style={{ transition: 'stroke-dashoffset .8s cubic-bezier(.4,0,.2,1)', filter: 'drop-shadow(0 0 6px color-mix(in srgb, var(--accent) 55%, transparent))' }} />
-      </svg>
-      <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="mono text-[32px] font-extrabold leading-none" style={{ letterSpacing: '-.03em', color: 'var(--theme-text-primary)' }}>{rating}</span>
-        <span className="mt-1 text-[10px] font-semibold uppercase" style={{ color: 'var(--theme-text-muted)', letterSpacing: '.08em' }}>{t('lobby.statRating')}</span>
-      </div>
+    <div className="arena-panel rounded-xl px-3 py-2 text-center">
+      <div className="mono text-lead font-extrabold leading-tight" style={{ color }}>{value}</div>
+      <div className="arena-muted text-[10px] font-semibold uppercase tracking-wider">{label}</div>
     </div>
   );
 }
 
-function Record({ label, value, color }: { label: string; value: string | number; color: string }) {
+function PanelTitle({ children, href, hrefLabel }: { children: React.ReactNode; href?: string; hrefLabel?: string }) {
   return (
-    <div className="min-w-[72px] rounded-[10px] px-3.5 py-2" style={{ background: 'var(--theme-bg-secondary)', border: '1px solid var(--theme-border)' }}>
-      <div className="text-[10px] font-semibold uppercase" style={{ color: 'var(--theme-text-muted)', letterSpacing: '.05em' }}>{label}</div>
-      <div className="mono text-[18px] font-extrabold" style={{ letterSpacing: '-.02em', color }}>{value}</div>
+    <div className="mb-3 flex items-center justify-between gap-2">
+      <h2 className="text-caption font-bold uppercase tracking-widest" style={{ color: 'var(--ag-text)' }}>{children}</h2>
+      {href && hrefLabel && (
+        <Link href={href} className="arena-muted text-caption underline-offset-2 hover:underline">{hrefLabel} →</Link>
+      )}
     </div>
   );
 }
@@ -85,6 +80,7 @@ export default function ArenaLobby() {
   const [topPlayers, setTopPlayers] = useState<ArenaLeaderboardRow[]>([]);
   const [listsLoading, setListsLoading] = useState(true);
   const myUserId = useAuthStore((s) => s.user?.id);
+  const myName = useAuthStore((s) => s.user?.name);
   const phase = useArenaStore((s) => s.phase);
   const queueStartedAt = useArenaStore((s) => s.queueStartedAt);
   const queueEstimatedWaitMs = useArenaStore((s) => s.queueEstimatedWaitMs);
@@ -184,6 +180,7 @@ export default function ArenaLobby() {
 
   // Opponents near your rating (real leaderboard rows, excluding you).
   const myRating = stats?.rating ?? 1000;
+  const tier = tierFor(myRating);
   const liveOpponents = useMemo(
     () => [...topPlayers]
       .filter((p) => p.userId !== myUserId)
@@ -191,394 +188,282 @@ export default function ArenaLobby() {
       .slice(0, 4),
     [topPlayers, myUserId, myRating],
   );
+  const selected = MODES.find((m) => m.key === selectedMode)!;
 
   return (
-    <div className="mx-auto max-w-360 px-4 py-2 sm:px-6">
-      {/* Hero: rating ring + record + CTA */}
-      <section className="relative mb-5 flex flex-col gap-6 overflow-hidden rounded-2xl p-5 sm:p-6 lg:flex-row lg:items-center"
-        style={{ background: 'var(--theme-bg-card)', border: '1px solid var(--theme-border)' }}>
-        <div aria-hidden className="pointer-events-none absolute -left-16 -top-24 h-72 w-72 rounded-full blur-3xl" style={{ background: 'color-mix(in srgb, var(--accent) 9%, transparent)' }} />
-        {statsLoading ? <div className="flex h-31 w-31 items-center justify-center"><Loading /></div> : <RatingRing rating={stats?.rating ?? 1000} />}
-        <div className="relative z-10 min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-2.5">
-            <h1 className="text-h2 font-extrabold" style={{ letterSpacing: '-.02em', color: 'var(--theme-text-primary)' }}>{t('lobby.heroTitle')}</h1>
-            <BetaBadge size="md" />
-          </div>
-          <p className="mt-1 text-caption" style={{ color: 'var(--theme-text-muted)' }}>
-            {(() => { const r = stats?.rating ?? 1000; const next = Math.ceil((r + 1) / 100) * 100; return t('lobby.toNextMilestone', { points: next - r, target: next }); })()} · {t('lobby.roundsInfo')}
-          </p>
-          <div className="mt-3 flex flex-wrap gap-2">
-            <Record label={t('lobby.recWins')} value={stats?.wins ?? 0} color="var(--success)" />
-            <Record label={t('lobby.recLosses')} value={stats?.losses ?? 0} color="var(--danger)" />
-            <Record label={t('lobby.recDraws')} value={stats?.draws ?? 0} color="var(--warn)" />
-            <Record label={t('lobby.statWinRate')} value={formatWinRate(stats)} color="var(--accent)" />
-            <Record label={t('lobby.statStreak')} value={`${stats?.currentStreak ?? 0} 🔥`} color="var(--streak)" />
-          </div>
-          <div className="mt-3 flex flex-wrap items-center gap-3 text-caption" style={{ color: 'var(--theme-text-muted)' }}>
-            <button type="button" onClick={() => setFeedbackOpen(true)} className="inline-flex items-center gap-1 underline-offset-2 hover:underline"><IconBug size={12} /><span>{t('lobby.reportBug')}</span></button>
-            <span style={{ opacity: 0.5 }}>·</span>
-            <Link href="/community/rules" className="inline-flex items-center gap-1 underline-offset-2 hover:underline"><span>📜</span><span>{t('lobby.communityRules')}</span></Link>
-          </div>
-        </div>
-        <div className="relative z-10 flex shrink-0 flex-col gap-2 lg:w-56">
-          {!isQueueing ? (
-            <button onClick={() => joinQueue(selectedMode)} className="v2-match-grad flex h-12 items-center justify-center gap-2 rounded-xl text-[15px] font-bold text-white transition-transform hover:-translate-y-0.5" style={{ boxShadow: '0 8px 24px color-mix(in srgb, var(--accent) 40%, transparent)' }}>
-              <IconFlame size={18} /> {t('lobby.rankedCta')}
-            </button>
-          ) : (
-            <button onClick={leaveQueue} className="flex h-12 items-center justify-center rounded-xl text-[15px] font-bold" style={{ border: '1px solid var(--danger)', color: 'var(--danger)' }}>
-              {t('lobby.cancelSearch', { seconds: Math.floor(elapsed / 1000) })}
-            </button>
-          )}
-        </div>
-      </section>
+    <div className="mx-auto max-w-360">
+      {connectionCopy && <Alert tone="warning">{connectionCopy}</Alert>}
+      {replaced && <Alert tone="warning">{t('lobby.replacedWarning')}</Alert>}
+      {lastError && <Alert tone="danger">{lastError.message}</Alert>}
 
-      {connectionCopy && (
-        <Alert tone="warning" className="mb-4">
-          {connectionCopy}
-        </Alert>
-      )}
-
-      {replaced && (
-        <Alert tone="warning" className="mb-4">
-          {t('lobby.replacedWarning')}
-        </Alert>
-      )}
-
-      {lastError && (
-        <Alert tone="danger" className="mb-4">
-          {lastError.message}
-        </Alert>
-      )}
-
-      <h2 className="mb-3 text-caption font-semibold uppercase tracking-widest" style={{ color: 'var(--theme-text-secondary)' }}>
-        {t('lobby.chooseMode')}
-      </h2>
-      <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
-        {MODES.map((m) => {
-          const isSelected = selectedMode === m.key;
-          return (
-            <button
-              key={m.key}
-              type="button"
-              onClick={() => setSelectedMode(m.key)}
-              disabled={isQueueing}
-              className="word-card-v2 relative rounded-[13px] p-4 text-left"
-              style={{
-                background: 'var(--theme-bg-card)',
-                border: `1.5px solid ${isSelected ? m.color : 'var(--theme-border)'}`,
-                ['--card-accent']: m.color,
-                boxShadow: isSelected ? `0 6px 18px color-mix(in srgb, ${m.color} 22%, transparent)` : 'none',
-                opacity: isQueueing && !isSelected ? 0.4 : 1,
-                cursor: isQueueing ? 'not-allowed' : 'pointer',
-              } as React.CSSProperties}
-            >
-              <div className="mb-2 flex items-center gap-2.5">
-                <span className="text-h2">{m.icon}</span>
-                <span className="mono rounded-[5px] px-2 py-0.5 text-[11px] font-bold" style={isSelected ? { background: m.color, color: 'white' } : { background: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)' }}>{m.badge}</span>
-                {isSelected && (
-                  <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full text-white" style={{ background: m.color }}>
-                    <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
-                  </span>
-                )}
-              </div>
-              <div className="text-body font-bold" style={{ color: 'var(--theme-text-primary)' }}>{t(`modes.${m.labelKey}` as 'modes.mixed')}</div>
-              <div className="mt-1 text-caption leading-relaxed" style={{ color: 'var(--theme-text-muted)' }}>{t(`lobby.${m.subKey}` as 'lobby.modeMixedSub')}</div>
-            </button>
-          );
-        })}
-      </div>
-
-      {isQueueing && (
-        <div className="arena-queue-ring mt-4 rounded-2xl">
-          <Card>
-            <div className="flex items-center gap-3">
-              <div
-                className="w-10 h-10 rounded-full shrink-0"
-                style={{
-                  background: GRADIENT.vocab,
-                  animation: 'marketingPulse 1.4s ease-in-out infinite',
-                }}
-              />
-              <div className="min-w-0">
-                <div className="font-semibold" style={{ color: 'var(--theme-text-primary)' }}>
-                  {t('lobby.searching')}
+      <section className="arena-stage relative rounded-3xl p-4 sm:p-6">
+        <div className="grid gap-5 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
+          {/* ── Player card ── */}
+          <div className="arena-panel flex flex-col gap-4 rounded-2xl p-5">
+            <div className="flex items-center gap-4">
+              {statsLoading ? <div className="flex h-24 w-22 items-center justify-center"><Loading /></div> : <TierBadge rating={myRating} size={86} />}
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2">
+                  <span className="truncate text-lead font-bold">{myName ?? t('player')}</span>
+                  <BetaBadge size="sm" />
                 </div>
-                <div className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>
-                  {queueCopy}
+                <div className="text-caption font-bold uppercase tracking-widest" style={{ color: 'var(--ag-gold)' }}>{t(`tiers.${tier.key}`)}</div>
+                <div className="mono mt-1 text-[34px] font-black leading-none" style={{ letterSpacing: '-.03em' }}>
+                  {myRating}
+                  <span className="arena-muted ml-1.5 text-caption font-semibold tracking-normal">{t('lobby.statRating')}</span>
                 </div>
               </div>
             </div>
-          </Card>
+
+            <div>
+              <div className="h-2.5 overflow-hidden rounded-full" style={{ background: 'rgba(255,255,255,.08)' }}>
+                <div className="h-full rounded-full transition-all duration-700" style={{ width: `${tier.progress}%`, background: tier.next ? tierFor(tier.next.min).gradient : tier.gradient }} />
+              </div>
+              <div className="arena-muted mt-1.5 text-caption">
+                {tier.next
+                  ? t('lobby.toNextTier', { points: tier.pointsToNext, tier: t(`tiers.${tier.next.key}`) })
+                  : t('lobby.maxTier')}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-5 gap-2">
+              <HudStat label={t('lobby.recWins')} value={stats?.wins ?? 0} color="var(--ag-win)" />
+              <HudStat label={t('lobby.recLosses')} value={stats?.losses ?? 0} color="var(--ag-lose)" />
+              <HudStat label={t('lobby.recDraws')} value={stats?.draws ?? 0} color="var(--ag-text)" />
+              <HudStat label={t('lobby.statWinRate')} value={formatWinRate(stats)} color="var(--ag-me)" />
+              <HudStat label={t('lobby.statStreak')} value={`${stats?.currentStreak ?? 0}🔥`} color="var(--ag-gold)" />
+            </div>
+
+            <div className="arena-muted mt-auto flex flex-wrap items-center gap-x-3 gap-y-1 text-caption">
+              <button type="button" onClick={() => setFeedbackOpen(true)} className="inline-flex items-center gap-1 underline-offset-2 hover:underline"><IconBug size={12} />{t('lobby.reportBug')}</button>
+              <span aria-hidden>·</span>
+              <Link href="/community/rules" className="underline-offset-2 hover:underline">📜 {t('lobby.communityRules')}</Link>
+            </div>
+          </div>
+
+          {/* ── Battle setup ── (first on phones: play is one tap away) */}
+          <div className="order-first flex flex-col gap-4 lg:order-none">
+            <div>
+              <h1 className="text-h1 font-black uppercase" style={{ letterSpacing: '.02em', textShadow: '0 4px 24px rgba(167,139,250,.55)' }}>{t('lobby.heroTitle')}</h1>
+              <p className="arena-muted mt-1 text-body">{t('lobby.heroSub')}</p>
+            </div>
+
+            <div className="grid grid-cols-3 gap-2.5">
+              {MODES.map((m) => (
+                <button key={m.key} type="button" aria-pressed={selectedMode === m.key}
+                  onClick={() => setSelectedMode(m.key)} disabled={isQueueing}
+                  className="arena-mode flex flex-col items-center gap-1.5 rounded-2xl px-2 py-4 text-center disabled:opacity-40">
+                  <span className="text-[34px] leading-none">{m.icon}</span>
+                  <span className="mono rounded-md px-2 py-0.5 text-[11px] font-bold"
+                    style={selectedMode === m.key ? { background: 'var(--ag-gold)', color: 'var(--ag-bg1)' } : { background: 'rgba(255,255,255,.08)', color: 'var(--ag-muted)' }}>
+                    {m.badge}
+                  </span>
+                  <span className="text-body font-bold">{t(`modes.${m.labelKey}`)}</span>
+                  <span className="arena-muted hidden text-caption leading-snug sm:block">{t(`lobby.${m.subKey}`)}</span>
+                </button>
+              ))}
+            </div>
+
+            <button type="button" onClick={() => joinQueue(selectedMode)} disabled={isQueueing}
+              className="arena-play-btn flex h-16 items-center justify-center gap-3 rounded-2xl text-xl font-black uppercase tracking-wider">
+              <IconFlame size={24} /> {t('lobby.playCta')}
+              <span className="mono rounded-md px-2 py-0.5 text-caption" style={{ background: 'rgba(42,19,0,.15)' }}>{selected.badge}</span>
+            </button>
+            <p className="arena-muted -mt-1 text-center text-caption">{t('lobby.roundsInfo')}</p>
+          </div>
         </div>
-      )}
 
-      {/* Opponents near your rating */}
-      {liveOpponents.length > 0 && (
-        <section className="mt-6">
-          <div className="mb-3 flex items-center gap-2">
-            <span className="v2-pulse h-1.5 w-1.5 rounded-full" style={{ background: 'var(--success)' }} />
-            <h2 className="text-caption font-semibold uppercase tracking-widest" style={{ color: 'var(--theme-text-secondary)' }}>{t('lobby.liveOpponents')}</h2>
+        {/* ── Bottom panels ── */}
+        <div className="mt-5 grid gap-4 lg:grid-cols-3">
+          <div className="arena-panel rounded-2xl p-4">
+            <PanelTitle href="/arena/leaderboard" hrefLabel={t('lobby.viewAll')}>{t('lobby.topTitle')}</PanelTitle>
+            <Podium items={topPlayers} loading={listsLoading} myUserId={myUserId} />
           </div>
-          <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-4">
-            {liveOpponents.map((o) => {
-              const diff = o.rating - myRating;
-              return (
-                <div key={o.userId} className="word-card-v2 flex items-center gap-2.5 rounded-[11px] p-3"
-                  style={{ background: 'var(--theme-bg-card)', border: '1px solid var(--theme-border)', ['--card-accent']: 'var(--accent)' } as React.CSSProperties}>
-                  <div className="relative shrink-0">
-                    <div className="v2-avatar-grad flex h-9 w-9 items-center justify-center rounded-[9px] text-caption font-bold text-white">{(o.user.name ?? '?').charAt(0).toUpperCase()}</div>
-                    <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full" style={{ background: 'var(--success)', border: '2px solid var(--theme-bg-card)' }} />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="truncate text-caption font-semibold" style={{ color: 'var(--theme-text-primary)' }}>{o.user.name ?? t('player')}</div>
-                    <div className="text-[11px]" style={{ color: 'var(--theme-text-muted)' }}>
-                      <span className="mono">{o.rating}</span>
-                      <span className="ml-1" style={{ color: Math.abs(diff) <= 30 ? 'var(--success)' : 'var(--theme-text-muted)' }}>({diff >= 0 ? '+' : ''}{diff})</span>
+
+          <div className="arena-panel rounded-2xl p-4">
+            <PanelTitle>
+              <span className="inline-flex items-center gap-1.5">
+                <span className="v2-pulse h-1.5 w-1.5 rounded-full" style={{ background: 'var(--ag-win)' }} />
+                {t('lobby.nearYou')}
+              </span>
+            </PanelTitle>
+            {listsLoading ? (
+              <div className="flex justify-center py-6"><Loading /></div>
+            ) : liveOpponents.length === 0 ? (
+              <p className="arena-muted py-6 text-center text-caption">{t('lobby.topEmpty')}</p>
+            ) : (
+              <div className="space-y-2">
+                {liveOpponents.map((o) => {
+                  const diff = o.rating - myRating;
+                  return (
+                    <div key={o.userId} className="flex items-center gap-3 rounded-xl px-2.5 py-2" style={{ background: 'rgba(255,255,255,.04)' }}>
+                      <TierBadge rating={o.rating} size={30} />
+                      <div className="min-w-0 flex-1">
+                        <div className="truncate text-body font-semibold">{o.user.name ?? t('player')}</div>
+                        <div className="arena-muted text-caption">
+                          <span className="mono">{o.rating}</span>
+                          <span className="ml-1" style={{ color: Math.abs(diff) <= 30 ? 'var(--ag-win)' : undefined }}>({diff >= 0 ? '+' : ''}{diff})</span>
+                        </div>
+                      </div>
+                      <button type="button" onClick={() => joinQueue(selectedMode)} disabled={isQueueing}
+                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg disabled:opacity-40"
+                        style={{ background: 'rgba(251,191,36,.16)', color: 'var(--ag-gold)' }} aria-label={t('lobby.findMatch')}>
+                        <IconFlame size={15} />
+                      </button>
                     </div>
-                  </div>
-                  <button onClick={() => joinQueue(selectedMode)} disabled={isQueueing}
-                    className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[7px] disabled:opacity-40"
-                    style={{ background: 'color-mix(in srgb, var(--accent) 16%, transparent)', color: 'var(--accent)' }} aria-label="match">
-                    <IconFlame size={13} />
-                  </button>
-                </div>
-              );
-            })}
+                  );
+                })}
+              </div>
+            )}
           </div>
-        </section>
-      )}
 
+          <div className="arena-panel rounded-2xl p-4">
+            <PanelTitle href="/arena/history" hrefLabel={t('lobby.viewAll')}>{t('lobby.recentTitle')}</PanelTitle>
+            <RecentMatches items={recentMatches} loading={listsLoading} myUserId={myUserId} />
+          </div>
+        </div>
+      </section>
+
+      {/* Friends / custom rooms keep the app's normal theme */}
       <RoomList />
 
-      <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <RecentMatchesCard items={recentMatches} loading={listsLoading} myUserId={myUserId} />
-        <TopPlayersCard items={topPlayers} loading={listsLoading} myUserId={myUserId} />
-      </div>
+      {isQueueing && (
+        <MatchmakingOverlay
+          elapsedMs={elapsed}
+          copy={queueCopy}
+          name={myName}
+          rating={myRating}
+          modeBadge={selected.badge}
+          modeLabel={t(`modes.${selected.labelKey}`)}
+          onCancel={leaveQueue}
+        />
+      )}
 
       {feedbackOpen && <FeedbackModal onClose={() => setFeedbackOpen(false)} />}
     </div>
   );
 }
 
-function Alert({
-  tone,
-  className,
-  children,
-}: {
-  tone: 'warning' | 'danger';
-  className?: string;
-  children: React.ReactNode;
+// ─── Full-screen radar while searching ──────────────────────────────────────
+function MatchmakingOverlay({ elapsedMs, copy, name, rating, modeBadge, modeLabel, onCancel }: {
+  elapsedMs: number;
+  copy: string;
+  name: string | null | undefined;
+  rating: number;
+  modeBadge: string;
+  modeLabel: string;
+  onCancel: () => void;
 }) {
-  const color = tone === 'warning' ? ACCENT.xp : STATUS.danger;
+  const t = useTranslations('arena');
   return (
-    <div
-      className={`px-4 py-3 rounded-xl text-body ${className ?? ''}`}
-      style={{
-        background: tone === 'warning' ? 'rgba(245,158,11,.12)' : 'rgba(239,68,68,.10)',
-        border: `1px solid ${tone === 'warning' ? 'rgba(245,158,11,.4)' : 'rgba(239,68,68,.35)'}`,
-        color,
-      }}
-    >
-      {children}
-    </div>
-  );
-}
-
-function SectionCard({
-  title,
-  href,
-  hrefLabel,
-  children,
-}: {
-  title: string;
-  href: string;
-  hrefLabel: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div
-      className="rounded-2xl p-4"
-      style={{
-        background: 'var(--theme-bg-card)',
-        border: '1px solid var(--theme-border)',
-      }}
-    >
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="text-lead font-semibold" style={{ color: 'var(--theme-text-primary)' }}>
-          {title}
-        </h3>
-        <Link
-          href={href}
-          className="text-caption underline-offset-2 hover:underline"
-          style={{ color: 'var(--theme-text-muted)' }}
-        >
-          {hrefLabel} →
-        </Link>
+    <div className="arena-stage fixed inset-0 z-[9000] flex flex-col items-center justify-center gap-6 px-6 text-center" role="dialog" aria-modal="true" aria-live="polite">
+      <div className="arena-radar flex h-60 w-60 items-center justify-center">
+        <span className="arena-ping absolute h-20 w-20 rounded-full" style={{ border: '2px solid var(--ag-me)' }} />
+        <div className="relative z-10 flex h-20 w-20 items-center justify-center rounded-full text-h1 font-black text-white"
+          style={{ background: GRADIENT.writing, boxShadow: '0 0 0 4px var(--ag-me), 0 0 30px rgba(34,211,238,.6)' }}>
+          {initialOf(name)}
+        </div>
+        {/* decorative blips */}
+        <span className="arena-ping absolute left-8 top-12 h-2.5 w-2.5 rounded-full" style={{ background: 'var(--ag-opp)', animationDelay: '.4s' }} />
+        <span className="arena-ping absolute bottom-10 right-10 h-2 w-2 rounded-full" style={{ background: 'var(--ag-gold)', animationDelay: '1.1s' }} />
       </div>
-      {children}
+      <div>
+        <div className="text-h2 font-black uppercase tracking-wider">{t('lobby.searching')}</div>
+        <div className="arena-muted mt-2 max-w-sm text-body">{copy}</div>
+      </div>
+      <div className="flex items-center gap-3">
+        <span className="mono text-h1 font-black" style={{ color: 'var(--ag-me)' }}>{formatClock(elapsedMs)}</span>
+        <span className="arena-panel rounded-lg px-2.5 py-1 text-caption font-semibold">
+          <span className="mono mr-1.5" style={{ color: 'var(--ag-gold)' }}>{modeBadge}</span>{modeLabel} · <span className="mono">{rating}</span>
+        </span>
+      </div>
+      <button type="button" onClick={onCancel}
+        className="rounded-xl border px-6 py-2.5 text-body font-bold transition-colors hover:bg-white/10"
+        style={{ borderColor: 'var(--ag-lose)', color: 'var(--ag-lose)' }}>
+        {t('lobby.cancelSearch', { seconds: Math.floor(elapsedMs / 1000) })}
+      </button>
     </div>
   );
 }
 
-function RecentMatchesCard({
-  items,
-  loading,
-  myUserId,
-}: {
-  items: ArenaMatchSummary[];
-  loading: boolean;
-  myUserId: string | undefined;
-}) {
+// ─── Top players: podium for the first three ────────────────────────────────
+function Podium({ items, loading, myUserId }: { items: ArenaLeaderboardRow[]; loading: boolean; myUserId: string | undefined }) {
   const t = useTranslations('arena');
+  if (loading) return <div className="flex justify-center py-6"><Loading /></div>;
+  if (items.length === 0) return <p className="arena-muted py-6 text-center text-caption">{t('lobby.topEmpty')}</p>;
+
+  const podium = [items[1], items[0], items[2]];
+  const heights = ['h-14', 'h-20', 'h-10'];
+  const medals = [GRADIENT.silver, GRADIENT.xpGold, GRADIENT.bronze];
+  const places = [2, 1, 3];
   return (
-    <SectionCard title={t('lobby.recentTitle')} href="/arena/history" hrefLabel={t('lobby.viewAll')}>
-      {loading ? (
-        <div className="flex justify-center py-6"><Loading /></div>
-      ) : items.length === 0 ? (
-        <div className="text-caption text-center py-6" style={{ color: 'var(--theme-text-muted)' }}>
-          {t('lobby.recentEmpty')}
+    <div>
+      <div className="grid grid-cols-3 items-end gap-2">
+        {podium.map((p, i) => p ? (
+          <div key={p.userId} className="flex min-w-0 flex-col items-center gap-1">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full text-body font-black text-white"
+              style={{ background: medals[i], boxShadow: p.userId === myUserId ? '0 0 0 3px var(--ag-me)' : undefined }}>
+              {initialOf(p.user.name)}
+            </div>
+            <div className="w-full truncate text-center text-caption font-semibold">{p.user.name ?? t('player')}</div>
+            <div className={`flex w-full flex-col items-center justify-start rounded-t-lg pt-1 ${heights[i]}`} style={{ background: medals[i] }}>
+              <span className="text-lead font-black text-white">{places[i]}</span>
+              <span className="mono text-[10px] font-bold text-white/90">{p.rating}</span>
+            </div>
+          </div>
+        ) : <div key={i} />)}
+      </div>
+      {items.slice(3).map((r, i) => (
+        <div key={r.userId} className="mt-2 flex items-center gap-3 rounded-lg px-2 py-1.5" style={{ background: r.userId === myUserId ? 'rgba(34,211,238,.12)' : 'rgba(255,255,255,.04)' }}>
+          <span className="mono w-5 text-center text-caption font-bold arena-muted">{i + 4}</span>
+          <span className="min-w-0 flex-1 truncate text-caption font-semibold">{r.user.name ?? t('player')}</span>
+          <span className="mono text-caption font-bold">{r.rating}</span>
         </div>
-      ) : (
-        <div className="space-y-2">
-          {items.map((m, i) => {
-            const isP1 = m.player1Id === myUserId;
-            const myScore = isP1 ? m.player1Score : m.player2Score;
-            const oppScore = isP1 ? m.player2Score : m.player1Score;
-            const opp = isP1 ? m.player2 : m.player1;
-            const isDraw = !m.winnerId;
-            const iWon = !isDraw && m.winnerId === myUserId;
-            const tone = isDraw
-              ? 'var(--theme-text-secondary)'
-              : iWon
-                ? STATUS.success
-                : STATUS.danger;
-            const letter = isDraw ? 'H' : iWon ? 'W' : 'L';
-            return (
-              <Link key={m.id} href={`/arena/match/${m.id}/result`} className="block">
-                <div
-                  className="flex items-center gap-3 px-3 py-2 rounded-xl transition-colors hover:opacity-90"
-                  style={{
-                    background: 'var(--theme-bg-secondary)',
-                    border: '1px solid var(--theme-border)',
-                    animation: 'slideUp 0.35s ease backwards',
-                    animationDelay: `${i * 60}ms`,
-                  }}
-                >
-                  <div
-                    className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-caption shrink-0"
-                    style={{
-                      background: isDraw
-                        ? 'var(--theme-bg-card)'
-                        : iWon
-                          ? 'rgba(34,197,94,.16)'
-                          : 'rgba(239,68,68,.16)',
-                      color: tone,
-                    }}
-                  >
-                    {letter}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div
-                      className="text-body font-semibold truncate"
-                      style={{ color: 'var(--theme-text-primary)' }}
-                    >
-                      {t('vs')} {opp?.name ?? t('bot')}
-                      {m.isBotMatch && (
-                        <span className="ml-1 text-caption" style={{ color: 'var(--theme-text-muted)' }}>
-                          · {t('bot')}
-                        </span>
-                      )}
-                    </div>
-                    <div className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>
-                      {m.mode} · {m.level}
-                    </div>
-                  </div>
-                  <div className="text-body font-bold tabular-nums shrink-0" style={{ color: tone }}>
-                    {myScore} - {oppScore}
-                  </div>
-                </div>
-              </Link>
-            );
-          })}
-        </div>
-      )}
-    </SectionCard>
+      ))}
+    </div>
   );
 }
 
-function TopPlayersCard({
-  items,
-  loading,
-  myUserId,
-}: {
-  items: ArenaLeaderboardRow[];
-  loading: boolean;
-  myUserId: string | undefined;
-}) {
+// ─── Recent matches with W/L/D pips ─────────────────────────────────────────
+function RecentMatches({ items, loading, myUserId }: { items: ArenaMatchSummary[]; loading: boolean; myUserId: string | undefined }) {
   const t = useTranslations('arena');
+  if (loading) return <div className="flex justify-center py-6"><Loading /></div>;
+  if (items.length === 0) return <p className="arena-muted py-6 text-center text-caption">{t('lobby.recentEmpty')}</p>;
   return (
-    <SectionCard title={t('lobby.topTitle')} href="/arena/leaderboard" hrefLabel={t('lobby.viewAll')}>
-      {loading ? (
-        <div className="flex justify-center py-6"><Loading /></div>
-      ) : items.length === 0 ? (
-        <div className="text-caption text-center py-6" style={{ color: 'var(--theme-text-muted)' }}>
-          {t('lobby.topEmpty')}
-        </div>
-      ) : (
-        <div className="space-y-2">
-          {items.map((r, i) => {
-            const isMe = r.userId === myUserId;
-            const medalBg =
-              i === 0
-                ? GRADIENT.xpGold
-                : i === 1
-                  ? GRADIENT.silver
-                  : i === 2
-                    ? GRADIENT.bronze
-                    : 'var(--theme-bg-card)';
-            return (
-              <div
-                key={r.userId}
-                className="flex items-center gap-3 px-3 py-2 rounded-xl"
-                style={{
-                  background: isMe ? 'rgba(139,92,246,.12)' : 'var(--theme-bg-secondary)',
-                  border: `1px solid ${isMe ? 'rgba(139,92,246,.4)' : 'var(--theme-border)'}`,
-                }}
-              >
-                <div
-                  className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-caption shrink-0"
-                  style={{ background: medalBg, color: i < 3 ? 'white' : 'var(--theme-text-secondary)' }}
-                >
-                  {i + 1}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div
-                    className="text-body font-semibold truncate"
-                    style={{ color: 'var(--theme-text-primary)' }}
-                  >
-                    {r.user.name ?? t('player')}
-                    {isMe && (
-                      <span className="ml-1 text-caption" style={{ color: ACCENT.vocab }}>
-                        · {t('you')}
-                      </span>
-                    )}
-                  </div>
-                  <div className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>
-                    {t('lobby.topStatLine', { wins: r.wins, losses: r.losses, streak: r.currentStreak })}
-                  </div>
-                </div>
-                <div
-                  className="text-body font-bold tabular-nums shrink-0"
-                  style={{ color: 'var(--theme-text-primary)' }}
-                >
-                  {r.rating}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
-    </SectionCard>
+    <div className="space-y-2">
+      {items.map((m) => {
+        const isP1 = m.player1Id === myUserId;
+        const myScore = isP1 ? m.player1Score : m.player2Score;
+        const oppScore = isP1 ? m.player2Score : m.player1Score;
+        const opp = isP1 ? m.player2 : m.player1;
+        const isDraw = !m.winnerId;
+        const iWon = !isDraw && m.winnerId === myUserId;
+        const tone = isDraw ? 'var(--ag-muted)' : iWon ? 'var(--ag-win)' : 'var(--ag-lose)';
+        return (
+          <Link key={m.id} href={`/arena/match/${m.id}/result`}
+            className="flex items-center gap-3 rounded-xl px-2.5 py-2 transition-colors hover:bg-white/5" style={{ background: 'rgba(255,255,255,.04)' }}>
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-caption font-black"
+              style={{ color: tone, border: `1.5px solid ${tone}` }}>
+              {isDraw ? 'H' : iWon ? 'W' : 'L'}
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="truncate text-body font-semibold">{t('vs')} {opp?.name ?? t('bot')}</div>
+              <div className="arena-muted text-caption">{m.mode} · {m.level}{m.isBotMatch ? ` · ${t('bot')}` : ''}</div>
+            </div>
+            <span className="mono text-body font-black" style={{ color: tone }}>{myScore}–{oppScore}</span>
+          </Link>
+        );
+      })}
+    </div>
+  );
+}
+
+function Alert({ tone, children }: { tone: 'warning' | 'danger'; children: React.ReactNode }) {
+  const color = tone === 'warning' ? 'var(--warn)' : 'var(--danger)';
+  return (
+    <div className="mb-4 rounded-xl px-4 py-3 text-body"
+      style={{ background: `color-mix(in srgb, ${color} 12%, transparent)`, border: `1px solid color-mix(in srgb, ${color} 40%, transparent)`, color }}>
+      {children}
+    </div>
   );
 }

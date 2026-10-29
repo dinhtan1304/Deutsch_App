@@ -32,7 +32,8 @@
     "myRooms": "Phòng của tôi",
     "publicRooms": "Phòng công khai",
     "loading": "Đang tải...",
-    "empty": "Chưa có phòng nào đang chờ. Hãy tạo phòng đầu tiên!"
+    "empty": "Chưa có phòng nào đang chờ. Hãy tạo phòng đầu tiên!",
+    "onlineLabel": "đang online"
   },
   "new": {
     "title": "Tạo phòng luyện nói",
@@ -80,7 +81,10 @@
     "loading": "Đang tải phòng...",
     "opponent": "Đối phương",
     "partnerLabel": "Đối tác",
-    "partnerLevel": "Trình độ {level}"
+    "partnerLevel": "Trình độ {level}",
+    "back": "Quay lại",
+    "tabChat": "Trò chuyện",
+    "tabSuggestions": "Gợi ý"
   },
   "join": {
     "title": "Vào phòng riêng",

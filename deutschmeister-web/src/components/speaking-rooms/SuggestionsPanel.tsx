@@ -10,11 +10,13 @@ interface Props {
   loading?: boolean;
   onFetch: () => void;
   onPick: (text: string) => void;
+  /** Inside a tab: no card frame, no collapse header, list fills the height. */
+  embedded?: boolean;
 }
 
 type Tab = 'subTopics' | 'starters' | 'followUps';
 
-export function SuggestionsPanel({ suggestions, loading, onFetch, onPick }: Props) {
+export function SuggestionsPanel({ suggestions, loading, onFetch, onPick, embedded }: Props) {
   const tr = useTranslations('speakingRooms.components');
   const [open, setOpen] = useState(true);
   const [tab, setTab] = useState<Tab>('starters');
@@ -29,9 +31,10 @@ export function SuggestionsPanel({ suggestions, loading, onFetch, onPick }: Prop
 
   return (
     <div
-      className="rounded-2xl border"
-      style={{ backgroundColor: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}
+      className={embedded ? 'min-h-0 flex-1 overflow-y-auto pt-3' : 'rounded-2xl border'}
+      style={embedded ? undefined : { backgroundColor: 'var(--theme-bg-card)', borderColor: 'var(--theme-border)' }}
     >
+      {!embedded && (
       <button
         onClick={() => setOpen((s) => !s)}
         className="w-full flex items-center justify-between p-3"
@@ -55,8 +58,9 @@ export function SuggestionsPanel({ suggestions, loading, onFetch, onPick }: Prop
           <polyline points="6 9 12 15 18 9" />
         </svg>
       </button>
+      )}
 
-      {open && (
+      {(open || embedded) && (
         <div className="p-3 pt-0">
           {!suggestions && !loading && (
             <button
@@ -92,7 +96,7 @@ export function SuggestionsPanel({ suggestions, loading, onFetch, onPick }: Prop
                   </button>
                 ))}
               </div>
-              <div className="space-y-2 max-h-64 overflow-y-auto">
+              <div className={embedded ? 'space-y-2' : 'space-y-2 max-h-64 overflow-y-auto'}>
                 {list.map((item, i) => (
                   <button
                     key={i}

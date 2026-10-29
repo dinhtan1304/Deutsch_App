@@ -61,6 +61,8 @@ interface ArenaStoreState {
   opponentConnected: boolean;
   graceRemainingMs: number;
   roundReveal: ArenaRoundRevealState | null;
+  /** Who took each finished round (by round number) — drives the HUD pips. */
+  roundWinners: Record<number, 'me' | 'opp' | 'none'>;
   matchResult: ArenaMatchEndEvent | null;
   announcement: string;
   roomError: { code: string; message?: string } | null;
@@ -139,6 +141,7 @@ const INITIAL: Omit<ArenaStoreState,
   opponentConnected: true,
   graceRemainingMs: 0,
   roundReveal: null,
+  roundWinners: {},
   matchResult: null,
   announcement: '',
   roomError: null,
@@ -235,6 +238,7 @@ export const useArenaStore = create<ArenaStoreState>((set, get) => ({
       opponentConnected: true,
       graceRemainingMs: 0,
       roundReveal: null,
+      roundWinners: {},
       matchResult: null,
       lastError: null,
       lastRejection: null,
@@ -261,6 +265,8 @@ export const useArenaStore = create<ArenaStoreState>((set, get) => ({
       opponentConnected: true,
       graceRemainingMs: 0,
       roundReveal: e.roundReveal ? toRevealState(e.roundReveal) : null,
+      // The snapshot carries no per-round history; pips refill from here on.
+      roundWinners: {},
       matchResult: e.matchResult,
       lastError: null,
       lastRejection: null,
@@ -311,6 +317,10 @@ export const useArenaStore = create<ArenaStoreState>((set, get) => ({
     set({
       phase: 'round-reveal',
       scores: mapScores(e.scores, mySlot),
+      roundWinners: {
+        ...get().roundWinners,
+        [e.roundNumber]: e.winnerUserId === null ? 'none' : e.winnerUserId === me ? 'me' : 'opp',
+      },
       roundReveal: {
         correctAnswer: e.correctAnswer,
         correctAnswerWithArticle: e.correctAnswerWithArticle,

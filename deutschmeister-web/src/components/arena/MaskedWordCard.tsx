@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import type { ArenaRoundClue } from '@/types/arena-events.types';
-import { ACCENT, GRADIENT } from '@/lib/tokens';
 import { IconVolume, IconBookOpen, IconPin, IconSparkles } from '@/components/ui/Icons';
 import { usePronunciation } from '@/hooks/usePronunciation';
 
@@ -71,122 +70,61 @@ export function MaskedWordCard({ clue, serverClockSkewMs = 0 }: MaskedWordCardPr
   const hintVi = clue.mode === 'vi_to_de' ? clue.translationVi : null;
 
   return (
-    <div
-      className="rounded-2xl p-5 sm:p-6 mb-4"
-      style={{
-        background: 'var(--theme-bg-card)',
-        border: '1px solid var(--theme-border)',
-        boxShadow: '0 0 0 1px rgba(139,92,246,0.25), var(--shadow-lifted)',
-        animation: 'bounceIn 0.4s cubic-bezier(0.34,1.56,0.64,1)',
-      }}
-    >
-      {/* Illustration */}
+    <div className="arena-panel w-full rounded-3xl p-5 text-center sm:p-6"
+      style={{ animation: 'bounceIn 0.4s cubic-bezier(0.34,1.56,0.64,1)', boxShadow: '0 0 40px rgba(124,58,237,.25)' }}>
       {clue.imageUrl && (
-        <div className="flex justify-center mb-4">
-          <div
-            className="w-32 h-32 sm:w-40 sm:h-40 rounded-2xl overflow-hidden"
-            style={{ background: 'rgba(139,92,246,.08)' }}
-          >
+        <div className="mb-4 flex justify-center">
+          <div className="h-28 w-28 overflow-hidden rounded-2xl sm:h-32 sm:w-32" style={{ border: '1px solid var(--ag-line)' }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={clue.imageUrl}
-              alt=""
-              className="w-full h-full object-cover"
-              loading="eager"
-            />
+            <img src={clue.imageUrl} alt="" className="h-full w-full object-cover" loading="eager" />
           </div>
         </div>
       )}
 
-      {/* For de_to_vi mode: show the German word at top */}
-      {isDeMode && germanWord && (
-        <div className="flex flex-col items-center mb-4">
-          <div
-            className="text-2xl sm:text-3xl font-bold flex items-center gap-2"
-            style={{ color: 'var(--theme-text-primary)' }}
-          >
-            {article && (
-              <span
-                className="text-lead font-semibold uppercase tracking-wide"
-                style={{ color: ACCENT.vocab }}
-              >
-                {article}
-              </span>
-            )}
-            <span>{germanWord}</span>
-            <button
-              type="button"
-              aria-label={t('pronounce')}
-              onClick={() => speak(germanWord, 'de-DE', { fast: true })}
-              className="ml-2 w-9 h-9 rounded-lg flex items-center justify-center transition-transform hover:scale-110"
-              style={{ background: 'rgba(59,130,246,.1)', color: ACCENT.srs }}
-            >
-              <IconVolume size={18} />
-            </button>
-          </div>
+      {/* The clue: German word (DE→VI) or Vietnamese meaning (VI→DE) */}
+      {isDeMode && germanWord ? (
+        <div className="mb-4 flex flex-wrap items-center justify-center gap-2">
+          {article && (
+            <span className="rounded-md px-2 py-0.5 text-body font-bold uppercase" style={{ background: 'rgba(251,191,36,.16)', color: 'var(--ag-gold)' }}>{article}</span>
+          )}
+          <span className="text-[28px] font-black sm:text-[34px]" style={{ textShadow: '0 4px 20px rgba(167,139,250,.5)' }}>{germanWord}</span>
+          <button type="button" aria-label={t('pronounce')}
+            onClick={() => speak(germanWord, 'de-DE', { fast: true })}
+            className="flex h-9 w-9 items-center justify-center rounded-full transition-transform hover:scale-110"
+            style={{ background: 'rgba(34,211,238,.16)', color: 'var(--ag-me)' }}>
+            <IconVolume size={18} />
+          </button>
         </div>
-      )}
+      ) : hintVi ? (
+        <div className="mb-4">
+          <div className="arena-muted mb-1 inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-widest">
+            <IconBookOpen size={12} />{t('translation')}
+          </div>
+          <div className="text-[24px] font-black leading-tight sm:text-[30px]" style={{ textShadow: '0 4px 20px rgba(167,139,250,.5)' }}>{hintVi}</div>
+        </div>
+      ) : null}
 
-      {/* Masked letters */}
-      <div className="flex justify-center mb-4 flex-wrap gap-1.5">
-        {targetForMask.map((ch, i) => {
-          const isVisible = ch !== '*';
-          return (
-            <div
-              key={i}
-              className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center font-bold text-lead"
-              style={{
-                background: isVisible
-                  ? GRADIENT.vocab
-                  : 'rgba(168,85,247,.18)',
-                color: isVisible ? '#fff' : 'rgba(168,85,247,.9)',
-                border: isVisible ? 'none' : '1px solid rgba(168,85,247,.3)',
-              }}
-            >
-              {ch === '*' ? '*' : ch.toUpperCase()}
-            </div>
-          );
-        })}
+      {/* Masked answer letters */}
+      <div className="flex flex-wrap justify-center gap-1.5">
+        {targetForMask.map((ch, i) => (
+          <div key={i}
+            className={`flex h-11 w-9 items-center justify-center rounded-lg text-lead font-black sm:h-12 sm:w-10 ${ch === '*' ? 'arena-tile' : 'arena-tile arena-tile--on'}`}>
+            {ch === '*' ? '' : ch.toUpperCase()}
+          </div>
+        ))}
       </div>
-
-      {/* Hint for vi_to_de: show Vietnamese translation */}
-      {hintVi && (
-        <div
-          className="rounded-xl p-3 mb-3"
-          style={{
-            background: 'rgba(99,102,241,.08)',
-            border: '1px solid rgba(99,102,241,.2)',
-          }}
-        >
-          <div
-            className="text-caption flex items-center gap-1"
-            style={{ color: 'var(--theme-text-muted)' }}
-          >
-            <IconBookOpen size={12} />
-            <span>{t('translation')}</span>
-          </div>
-          <div
-            className="text-lead font-semibold mt-0.5"
-            style={{ color: 'var(--theme-text-primary)' }}
-          >
-            {hintVi}
-          </div>
-        </div>
-      )}
 
       {/* Progressive hints — unlocked at 20s and 10s remaining */}
-      <div className="space-y-2">
-        {hintTier >= 1 && clue.category && (
-          <RevealedHint label={t('hintWordType')} Icon={IconPin}>
-            <span style={{ color: 'var(--theme-text-secondary)' }}>{clue.category}</span>
-          </RevealedHint>
-        )}
-        {hintTier >= 2 && isDeMode && pronunciation && (
-          <RevealedHint label={t('hintPronunciation')} Icon={IconSparkles}>
-            <span style={{ color: 'var(--theme-text-secondary)' }}>/{pronunciation}/</span>
-          </RevealedHint>
-        )}
-      </div>
+      {(hintTier >= 1 && clue.category) || (hintTier >= 2 && isDeMode && pronunciation) ? (
+        <div className="mt-4 flex flex-wrap justify-center gap-2">
+          {hintTier >= 1 && clue.category && (
+            <RevealedHint label={t('hintWordType')} Icon={IconPin}>{clue.category}</RevealedHint>
+          )}
+          {hintTier >= 2 && isDeMode && pronunciation && (
+            <RevealedHint label={t('hintPronunciation')} Icon={IconSparkles}>/{pronunciation}/</RevealedHint>
+          )}
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -199,20 +137,11 @@ interface RevealedHintProps {
 
 function RevealedHint({ label, Icon, children }: RevealedHintProps) {
   return (
-    <div
-      className="rounded-lg px-3 py-2 flex items-center gap-2 text-caption"
-      style={{
-        background: 'rgba(245,158,11,.08)',
-        border: '1px solid rgba(245,158,11,.3)',
-        color: 'var(--theme-text-muted)',
-        animation: 'slideUp 0.35s cubic-bezier(0.34,1.56,0.64,1)',
-      }}
-    >
-      <span style={{ color: ACCENT.xp, display: 'inline-flex' }}>
-        <Icon size={14} />
-      </span>
-      <span className="font-semibold">{label}:</span>
-      {children}
-    </div>
+    <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-caption"
+      style={{ background: 'rgba(251,191,36,.12)', border: '1px solid rgba(251,191,36,.35)', animation: 'slideUp 0.35s cubic-bezier(0.34,1.56,0.64,1)' }}>
+      <span style={{ color: 'var(--ag-gold)', display: 'inline-flex' }}><Icon size={13} /></span>
+      <span className="font-bold" style={{ color: 'var(--ag-gold)' }}>{label}:</span>
+      <span>{children}</span>
+    </span>
   );
 }

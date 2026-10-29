@@ -32,7 +32,8 @@
     "myRooms": "My rooms",
     "publicRooms": "Public rooms",
     "loading": "Loading...",
-    "empty": "No rooms waiting yet. Create the first one!"
+    "empty": "No rooms waiting yet. Create the first one!",
+    "onlineLabel": "online"
   },
   "new": {
     "title": "Create a speaking room",
@@ -80,7 +81,10 @@
     "loading": "Loading room...",
     "opponent": "Partner",
     "partnerLabel": "Partner",
-    "partnerLevel": "Level {level}"
+    "partnerLevel": "Level {level}",
+    "back": "Back",
+    "tabChat": "Chat",
+    "tabSuggestions": "Suggestions"
   },
   "join": {
     "title": "Join a private room",

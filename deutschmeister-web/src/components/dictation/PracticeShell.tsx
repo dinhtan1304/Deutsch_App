@@ -2,28 +2,8 @@
 
 import { useState, type ReactNode, type Ref } from 'react';
 import { SHADOW, STATUS } from '@/lib/tokens';
+import { FIT_VIEWPORT_HEIGHT, fitToViewport } from '@/lib/fitToViewport';
 import { IconChevron, PracticeGuide, useGuideDismissed } from './PracticeKit';
-
-/**
- * Callback ref: publishes the element's document top as `--fit-top` so CSS can
- * size it to exactly the rest of the viewport (navbar, banners and breadcrumb
- * above it vary per user). Re-measured on resize / layout shifts.
- */
-function fitToViewport(el: HTMLElement | null) {
-  if (!el) return;
-  const update = () => {
-    const top = el.getBoundingClientRect().top + window.scrollY;
-    el.style.setProperty('--fit-top', `${Math.round(top)}px`);
-  };
-  update();
-  const ro = new ResizeObserver(update);
-  ro.observe(document.body);
-  window.addEventListener('resize', update);
-  return () => {
-    ro.disconnect();
-    window.removeEventListener('resize', update);
-  };
-}
 
 function IconButton({ label, onClick, active, accent, children }: {
   label: string;
@@ -108,7 +88,7 @@ export function PracticeShell({
 
   return (
     <div ref={fitToViewport}
-      className="relative mx-auto flex max-w-360 flex-col gap-3 min-h-115 h-[calc(100dvh-var(--fit-top,0px)-80px-env(safe-area-inset-bottom))] md:h-[calc(100dvh-var(--fit-top,0px)-16px)]">
+      className={`relative mx-auto flex max-w-360 flex-col gap-3 min-h-115 ${FIT_VIEWPORT_HEIGHT}`}>
       {/* Top bar */}
       <div className="flex h-10 shrink-0 items-center gap-2">
         <button type="button" onClick={onBack} aria-label={backLabel}

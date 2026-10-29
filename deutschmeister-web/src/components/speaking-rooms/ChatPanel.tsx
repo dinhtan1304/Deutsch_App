@@ -28,12 +28,7 @@ export function ChatPanel({ messages, currentUserId, participantById, typingUser
   return (
     <div
       ref={scrollRef}
-      className="flex-1 overflow-y-auto p-3 space-y-2 rounded-2xl border"
-      style={{
-        backgroundColor: 'var(--theme-bg-card)',
-        borderColor: 'var(--theme-border)',
-        minHeight: 320,
-      }}
+      className="min-h-0 flex-1 space-y-2 overflow-y-auto p-3"
     >
       {messages.length === 0 && (
         <p className="text-center text-sm py-8" style={{ color: 'var(--theme-text-muted)' }}>

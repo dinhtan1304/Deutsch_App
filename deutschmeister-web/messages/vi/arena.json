@@ -48,7 +48,11 @@
     "viewAll": "Xem tất cả",
     "recentEmpty": "Chưa có trận nào. Bấm “Tìm trận” để bắt đầu!",
     "topEmpty": "Chưa có ai trên bảng xếp hạng — bạn có thể là người đầu tiên!",
-    "topStatLine": "{wins}W · {losses}L · chuỗi {streak}"
+    "topStatLine": "{wins}W · {losses}L · chuỗi {streak}",
+    "toNextTier": "Còn {points} điểm lên hạng {tier}",
+    "maxTier": "Bạn đang ở hạng cao nhất!",
+    "playCta": "Tìm trận",
+    "nearYou": "Đối thủ gần hạng bạn"
   },
   "leaderboard": {
     "title": "Bảng xếp hạng đấu trường",
@@ -184,7 +188,12 @@
     "redirecting": "Đang chuyển sang trang kết quả...",
     "connConnecting": "Đang kết nối tới Đấu trường...",
     "connReconnecting": "Đang kết nối lại. Trận sẽ tự khôi phục nếu còn hiệu lực.",
-    "connLost": "Mất kết nối tới Đấu trường."
+    "connLost": "Mất kết nối tới Đấu trường.",
+    "vs": "VS",
+    "surrender": "Đầu hàng",
+    "victory": "Chiến thắng",
+    "defeat": "Thất bại",
+    "drawBanner": "Hòa"
   },
   "components": {
     "openRooms": "Phòng đang mở",
@@ -214,6 +223,16 @@
     "pronounce": "Phát âm",
     "translation": "Bản dịch",
     "hintWordType": "Loại từ",
-    "hintPronunciation": "Phát âm"
+    "hintPronunciation": "Phát âm",
+    "statusCorrect": "✓ Đúng",
+    "statusWrong": "✗ Sai",
+    "statusTypingAria": "{name} đang gõ"
+  },
+  "tiers": {
+    "bronze": "Đồng",
+    "silver": "Bạc",
+    "gold": "Vàng",
+    "platinum": "Bạch kim",
+    "diamond": "Kim cương"
   }
 }

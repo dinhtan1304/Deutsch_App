@@ -32,7 +32,8 @@
     "myRooms": "Meine Räume",
     "publicRooms": "Öffentliche Räume",
     "loading": "Wird geladen...",
-    "empty": "Noch keine wartenden Räume. Erstelle den ersten!"
+    "empty": "Noch keine wartenden Räume. Erstelle den ersten!",
+    "onlineLabel": "online"
   },
   "new": {
     "title": "Sprechraum erstellen",
@@ -80,7 +81,10 @@
     "loading": "Raum wird geladen...",
     "opponent": "Partner",
     "partnerLabel": "Partner",
-    "partnerLevel": "Niveau {level}"
+    "partnerLevel": "Niveau {level}",
+    "back": "Zurück",
+    "tabChat": "Chat",
+    "tabSuggestions": "Vorschläge"
   },
   "join": {
     "title": "Privatem Raum beitreten",
