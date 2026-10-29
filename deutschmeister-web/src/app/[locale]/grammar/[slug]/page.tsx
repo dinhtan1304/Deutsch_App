@@ -15,6 +15,11 @@ import { LessonView } from './_components/LessonView';
  * Fetching here and handing the result down as `initialData` puts the theory in
  * the first response while leaving the interactive lesson exactly as it was.
  */
+/** Rendered on first visit, then ISR-cached; without this the route is fully dynamic. */
+export function generateStaticParams() {
+  return [];
+}
+
 export default async function GrammarLessonPage({
   params,
 }: {

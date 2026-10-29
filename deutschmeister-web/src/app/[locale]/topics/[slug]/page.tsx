@@ -13,6 +13,11 @@ import { TopicView } from './_components/TopicView';
  * Fetching here and passing the topic down as `initialData` ships the words in
  * the first response, and the client view is otherwise untouched.
  */
+/** Rendered on first visit, then ISR-cached; without this the route is fully dynamic. */
+export function generateStaticParams() {
+  return [];
+}
+
 export default async function TopicDetailPage({
   params,
 }: {

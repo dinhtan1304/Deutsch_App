@@ -28,7 +28,6 @@ export async function generateSitemaps() {
 
 export default async function sitemap({ id }: { id: number | Promise<number> }): Promise<MetadataRoute.Sitemap> {
   const slugs = await fetchWordSlugs();
-  const now = new Date();
 
   // Next 16 delivers this the way it delivers route params — as a promise.
   // Reading it directly yields a Promise, whose Number() is NaN, and every file
@@ -39,7 +38,8 @@ export default async function sitemap({ id }: { id: number | Promise<number> }):
     .slice(page * URLS_PER_SITEMAP, (page + 1) * URLS_PER_SITEMAP)
     .map((entry) => ({
       url: `${BASE_URL}/words/${entry.level.toLowerCase()}/${entry.slug}`,
-      lastModified: now,
+      // No lastModified: stamping "now" told crawlers all 41k pages changed every
+      // day, so they kept re-fetching them.
       changeFrequency: 'yearly' as const,
       // Below topics (0.6) and grammar lessons (0.7). A single vocabulary entry
       // is genuinely useful but it is not what the site is for, and saying so

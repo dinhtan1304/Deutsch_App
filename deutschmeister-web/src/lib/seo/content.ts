@@ -73,11 +73,24 @@ export function fetchTopicDetail<T>(slug: string): Promise<T | null> {
   return getJson<T>(`/topics/${encodeURIComponent(slug)}?includeWords=true`);
 }
 
-/** One vocabulary entry by the slug its public page is addressed under. */
-export function fetchWordBySlug<T>(level: string, slug: string): Promise<T | null> {
-  return getJson<T>(
-    `/words/by-slug/${encodeURIComponent(level.toLowerCase())}/${encodeURIComponent(slug)}`,
+/** Word pages are cached for a day; a shorter fetch revalidate would override that. */
+const WORD_REVALIDATE_SECONDS = 86400;
+
+/**
+ * One vocabulary entry by the slug its public page is addressed under.
+ *
+ * Null only for a real 404. Anything else throws: the page is ISR-cached for a
+ * day, and swallowing an API blip here would cache a `notFound()` for that long.
+ * A throw instead keeps serving the previous version (or fails without caching).
+ */
+export async function fetchWordBySlug<T>(level: string, slug: string): Promise<T | null> {
+  const res = await fetch(
+    `${API_URL}/words/by-slug/${encodeURIComponent(level.toLowerCase())}/${encodeURIComponent(slug)}`,
+    { next: { revalidate: WORD_REVALIDATE_SECONDS } },
   );
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error(`word ${level}/${slug}: API ${res.status}`);
+  return (await res.json()) as T;
 }
 
 /**

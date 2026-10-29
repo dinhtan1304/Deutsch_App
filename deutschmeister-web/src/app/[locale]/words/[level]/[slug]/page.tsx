@@ -24,6 +24,15 @@ import { ACCENT, RADIUS } from '@/lib/tokens';
 
 export const revalidate = 86400;
 
+/**
+ * None prebuilt, each rendered on first visit and then cached (ISR). Without a
+ * `generateStaticParams` the route is fully dynamic and `revalidate` is ignored:
+ * every crawler hit was a fresh server render, which blew the Vercel quota.
+ */
+export function generateStaticParams() {
+  return [];
+}
+
 /** Colour per grammatical gender — the same three the rest of the app uses. */
 const GENDER_COLOR: Record<string, string> = {
   der: ACCENT.der,
