@@ -18,6 +18,7 @@ import { speakGerman } from '@/lib/utils';
 import { TopicFlashcard } from '@/components/topics/TopicFlashcard';
 import { TopicQuiz } from '@/components/topics/TopicQuiz';
 import { TopicMatching } from '@/components/topics/TopicMatching';
+import { TopicDrill, type DrillMode } from '@/components/topics/TopicDrill';
 import { TopicWordDetailModal } from '@/components/topics/TopicWordDetailModal';
 import { LevelLockCard } from '@/components/subscription/LevelLockCard';
 
@@ -42,16 +43,16 @@ const ArticleColor: Record<string, { color: string; gradient: string; bg: string
 };
 
 // ─── Tab type ───
-type TabKey = 'words' | 'flashcard' | 'quiz' | 'matching';
+type TabKey = 'words' | 'flashcard' | 'quiz' | 'matching' | DrillMode;
 
 // ─── Study Modes Data ───
 const STUDY_MODES = [
   { key: 'flashcard', labelKey: 'modeFlashcard', descKey: 'modeFlashcardDesc', icon: IconCards,      color: ACCENT.vocab,     gradient: GRADIENT.vocab,    disabled: false },
   { key: 'quiz',      labelKey: 'modeQuiz',      descKey: 'modeQuizDesc',      icon: IconPenLine,    color: ACCENT.games,     gradient: GRADIENT.xp,       disabled: false },
-  { key: 'listening', labelKey: 'modeListening', descKey: 'modeListeningDesc', icon: IconHeadphones, color: ACCENT.srs,       gradient: GRADIENT.action,   disabled: true },
-  { key: 'typing',    labelKey: 'modeTyping',    descKey: 'modeTypingDesc',    icon: IconKeyboard,   color: ACCENT.reading,   gradient: GRADIENT.reading,  disabled: true },
+  { key: 'listening', labelKey: 'modeListening', descKey: 'modeListeningDesc', icon: IconHeadphones, color: ACCENT.srs,       gradient: GRADIENT.action,   disabled: false },
+  { key: 'typing',    labelKey: 'modeTyping',    descKey: 'modeTypingDesc',    icon: IconKeyboard,   color: ACCENT.reading,   gradient: GRADIENT.reading,  disabled: false },
   { key: 'matching',  labelKey: 'modeMatching',  descKey: 'modeMatchingDesc',  icon: IconLink,       color: ACCENT.srs,       gradient: GRADIENT.action,   disabled: false },
-  { key: 'mixed',     labelKey: 'modeMixed',     descKey: 'modeMixedDesc',     icon: IconFlame,      color: ACCENT.listening, gradient: GRADIENT.listening, disabled: true },
+  { key: 'mixed',     labelKey: 'modeMixed',     descKey: 'modeMixedDesc',     icon: IconFlame,      color: ACCENT.listening, gradient: GRADIENT.listening, disabled: false },
 ] as const;
 
 type FilterMode = 'all' | 'core' | 'learned' | 'unlearned';
@@ -543,6 +544,17 @@ export function TopicView({ initialTopic }: { initialTopic?: TopicWithWords }) {
         {activeTab === 'matching' && topic.words && (
           <TopicMatching
             words={topic.words}
+            topicColor={topicColor}
+            onMarkLearned={markLearned}
+          />
+        )}
+
+        {/* Tab: Listening / Typing / Mixed */}
+        {(activeTab === 'listening' || activeTab === 'typing' || activeTab === 'mixed') && topic.words && (
+          <TopicDrill
+            key={activeTab}
+            words={topic.words}
+            mode={activeTab}
             topicColor={topicColor}
             onMarkLearned={markLearned}
           />
