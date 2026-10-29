@@ -26,6 +26,8 @@ interface Props {
   recordingColor?: string;
   /** Optional "get ready" 3·2·1 countdown before capture starts (ms). 0 = off. */
   countdownMs?: number;
+  /** Status text beside (row) or under (column) the button. */
+  layout?: 'row' | 'column';
 }
 
 export const RecordButton = forwardRef<RecordButtonRef, Props>(function RecordButton({
@@ -37,6 +39,7 @@ export const RecordButton = forwardRef<RecordButtonRef, Props>(function RecordBu
   accentColor = ACCENT.dictation,
   recordingColor = STATUS.danger,
   countdownMs = 0,
+  layout = 'row',
 }, ref) {
   const t = useTranslations('practice.dictation.shadow.components');
   const [state, setState] = useState<RecState>('idle');
@@ -201,7 +204,7 @@ export const RecordButton = forwardRef<RecordButtonRef, Props>(function RecordBu
   const isProcessing = state === 'processing';
 
   return (
-    <div className="flex items-center gap-3">
+    <div className={layout === 'column' ? 'flex flex-col items-center gap-2' : 'flex items-center gap-3'}>
       <button
         type="button"
         onClick={handleClick}
