@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { animate, motion, useMotionValue, useReducedMotion, useTransform } from 'motion/react';
+import { animate, m, useMotionValue, useReducedMotion, useTransform } from 'motion/react';
 import { ACCENT, GRADIENT, MOTION, type AccentKey } from '@/lib/tokens';
 
 interface ScoreRingProps {
@@ -86,7 +86,7 @@ export function ScoreRing({
           stroke="var(--theme-border)"
           strokeWidth={strokeWidth}
         />
-        <motion.circle
+        <m.circle
           cx={size / 2}
           cy={size / 2}
           r={radius}

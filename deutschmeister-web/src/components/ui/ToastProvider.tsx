@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react';
-import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
+import { AnimatePresence, m, useReducedMotion } from 'motion/react';
 import { slideInRight } from '@/lib/motion-presets';
 import { THEME_VAR, RADIUS, SHADOW, STATUS } from '@/lib/tokens';
 
@@ -78,7 +78,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
       >
         <AnimatePresence initial={false}>
           {items.map((t) => (
-            <motion.div
+            <m.div
               key={t.id}
               layout
               variants={reduce ? undefined : slideInRight}
@@ -106,7 +106,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
                   {t.description}
                 </div>
               )}
-            </motion.div>
+            </m.div>
           ))}
         </AnimatePresence>
       </div>

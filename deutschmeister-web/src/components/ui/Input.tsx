@@ -1,7 +1,7 @@
 'use client';
 
 import { forwardRef, InputHTMLAttributes, useId } from 'react';
-import { motion, useReducedMotion } from 'motion/react';
+import { m, useReducedMotion } from 'motion/react';
 import { STATUS } from '@/lib/tokens';
 import { shake } from '@/lib/motion-presets';
 import { cn } from '@/lib/utils';
@@ -25,7 +25,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             {label}
           </label>
         )}
-        <motion.div
+        <m.div
           variants={reduce ? undefined : shake}
           animate={reduce ? undefined : (error ? 'shake' : 'idle')}
         >
@@ -48,7 +48,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             }}
             {...props}
           />
-        </motion.div>
+        </m.div>
         {error && (
           <p id={errorId} role="alert" className="mt-1 text-xs" style={{ color: STATUS.danger }}>{error}</p>
         )}

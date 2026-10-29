@@ -2,7 +2,7 @@
 /* eslint-disable no-restricted-syntax */
 
 import { forwardRef, ButtonHTMLAttributes, ReactNode } from 'react';
-import { motion, useReducedMotion } from 'motion/react';
+import { m, useReducedMotion } from 'motion/react';
 import { cn } from '@/lib/utils';
 import { ACCENT, GRADIENT, type AccentKey } from '@/lib/tokens';
 
@@ -63,7 +63,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     };
 
     return (
-      <motion.button
+      <m.button
         ref={ref}
         className={cn(baseStyles, sizes[size], 'hover:-translate-y-0.5', fullWidth && 'w-full', className)}
         style={{ ...variantStyles[variant], ...style }}
@@ -80,7 +80,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         {!isLoading && leftIcon}
         {children}
         {rightIcon}
-      </motion.button>
+      </m.button>
     );
   }
 );
