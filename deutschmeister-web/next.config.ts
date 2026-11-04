@@ -45,7 +45,9 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   reactCompiler: true,
   images: {
-    formats: ['image/avif', 'image/webp'],
+    // WebP only: AVIF encoding is CPU-heavy, and the host bills CPU time.
+    formats: ['image/webp'],
+    minimumCacheTTL: 2592000,
     remotePatterns: [
       { protocol: 'https', hostname: 'img.youtube.com' },
       { protocol: 'https', hostname: 'i.ytimg.com' },
@@ -75,6 +77,17 @@ const nextConfig: NextConfig = {
       {
         source: '/:file(logo.*|icon-.*)\\.png',
         headers: [{ key: 'Cache-Control', value: 'public, max-age=86400, stale-while-revalidate=604800' }],
+      },
+    ];
+  },
+  // Bare domain to www. Vercel did this at the platform level; self-hosted, the app has to.
+  async redirects() {
+    return [
+      {
+        source: '/:path*',
+        has: [{ type: 'host', value: 'deutschmeister.vn' }],
+        destination: 'https://www.deutschmeister.vn/:path*',
+        permanent: true,
       },
     ];
   },

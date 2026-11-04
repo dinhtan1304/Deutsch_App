@@ -1,0 +1,13 @@
+node_modules
+.next
+.git
+.agents
+tests
+test-results
+playwright-report
+tsconfig.tsbuildinfo
+*.md
+
+# Local overrides only. .env.production must stay: it carries NEXT_PUBLIC_* for the build.
+.env.local
+.env.*.local
