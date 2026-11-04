@@ -2,7 +2,6 @@ import { ImageResponse } from 'next/og';
 /* eslint-disable no-restricted-syntax */
 import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
 
-export const runtime = 'edge';
 export const alt = 'Deutschmeister — Học tiếng Đức cùng AI';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
@@ -81,11 +80,12 @@ export default function OGImage() {
 
         {/* Main tagline */}
         <div style={{
+          display: 'flex', flexWrap: 'wrap', justifyContent: 'center', columnGap: 10,
           fontSize: 30, fontWeight: 700, color: 'rgba(255,255,255,0.85)',
           textAlign: 'center', maxWidth: 760, lineHeight: 1.4,
           marginBottom: 40,
         }}>
-          Học tiếng Đức toàn diện — AI chấm bài,{' '}
+          <span>Học tiếng Đức toàn diện — AI chấm bài,</span>
           <span style={{ color: '#4ADE80' }}>luyện thi Goethe & TELC</span>
         </div>
 
