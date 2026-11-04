@@ -6,7 +6,7 @@ const BASE_URL = 'https://www.deutschmeister.vn';
 /** Google's ceiling is 50,000 URLs per file; well under it leaves room to grow. */
 const URLS_PER_SITEMAP = 10000;
 
-export const revalidate = 86400;
+export const revalidate = 604800;
 
 /**
  * Word pages, split across numbered sitemap files.

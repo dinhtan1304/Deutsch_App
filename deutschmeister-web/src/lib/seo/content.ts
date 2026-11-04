@@ -12,8 +12,13 @@
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL || 'https://deutschmeister-api-production.up.railway.app/api';
 
-/** Content changes rarely and metadata is cheap to serve stale, so cache for an hour. */
-const REVALIDATE_SECONDS = 3600;
+/**
+ * Content changes rarely, and the client query refreshes whatever a visitor sees.
+ * A fetch's revalidate also caps the ISR window of the page around it, so this
+ * value is how often every topic and grammar page gets regenerated.
+ */
+const REVALIDATE_SECONDS = 86400;
+const WEEK_SECONDS = 604800;
 
 export interface SeoTopic {
   slug: string;
@@ -36,10 +41,10 @@ export interface SeoGrammarLesson {
   lessonNumber: number;
 }
 
-async function getJson<T>(path: string): Promise<T | null> {
+async function getJson<T>(path: string, revalidate = REVALIDATE_SECONDS): Promise<T | null> {
   try {
     const res = await fetch(`${API_URL}${path}`, {
-      next: { revalidate: REVALIDATE_SECONDS },
+      next: { revalidate },
     });
     if (!res.ok) return null;
     return (await res.json()) as T;
@@ -73,20 +78,17 @@ export function fetchTopicDetail<T>(slug: string): Promise<T | null> {
   return getJson<T>(`/topics/${encodeURIComponent(slug)}?includeWords=true`);
 }
 
-/** Word pages are cached for a day; a shorter fetch revalidate would override that. */
-const WORD_REVALIDATE_SECONDS = 86400;
-
 /**
  * One vocabulary entry by the slug its public page is addressed under.
  *
- * Null only for a real 404. Anything else throws: the page is ISR-cached for a
- * day, and swallowing an API blip here would cache a `notFound()` for that long.
- * A throw instead keeps serving the previous version (or fails without caching).
+ * Null only for a real 404. Anything else throws, because the CDN keeps the
+ * response for a month and an API blip must not be stored as a missing word.
+ * Not fetch-cached: the CDN already holds the finished page.
  */
 export async function fetchWordBySlug<T>(level: string, slug: string): Promise<T | null> {
   const res = await fetch(
     `${API_URL}/words/by-slug/${encodeURIComponent(level.toLowerCase())}/${encodeURIComponent(slug)}`,
-    { next: { revalidate: WORD_REVALIDATE_SECONDS } },
+    { cache: 'no-store', signal: AbortSignal.timeout(8000) },
   );
   if (res.status === 404) return null;
   if (!res.ok) throw new Error(`word ${level}/${slug}: API ${res.status}`);
@@ -95,11 +97,11 @@ export async function fetchWordBySlug<T>(level: string, slug: string): Promise<T
 
 /**
  * Every addressable word page. ~41k entries, so this is only ever called from
- * the sitemap, which regenerates daily — the API caches it for an hour on its
+ * the sitemap, which regenerates weekly — the API caches it for an hour on its
  * side too.
  */
 export function fetchWordSlugs(): Promise<{ slug: string; level: string }[]> {
-  return getJson<{ slug: string; level: string }[]>('/words/slug-index').then((data) =>
+  return getJson<{ slug: string; level: string }[]>('/words/slug-index', WEEK_SECONDS).then((data) =>
     Array.isArray(data) ? data : [],
   );
 }
