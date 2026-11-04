@@ -290,5 +290,11 @@
     "warning": "⚠️ False reports may reduce your account's trust score.",
     "cancel": "Cancel",
     "submit": "Send report"
+  },
+  "serviceNotice": {
+    "title": "We apologize for the recent interruption",
+    "body": "From November 1 to 4, the DeutschMeister website was unavailable while we upgraded our infrastructure. We apologize for interrupting your learning.",
+    "reassurance": "Your learning data is safe. If anything looks wrong, message us through the support chat in the corner of the screen.",
+    "confirm": "Got it"
   }
 }

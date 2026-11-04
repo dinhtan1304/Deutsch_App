@@ -20,6 +20,7 @@ import { notifKeys } from '@/hooks/useNotifications';
 import { subscriptionKeys } from '@/hooks/useSubscription';
 import { createAppQueryClient } from '@/lib/queryClient';
 import { UpdateAnnouncement } from '@/components/updates/UpdateAnnouncement';
+import { ServiceNotice } from '@/components/updates/ServiceNotice';
 import { OfflineSync } from '@/components/learning/OfflineSync';
 
 // Real session expiry is handled centrally in client.ts (onAuthExpired fires
@@ -165,6 +166,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
                       {children}
                       <AchievementToastProvider />
                       <UpdateAnnouncement />
+                      <ServiceNotice />
                       <OfflineSync />
                     </ToastProvider>
                   </GrammarAnalyzerProvider>

@@ -290,5 +290,11 @@
     "warning": "⚠️ Falschmeldungen können den Vertrauenswert deines Kontos senken.",
     "cancel": "Abbrechen",
     "submit": "Meldung senden"
+  },
+  "serviceNotice": {
+    "title": "Entschuldigung für die Unterbrechung",
+    "body": "Vom 1. bis 4. November war die DeutschMeister-Website wegen eines Infrastruktur-Upgrades nicht erreichbar. Wir entschuldigen uns dafür, dass dein Lernen unterbrochen wurde.",
+    "reassurance": "Deine Lerndaten sind sicher. Falls dir etwas auffällt, schreib uns über den Support-Chat in der Bildschirmecke.",
+    "confirm": "Verstanden"
   }
 }

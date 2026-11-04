@@ -290,5 +290,11 @@
     "warning": "⚠️ Báo cáo sai sự thật có thể dẫn tới giảm uy tín tài khoản của bạn.",
     "cancel": "Huỷ",
     "submit": "Gửi báo cáo"
+  },
+  "serviceNotice": {
+    "title": "Xin lỗi vì sự gián đoạn vừa qua",
+    "body": "Từ 01/11 đến 04/11, website DeutschMeister tạm ngừng hoạt động để nâng cấp hạ tầng. Chúng tôi xin lỗi vì đã làm gián đoạn việc học của bạn.",
+    "reassurance": "Dữ liệu học của bạn vẫn an toàn. Nếu thấy có gì bất thường, hãy nhắn cho chúng tôi qua mục Hỗ trợ & phản hồi ở góc màn hình.",
+    "confirm": "Đã hiểu"
   }
 }

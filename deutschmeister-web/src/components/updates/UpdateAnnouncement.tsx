@@ -7,7 +7,8 @@ import { AnimatedModal, Button, Card } from '@/components/ui';
 import { IconStar, IconX } from '@/components/ui/Icons';
 import { useModalA11y } from '@/hooks/useModalA11y';
 import { useAuthStore } from '@/stores/authStore';
-import { APP_RELEASE } from '@/config/release';
+import { ANNOUNCEMENT_PAGES, APP_RELEASE } from '@/config/release';
+import { isServiceNoticePending } from './ServiceNotice';
 import { ACCENT } from '@/lib/tokens';
 
 const STORAGE_KEY = `dm:release-seen:${APP_RELEASE.id}`;
@@ -59,22 +60,9 @@ export function UpdateAnnouncement() {
   }, []);
 
   useEffect(() => {
-    // Defer automatic announcements until a hub page; never cover an exercise,
-    // an OAuth callback, onboarding, or an administrator's workflow.
-    const eligible = [
-      '/',
-      '/dashboard',
-      '/smart-review',
-      '/learning-session',
-      '/error-notebook',
-      '/resources',
-      '/settings',
-      '/topics',
-      '/practice-test',
-      '/games',
-      '/pricing',
-    ].includes(pathname);
-    if (!hydrated || !eligible || dismissedInMemory) return;
+    if (!hydrated || !ANNOUNCEMENT_PAGES.includes(pathname) || dismissedInMemory) return;
+    // One modal at a time: the release notes wait for the next hub page.
+    if (isAuthenticated && isServiceNoticePending()) return;
     try {
       if (localStorage.getItem(STORAGE_KEY)) return;
     } catch {
@@ -82,7 +70,7 @@ export function UpdateAnnouncement() {
     }
     const timer = window.setTimeout(() => setOpen(true), 1200);
     return () => window.clearTimeout(timer);
-  }, [hydrated, pathname]);
+  }, [hydrated, isAuthenticated, pathname]);
 
   return (
     <AnimatedModal open={open} onClose={close} size="lg" ariaLabel={t('title')}>
