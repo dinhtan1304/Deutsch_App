@@ -8,7 +8,7 @@ This file is auto-loaded into every Claude Code session at this repo root. Keep 
 
 | Path | Stack | Deploy |
 |---|---|---|
-| `deutschmeister-web/` | Next.js 15 App Router, Tailwind v4, Zustand, TanStack Query | Vercel |
+| `deutschmeister-web/` | Next.js 15 App Router, Tailwind v4, Zustand, TanStack Query | Railway (Dockerfile) |
 | `deutschmeister-api/` | NestJS 10, Prisma, PostgreSQL, Socket.IO | Railway |
 
 `deutschmeister-api/` is a **git submodule** with default branch `master` (not `main`). Two other workspaces exist in the repo (`deutschmeister-mobile/`, `deutschmeister-tts/`) but are not covered here — mobile has its own `/mobile-*` skills.

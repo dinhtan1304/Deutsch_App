@@ -44,6 +44,8 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   reactCompiler: true,
+  // No in-memory ISR copy: the same pages are already on disk, and this host bills RAM.
+  cacheMaxMemorySize: 0,
   images: {
     // WebP only: AVIF encoding is CPU-heavy, and the host bills CPU time.
     formats: ['image/webp'],

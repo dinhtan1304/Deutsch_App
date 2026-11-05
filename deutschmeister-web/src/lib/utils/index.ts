@@ -60,6 +60,8 @@ const ttsBlobUrlCache = new Map<string, string>();
 const ttsInflight = new Map<string, Promise<string>>();
 let currentAudio: HTMLAudioElement | null = null;
 let currentSequence: AudioSequenceHandle | null = null;
+const BACKEND_VOICE_WAIT_MS = 4000;
+let pendingBrowserVoice: ReturnType<typeof setTimeout> | null = null;
 
 const TTS_API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://deutschmeister-api-production.up.railway.app/api';
 
@@ -207,6 +209,8 @@ interface AudioSequenceOptions {
   onStart?: () => void;
   /** Fired when the last chunk finishes. */
   onEnded?: () => void;
+  /** Fired once, when the first chunk actually starts producing sound. */
+  onAudioStart?: () => void;
   /** Fired when the backend fails before any audio could play, so the caller
    *  can fall back (e.g. to the Web Speech API) for the whole passage. */
   onError?: (err: unknown) => void;
@@ -314,8 +318,10 @@ export function synthesizeAudioSequence(
       audio.onended = () => { void playFrom(i + 1); };
       audio.onerror = () => { void playFrom(i + 1); };
       await audio.play();
+      if (!playedAny) opts.onAudioStart?.();
       playedAny = true;
     } catch (err) {
+      if (stopped) return;
       if (!playedAny) {
         // Total failure before any audio played — let the caller fall back.
         playing = false;
@@ -357,6 +363,7 @@ export function synthesizeAudioSequence(
 // Stop whatever speakGerman started last — a chunk sequence, a single audio
 // element, or a Web Speech utterance.
 function stopCurrentPlayback(): void {
+  clearPendingBrowserVoice();
   if (currentSequence) { currentSequence.stop(); currentSequence = null; }
   if (currentAudio) {
     currentAudio.pause();
@@ -366,6 +373,11 @@ function stopCurrentPlayback(): void {
   if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
     window.speechSynthesis.cancel();
   }
+}
+
+function clearPendingBrowserVoice(): void {
+  if (pendingBrowserVoice) clearTimeout(pendingBrowserVoice);
+  pendingBrowserVoice = null;
 }
 
 function speakViaBrowser(text: string, slow: boolean): void {
@@ -402,11 +414,21 @@ export function speakGerman(text: string, slow = false): void {
 
   const seq = synthesizeAudioSequence(trimmed, {
     playbackRate: slow ? 0.7 : 1,
+    onAudioStart: clearPendingBrowserVoice,
     onError: err => {
+      clearPendingBrowserVoice();
       console.warn('[speakGerman] backend failed, falling back to Web Speech API:', err);
       speakViaBrowser(trimmed, slow);
     },
   });
   currentSequence = seq;
+  // A sleeping TTS service can take 15 seconds to answer. Rather than leaving the
+  // learner in silence, speak with the browser voice. The request keeps running
+  // and its audio stays cached, so the next click gets the better voice.
+  pendingBrowserVoice = setTimeout(() => {
+    pendingBrowserVoice = null;
+    seq.stop();
+    speakViaBrowser(trimmed, slow);
+  }, BACKEND_VOICE_WAIT_MS);
   void seq.play();
 }

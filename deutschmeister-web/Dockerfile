@@ -17,8 +17,11 @@ COPY . .
 RUN npm run build
 
 ENV NODE_ENV=production
-# Railway bills RAM per GB, so keep the heap bounded.
-ENV NODE_OPTIONS=--max-old-space-size=512
+# Railway bills RAM per GB, and V8 grows into whatever heap it is allowed: at 512
+# this service climbed from 120 MB to 520 MB on almost no traffic. glibc's per-thread
+# malloc arenas also hold on to memory that sharp has already freed.
+ENV NODE_OPTIONS=--max-old-space-size=192
+ENV MALLOC_ARENA_MAX=2
 
 # ISR and the image optimizer write under .next at runtime.
 RUN chown -R node:node .next
