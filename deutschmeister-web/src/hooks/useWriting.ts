@@ -16,6 +16,7 @@ import {
   WritingStats,
   TopicSuggestions,
   ExplainErrorResponse,
+  ModelAnswer,
 } from '@/lib/api/writing';
 
 // ── Query Keys ──
@@ -29,6 +30,7 @@ export const writingKeys = {
   history: (params?: Record<string, unknown>) => [...writingKeys.historyAll(), params] as const,
   stats: () => [...writingKeys.all, 'stats'] as const,
   session: (id: string) => [...writingKeys.all, 'session', id] as const,
+  modelAnswer: (id: string) => [...writingKeys.all, 'model-answer', id] as const,
 };
 
 // ── Queries ──
@@ -125,6 +127,20 @@ export function useDeleteWriting() {
       queryClient.invalidateQueries({ queryKey: writingKeys.historyAll() });
       queryClient.invalidateQueries({ queryKey: writingKeys.stats() });
     },
+  });
+}
+
+/**
+ * Bài mẫu for a graded session. Fetched only when the learner asks for it
+ * (enabled), and never refetched: the server caches it per task.
+ */
+export function useModelAnswer(sessionId: string, enabled: boolean) {
+  return useQuery<ModelAnswer>({
+    queryKey: writingKeys.modelAnswer(sessionId),
+    queryFn: () => writingApi.getModelAnswer(sessionId),
+    enabled: enabled && !!sessionId,
+    staleTime: Infinity,
+    retry: false,
   });
 }
 

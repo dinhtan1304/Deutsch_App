@@ -1,5 +1,6 @@
 import { apiGet, apiPost, api } from './client';
 import type { GradingInsights } from './types/grading-insights';
+import type { ModelAnswer } from './writing';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -103,6 +104,10 @@ export const examWritingApi = {
 
   getSession: (id: string) =>
     apiGet<ExamWritingSession>(`/exam-writing/${id}`),
+
+  /** Musterlösung for one Teil of a graded session. */
+  getModelAnswer: (id: string, teil: number) =>
+    apiGet<ModelAnswer>(`/exam-writing/${id}/model-answer/${teil}`),
 
   getHistory: (params?: {
     page?: number; limit?: number; status?: string; examType?: string; cefrLevel?: string;

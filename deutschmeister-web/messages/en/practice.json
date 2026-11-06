@@ -1843,5 +1843,16 @@
     "traps": "Common traps",
     "redemittel": "Redemittel — useful phrases",
     "redemittelPanelTitle": "Redemittel B1 — phrase lookup"
+  },
+  "modelAnswer": {
+    "title": "Model answer (Musterlösung)",
+    "show": "Show model answer",
+    "hide": "Hide",
+    "loading": "Writing the model answer…",
+    "error": "Couldn't create the model answer. Try again in a few minutes.",
+    "premiumOnly": "Premium",
+    "wordCount": "{n} words",
+    "structure": "How it is built",
+    "disclaimer": "Highlighted phrases are ones you can reuse. Written by AI: one good way to do it, not the only right answer."
   }
 }

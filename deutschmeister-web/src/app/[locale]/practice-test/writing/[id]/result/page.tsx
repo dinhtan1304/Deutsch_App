@@ -10,6 +10,7 @@ import { useAuthStore } from '@/stores/authStore';
 import type { WritingError, GrammarAnalysis } from '@/lib/api/writing';
 import { CriterionRadar } from '@/components/writing/CriterionRadar';
 import { WritingRevisions } from '@/components/writing/WritingRevisions';
+import { ModelAnswerPanel } from '@/components/writing/ModelAnswerPanel';
 import { InsightsPanel } from '@/components/grading/InsightsPanel';
 import { coalesceInsights } from '@/lib/api/utils/insights-fallback';
 import { getErrorTip } from '@/data/error-tips';
@@ -387,6 +388,9 @@ export default function WritingResultPage() {
           </div>
         )}
       </div>
+
+      {/* Model answer for the same task — compare before rewriting */}
+      <ModelAnswerPanel sessionId={id} className="mb-5" />
 
       {/* Text Comparison + Error Details */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">

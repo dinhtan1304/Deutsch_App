@@ -1843,5 +1843,16 @@
     "traps": "Bẫy thường gặp",
     "redemittel": "Redemittel — mẫu câu",
     "redemittelPanelTitle": "Redemittel B1 — tra cứu mẫu câu"
+  },
+  "modelAnswer": {
+    "title": "Bài mẫu (Musterlösung)",
+    "show": "Xem bài mẫu",
+    "hide": "Ẩn bài mẫu",
+    "loading": "Đang soạn bài mẫu…",
+    "error": "Chưa tạo được bài mẫu. Thử lại sau ít phút.",
+    "premiumOnly": "Premium",
+    "wordCount": "{n} từ",
+    "structure": "Cách bài được xây dựng",
+    "disclaimer": "Cụm được tô màu là mẫu câu bạn có thể dùng lại. Bài mẫu do AI viết — một cách làm tốt, không phải đáp án duy nhất."
   }
 }

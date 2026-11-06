@@ -126,6 +126,15 @@ export interface GrammarAnalysis {
   tipVi: string;
 }
 
+/** Musterlösung for a writing task (AI, cached per task server-side). */
+export interface ModelAnswer {
+  text: string;
+  wordCount: number;
+  keyPhrases: string[];
+  structureNotes: string[];
+  cached: boolean;
+}
+
 export interface ExplainErrorResponse {
   errorId: string;
   originalText: string;
@@ -231,5 +240,10 @@ export const writingApi = {
   /** AI giải thích lỗi chi tiết (Premium) */
   explainError: async (sessionId: string, errorId: string): Promise<ExplainErrorResponse> => {
     return apiPost<ExplainErrorResponse>(`/writing/${sessionId}/explain-error`, { errorId });
+  },
+
+  /** Bài mẫu cho đề của bài đã chấm (Premium) */
+  getModelAnswer: async (sessionId: string): Promise<ModelAnswer> => {
+    return apiGet<ModelAnswer>(`/writing/${sessionId}/model-answer`);
   },
 };

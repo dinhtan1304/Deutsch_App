@@ -16,7 +16,19 @@ export const examWritingKeys = {
   history: (params?: Record<string, unknown>) => [...examWritingKeys.historyAll(), params] as const,
   stats: () => [...examWritingKeys.all, 'stats'] as const,
   session: (id: string) => [...examWritingKeys.all, 'session', id] as const,
+  modelAnswer: (id: string, teil: number) => [...examWritingKeys.all, 'model-answer', id, teil] as const,
 };
+
+/** Musterlösung for one Teil; fetched on demand, cached server-side per task. */
+export function useExamModelAnswer(id: string, teil: number, enabled: boolean) {
+  return useQuery({
+    queryKey: examWritingKeys.modelAnswer(id, teil),
+    queryFn: () => examWritingApi.getModelAnswer(id, teil),
+    enabled: enabled && !!id,
+    staleTime: Infinity,
+    retry: false,
+  });
+}
 
 export function useExamWritingHistory(params?: {
   page?: number; limit?: number; status?: string; examType?: string; cefrLevel?: string;

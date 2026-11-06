@@ -1843,5 +1843,16 @@
     "traps": "Typische Fallen",
     "redemittel": "Redemittel",
     "redemittelPanelTitle": "Redemittel B1 — Nachschlagen"
+  },
+  "modelAnswer": {
+    "title": "Musterlösung",
+    "show": "Musterlösung anzeigen",
+    "hide": "Ausblenden",
+    "loading": "Musterlösung wird erstellt…",
+    "error": "Die Musterlösung konnte nicht erstellt werden. Versuch es in ein paar Minuten noch einmal.",
+    "premiumOnly": "Premium",
+    "wordCount": "{n} Wörter",
+    "structure": "So ist der Text aufgebaut",
+    "disclaimer": "Markierte Wendungen kannst du übernehmen. Von KI geschrieben: eine gute Lösung, nicht die einzig richtige."
   }
 }

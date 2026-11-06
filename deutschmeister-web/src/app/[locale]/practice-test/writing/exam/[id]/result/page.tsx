@@ -9,6 +9,7 @@ import { useShareResult } from '@/hooks/useShareResult';
 import { ExamWritingTeil, TeilGrading } from '@/lib/api/examWriting';
 import { CriterionRadar } from '@/components/writing/CriterionRadar';
 import { InsightsPanel } from '@/components/grading/InsightsPanel';
+import { ModelAnswerPanel } from '@/components/writing/ModelAnswerPanel';
 import { coalesceInsights } from '@/lib/api/utils/insights-fallback';
 import { PageHeader, FixedActionBar } from '@/components/ui';
 import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
@@ -390,14 +391,16 @@ export default function ExamWritingResultPage() {
             const g = grading[`teil_${teil.number}`];
             if (!g) return null;
             return (
-              <TeilGradingCard
-                key={teil.number}
-                teil={teil}
-                grading={g}
-                userText={userTexts[`teil_${teil.number}`] ?? ''}
-                expanded={expandedTeil === i}
-                onToggle={() => setExpandedTeil(expandedTeil === i ? null : i)}
-              />
+              <div key={teil.number} className="space-y-2">
+                <TeilGradingCard
+                  teil={teil}
+                  grading={g}
+                  userText={userTexts[`teil_${teil.number}`] ?? ''}
+                  expanded={expandedTeil === i}
+                  onToggle={() => setExpandedTeil(expandedTeil === i ? null : i)}
+                />
+                {expandedTeil === i && <ModelAnswerPanel sessionId={session.id} teil={teil.number} />}
+              </div>
             );
           })}
         </div>
