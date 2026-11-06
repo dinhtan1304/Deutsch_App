@@ -10,7 +10,9 @@ import {
   DictationStats,
   DictationVideo,
   MyDictationRequestsResponse,
+  YouTubeUrlPreview,
 } from '@/lib/api/dictation';
+import { canonicalYouTubeUrl } from '@/lib/youtube';
 
 // ─── Query keys ───────────────────────────────────────────────────────────────
 
@@ -24,7 +26,19 @@ export const dictationKeys = {
   history: (params?: Record<string, unknown>) => [...dictationKeys.historyAll(), params] as const,
   stats: () => [...dictationKeys.all, 'stats'] as const,
   myRequests: () => [...dictationKeys.all, 'my-requests'] as const,
+  urlPreview: (youtubeId: string) => [...dictationKeys.all, 'url-preview', youtubeId] as const,
 };
+
+/** Preview card for a pasted YouTube link; pass null until the id parses. */
+export function useYouTubeUrlPreview(youtubeId: string | null) {
+  return useQuery<YouTubeUrlPreview>({
+    queryKey: dictationKeys.urlPreview(youtubeId ?? ''),
+    queryFn: () => dictationApi.urlPreview(canonicalYouTubeUrl(youtubeId!)),
+    enabled: !!youtubeId,
+    staleTime: 10 * 60_000,
+    retry: false,
+  });
+}
 
 // ─── Queries ─────────────────────────────────────────────────────────────────
 

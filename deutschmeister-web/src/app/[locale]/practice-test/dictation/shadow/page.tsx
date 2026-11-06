@@ -12,10 +12,13 @@ import {
   useStartShadowingFromUrl,
 } from '@/hooks/useShadowing';
 import { dictationApi } from '@/lib/api/dictation';
-import { ApiError } from '@/lib/api/client';
 import type { ShadowingHistoryItem } from '@/lib/api/shadowing';
 import { GridSkeleton } from '@/components/ui';
+import { YouTubeUrlStarter } from '@/components/dictation/YouTubeUrlStarter';
 import { ACCENT, STATUS } from '@/lib/tokens';
+
+// Levels the import API accepts; '' = keep the video's own level.
+const STARTER_LEVELS = ['', 'A1', 'A2', 'B1'] as const;
 
 const CEFR_COLORS: Record<string, string> = {
   A1: STATUS.success, A2: ACCENT.srs, B1: ACCENT.vocab,
@@ -216,8 +219,6 @@ export default function ShadowingListPage() {
   const [starterLevel, setStarterLevel] = useState('');
   const [isLoadingRandom, setIsLoadingRandom] = useState(false);
   const [randomError, setRandomError] = useState('');
-  const [youtubeUrl, setYoutubeUrl] = useState('');
-  const [urlError, setUrlError] = useState('');
 
   const { data: history, isLoading } = useShadowingHistory({
     page, limit: 10,
@@ -235,26 +236,13 @@ export default function ShadowingListPage() {
     setConfirmDeleteId(null);
   };
 
-  const handleStartFromUrl = async () => {
-    if (!youtubeUrl.trim()) { setUrlError(t('urlMissing')); return; }
-    if (!/(?:youtu\.be\/|youtube(?:-nocookie)?\.com\/(?:watch|embed|shorts|live|v)\/?)/i.test(youtubeUrl)) {
-      setUrlError(t('urlInvalid')); return;
-    }
-    setUrlError('');
-    try {
-      const session = await startFromUrlMutation.mutateAsync({
-        youtubeUrl: youtubeUrl.trim(),
-        cefrLevel: starterLevel || undefined,
-      });
-      router.push(`/practice-test/dictation/shadow/${session.id}`);
-    } catch (err) {
-      if (err instanceof ApiError && (err.data as { code?: string })?.code === 'VIDEO_NOT_GERMAN') {
-        setUrlError(t('urlNotGerman'));
-        return;
-      }
-      const msg = err instanceof Error && err.message ? err.message : '';
-      setUrlError(msg || t('urlGenericError'));
-    }
+  // Errors propagate to YouTubeUrlStarter, which translates them by code.
+  const handleStartFromUrl = async (youtubeUrl: string) => {
+    const session = await startFromUrlMutation.mutateAsync({
+      youtubeUrl,
+      cefrLevel: starterLevel || undefined,
+    });
+    router.push(`/practice-test/dictation/shadow/${session.id}`);
   };
 
   const handleStartRandom = async () => {
@@ -311,23 +299,7 @@ export default function ShadowingListPage() {
         <div className="flex flex-col gap-4 lg:flex-row lg:items-stretch">
           <div className="flex flex-1 flex-col gap-2.5">
             {starterMode === 'url' && (
-              <>
-                <p className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>{t('urlSubtitle')}</p>
-                <div className="flex gap-2">
-                  <input type="text" value={youtubeUrl}
-                    onChange={(e) => { setYoutubeUrl(e.target.value); setUrlError(''); }}
-                    onKeyDown={(e) => e.key === 'Enter' && !startFromUrlMutation.isPending && handleStartFromUrl()}
-                    placeholder={t('urlPlaceholder')}
-                    className="h-10 min-w-0 flex-1 rounded-[9px] px-3.5 text-caption outline-none"
-                    style={{ background: 'var(--theme-bg-secondary)', border: `1px solid ${urlError ? 'var(--danger)' : 'var(--theme-border)'}`, color: 'var(--theme-text-primary)' }} />
-                  <button onClick={handleStartFromUrl} disabled={!youtubeUrl.trim() || startFromUrlMutation.isPending}
-                    className="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-[9px] px-5 text-caption font-bold disabled:opacity-50"
-                    style={youtubeUrl.trim() ? { background: 'var(--accent)', color: 'var(--accent-on)' } : { background: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)', border: '1px solid var(--theme-border)' }}>
-                    {startFromUrlMutation.isPending ? t('processing') : t('start')}
-                  </button>
-                </div>
-                {urlError && <p className="text-[11px]" style={{ color: 'var(--danger)' }}>{urlError}</p>}
-              </>
+              <YouTubeUrlStarter variant="shadowing" subtitle={t('urlSubtitle')} onStart={handleStartFromUrl} />
             )}
             {starterMode === 'lib' && (
               <>
@@ -352,7 +324,7 @@ export default function ShadowingListPage() {
           <div className="lg:min-w-48">
             <div className="mb-2 text-[10.5px] font-semibold uppercase" style={{ color: 'var(--theme-text-muted)', letterSpacing: '.06em' }}>{t('levelLabel')}</div>
             <div className="flex flex-wrap gap-1.5">
-              {['', 'A1', 'A2', 'B1', 'B2'].map((lvl) => (
+              {STARTER_LEVELS.map((lvl) => (
                 <FChip key={lvl} label={lvl || t('allLevels')} mono={!!lvl} on={starterLevel === lvl} onClick={() => setStarterLevel(lvl)} />
               ))}
             </div>

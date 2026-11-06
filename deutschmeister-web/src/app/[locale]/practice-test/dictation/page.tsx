@@ -6,9 +6,12 @@ import { Link } from '@/i18n/navigation';
 import { useRouter } from 'next/navigation';
 import * as DictationHooks from '@/hooks/useDictation';
 import { DictationHistoryItem, dictationApi } from '@/lib/api/dictation';
-import { ApiError } from '@/lib/api/client';
 import { GridSkeleton } from '@/components/ui';
+import { YouTubeUrlStarter } from '@/components/dictation/YouTubeUrlStarter';
 import { ACCENT, STATUS } from '@/lib/tokens';
+
+// Levels the import API accepts (blank ratios exist for A1–B1 only); '' = video's own level.
+const STARTER_LEVELS = ['', 'A1', 'A2', 'B1'] as const;
 
 // ─── Local Icons ─────────────────────────────────────────────────────────────
 function IconVideo({ size = 20, style }: { size?: number; style?: React.CSSProperties }) {
@@ -177,8 +180,6 @@ export default function DictationListPage() {
   const [starterMode, setStarterMode] = useState<'url' | 'rand'>('url');
   const [starterLevel, setStarterLevel] = useState('');
   const [filterSource, setFilterSource] = useState('');
-  const [youtubeUrl, setYoutubeUrl] = useState('');
-  const [urlError, setUrlError] = useState('');
   const [queuedMessage, setQueuedMessage] = useState('');
   const [isLoadingRandom, setIsLoadingRandom] = useState(false);
   const [randomError, setRandomError] = useState('');
@@ -200,32 +201,18 @@ export default function DictationListPage() {
     setConfirmDeleteId(null);
   };
 
-  const handleStartFromUrl = async () => {
-    if (!youtubeUrl.trim()) { setUrlError(tQuick('urlMissing')); return; }
-    if (!/(?:youtu\.be\/|youtube(?:-nocookie)?\.com\/(?:watch|embed|shorts|live|v)\/?)/i.test(youtubeUrl)) {
-      setUrlError(tQuick('urlInvalid')); return;
-    }
-    setUrlError('');
+  // Errors propagate to YouTubeUrlStarter, which translates them by code.
+  const handleStartFromUrl = async (youtubeUrl: string) => {
     setQueuedMessage('');
-    try {
-      const result = await startFromUrlMutation.mutateAsync({
-        youtubeUrl: youtubeUrl.trim(),
-        cefrLevel: starterLevel || undefined,
-      });
-      if ('status' in result && result.status === 'QUEUED') {
-        setQueuedMessage(result.message);
-        setYoutubeUrl('');
-        return;
-      }
-      router.push(`/practice-test/dictation/${result.id}`);
-    } catch (err) {
-      if (err instanceof ApiError && (err.data as { code?: string })?.code === 'VIDEO_NOT_GERMAN') {
-        setUrlError(tQuick('urlNotGerman'));
-        return;
-      }
-      const msg = err instanceof Error && err.message ? err.message : '';
-      setUrlError(msg || tQuick('urlGenericError'));
+    const result = await startFromUrlMutation.mutateAsync({
+      youtubeUrl,
+      cefrLevel: starterLevel || undefined,
+    });
+    if ('status' in result && result.status === 'QUEUED') {
+      setQueuedMessage(result.message);
+      return;
     }
+    router.push(`/practice-test/dictation/${result.id}`);
   };
 
   const handleStartRandom = async () => {
@@ -289,26 +276,15 @@ export default function DictationListPage() {
         <div className="flex flex-col gap-4 lg:flex-row lg:items-stretch">
           <div className="flex flex-1 flex-col gap-2.5">
             {starterMode === 'url' ? (
-              <>
-                <p className="text-caption" style={{ color: 'var(--theme-text-muted)' }}>{tQuick('urlSubtitle')}</p>
-                <div className="flex gap-2">
-                  <input type="text" value={youtubeUrl}
-                    onChange={(e) => { setYoutubeUrl(e.target.value); setUrlError(''); setQueuedMessage(''); }}
-                    onKeyDown={(e) => e.key === 'Enter' && handleStartFromUrl()}
-                    placeholder={tQuick('urlPlaceholder')}
-                    className="h-10 min-w-0 flex-1 rounded-[9px] px-3.5 text-caption outline-none"
-                    style={{ background: 'var(--theme-bg-secondary)', border: `1px solid ${urlError ? 'var(--danger)' : 'var(--theme-border)'}`, color: 'var(--theme-text-primary)' }} />
-                  <button onClick={handleStartFromUrl} disabled={!youtubeUrl.trim() || startFromUrlMutation.isPending}
-                    className="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-[9px] px-5 text-caption font-bold disabled:opacity-50"
-                    style={youtubeUrl.trim() ? { background: 'var(--accent)', color: 'var(--accent-on)' } : { background: 'var(--theme-bg-secondary)', color: 'var(--theme-text-muted)', border: '1px solid var(--theme-border)' }}>
-                    {startFromUrlMutation.isPending ? tQuick('processing') : tQuick('start')}
-                  </button>
-                </div>
-                {urlError && <p className="text-[11px]" style={{ color: 'var(--danger)' }}>{urlError}</p>}
-                {queuedMessage && (
+              <YouTubeUrlStarter
+                variant="dictation"
+                subtitle={tQuick('urlSubtitle')}
+                onStart={handleStartFromUrl}
+                onEdit={() => setQueuedMessage('')}
+                notice={queuedMessage ? (
                   <p className="inline-flex items-center gap-1.5 text-[11px]" style={{ color: 'var(--success)' }}><IconCheck size={13} />{queuedMessage}</p>
-                )}
-              </>
+                ) : null}
+              />
             ) : (
               <>
                 <p className="text-caption leading-relaxed" style={{ color: 'var(--theme-text-muted)' }}>{tQuick('randomDescription')}</p>
@@ -324,7 +300,7 @@ export default function DictationListPage() {
           <div className="lg:min-w-48">
             <div className="mb-2 text-[10.5px] font-semibold uppercase" style={{ color: 'var(--theme-text-muted)', letterSpacing: '.06em' }}>{tQuick('levelLabel')}</div>
             <div className="flex flex-wrap gap-1.5">
-              {['', 'A1', 'A2', 'B1', 'B2'].map((lvl) => (
+              {STARTER_LEVELS.map((lvl) => (
                 <FChip key={lvl} label={lvl || tQuick('allLevels')} mono={!!lvl} on={starterLevel === lvl} onClick={() => setStarterLevel(lvl)} />
               ))}
             </div>

@@ -56,6 +56,26 @@ export type StartFromUrlResponse =
   | { id: string; status: 'DRAFT' }
   | { status: 'QUEUED'; requestId: string; message: string };
 
+/** `GET /dictation/url-preview` — cheap card shown while the user pastes a link. */
+export interface YouTubeUrlPreview {
+  youtubeId: string;
+  title: string | null;
+  channelName: string | null;
+  thumbnailUrl: string;
+  inLibrary: boolean;
+  /** oEmbed says private / removed / embedding disabled. */
+  unavailable: boolean;
+  /** Recently cached transcript failure code for this video, if any. */
+  knownFailure: string | null;
+  video: {
+    id: string;
+    cefrLevel: string;
+    durationSec: number;
+    transcriptSource: string;
+    isActive: boolean;
+  } | null;
+}
+
 export interface MyDictationRequestItem {
   id: string;
   youtubeUrl: string;
@@ -143,6 +163,9 @@ export const dictationApi = {
 
   startFromUrl: (data: { youtubeUrl: string; cefrLevel?: string }) =>
     apiPost<StartFromUrlResponse>('/dictation/start-from-url', data),
+
+  urlPreview: (url: string) =>
+    apiGet<YouTubeUrlPreview>(`/dictation/url-preview${toQS({ url })}`),
 
   getMyRequests: () =>
     apiGet<MyDictationRequestsResponse>('/dictation/my-requests'),
