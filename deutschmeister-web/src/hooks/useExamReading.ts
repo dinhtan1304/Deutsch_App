@@ -10,7 +10,10 @@ import {
 
 export const examReadingKeys = {
   all: ['exam-reading'] as const,
-  history: (params?: Record<string, unknown>) => [...examReadingKeys.all, 'history', params] as const,
+  // Prefix key for invalidation: history(params) caches under [..., 'history', {page}],
+  // which history() (params undefined) never prefix-matches.
+  historyAll: () => [...examReadingKeys.all, 'history'] as const,
+  history: (params?: Record<string, unknown>) => [...examReadingKeys.historyAll(), params] as const,
   stats: () => [...examReadingKeys.all, 'stats'] as const,
   session: (id: string) => [...examReadingKeys.all, 'session', id] as const,
 };
@@ -47,7 +50,7 @@ export function useGenerateExamReading() {
     mutationFn: (data: { examType: string; cefrLevel: string; teilNumber?: number }) =>
       examReadingApi.generateSession(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: examReadingKeys.history() });
+      queryClient.invalidateQueries({ queryKey: examReadingKeys.historyAll() });
     },
   });
 }
@@ -59,7 +62,7 @@ export function useSubmitExamReading() {
       examReadingApi.submitAnswers(id, userAnswers),
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: examReadingKeys.session(id) });
-      queryClient.invalidateQueries({ queryKey: examReadingKeys.history() });
+      queryClient.invalidateQueries({ queryKey: examReadingKeys.historyAll() });
       queryClient.invalidateQueries({ queryKey: examReadingKeys.stats() });
     },
   });
@@ -70,7 +73,7 @@ export function useDeleteExamReading() {
   return useMutation({
     mutationFn: (id: string) => examReadingApi.deleteSession(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: examReadingKeys.history() });
+      queryClient.invalidateQueries({ queryKey: examReadingKeys.historyAll() });
       queryClient.invalidateQueries({ queryKey: examReadingKeys.stats() });
     },
   });

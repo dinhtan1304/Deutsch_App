@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { useParams, useRouter } from 'next/navigation';
 import { useJoinByCode } from '@/hooks/useSpeakingRooms';
 import { PageHeader } from '@/components/ui';
+import { STATUS } from '@/lib/tokens';
 import { getApiErrorMessage } from '@/lib/api/client';
 import { parseSpeakingRoomInviteCode } from '@/lib/api/speakingRooms';
 
@@ -35,8 +36,8 @@ export default function JoinByCodePage() {
       <PageHeader title={t('join.title')} accent="speaking" backHref="/practice-test/speaking-rooms" />
       {joining && <p style={{ color: 'var(--theme-text-muted)' }}>{t('join.joining')}</p>}
       {errorMsg && (
-        <div className="mt-4 p-4 rounded-2xl" style={{ backgroundColor: 'rgba(239,68,68,0.08)', border: '1px solid #EF4444' }}>
-          <p className="font-bold" style={{ color: '#EF4444' }}>{errorMsg}</p>
+        <div className="mt-4 p-4 rounded-2xl" style={{ backgroundColor: `${STATUS.danger}14`, border: `1px solid ${STATUS.danger}` }}>
+          <p className="font-bold" style={{ color: STATUS.danger }}>{errorMsg}</p>
         </div>
       )}
     </div>

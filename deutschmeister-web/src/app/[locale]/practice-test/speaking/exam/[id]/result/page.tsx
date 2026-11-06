@@ -115,6 +115,8 @@ function NativeSpeakerPlayer({ text }: { text: string }) {
     if (playing) { stop(); return; }
     setProgress(0);
     const startTimer = () => {
+      // onplay fires again after a pause/resume — never stack a second interval.
+      if (intervalRef.current) clearInterval(intervalRef.current);
       let elapsed = 0;
       intervalRef.current = setInterval(() => { elapsed++; setProgress(Math.min(elapsed / duration, 0.99)); }, 1000);
     };

@@ -10,7 +10,10 @@ import {
 
 export const examWritingKeys = {
   all: ['exam-writing'] as const,
-  history: (params?: Record<string, unknown>) => [...examWritingKeys.all, 'history', params] as const,
+  // Prefix key for invalidation: history(params) caches under [..., 'history', {page}],
+  // which history() (params undefined) never prefix-matches.
+  historyAll: () => [...examWritingKeys.all, 'history'] as const,
+  history: (params?: Record<string, unknown>) => [...examWritingKeys.historyAll(), params] as const,
   stats: () => [...examWritingKeys.all, 'stats'] as const,
   session: (id: string) => [...examWritingKeys.all, 'session', id] as const,
 };
@@ -52,7 +55,7 @@ export function useGenerateExamWriting() {
     mutationFn: (data: { examType: string; cefrLevel: string; teilNumber?: number }) =>
       examWritingApi.generateSession(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: examWritingKeys.history() });
+      queryClient.invalidateQueries({ queryKey: examWritingKeys.historyAll() });
     },
   });
 }
@@ -71,7 +74,7 @@ export function useSubmitExamWriting() {
       examWritingApi.submitAndGrade(id, userTexts),
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: examWritingKeys.session(id) });
-      queryClient.invalidateQueries({ queryKey: examWritingKeys.history() });
+      queryClient.invalidateQueries({ queryKey: examWritingKeys.historyAll() });
       queryClient.invalidateQueries({ queryKey: examWritingKeys.stats() });
     },
   });
@@ -82,7 +85,7 @@ export function useDeleteExamWriting() {
   return useMutation({
     mutationFn: (id: string) => examWritingApi.deleteSession(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: examWritingKeys.history() });
+      queryClient.invalidateQueries({ queryKey: examWritingKeys.historyAll() });
       queryClient.invalidateQueries({ queryKey: examWritingKeys.stats() });
     },
   });

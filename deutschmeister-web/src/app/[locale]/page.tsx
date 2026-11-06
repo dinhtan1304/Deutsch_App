@@ -109,8 +109,10 @@ export default function HomePage() {
   ];
 
   useEffect(() => {
+    // Plain fetch on purpose: a public, cookie-less simple GET skips the CORS
+    // preflight that apiGet's JSON content-type would add for first-time visitors.
     fetch(`${DEMO_API_URL}/dashboard/public-stats`)
-      .then(r => r.json())
+      .then(r => (r.ok ? r.json() : null))
       .then(d => { if (d?.totalUsers) setPublicStats(d); })
       .catch(() => {});
   }, []);

@@ -22,7 +22,10 @@ import {
 export const readingKeys = {
   all: ['reading'] as const,
   topics: (level: string) => [...readingKeys.all, 'topics', level] as const,
-  history: (params?: Record<string, unknown>) => [...readingKeys.all, 'history', params] as const,
+  // Prefix key for invalidation: history(params) caches under [..., 'history', {page}],
+  // which history() (params undefined) never prefix-matches.
+  historyAll: () => [...readingKeys.all, 'history'] as const,
+  history: (params?: Record<string, unknown>) => [...readingKeys.historyAll(), params] as const,
   stats: () => [...readingKeys.all, 'stats'] as const,
   session: (id: string) => [...readingKeys.all, 'session', id] as const,
 };
@@ -78,7 +81,7 @@ export function useGenerateReading() {
   return useMutation({
     mutationFn: (dto: CreateReadingDto) => readingApi.generateExercise(dto),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: readingKeys.history() });
+      queryClient.invalidateQueries({ queryKey: readingKeys.historyAll() });
     },
   });
 }
@@ -92,7 +95,7 @@ export function useSubmitReading() {
       readingApi.submitAnswers(id, userAnswers),
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: readingKeys.session(id) });
-      queryClient.invalidateQueries({ queryKey: readingKeys.history() });
+      queryClient.invalidateQueries({ queryKey: readingKeys.historyAll() });
       queryClient.invalidateQueries({ queryKey: readingKeys.stats() });
     },
   });
@@ -105,7 +108,7 @@ export function useDeleteReading() {
   return useMutation({
     mutationFn: (id: string) => readingApi.deleteSession(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: readingKeys.history() });
+      queryClient.invalidateQueries({ queryKey: readingKeys.historyAll() });
       queryClient.invalidateQueries({ queryKey: readingKeys.stats() });
     },
   });

@@ -25,7 +25,10 @@ export const trainerKeys = {
   all: ['grammar-trainer'] as const,
   exercises: (params: Record<string, unknown>) => [...trainerKeys.all, 'exercises', params] as const,
   stats: () => [...trainerKeys.all, 'stats'] as const,
-  history: (params?: Record<string, unknown>) => [...trainerKeys.all, 'history', params] as const,
+  // Prefix key for invalidation: history(params) caches under [..., 'history', {page}],
+  // which history() (params undefined) never prefix-matches.
+  historyAll: () => [...trainerKeys.all, 'history'] as const,
+  history: (params?: Record<string, unknown>) => [...trainerKeys.historyAll(), params] as const,
   adminExercises: (params?: Record<string, unknown>) => [...trainerKeys.all, 'admin', params] as const,
   adminExercise: (id: string) => [...trainerKeys.all, 'admin', 'detail', id] as const,
 };
@@ -113,7 +116,7 @@ export function useRecordTrainerSession() {
     mutationFn: (dto: RecordSessionDto) => grammarTrainerApi.recordSession(dto),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: trainerKeys.stats() });
-      qc.invalidateQueries({ queryKey: trainerKeys.history() });
+      qc.invalidateQueries({ queryKey: trainerKeys.historyAll() });
     },
   });
 }

@@ -9,7 +9,8 @@ import {
 
 export const examRagKeys = {
   all: ['exam-rag'] as const,
-  list: (params?: Record<string, unknown>) => [...examRagKeys.all, 'list', params] as const,
+  listAll: () => [...examRagKeys.all, 'list'] as const,
+  list: (params?: Record<string, unknown>) => [...examRagKeys.listAll(), params] as const,
   detail: (id: string) => [...examRagKeys.all, id] as const,
 };
 
@@ -55,7 +56,7 @@ export function useRechunkExamDocument() {
     mutationFn: (id: string) => examRagApi.rechunk(id),
     onSuccess: (_, id) => {
       queryClient.invalidateQueries({ queryKey: examRagKeys.detail(id) });
-      queryClient.invalidateQueries({ queryKey: examRagKeys.list() });
+      queryClient.invalidateQueries({ queryKey: examRagKeys.listAll() });
     },
   });
 }

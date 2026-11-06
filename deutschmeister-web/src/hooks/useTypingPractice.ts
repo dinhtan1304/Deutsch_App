@@ -13,7 +13,10 @@ import {
 
 export const typingPracticeKeys = {
   all: ['typing-practice'] as const,
-  history: (limit?: number) => [...typingPracticeKeys.all, 'history', limit] as const,
+  // Prefix key for invalidation: history(params) caches under [..., 'history', {page}],
+  // which history() (params undefined) never prefix-matches.
+  historyAll: () => [...typingPracticeKeys.all, 'history'] as const,
+  history: (limit?: number) => [...typingPracticeKeys.historyAll(), limit] as const,
   stats: () => [...typingPracticeKeys.all, 'stats'] as const,
 };
 
@@ -36,7 +39,7 @@ export function useSubmitTypingSession() {
   return useMutation<TypingSessionResult, Error, SubmitTypingPayload>({
     mutationFn: (payload) => typingPracticeApi.submitSession(payload),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: typingPracticeKeys.history() });
+      qc.invalidateQueries({ queryKey: typingPracticeKeys.historyAll() });
       qc.invalidateQueries({ queryKey: typingPracticeKeys.stats() });
     },
   });

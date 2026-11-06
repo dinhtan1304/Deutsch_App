@@ -17,7 +17,8 @@ export const adminKeys = {
   stats: () => [...adminKeys.all, 'stats'] as const,
   tokenStats: () => [...adminKeys.all, 'token-stats'] as const,
   analytics: (days: number, weeks: number) => [...adminKeys.all, 'analytics', days, weeks] as const,
-  users: (params?: Record<string, unknown>) => [...adminKeys.all, 'users', params] as const,
+  usersAll: () => [...adminKeys.all, 'users'] as const,
+  users: (params?: Record<string, unknown>) => [...adminKeys.usersAll(), params] as const,
   user: (id: string) => [...adminKeys.all, 'users', id] as const,
 };
 
@@ -76,7 +77,7 @@ export function useUpdateAdminUser() {
       adminApi.updateUser(id, data),
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: adminKeys.user(id) });
-      queryClient.invalidateQueries({ queryKey: adminKeys.users() });
+      queryClient.invalidateQueries({ queryKey: adminKeys.usersAll() });
       queryClient.invalidateQueries({ queryKey: adminKeys.stats() });
     },
   });
@@ -87,7 +88,7 @@ export function useDeleteAdminUser() {
   return useMutation({
     mutationFn: (id: string) => adminApi.deleteUser(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: adminKeys.users() });
+      queryClient.invalidateQueries({ queryKey: adminKeys.usersAll() });
       queryClient.invalidateQueries({ queryKey: adminKeys.stats() });
     },
   });

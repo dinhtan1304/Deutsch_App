@@ -9,7 +9,10 @@ import {
 
 export const mockExamKeys = {
   all: ['mock-exam'] as const,
-  history: (params?: Record<string, unknown>) => [...mockExamKeys.all, 'history', params] as const,
+  // Prefix key for invalidation: history(params) caches under [..., 'history', {page}],
+  // which history() (params undefined) never prefix-matches.
+  historyAll: () => [...mockExamKeys.all, 'history'] as const,
+  history: (params?: Record<string, unknown>) => [...mockExamKeys.historyAll(), params] as const,
   state: (id: string) => [...mockExamKeys.all, 'state', id] as const,
 };
 
@@ -43,7 +46,7 @@ export function useStartMockExam() {
     mutationFn: (data: { examType: string; cefrLevel: string; includeSpeaking?: boolean }) =>
       mockExamApi.start(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: mockExamKeys.history() });
+      queryClient.invalidateQueries({ queryKey: mockExamKeys.historyAll() });
     },
   });
 }
@@ -64,7 +67,7 @@ export function useFinishMockExam() {
     mutationFn: (id: string) => mockExamApi.finish(id),
     onSuccess: (state) => {
       queryClient.setQueryData(mockExamKeys.state(state.id), state);
-      queryClient.invalidateQueries({ queryKey: mockExamKeys.history() });
+      queryClient.invalidateQueries({ queryKey: mockExamKeys.historyAll() });
     },
   });
 }

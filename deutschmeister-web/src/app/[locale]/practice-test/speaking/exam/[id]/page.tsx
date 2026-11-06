@@ -163,6 +163,14 @@ export default function ExamSpeakingSessionPage() {
   // Hết giờ: dừng mic/ghi âm rồi nộp các bản ghi đã có.
   useEffect(() => { timeUpRef.current = () => { cleanup(); handleSubmit(); }; }, [cleanup, handleSubmit]);
 
+  // Already submitted → go to the result. Navigating is a side effect, so it
+  // belongs in an effect, not in render (React warns about updating the router
+  // while rendering).
+  const alreadySubmitted = session?.status === 'GRADED' || session?.status === 'GRADING';
+  useEffect(() => {
+    if (alreadySubmitted) router.replace(doneHref);
+  }, [alreadySubmitted, router, doneHref]);
+
   if (isLoading) {
     return (
       <div className="py-6 flex items-center justify-center min-h-[60vh]">
@@ -183,10 +191,7 @@ export default function ExamSpeakingSessionPage() {
     );
   }
 
-  if (session.status === 'GRADED' || session.status === 'GRADING') {
-    router.replace(doneHref);
-    return null;
-  }
+  if (alreadySubmitted) return null;
 
   const teile = session.teile as ExamSpeakingTeil[];
   const currentTeil = teile[currentTeilIdx]!;
@@ -203,15 +208,16 @@ export default function ExamSpeakingSessionPage() {
     }
     setTeilState('prep');
     setPrepCountdown(currentTeil.prepTimeSeconds);
+    // Count in the closure and start the mic outside any setState updater:
+    // StrictMode runs updaters twice, which opened the microphone twice.
+    let prepLeft = currentTeil.prepTimeSeconds;
     prepTimerRef.current = setInterval(() => {
-      setPrepCountdown(prev => {
-        if (prev <= 1) {
-          clearInterval(prepTimerRef.current!);
-          startRecording();
-          return 0;
-        }
-        return prev - 1;
-      });
+      prepLeft -= 1;
+      setPrepCountdown(Math.max(prepLeft, 0));
+      if (prepLeft <= 0) {
+        clearInterval(prepTimerRef.current!);
+        startRecording();
+      }
     }, 1000);
   };
 
@@ -260,15 +266,14 @@ export default function ExamSpeakingSessionPage() {
         recognitionRef.current = recognition;
       }
 
+      let recLeft = currentTeil.speakTimeSeconds;
       recTimerRef.current = setInterval(() => {
-        setRecCountdown(prev => {
-          if (prev <= 1) {
-            clearInterval(recTimerRef.current!);
-            stopRecording();
-            return 0;
-          }
-          return prev - 1;
-        });
+        recLeft -= 1;
+        setRecCountdown(Math.max(recLeft, 0));
+        if (recLeft <= 0) {
+          clearInterval(recTimerRef.current!);
+          stopRecording();
+        }
       }, 1000);
     } catch {
       setTeilState('idle');

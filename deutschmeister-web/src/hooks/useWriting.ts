@@ -23,7 +23,10 @@ import {
 export const writingKeys = {
   all: ['writing'] as const,
   topics: (level: string) => [...writingKeys.all, 'topics', level] as const,
-  history: (params?: Record<string, unknown>) => [...writingKeys.all, 'history', params] as const,
+  // Prefix key for invalidation: history(params) caches under [..., 'history', {page}],
+  // which history() (params undefined) never prefix-matches.
+  historyAll: () => [...writingKeys.all, 'history'] as const,
+  history: (params?: Record<string, unknown>) => [...writingKeys.historyAll(), params] as const,
   stats: () => [...writingKeys.all, 'stats'] as const,
   session: (id: string) => [...writingKeys.all, 'session', id] as const,
 };
@@ -79,7 +82,7 @@ export function useGeneratePrompt() {
   return useMutation({
     mutationFn: (dto: CreateWritingDto) => writingApi.generatePrompt(dto),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: writingKeys.history() });
+      queryClient.invalidateQueries({ queryKey: writingKeys.historyAll() });
     },
   });
 }
@@ -106,7 +109,7 @@ export function useSubmitWriting() {
       writingApi.submitWriting(id, userText),
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: writingKeys.session(id) });
-      queryClient.invalidateQueries({ queryKey: writingKeys.history() });
+      queryClient.invalidateQueries({ queryKey: writingKeys.historyAll() });
       queryClient.invalidateQueries({ queryKey: writingKeys.stats() });
     },
   });
@@ -119,7 +122,7 @@ export function useDeleteWriting() {
   return useMutation({
     mutationFn: (id: string) => writingApi.deleteSession(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: writingKeys.history() });
+      queryClient.invalidateQueries({ queryKey: writingKeys.historyAll() });
       queryClient.invalidateQueries({ queryKey: writingKeys.stats() });
     },
   });

@@ -5,7 +5,10 @@ import { examListeningApi, ExamListeningSession, ExamListeningHistoryResponse, E
 
 export const examListeningKeys = {
   all: ['exam-listening'] as const,
-  history: (params?: Record<string, unknown>) => [...examListeningKeys.all, 'history', params] as const,
+  // Prefix key for invalidation: history(params) caches under [..., 'history', {page}],
+  // which history() (params undefined) never prefix-matches.
+  historyAll: () => [...examListeningKeys.all, 'history'] as const,
+  history: (params?: Record<string, unknown>) => [...examListeningKeys.historyAll(), params] as const,
   stats: () => [...examListeningKeys.all, 'stats'] as const,
   session: (id: string) => [...examListeningKeys.all, 'session', id] as const,
 };
@@ -40,7 +43,7 @@ export function useGenerateExamListening() {
     mutationFn: (data: { examType: string; cefrLevel: string; teilNumber?: number }) =>
       examListeningApi.generateSession(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: examListeningKeys.history() });
+      queryClient.invalidateQueries({ queryKey: examListeningKeys.historyAll() });
     },
   });
 }
@@ -52,7 +55,7 @@ export function useSubmitExamListening() {
       examListeningApi.submitAnswers(id, userAnswers),
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: examListeningKeys.session(id) });
-      queryClient.invalidateQueries({ queryKey: examListeningKeys.history() });
+      queryClient.invalidateQueries({ queryKey: examListeningKeys.historyAll() });
       queryClient.invalidateQueries({ queryKey: examListeningKeys.stats() });
     },
   });
@@ -63,7 +66,7 @@ export function useDeleteExamListening() {
   return useMutation({
     mutationFn: (id: string) => examListeningApi.deleteSession(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: examListeningKeys.history() });
+      queryClient.invalidateQueries({ queryKey: examListeningKeys.historyAll() });
       queryClient.invalidateQueries({ queryKey: examListeningKeys.stats() });
     },
   });

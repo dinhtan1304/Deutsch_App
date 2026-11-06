@@ -37,7 +37,7 @@ export function WritingRevisions({ session }: { session: WritingSession }) {
         queryKey: [...writingKeys.session(session.id), 'revisions'],
       });
       void queryClient.invalidateQueries({ queryKey: ['learning', 'errors'] });
-      void queryClient.invalidateQueries({ queryKey: writingKeys.history() });
+      void queryClient.invalidateQueries({ queryKey: writingKeys.historyAll() });
     },
   });
   const currentText = text ?? session.userText ?? '';

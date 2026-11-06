@@ -33,17 +33,23 @@ export function LandingDemoQuiz() {
   const startQuiz = async () => {
     setLoading(true);
     try {
+      // Plain fetch on purpose: public simple GET, no CORS preflight for guests.
       const res = await fetch(`${DEMO_API_URL}/words/random?count=10&levels[]=A1`);
+      if (!res.ok) return;
       const data: DemoWord[] = await res.json();
-      if (!data.length) return;
+      if (!Array.isArray(data) || !data.length) return;
       setWords(data);
       setIdx(0);
       setScore(0);
       setSelected(null);
       setPhase('playing');
       trackDemoStart();
-    } catch { /* ignore */ }
-    setLoading(false);
+    } catch {
+      /* ignore */
+    } finally {
+      // The early returns above used to skip this and leave the button spinning.
+      setLoading(false);
+    }
   };
 
   const handleAnswer = (article: string) => {

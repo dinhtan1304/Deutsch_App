@@ -5,7 +5,10 @@ import { listeningApi, ListeningSession, ListeningHistoryResponse, ListeningStat
 
 export const listeningKeys = {
   all: ['listening'] as const,
-  history: (params?: Record<string, unknown>) => [...listeningKeys.all, 'history', params] as const,
+  // Prefix key for invalidation: history(params) caches under [..., 'history', {page}],
+  // which history() (params undefined) never prefix-matches.
+  historyAll: () => [...listeningKeys.all, 'history'] as const,
+  history: (params?: Record<string, unknown>) => [...listeningKeys.historyAll(), params] as const,
   stats: () => [...listeningKeys.all, 'stats'] as const,
   session: (id: string) => [...listeningKeys.all, 'session', id] as const,
 };
@@ -39,7 +42,7 @@ export function useGenerateListening() {
     mutationFn: (data: { cefrLevel: string; scriptType: string }) =>
       listeningApi.generateSession(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: listeningKeys.history() });
+      queryClient.invalidateQueries({ queryKey: listeningKeys.historyAll() });
     },
   });
 }
@@ -51,7 +54,7 @@ export function useSubmitListening() {
       listeningApi.submitAnswers(id, userAnswers),
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: listeningKeys.session(id) });
-      queryClient.invalidateQueries({ queryKey: listeningKeys.history() });
+      queryClient.invalidateQueries({ queryKey: listeningKeys.historyAll() });
       queryClient.invalidateQueries({ queryKey: listeningKeys.stats() });
     },
   });
@@ -62,7 +65,7 @@ export function useDeleteListening() {
   return useMutation({
     mutationFn: (id: string) => listeningApi.deleteSession(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: listeningKeys.history() });
+      queryClient.invalidateQueries({ queryKey: listeningKeys.historyAll() });
       queryClient.invalidateQueries({ queryKey: listeningKeys.stats() });
     },
   });
