@@ -2,7 +2,13 @@
 // Strategy: cache-first for immutable static assets, network-first for navigations
 // (with an offline cache fallback). Never touches API/auth/admin responses.
 // Served as /service-worker.js (public/sw.js is gitignored by a leftover PWA rule).
-const VERSION = 'v3-learning-2026-10';
+const VERSION = 'v4-devsafe-2026-11';
+
+// On a dev host the SW must stay out of the way: Turbopack chunk names repeat
+// across dev-server restarts, so a cache-first copy from an older run gets
+// served against the new runtime ("module factory is not available"). Web
+// Push still registers this SW in dev, so the guard lives here.
+const IS_DEV_HOST = ['localhost', '127.0.0.1', '[::1]'].includes(self.location.hostname);
 const STATIC_CACHE = `dm-static-${VERSION}`;
 const PAGE_CACHE = `dm-pages-${VERSION}`;
 
@@ -19,7 +25,9 @@ self.addEventListener('activate', (event) => {
     (async () => {
       const keys = await caches.keys();
       await Promise.all(
-        keys.filter((k) => k.startsWith('dm-') && k !== STATIC_CACHE && k !== PAGE_CACHE).map((k) => caches.delete(k)),
+        keys
+          .filter((k) => k.startsWith('dm-') && (IS_DEV_HOST || (k !== STATIC_CACHE && k !== PAGE_CACHE)))
+          .map((k) => caches.delete(k)),
       );
       await self.clients.claim();
     })(),
@@ -54,6 +62,7 @@ async function boundedPut(name, request, response, limit) {
 
 self.addEventListener('fetch', (event) => {
   const { request } = event;
+  if (IS_DEV_HOST) return; // never cache in dev — see IS_DEV_HOST
   if (request.method !== 'GET') return;
 
   const url = new URL(request.url);
