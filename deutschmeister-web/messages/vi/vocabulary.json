@@ -203,7 +203,14 @@
       "statSkipped": "Đã có",
       "statFailed": "Lỗi",
       "skippedHeader": "Từ đã có (bỏ qua):",
-      "close": "Đóng"
+      "close": "Đóng",
+      "tabFile": "Tệp",
+      "tabPaste": "Dán (Quizlet)",
+      "fileFormats": "Nhận .xlsx, .xls, .csv, .tsv, .txt. CSV/TSV có dòng tiêu đề sẽ khớp cột theo tên; không có tiêu đề thì đọc là “từ, nghĩa”.",
+      "pasteLabel": "Dán danh sách từ",
+      "pastePlaceholder": "der Hund\tcon chó\ndie Katze\tcon mèo\ngehen\tđi",
+      "pasteHint": "Mỗi dòng một từ: từ, rồi Tab (hoặc dấu phẩy/chấm phẩy), rồi nghĩa — đúng định dạng “Xuất” của Quizlet. Viết kèm der/die/das để nhận là danh từ. Nghĩa được điền cho cả tiếng Việt và tiếng Anh; bạn sửa lại sau.",
+      "pasteRead": "Đọc danh sách"
     },
     "aiVocab": {
       "title": "Tạo từ vựng bằng AI",
@@ -275,7 +282,9 @@
       "flipHint": "Nhấn <kbd>Space</kbd> hoặc click để lật thẻ",
       "shortcuts": "Phím tắt",
       "scFlip": "Lật thẻ"
-    }
+    },
+    "exportTsv": "Xuất TSV (Excel)",
+    "exportAnki": "Xuất cho Anki"
   },
   "grammar": {
     "pageTitle": "Ngữ pháp tiếng Đức",

@@ -124,10 +124,11 @@ export const personalWordsApi = {
   },
 
   // GET /api/personal-words/export
-  exportTsv: async (): Promise<Blob> => {
-    return api<Blob>('/personal-words/export', {
+  /** tsv: spreadsheet columns. anki: Anki "Notes in Plain Text" file (File → Import). */
+  exportTsv: async (format: 'tsv' | 'anki' = 'tsv'): Promise<Blob> => {
+    return api<Blob>(`/personal-words/export${format === 'anki' ? '?format=anki' : ''}`, {
       method: 'GET',
-      headers: { Accept: 'text/tab-separated-values' },
+      headers: { Accept: format === 'anki' ? 'text/plain' : 'text/tab-separated-values' },
     });
   },
 

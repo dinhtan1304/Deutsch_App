@@ -5,6 +5,10 @@ import { useTranslations } from 'next-intl';
 import { ImportRow, ImportResult, ImportValidationError, WordType, WordTypeInfo } from '@/types/personalWord';
 import { IconDownload, IconX, IconLoader, IconCheck, IconUpload } from '@/components/ui/Icons';
 import { ACCENT, GRADIENT, STATUS } from '@/lib/tokens';
+import { rowFromRecord, rowsFromDelimitedText } from '@/lib/wordBankImport';
+
+// Read as text (UTF-8) so Umlauts survive; xlsx would treat bytes as Latin-1.
+const TEXT_EXTENSIONS = /\.(csv|tsv|txt)$/i;
 
 type ImportT = (key: string, values?: Record<string, string | number>) => string;
 
@@ -39,28 +43,6 @@ function validateImportRow(row: ImportRow, rowIndex: number, t: ImportT): Import
 }
 
 // ============================================
-// Column mapping (Vietnamese + German + English headers)
-// ============================================
-const COLUMN_MAP: Record<string, keyof ImportRow> = {
-  'từ': 'word', 'tu': 'word', 'word': 'word', 'wort': 'word',
-  'loại': 'wordType', 'loai': 'wordType', 'từ loại': 'wordType', 'wordtype': 'wordType', 'type': 'wordType',
-  'mạo từ': 'article', 'mao tu': 'article', 'article': 'article', 'artikel': 'article',
-  'số nhiều': 'plural', 'so nhieu': 'plural', 'plural': 'plural',
-  'partizipii': 'partizipII', 'partizip ii': 'partizipII', 'partizip2': 'partizipII',
-  'hilfsverb': 'hilfsverb',
-  'komparativ': 'komparativ',
-  'superlativ': 'superlativ',
-  'kasus': 'kasus',
-  'nghĩa anh': 'translationEn', 'nghia anh': 'translationEn', 'tiếng anh': 'translationEn', 'english': 'translationEn', 'en': 'translationEn', 'translationen': 'translationEn',
-  'nghĩa việt': 'translationVi', 'nghia viet': 'translationVi', 'tiếng việt': 'translationVi', 'vietnamese': 'translationVi', 'vi': 'translationVi', 'translationvi': 'translationVi',
-  'ví dụ': 'examples', 'vi du': 'examples', 'examples': 'examples', 'example': 'examples',
-  'cấp độ': 'level', 'cap do': 'level', 'level': 'level',
-  'chủ đề': 'category', 'chu de': 'category', 'category': 'category',
-  'ghi chú': 'notes', 'ghi chu': 'notes', 'notes': 'notes', 'note': 'notes',
-  'tags': 'tags', 'tag': 'tags',
-};
-
-// ============================================
 // Modal Props
 // ============================================
 interface ImportModalProps {
@@ -77,6 +59,8 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
   const [importResult, setImportResult] = useState<ImportResult | null>(null);
   const [importError, setImportError] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string>('');
+  const [source, setSource] = useState<'file' | 'paste'>('file');
+  const [pasteText, setPasteText] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const reset = () => {
@@ -86,6 +70,7 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
     setImportResult(null);
     setImportError(null);
     setFileName('');
+    setPasteText('');
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
@@ -99,48 +84,28 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
 
     if (jsonData.length === 0) return [];
 
-    return jsonData.map((row) => {
-      const mapped: Partial<ImportRow> = {};
+    return jsonData.map(rowFromRecord).filter(r => r.word.trim());
+  };
 
-      Object.entries(row).forEach(([key, value]) => {
-        const normalizedKey = key.toLowerCase().trim();
-        const fieldName = COLUMN_MAP[normalizedKey];
-        if (fieldName && value !== null && value !== undefined) {
-          const stringValue = String(value).trim();
+  // Shared by every source: validate, then show the preview.
+  const acceptRows = (rows: ImportRow[]) => {
+    if (rows.length === 0) {
+      setImportError(t('fileEmpty'));
+      return;
+    }
+    setParsedRows(rows);
+    const allErrors: ImportValidationError[] = [];
+    rows.forEach((row, i) => {
+      allErrors.push(...validateImportRow(row, i + 1, t as ImportT));
+    });
+    setPreviewErrors(allErrors);
+    setStep('preview');
+  };
 
-          // Normalize wordType immediately
-          if (fieldName === 'wordType') {
-            mapped[fieldName] = stringValue.toLowerCase() as WordType;
-          }
-          // Normalize article immediately
-          else if (fieldName === 'article') {
-            mapped[fieldName] = stringValue.toLowerCase();
-          }
-          else {
-            mapped[fieldName] = stringValue;
-          }
-        }
-      });
-
-      return {
-        word: mapped.word || '',
-        wordType: (mapped.wordType || 'andere') as WordType,
-        article: mapped.article,
-        plural: mapped.plural,
-        partizipII: mapped.partizipII,
-        hilfsverb: mapped.hilfsverb,
-        komparativ: mapped.komparativ,
-        superlativ: mapped.superlativ,
-        kasus: mapped.kasus,
-        translationEn: mapped.translationEn || '',
-        translationVi: mapped.translationVi || '',
-        examples: mapped.examples,
-        level: mapped.level || 'A1',
-        category: mapped.category,
-        tags: mapped.tags,
-        notes: mapped.notes,
-      };
-    }).filter(r => r.word.trim());
+  // Quizlet "Export" / any term<TAB>definition list, or a CSV pasted as text.
+  const handlePaste = () => {
+    setImportError(null);
+    acceptRows(rowsFromDelimitedText(pasteText));
   };
 
   // Handle file upload
@@ -151,32 +116,21 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
     setFileName(file.name);
     setImportError(null);
 
+    const isText = TEXT_EXTENSIONS.test(file.name);
     const reader = new FileReader();
     reader.onload = async (ev) => {
       try {
-        const data = ev.target?.result as ArrayBuffer;
-        const rows = await parseExcel(data);
-
-        if (rows.length === 0) {
-          setImportError(t('fileEmpty'));
-          return;
-        }
-
-        setParsedRows(rows);
-
-        const allErrors: ImportValidationError[] = [];
-        rows.forEach((row, i) => {
-          const errors = validateImportRow(row, i + 1, t as ImportT);
-          allErrors.push(...errors);
-        });
-        setPreviewErrors(allErrors);
-        setStep('preview');
+        const rows = isText
+          ? rowsFromDelimitedText(String(ev.target?.result ?? ''))
+          : await parseExcel(ev.target?.result as ArrayBuffer);
+        acceptRows(rows);
       } catch (err) {
         if (process.env.NODE_ENV === 'development') console.error(err);
         setImportError(t('fileReadError'));
       }
     };
-    reader.readAsArrayBuffer(file);
+    if (isText) reader.readAsText(file, 'utf-8');
+    else reader.readAsArrayBuffer(file);
   };
 
   // Import handler
@@ -285,11 +239,40 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
                 </div>
               )}
 
-              <div>
-                <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--theme-text-primary)' }}>{t('selectFile')}</label>
-                <input ref={fileInputRef} type="file" accept=".xlsx,.xls" onChange={handleFileUpload}
-                  className="w-full p-3 rounded-xl border" style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-secondary)' }} />
+              <div className="flex rounded-lg p-0.5 w-fit" role="tablist" style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
+                {(['file', 'paste'] as const).map((key) => (
+                  <button key={key} role="tab" aria-selected={source === key} onClick={() => setSource(key)}
+                    className="px-3 py-1 rounded-md text-xs font-semibold transition-colors"
+                    style={source === key
+                      ? { backgroundColor: 'var(--theme-bg-card)', color: 'var(--theme-text-primary)' }
+                      : { color: 'var(--theme-text-muted)' }}>
+                    {key === 'file' ? t('tabFile') : t('tabPaste')}
+                  </button>
+                ))}
               </div>
+
+              {source === 'file' ? (
+                <div>
+                  <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--theme-text-primary)' }}>{t('selectFile')}</label>
+                  <input ref={fileInputRef} type="file" accept=".xlsx,.xls,.csv,.tsv,.txt" onChange={handleFileUpload}
+                    className="w-full p-3 rounded-xl border" style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-secondary)' }} />
+                  <p className="text-xs mt-2" style={{ color: 'var(--theme-text-muted)' }}>{t('fileFormats')}</p>
+                </div>
+              ) : (
+                <div>
+                  <label htmlFor="wb-paste" className="block text-sm font-semibold mb-2" style={{ color: 'var(--theme-text-primary)' }}>{t('pasteLabel')}</label>
+                  <textarea id="wb-paste" value={pasteText} onChange={(e) => setPasteText(e.target.value)}
+                    rows={8} placeholder={t('pastePlaceholder')}
+                    className="w-full p-3 rounded-xl border font-mono text-xs"
+                    style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-primary)' }} />
+                  <p className="text-xs mt-2 mb-3" style={{ color: 'var(--theme-text-muted)' }}>{t('pasteHint')}</p>
+                  <button onClick={handlePaste} disabled={!pasteText.trim()}
+                    className="px-4 py-2 rounded-lg text-sm font-semibold transition-opacity disabled:opacity-50"
+                    style={{ background: ACCENT.brand, color: 'white' }}>
+                    {t('pasteRead')}
+                  </button>
+                </div>
+              )}
             </div>
           )}
 

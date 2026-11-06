@@ -203,7 +203,14 @@
       "statSkipped": "Existing",
       "statFailed": "Errors",
       "skippedHeader": "Existing words (skipped):",
-      "close": "Close"
+      "close": "Close",
+      "tabFile": "File",
+      "tabPaste": "Paste (Quizlet)",
+      "fileFormats": "Accepts .xlsx, .xls, .csv, .tsv, .txt. CSV/TSV with a header row is matched by column name; without one, each line is read as “term, meaning”.",
+      "pasteLabel": "Paste your word list",
+      "pastePlaceholder": "der Hund\tdog\ndie Katze\tcat\ngehen\tto go",
+      "pasteHint": "One word per line: term, then Tab (or comma/semicolon), then meaning — the format of Quizlet's Export. Include der/die/das to mark a noun. The meaning fills both the Vietnamese and English fields; edit them later.",
+      "pasteRead": "Read list"
     },
     "aiVocab": {
       "title": "Generate vocabulary with AI",
@@ -275,7 +282,9 @@
       "flipHint": "Press <kbd>Space</kbd> or click to flip the card",
       "shortcuts": "Shortcuts",
       "scFlip": "Flip card"
-    }
+    },
+    "exportTsv": "Export TSV (Excel)",
+    "exportAnki": "Export for Anki"
   },
   "grammar": {
     "pageTitle": "German grammar",

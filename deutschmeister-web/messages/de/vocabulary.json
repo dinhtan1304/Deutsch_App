@@ -203,7 +203,14 @@
       "statSkipped": "Vorhanden",
       "statFailed": "Fehler",
       "skippedHeader": "Vorhandene Wörter (übersprungen):",
-      "close": "Schließen"
+      "close": "Schließen",
+      "tabFile": "Datei",
+      "tabPaste": "Einfügen (Quizlet)",
+      "fileFormats": "Erlaubt: .xlsx, .xls, .csv, .tsv, .txt. CSV/TSV mit Kopfzeile wird nach Spaltennamen zugeordnet, ohne Kopfzeile als „Begriff, Bedeutung“.",
+      "pasteLabel": "Wortliste einfügen",
+      "pastePlaceholder": "der Hund\tdog\ndie Katze\tcat\ngehen\tto go",
+      "pasteHint": "Ein Wort pro Zeile: Begriff, dann Tab (oder Komma/Semikolon), dann Bedeutung — wie beim Quizlet-Export. Mit der/die/das wird es als Nomen erkannt. Die Bedeutung füllt das vietnamesische und das englische Feld; du kannst sie später ändern.",
+      "pasteRead": "Liste lesen"
     },
     "aiVocab": {
       "title": "Vokabeln mit KI erzeugen",
@@ -275,7 +282,9 @@
       "flipHint": "Drücke <kbd>Space</kbd> oder klicke, um die Karte zu drehen",
       "shortcuts": "Tastenkürzel",
       "scFlip": "Karte drehen"
-    }
+    },
+    "exportTsv": "Als TSV (Excel)",
+    "exportAnki": "Für Anki exportieren"
   },
   "grammar": {
     "pageTitle": "Deutsche Grammatik",

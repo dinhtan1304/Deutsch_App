@@ -41,7 +41,7 @@ import {
   useSRSStats,
   useBatchDeletePersonalWords,
 } from '@/hooks/usePersonalWords';
-import { ImportRow, PersonalWord } from '@/types/personalWord';
+import { ImportResult, ImportRow, PersonalWord } from '@/types/personalWord';
 
 export default function WordBankPage() {
   const t = useTranslations('vocabulary.wordBank');
@@ -116,7 +116,10 @@ export default function WordBankPage() {
     speakGerman(text);
   }, []);
 
-  const handleImport = (rows: ImportRow[]) => {
+  // The API takes at most 500 rows per request; a long Quizlet list is sent
+  // in slices and the results merged (row numbers shifted back to the list).
+  const IMPORT_BATCH = 500;
+  const handleImport = async (rows: ImportRow[]): Promise<ImportResult> => {
     const mapped = rows.map(r => ({
       word: r.word, wordType: r.wordType, translationEn: r.translationEn,
       translationVi: r.translationVi, article: r.article, plural: r.plural,
@@ -124,7 +127,16 @@ export default function WordBankPage() {
       superlativ: r.superlativ, kasus: r.kasus, examples: r.examples,
       level: r.level, category: r.category, tags: r.tags, notes: r.notes,
     }));
-    return importMutation.mutateAsync({ rows: mapped });
+    const total: ImportResult = { added: 0, skipped: 0, failed: 0, errors: [], skippedWords: [] };
+    for (let start = 0; start < mapped.length; start += IMPORT_BATCH) {
+      const part = await importMutation.mutateAsync({ rows: mapped.slice(start, start + IMPORT_BATCH) });
+      total.added += part.added;
+      total.skipped += part.skipped;
+      total.failed += part.failed;
+      total.errors.push(...part.errors.map((e) => ({ ...e, row: e.row + start })));
+      total.skippedWords.push(...part.skippedWords);
+    }
+    return total;
   };
 
   const statTotal = stats?.total ?? 0;
@@ -192,14 +204,17 @@ export default function WordBankPage() {
             >
               <IconDownload size={15} /> {t('import')}
             </button>
-            <button
-              onClick={() => exportMutation.mutate()}
-              disabled={statTotal === 0 || exportMutation.isPending}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl text-body font-medium border transition-all hover:-translate-y-0.5 disabled:opacity-40"
-              style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)' }}
-            >
-              <IconUpload size={15} /> {t('export')}
-            </button>
+            {(['tsv', 'anki'] as const).map((format) => (
+              <button
+                key={format}
+                onClick={() => exportMutation.mutate(format)}
+                disabled={statTotal === 0 || exportMutation.isPending}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl text-body font-medium border transition-all hover:-translate-y-0.5 disabled:opacity-40"
+                style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)' }}
+              >
+                <IconUpload size={15} /> {format === 'tsv' ? t('exportTsv') : t('exportAnki')}
+              </button>
+            ))}
           </div>
         </div>
 

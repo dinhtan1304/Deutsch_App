@@ -178,15 +178,16 @@ export function useImportPersonalWords() {
   });
 }
 
-/** Export TSV */
+/** Export TSV, or an Anki import file */
 export function useExportPersonalWords() {
   return useMutation({
-    mutationFn: async () => {
-      const blob = await personalWordsApi.exportTsv();
+    mutationFn: async (format: 'tsv' | 'anki' = 'tsv') => {
+      const blob = await personalWordsApi.exportTsv(format);
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `word-bank-${new Date().toISOString().slice(0, 10)}.tsv`;
+      const date = new Date().toISOString().slice(0, 10);
+      a.download = format === 'anki' ? `deutschmeister-anki-${date}.txt` : `word-bank-${date}.tsv`;
       a.click();
       URL.revokeObjectURL(url);
     },
