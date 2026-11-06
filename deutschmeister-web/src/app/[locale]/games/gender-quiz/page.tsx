@@ -11,6 +11,7 @@ import { useGameSession } from '@/hooks/useGameSession';
 import { useWordBankGameWords } from '@/hooks/usePersonalWords';
 import { personalWordsToGameWords, getEligibleWordsForGame } from '@/lib/personalWordAdapter';
 import { Gender, GenderInfo, Word } from '@/types';
+import { allRules } from '@/lib/genderRules';
 import {
   GameSetupCard, GameResultCard, GameProgressBar,
   GenderButtons, AnswerReview, AddWrongWordsToBank, GameResultUpsell, GameInfoBox, KBD,
@@ -36,6 +37,12 @@ export default function GenderQuizPage() {
   const searchParams = useSearchParams();
   const isWordBankMode = searchParams.get('source') === 'wordbank';
   const collectionId = searchParams.get('collectionId') ?? undefined;
+  // ?rule=die-ung (from /tips) → only nouns that follow that spelling rule.
+  // Category rules can't be matched on spelling, so they are ignored here.
+  const ruleParam = searchParams.get('rule');
+  const activeRule = ruleParam
+    ? allRules.find((r) => r.id === ruleParam && (r.type === 'ending' || r.type === 'prefix')) ?? null
+    : null;
   const t = useTranslations('games');
 
   const { settings, isLoaded, loadSettings } = useSettingsStore();
@@ -60,11 +67,18 @@ export default function GenderQuizPage() {
   const wrongRef = useRef(0);
 
   const questionsCount = isLoaded ? settings.questionsPerGame : 20;
-  const { data: globalWords, refetch, isLoading: globalLoading } = useRandomWords(questionsCount, { nounsOnly: true });
+  const { data: globalWords, refetch, isLoading: globalLoading } = useRandomWords(questionsCount, {
+    nounsOnly: true,
+    ...(activeRule && !isWordBankMode ? { rule: activeRule.id } : {}),
+  });
   const wbData = useWordBankGameWords({ collectionId, enabled: isWordBankMode });
   const words = isWordBankMode ? wbGameWords : (globalWords ?? []);
   const isLoading = isWordBankMode ? wbData.isLoading : globalLoading;
   const currentWord = words?.[index];
+  // A narrow rule (or a small level pool) can return fewer words than the
+  // configured round size; end the round when the words run out instead of
+  // waiting on a question that doesn't exist.
+  const roundSize = words.length > 0 ? Math.min(questionsCount, words.length) : questionsCount;
 
   useEffect(() => { loadSettings(); }, [loadSettings]);
 
@@ -83,12 +97,12 @@ export default function GenderQuizPage() {
       session.start(shuffled.length);
     } else {
       const result = await refetch();
-      if (!result.data?.length) { setLoadError(t('common.errors.noVocab')); return; }
+      if (!result.data?.length || (activeRule && result.data.length < 4)) { setLoadError(t('common.errors.noVocab')); return; }
       setIndex(0); setScore(0); setCombo(0); setBestCombo(0);
       scoreRef.current = 0; bestComboRef.current = 0;
       correctRef.current = 0; wrongRef.current = 0;
       setAnswered(false); setSelectedAnswer(null); setAnswers([]); setPhase('playing');
-      session.start(questionsCount);
+      session.start(Math.min(questionsCount, result.data.length));
     }
   };
 
@@ -112,10 +126,10 @@ export default function GenderQuizPage() {
     } else { playWrong(); wrongRef.current++; setCombo(0); }
 
     setTimeout(() => {
-      if (index + 1 >= questionsCount) { playGameOver(); setPhase('result'); }
+      if (index + 1 >= roundSize) { playGameOver(); setPhase('result'); }
       else { setIndex(i => i + 1); setAnswered(false); setSelectedAnswer(null); }
     }, 1200);
-  }, [answered, currentWord, combo, bestCombo, index, questionsCount, score, playCorrect, playWrong, playCombo, playGameOver, session]);
+  }, [answered, currentWord, combo, bestCombo, index, roundSize, score, playCorrect, playWrong, playCombo, playGameOver, session]);
 
   useEffect(() => {
     const handle = (e: KeyboardEvent) => {
@@ -147,6 +161,15 @@ export default function GenderQuizPage() {
               emphasis: (chunks) => <span className="font-bold" style={{ color: ACCENT.srs }}>{chunks}</span>,
             })}
           </p>
+          {activeRule && !isWordBankMode && (
+            <p className="inline-flex items-center gap-2 px-3 py-1 mb-2 rounded-full text-xs font-semibold"
+              style={{ background: 'var(--theme-bg-secondary)', color: ACCENT.srs, border: '1px solid var(--theme-border)' }}>
+              {t('genderQuiz.ruleFilter', {
+                pattern: activeRule.type === 'prefix' ? 'Ge-' : activeRule.pattern.replace('$', ''),
+                article: activeRule.gender === 'masculine' ? 'der' : activeRule.gender === 'feminine' ? 'die' : 'das',
+              })}
+            </p>
+          )}
           <p className="text-xs mb-6" style={{ color: 'var(--theme-text-muted)' }}>
             {t('common.settingsHint')}
           </p>
@@ -182,7 +205,7 @@ export default function GenderQuizPage() {
   if (phase === 'result') {
     const correctCount = answers.filter(a => a.isCorrect).length;
     const wrongCount = answers.filter(a => !a.isCorrect).length;
-    const accuracy = Math.round((correctCount / questionsCount) * 100);
+    const accuracy = Math.round((correctCount / roundSize) * 100);
 
     return (
       <div className="mx-auto max-w-360 px-4 py-6 sm:px-6">
@@ -192,7 +215,7 @@ export default function GenderQuizPage() {
             bare
             accuracy={accuracy}
             correct={correctCount}
-            total={questionsCount}
+            total={roundSize}
             stats={[
               { label: t('genderQuiz.scoreUnit'), value: score, color: ACCENT.vocab, icon: IconZap },
               { label: t('common.accuracy'), value: `${accuracy}%`, color: STATUS.success, icon: IconTarget },
@@ -232,9 +255,9 @@ export default function GenderQuizPage() {
         { label: t('common.score'),  value: score,        color: ACCENT.srs },
         { label: t('common.correctLabel'), value: correctCount, color: STATUS.success, dot: true },
         { label: t('common.wrongLabel'),   value: wrongCount,   color: STATUS.danger, dot: true },
-        { label: t('common.questionLabel'), value: `${index + 1}/${questionsCount}`, color: 'var(--theme-text-primary)' },
+        { label: t('common.questionLabel'), value: `${index + 1}/${roundSize}`, color: 'var(--theme-text-primary)' },
       ]} />
-      <GameProgressBar current={index + 1} total={questionsCount} />
+      <GameProgressBar current={index + 1} total={roundSize} />
 
       {currentWord && (
         <GameWordCard gradient="linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)">

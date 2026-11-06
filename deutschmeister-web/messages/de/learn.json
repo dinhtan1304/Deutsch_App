@@ -23,7 +23,9 @@
     "learnTip4Title": "Nach Endungen gruppieren",
     "learnTip4Desc": "Sammle Wörter mit gleicher Endung, um die Regel zu festigen",
     "learnTip5Title": "SRS-Wiederholung",
-    "learnTip5Desc": "Nutze die SRS-Funktion für langfristiges Behalten"
+    "learnTip5Desc": "Nutze die SRS-Funktion für langfristiges Behalten",
+    "practiceRule": "Diese Regel üben",
+    "ruleAccuracy": "Du: {pct}% richtig · {n} Antworten"
   },
   "resources": {
     "title": "Native Ressourcen",

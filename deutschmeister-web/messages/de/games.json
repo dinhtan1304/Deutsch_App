@@ -217,7 +217,8 @@
       "soundOn": "An",
       "soundOff": "Aus"
     },
-    "answer": "Antwort:"
+    "answer": "Antwort:",
+    "ruleFilter": "Regel: {pattern} → {article}"
   },
   "typing": {
     "title": "Tipp-Übung",

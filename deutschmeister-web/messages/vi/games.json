@@ -217,7 +217,8 @@
       "soundOn": "Bật",
       "soundOff": "Tắt"
     },
-    "answer": "Đáp án:"
+    "answer": "Đáp án:",
+    "ruleFilter": "Quy tắc: {pattern} → {article}"
   },
   "typing": {
     "title": "Luyện gõ phím",

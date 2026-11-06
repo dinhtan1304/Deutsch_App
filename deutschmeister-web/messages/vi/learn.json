@@ -23,7 +23,9 @@
     "learnTip4Title": "Học theo nhóm đuôi",
     "learnTip4Desc": "Gom các từ cùng đuôi để nhớ quy tắc",
     "learnTip5Title": "Ôn tập SRS",
-    "learnTip5Desc": "Dùng tính năng SRS Review để nhớ lâu hơn"
+    "learnTip5Desc": "Dùng tính năng SRS Review để nhớ lâu hơn",
+    "practiceRule": "Luyện quy tắc này",
+    "ruleAccuracy": "Bạn đúng {pct}% · {n} câu"
   },
   "resources": {
     "title": "Tài nguyên bản xứ",

@@ -23,7 +23,9 @@
     "learnTip4Title": "Learn by ending group",
     "learnTip4Desc": "Bundle words with the same ending to lock in the rule",
     "learnTip5Title": "SRS review",
-    "learnTip5Desc": "Use the SRS Review feature for long-term retention"
+    "learnTip5Desc": "Use the SRS Review feature for long-term retention",
+    "practiceRule": "Practice this rule",
+    "ruleAccuracy": "You: {pct}% right · {n} answers"
   },
   "resources": {
     "title": "Native resources",

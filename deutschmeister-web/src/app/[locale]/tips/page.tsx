@@ -11,6 +11,10 @@ import {
   quickReference,
   GenderRule,
 } from '@/lib/genderRules';
+import { useGenderRuleStats } from '@/hooks/useGames';
+
+// Below this many answers a percentage is noise, so the badge stays hidden.
+const MIN_RULE_ANSWERS = 5;
 
 // ─── Inline SVG Icons ───
 function IconLightbulb({ size = 16, style }: { size?: number; style?: React.CSSProperties }) {
@@ -95,9 +99,12 @@ const TABS: { id: TabType; labelKey?: TabKey; literal?: string; color: string }[
 ];
 
 // ─── Rule Card ───
-function RuleCard({ rule }: { rule: GenderRule }) {
+function RuleCard({ rule, stats }: { rule: GenderRule; stats?: { correct: number; total: number } }) {
   const t = useTranslations('learn.tips');
   const gc = GENDER_COLORS[rule.gender];
+  // Only spelling rules can be drilled: the quiz filters words by ending/prefix.
+  const drillable = rule.type === 'ending' || rule.type === 'prefix';
+  const showAccuracy = drillable && stats && stats.total >= MIN_RULE_ANSWERS;
   return (
     <div className="rounded-[13px] border p-4 transition-transform duration-200 hover:-translate-y-0.5"
       style={{ backgroundColor: tint(gc.color), borderColor: gc.color }}>
@@ -133,6 +140,21 @@ function RuleCard({ rule }: { rule: GenderRule }) {
           {t('exceptions', { list: rule.exceptions.join(', ') })}
         </p>
       )}
+
+      {drillable && (
+        <div className="flex flex-wrap items-center justify-between gap-2 mt-3">
+          <Link href={`/games/gender-quiz?rule=${rule.id}`}
+            className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold transition-opacity hover:opacity-80"
+            style={{ backgroundColor: gc.color, color: 'var(--theme-bg-card)' }}>
+            {t('practiceRule')}
+          </Link>
+          {showAccuracy && (
+            <span className="text-caption font-semibold" style={{ color: 'var(--theme-text-muted)' }}>
+              {t('ruleAccuracy', { pct: Math.round((stats.correct / stats.total) * 100), n: stats.total })}
+            </span>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -140,6 +162,7 @@ function RuleCard({ rule }: { rule: GenderRule }) {
 export default function TipsPage() {
   const t = useTranslations('learn.tips');
   const [activeTab, setActiveTab] = useState<TabType>('all');
+  const { data: ruleStats } = useGenderRuleStats();
 
   const learnTips: { num: string; titleKey: 'learnTip1Title' | 'learnTip2Title' | 'learnTip3Title' | 'learnTip4Title' | 'learnTip5Title'; descKey: 'learnTip1Desc' | 'learnTip2Desc' | 'learnTip3Desc' | 'learnTip4Desc' | 'learnTip5Desc' }[] = [
     { num: '1', titleKey: 'learnTip1Title', descKey: 'learnTip1Desc' },
@@ -275,7 +298,7 @@ export default function TipsPage() {
               </h2>
             </div>
             <div className="grid gap-3">
-              {derRules.map(rule => <RuleCard key={rule.id} rule={rule} />)}
+              {derRules.map(rule => <RuleCard key={rule.id} rule={rule} stats={ruleStats?.[rule.id]} />)}
             </div>
           </div>
         )}
@@ -293,7 +316,7 @@ export default function TipsPage() {
               </h2>
             </div>
             <div className="grid gap-3">
-              {dieRules.map(rule => <RuleCard key={rule.id} rule={rule} />)}
+              {dieRules.map(rule => <RuleCard key={rule.id} rule={rule} stats={ruleStats?.[rule.id]} />)}
             </div>
           </div>
         )}
@@ -311,7 +334,7 @@ export default function TipsPage() {
               </h2>
             </div>
             <div className="grid gap-3">
-              {dasRules.map(rule => <RuleCard key={rule.id} rule={rule} />)}
+              {dasRules.map(rule => <RuleCard key={rule.id} rule={rule} stats={ruleStats?.[rule.id]} />)}
             </div>
           </div>
         )}

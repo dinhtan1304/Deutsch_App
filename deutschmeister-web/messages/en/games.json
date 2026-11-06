@@ -217,7 +217,8 @@
       "soundOn": "On",
       "soundOff": "Off"
     },
-    "answer": "Answer:"
+    "answer": "Answer:",
+    "ruleFilter": "Rule: {pattern} → {article}"
   },
   "typing": {
     "title": "Typing practice",

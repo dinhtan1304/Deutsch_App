@@ -55,3 +55,23 @@ export function useLeaderboard(gameType?: string, limit = 10) {
     staleTime: 5 * 60_000,
   });
 }
+
+export const gameKeys = {
+  all: ['games'] as const,
+  // Under ['games', 'history'] on purpose: every finished game already
+  // invalidates that prefix (useGameSession / useEndGame), so per-rule
+  // accuracy refreshes after each round with no extra wiring.
+  genderRuleStats: () => [...gameKeys.all, 'history', 'gender-rule-stats'] as const,
+};
+
+/** Accuracy per der/die/das spelling rule; signed-in users only. */
+export function useGenderRuleStats() {
+  const authenticated = useAuthStore((s) => s.isAuthenticated);
+  return useQuery({
+    queryKey: gameKeys.genderRuleStats(),
+    queryFn: () => gamesApi.getGenderRuleStats(),
+    enabled: authenticated,
+    retry: false,
+    staleTime: 5 * 60_000,
+  });
+}

@@ -28,6 +28,11 @@ export const gamesApi = {
     return apiPost<GameSession>('/games/end', data);
   },
 
+  /** Accuracy per der/die/das spelling rule ({ ruleId: { correct, total } }). */
+  getGenderRuleStats: async (): Promise<Record<string, { correct: number; total: number }>> => {
+    return apiGet('/games/gender-quiz/rule-stats');
+  },
+
   getHistory: async (limit = 20): Promise<GameSession[]> => {
     return apiGet<GameSession[]>(`/games/history?limit=${limit}`);
   },
