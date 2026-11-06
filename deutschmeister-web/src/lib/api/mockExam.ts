@@ -62,6 +62,10 @@ export interface MockExamHistoryResponse {
   totalPages: number;
 }
 
+export type MockExamPercentile =
+  | { available: false; sampleSize: number; minSample: number }
+  | { available: true; percentile: number; sampleSize: number; minSample: number };
+
 // ─── API client ───────────────────────────────────────────────────────────────
 
 export const mockExamApi = {
@@ -76,6 +80,10 @@ export const mockExamApi = {
 
   getState: (id: string) =>
     apiGet<MockExamState>(`/mock-exam/${id}`),
+
+  /** "Higher than X% of test-takers" — hidden server-side below a minimum sample. */
+  getPercentile: (id: string) =>
+    apiGet<MockExamPercentile>(`/mock-exam/${id}/percentile`),
 
   getHistory: (params?: { page?: number; limit?: number; status?: string }) => {
     const entries = Object.entries(params ?? {}).filter(([, v]) => v !== undefined && v !== null);

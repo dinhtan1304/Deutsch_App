@@ -1854,5 +1854,9 @@
     "wordCount": "{n} từ",
     "structure": "Cách bài được xây dựng",
     "disclaimer": "Cụm được tô màu là mẫu câu bạn có thể dùng lại. Bài mẫu do AI viết — một cách làm tốt, không phải đáp án duy nhất."
+  },
+  "mockPercentile": {
+    "label": "Bạn cao điểm hơn {pct}% người thi {exam} {level}",
+    "sample": "(so với {n} người, lấy điểm cao nhất của mỗi người)"
   }
 }

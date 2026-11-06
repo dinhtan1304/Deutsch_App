@@ -1854,5 +1854,9 @@
     "wordCount": "{n} words",
     "structure": "How it is built",
     "disclaimer": "Highlighted phrases are ones you can reuse. Written by AI: one good way to do it, not the only right answer."
+  },
+  "mockPercentile": {
+    "label": "You scored higher than {pct}% of {exam} {level} test-takers",
+    "sample": "(vs {n} people, each counted by their best score)"
   }
 }

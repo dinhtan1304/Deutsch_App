@@ -3,13 +3,14 @@
 import { useParams } from 'next/navigation';
 import { Link } from '@/i18n/navigation';
 import { useTranslations, useFormatter } from 'next-intl';
-import { useMockExamState } from '@/hooks/useMockExam';
+import { useMockExamState, useMockExamPercentile } from '@/hooks/useMockExam';
 import { MockSkill } from '@/lib/api/mockExam';
 import {
   IconTrophy, IconBookOpen, IconHeadphones, IconPenLine, IconMic,
   IconChevronLeft, IconPlus,
 } from '@/components/ui/Icons';
 import { ACCENT } from '@/lib/tokens';
+import { EXAM_PROVIDERS } from '@/config/examProviders';
 import { GridSkeleton } from '@/components/ui';
 
 const SKILL_META: Record<MockSkill, {
@@ -31,6 +32,9 @@ export default function MockExamResultPage() {
   const formatter = useFormatter();
 
   const { data: state, isLoading } = useMockExamState(id);
+  const tRank = useTranslations('practice.mockPercentile');
+  const tSetup = useTranslations('practice.examCommon.setup');
+  const { data: rank } = useMockExamPercentile(id, state?.status === 'COMPLETED');
 
   if (isLoading || !state) {
     return (
@@ -147,6 +151,17 @@ export default function MockExamResultPage() {
             <span className="text-body font-semibold" style={{ color: 'var(--theme-text-secondary)' }}>{t('overallLabel')}</span>
             <span className="mono text-h3 font-extrabold" style={{ color: verdictColor }}>{Math.round(result.overallPercent)}%</span>
           </div>
+          {rank?.available && (
+            <p className="mt-2.5 text-body font-semibold" style={{ color: 'var(--theme-text-secondary)' }}>
+              {tRank('label', { pct: rank.percentile, exam: (() => {
+                const provider = EXAM_PROVIDERS.find((p) => p.id === state.examType.toUpperCase());
+                return provider ? tSetup(provider.labelKey as Parameters<typeof tSetup>[0]) : state.examType;
+              })(), level: state.cefrLevel })}
+              <span className="ml-1 text-caption font-normal" style={{ color: 'var(--theme-text-muted)' }}>
+                {tRank('sample', { n: rank.sampleSize })}
+              </span>
+            </p>
+          )}
           <p className="mt-2.5 text-[11.5px] leading-relaxed" style={{ color: 'var(--theme-text-muted)' }}>
             {result.rule === 'PER_MODULE_60' ? t('ruleNotePerModule') : t('ruleNoteTotal')} · {t('thresholdLine')}
           </p>

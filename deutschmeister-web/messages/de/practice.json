@@ -1854,5 +1854,9 @@
     "wordCount": "{n} Wörter",
     "structure": "So ist der Text aufgebaut",
     "disclaimer": "Markierte Wendungen kannst du übernehmen. Von KI geschrieben: eine gute Lösung, nicht die einzig richtige."
+  },
+  "mockPercentile": {
+    "label": "Du hast besser abgeschnitten als {pct}% der Teilnehmenden ({exam} {level})",
+    "sample": "(im Vergleich zu {n} Personen, jeweils mit ihrem besten Ergebnis)"
   }
 }

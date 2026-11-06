@@ -5,6 +5,7 @@ import {
   mockExamApi,
   MockExamState,
   MockExamHistoryResponse,
+  MockExamPercentile,
 } from '@/lib/api/mockExam';
 
 export const mockExamKeys = {
@@ -14,7 +15,19 @@ export const mockExamKeys = {
   historyAll: () => [...mockExamKeys.all, 'history'] as const,
   history: (params?: Record<string, unknown>) => [...mockExamKeys.historyAll(), params] as const,
   state: (id: string) => [...mockExamKeys.all, 'state', id] as const,
+  percentile: (id: string) => [...mockExamKeys.all, 'percentile', id] as const,
 };
+
+/** Rank among other test-takers; only for a completed sitting. */
+export function useMockExamPercentile(id: string, enabled: boolean) {
+  return useQuery<MockExamPercentile>({
+    queryKey: mockExamKeys.percentile(id),
+    queryFn: () => mockExamApi.getPercentile(id),
+    enabled: enabled && !!id,
+    staleTime: 10 * 60 * 1000,
+    retry: false,
+  });
+}
 
 /**
  * Live sitting state. Polls while a module is being AI-graded (writing/
